@@ -2,6 +2,7 @@
 """Boston Events — scrape a handful of venue sites and serve a simple list at localhost:3000."""
 
 import json
+import sys
 import os
 import re
 import time
@@ -2954,7 +2955,25 @@ def api_events():
     return jsonify(get_all_events(force="refresh" in request.args))
 
 
+def export_json(path):
+    """Run all scrapers and write a single JSON bundle for the static frontend."""
+    payload = {
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "venues": get_all_events(force=True),
+        "weather": fetch_boston_weather(),
+        "luckyseat": fetch_luckyseat_boston(),
+    }
+    with open(path, "w") as f:
+        json.dump(payload, f, separators=(",", ":"))
+    total = sum(len(v["events"]) for v in payload["venues"])
+    print(f"wrote {path}: {total} events across {len(payload['venues'])} venues")
+
+
 if __name__ == "__main__":
-    host = "0.0.0.0" if os.environ.get("PORT") else "127.0.0.1"
-    print(f"Boston Events → http://{host}:{PORT}")
-    app.run(host=host, port=PORT, debug=False)
+    if len(sys.argv) > 1 and sys.argv[1] == "export":
+        out = sys.argv[2] if len(sys.argv) > 2 else "events.json"
+        export_json(out)
+    else:
+        host = "0.0.0.0" if os.environ.get("PORT") else "127.0.0.1"
+        print(f"Boston Events → http://{host}:{PORT}")
+        app.run(host=host, port=PORT, debug=False)
