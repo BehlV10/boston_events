@@ -739,8 +739,6 @@ def render_page(results):
     background-color: #121020;
     background-image:
       linear-gradient(180deg, rgba(12, 14, 20, 0.18) 0%, rgba(12, 14, 20, 0.62) 58%, rgba(12, 14, 20, 0.98) 100%),
-      url('/banner.jpg'),
-      url('/static/banner.jpg'),
       url('banner.jpg');
     background-size: cover;
     background-position: center 60%;
@@ -1105,7 +1103,7 @@ def render_page(results):
         <span class="pill-dot">·</span>
         <span class="pill-stat"><strong>{total:,}</strong> events · <strong>{len(results)}</strong> venues</span>
         <span class="pill-dot">·</span>
-        <a href="/?refresh=1" class="pill-refresh" title="Force refresh live feeds">↻ Refresh</a>
+        <a href="?refresh=1" class="pill-refresh" title="Force refresh live feeds">↻ Refresh</a>
       </div>
     </div>
   </div>

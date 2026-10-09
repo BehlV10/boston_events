@@ -27,15 +27,16 @@ jobs:
       - run: pip install -r requirements.txt
 
       - run: python server.py export events.json
+      - run: python server.py export html index.html
 
-      - name: Commit JSON if changed
+      - name: Commit data and static site if changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add events.json
+          git add events.json index.html events.html
           if git diff --staged --quiet; then
             echo "no changes"
           else
-            git commit -m "events.json: $(date -u +%Y-%m-%dT%H:%MZ)"
+            git commit -m "Update events and site: $(date -u +%Y-%m-%dT%H:%MZ)"
             git push
           fi
