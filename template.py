@@ -86,20 +86,85 @@ def _maps_link(venue, city):
     return f"https://www.google.com/maps/search/?api=1&query={quote(query)}"
 
 
+_FREE_TITLE_RE = re.compile(
+    r"\b("
+    r"free|"
+    r"honk(!|\b)|"
+    r"porchfest|"
+    r"parade|"
+    r"car-free|"
+    r"open streets?|"
+    r"open studios?|"
+    r"farmers? markets?|"
+    r"artisan markets?|"
+    r"flea markets?|"
+    r"craft markets?|"
+    r"vintage markets?|"
+    r"open markets?|"
+    r"clothing swaps?|"
+    r"book swaps?|"
+    r"seed swaps?|"
+    r"clean-?ups?|"
+    r"blood drive|"
+    r"book clubs?|"
+    r"open mics?|"
+    r"board games?|"
+    r"storytimes?|"
+    r"fun runs?|"
+    r"run clubs?|"
+    r"no cover"
+    r")\b",
+    re.IGNORECASE,
+)
+
+_FREE_DESC_PHRASES = [
+    "admission: free",
+    "admission is free",
+    "free admission",
+    "free event",
+    "free and open",
+    "free to attend",
+    "free to the public",
+    "all events are free",
+    "no cover",
+    "free entry",
+    "complimentary admission",
+    "complimentary entry",
+    "free outdoor",
+    "no tickets required",
+    "free dance class",
+]
+
+
 def _is_event_free(e):
     price = (e.get("price") or "").strip().lower()
-    if any(k in price for k in ["free", "$0", "no cover"]):
-        return True
+    if price:
+        if any(k in price for k in ["free", "no cover", "complimentary", "pay what you can"]):
+            return True
+        if price in ("0", "$0", "$0.00", "0.00"):
+            return True
+        if re.search(r"\$[1-9]", price):
+            return False
+
     name = (e.get("name") or "").lower()
     desc = (e.get("description") or "").lower()
-    source = (e.get("_source_venue") or e.get("venue") or "").lower()
-    if any(k in source for k in ["library", "farmers market", "open market"]):
+    source = (e.get("_source_venue") or "").lower()
+    venue = (e.get("venue") or "").lower()
+
+    if any(k in source or k in venue for k in [
+        "library", "bpl", "farmers market", "open market",
+        "esplanade association", "greenway", "rose kennedy greenway", "arnold arboretum"
+    ]):
         return True
-    if any(k in name for k in ["farmers market", "free outdoor", "open mic", "drop-in art", "board games", "fun run"]):
+
+    if _FREE_TITLE_RE.search(name):
         return True
-    if any(k in desc for k in ["free dance class", "free event", "free admission", "free and open to the public", "no cover"]):
+
+    if any(p in desc for p in _FREE_DESC_PHRASES):
         return True
+
     return False
+
 
 
 def _build_gcal_link(e, title, venue, city):
