@@ -863,7 +863,82 @@ def render_page(results):
   .useful-cat li a {{ color: var(--accent); text-decoration: none; font-size: 12px; display: block; padding: 2px 0; }}
   .useful-cat li a:hover {{ text-decoration: underline; }}
 
-  main {{ display: flex; flex-direction: column; gap: 16px; min-width: 0; }}
+  main {{ display: flex; flex-direction: column; gap: 14px; min-width: 0; }}
+
+  /* Top-Level Location Bar */
+  .location-chips-bar {{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 8px 12px;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    max-width: 100%;
+  }}
+  .location-chips-bar::-webkit-scrollbar {{
+    display: none;
+  }}
+  .loc-chip {{
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+    color: var(--fg);
+    padding: 5px 13px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+  }}
+  .loc-chip:hover {{
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--accent);
+    color: #fff;
+  }}
+  .loc-chip.active {{
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.35);
+    color: #fff;
+    font-weight: 700;
+  }}
+  .loc-chip.active[data-city="boston"] {{
+    border-color: #5d9bff;
+    background: rgba(93, 155, 255, 0.18);
+    color: #79aeff;
+  }}
+  .loc-chip.active[data-city="cambridge"] {{
+    border-color: #e05a6b;
+    background: rgba(224, 90, 107, 0.18);
+    color: #ff7a8a;
+  }}
+  .loc-chip.active[data-city="somerville"] {{
+    border-color: #f29e4c;
+    background: rgba(242, 158, 76, 0.18);
+    color: #ffb169;
+  }}
+  .loc-chip.active[data-city="other"] {{
+    border-color: #9aa3b2;
+    background: rgba(154, 163, 178, 0.18);
+    color: #d1d5db;
+  }}
+  .city-dot {{
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+  }}
 
   /* Quick-Access Chips Bar */
   .quick-chips-bar {{
@@ -1101,6 +1176,14 @@ def render_page(results):
       font-family: inherit;
       margin-bottom: 12px;
     }}
+    .location-chips-bar {{
+      padding: 6px 10px;
+      gap: 6px;
+    }}
+    .loc-chip {{
+      padding: 5px 12px;
+      font-size: 12px;
+    }}
     .quick-chips-bar {{
       flex-wrap: nowrap;
       overflow-x: auto;
@@ -1230,6 +1313,13 @@ def render_page(results):
       </div>
     </aside>
     <main>
+      <div class="location-chips-bar" id="location-chips">
+        <button type="button" class="loc-chip active" data-city="all">📍 All Areas</button>
+        <button type="button" class="loc-chip" data-city="boston"><span class="city-dot" style="background:#5d9bff"></span>Boston</button>
+        <button type="button" class="loc-chip" data-city="cambridge"><span class="city-dot" style="background:#e05a6b"></span>Cambridge</button>
+        <button type="button" class="loc-chip" data-city="somerville"><span class="city-dot" style="background:#f29e4c"></span>Somerville</button>
+        <button type="button" class="loc-chip" data-city="other"><span class="city-dot" style="background:#9aa3b2"></span>Greater Boston</button>
+      </div>
       <div class="quick-chips-bar" id="quick-chips">
         <button type="button" class="chip active" data-time="all">All Upcoming</button>
         <button type="button" class="chip" data-time="today">⚡ Today</button>
@@ -1277,6 +1367,7 @@ def render_page(results):
     const searchCount = document.getElementById('search-count');
     const freeOnlyChk = document.getElementById('free-only-chk');
 
+    const locChips = document.querySelectorAll('#location-chips .loc-chip');
     const quickChips = document.querySelectorAll('#quick-chips .chip[data-time]');
     const quickFreeChip = document.getElementById('quick-free-chip');
     let timeFilter = 'all';
@@ -1330,6 +1421,19 @@ def render_page(results):
       if (quickFreeChip) {{
         quickFreeChip.classList.toggle('active', freeOnlyChk ? freeOnlyChk.checked : false);
       }}
+    }}
+
+    function updateLocChipsUI() {{
+      const allCities = cityBoxes.length;
+      const checkedCities = Array.from(cityBoxes).filter(b => b.checked).map(b => b.value);
+      locChips.forEach(chip => {{
+        const city = chip.dataset.city;
+        if (city === 'all') {{
+          chip.classList.toggle('active', checkedCities.length === allCities || checkedCities.length === 0);
+        }} else {{
+          chip.classList.toggle('active', checkedCities.length === 1 && checkedCities[0] === city);
+        }}
+      }});
     }}
 
     function updateSearchUI() {{
@@ -1470,6 +1574,7 @@ def render_page(results):
       renderCal();
       updateWeekLabel();
       updateQuickChipsUI();
+      updateLocChipsUI();
       updateSearchUI();
       updateMobileBadge();
       stateToHash();
@@ -1633,6 +1738,25 @@ def render_page(results):
     document.getElementById('venue-none').addEventListener('click', () => {{ venueBoxes.forEach(b => b.checked = false); apply(); }});
     document.getElementById('city-all').addEventListener('click', () => {{ cityBoxes.forEach(b => b.checked = true); apply(); }});
     document.getElementById('city-none').addEventListener('click', () => {{ cityBoxes.forEach(b => b.checked = false); apply(); }});
+
+    locChips.forEach(chip => {{
+      chip.addEventListener('click', () => {{
+        const targetCity = chip.dataset.city;
+        if (targetCity === 'all') {{
+          cityBoxes.forEach(b => {{ b.checked = true; }});
+        }} else {{
+          const checked = Array.from(cityBoxes).filter(b => b.checked).map(b => b.value);
+          if (checked.length === 1 && checked[0] === targetCity) {{
+            cityBoxes.forEach(b => {{ b.checked = true; }});
+          }} else {{
+            cityBoxes.forEach(b => {{
+              b.checked = (b.value === targetCity);
+            }});
+          }}
+        }}
+        apply();
+      }});
+    }});
 
     function downloadICS(title, dateStr, venue, url) {{
       if (!dateStr) return;
