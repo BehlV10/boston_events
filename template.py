@@ -684,23 +684,15 @@ def render_page(results):
     )
 
     fail_banner = ""
-    if failed:
-        parts = " · ".join(
-            f'<a href="{escape(r["url"])}" target="_blank" rel="noopener">{escape(r["venue"])}</a>'
-            for r in failed
-        )
-        fail_banner = f'<div class="fail">Couldn\'t scrape: {parts}</div>'
-
+    # In live mode, we keep fail_banner and internal notes silent for visitors
     other_note = ""
-    if other_count:
-        other_note = f'<div class="other-note">{other_count} event{"" if other_count == 1 else "s"} fell through to <b>Community → other</b> — no keyword matched their title.</div>'
 
     return f"""<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <title>Boston Events</title>
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
 <style>
   :root {{
     --bg: #0c0e14;
@@ -720,9 +712,14 @@ def render_page(results):
     --radius-md: 10px;
     --radius-sm: 6px;
   }}
-  * {{ box-sizing: border-box; }}
-  body {{
+  *, *::before, *::after {{ box-sizing: border-box; }}
+  html, body {{
     margin: 0;
+    padding: 0;
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+    -webkit-text-size-adjust: 100%;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background: var(--bg);
     color: var(--fg);
@@ -1046,10 +1043,25 @@ def render_page(results):
     aside.useful {{ position: static; grid-column: 1 / -1; max-height: none; }}
   }}
   @media (max-width: 860px) {{
-    .banner-title {{ font-size: 32px; }}
-    .banner {{ min-height: 220px; padding: 30px 16px 20px; }}
-    .layout {{ grid-template-columns: minmax(0, 1fr); padding: 16px; }}
-    .mobile-filter-bar {{ display: block; margin-bottom: 12px; }}
+    .banner-title {{ font-size: 28px; }}
+    .banner {{ min-height: 190px; padding: 24px 16px 16px; width: 100%; max-width: 100vw; }}
+    .banner-meta-pill {{
+      border-radius: var(--radius-md);
+      font-size: 12px;
+      padding: 6px 12px;
+      gap: 6px 10px;
+      max-width: 100%;
+    }}
+    .layout {{
+      grid-template-columns: minmax(0, 1fr);
+      padding: 12px;
+      gap: 12px;
+      width: 100%;
+      max-width: 100vw;
+      box-sizing: border-box;
+      overflow-x: hidden;
+    }}
+    .mobile-filter-bar {{ display: block; margin-bottom: 8px; }}
     .mobile-filter-btn {{
       width: 100%;
       background: var(--card);
@@ -1089,7 +1101,72 @@ def render_page(results):
       font-family: inherit;
       margin-bottom: 12px;
     }}
+    .quick-chips-bar {{
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      white-space: nowrap;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      padding: 8px 10px;
+      gap: 6px;
+    }}
+    .quick-chips-bar::-webkit-scrollbar {{
+      display: none;
+    }}
+    .chip {{
+      flex-shrink: 0;
+      padding: 5px 12px;
+      font-size: 12px;
+    }}
     .chip-free {{ margin-left: 0; }}
+
+    .week-nav {{
+      justify-content: space-between;
+      gap: 6px;
+      padding: 8px 10px;
+      flex-wrap: wrap;
+    }}
+    #week-label, #week-label-b {{
+      min-width: 0;
+      width: 100%;
+      flex-basis: 100%;
+      order: -1;
+      margin-bottom: 4px;
+      font-size: 12px;
+      text-align: center;
+    }}
+
+    .event {{
+      grid-template-columns: 66px minmax(0, 1fr);
+      gap: 8px;
+      padding: 8px 10px;
+    }}
+    .what {{
+      min-width: 0;
+      overflow-wrap: break-word;
+      word-break: break-word;
+    }}
+    .venue-tag {{
+      font-size: 11px;
+      gap: 4px;
+    }}
+    .cal-links {{
+      margin-left: 0;
+      margin-top: 2px;
+    }}
+    .day {{
+      padding: 12px 14px 10px;
+    }}
+    .day h2 {{
+      font-size: 15px;
+    }}
+    aside.useful {{
+      grid-column: 1 / -1;
+      width: 100%;
+      max-width: 100%;
+      box-sizing: border-box;
+    }}
   }}
 </style>
 </head>

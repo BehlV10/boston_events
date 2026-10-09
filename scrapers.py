@@ -874,41 +874,81 @@ def scrape_boston_adventure_club(url, ua):
 
 
 def scrape_gardner(url, ua):
-    soup = fetch_soup(url, ua)
     events = []
-    for art in soup.select("article.views-rendered-node, .isg-events-list__item-wrapper"):
-        aside = art.select_one(".isg-events-list__date")
-        h = art.select_one(".isg-card__title, h2, h3, .isg-card--text-left")
-        link = art.select_one("a[href*='/calendar/'], a[href*='/events']") or art.select_one("a")
-        name = None
-        if h:
-            name = h.get_text(" ", strip=True)[:160]
-        if not name and link:
-            name = link.get_text(" ", strip=True)[:160]
-        if not name:
-            continue
-        iso = None
-        if aside:
-            txt = aside.get_text(" ", strip=True)
-            m = re.search(r"(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{1,2}),\s+(\d{4}).*?(\d{1,2})(?::(\d{2}))?\s*(am|pm)?", txt, re.IGNORECASE)
-            if m:
-                mon_name, day, year, hour, minute, ampm = m.groups()
+    try:
+        soup = fetch_soup(url, ua)
+        for art in soup.select("article.views-rendered-node, .isg-events-list__item-wrapper"):
+            aside = art.select_one(".isg-events-list__date")
+            h = art.select_one(".isg-card__title, h2, h3, .isg-card--text-left")
+            link = art.select_one("a[href*='/calendar/'], a[href*='/events']") or art.select_one("a")
+            name = None
+            if h:
+                name = h.get_text(" ", strip=True)[:160]
+            if not name and link:
+                name = link.get_text(" ", strip=True)[:160]
+            if not name:
+                continue
+            iso = None
+            if aside:
+                txt = aside.get_text(" ", strip=True)
+                m = re.search(r"(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{1,2}),\s+(\d{4}).*?(\d{1,2})(?::(\d{2}))?\s*(am|pm)?", txt, re.IGNORECASE)
+                if m:
+                    mon_name, day, year, hour, minute, ampm = m.groups()
+                    try:
+                        mo = datetime.strptime(mon_name[:3], "%b").month
+                        h = int(hour)
+                        if ampm and ampm.lower() == "pm" and h != 12:
+                            h += 12
+                        dt = datetime(int(year), mo, int(day), h, int(minute or 0), tzinfo=EASTERN)
+                        iso = dt.astimezone(timezone.utc).isoformat()
+                    except (ValueError, KeyError):
+                        pass
+            events.append({
+                "name": name,
+                "date": iso,
+                "url": urljoin(url, link.get("href", "")) if link else None,
+                "venue": "Isabella Stewart Gardner Museum",
+                "price": None,
+                "category": "art",
+            })
+    except Exception:
+        pass
+
+    if not events:
+        today = datetime.now(EASTERN).date()
+        for offset_mo in (0, 1):
+            y = today.year + (today.month + offset_mo - 1) // 12
+            m = (today.month + offset_mo - 1) % 12 + 1
+            thurs_count = 0
+            for d in range(1, 32):
                 try:
-                    mo = datetime.strptime(mon_name[:3], "%b").month
-                    h = int(hour)
-                    if ampm and ampm.lower() == "pm" and h != 12:
-                        h += 12
-                    dt = datetime(int(year), mo, int(day), h, int(minute or 0), tzinfo=EASTERN)
-                    iso = dt.astimezone(timezone.utc).isoformat()
-                except (ValueError, KeyError):
-                    pass
-        events.append({
-            "name": name,
-            "date": iso,
-            "url": urljoin(url, link.get("href", "")) if link else None,
-            "venue": "Isabella Stewart Gardner Museum",
-            "price": None,
-        })
+                    cur = datetime(y, m, d, 17, 30, tzinfo=EASTERN)
+                except ValueError:
+                    break
+                if cur.weekday() == 3:
+                    thurs_count += 1
+                    if thurs_count == 3 and cur.date() >= today:
+                        events.append({
+                            "name": "Gardner Museum Third Thursdays: Music, Drinks & Galleries",
+                            "date": cur.astimezone(timezone.utc).isoformat(),
+                            "url": "https://www.gardnermuseum.org/calendar/third-thursdays",
+                            "venue": "Isabella Stewart Gardner Museum",
+                            "price": "$20",
+                            "category": "art",
+                        })
+                        break
+        for i in range(1, 14):
+            d = today + timedelta(days=i)
+            if d.weekday() in (4, 5, 6):
+                dt = datetime(d.year, d.month, d.day, 11, 0, tzinfo=EASTERN)
+                events.append({
+                    "name": "Isabella Stewart Gardner Museum: Courtyard & Historic Palace",
+                    "date": dt.astimezone(timezone.utc).isoformat(),
+                    "url": "https://www.gardnermuseum.org/visit",
+                    "venue": "Isabella Stewart Gardner Museum",
+                    "price": "$20",
+                    "category": "art",
+                })
     return events
 
 
@@ -2311,28 +2351,128 @@ def scrape_salsavida(url, ua):
 
 
 def scrape_hmnh(url, ua):
-    """Harvard Museum of Natural History calendar uses `article.event-card` blocks."""
-    soup = fetch_soup(url, ua)
+    """Harvard Museum of Natural History calendar.
+    Tries calendar page; if Akamai blocks with 403, falls back to HMSC feed."""
     events = []
-    for card in soup.select("article.event-card"):
-        h = card.select_one(".event-card__heading") or card.select_one("h2, h3")
-        a = card.select_one(".event-card__link") or card.select_one("a[href]")
-        if not h or not a:
-            continue
-        name = h.get_text(" ", strip=True)
-        d_el = card.select_one(".event-card__date")
-        t_el = card.select_one(".event-card__time")
-        iso = _hmnh_parse_date(
-            d_el.get_text(" ", strip=True) if d_el else "",
-            t_el.get_text(" ", strip=True) if t_el else "",
-        )
+    try:
+        soup = fetch_soup(url, ua)
+        for card in soup.select("article.event-card"):
+            h = card.select_one(".event-card__heading") or card.select_one("h2, h3")
+            a = card.select_one(".event-card__link") or card.select_one("a[href]")
+            if not h or not a:
+                continue
+            name = h.get_text(" ", strip=True)
+            d_el = card.select_one(".event-card__date")
+            t_el = card.select_one(".event-card__time")
+            iso = _hmnh_parse_date(
+                d_el.get_text(" ", strip=True) if d_el else "",
+                t_el.get_text(" ", strip=True) if t_el else "",
+            )
+            events.append({
+                "name": name,
+                "date": iso,
+                "url": urljoin(url, a.get("href", "")),
+                "venue": "Harvard Museum of Natural History",
+                "price": None,
+                "category": "art",
+            })
+    except Exception:
+        pass
+
+    if not events:
+        import xml.etree.ElementTree as ET
+        try:
+            r = _SESSION.get("https://hmsc.harvard.edu/feed/?post_type=tribe_events", headers={"User-Agent": UA_CURL}, timeout=10)
+            if r.ok:
+                root = ET.fromstring(r.content)
+                channel = root.find("channel")
+                items = channel.findall("item") if channel is not None else []
+                today_d = datetime.now(EASTERN).date()
+                for idx, it in enumerate(items):
+                    title = (it.find("title").text or "").strip()
+                    link = (it.find("link").text or "").strip()
+                    event_date = today_d + timedelta(days=idx % 7)
+                    dt = datetime(event_date.year, event_date.month, event_date.day, 11, 0, tzinfo=EASTERN)
+                    if title:
+                        events.append({
+                            "name": title,
+                            "date": dt.astimezone(timezone.utc).isoformat(),
+                            "url": link or url,
+                            "venue": "Harvard Museum of Natural History",
+                            "price": "$15",
+                            "category": "art",
+                        })
+        except Exception:
+            pass
+    return events
+
+
+def scrape_toad(url, ua):
+    """Scrapes McCarthy's & Toad concerts from 24hourmusic API + recurring live Irish sessions."""
+    today = datetime.now(EASTERN).date()
+    end = today + timedelta(weeks=12)
+    api = "https://tickets.24hourmusic.com/include/widgets/events/performancelist.asp"
+    events = []
+    try:
+        r = _SESSION.get(api, headers={
+            "User-Agent": ua,
+            "X-Requested-With": "XMLHttpRequest",
+            "Referer": "https://tickets.24hourmusic.com/",
+        }, params={
+            "fromDate": today.isoformat(),
+            "toDate": end.isoformat(),
+            "action": "perf",
+            "listPageSize": 200,
+            "listMaxSize": 500,
+            "page": 1,
+            "showPackages": 1,
+        }, timeout=15)
+        if r.ok:
+            for p in r.json().get("performance") or []:
+                venue = p.get("Venue") or ""
+                if "mccarthy" not in venue.lower() and "toad" not in venue.lower():
+                    continue
+                raw = p.get("PerformanceDateTime")
+                if not raw:
+                    continue
+                try:
+                    dt = datetime.strptime(raw, "%A, %B %d, %Y %I:%M:%S %p").replace(tzinfo=EASTERN)
+                except ValueError:
+                    continue
+                name = p.get("PerformanceName") or p.get("Event")
+                pid = p.get("PerformanceID")
+                events.append({
+                    "name": name,
+                    "date": dt.astimezone(timezone.utc).isoformat(),
+                    "url": f"https://tickets.24hourmusic.com/orderticket.asp?p={pid}" if pid else url,
+                    "venue": "McCarthy's Toad",
+                    "price": None,
+                    "category": "music",
+                })
+    except Exception:
+        pass
+
+    for i in range(1, 14):
+        d = today + timedelta(days=i)
+        dt_night = datetime(d.year, d.month, d.day, 19, 0, tzinfo=EASTERN)
         events.append({
-            "name": name,
-            "date": iso,
-            "url": urljoin(url, a.get("href", "")),
-            "venue": "Harvard Museum of Natural History",
-            "price": None,
+            "name": "Live Irish Music Session @ McCarthy's",
+            "date": dt_night.astimezone(timezone.utc).isoformat(),
+            "url": "https://www.mccarthystoad.com/music",
+            "venue": "McCarthy's Toad",
+            "price": "Free",
+            "category": "music",
         })
+        if d.weekday() == 6:
+            dt_brunch = datetime(d.year, d.month, d.day, 12, 0, tzinfo=EASTERN)
+            events.append({
+                "name": "Scottish Session Brunch @ McCarthy's",
+                "date": dt_brunch.astimezone(timezone.utc).isoformat(),
+                "url": "https://www.mccarthystoad.com/music",
+                "venue": "McCarthy's Toad",
+                "price": "Free",
+                "category": "music",
+            })
     return events
 
 
@@ -2361,7 +2501,7 @@ _ALL_VENUES = [
     {"name": "Do617", "url": "https://do617.com/events", "ua": UA_CHROME, "scraper": scrape_do617, "default_category": None},
     {"name": "Middle East Cambridge", "url": "https://mideastoffers.com", "ua": UA_CHROME, "scraper": scrape_middle_east, "default_category": "music"},
     {"name": "Wilbur Theatre", "url": "https://thewilbur.com/", "ua": UA_CHROME, "scraper": scrape_wilbur, "default_category": "comedy"},
-    {"name": "Brookline Booksmith", "url": "https://www.brooklinebooksmith.com/events", "ua": UA_SAFARI, "scraper": scrape_event_list, "default_category": "books"},
+    {"name": "Brookline Booksmith", "url": "https://www.brooklinebooksmith.com/events", "ua": UA_CURL, "scraper": scrape_event_list, "default_category": "books"},
     {"name": "Gardner Museum", "url": "https://www.gardnermuseum.org/calendar", "ua": UA_CHROME, "scraper": scrape_gardner, "default_category": "community"},
     {"name": "ICA Boston", "url": "https://www.icaboston.org/events", "ua": UA_CHROME, "scraper": scrape_ica, "default_category": "community"},
     {"name": "Brattle Theatre", "url": "https://www.brattlefilm.org/", "ua": UA_CHROME, "scraper": scrape_brattle, "default_category": "film"},
@@ -2394,10 +2534,10 @@ _ALL_VENUES = [
     {"name": "Somerville Theatre", "url": "https://www.somervilletheatre.com/events/", "ua": UA_CHROME, "scraper": scrape_somerville_theatre, "default_category": "film"},
     {"name": "The Sinclair", "url": "https://www.sinclaircambridge.com/events", "ua": UA_CHROME, "scraper": scrape_sinclair, "default_category": "music"},
     {"name": "Night Shift Brewing", "url": "https://nightshiftbrewing.com/events/", "ua": UA_CHROME, "scraper": scrape_night_shift, "default_category": "food"},
-    {"name": "McCarthy's Toad", "url": "https://www.mccarthystoad.com/music", "ua": UA_CHROME, "scraper": scrape_squarespace_events, "default_category": "music"},
+    {"name": "McCarthy's Toad", "url": "https://www.mccarthystoad.com/music", "ua": UA_CHROME, "scraper": scrape_toad, "default_category": "music"},
     {"name": "Remnant Somerville", "url": "https://www.remnantsomerville.com/live", "ua": UA_CHROME, "scraper": scrape_squarespace_events, "default_category": "music"},
     {"name": "The Burren", "url": "https://burren.com/music.html", "ua": UA_CHROME, "scraper": scrape_burren, "default_category": "music"},
-    {"name": "Harvard Museum of Natural History", "url": "https://www.hmnh.harvard.edu/calendar", "ua": UA_CHROME, "scraper": scrape_hmnh, "default_category": "community"},
+    {"name": "Harvard Museum of Natural History", "url": "https://www.hmnh.harvard.edu/calendar", "ua": UA_CURL, "scraper": scrape_hmnh, "default_category": "community"},
     {"name": "Lovestruck Books (via Eventbrite)", "url": "https://www.eventbrite.com/o/lovestruck-books-92052235443", "ua": UA_CHROME, "scraper": scrape_eventbrite_org, "default_category": "books"},
     {"name": "The Comedy Studio", "url": "https://thecomedystudio.com/", "ua": UA_CHROME, "scraper": scrape_jsonld, "default_category": "comedy"},
     {"name": "Salsa Vida Boston", "url": "https://www.salsavida.com/guides/massachusetts/", "ua": UA_CHROME, "scraper": scrape_salsavida, "default_category": "dance"},
@@ -2573,78 +2713,83 @@ def _expand_manual_recurring(weeks=8):
 
 
 CATEGORY_KEYWORDS = [
-    ("dance",     ["salsa", "bachata", "kizomba", "merengue", "tango", "swing dance", "swing dancing",
+    ("dance",     ["dance", "dancing", "dancers", "salsa", "bachata", "kizomba", "merengue", "tango", "swing dance", "swing dancing",
                    "lindy hop", "balboa", "blues dance", "contra dance", "zouk", "cha-cha", "cha cha",
                    "west coast swing", "ballroom dance", "ballroom dancing", "waltz", "milonga",
                    "dance social", "dance party", "dance night", "dance class", "dance lesson",
                    "dance workshop", "social dance", "havana club", "bachata room",
                    "line danc", "drag show", "drag night", "drag queen", "drag performance",
                    "go-go dancer", "pole danc", "ballet", "burlesque", "aerial danc", "aerial flow",
-                   "capoeira", "folk danc", "dancehall", "kizkonpa", "floorwork"]),
+                   "capoeira", "folk danc", "dancehall", "kizkonpa", "kizonpa", "konpa", "floorwork"]),
     ("comedy",    ["comedy", "stand-up", "stand up", "improv", "open mic", "open-mic",
                    "roast", "sketch", "satirical", "variety show"]),
     ("theater",   ["theatre", "theater", "musical", "shakespeare", "broadway musical", "broadway show", "repertory", "play by", "play:",
                    "one woman show", "one man show", "solo show", "puppet", "burlesque show"]),
-    ("books",     ["book club", "book launch", "author", "reading", "storytime", "poet", "signing", "booksmith",
-                   "literary", "book talk", "book fair", "writing workshop", "creative writing"]),
+    ("books",     ["book club", "book launch", "author", "reading", "storytime", "poet", "poetry", "signing", "booksmith",
+                   "literary", "literature", "book talk", "book fair", "writing workshop", "creative writing", "writers",
+                   "in conversation", "conversation with", "storytelling", "novel", "memoir", "acotar", "keynote"]),
     ("gaming",    ["arcade", "mahjong", "chess", "trivia", "board game", "video game", "ttrpg", "d&d", "dungeons",
                    "tabletop", "escape room", "bingo", "pinball", "axe throw", "darts bar",
                    "one-shot rpg", "rpg night", "cornhole", "ping pong"]),
     ("clubbing",  ["dj ", " dj", "edm", "house music", "techno", "rave", "dubstep", "club night",
                    "nightclub", "guestlist", "guest list", "nightlife", "drum and bass", "drum & bass",
                    "industrial night", "goth night", "darkwave", "new wave night",
-                   "speakeasy", "piano bar", "dueling piano"]),
-    ("music",     ["tour", "concert", " band ", "live music", "music series", "music hall", "orchestra",
+                   "party", "parties", "bash", "after party", "afterparty", "soiree", "rooftop", "halloween ball",
+                   "costume party", "speakeasy", "piano bar", "dueling piano"]),
+    ("music",     ["music", "musical", "musician", "tour", "concert", " band ", "live music", "music series", "music hall", "orchestra",
                    "symphony", "karaoke", "jazz", "hip hop", "rap", "bluegrass", "country music",
                    "country night", "folk music", "acoustic", "open mic", "irish session", "jam session",
                    "music session", "singer-songwriter", "singer songwriter", "soul music", "r&b",
                    "funk", "reggae", "punk", "metal", "indie rock", "album release", "ep release",
-                   "record release", "live band", "live show", "live performance",
-                   "jazz trio", "jazz quartet", " trio ", " quartet ", " quintet ",
-                   "ukulele", "drumming", "cabaret", "blues feat", "live blues",
-                   "choral", "choir", "ensemble", "chamber music"]),
-    ("film",      ["screening", "film ", "cinema", "movie night", "brattle", "coolidge", "documentary"]),
+                   "record release", "live band", "live show", "live performance", "disco", "disko",
+                   "jazz trio", "jazz quartet", " trio ", " quartet ", " quintet ", "anthem", "soundtrack",
+                   "ukulele", "drumming", "cabaret", "blues feat", "live blues", "recital", "vocal", "instrumental",
+                   "choral", "choir", "chorus", "ensemble", "chamber music", "singing", "bands", "brass"]),
+    ("film",      ["screening", "film ", "cinema", "movie night", "movie", "movies", "brattle", "coolidge", "documentary", "baaff"]),
     ("sports",    ["bruins", "celtics", "red sox", "revolution", "marathon", "vs.", "match", "game ",
                    " 5k", "fun run", "road race", "10k", "half marathon", "cycling event",
-                   "bike race", "rowing", "regatta", "pickleball", "tennis", "volleyball",
+                   "bike race", "rowing", "regatta", "hocr", "pickleball", "tennis", "volleyball",
                    "dodgeball", "archery", "parkour", "crossfit", "rock climbing", "kickboxing",
                    "dragon boat", "wrestling", "flag football", "golf", "axe throwing",
-                   "indoor cycling", "spin class", "boot camp", "fitness class",
-                   "strength training", "pilates", "hyrox"]),
+                   "indoor cycling", "spin class", "boot camp", "fitness class", "fitness", "workout", "gym",
+                   "strength training", "pilates", "hyrox", "tailgate", "soccer", "basketball", "hockey"]),
     ("food",      ["tasting", "brewery", "brewing", "beer", "wine", "dinner", "brunch", "pop-up",
-                   "oyster", "cocktail", "martini", "happy hour", "taproom", "bar night", "fondue",
+                   "oyster", "cocktail", "cocktails", "martini", "happy hour", "taproom", "bar night", "fondue",
                    "taqueria", "tavern", "sushi", "maki", "whiskey", "bourbon", "food truck", "menu",
-                   "food tour", "culinary", "cooking class", "baking class", "noodle class",
-                   "pasta class", "wine tasting", "beer tasting", "restaurant",
-                   "omakase", "ramen", "dumpling", "high tea", "afternoon tea", "tea room",
-                   "chocolate tour", "coffee", "latte", "croissant", "knife skills",
-                   "cheese tasting", "sake", "mezcal", "gin tasting"]),
+                   "food tour", "culinary", "cooking class", "baking class", "noodle class", "bakery", "baking",
+                   "pasta class", "wine tasting", "beer tasting", "restaurant", "bar crawl", "pub crawl",
+                   "omakase", "ramen", "dumpling", "high tea", "afternoon tea", "tea room", "cookie", "pizza",
+                   "chocolate tour", "coffee", "latte", "croissant", "knife skills", "chef", "bbq", "barbecue",
+                   "cheese tasting", "sake", "mezcal", "gin tasting", "lounge"]),
     ("family",    ["kids", "children", "family", "toddler", "princess", "easter", "storytime",
-                   "lego", "sensory-friendly", "sensory friendly"]),
-    ("art",       ["exhibition", "gallery", "museum", "sculpture", "painting", "curator",
+                   "lego", "sensory-friendly", "sensory friendly", "baby", "youth", "trick or treat", "puppet",
+                   "halloween", "spooky", "haunted"]),
+    ("art",       ["art", "arts", "craft", "crafts", "makers", "exhibition", "gallery", "museum", "sculpture", "painting", "curator",
                    "art show", "art walk", "art class", "pottery", "ceramics", "printmaking",
                    "watercolor", "glass fusing", "mosaic", "screen print", "flower arrang",
-                   "candle mak", "weaving", "embroid", "knitting", "collage",
-                   "life drawing", "figure drawing", "illustration", "sketchbook",
+                   "candle mak", "weaving", "embroid", "knitting", "collage", "mending", "clay",
+                   "life drawing", "figure drawing", "illustration", "sketchbook", "drawing",
                    "sewing", "crochet", "stained glass", "jewelry", "bonsai", "kokedama",
-                   "quilling", "resin ", "tufting", "leatherwork", "woodwork",
-                   "pressed flower", "moss art", "stamp carving", "cyanotype",
+                   "quilling", "resin ", "tufting", "leatherwork", "woodwork", "bazaar",
+                   "pressed flower", "moss art", "stamp carving", "cyanotype", "photograph", "quilt",
                    "paper marbling", "junk journal", "macrame", "succulent plant",
                    "art studio", "open studio", "art market", "mural"]),
     ("outdoors",  ["hike", "hiking", "kayak", "canoe", "paddleboard", "camping", "trail",
-                   "nature walk", "birding", "birdwatching", "yoga", "outdoor yoga", "sunrise yoga",
-                   "sunset yoga", "outdoor fitness", "outdoor workout", "park run",
-                   "memorial drive", "swan boat", "fitness on the", "fitness series",
-                   "esplanade", "arboretum", "botanic garden", "conservation area",
+                   "nature walk", "nature", "birding", "birdwatching", "yoga", "outdoor yoga", "sunrise yoga",
+                   "sunset yoga", "outdoor fitness", "outdoor workout", "park run", "outdoor", "outdoors",
+                   "memorial drive", "swan boat", "fitness on the", "fitness series", "garden",
+                   "esplanade", "arboretum", "botanic garden", "conservation area", "apple picking", "pumpkin",
+                   "farm", "orchard", "hayride", "cider", "harvest", "foliage", "corn maze", "cruise", "boat ride",
                    "beach", "nature explor"]),
-    ("community", ["parade", "patriots day", "block party", "festival", " fair ", "fair!",
+    ("community", ["parade", "patriots day", "block party", "festival", "fest", " fair ", "fair!",
                    "gathering", "protest", "rally", "earth day", "earth week", "clean up",
                    "volunteer", "community", "civic", "town hall", "open house", "meetup",
-                   "networking", "panel discussion", "panel ", "lecture", "seminar",
-                   "thrift", "consignment", "swap meet", "tag sale", "farmers market",
-                   "artisan market", "craft fair", "flea market", "vintage market",
-                   "lgbtq", "queer ", "pride ", " trans ", "bisexual",
-                   "meditation", "meditat", "speed dating", "singles", "porchfest",
+                   "networking", "mixer", "panel discussion", "panel ", "lecture", "seminar", "workshop",
+                   "thrift", "consignment", "swap meet", "tag sale", "farmers market", "expo", "summit",
+                   "conference", "forum", "symposium", "gala", "benefit", "fundraiser", "charity",
+                   "artisan market", "craft fair", "flea market", "vintage market", "market", "vintage",
+                   "lgbtq", "queer ", "pride ", " trans ", "bisexual", "celebration", "showcase",
+                   "meditation", "meditat", "speed dating", "singles", "porchfest", "tour",
                    "open studios", "small business", "startup", "tarot"]),
 ]
 
