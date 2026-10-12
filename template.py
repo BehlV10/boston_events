@@ -542,7 +542,8 @@ def render_page(results):
             cal_actions.append(f'<button type="button" class="cal-btn ics-btn" data-title="{escape(raw_title)}" data-date="{escape(e["date"])}" data-venue="{escape(venue)}" data-url="{escape(e.get("url") or "")}" title="Download .ics for Apple/Outlook">+ .ics</button>')
         cal_html = f'<span class="cal-links">{" ".join(cal_actions)}</span>' if cal_actions else ""
 
-        desc = (e.get("description") or "")[:150]
+        raw_desc = (e.get("description") or "").replace("***", "").replace("**", "").replace("__", "").replace("`", "").strip()
+        desc = raw_desc[:180]
         desc_html = f'<div class="desc">{escape(desc)}</div>' if desc else ""
         free_flag = "true" if is_free else "false"
         return f'''<li class="event" data-cat="{escape(cat)}" data-bucket="{escape(bucket)}" data-venue="{escape(source)}" data-city="{escape(city)}" data-recur="{recur_flag}" data-free="{free_flag}">
@@ -1082,9 +1083,10 @@ def render_page(results):
     border: 1px solid rgba(255, 255, 255, 0.04);
     margin-bottom: 6px;
     display: grid;
-    grid-template-columns: 78px 1fr;
+    grid-template-columns: 78px minmax(0, 1fr);
     gap: 12px;
     font-size: 14px;
+    min-width: 0;
     transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
   }}
   .event:hover {{
@@ -1094,6 +1096,7 @@ def render_page(results):
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
   }}
   .when {{ color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; padding-top: 2px; font-weight: 500; }}
+  .what {{ min-width: 0; overflow-wrap: break-word; word-break: break-word; }}
   .what a {{ color: #79aeff; text-decoration: none; font-weight: 500; }}
   .what a:hover {{ text-decoration: underline; color: #a5caff; }}
   .venue-tag {{ color: var(--muted); font-size: 11px; margin-top: 4px; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }}
@@ -1109,7 +1112,19 @@ def render_page(results):
   .alt-sources {{ color: var(--muted); font-size: 11px; }}
   .alt-sources a {{ color: var(--accent); text-decoration: none; }}
   .alt-sources a:hover {{ text-decoration: underline; }}
-  .desc {{ color: var(--muted); font-size: 12px; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }}
+  .desc {{
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 5px;
+    line-height: 1.45;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    max-width: 100%;
+  }}
   .bucket.empty {{ display: none; }}
 
   /* Filter Groups */
