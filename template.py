@@ -759,6 +759,7 @@ def render_page(results):
 <meta charset="utf-8">
 <title>Wicked Boston Events</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230c0e14'/%3E%3Crect x='3' y='3' width='58' height='58' rx='13' fill='none' stroke='%235d9bff' stroke-width='3'/%3E%3Ctext x='32' y='46' font-family='system-ui, -apple-system, sans-serif' font-weight='900' font-size='38' fill='%23ffd866' text-anchor='middle'%3EW%3C/text%3E%3Ccircle cx='48' cy='16' r='4' fill='%23ff7ab2'/%3E%3C/svg%3E">
 <style>
   :root {{
     --bg: #0c0e14;
