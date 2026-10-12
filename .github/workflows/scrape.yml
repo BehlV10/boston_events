@@ -1,15 +1,20 @@
-name: Scrape events
+name: Scrape events and deploy site
 
 on:
   schedule:
     - cron: "*/30 * * * *"
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 concurrency:
-  group: scrape
+  group: pages
   cancel-in-progress: false
 
 jobs:
@@ -28,6 +33,7 @@ jobs:
 
       - run: python server.py export events.json
       - run: python server.py export html index.html
+      - run: cp index.html events.html
 
       - name: Commit data and static site if changed
         run: |
@@ -40,3 +46,22 @@ jobs:
             git commit -m "Update events and site: $(date -u +%Y-%m-%dT%H:%MZ)"
             git push
           fi
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+  deploy:
+    needs: scrape
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
