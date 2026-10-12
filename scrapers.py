@@ -663,27 +663,72 @@ def scrape_event_list(url, ua):
         a = art.select_one(".event-list__title a") or art.select_one("a[href*='/event/']")
         if not a:
             continue
-        mon = art.select_one(".event-list__date--month")
-        day = art.select_one(".event-list__date--day")
         href = a.get("href", "")
+
+        # Extract time from .event-list__details--item or article text
+        hour, minute = 19, 0
+        time_text = None
+        date_text = None
+        for item in art.select(".event-list__details--item"):
+            label = item.select_one(".event-list__details--label")
+            if label and "time" in label.get_text().lower():
+                time_text = item.get_text(" ", strip=True).replace(label.get_text(strip=True), "").strip()
+            elif label and "date" in label.get_text().lower():
+                date_text = item.get_text(" ", strip=True).replace(label.get_text(strip=True), "").strip()
+            elif "time:" in item.get_text().lower():
+                time_text = re.sub(r"(?i)^.*?time:\s*", "", item.get_text(" ", strip=True)).strip()
+            elif "date:" in item.get_text().lower():
+                date_text = re.sub(r"(?i)^.*?date:\s*", "", item.get_text(" ", strip=True)).strip()
+
+        if not time_text:
+            m_tm = re.search(r"(?:Time:\s*)(\d{1,2}(?::\d{2})?\s*(?:am|pm))", art.get_text(" ", strip=True), re.IGNORECASE)
+            if m_tm:
+                time_text = m_tm.group(1)
+
+        if time_text:
+            m_time = re.search(r"(\d{1,2})(?::(\d{2}))?\s*(am|pm)", time_text, re.IGNORECASE)
+            if m_time:
+                h = int(m_time.group(1))
+                mn = int(m_time.group(2) or 0)
+                ampm = m_time.group(3).lower()
+                if ampm == "pm" and h != 12:
+                    h += 12
+                elif ampm == "am" and h == 12:
+                    h = 0
+                hour, minute = h, mn
+
         m = re.search(r"/(\d{4})-(\d{2})-(\d{2})/", href)
         iso = None
         if m:
             y, mo, d = map(int, m.groups())
             try:
-                dt = datetime(y, mo, d, 19, 0, tzinfo=EASTERN)
+                dt = datetime(y, mo, d, hour, minute, tzinfo=EASTERN)
                 iso = dt.astimezone(timezone.utc).isoformat()
             except ValueError:
                 pass
-        elif mon and day:
-            try:
-                year = datetime.now(EASTERN).year
-                dt = datetime.strptime(f"{mon.get_text(strip=True)} {day.get_text(strip=True)} {year} 19:00", "%b %d %Y %H:%M").replace(tzinfo=EASTERN)
-                if dt < datetime.now(EASTERN):
-                    dt = dt.replace(year=year + 1)
-                iso = dt.astimezone(timezone.utc).isoformat()
-            except ValueError:
-                pass
+        elif date_text:
+            dm = re.search(r"(\d{1,2})/(\d{1,2})/(\d{4})", date_text)
+            if dm:
+                mo, d, y = map(int, dm.groups())
+                try:
+                    dt = datetime(y, mo, d, hour, minute, tzinfo=EASTERN)
+                    iso = dt.astimezone(timezone.utc).isoformat()
+                except ValueError:
+                    pass
+
+        if not iso:
+            mon = art.select_one(".event-list__date--month")
+            day = art.select_one(".event-list__date--day")
+            if mon and day:
+                try:
+                    year = datetime.now(EASTERN).year
+                    dt = datetime.strptime(f"{mon.get_text(strip=True)} {day.get_text(strip=True)} {year} {hour:02d}:{minute:02d}", "%b %d %Y %H:%M").replace(tzinfo=EASTERN)
+                    if dt < datetime.now(EASTERN):
+                        dt = dt.replace(year=year + 1)
+                    iso = dt.astimezone(timezone.utc).isoformat()
+                except ValueError:
+                    pass
+
         price = None
         body = art.select_one(".event-list__body")
         body_text = body.get_text(" ", strip=True) if body else ""
