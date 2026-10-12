@@ -2189,52 +2189,81 @@ def scrape_big_night_live(url, ua):
 
 def scrape_lous(url, ua):
     """Lou's in Harvard Square — live music calendar and weekend brunches."""
+    json_url = f"{url.split('?')[0]}?format=json"
+    try:
+        resp = _SESSION.get(json_url, headers={"User-Agent": ua}, timeout=12)
+        resp.raise_for_status()
+        data = resp.json()
+        items = data.get("upcoming") or data.get("items") or []
+        events = []
+        weekdays_pattern = r"^(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\s*[\u2013\u2014\-:]\s*"
+        for item in items:
+            raw_title = item.get("title") or ""
+            import html as py_html
+            raw_title = py_html.unescape(raw_title).replace("\xa0", " ").strip()
+            clean_title = re.sub(weekdays_pattern, "", raw_title, flags=re.I).strip()
+            if not clean_title:
+                clean_title = raw_title
+
+            start_ts = item.get("startDate")
+            if not start_ts:
+                continue
+            dt = datetime.fromtimestamp(start_ts / 1000, timezone.utc)
+
+            full_url = item.get("fullUrl")
+            event_url = f"https://www.wearelous.com{full_url}" if full_url else url
+
+            cat = "music"
+            t_lower = raw_title.lower()
+            if "brunch" in t_lower:
+                cat = "food"
+            elif "dance" in t_lower:
+                cat = "dance"
+            elif "dj" in t_lower or "late night" in t_lower:
+                cat = "clubbing"
+
+            events.append({
+                "name": clean_title,
+                "date": dt.isoformat(),
+                "url": event_url,
+                "venue": "Lou's (Harvard Square)",
+                "price": None,
+                "category": cat,
+            })
+        if events:
+            return events
+    except Exception:
+        pass
+
+    # Fallback to HTML time tags if format=json is unavailable
     resp = _SESSION.get(url, headers={"User-Agent": ua}, timeout=12)
     resp.raise_for_status()
     soup = BeautifulSoup(resp.text, "html.parser")
     events = []
-    now = datetime.now(EASTERN)
-    weekdays = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
-    for h in soup.find_all(["h1", "h2", "h3", "h4"]):
-        text = h.get_text(" ", strip=True)
-        if not text or len(text) < 10:
+    for card in soup.select(".eventlist-column-info, .eventlist-event"):
+        title_el = card.select_one(".eventlist-title, h1, h2")
+        time_el = card.select_one("time.event-date, time")
+        if not title_el or not time_el:
             continue
-        day_match = re.search(r"\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b", text, re.I)
-        if not day_match:
+        raw_title = title_el.get_text(" ", strip=True)
+        date_str = time_el.get("datetime")
+        if not date_str:
             continue
-        weekday_name = day_match.group(1).lower()
-        target_wd = weekdays.index(weekday_name)
-        clean_title = re.sub(r"^(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\s*[\u2013\u2014\-:]\s*", "", text, flags=re.I).strip()
-        if not clean_title or clean_title.lower() in weekdays:
+        try:
+            d = datetime.strptime(date_str[:10], "%Y-%m-%d").date()
+            dt = datetime(d.year, d.month, d.day, 20, 0, tzinfo=EASTERN)
+        except Exception:
             continue
-
-        time_hour = 19
-        time_min = 0
-        sibling = h.find_next_sibling("p")
-        if sibling:
-            sib_text = sibling.get_text(" ", strip=True)
-            tm = re.search(r"(\d{1,2}):(\d{2})\s*(am|pm)", sib_text, re.I)
-            if tm:
-                h_val = int(tm.group(1))
-                time_min = int(tm.group(2))
-                if tm.group(3).lower() == "pm" and h_val != 12:
-                    h_val += 12
-                elif tm.group(3).lower() == "am" and h_val == 12:
-                    h_val = 0
-                time_hour = h_val
-
-        for w_offset in range(2):
-            days_ahead = (target_wd - now.weekday()) % 7 + (w_offset * 7)
-            d = now.date() + timedelta(days=days_ahead)
-            dt = datetime(d.year, d.month, d.day, time_hour, time_min, tzinfo=EASTERN)
-            events.append({
-                "name": clean_title,
-                "date": dt.astimezone(timezone.utc).isoformat(),
-                "url": url,
-                "venue": "Lou's (Harvard Square)",
-                "price": None,
-                "category": "music" if "brunch" not in clean_title.lower() else "food",
-            })
+        a = title_el.find("a")
+        event_url = urljoin(url, a["href"]) if (a and a.get("href")) else url
+        events.append({
+            "name": raw_title,
+            "date": dt.astimezone(timezone.utc).isoformat(),
+            "url": event_url,
+            "venue": "Lou's (Harvard Square)",
+            "price": None,
+            "category": "music",
+        })
     return events
 
 

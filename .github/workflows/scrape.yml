@@ -43,7 +43,7 @@ jobs:
           if git diff --staged --quiet; then
             echo "no changes"
           else
-            git commit -m "Update events and site: $(date -u +%Y-%m-%dT%H:%MZ)"
+            git commit -m "Update events and site: $(date -u +%Y-%m-%dT%H:%MZ) [skip ci]"
             git push
           fi
 
