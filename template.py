@@ -67,19 +67,20 @@ CITY_LABELS = {
 
 
 def _event_city(venue, source):
-    v = (venue or "").strip().lower()
-    hay = v if v else (source or "").strip().lower()
-    if hay == "boston":
-        return "boston"
-    for city, needles in CITY_RULES:
-        for n in needles:
-            if n in hay:
-                return city
+    for target in [(venue or "").strip().lower(), (source or "").strip().lower()]:
+        if not target:
+            continue
+        if target == "boston":
+            return "boston"
+        for city, needles in CITY_RULES:
+            for n in needles:
+                if n in target:
+                    return city
     return "other"
 
 
 def _maps_link(venue, city):
-    if not venue:
+    if not venue or venue.strip().lower() in ("zoom", "online", "virtual"):
         return ""
     label = CITY_LABELS.get(city)
     query = venue if city == "other" or not label else f"{venue}, {label}, MA"
@@ -178,7 +179,12 @@ def _build_gcal_link(e, title, venue, city):
         end_str = end_dt.strftime("%Y%m%dT%H%M%SZ")
     except (ValueError, TypeError, AttributeError):
         return None
-    loc = f"{venue}, {city.capitalize() if city else 'Boston'}, MA" if venue else "Boston, MA"
+    if venue and venue.lower() in ("zoom", "online", "virtual"):
+        loc = venue.capitalize()
+    elif venue:
+        loc = f"{venue}, {city.capitalize() if city else 'Boston'}, MA"
+    else:
+        loc = "Boston, MA"
     details = f"Details & Tickets: {e.get('url') or ''}\n\nDiscovered on Wicked Boston Events"
     return f"https://calendar.google.com/calendar/render?action=TEMPLATE&text={quote(title)}&dates={start_str}/{end_str}&details={quote(details)}&location={quote(loc)}"
 
@@ -529,8 +535,16 @@ def render_page(results):
             if alt_links:
                 alt_html = f'<span class="alt-sources">also on {alt_links}</span>'
         if venue:
-            maps_url = _maps_link(venue, city)
-            venue_html = f'<a class="venue-link" href="{escape(maps_url)}" target="_blank" rel="noopener">{escape(venue)}</a>'
+            if venue.lower() in ("zoom", "online", "virtual"):
+                venue_link = f'<span class="venue-online">💻 {escape(venue)}</span>'
+            else:
+                maps_url = _maps_link(venue, city)
+                venue_link = f'<a class="venue-link" href="{escape(maps_url)}" target="_blank" rel="noopener">{escape(venue)}</a>'
+
+            if source and source.lower() != venue.lower() and not any(agg in source.lower() for agg in ["ticketmaster", "eventbrite", "do617", "boston calendar"]):
+                venue_html = f'{venue_link} <span class="venue-via">(via {escape(source)})</span>'
+            else:
+                venue_html = venue_link
         else:
             venue_html = ""
 
@@ -1103,6 +1117,8 @@ def render_page(results):
   .venue-tag {{ color: var(--muted); font-size: 11px; margin-top: 4px; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }}
   .venue-link {{ color: var(--muted); text-decoration: none; border-bottom: 1px dotted rgba(154,163,178,0.4); }}
   .venue-link:hover {{ color: var(--fg); border-bottom-color: var(--fg); }}
+  .venue-via {{ color: var(--muted); font-size: 11px; opacity: 0.85; font-style: italic; }}
+  .venue-online {{ color: var(--muted); font-size: 11px; }}
   .cat-pill {{ display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 5px; font-size: 11px; font-weight: 600; line-height: 1.3; border: 1px solid; }}
   .price {{ display:inline-block; background: rgba(255,255,255,0.06); color: var(--muted); font-size: 11px; padding: 2px 7px; border-radius: 5px; font-weight: 500; }}
   .price.free {{ background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); font-weight: 700; }}

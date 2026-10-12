@@ -729,6 +729,45 @@ def scrape_event_list(url, ua):
                 except ValueError:
                     pass
 
+        # Extract offsite venue location if present
+        venue_name = None
+        loc_item = art.select_one(".event-details__location--location")
+        if not loc_item:
+            for item in art.select(".event-list__details--item"):
+                label = item.select_one(".event-list__details--label")
+                if label and "place" in label.get_text().lower():
+                    loc_item = item
+                    break
+
+        if loc_item:
+            line1 = loc_item.select_one(".address-line1")
+            if line1:
+                text = line1.get_text(strip=True)
+                if text and not re.match(r"^\d+\s+[A-Za-z]", text):
+                    venue_name = text
+            if not venue_name:
+                addr = loc_item.select_one("address")
+                if addr:
+                    lines = [l.strip() for l in addr.get_text("\n").split("\n") if l.strip()]
+                    if lines and not re.match(r"^\d+\s+[A-Za-z]", lines[0]):
+                        venue_name = lines[0]
+            if not venue_name:
+                lbl = loc_item.select_one(".event-list__details--label")
+                lbl_txt = lbl.get_text(strip=True) if lbl else ""
+                txt = loc_item.get_text(" ", strip=True).replace(lbl_txt, "").strip()
+                if txt and not re.match(r"^\d+\s+[A-Za-z]", txt) and txt.lower() not in ("place:", ""):
+                    venue_name = txt
+
+        if venue_name:
+            v_low = venue_name.lower()
+            u_low = url.lower()
+            if "brookline" in u_low and "brookline booksmith" in v_low:
+                venue_name = None
+            elif "harvard" in u_low and "harvard book" in v_low:
+                venue_name = None
+            elif "trident" in u_low and "trident" in v_low:
+                venue_name = None
+
         price = None
         body = art.select_one(".event-list__body")
         body_text = body.get_text(" ", strip=True) if body else ""
@@ -739,7 +778,7 @@ def scrape_event_list(url, ua):
             "name": a.get_text(strip=True),
             "date": iso,
             "url": urljoin(url, href),
-            "venue": None,
+            "venue": venue_name,
             "price": price,
         })
     return events
