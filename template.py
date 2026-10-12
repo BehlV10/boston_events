@@ -179,7 +179,7 @@ def _build_gcal_link(e, title, venue, city):
     except (ValueError, TypeError, AttributeError):
         return None
     loc = f"{venue}, {city.capitalize() if city else 'Boston'}, MA" if venue else "Boston, MA"
-    details = f"Details & Tickets: {e.get('url') or ''}\n\nDiscovered on Boston Events"
+    details = f"Details & Tickets: {e.get('url') or ''}\n\nDiscovered on Wicked Boston Events"
     return f"https://calendar.google.com/calendar/render?action=TEMPLATE&text={quote(title)}&dates={start_str}/{end_str}&details={quote(details)}&location={quote(loc)}"
 
 
@@ -756,7 +756,7 @@ def render_page(results):
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Boston Events</title>
+<title>Wicked Boston Events</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
 <style>
   :root {{
@@ -1322,7 +1322,7 @@ def render_page(results):
   <div class="banner">
     <div class="banner-inner">
       <div class="banner-top-tag"><span class="live-pulse"></span> GREATER BOSTON LIVE EVENTS</div>
-      <h1 class="banner-title">Boston Events</h1>
+      <h1 class="banner-title">Wicked Boston Events</h1>
       <div class="banner-meta-pill">
         {weather_pill_html}
         <span class="pill-dot">·</span>
@@ -1847,7 +1847,7 @@ def render_page(results):
       const ics = [
         'BEGIN:VCALENDAR',
         'VERSION:2.0',
-        'PRODID:-//Boston Events//EN',
+        'PRODID:-//Wicked Boston Events//EN',
         'BEGIN:VEVENT',
         'SUMMARY:' + cleanTitle,
         'DTSTART:' + start,
