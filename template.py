@@ -46,7 +46,7 @@ CITY_RULES = [
         "td garden", "mgm music hall", "citizens house of blues", "fenway", "back bay",
         "downtown crossing", "seaport", "boston, ma", "(boston)", ", boston",
         "boston common", "trident booksellers", "mfa", "museum of fine arts",
-        "brookline booksmith",
+        "brookline booksmith", "esplanade", "hatch shell",
         "loretta", "versus boston", "opera house", "symphony hall", "brighton music hall",
         "boch center", "wang theatre", "boston conservatory", "the beehive", "play boston",
         "petit robert", "the grand", "scorpion bar", "scorpion", "memoire",

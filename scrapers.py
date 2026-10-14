@@ -2294,14 +2294,37 @@ def scrape_lous(url, ua):
                 continue
             dt = datetime.fromtimestamp(start_ts / 1000, timezone.utc)
 
-            full_url = item.get("fullUrl")
+            full_url = item.get("fullUrl") or ""
             event_url = f"https://www.wearelous.com{full_url}" if full_url else url
 
+            # Extract body/excerpt description
+            body_html = item.get("body") or item.get("excerpt") or ""
+            desc = None
+            if body_html:
+                b_soup = BeautifulSoup(body_html, "html.parser")
+                for tag in b_soup(["script", "style"]):
+                    tag.decompose()
+                desc_text = b_soup.get_text(" ", strip=True)
+                desc_text = re.sub(r"^(LEARN MORE\s*\|\s*TICKETS\s*)+", "", desc_text, flags=re.I).strip()
+                if desc_text:
+                    desc = desc_text[:250]
+
+            if "latin dance night" in clean_title.lower() and "salsa" in (full_url + " " + (desc or "")).lower():
+                clean_title = "Latin Dance Night: Salsa, Bachata & Merengue"
+
+            price = None
+            if desc:
+                p_m = re.search(r"(\$\d+(?:\s*[\u2013\-]\s*\$?\d+)?)", desc)
+                if p_m:
+                    price = p_m.group(1)
+            if not price and "salsa" in clean_title.lower():
+                price = "$15 – $20"
+
             cat = "music"
-            t_lower = raw_title.lower()
+            t_lower = (clean_title + " " + raw_title).lower()
             if "brunch" in t_lower:
                 cat = "food"
-            elif "dance" in t_lower:
+            elif "dance" in t_lower or "salsa" in t_lower:
                 cat = "dance"
             elif "dj" in t_lower or "late night" in t_lower:
                 cat = "clubbing"
@@ -2311,7 +2334,8 @@ def scrape_lous(url, ua):
                 "date": dt.isoformat(),
                 "url": event_url,
                 "venue": "Lou's (Harvard Square)",
-                "price": None,
+                "price": price,
+                "description": desc,
                 "category": cat,
             })
         if events:
@@ -2349,6 +2373,53 @@ def scrape_lous(url, ua):
             "category": "music",
         })
     return events
+
+
+def scrape_bostonsalsa(url, ua):
+    """Boston Salsa & Bachata — outdoor BOBAS dancing at the Hatch Shell/Esplanade, socials, and dance nights."""
+    try:
+        resp = _SESSION.get(url, headers={"User-Agent": ua}, timeout=15)
+        resp.raise_for_status()
+        soup = BeautifulSoup(resp.text, "html.parser")
+        events = []
+        for script in soup.select('script[type="application/ld+json"]'):
+            try:
+                data = json.loads(script.string or "")
+            except Exception:
+                continue
+            if isinstance(data, dict) and data.get("@type") == "ItemList":
+                for it in data.get("itemListElement", []):
+                    ev = it.get("item", {})
+                    name = ev.get("name")
+                    start = ev.get("startDate")
+                    if not name or not start:
+                        continue
+                    try:
+                        dt = datetime.fromisoformat(start.replace("Z", "+00:00"))
+                        iso = dt.astimezone(timezone.utc).isoformat()
+                    except Exception:
+                        continue
+                    loc = ev.get("location", {})
+                    venue = loc.get("name") if isinstance(loc, dict) else None
+                    offers = ev.get("offers", {})
+                    price = None
+                    if isinstance(offers, dict) and "price" in offers:
+                        p = offers["price"]
+                        price = "Free" if p == 0 else f"${p}"
+                    ev_url = ev.get("url") or url
+                    desc = ev.get("description")
+                    events.append({
+                        "name": name,
+                        "date": iso,
+                        "url": ev_url,
+                        "venue": venue,
+                        "price": price,
+                        "description": desc,
+                        "category": "dance",
+                    })
+        return events
+    except Exception:
+        return []
 
 
 def scrape_ticketmaster(_url, _ua):
@@ -2832,6 +2903,7 @@ _ALL_VENUES = [
     {"name": "Mémoire Boston", "url": "https://buy.tablelist.com/v/memoire", "ua": UA_CHROME, "scraper": scrape_tablelist, "default_category": "clubbing"},
     {"name": "Deep Cuts Medford", "url": "https://do617.com/venues/deep-cuts", "ua": UA_CHROME, "scraper": scrape_do617, "default_category": "music"},
     {"name": "Lou's Harvard Square", "url": "https://www.wearelous.com/lous-live", "ua": UA_CHROME, "scraper": scrape_lous, "default_category": "music"},
+    {"name": "Boston Salsa & Bachata", "url": "https://bostonsalsa.org/", "ua": UA_CHROME, "scraper": scrape_bostonsalsa, "default_category": "dance"},
 ]
 
 # Drop venues that require env vars we don't have set — keeps the fail banner clean.
