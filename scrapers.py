@@ -213,8 +213,11 @@ def _eventbrite_org_json_events(html, base_url):
             price = "Free"
         else:
             p = re.search(r'"minimum_ticket_price":\{[^}]*?"major_value":"([\d.]+)"', chunk)
+            if not p:
+                p = re.search(r'"minimum_ticket_price":\{[^}]*?"display":"([\d.]+)\s*USD"', chunk)
             if p:
-                price = f"${float(p.group(1)):g}"
+                val = float(p.group(1))
+                price = "Free" if val == 0 else f"${val:g}"
         venue = re.search(r'"primary_venue":\{[^{}]*?"name":"((?:[^"\\]|\\.)*)"', chunk)
         events.append({
             "name": name,
@@ -377,10 +380,28 @@ _BC_GOES_UNTIL_RE = re.compile(r"goes until\s+(\d{1,2})/(\d{1,2})", re.IGNORECAS
 _BC_EXTERNAL_RE = re.compile(r"event\s*website", re.IGNORECASE)
 
 
-def _bc_external_url(bc_url, ua):
-    """Fetch a Boston Calendar event detail page and extract the external 'Event website' link.
-    Retries once on transient failure since the parallel rewrite hammers BC; returns None
-    only after both attempts fail."""
+def _parse_bc_admission(text):
+    if not text:
+        return None
+    t = re.sub(r"^\s*admission\s*:\s*", "", text, flags=re.IGNORECASE).strip()
+    if not t:
+        return None
+    if re.search(r"\bfree\b", t, re.IGNORECASE) and "$" not in t:
+        return "Free"
+    m = re.search(r"\$\s*(\d+(?:\.\d{2})?)(?:\s*[-–]\s*\$?(\d+(?:\.\d{2})?))?", t)
+    if m:
+        p1 = m.group(1)
+        p2 = m.group(2)
+        if p2:
+            return "Free" if p1 in ("0", "0.00") and p2 in ("0", "0.00") else f"${p1} - ${p2}"
+        return "Free" if p1 in ("0", "0.00") else f"${p1}"
+    if re.search(r"\bfree\b", t, re.IGNORECASE):
+        return "Free"
+    return None
+
+
+def _bc_detail_info(bc_url, ua):
+    """Fetch detail page for The Boston Calendar event and extract (external_url, admission_price)."""
     soup = None
     for attempt in range(2):
         try:
@@ -390,17 +411,23 @@ def _bc_external_url(bc_url, ua):
             if attempt == 0:
                 time.sleep(0.5)
                 continue
-            return None
+            return None, None
     if soup is None:
-        return None
+        return None, None
+    ext_url = None
+    price = None
     for p in soup.find_all("p"):
         b = p.find("b") or p.find("strong")
-        if not b or not _BC_EXTERNAL_RE.search(b.get_text(" ", strip=True)):
+        if not b:
             continue
-        a = p.find("a", href=True)
-        if a and a.get("href"):
-            return a["href"]
-    return None
+        label = b.get_text(" ", strip=True).lower()
+        if _BC_EXTERNAL_RE.search(label):
+            a = p.find("a", href=True)
+            if a and a.get("href"):
+                ext_url = a["href"]
+        elif "admission" in label:
+            price = _parse_bc_admission(p.get_text(" ", strip=True))
+    return ext_url, price
 
 
 _BC_NOISE_PREFIXES = re.compile(
@@ -489,12 +516,15 @@ def scrape_boston_calendar(url, ua):
             if seen_key in seen_urls:
                 continue
             seen_urls.add(seen_key)
+            price = None
+            if re.search(r"\b(?:free|no cover|complimentary)\b", name, re.IGNORECASE):
+                price = "Free"
             entry = {
                 "name": name,
                 "date": iso,
                 "url": href,
                 "venue": loc_el.get_text(strip=True) if loc_el else None,
-                "price": None,
+                "price": price,
             }
             until = _BC_GOES_UNTIL_RE.search(raw_time)
             if iso is None and until:
@@ -503,12 +533,14 @@ def scrape_boston_calendar(url, ua):
                 entry["ends"] = f"{end_year:04d}-{end_month:02d}-{end_day:02d}"
             events.append(entry)
     if events:
-        top = events[:30]
-        with ThreadPoolExecutor(max_workers=8) as ex:
-            externals = list(ex.map(lambda e: _bc_external_url(e["url"], ua), top))
-        for e, ext in zip(top, externals):
+        top = events[:60]
+        with ThreadPoolExecutor(max_workers=12) as ex:
+            details = list(ex.map(lambda e: _bc_detail_info(e["url"], ua), top))
+        for e, (ext, p) in zip(top, details):
             if ext:
                 e["url"] = ext
+            if p and not e.get("price"):
+                e["price"] = p
     return events
 
 
@@ -2640,15 +2672,21 @@ def scrape_burren(url, ua):
         hour, minute = _burren_parse_time(time_el.get_text(" ", strip=True) if time_el else "")
         dt = datetime(current_date.year, current_date.month, current_date.day, hour, minute, tzinfo=EASTERN)
         venue = "The Burren"
+        room_txt = room.get_text(" ", strip=True) if room else ""
         if room:
-            venue = f"The Burren — {room.get_text(' ', strip=True).title()}"
+            venue = f"The Burren — {room_txt.title()}"
         desc = text_el.get_text(" ", strip=True) if text_el else ""
+        price = None
+        if "front room" in room_txt.lower():
+            price = "Free"
+        elif "free" in desc.lower() or "free" in name.lower() or "no cover" in desc.lower():
+            price = "Free"
         events.append({
             "name": name.title() if name.isupper() else name,
             "date": dt.astimezone(timezone.utc).isoformat(),
             "url": url,
             "venue": venue,
-            "price": None,
+            "price": price,
             "description": desc or None,
         })
     return events

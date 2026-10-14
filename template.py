@@ -499,8 +499,9 @@ def _build_compare_links(e, raw_title):
         return ""
     encoded_q = quote_plus(q)
     gt_url = f"https://gametime.co/search?q={encoded_q}"
-    sh_url = f"https://www.stubhub.com/find/s/?q={encoded_q}"
-    return f'<span class="compare-tickets">compare: <a href="{escape(gt_url)}" target="_blank" rel="noopener">Gametime</a> · <a href="{escape(sh_url)}" target="_blank" rel="noopener">StubHub</a></span>'
+    sh_url = f"https://www.stubhub.com/search?q={encoded_q}"
+    label = "compare prices" if e.get("price") else "live prices"
+    return f'<span class="compare-tickets">{label}: <a href="{escape(gt_url)}" target="_blank" rel="noopener">Gametime</a> · <a href="{escape(sh_url)}" target="_blank" rel="noopener">StubHub</a></span>'
 
 
 def _merge_duplicates(events):
@@ -627,6 +628,7 @@ def render_page(results):
         )
         is_free = _is_event_free(e)
         price_raw = escape(e["price"]) if e.get("price") else ""
+        is_comm = _is_commercial_ticketed(e)
         if price_raw:
             if "free" in price_raw.lower() or price_raw in ("$0", "0"):
                 price_tag = f'<span class="price free">{price_raw}</span>'
@@ -634,6 +636,8 @@ def render_page(results):
                 price_tag = f'<span class="price">{price_raw}</span>'
         elif is_free:
             price_tag = '<span class="price free">Free</span>'
+        elif is_comm:
+            price_tag = '<span class="price ticketed">Live Pricing ↗</span>'
         else:
             price_tag = ""
 
@@ -1257,6 +1261,7 @@ def render_page(results):
   .cat-pill {{ display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 5px; font-size: 11px; font-weight: 600; line-height: 1.3; border: 1px solid; }}
   .price {{ display:inline-block; background: rgba(255,255,255,0.06); color: var(--muted); font-size: 11px; padding: 2px 7px; border-radius: 5px; font-weight: 500; }}
   .price.free {{ background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); font-weight: 700; }}
+  .price.ticketed {{ background: rgba(139, 178, 255, 0.12); color: #8bb2ff; border: 1px solid rgba(139, 178, 255, 0.3); font-weight: 600; font-size: 10px; }}
   .cal-links {{ display: inline-flex; align-items: center; gap: 4px; margin-left: 4px; }}
   .cal-btn {{ background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--muted); padding: 2px 7px; border-radius: 5px; font-size: 10px; font-weight: 500; text-decoration: none; cursor: pointer; line-height: 1.3; display: inline-flex; align-items: center; gap: 3px; font-family: inherit; transition: all 0.15s ease; }}
   .cal-btn:hover {{ color: #fff; border-color: var(--accent); background: rgba(93,155,255,0.15); }}
