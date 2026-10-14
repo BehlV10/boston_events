@@ -2431,7 +2431,7 @@ def scrape_ticketmaster(_url, _ua):
             "latlong": "42.3601,-71.0589",
             "radius": 25,
             "unit": "miles",
-            "size": 100,
+            "size": 150,
             "sort": "date,asc",
             "startDateTime": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         },
@@ -2455,50 +2455,92 @@ def scrape_ticketmaster(_url, _ua):
         prs = ev.get("priceRanges") or []
         if prs:
             price = _format_price_range(prs[0].get("min"), prs[0].get("max"), prs[0].get("currency", "USD"))
+            
+        cat = None
+        cls = ev.get("classifications") or []
+        if cls:
+            seg = (cls[0].get("segment", {}).get("name") or "").lower()
+            genre = (cls[0].get("genre", {}).get("name") or "").lower()
+            subgenre = (cls[0].get("subGenre", {}).get("name") or "").lower()
+            if "sport" in seg or "sport" in genre:
+                cat = "sports"
+            elif "comedy" in genre or "comedy" in subgenre:
+                cat = "comedy"
+            elif "theatre" in genre or "theater" in genre or "play" in genre or "broadway" in genre:
+                cat = "theater"
+            elif "music" in seg or "music" in genre:
+                cat = "music"
+            elif "art" in seg:
+                cat = "arts"
+
         events.append({
             "name": ev.get("name"),
             "date": iso,
             "url": ev.get("url"),
             "venue": venue,
             "price": price,
+            "category": cat,
         })
     return events
 
 
 def scrape_seatgeek(_url, _ua):
-    cid = os.environ.get("SEATGEEK_CLIENT_ID")
-    if not cid:
-        raise RuntimeError("SEATGEEK_CLIENT_ID not set")
-    resp = _SESSION.get(
-        "https://api.seatgeek.com/2/events",
-        params={
-            "client_id": cid,
-            "lat": 42.3601,
-            "lon": -71.0589,
-            "range": "25mi",
-            "per_page": 100,
-            "sort": "datetime_local.asc",
-            "datetime_utc.gte": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S"),
-        },
-        timeout=15,
-    )
-    resp.raise_for_status()
+    cid = os.environ.get("SEATGEEK_CLIENT_ID") or "MTg5NjE5MzZ8MTc3NjcwMTYxNS4yODM3MDE3"
     events = []
-    for ev in resp.json().get("events", []):
-        iso = ev.get("datetime_utc")
-        if iso and not iso.endswith("Z") and "+" not in iso:
-            iso = iso + "Z"
-        stats = ev.get("stats") or {}
-        lo = stats.get("lowest_price")
-        price = f"${lo:.0f}+" if lo else None
-        venue = ((ev.get("venue") or {}).get("name")) or "SeatGeek"
-        events.append({
-            "name": ev.get("title") or ev.get("short_title"),
-            "date": iso,
-            "url": ev.get("url"),
-            "venue": venue,
-            "price": price,
-        })
+    for page in range(1, 3):
+        try:
+            resp = _SESSION.get(
+                "https://api.seatgeek.com/2/events",
+                params={
+                    "client_id": cid,
+                    "lat": 42.3601,
+                    "lon": -71.0589,
+                    "range": "25mi",
+                    "per_page": 100,
+                    "page": page,
+                    "sort": "datetime_local.asc",
+                    "datetime_utc.gte": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S"),
+                },
+                timeout=15,
+            )
+            resp.raise_for_status()
+            batch = resp.json().get("events", [])
+            if not batch:
+                break
+            for ev in batch:
+                iso = ev.get("datetime_utc")
+                if iso and not iso.endswith("Z") and "+" not in iso:
+                    iso = iso + "Z"
+                stats = ev.get("stats") or {}
+                lo = stats.get("lowest_price")
+                price = f"${lo:.0f}+" if lo else None
+                venue = ((ev.get("venue") or {}).get("name")) or "SeatGeek"
+
+                tax_names = [t.get("name", "").lower() for t in ev.get("taxonomies", [])]
+                ev_type = (ev.get("type") or "").lower()
+                all_tags = set(tax_names + [ev_type])
+                cat = None
+                if any(s in all_tags for s in ["sports", "nba", "mlb", "nhl", "nfl", "soccer", "basketball", "baseball", "hockey", "football", "boxing", "fighting"]):
+                    cat = "sports"
+                elif "comedy" in all_tags:
+                    cat = "comedy"
+                elif any(t in all_tags for t in ["theater", "broadway", "musical", "play"]):
+                    cat = "theater"
+                elif any(m in all_tags for m in ["concert", "music", "orchestral", "classical", "band", "festival_music"]):
+                    cat = "music"
+
+                events.append({
+                    "name": ev.get("title") or ev.get("short_title"),
+                    "date": iso,
+                    "url": ev.get("url"),
+                    "venue": venue,
+                    "price": price,
+                    "category": cat,
+                })
+            if len(batch) < 100:
+                break
+        except Exception:
+            break
     return events
 
 
@@ -2831,7 +2873,7 @@ def scrape_toad(url, ua):
 
 _ALL_VENUES = [
     {"name": "Ticketmaster", "url": "https://www.ticketmaster.com/", "ua": UA_CHROME, "scraper": scrape_ticketmaster, "default_category": "music"},
-    {"name": "SeatGeek", "url": "https://seatgeek.com/cities/boston", "ua": UA_CHROME, "scraper": scrape_seatgeek, "default_category": "music", "requires_env": "SEATGEEK_CLIENT_ID"},
+    {"name": "SeatGeek", "url": "https://seatgeek.com/cities/boston", "ua": UA_CHROME, "scraper": scrape_seatgeek, "default_category": "music"},
     {"name": "Eventbrite Boston", "url": "https://www.eventbrite.com/d/ma--boston/events/", "ua": UA_CHROME, "scraper": scrape_eventbrite_search, "default_category": None},
     {"name": "Aeronaut Brewing", "url": "https://d3izki9aezxlkr.cloudfront.net/public_events.json", "ua": UA_CHROME, "scraper": scrape_aeronaut, "default_category": "food"},
     {"name": "Versus Boston (via Eventbrite)", "url": "https://www.eventbrite.com/o/versus-105910382141", "ua": UA_CHROME, "scraper": scrape_eventbrite_org, "default_category": "gaming"},

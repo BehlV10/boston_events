@@ -4,7 +4,7 @@ import re
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from html import escape
-from urllib.parse import quote
+from urllib.parse import quote, quote_plus
 
 from scrapers import (
     EASTERN,
@@ -403,39 +403,161 @@ def compute_recurring(dated):
     return recurring
 
 
-def _dedup_key(e):
-    name = (e.get("name") or "").strip().lower()
-    name = re.sub(r"[^a-z0-9]+", " ", name).strip()
-    if not name or len(name) < 4:
-        return None
-    return name
+GENERIC_HEADS = {
+    "trivia", "story hour", "open mic", "board games", "run club", "farmers market",
+    "salsa", "bachata", "yoga", "live music", "comedy night", "book club",
+    "happy hour", "karaoke", "jazz night", "reunion", "tour", "tours", "market"
+}
+
+COMMERCIAL_VENUES = {
+    "td garden", "fenway park", "fenway", "gillette stadium", "mgm music hall",
+    "house of blues", "roadrunner", "royale", "the wilbur", "wilbur theatre",
+    "chevalier theatre", "citizens bank opera house", "citizens opera house",
+    "boch center", "wang theatre", "shubert theatre", "paradise rock club",
+    "brighton music hall", "leader bank pavilion", "big night live", "the sinclair",
+    "crystal ballroom", "middle east", "city winery", "laugh boston",
+    "boston symphony orchestra", "symphony hall", "huntington theatre",
+    "emerson colonial theatre", "agganis arena"
+}
+
+EXCLUDE_VENUES_OR_SOURCES = {
+    "museum", "library", "bookstore", "booksmith", "farmers market",
+    "park run", "board games", "trivia", "contra dance", "language lovers",
+    "hiking", "photography", "volunteer", "mit events", "botanic", "church", "cathedral"
+}
+
+
+def _normalize_title_head(title):
+    t = (title or "").lower().strip()
+    t = re.sub(r"[\(\[][^\)\]]*(?:touring|18\+|21\+|sold out|ages|rescheduled|presale|preseason)[^\)\]]*[\)\]]", "", t)
+    t = re.sub(r"\s*-\s*boston(\b.*)?", "", t)
+    t = re.sub(r"^(?:broadway in boston|presents|live nation presents|bowery presents):\s*", "", t)
+    t = re.sub(r"^(?:nba\s+|mlb\s+|nhl\s+|nfl\s+)?(?:preseason|rescheduled|postponed):\s*", "", t)
+    for sep in [":", " with ", " feat. ", " feat ", " ft. ", " ft ", " - ", " – ", " — ", " “", " \"", "”", "“", "\""]:
+        if sep in t:
+            parts = t.split(sep, 1)
+            if len(parts[0].strip()) >= 3 and not any(gen in parts[0].strip() for gen in ["an evening", "a night", "special"]):
+                t = parts[0].strip()
+                break
+    if "," in t:
+        parts = t.split(",", 1)
+        if len(parts[0].strip()) >= 3:
+            t = parts[0].strip()
+    t = re.sub(r"[^a-z0-9]+", " ", t).strip()
+    return t
+
+
+def _clean_ticket_query(title):
+    if not title:
+        return ""
+    q = title
+    q = re.sub(r"^(?:broadway in boston|presents|live nation presents|bowery presents):\s*", "", q, flags=re.IGNORECASE)
+    q = re.sub(r"^(?:nba\s+|mlb\s+|nhl\s+|nfl\s+)?(?:preseason|rescheduled|postponed):\s*", "", q, flags=re.IGNORECASE)
+    q = re.sub(r"\s*[\(\[](?:18\+|21\+|all ages|sold out|matinee|late show|early show|touring|preseason)[^\)\]]*[\)\]]", "", q, flags=re.IGNORECASE)
+    if ":" in q:
+        head, _ = q.split(":", 1)
+        if len(head.strip()) >= 3 and not any(gen in head.lower() for gen in ["tour", "special", "an evening", "night", "live"]):
+            q = head.strip()
+    for q_sep in [" “", " \"", " - ", " – ", " — "]:
+        if q_sep in q:
+            head, _ = q.split(q_sep, 1)
+            if len(head.strip()) >= 4:
+                q = head.strip()
+                break
+    q = re.sub(r"\s*-\s*Boston\b.*", "", q, flags=re.IGNORECASE)
+    q = re.sub(r"[\"“”]", "", q)
+    q = re.sub(r"\s+", " ", q).strip()
+    return q
+
+
+def _is_commercial_ticketed(e):
+    p = (e.get("price") or "").lower()
+    if "free" in p or p in ("$0", "0"):
+        return False
+    source = (e.get("_source_venue") or "").lower()
+    venue = (e.get("venue") or "").lower()
+    name = (e.get("name") or "").lower()
+    cat = (e.get("category") or "").lower()
+    if any(ex in source or ex in venue for ex in EXCLUDE_VENUES_OR_SOURCES):
+        return False
+    if "museum tour" in name or "walking tour" in name or "historical tour" in name:
+        return False
+    if any(s in source for s in ["ticketmaster", "seatgeek", "boston sports", "bowery presents"]):
+        return True
+    if any(cv in venue or cv in source for cv in COMMERCIAL_VENUES):
+        return True
+    if cat in ("music", "sports", "comedy", "theater") and e.get("price"):
+        return True
+    return False
+
+
+def _build_compare_links(e, raw_title):
+    if not _is_commercial_ticketed(e):
+        return ""
+    q = _clean_ticket_query(raw_title)
+    if not q or len(q) < 3:
+        return ""
+    encoded_q = quote_plus(q)
+    gt_url = f"https://gametime.co/search?q={encoded_q}"
+    sh_url = f"https://www.stubhub.com/find/s/?q={encoded_q}"
+    return f'<span class="compare-tickets">compare: <a href="{escape(gt_url)}" target="_blank" rel="noopener">Gametime</a> · <a href="{escape(sh_url)}" target="_blank" rel="noopener">StubHub</a></span>'
 
 
 def _merge_duplicates(events):
-    """Collapse events sharing a normalized name within the same day bucket.
+    """Collapse events sharing a normalized name or head title within the same day bucket.
 
-    The first occurrence wins; later ones are attached as alt sources so render
-    can link out to both. Events without a usable dedup key pass through as-is.
+    Preserves the best physical venue, merges prices across primary and alt sources,
+    and attaches alt sources so users can compare providers.
     """
-    seen = {}
+    seen_exact = {}
+    seen_head = {}
     out = []
+    generic_sources = {"ticketmaster", "seatgeek", "the boston calendar", "eventbrite boston", "eventbrite cambridge", "eventbrite somerville", "do617"}
+
     for e in events:
-        key = _dedup_key(e)
-        if key is None:
-            out.append(e)
-            continue
-        if key in seen:
-            primary = seen[key]
-            primary.setdefault("_alt_sources", [])
+        raw_name = e.get("name") or ""
+        full = re.sub(r"[^a-z0-9]+", " ", raw_name.lower()).strip()
+        head = _normalize_title_head(raw_name)
+        venue = (e.get("venue") or "").lower()
+
+        match = None
+        if full and len(full) >= 4 and full in seen_exact:
+            match = seen_exact[full]
+        elif head and len(head) >= 4 and head not in GENERIC_HEADS and head in seen_head:
+            candidate = seen_head[head]
+            c_venue = (candidate.get("venue") or "").lower()
+            v_words1 = set(re.findall(r"\w+", venue))
+            v_words2 = set(re.findall(r"\w+", c_venue))
+            common_words = v_words1 & v_words2 - {"the", "at", "in", "of", "and", "boston", "presented", "by", "citizens"}
+            if common_words or not venue or not c_venue or (venue in generic_sources) or (c_venue in generic_sources):
+                match = candidate
+
+        if match:
+            match.setdefault("_alt_sources", [])
             src_url = e.get("url")
             src_name = e.get("_source_venue") or e.get("venue") or "source"
-            if src_url and not any(a.get("url") == src_url for a in primary["_alt_sources"]) and src_url != primary.get("url"):
-                primary["_alt_sources"].append({"venue": src_name, "url": src_url})
-            if not primary.get("price") and e.get("price"):
-                primary["price"] = e["price"]
+            if src_url and not any(a.get("url") == src_url for a in match["_alt_sources"]) and src_url != match.get("url"):
+                match["_alt_sources"].append({"venue": src_name, "url": src_url, "price": e.get("price")})
+
+            if not match.get("price") and e.get("price"):
+                match["price"] = e["price"]
+
+            p_venue = (match.get("venue") or "").lower()
+            if p_venue in generic_sources and venue and venue not in generic_sources:
+                match["venue"] = e.get("venue")
+
+            if (not match.get("category") or match.get("category") in ("other", "community")) and e.get("category") and e.get("category") not in ("other", "community"):
+                match["category"] = e["category"]
+
+            if not match.get("description") and e.get("description"):
+                match["description"] = e["description"]
         else:
-            seen[key] = e
+            if full and len(full) >= 4:
+                seen_exact[full] = e
+            if head and len(head) >= 4 and head not in GENERIC_HEADS:
+                seen_head[head] = e
             out.append(e)
+
     return out
 
 
@@ -528,12 +650,18 @@ def render_page(results):
         alts = e.get("_alt_sources") or []
         alt_html = ""
         if alts:
-            alt_links = " · ".join(
-                f'<a href="{escape(a["url"])}" target="_blank" rel="noopener">{escape(a["venue"])}</a>'
-                for a in alts if a.get("url")
-            )
-            if alt_links:
-                alt_html = f'<span class="alt-sources">also on {alt_links}</span>'
+            alt_parts = []
+            for a in alts:
+                if not a.get("url"):
+                    continue
+                v_name = escape(a.get("venue") or "source")
+                a_price = f" ({escape(a['price'])})" if a.get("price") and a["price"] != e.get("price") else ""
+                alt_parts.append(f'<a href="{escape(a["url"])}" target="_blank" rel="noopener">{v_name}{a_price}</a>')
+            if alt_parts:
+                alt_html = f'<span class="alt-sources">also on {" · ".join(alt_parts)}</span>'
+
+        compare_html = _build_compare_links(e, raw_title)
+
         if venue:
             if venue.lower() in ("zoom", "online", "virtual"):
                 venue_link = f'<span class="venue-online">💻 {escape(venue)}</span>'
@@ -547,6 +675,13 @@ def render_page(results):
                 venue_html = venue_link
         else:
             venue_html = ""
+
+        extra_tags = []
+        if alt_html:
+            extra_tags.append(alt_html)
+        if compare_html:
+            extra_tags.append(compare_html)
+        extra_html = (" · " + " · ".join(extra_tags)) if extra_tags else ""
 
         gcal_url = _build_gcal_link(e, raw_title, venue, city)
         cal_actions = []
@@ -563,7 +698,7 @@ def render_page(results):
         return f'''<li class="event" data-cat="{escape(cat)}" data-bucket="{escape(bucket)}" data-venue="{escape(source)}" data-city="{escape(city)}" data-recur="{recur_flag}" data-free="{free_flag}">
           <div class="when">{escape(format_when(e))}</div>
           <div class="what">{link}{price_tag}{recur_badge}
-            <div class="venue-tag">{cat_tag} · {venue_html}{(" · " + alt_html) if alt_html else ""}{cal_html}</div>
+            <div class="venue-tag">{cat_tag} · {venue_html}{extra_html}{cal_html}</div>
             {desc_html}
           </div>
         </li>'''
@@ -1129,6 +1264,9 @@ def render_page(results):
   .alt-sources {{ color: var(--muted); font-size: 11px; }}
   .alt-sources a {{ color: var(--accent); text-decoration: none; }}
   .alt-sources a:hover {{ text-decoration: underline; }}
+  .compare-tickets {{ color: var(--muted); font-size: 11px; }}
+  .compare-tickets a {{ color: #8bb2ff; text-decoration: none; border-bottom: 1px dotted rgba(139,178,255,0.4); }}
+  .compare-tickets a:hover {{ color: #fff; border-bottom-color: #fff; }}
   .desc {{
     color: var(--muted);
     font-size: 12px;
