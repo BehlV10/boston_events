@@ -52,6 +52,8 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
     "mit strategic games society": (42.3590, -71.0940, "Kendall Square / MIT", "84 Massachusetts Ave, Cambridge", "MIT Strategic Games Society"),
     "mit events": (42.3590, -71.0940, "Kendall Square / MIT", "Cambridge", "MIT Campus"),
     "kendall square farmers market": (42.3625, -71.0850, "Kendall Square", "350 Kendall St, Cambridge", "Kendall Square Farmers Market"),
+    "kendall center": (42.3625, -71.0865, "Kendall Square", "90 Broadway, Cambridge", "Kendall Center"),
+    "urban park roof garden": (42.3625, -71.0865, "Kendall Square", "90 Broadway, Cambridge", "Urban Park Roof Garden"),
     "cambridge crossing": (42.3712, -71.0768, "Cambridge Crossing", "222 Jacobs St, Cambridge", "Cambridge Crossing"),
 
     # Porter Square & North Cambridge
@@ -76,10 +78,12 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
     "craft loft": (42.3814, -71.1066, "Somerville", "14 Tyler St, Somerville", "Craft Loft"),
     "remnant somerville": (42.3804, -71.0970, "Union Square", "1 Bow Market Way, Somerville", "Remnant Brewing"),
     "bow market": (42.3804, -71.0970, "Union Square", "1 Bow Market Way, Somerville", "Bow Market"),
+    "upstairs at bow": (42.3804, -71.0970, "Union Square", "1 Bow Market Way, Somerville", "Upstairs at Bow"),
     "dark mode at bow market": (42.3804, -71.0970, "Union Square", "1 Bow Market Way, Somerville", "DARK MODE at Bow Market"),
     "vera's": (42.3797, -71.0962, "Union Square", "70 Union Sq, Somerville", "Vera's"),
     "union square farmers market": (42.3797, -71.0962, "Union Square", "66 Union Sq, Somerville", "Union Square Farmers Market"),
     "arts at the armory": (42.3912, -71.1086, "Spring Hill", "191 Highland Ave, Somerville", "Arts at the Armory"),
+    "somerville arts council": (42.3875, -71.0995, "Somerville", "Somerville, MA", "Somerville Arts Council"),
     "sabina mezcalería": (42.3926, -71.0963, "Winter Hill", "514 Medford St, Somerville", "Sabina Mezcalería"),
     "sabina": (42.3926, -71.0963, "Winter Hill", "514 Medford St, Somerville", "Sabina Mezcalería"),
     "somerville public library": (42.3868, -71.0970, "Somerville", "79 Highland Ave, Somerville", "Somerville Public Library"),
@@ -111,6 +115,8 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
     "hatch shell": (42.3582, -71.0735, "Esplanade", "47 David G Mugar Way, Boston", "Hatch Memorial Shell"),
     "esplanade": (42.3582, -71.0735, "Esplanade", "47 David G Mugar Way, Boston", "The Esplanade"),
     "greenway artisan market": (42.3575, -71.0515, "Downtown Waterfront", "Atlantic Ave, Boston", "Rose Kennedy Greenway"),
+    "rose kennedy greenway": (42.3550, -71.0520, "Downtown / Waterfront", "Atlantic Ave, Boston", "Rose Kennedy Greenway"),
+    "the greenway": (42.3550, -71.0520, "Downtown / Waterfront", "Atlantic Ave, Boston", "Rose Kennedy Greenway"),
 
     # North Station, West End & TD Garden
     "td garden": (42.3662, -71.0621, "West End / North Station", "100 Legends Way, Boston", "TD Garden"),
@@ -157,11 +163,17 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
     "huntington theatre": (42.3421, -71.0853, "Symphony", "264 Huntington Ave, Boston", "Huntington Theatre"),
     "museum of fine arts": (42.3394, -71.0940, "Museum District", "465 Huntington Ave, Boston", "Museum of Fine Arts (MFA)"),
     "isabella stewart gardner museum": (42.3382, -71.0991, "Museum District", "25 Evans Way, Boston", "Isabella Stewart Gardner Museum"),
+    "time out market": (42.3429, -71.1003, "Fenway", "401 Park Dr, Boston", "Time Out Market Boston"),
+    "time out market boston": (42.3429, -71.1003, "Fenway", "401 Park Dr, Boston", "Time Out Market Boston"),
+    "401 park": (42.3429, -71.1003, "Fenway", "401 Park Dr, Boston", "401 Park"),
+    "the fenway": (42.3429, -71.1003, "Fenway", "401 Park Dr, Boston", "The Fenway"),
 
     # Allston & Brighton
     "paradise rock club": (42.3519, -71.1201, "Allston", "967 Commonwealth Ave, Boston", "Paradise Rock Club"),
     "brighton music hall": (42.3533, -71.1373, "Allston", "158 Brighton Ave, Allston", "Brighton Music Hall"),
     "roadrunner": (42.3582, -71.1492, "Boston Landing", "89 Guest St, Brighton", "Roadrunner"),
+    "charles river speedway": (42.3585, -71.1396, "Brighton", "525 Western Ave, Boston", "Charles River Speedway"),
+    "speedway": (42.3585, -71.1396, "Brighton", "525 Western Ave, Boston", "Charles River Speedway"),
     "silhouette lounge": (42.3533, -71.1332, "Allston", "200 Brighton Ave, Allston", "Silhouette Lounge"),
     "model cafe": (42.3537, -71.1378, "Allston", "7 N Beacon St, Allston", "Model Cafe"),
     "agganis arena": (42.3522, -71.1177, "BU / Allston", "925 Commonwealth Ave, Boston", "Agganis Arena"),
@@ -300,6 +312,16 @@ VENUE_RULES = [
     ("venture cafe", (42.3615, -71.0870, "Kendall Square", "1 Broadway, Cambridge", "Venture Café Cambridge")),
     ("the druid", (42.3738, -71.1002, "Inman Square", "1357 Cambridge St, Cambridge", "The Druid")),
     ("druid", (42.3738, -71.1002, "Inman Square", "1357 Cambridge St, Cambridge", "The Druid")),
+    ("charles river speedway", (42.3585, -71.1396, "Brighton", "525 Western Ave, Boston", "Charles River Speedway")),
+    ("speedway", (42.3585, -71.1396, "Brighton", "525 Western Ave, Boston", "Charles River Speedway")),
+    ("time out market", (42.3429, -71.1003, "Fenway", "401 Park Dr, Boston", "Time Out Market Boston")),
+    ("401 park", (42.3429, -71.1003, "Fenway", "401 Park Dr, Boston", "401 Park")),
+    ("the fenway", (42.3429, -71.1003, "Fenway", "401 Park Dr, Boston", "The Fenway")),
+    ("rose kennedy greenway", (42.3550, -71.0520, "Downtown / Waterfront", "Atlantic Ave, Boston", "Rose Kennedy Greenway")),
+    ("greenway", (42.3550, -71.0520, "Downtown / Waterfront", "Atlantic Ave, Boston", "Rose Kennedy Greenway")),
+    ("kendall center", (42.3625, -71.0865, "Kendall Square", "90 Broadway, Cambridge", "Kendall Center")),
+    ("urban park", (42.3625, -71.0865, "Kendall Square", "90 Broadway, Cambridge", "Urban Park Roof Garden")),
+    ("somerville arts council", (42.3875, -71.0995, "Somerville", "Somerville, MA", "Somerville Arts Council")),
 ]
 
 # Coordinate bounding box for valid Greater Boston / Eastern MA events

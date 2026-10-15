@@ -1,5 +1,6 @@
 """Boston Events — venue scrapers and data definitions."""
 
+import html
 import json
 import os
 import re
@@ -1528,48 +1529,66 @@ _ST_MONTHS = {m.lower(): i for i, m in enumerate(
 
 
 def scrape_somerville_theatre(url, ua):
-    """WP Theatre plugin: one `.wp_theatre_event` per show with title, date,
-    time, and ticket link rendered inline."""
-    soup = fetch_soup(url, ua)
+    """WP Theatre plugin: fetches both /events/ (live shows/concerts) and
+    /calendar/ (repertory cinema screenings), deduplicating by title + showtime."""
+    urls = [
+        "https://www.somervilletheatre.com/events/",
+        "https://www.somervilletheatre.com/calendar/",
+    ]
+    seen = set()
     events = []
-    for block in soup.select(".wp_theatre_event"):
-        title_el = block.select_one(".wp_theatre_event_title")
-        if not title_el:
-            continue
-        name = re.sub(r"\s+", " ", title_el.get_text(" ", strip=True))
-        date_el = block.select_one(".wp_theatre_event_startdate")
-        time_el = block.select_one(".wp_theatre_event_starttime")
-        if not date_el:
-            continue
-        m = re.match(r"([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})", date_el.get_text(strip=True))
-        if not m:
-            continue
-        month = _ST_MONTHS.get(m.group(1).lower())
-        if not month:
-            continue
-        day, year = int(m.group(2)), int(m.group(3))
-        hour, minute = 19, 30
-        if time_el:
-            tm = re.match(r"(\d{1,2}):(\d{2})\s*(am|pm)?", time_el.get_text(strip=True), re.IGNORECASE)
-            if tm:
-                hour, minute = int(tm.group(1)), int(tm.group(2))
-                if tm.group(3) and tm.group(3).lower() == "pm" and hour != 12:
-                    hour += 12
-                elif tm.group(3) and tm.group(3).lower() == "am" and hour == 12:
-                    hour = 0
+    now = datetime.now(timezone.utc)
+    for u in urls:
         try:
-            dt = datetime(year, month, day, hour, minute, tzinfo=EASTERN)
-        except ValueError:
+            soup = fetch_soup(u, ua)
+        except Exception:
             continue
-        link = block.select_one("a.wp_theatre_event_tickets_url") or block.select_one("a[href]")
-        href = link.get("href") if link else url
-        events.append({
-            "name": name,
-            "date": dt.astimezone(timezone.utc).isoformat(),
-            "url": href,
-            "venue": "Somerville Theatre",
-            "price": None,
-        })
+        for block in soup.select(".wp_theatre_event"):
+            title_el = block.select_one(".wp_theatre_event_title")
+            if not title_el:
+                continue
+            name = re.sub(r"\s+", " ", title_el.get_text(" ", strip=True))
+            date_el = block.select_one(".wp_theatre_event_startdate")
+            time_el = block.select_one(".wp_theatre_event_starttime")
+            if not date_el:
+                continue
+            m = re.match(r"([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})", date_el.get_text(strip=True))
+            if not m:
+                continue
+            month = _ST_MONTHS.get(m.group(1).lower())
+            if not month:
+                continue
+            day, year = int(m.group(2)), int(m.group(3))
+            hour, minute = 19, 30
+            if time_el:
+                tm = re.match(r"(\d{1,2}):(\d{2})\s*(am|pm)?", time_el.get_text(strip=True), re.IGNORECASE)
+                if tm:
+                    hour, minute = int(tm.group(1)), int(tm.group(2))
+                    if tm.group(3) and tm.group(3).lower() == "pm" and hour != 12:
+                        hour += 12
+                    elif tm.group(3) and tm.group(3).lower() == "am" and hour == 12:
+                        hour = 0
+            try:
+                dt = datetime(year, month, day, hour, minute, tzinfo=EASTERN)
+                dt_utc = dt.astimezone(timezone.utc)
+            except ValueError:
+                continue
+            if dt_utc < now:
+                continue
+            dedup_key = (name.lower(), dt_utc.isoformat())
+            if dedup_key in seen:
+                continue
+            seen.add(dedup_key)
+            link = block.select_one("a.wp_theatre_event_tickets_url") or block.select_one("a[href]")
+            href = link.get("href") if link else u
+            events.append({
+                "name": name,
+                "date": dt_utc.isoformat(),
+                "url": href,
+                "venue": "Somerville Theatre",
+                "price": None,
+                "category": "film",
+            })
     return events
 
 
@@ -3154,6 +3173,491 @@ def scrape_toad(url, ua):
     return events
 
 
+_SHORT_MONTHS = {
+    "jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6,
+    "jul": 7, "aug": 8, "sep": 9, "oct": 10, "nov": 11, "dec": 12,
+}
+
+
+def scrape_tribe_rest(url, ua, default_venue=None, default_category=None):
+    """The Events Calendar (Tribe) REST API: fetches /wp-json/tribe/events/v1/events."""
+    now = datetime.now(timezone.utc)
+    events = []
+    if "/wp-json/tribe/events/v1/events" not in url:
+        base = url.rstrip("/")
+        endpoint = f"{base}/wp-json/tribe/events/v1/events?per_page=50"
+    else:
+        endpoint = url
+
+    try:
+        r = _SESSION.get(endpoint, headers={"User-Agent": ua}, timeout=15)
+        if r.status_code != 200:
+            return []
+        data = r.json()
+    except Exception:
+        return []
+
+    for item in data.get("events", []):
+        name = html.unescape(item.get("title", "")).strip()
+        if not name:
+            continue
+        start_str = item.get("start_date")
+        if not start_str:
+            continue
+        try:
+            dt_local = datetime.strptime(start_str, "%Y-%m-%d %H:%M:%S").replace(tzinfo=EASTERN)
+            dt_utc = dt_local.astimezone(timezone.utc)
+        except Exception:
+            continue
+        if dt_utc < now:
+            continue
+
+        venue_data = item.get("venue") or {}
+        vname = venue_data.get("venue") or default_venue or "Boston Event"
+        vname = html.unescape(vname)
+
+        cost = item.get("cost") or ""
+        cost = html.unescape(cost).strip()
+        price = cost if cost else None
+
+        event_url = item.get("url") or endpoint
+
+        cat_names = [c.get("name", "").lower() for c in item.get("categories", [])]
+        category = default_category or "community"
+        if any("music" in c for c in cat_names):
+            category = "music"
+        elif any("film" in c or "movie" in c for c in cat_names):
+            category = "film"
+        elif any("fitness" in c or "sports" in c or "run" in c for c in cat_names):
+            category = "fitness"
+        elif any("comedy" in c for c in cat_names):
+            category = "comedy"
+        elif any("art" in c for c in cat_names):
+            category = "art"
+
+        events.append({
+            "name": name,
+            "date": dt_utc.isoformat(),
+            "url": event_url,
+            "venue": vname,
+            "price": price,
+            "category": category,
+        })
+    return events
+
+
+def scrape_speedway(url, ua):
+    """Charles River Speedway in Brighton (Notch Brewing, run club, markets, comedy)."""
+    return scrape_tribe_rest(url, ua, default_venue="Charles River Speedway", default_category="food")
+
+
+def scrape_kendall_center(url, ua):
+    """Kendall Center (Urban Park Roof Garden film screenings, social events)."""
+    return scrape_tribe_rest(url, ua, default_venue="Urban Park Roof Garden", default_category="community")
+
+
+def scrape_lizard_lounge(url, ua):
+    """Lizard Lounge in Cambridge (live music cellar, album releases, poetry)."""
+    return scrape_tribe_rest(url, ua, default_venue="Lizard Lounge", default_category="music")
+
+
+def scrape_the_fenway(url, ua):
+    """The Fenway / 401 Park / Time Out Market neighborhood events calendar."""
+    soup = fetch_soup(url, ua)
+    now = datetime.now(timezone.utc)
+    current_year = now.year
+    events = []
+
+    for card in soup.select("li.type-event, li.event"):
+        day_el = card.select_one(".wp-block-bytesco-event-day")
+        time_el = card.select_one(".wp-block-bytesco-event-date")
+        title_el = card.select_one("h2.wp-block-post-title, h3.wp-block-post-title, .wp-block-post-title")
+        loc_el = card.select_one(".wp-block-bytesco-event-location")
+        link_el = title_el.find("a") if title_el else card.find("a", href=re.compile(r"/events/"))
+
+        if not title_el or not day_el:
+            continue
+        name = html.unescape(title_el.get_text(" ", strip=True))
+        if not name:
+            continue
+
+        day_text = day_el.get_text(" ", strip=True)
+        m_day = re.match(r"([A-Za-z]{3,})\s+(\d{1,2})", day_text)
+        if not m_day:
+            continue
+        m_str = m_day.group(1)[:3].lower()
+        month = _SHORT_MONTHS.get(m_str)
+        if not month:
+            continue
+        day = int(m_day.group(2))
+
+        year = current_year
+        if month < now.month - 2:
+            year += 1
+
+        hour, minute = 18, 0
+        if time_el:
+            t_text = time_el.get_text(" ", strip=True)
+            tm = re.search(r"(\d{1,2}):(\d{2})\s*(am|pm)?", t_text, re.I)
+            if tm:
+                hour = int(tm.group(1))
+                minute = int(tm.group(2))
+                meridiem = (tm.group(3) or "").lower()
+                if meridiem == "pm" and hour < 12:
+                    hour += 12
+                elif meridiem == "am" and hour == 12:
+                    hour = 0
+            else:
+                tm_h = re.search(r"(\d{1,2})\s*(am|pm)", t_text, re.I)
+                if tm_h:
+                    hour = int(tm_h.group(1))
+                    meridiem = tm_h.group(2).lower()
+                    if meridiem == "pm" and hour < 12:
+                        hour += 12
+                    elif meridiem == "am" and hour == 12:
+                        hour = 0
+        try:
+            dt = datetime(year, month, day, hour, minute, tzinfo=EASTERN).astimezone(timezone.utc)
+        except Exception:
+            continue
+
+        if dt < now:
+            continue
+
+        loc = loc_el.get_text(" ", strip=True) if loc_el else "The Fenway"
+        venue = f"{loc} (The Fenway)" if "fenway" not in loc.lower() else loc
+        event_url = link_el.get("href") if link_el else url
+
+        cat = "food"
+        low = name.lower()
+        if "trivia" in low:
+            cat = "community"
+        elif "music" in low or "band" in low:
+            cat = "music"
+        elif "sports" in low or "bowl" in low or "game" in low or "football" in low:
+            cat = "sports"
+
+        events.append({
+            "name": name,
+            "date": dt.isoformat(),
+            "url": event_url,
+            "venue": venue,
+            "price": None,
+            "category": cat,
+        })
+    return events
+
+
+def scrape_greenway(url, ua):
+    """Rose Kennedy Greenway Conservancy calendar (movie nights, public art, beer gardens)."""
+    soup = fetch_soup(url, ua)
+    now = datetime.now(timezone.utc)
+    events = []
+
+    for day_el in soup.select(".em-cal-day"):
+        date_meta = day_el.select_one(".em-cal-day-date[data-date]")
+        if not date_meta:
+            continue
+        date_str = date_meta.get("data-date")
+        try:
+            d_parts = [int(p) for p in date_str.split("-")]
+            year, month, day = d_parts[0], d_parts[1], d_parts[2]
+        except Exception:
+            continue
+
+        for ev_div in day_el.select(".em-cal-event"):
+            link_el = ev_div.find("a")
+            if not link_el:
+                continue
+            name = html.unescape(link_el.get_text(" ", strip=True))
+            if not name:
+                continue
+            href = link_el.get("href") or url
+
+            full_text = ev_div.get_text(" ", strip=True)
+            hour, minute = 12, 0
+            tm = re.search(r"(\d{1,2}):(\d{2})\s*(AM|PM)", full_text, re.I)
+            if tm:
+                hour = int(tm.group(1))
+                minute = int(tm.group(2))
+                mer = tm.group(3).upper()
+                if mer == "PM" and hour < 12:
+                    hour += 12
+                elif mer == "AM" and hour == 12:
+                    hour = 0
+            try:
+                dt = datetime(year, month, day, hour, minute, tzinfo=EASTERN).astimezone(timezone.utc)
+            except Exception:
+                continue
+            if dt < now:
+                continue
+
+            cat = "outdoors"
+            low_name = name.lower()
+            if "movie" in low_name or "film" in low_name:
+                cat = "film"
+            elif "beer" in low_name or "distillery" in low_name or "brew" in low_name:
+                cat = "food"
+            elif "art" in low_name or "mural" in low_name or "projection" in low_name:
+                cat = "art"
+
+            events.append({
+                "name": name,
+                "date": dt.isoformat(),
+                "url": href,
+                "venue": "Rose Kennedy Greenway",
+                "price": "Free",
+                "category": cat,
+            })
+    return events
+
+
+def scrape_bow_market(url, ua):
+    """Bow Market in Union Square Somerville via official Ticket Tailor listings."""
+    soup = fetch_soup(url, ua)
+    now = datetime.now(timezone.utc)
+    events = []
+
+    for item in soup.select("li.main-events-listing__event, li.events-listing__item"):
+        title_el = item.select_one("h3.event__title a.event__link, a.event__link")
+        if not title_el:
+            continue
+        name = html.unescape(title_el.get_text(" ", strip=True))
+        if not name:
+            continue
+
+        href = title_el.get("href")
+        if href and href.startswith("/"):
+            href = "https://tickettailor.com" + href
+        elif not href:
+            href = url
+
+        date_el = item.select_one(".event-meta__date")
+        if not date_el:
+            continue
+
+        date_text = date_el.get_text(" ", strip=True)
+        m = re.search(r"([A-Za-z]{3,})\s+(\d{1,2})\s*,?\s*(\d{4})", date_text)
+        if not m:
+            continue
+        m_str = m.group(1)[:3].lower()
+        month = _SHORT_MONTHS.get(m_str)
+        if not month:
+            continue
+        day = int(m.group(2))
+        year = int(m.group(3))
+
+        hour, minute = 12, 0
+        tm = re.search(r"(\d{1,2}):(\d{2})\s*(AM|PM)", date_text, re.I)
+        if tm:
+            hour = int(tm.group(1))
+            minute = int(tm.group(2))
+            mer = tm.group(3).upper()
+            if mer == "PM" and hour < 12:
+                hour += 12
+            elif mer == "AM" and hour == 12:
+                hour = 0
+
+        try:
+            dt = datetime(year, month, day, hour, minute, tzinfo=EASTERN).astimezone(timezone.utc)
+        except Exception:
+            continue
+
+        if dt < now:
+            continue
+
+        loc_el = item.select_one(".event-meta__location")
+        loc_text = loc_el.get_text(" ", strip=True) if loc_el else "Bow Market"
+        venue = "Bow Market"
+        if "upstairs" in loc_text.lower():
+            venue = "Upstairs at Bow"
+
+        cat = "community"
+        low = name.lower()
+        if "fest" in low or "market" in low:
+            cat = "community"
+        elif "music" in low or "concert" in low:
+            cat = "music"
+        elif "comedy" in low:
+            cat = "comedy"
+
+        events.append({
+            "name": name,
+            "date": dt.isoformat(),
+            "url": href,
+            "venue": venue,
+            "price": None,
+            "category": cat,
+        })
+    return events
+
+
+def scrape_arts_at_the_armory(url, ua):
+    """The Center for Arts at the Armory in Somerville."""
+    soup = fetch_soup(url, ua)
+    now = datetime.now(timezone.utc)
+    events = []
+
+    for item in soup.select(".em-event.em-item"):
+        title_el = item.select_one(".em-item-title a, h3 a, a")
+        if not title_el:
+            continue
+        name = html.unescape(title_el.get_text(" ", strip=True))
+        if not name:
+            continue
+        href = title_el.get("href") or url
+
+        date_el = item.select_one(".em-event-date")
+        time_el = item.select_one(".em-event-time")
+        if not date_el:
+            continue
+
+        date_text = date_el.get_text(" ", strip=True)
+        m = re.search(r"([A-Za-z]{3,})\.?\s+(\d{1,2}),?\s+(\d{4})", date_text)
+        if not m:
+            continue
+        m_str = m.group(1)[:3].lower()
+        month = _SHORT_MONTHS.get(m_str)
+        if not month:
+            continue
+        day = int(m.group(2))
+        year = int(m.group(3))
+
+        hour, minute = 19, 0
+        if time_el:
+            t_text = time_el.get_text(" ", strip=True)
+            tm = re.search(r"(\d{1,2}):(\d{2})\s*(am|pm)?", t_text, re.I)
+            if tm:
+                hour = int(tm.group(1))
+                minute = int(tm.group(2))
+                mer = (tm.group(3) or "").lower()
+                if mer == "pm" and hour < 12:
+                    hour += 12
+                elif mer == "am" and hour == 12:
+                    hour = 0
+            else:
+                tm_h = re.search(r"(\d{1,2})\s*(am|pm)", t_text, re.I)
+                if tm_h:
+                    hour = int(tm_h.group(1))
+                    mer = tm_h.group(2).lower()
+                    if mer == "pm" and hour < 12:
+                        hour += 12
+                    elif mer == "am" and hour == 12:
+                        hour = 0
+        try:
+            dt = datetime(year, month, day, hour, minute, tzinfo=EASTERN).astimezone(timezone.utc)
+        except Exception:
+            continue
+
+        if dt < now:
+            continue
+
+        cat = "arts"
+        low = name.lower()
+        if "comedy" in low or "improv" in low:
+            cat = "comedy"
+        elif "music" in low or "concert" in low or "sing" in low or "band" in low:
+            cat = "music"
+        elif "market" in low or "social" in low or "farmers" in low:
+            cat = "community"
+        elif "film" in low or "movie" in low:
+            cat = "film"
+        elif "dance" in low:
+            cat = "dance"
+
+        events.append({
+            "name": name,
+            "date": dt.isoformat(),
+            "url": href,
+            "venue": "Arts at the Armory",
+            "price": None,
+            "category": cat,
+        })
+    return events
+
+
+def scrape_somerville_arts_council(url, ua):
+    """Somerville Arts Council community festivals and exhibitions."""
+    soup = fetch_soup(url, ua)
+    now = datetime.now(timezone.utc)
+    events = []
+
+    for item in soup.select(".em-event.em-item"):
+        title_el = item.select_one(".em-item-title a, h3 a, a")
+        if not title_el:
+            continue
+        name = html.unescape(title_el.get_text(" ", strip=True))
+        if not name:
+            continue
+        href = title_el.get("href") or url
+
+        date_el = item.select_one(".em-event-date")
+        time_el = item.select_one(".em-event-time")
+        if not date_el:
+            continue
+
+        date_text = date_el.get_text(" ", strip=True)
+        m = re.search(r"([A-Za-z]{3,})\.?\s+(\d{1,2}),?\s+(\d{4})", date_text)
+        if not m:
+            continue
+        m_str = m.group(1)[:3].lower()
+        month = _SHORT_MONTHS.get(m_str)
+        if not month:
+            continue
+        day = int(m.group(2))
+        year = int(m.group(3))
+
+        hour, minute = 13, 0
+        if time_el:
+            t_text = time_el.get_text(" ", strip=True)
+            tm = re.search(r"(\d{1,2}):(\d{2})\s*(am|pm)?", t_text, re.I)
+            if tm:
+                hour = int(tm.group(1))
+                minute = int(tm.group(2))
+                mer = (tm.group(3) or "").lower()
+                if mer == "pm" and hour < 12:
+                    hour += 12
+                elif mer == "am" and hour == 12:
+                    hour = 0
+            else:
+                tm_h = re.search(r"(\d{1,2})\s*(am|pm)", t_text, re.I)
+                if tm_h:
+                    hour = int(tm_h.group(1))
+                    mer = tm_h.group(2).lower()
+                    if mer == "pm" and hour < 12:
+                        hour += 12
+                    elif mer == "am" and hour == 12:
+                        hour = 0
+        try:
+            dt = datetime(year, month, day, hour, minute, tzinfo=EASTERN).astimezone(timezone.utc)
+        except Exception:
+            continue
+
+        if dt < now:
+            continue
+
+        loc_el = item.select_one(".em-event-location")
+        loc_text = loc_el.get_text(" ", strip=True) if loc_el else "Somerville"
+        venue = f"Somerville Arts Council ({loc_text})" if loc_text and "somerville" not in loc_text.lower() else (loc_text or "Somerville Arts Council")
+
+        cat = "arts"
+        low = name.lower()
+        if "music" in low or "concert" in low:
+            cat = "music"
+        elif "monster" in low or "parade" in low or "festival" in low or "somerstreets" in low:
+            cat = "community"
+
+        events.append({
+            "name": name,
+            "date": dt.isoformat(),
+            "url": href,
+            "venue": venue,
+            "price": "Free",
+            "category": cat,
+        })
+    return events
+
+
 _ALL_VENUES = [
     {"name": "Ticketmaster", "url": "https://www.ticketmaster.com/", "ua": UA_CHROME, "scraper": scrape_ticketmaster, "default_category": "music"},
     {"name": "SeatGeek", "url": "https://seatgeek.com/cities/boston", "ua": UA_CHROME, "scraper": scrape_seatgeek, "default_category": "music"},
@@ -3229,6 +3733,14 @@ _ALL_VENUES = [
     {"name": "Deep Cuts Medford", "url": "https://do617.com/venues/deep-cuts", "ua": UA_CHROME, "scraper": scrape_do617, "default_category": "music"},
     {"name": "Lou's Harvard Square", "url": "https://www.wearelous.com/lous-live", "ua": UA_CHROME, "scraper": scrape_lous, "default_category": "music"},
     {"name": "Boston Salsa & Bachata", "url": "https://bostonsalsa.org/", "ua": UA_CHROME, "scraper": scrape_bostonsalsa, "default_category": "dance"},
+    {"name": "Charles River Speedway", "url": "https://charlesriverspeedway.com", "ua": UA_CHROME, "scraper": scrape_speedway, "default_category": "food"},
+    {"name": "Kendall Center", "url": "https://www.kendallcenter.com", "ua": UA_CHROME, "scraper": scrape_kendall_center, "default_category": "community"},
+    {"name": "Lizard Lounge Cambridge", "url": "https://lizardloungeclub.com", "ua": UA_CHROME, "scraper": scrape_lizard_lounge, "default_category": "music"},
+    {"name": "The Fenway (Time Out Market & 401 Park)", "url": "https://thefenway.com/events/", "ua": UA_CHROME, "scraper": scrape_the_fenway, "default_category": "food"},
+    {"name": "Rose Kennedy Greenway", "url": "https://www.rosekennedygreenway.org/events/", "ua": UA_CHROME, "scraper": scrape_greenway, "default_category": "outdoors"},
+    {"name": "Bow Market", "url": "https://tickettailor.com/events/bowmarket", "ua": UA_CHROME, "scraper": scrape_bow_market, "default_category": "community"},
+    {"name": "Arts at the Armory", "url": "https://artsatthearmory.org/upcoming-events/", "ua": UA_CHROME, "scraper": scrape_arts_at_the_armory, "default_category": "arts"},
+    {"name": "Somerville Arts Council", "url": "https://somervilleartscouncil.org/events", "ua": UA_CHROME, "scraper": scrape_somerville_arts_council, "default_category": "arts"},
 ]
 
 # Drop venues that require env vars we don't have set — keeps the fail banner clean.
