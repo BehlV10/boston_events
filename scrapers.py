@@ -301,6 +301,9 @@ def scrape_eventbrite_search(url, ua):
                 iso = None
             loc = ev.get("location") or {}
             venue = loc.get("name") if isinstance(loc, dict) else None
+            geo = loc.get("geo") or {} if isinstance(loc, dict) else {}
+            lat = geo.get("latitude")
+            lng = geo.get("longitude")
             events.append({
                 "name": ev.get("name"),
                 "date": iso,
@@ -308,6 +311,8 @@ def scrape_eventbrite_search(url, ua):
                 "venue": venue,
                 "price": None,
                 "description": (ev.get("description") or "")[:200],
+                "lat": lat,
+                "lng": lng,
             })
     return events
 
@@ -2483,6 +2488,9 @@ def scrape_ticketmaster(_url, _ua):
                 iso = None
         venues = ev.get("_embedded", {}).get("venues") or []
         venue = venues[0]["name"] if venues and venues[0].get("name") else "Ticketmaster"
+        loc = venues[0].get("location") if venues else {}
+        lat = float(loc["latitude"]) if loc and loc.get("latitude") else None
+        lng = float(loc["longitude"]) if loc and loc.get("longitude") else None
         price = None
         prs = ev.get("priceRanges") or []
         if prs:
@@ -2512,6 +2520,8 @@ def scrape_ticketmaster(_url, _ua):
             "venue": venue,
             "price": price,
             "category": cat,
+            "lat": lat,
+            "lng": lng,
         })
     return events
 
@@ -2546,7 +2556,11 @@ def scrape_seatgeek(_url, _ua):
                 stats = ev.get("stats") or {}
                 lo = stats.get("lowest_price")
                 price = f"${lo:.0f}+" if lo else None
-                venue = ((ev.get("venue") or {}).get("name")) or "SeatGeek"
+                v_obj = ev.get("venue") or {}
+                venue = v_obj.get("name") or "SeatGeek"
+                v_loc = v_obj.get("location") or {}
+                lat = v_loc.get("lat")
+                lng = v_loc.get("lon")
 
                 tax_names = [t.get("name", "").lower() for t in ev.get("taxonomies", [])]
                 ev_type = (ev.get("type") or "").lower()
@@ -2568,6 +2582,8 @@ def scrape_seatgeek(_url, _ua):
                     "venue": venue,
                     "price": price,
                     "category": cat,
+                    "lat": lat,
+                    "lng": lng,
                 })
             if len(batch) < 100:
                 break

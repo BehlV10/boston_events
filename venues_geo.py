@@ -1,0 +1,337 @@
+"""Boston Events — Venue geocoding and coordinate mapping for OpenStreetMap integration.
+
+Provides pre-geocoded coordinates for Greater Boston music venues, comedy clubs,
+theatres, museums, breweries, and event spaces to enable instant, zero-latency
+client-side mapping without rate limits.
+"""
+
+import re
+from typing import Optional, Dict, Any, Tuple
+
+# Curated coordinates for Greater Boston venues
+# (lat, lng, neighborhood, street_address, canonical_name)
+VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
+    # Harvard Square & West Cambridge
+    "the sinclair": (42.3746, -71.1207, "Harvard Square", "52 Church St, Cambridge", "The Sinclair"),
+    "lou's": (42.3747, -71.1206, "Harvard Square", "50 Church St, Cambridge", "Lou's (Harvard Square)"),
+    "club passim": (42.3741, -71.1204, "Harvard Square", "47 Palmer St, Cambridge", "Club Passim"),
+    "brattle theatre": (42.3740, -71.1208, "Harvard Square", "40 Brattle St, Cambridge", "Brattle Theatre"),
+    "harvard book store": (42.3729, -71.1166, "Harvard Square", "1256 Massachusetts Ave, Cambridge", "Harvard Book Store"),
+    "harvard museum of natural history": (42.3787, -71.1155, "Harvard Square", "26 Oxford St, Cambridge", "Harvard Museum of Natural History"),
+    "peabody museum": (42.3785, -71.1152, "Harvard Square", "11 Divinity Ave, Cambridge", "Peabody Museum"),
+    "ccae": (42.3744, -71.1219, "Harvard Square", "42 Brattle St, Cambridge", "CCAE (Cambridge Center for Adult Education)"),
+    "lovestruck books": (42.3739, -71.1200, "Harvard Square", "22 Church St, Cambridge", "Lovestruck Books & Cafe"),
+    "grendel's den": (42.3721, -71.1207, "Harvard Square", "89 Winthrop St, Cambridge", "Grendel's Den"),
+    "charlie's kitchen": (42.3729, -71.1218, "Harvard Square", "10 Eliot St, Cambridge", "Charlie's Kitchen"),
+    "the hong kong": (42.3728, -71.1174, "Harvard Square", "1238 Massachusetts Ave, Cambridge", "The Hong Kong"),
+    "plough and stars": (42.3688, -71.1118, "Cambridge", "912 Massachusetts Ave, Cambridge", "The Plough and Stars"),
+    "cambridge public library": (42.3744, -71.1111, "Mid-Cambridge", "449 Broadway, Cambridge", "Cambridge Public Library"),
+
+    # Central Square
+    "middle east": (42.3638, -71.1018, "Central Square", "472 Massachusetts Ave, Cambridge", "The Middle East"),
+    "sonia": (42.3638, -71.1018, "Central Square", "10 Brookline St, Cambridge", "Sonia"),
+    "the cantab lounge": (42.3662, -71.1061, "Central Square", "738 Massachusetts Ave, Cambridge", "The Cantab Lounge"),
+    "havana club": (42.3649, -71.1026, "Central Square", "288 Green St, Cambridge", "Havana Club"),
+    "manray": (42.3662, -71.1027, "Central Square", "40 Prospect St, Cambridge", "ManRay"),
+    "middlesex lounge": (42.3619, -71.0988, "Central Square", "315 Massachusetts Ave, Cambridge", "Middlesex Lounge"),
+    "the phoenix landing": (42.3655, -71.1042, "Central Square", "512 Massachusetts Ave, Cambridge", "The Phoenix Landing"),
+    "la fabrica central": (42.3633, -71.1011, "Central Square", "450 Massachusetts Ave, Cambridge", "La Fabrica Central"),
+    "central square farmers market": (42.3653, -71.1033, "Central Square", "76 Bishop Allen Dr, Cambridge", "Central Square Farmers Market"),
+    "ywca cambridge": (42.3644, -71.1021, "Central Square", "7 Temple St, Cambridge", "YWCA Cambridge"),
+    "lamplighter brewing": (42.3688, -71.0994, "Cambridgeport", "284 Broadway, Cambridge", "Lamplighter Brewing Co."),
+    "the foundry": (42.3663, -71.0853, "East Cambridge", "101 Rogers St, Cambridge", "The Foundry"),
+
+    # Kendall Square & MIT
+    "mit museum": (42.3621, -71.0858, "Kendall Square", "314 Main St, Cambridge", "MIT Museum"),
+    "venture café": (42.3615, -71.0870, "Kendall Square", "1 Broadway, Cambridge", "Venture Café Cambridge"),
+    "mit strategic games society": (42.3590, -71.0940, "Kendall Square / MIT", "84 Massachusetts Ave, Cambridge", "MIT Strategic Games Society"),
+    "mit events": (42.3590, -71.0940, "Kendall Square / MIT", "Cambridge", "MIT Campus"),
+    "kendall square farmers market": (42.3625, -71.0850, "Kendall Square", "350 Kendall St, Cambridge", "Kendall Square Farmers Market"),
+    "cambridge crossing": (42.3712, -71.0768, "Cambridge Crossing", "222 Jacobs St, Cambridge", "Cambridge Crossing"),
+
+    # Porter Square & North Cambridge
+    "mccarthy's toad": (42.3892, -71.1195, "Porter Square", "1920 Massachusetts Ave, Cambridge", "Toad"),
+    "toad": (42.3892, -71.1195, "Porter Square", "1920 Massachusetts Ave, Cambridge", "Toad"),
+    "porter square books": (42.3888, -71.1192, "Porter Square", "25 White St, Cambridge", "Porter Square Books"),
+    "lizard lounge": (42.3809, -71.1197, "North Cambridge", "1667 Massachusetts Ave, Cambridge", "Lizard Lounge"),
+    "central rock gym": (42.3912, -71.1512, "North Cambridge", "127 Smith Pl, Cambridge", "Central Rock Gym"),
+
+    # Davis Square & Teele Square
+    "the burren": (42.3963, -71.1224, "Davis Square", "247 Elm St, Somerville", "The Burren"),
+    "somerville theatre": (42.3968, -71.1228, "Davis Square", "55 Davis Sq, Somerville", "Somerville Theatre"),
+    "crystal ballroom": (42.3968, -71.1228, "Davis Square", "55 Davis Sq, Somerville", "Crystal Ballroom"),
+    "the comedy studio": (42.3968, -71.1228, "Davis Square", "55 Davis Sq, Somerville", "The Comedy Studio"),
+    "goofs comedy club": (42.3968, -71.1228, "Davis Square", "55 Davis Sq, Somerville", "Goofs Comedy Club"),
+    "painted burro somerville": (42.3961, -71.1220, "Davis Square", "219 Elm St, Somerville", "Painted Burro"),
+    "davis square farmers market": (42.3968, -71.1228, "Davis Square", "Day St & Herbert St, Somerville", "Davis Square Farmers Market"),
+    "blues union": (42.3995, -71.1278, "Teele Square", "160 Holland St, Somerville", "Blues Union"),
+
+    # Union Square & Somerville
+    "aeronaut brewing": (42.3814, -71.1066, "Somerville", "14 Tyler St, Somerville", "Aeronaut Brewing"),
+    "craft loft": (42.3814, -71.1066, "Somerville", "14 Tyler St, Somerville", "Craft Loft"),
+    "remnant somerville": (42.3804, -71.0970, "Union Square", "1 Bow Market Way, Somerville", "Remnant Brewing"),
+    "bow market": (42.3804, -71.0970, "Union Square", "1 Bow Market Way, Somerville", "Bow Market"),
+    "dark mode at bow market": (42.3804, -71.0970, "Union Square", "1 Bow Market Way, Somerville", "DARK MODE at Bow Market"),
+    "vera's": (42.3797, -71.0962, "Union Square", "70 Union Sq, Somerville", "Vera's"),
+    "union square farmers market": (42.3797, -71.0962, "Union Square", "66 Union Sq, Somerville", "Union Square Farmers Market"),
+    "arts at the armory": (42.3912, -71.1086, "Spring Hill", "191 Highland Ave, Somerville", "Arts at the Armory"),
+    "sabina mezcalería": (42.3926, -71.0963, "Winter Hill", "514 Medford St, Somerville", "Sabina Mezcalería"),
+    "sabina": (42.3926, -71.0963, "Winter Hill", "514 Medford St, Somerville", "Sabina Mezcalería"),
+    "somerville public library": (42.3868, -71.0970, "Somerville", "79 Highland Ave, Somerville", "Somerville Public Library"),
+    "once somerville": (42.3756, -71.0901, "Boynton Yards", "101 South St, Somerville", "ONCE Somerville"),
+    "all she wrote books": (42.3820, -71.0850, "East Somerville", "459 McGrath Hwy, Somerville", "All She Wrote Books"),
+    "assembly row": (42.3928, -71.0776, "Assembly Row", "Assembly Row, Somerville", "Assembly Row"),
+
+    # Medford, Arlington & Suburbs
+    "deep cuts": (42.4178, -71.1070, "Medford Square", "21 Main St, Medford", "Deep Cuts"),
+    "regent theatre": (42.4158, -71.1542, "Arlington", "7 Medford St, Arlington", "Regent Theatre"),
+    "painted burro waltham": (42.3765, -71.2372, "Waltham", "665 Main St, Waltham", "Painted Burro Waltham"),
+    "gillette stadium": (42.0909, -71.2643, "Foxborough", "1 Patriot Pl, Foxborough", "Gillette Stadium"),
+
+    # Downtown, Theater District & Chinatown
+    "royale": (42.3508, -71.0654, "Theater District", "279 Tremont St, Boston", "Royale"),
+    "the wilbur": (42.3516, -71.0648, "Theater District", "246 Tremont St, Boston", "The Wilbur"),
+    "boch center wang theatre": (42.3509, -71.0651, "Theater District", "270 Tremont St, Boston", "Boch Center Wang Theatre"),
+    "boch center shubert theatre": (42.3513, -71.0651, "Theater District", "265 Tremont St, Boston", "Boch Center Shubert Theatre"),
+    "emerson colonial theatre": (42.3524, -71.0658, "Theater District", "106 Boylston St, Boston", "Emerson Colonial Theatre"),
+    "emerson paramount center": (42.3533, -71.0628, "Theater District", "559 Washington St, Boston", "Emerson Paramount Center"),
+    "citizens bank opera house": (42.3541, -71.0617, "Downtown Crossing", "539 Washington St, Boston", "Citizens Bank Opera House"),
+    "orpheum theatre": (42.3567, -71.0601, "Downtown", "1 Hamilton Pl, Boston", "Orpheum Theatre"),
+    "versus boston": (42.3536, -71.0608, "Downtown Crossing", "42 Province St, Boston", "Versus Boston"),
+    "nick's comedy stop": (42.3512, -71.0664, "Theater District", "100 Warrenton St, Boston", "Nick's Comedy Stop"),
+    "the tam": (42.3521, -71.0645, "Theater District", "222 Tremont St, Boston", "The Tam"),
+    "biddy early's": (42.3551, -71.0544, "Financial District", "141 Pearl St, Boston", "Biddy Early's"),
+    "boston common": (42.3550, -71.0656, "Downtown", "139 Tremont St, Boston", "Boston Common"),
+    "boston public garden": (42.3542, -71.0704, "Back Bay", "4 Charles St, Boston", "Boston Public Garden"),
+    "hatch shell": (42.3582, -71.0735, "Esplanade", "47 David G Mugar Way, Boston", "Hatch Memorial Shell"),
+    "esplanade": (42.3582, -71.0735, "Esplanade", "47 David G Mugar Way, Boston", "The Esplanade"),
+    "greenway artisan market": (42.3575, -71.0515, "Downtown Waterfront", "Atlantic Ave, Boston", "Rose Kennedy Greenway"),
+
+    # North Station, West End & TD Garden
+    "td garden": (42.3662, -71.0621, "West End / North Station", "100 Legends Way, Boston", "TD Garden"),
+    "big night live": (42.3656, -71.0617, "West End / North Station", "110 Causeway St, Boston", "Big Night Live"),
+    "the sports museum": (42.3662, -71.0621, "West End / North Station", "100 Legends Way, Boston", "The Sports Museum"),
+    "city winery boston": (42.3644, -71.0601, "West End", "80 Beverly St, Boston", "City Winery Boston"),
+    "the tip tap room": (42.3610, -71.0637, "Beacon Hill", "138 Cambridge St, Boston", "The Tip Tap Room"),
+    "the anchor boston": (42.3734, -71.0505, "Charlestown Navy Yard", "1 Shipyard Park, Charlestown", "The Anchor Boston"),
+
+    # Seaport & Fort Point
+    "ica boston": (42.3528, -71.0432, "Seaport", "25 Harbor Shore Dr, Boston", "ICA Boston"),
+    "laugh boston": (42.3481, -71.0456, "Seaport", "425 Summer St, Boston", "Laugh Boston"),
+    "leader bank pavilion": (42.3475, -71.0360, "Seaport", "290 Northern Ave, Boston", "Leader Bank Pavilion"),
+    "the grand boston": (42.3524, -71.0475, "Seaport", "58 Seaport Blvd, Boston", "The Grand"),
+    "scorpion bar boston": (42.3524, -71.0475, "Seaport", "58 Seaport Blvd, Boston", "Scorpion Bar Boston"),
+    "trillium fort point": (42.3518, -71.0494, "Fort Point", "50 Thomson Pl, Boston", "Trillium Fort Point"),
+
+    # Back Bay & South End
+    "boston public library": (42.3496, -71.0779, "Copley Square", "700 Boylston St, Boston", "Boston Public Library"),
+    "copley square": (42.3501, -71.0766, "Copley Square", "560 Boylston St, Boston", "Copley Square"),
+    "trident booksellers": (42.3484, -71.0863, "Back Bay", "338 Newbury St, Boston", "Trident Booksellers & Cafe"),
+    "the beehive": (42.3444, -71.0706, "South End", "541 Tremont St, Boston", "The Beehive"),
+    "wally's café": (42.3409, -71.0827, "South End", "427 Massachusetts Ave, Boston", "Wally's Café"),
+    "darryl's corner bar": (42.3400, -71.0805, "South End", "604 Columbus Ave, Boston", "Darryl's Corner Bar & Kitchen"),
+    "club cafe": (42.3486, -71.0718, "South End / Back Bay", "209 Columbus Ave, Boston", "Club Cafe"),
+    "calderwood pavilion": (42.3448, -71.0701, "South End", "527 Tremont St, Boston", "Calderwood Pavilion"),
+    "sowa open market": (42.3425, -71.0673, "South End", "530 Harrison Ave, Boston", "SoWa Open Market"),
+    "reunion bbq": (42.3468, -71.0688, "South End", "439 Tremont St, Boston", "Reunion BBQ"),
+    "posto south end": (42.3450, -71.0680, "South End", "Washington St, Boston", "Posto South End"),
+    "urbanity dance": (42.3424, -71.0664, "South End", "1180 Washington St, Boston", "Urbanity Dance"),
+
+    # Fenway, Kenmore & Symphony
+    "fenway park": (42.3467, -71.0972, "Fenway", "4 Jersey St, Boston", "Fenway Park"),
+    "mgm music hall": (42.3472, -71.0967, "Fenway", "2 Lansdowne St, Boston", "MGM Music Hall at Fenway"),
+    "house of blues": (42.3474, -71.0954, "Fenway", "15 Lansdowne St, Boston", "House of Blues Boston"),
+    "loretta's last call": (42.3475, -71.0963, "Fenway", "1 Lansdowne St, Boston", "Loretta's Last Call"),
+    "bill's bar": (42.3474, -71.0960, "Fenway", "5 Lansdowne St, Boston", "Bill's Bar"),
+    "lansdowne pub": (42.3473, -71.0957, "Fenway", "9 Lansdowne St, Boston", "Lansdowne Pub"),
+    "bleacher bar": (42.3468, -71.0975, "Fenway", "82A Lansdowne St, Boston", "Bleacher Bar"),
+    "cask 'n flagon": (42.3469, -71.0989, "Fenway", "62 Brookline Ave, Boston", "Cask 'n Flagon"),
+    "symphony hall": (42.3428, -71.0858, "Fenway / Symphony", "301 Massachusetts Ave, Boston", "Symphony Hall"),
+    "berklee performance center": (42.3479, -71.0886, "Back Bay / Fenway", "136 Massachusetts Ave, Boston", "Berklee Performance Center"),
+    "bebop": (42.3472, -71.0886, "Back Bay / Fenway", "1116 Boylston St, Boston", "The Bebop"),
+    "huntington theatre": (42.3421, -71.0853, "Symphony", "264 Huntington Ave, Boston", "Huntington Theatre"),
+    "museum of fine arts": (42.3394, -71.0940, "Museum District", "465 Huntington Ave, Boston", "Museum of Fine Arts (MFA)"),
+    "isabella stewart gardner museum": (42.3382, -71.0991, "Museum District", "25 Evans Way, Boston", "Isabella Stewart Gardner Museum"),
+
+    # Allston & Brighton
+    "paradise rock club": (42.3519, -71.1201, "Allston", "967 Commonwealth Ave, Boston", "Paradise Rock Club"),
+    "brighton music hall": (42.3533, -71.1373, "Allston", "158 Brighton Ave, Allston", "Brighton Music Hall"),
+    "roadrunner": (42.3582, -71.1492, "Boston Landing", "89 Guest St, Brighton", "Roadrunner"),
+    "silhouette lounge": (42.3533, -71.1332, "Allston", "200 Brighton Ave, Allston", "Silhouette Lounge"),
+    "model cafe": (42.3537, -71.1378, "Allston", "7 N Beacon St, Allston", "Model Cafe"),
+    "agganis arena": (42.3522, -71.1177, "BU / Allston", "925 Commonwealth Ave, Boston", "Agganis Arena"),
+    "artisans asylum": (42.3598, -71.1415, "Allston", "96 Holton St, Boston", "Artisans Asylum"),
+
+    # Brookline & Coolidge Corner
+    "coolidge corner theatre": (42.3424, -71.1215, "Coolidge Corner", "290 Harvard St, Brookline", "Coolidge Corner Theatre"),
+    "brookline booksmith": (42.3422, -71.1218, "Coolidge Corner", "279 Harvard St, Brookline", "Brookline Booksmith"),
+
+    # Jamaica Plain & Roxbury
+    "midway cafe": (42.3089, -71.1090, "Jamaica Plain", "3496 Washington St, Jamaica Plain", "Midway Cafe"),
+    "jeanie johnston pub": (42.3039, -71.1147, "Jamaica Plain", "144 South St, Jamaica Plain", "Jeanie Johnston Pub"),
+    "the haven": (42.3153, -71.1042, "Jamaica Plain", "284 Amory St, Jamaica Plain", "The Haven"),
+    "long live roxbury": (42.3278, -71.0763, "Roxbury", "152 Hampden St, Roxbury", "Long Live Roxbury"),
+}
+
+# Substring needle rules for matching variations in scraped venue titles
+VENUE_RULES = [
+    # Top venues
+    ("aeronaut", (42.3814, -71.1066, "Somerville", "14 Tyler St, Somerville", "Aeronaut Brewing")),
+    ("comedy studio", (42.3968, -71.1228, "Davis Square", "55 Davis Sq, Somerville", "The Comedy Studio")),
+    ("coolidge corner", (42.3424, -71.1215, "Coolidge Corner", "290 Harvard St, Brookline", "Coolidge Corner Theatre")),
+    ("burren", (42.3963, -71.1224, "Davis Square", "247 Elm St, Somerville", "The Burren")),
+    ("city winery", (42.3644, -71.0601, "West End", "80 Beverly St, Boston", "City Winery Boston")),
+    ("anchor", (42.3734, -71.0505, "Charlestown Navy Yard", "1 Shipyard Park, Charlestown", "The Anchor Boston")),
+    ("beehive", (42.3444, -71.0706, "South End", "541 Tremont St, Boston", "The Beehive")),
+    ("royale", (42.3508, -71.0654, "Theater District", "279 Tremont St, Boston", "Royale")),
+    ("cantab", (42.3662, -71.1061, "Central Square", "738 Massachusetts Ave, Cambridge", "The Cantab Lounge")),
+    ("boston public library", (42.3496, -71.0779, "Copley Square", "700 Boylston St, Boston", "Boston Public Library")),
+    ("wally", (42.3409, -71.0827, "South End", "427 Massachusetts Ave, Boston", "Wally's Café")),
+    ("natural history", (42.3787, -71.1155, "Harvard Square", "26 Oxford St, Cambridge", "Harvard Museum of Natural History")),
+    ("peabody museum", (42.3785, -71.1152, "Harvard Square", "11 Divinity Ave, Cambridge", "Peabody Museum")),
+    ("lou's", (42.3747, -71.1206, "Harvard Square", "50 Church St, Cambridge", "Lou's (Harvard Square)")),
+    ("wearelous", (42.3747, -71.1206, "Harvard Square", "50 Church St, Cambridge", "Lou's (Harvard Square)")),
+    ("havana club", (42.3649, -71.1026, "Central Square", "288 Green St, Cambridge", "Havana Club")),
+    ("big night live", (42.3656, -71.0617, "West End / TD Garden", "110 Causeway St, Boston", "Big Night Live")),
+    ("symphony hall", (42.3428, -71.0858, "Fenway / Symphony", "301 Massachusetts Ave, Boston", "Symphony Hall")),
+    ("somerville theatre", (42.3968, -71.1228, "Davis Square", "55 Davis Sq, Somerville", "Somerville Theatre")),
+    ("crystal ballroom", (42.3968, -71.1228, "Davis Square", "55 Davis Sq, Somerville", "Crystal Ballroom")),
+    ("trident", (42.3484, -71.0863, "Back Bay", "338 Newbury St, Boston", "Trident Booksellers & Cafe")),
+    ("remnant", (42.3804, -71.0970, "Union Square", "1 Bow Market Way, Somerville", "Remnant Brewing")),
+    ("craft loft", (42.3814, -71.1066, "Somerville", "14 Tyler St, Somerville", "Craft Loft")),
+    ("ica boston", (42.3528, -71.0432, "Seaport", "25 Harbor Shore Dr, Boston", "ICA Boston")),
+    ("td garden", (42.3662, -71.0621, "West End / North Station", "100 Legends Way, Boston", "TD Garden")),
+    ("sports museum", (42.3662, -71.0621, "West End / North Station", "100 Legends Way, Boston", "The Sports Museum")),
+    ("ccae", (42.3744, -71.1219, "Harvard Square", "42 Brattle St, Cambridge", "CCAE")),
+    ("loretta", (42.3475, -71.0963, "Fenway", "1 Lansdowne St, Boston", "Loretta's Last Call")),
+    ("harvard book", (42.3729, -71.1166, "Harvard Square", "1256 Massachusetts Ave, Cambridge", "Harvard Book Store")),
+    ("laugh boston", (42.3481, -71.0456, "Seaport", "425 Summer St, Boston", "Laugh Boston")),
+    ("toad", (42.3892, -71.1195, "Porter Square", "1920 Massachusetts Ave, Cambridge", "Toad")),
+    ("porter square book", (42.3888, -71.1192, "Porter Square", "25 White St, Cambridge", "Porter Square Books")),
+    ("brookline booksmith", (42.3422, -71.1218, "Coolidge Corner", "279 Harvard St, Brookline", "Brookline Booksmith")),
+    ("deep cuts", (42.4178, -71.1070, "Medford Square", "21 Main St, Medford", "Deep Cuts")),
+    ("versus", (42.3536, -71.0608, "Downtown Crossing", "42 Province St, Boston", "Versus Boston")),
+    ("wilbur", (42.3516, -71.0648, "Theater District", "246 Tremont St, Boston", "The Wilbur")),
+    ("museum of fine arts", (42.3394, -71.0940, "Museum District", "465 Huntington Ave, Boston", "Museum of Fine Arts (MFA)")),
+    ("mfa", (42.3394, -71.0940, "Museum District", "465 Huntington Ave, Boston", "Museum of Fine Arts (MFA)")),
+    ("middle east", (42.3638, -71.1018, "Central Square", "472 Massachusetts Ave, Cambridge", "The Middle East")),
+    ("sinclair", (42.3746, -71.1207, "Harvard Square", "52 Church St, Cambridge", "The Sinclair")),
+    ("colonial theatre", (42.3524, -71.0658, "Theater District", "106 Boylston St, Boston", "Emerson Colonial Theatre")),
+    ("paramount center", (42.3533, -71.0628, "Theater District", "559 Washington St, Boston", "Emerson Paramount Center")),
+    ("opera house", (42.3541, -71.0617, "Downtown Crossing", "539 Washington St, Boston", "Citizens Bank Opera House")),
+    ("wang thea", (42.3509, -71.0651, "Theater District", "270 Tremont St, Boston", "Boch Center Wang Theatre")),
+    ("shubert thea", (42.3513, -71.0651, "Theater District", "265 Tremont St, Boston", "Boch Center Shubert Theatre")),
+    ("roadrunner", (42.3582, -71.1492, "Boston Landing", "89 Guest St, Brighton", "Roadrunner")),
+    ("paradise rock", (42.3519, -71.1201, "Allston", "967 Commonwealth Ave, Boston", "Paradise Rock Club")),
+    ("brighton music hall", (42.3533, -71.1373, "Allston", "158 Brighton Ave, Allston", "Brighton Music Hall")),
+    ("house of blues", (42.3474, -71.0954, "Fenway", "15 Lansdowne St, Boston", "House of Blues Boston")),
+    ("mgm music hall", (42.3472, -71.0967, "Fenway", "2 Lansdowne St, Boston", "MGM Music Hall at Fenway")),
+    ("leader bank pavilion", (42.3475, -71.0360, "Seaport", "290 Northern Ave, Boston", "Leader Bank Pavilion")),
+    ("the grand", (42.3524, -71.0475, "Seaport", "58 Seaport Blvd, Boston", "The Grand")),
+    ("scorpion bar", (42.3524, -71.0475, "Seaport", "58 Seaport Blvd, Boston", "Scorpion Bar")),
+    ("bow market", (42.3804, -71.0970, "Union Square", "1 Bow Market Way, Somerville", "Bow Market")),
+    ("dark mode", (42.3804, -71.0970, "Union Square", "1 Bow Market Way, Somerville", "DARK MODE at Bow Market")),
+    ("vera's", (42.3797, -71.0962, "Union Square", "70 Union Sq, Somerville", "Vera's")),
+    ("armory", (42.3912, -71.1086, "Spring Hill", "191 Highland Ave, Somerville", "Arts at the Armory")),
+    ("sabina", (42.3926, -71.0963, "Winter Hill", "514 Medford St, Somerville", "Sabina Mezcalería")),
+    ("bobas", (42.3582, -71.0735, "Esplanade", "47 David G Mugar Way, Boston", "Hatch Shell (Esplanade)")),
+    ("esplanade", (42.3582, -71.0735, "Esplanade", "47 David G Mugar Way, Boston", "The Esplanade")),
+    ("hatch shell", (42.3582, -71.0735, "Esplanade", "47 David G Mugar Way, Boston", "Hatch Shell")),
+    ("boston common", (42.3550, -71.0656, "Downtown", "139 Tremont St, Boston", "Boston Common")),
+    ("public garden", (42.3542, -71.0704, "Back Bay", "4 Charles St, Boston", "Boston Public Garden")),
+    ("copley", (42.3501, -71.0766, "Copley Square", "560 Boylston St, Boston", "Copley Square")),
+    ("sowa", (42.3425, -71.0673, "South End", "530 Harrison Ave, Boston", "SoWa Open Market")),
+    ("reunion bbq", (42.3468, -71.0688, "South End", "439 Tremont St, Boston", "Reunion BBQ")),
+    ("posto", (42.3450, -71.0680, "South End", "Washington St, Boston", "Posto South End")),
+    ("club cafe", (42.3486, -71.0718, "South End / Back Bay", "209 Columbus Ave, Boston", "Club Cafe")),
+    ("darryl's", (42.3400, -71.0805, "South End", "604 Columbus Ave, Boston", "Darryl's Corner Bar & Kitchen")),
+    ("urbanity dance", (42.3424, -71.0664, "South End", "1180 Washington St, Boston", "Urbanity Dance")),
+    ("fenway park", (42.3467, -71.0972, "Fenway", "4 Jersey St, Boston", "Fenway Park")),
+    ("bleacher bar", (42.3468, -71.0975, "Fenway", "82A Lansdowne St, Boston", "Bleacher Bar")),
+    ("lansdowne pub", (42.3473, -71.0957, "Fenway", "9 Lansdowne St, Boston", "Lansdowne Pub")),
+    ("bill's bar", (42.3474, -71.0960, "Fenway", "5 Lansdowne St, Boston", "Bill's Bar")),
+    ("cask 'n flagon", (42.3469, -71.0989, "Fenway", "62 Brookline Ave, Boston", "Cask 'n Flagon")),
+    ("huntington ave", (42.3421, -71.0853, "Symphony", "264 Huntington Ave, Boston", "Huntington Theatre")),
+    ("huntington thea", (42.3421, -71.0853, "Symphony", "264 Huntington Ave, Boston", "Huntington Theatre")),
+    ("gardner museum", (42.3382, -71.0991, "Museum District", "25 Evans Way, Boston", "Isabella Stewart Gardner Museum")),
+    ("isabella stewart", (42.3382, -71.0991, "Museum District", "25 Evans Way, Boston", "Isabella Stewart Gardner Museum")),
+    ("berklee", (42.3479, -71.0886, "Back Bay / Fenway", "136 Massachusetts Ave, Boston", "Berklee Performance Center")),
+    ("bebop", (42.3472, -71.0886, "Back Bay / Fenway", "1116 Boylston St, Boston", "The Bebop")),
+    ("artisans asylum", (42.3598, -71.1415, "Allston", "96 Holton St, Boston", "Artisans Asylum")),
+    ("silhouette", (42.3533, -71.1332, "Allston", "200 Brighton Ave, Allston", "Silhouette Lounge")),
+    ("model cafe", (42.3537, -71.1378, "Allston", "7 N Beacon St, Allston", "Model Cafe")),
+    ("agganis arena", (42.3522, -71.1177, "BU / Allston", "925 Commonwealth Ave, Boston", "Agganis Arena")),
+    ("midway cafe", (42.3089, -71.1090, "Jamaica Plain", "3496 Washington St, Jamaica Plain", "Midway Cafe")),
+    ("jeanie johnston", (42.3039, -71.1147, "Jamaica Plain", "144 South St, Jamaica Plain", "Jeanie Johnston Pub")),
+    ("the haven", (42.3153, -71.1042, "Jamaica Plain", "284 Amory St, Jamaica Plain", "The Haven")),
+    ("long live", (42.3278, -71.0763, "Roxbury", "152 Hampden St, Roxbury", "Long Live Roxbury")),
+    ("gillette stadium", (42.0909, -71.2643, "Foxborough", "1 Patriot Pl, Foxborough", "Gillette Stadium")),
+    ("regent thea", (42.4158, -71.1542, "Arlington", "7 Medford St, Arlington", "Regent Theatre")),
+    ("painted burro", (42.3961, -71.1220, "Davis Square", "219 Elm St, Somerville", "Painted Burro")),
+    ("blues union", (42.3995, -71.1278, "Teele Square", "160 Holland St, Somerville", "Blues Union")),
+    ("foundry", (42.3663, -71.0853, "East Cambridge", "101 Rogers St, Cambridge", "The Foundry")),
+    ("lamplighter", (42.3688, -71.0994, "Cambridgeport", "284 Broadway, Cambridge", "Lamplighter Brewing")),
+    ("lovestruck", (42.3739, -71.1200, "Harvard Square", "22 Church St, Cambridge", "Lovestruck Books & Cafe")),
+    ("all she wrote", (42.3820, -71.0850, "East Somerville", "459 McGrath Hwy, Somerville", "All She Wrote Books")),
+    ("manray", (42.3662, -71.1027, "Central Square", "40 Prospect St, Cambridge", "ManRay")),
+    ("passim", (42.3741, -71.1204, "Harvard Square", "47 Palmer St, Cambridge", "Club Passim")),
+    ("lizard lounge", (42.3809, -71.1197, "North Cambridge", "1667 Massachusetts Ave, Cambridge", "Lizard Lounge")),
+    ("somerville library", (42.3868, -71.0970, "Somerville", "79 Highland Ave, Somerville", "Somerville Public Library")),
+    ("cambridge library", (42.3744, -71.1111, "Mid-Cambridge", "449 Broadway, Cambridge", "Cambridge Public Library")),
+    ("mit ", (42.3590, -71.0940, "Kendall Square / MIT", "Cambridge", "MIT Campus")),
+]
+
+# Coordinate bounding box for valid Greater Boston / Eastern MA events
+MIN_LAT, MAX_LAT = 41.8, 42.8
+MIN_LNG, MAX_LNG = -71.8, -70.5
+
+
+def resolve_event_geo(event: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Resolve latitude, longitude, neighborhood, and venue name for an event.
+
+    Prioritizes:
+    1. Pre-existing valid event coordinates (e.g. from Ticketmaster/SeatGeek/Eventbrite)
+    2. Exact curated venue match
+    3. Pattern/needle match on venue name and source
+    """
+    venue_raw = (event.get("venue") or "").strip()
+    source_raw = (event.get("_source_venue") or "").strip()
+
+    # Discard non-physical venues
+    v_lower = venue_raw.lower()
+    if not v_lower or v_lower in ("zoom", "online", "virtual", "online event", "tba", "various"):
+        return None
+
+    # 1. Check if event has native coordinates
+    lat = event.get("lat") or event.get("latitude")
+    lng = event.get("lng") or event.get("lon") or event.get("longitude")
+    if lat is not None and lng is not None:
+        try:
+            flat, flng = float(lat), float(lng)
+            if MIN_LAT <= flat <= MAX_LAT and MIN_LNG <= flng <= MAX_LNG:
+                return {
+                    "lat": round(flat, 5),
+                    "lng": round(flng, 5),
+                    "venue": venue_raw or source_raw,
+                    "neighborhood": event.get("neighborhood") or "",
+                    "address": event.get("address") or "",
+                }
+        except (ValueError, TypeError):
+            pass
+
+    # 2. Check exact curated match
+    norm_v = re.sub(r"[^\w\s]", "", v_lower).strip()
+    if v_lower in VENUE_COORDINATES:
+        lat, lng, neigh, addr, cname = VENUE_COORDINATES[v_lower]
+        return {"lat": lat, "lng": lng, "venue": cname, "neighborhood": neigh, "address": addr}
+    if norm_v in VENUE_COORDINATES:
+        lat, lng, neigh, addr, cname = VENUE_COORDINATES[norm_v]
+        return {"lat": lat, "lng": lng, "venue": cname, "neighborhood": neigh, "address": addr}
+
+    # 3. Check needle rules
+    target = f"{v_lower} {source_raw.lower()}"
+    for needle, (lat, lng, neigh, addr, cname) in VENUE_RULES:
+        if needle in target:
+            return {"lat": lat, "lng": lng, "venue": cname, "neighborhood": neigh, "address": addr}
+
+    return None

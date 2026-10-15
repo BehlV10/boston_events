@@ -16,6 +16,7 @@ from scrapers import (
     fetch_boston_weather,
     fetch_luckyseat_boston,
 )
+from venues_geo import resolve_event_geo
 
 
 CITY_RULES = [
@@ -668,6 +669,13 @@ def render_page(results):
 
         compare_html = _build_compare_links(e, raw_title)
 
+        geo = resolve_event_geo(e)
+        geo_attrs = ""
+        geo_btn = ""
+        if geo:
+            geo_attrs = f' data-lat="{geo["lat"]}" data-lng="{geo["lng"]}" data-venue-name="{escape(geo["venue"])}" data-neighborhood="{escape(geo["neighborhood"])}"'
+            geo_btn = f' <button type="button" class="venue-map-jump" data-lat="{geo["lat"]}" data-lng="{geo["lng"]}" data-venue="{escape(geo["venue"])}" title="View {escape(geo["venue"])} on Map">📍</button>'
+
         if venue:
             if venue.lower() in ("zoom", "online", "virtual"):
                 venue_link = f'<span class="venue-online">💻 {escape(venue)}</span>'
@@ -676,9 +684,9 @@ def render_page(results):
                 venue_link = f'<a class="venue-link" href="{escape(maps_url)}" target="_blank" rel="noopener">{escape(venue)}</a>'
 
             if source and source.lower() != venue.lower() and not any(agg in source.lower() for agg in ["ticketmaster", "eventbrite", "do617", "boston calendar"]):
-                venue_html = f'{venue_link} <span class="venue-via">(via {escape(source)})</span>'
+                venue_html = f'{venue_link}{geo_btn} <span class="venue-via">(via {escape(source)})</span>'
             else:
-                venue_html = venue_link
+                venue_html = f'{venue_link}{geo_btn}'
         else:
             venue_html = ""
 
@@ -701,7 +709,7 @@ def render_page(results):
         desc = raw_desc[:180]
         desc_html = f'<div class="desc">{escape(desc)}</div>' if desc else ""
         free_flag = "true" if is_free else "false"
-        return f'''<li class="event" data-cat="{escape(cat)}" data-bucket="{escape(bucket)}" data-venue="{escape(source)}" data-city="{escape(city)}" data-recur="{recur_flag}" data-free="{free_flag}">
+        return f'''<li class="event" data-cat="{escape(cat)}" data-bucket="{escape(bucket)}" data-venue="{escape(source)}" data-city="{escape(city)}" data-recur="{recur_flag}" data-free="{free_flag}"{geo_attrs}>
           <div class="when">{escape(format_when(e))}</div>
           <div class="what">{link}{price_tag}{recur_badge}
             <div class="venue-tag">{cat_tag} · {venue_html}{extra_html}{cal_html}</div>
@@ -1358,6 +1366,330 @@ def render_page(results):
     font-size: 14px;
     color: var(--fg);
   }}
+
+  /* View Switcher */
+  .view-switch-bar {{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 6px 12px;
+  }}
+  .view-toggle {{
+    display: inline-flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 2px;
+    gap: 2px;
+  }}
+  .view-btn {{
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+  }}
+  .view-btn:hover {{
+    color: var(--fg);
+  }}
+  .view-btn.active {{
+    background: var(--accent);
+    color: #0c0e14;
+    font-weight: 700;
+    box-shadow: 0 2px 8px var(--accent-glow);
+  }}
+  .map-tag-live {{
+    font-size: 9px;
+    text-transform: uppercase;
+    background: rgba(0, 0, 0, 0.25);
+    padding: 1px 5px;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
+  }}
+  .map-venue-stat {{
+    font-size: 12px;
+    color: var(--muted);
+  }}
+  .map-venue-stat strong {{
+    color: var(--accent);
+  }}
+
+  /* Map View Wrapper */
+  .map-view-wrapper {{
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
+  }}
+  .map-header {{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0 4px;
+  }}
+  .map-header-title {{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--fg);
+  }}
+  .map-hint {{
+    color: var(--muted);
+    font-size: 11px;
+  }}
+  .map-tool-btn {{
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    color: var(--fg);
+    border-radius: var(--radius-sm);
+    padding: 3px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s ease;
+  }}
+  .map-tool-btn:hover {{
+    border-color: var(--accent);
+    color: var(--accent);
+  }}
+  .leaflet-map {{
+    width: 100%;
+    height: 520px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: #0c0e14;
+    z-index: 1;
+  }}
+
+  /* Venue Map Pin in Leaflet */
+  .custom-venue-icon {{
+    background: transparent !important;
+    border: none !important;
+  }}
+  .venue-marker {{
+    background: #141824;
+    border: 1.5px solid var(--accent);
+    color: #eef1f8;
+    border-radius: 999px;
+    padding: 3px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.7), 0 0 10px rgba(93, 155, 255, 0.35);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+    transform: translate(-50%, -50%);
+    user-select: none;
+  }}
+  .venue-marker:hover, .venue-marker.highlighted {{
+    transform: translate(-50%, -50%) scale(1.12);
+    background: var(--accent);
+    color: #0c0e14;
+    border-color: #fff;
+    box-shadow: 0 6px 20px rgba(93, 155, 255, 0.6);
+    z-index: 9999 !important;
+  }}
+  .venue-marker .pin-count {{
+    background: var(--accent);
+    color: #0c0e14;
+    border-radius: 999px;
+    font-size: 10px;
+    padding: 1px 6px;
+    font-weight: 800;
+    line-height: 1.2;
+  }}
+  .venue-marker:hover .pin-count, .venue-marker.highlighted .pin-count {{
+    background: #0c0e14;
+    color: #fff;
+  }}
+  .venue-map-jump {{
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 0 2px;
+    line-height: 1;
+    opacity: 0.75;
+    transition: transform 0.12s ease, opacity 0.12s ease;
+    display: inline-block;
+    vertical-align: middle;
+  }}
+  .venue-map-jump:hover {{
+    opacity: 1;
+    transform: scale(1.3);
+  }}
+
+  /* Dark theme Leaflet Popups */
+  .leaflet-popup-content-wrapper, .leaflet-popup-tip {{
+    background: #151822 !important;
+    color: #eef1f8 !important;
+    border: 1px solid rgba(255, 255, 255, 0.15) !important;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.85) !important;
+    border-radius: 12px !important;
+  }}
+  .leaflet-popup-content {{
+    margin: 12px 14px !important;
+    line-height: 1.4 !important;
+    font-family: inherit !important;
+  }}
+  .leaflet-container a.leaflet-popup-close-button {{
+    color: var(--muted) !important;
+    padding: 8px 10px !important;
+  }}
+  .leaflet-container a.leaflet-popup-close-button:hover {{
+    color: #fff !important;
+  }}
+  .map-popup {{
+    min-width: 220px;
+    max-width: 280px;
+  }}
+  .popup-head {{
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }}
+  .popup-head strong {{
+    font-size: 13px;
+    color: #fff;
+  }}
+  .popup-neighborhood {{
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 500;
+  }}
+  .popup-events {{
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 220px;
+    overflow-y: auto;
+  }}
+  .popup-event-item {{
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 4px 6px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.03);
+  }}
+  .popup-time {{
+    font-size: 10px;
+    color: var(--muted);
+  }}
+  .popup-title {{
+    color: var(--fg);
+    text-decoration: none;
+    font-weight: 500;
+  }}
+  .popup-title:hover {{
+    color: var(--accent);
+    text-decoration: underline;
+  }}
+  .popup-price {{
+    font-size: 10px;
+    color: var(--muted);
+  }}
+  .popup-price.free {{
+    color: var(--green);
+    font-weight: 600;
+  }}
+  .popup-more {{
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+    padding: 4px 0 2px;
+  }}
+  .popup-foot {{
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+  }}
+  .popup-dir-link {{
+    font-size: 11px;
+    color: var(--accent);
+    text-decoration: none;
+  }}
+  .popup-dir-link:hover {{
+    text-decoration: underline;
+  }}
+
+  /* Venue Card below map */
+  .map-venue-card {{
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+  }}
+  .map-venue-card-head {{
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+  }}
+  .map-venue-card-head h3 {{
+    margin: 0;
+    font-size: 15px;
+    color: #fff;
+  }}
+  .panel-sub {{
+    margin: 2px 0 0;
+    font-size: 12px;
+    color: var(--accent);
+  }}
+  .panel-close {{
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 6px;
+    padding: 2px 8px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+  }}
+  .panel-close:hover {{
+    color: var(--fg);
+    border-color: var(--fg);
+  }}
+  .panel-events {{
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 260px;
+    overflow-y: auto;
+  }}
   .ongoing {{ margin-top: 4px; }}
   .ongoing h2 {{ margin: 0 0 4px; font-size: 15px; font-weight: 600; display:flex; align-items:center; gap:8px; color: var(--fg); }}
   .ongoing .hint {{ margin: 0 0 10px; color: var(--muted); font-size: 12px; }}
@@ -1508,6 +1840,14 @@ def render_page(results):
       max-width: 100%;
       box-sizing: border-box;
     }}
+    .leaflet-map {{
+      height: 380px;
+    }}
+    .map-header {{
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+    }}
   }}
 </style>
 </head>
@@ -1571,6 +1911,21 @@ def render_page(results):
       </div>
     </aside>
     <main>
+      <div class="view-switch-bar">
+        <div class="view-toggle" role="group" aria-label="View mode">
+          <button type="button" class="view-btn active" id="btn-view-list" data-view="list">
+            <span>📋</span> List View
+          </button>
+          <button type="button" class="view-btn" id="btn-view-map" data-view="map">
+            <span>🗺️</span> Map View <span class="map-tag-live">OSM</span>
+          </button>
+        </div>
+        <div class="view-switch-right">
+          <span id="map-venue-stat" class="map-venue-stat" style="display: none;">
+            <strong id="map-venue-count">0</strong> venues on map
+          </span>
+        </div>
+      </div>
       <div class="location-chips-bar" id="location-chips">
         <button type="button" class="loc-chip active" data-city="all">📍 All Areas</button>
         <button type="button" class="loc-chip" data-city="boston"><span class="city-dot" style="background:#5d9bff"></span>Boston</button>
@@ -1601,6 +1956,29 @@ def render_page(results):
           <button type="button" id="cal-next-month" aria-label="Next month">›</button>
         </div>
         <div class="mini-cal-grid" id="mini-cal-grid"></div>
+      </div>
+      <div id="map-view-wrapper" class="map-view-wrapper" style="display: none;">
+        <div class="map-header">
+          <div class="map-header-title">
+            <span class="live-pulse"></span>
+            <strong>Greater Boston Live Map</strong>
+            <span class="map-hint">· OpenStreetMap · Pins update with your date &amp; filters</span>
+          </div>
+          <div class="map-header-actions">
+            <button type="button" id="map-recenter-btn" class="map-tool-btn" title="Center map on Boston">🎯 Center Boston</button>
+          </div>
+        </div>
+        <div id="leaflet-map" class="leaflet-map"></div>
+        <div id="map-selected-venue" class="map-venue-card" style="display: none;">
+          <div class="map-venue-card-head">
+            <div>
+              <h3 id="panel-venue-name"></h3>
+              <p id="panel-venue-sub" class="panel-sub"></p>
+            </div>
+            <button type="button" id="panel-close-btn" class="panel-close" aria-label="Close panel">✕</button>
+          </div>
+          <ul id="panel-events-list" class="panel-events"></ul>
+        </div>
       </div>
       <div id="no-events-msg" class="no-events-msg" style="display: none;">
         <p>No events found for this selection.</p>
@@ -1636,6 +2014,10 @@ def render_page(results):
     const quickChips = document.querySelectorAll('#quick-chips .chip[data-time]');
     const quickFreeChip = document.getElementById('quick-free-chip');
     let timeFilter = 'today';
+    let currentView = 'list';
+    let leafletMap = null;
+    let markersLayer = null;
+    let mapLoading = false;
 
     const mobileToggle = document.getElementById('mobile-filter-toggle');
     const mobileClose = document.getElementById('mobile-filter-close');
@@ -1697,6 +2079,186 @@ def render_page(results):
         btn.textContent = (timeFilter === 'all' || showAll) ? 'today view' : 'show all';
         btn.setAttribute('aria-pressed', (timeFilter === 'all' || showAll) ? 'true' : 'false');
       }}
+    }}
+
+    function escapeHTML(str) {{
+      if (!str) return '';
+      return String(str)
+        .split('&').join('&amp;')
+        .split('<').join('&lt;')
+        .split('>').join('&gt;')
+        .split('"').join('&quot;')
+        .split("'").join('&#39;');
+    }}
+
+    function loadLeaflet(callback) {{
+      if (window.L) {{ callback(); return; }}
+      if (mapLoading) {{
+        const interval = setInterval(() => {{
+          if (window.L) {{ clearInterval(interval); callback(); }}
+        }}, 50);
+        return;
+      }}
+      mapLoading = true;
+      const css = document.createElement('link');
+      css.rel = 'stylesheet';
+      css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      document.head.appendChild(css);
+
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+      script.onload = () => {{
+        mapLoading = false;
+        callback();
+      }};
+      document.head.appendChild(script);
+    }}
+
+    function initMap() {{
+      if (leafletMap) return;
+      const mapEl = document.getElementById('leaflet-map');
+      if (!mapEl) return;
+
+      leafletMap = L.map(mapEl, {{
+        center: [42.3601, -71.0750],
+        zoom: 13,
+        minZoom: 10,
+        maxZoom: 18,
+      }});
+
+      L.tileLayer('https://{{s}}.basemaps.cartocdn.com/dark_all/{{z}}/{{x}}/{{y}}{{r}}.png', {{
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> &copy; <a href="https://carto.com/" target="_blank" rel="noopener">CARTO</a>',
+        subdomains: 'abcd',
+        maxZoom: 19
+      }}).addTo(leafletMap);
+
+      markersLayer = L.layerGroup().addTo(leafletMap);
+      updateMapMarkers();
+    }}
+
+    function switchView(mode) {{
+      currentView = mode;
+      const listBtn = document.getElementById('btn-view-list');
+      const mapBtn = document.getElementById('btn-view-map');
+      const mapWrapper = document.getElementById('map-view-wrapper');
+      const mapStat = document.getElementById('map-venue-stat');
+
+      if (listBtn) listBtn.classList.toggle('active', mode === 'list');
+      if (mapBtn) mapBtn.classList.toggle('active', mode === 'map');
+      if (mapWrapper) mapWrapper.style.display = (mode === 'map') ? 'flex' : 'none';
+      if (mapStat) mapStat.style.display = (mode === 'map') ? 'inline-block' : 'none';
+
+      if (mode === 'map') {{
+        loadLeaflet(() => {{
+          initMap();
+          if (leafletMap) {{
+            leafletMap.invalidateSize();
+            updateMapMarkers();
+          }}
+        }});
+      }}
+      stateToHash();
+    }}
+
+    function updateMapMarkers() {{
+      if (!leafletMap || !markersLayer) return;
+      markersLayer.clearLayers();
+
+      const visibleDaySecs = daySections.filter(d => !d.classList.contains('out-of-week') && !d.classList.contains('empty'));
+      const venueMap = new Map();
+
+      visibleDaySecs.forEach(day => {{
+        const dayDate = day.dataset.date;
+        day.querySelectorAll('.event:not(.hidden)').forEach(li => {{
+          const lat = parseFloat(li.dataset.lat);
+          const lng = parseFloat(li.dataset.lng);
+          if (isNaN(lat) || isNaN(lng)) return;
+
+          const vName = li.dataset.venueName || li.dataset.venue || 'Venue';
+          const key = `${{lat.toFixed(4)}},${{lng.toFixed(4)}}`;
+          if (!venueMap.has(key)) {{
+            venueMap.set(key, {{
+              lat, lng,
+              name: vName,
+              neighborhood: li.dataset.neighborhood || '',
+              events: []
+            }});
+          }}
+
+          const linkEl = li.querySelector('.what a');
+          const title = linkEl ? linkEl.textContent.trim() : (li.querySelector('.what')?.textContent || '');
+          const url = linkEl ? linkEl.getAttribute('href') : '';
+          const when = li.querySelector('.when')?.textContent.trim() || '';
+          const price = li.querySelector('.price')?.textContent.trim() || '';
+          const isFree = li.dataset.free === 'true';
+
+          venueMap.get(key).events.push({{
+            title, url, when, price, isFree, date: dayDate
+          }});
+        }});
+      }});
+
+      const countBadge = document.getElementById('map-venue-count');
+      if (countBadge) countBadge.textContent = venueMap.size;
+
+      venueMap.forEach(v => {{
+        const count = v.events.length;
+        const icon = L.divIcon({{
+          className: 'custom-venue-icon',
+          html: `<div class="venue-marker" title="${{escapeHTML(v.name)}} (${{count}} events)"><span class="pin-name">${{escapeHTML(v.name)}}</span><span class="pin-count">${{count}}</span></div>`,
+          iconSize: null,
+          iconAnchor: [0, 0],
+        }});
+
+        const marker = L.marker([v.lat, v.lng], {{ icon: icon }});
+
+        let popupHtml = `<div class="map-popup">
+          <div class="popup-head">
+            <strong>${{escapeHTML(v.name)}}</strong>
+            ${{v.neighborhood ? `<span class="popup-neighborhood">📍 ${{escapeHTML(v.neighborhood)}}</span>` : ''}}
+          </div>
+          <div class="popup-events">`;
+
+        v.events.slice(0, 5).forEach(ev => {{
+          popupHtml += `<div class="popup-event-item">
+            <span class="popup-time">${{escapeHTML(ev.when)}}</span>
+            <a href="${{escapeHTML(ev.url)}}" target="_blank" rel="noopener" class="popup-title">${{escapeHTML(ev.title)}}</a>
+            ${{ev.price ? `<span class="popup-price ${{ev.isFree ? 'free' : ''}}">${{escapeHTML(ev.price)}}</span>` : ''}}
+          </div>`;
+        }});
+        if (v.events.length > 5) {{
+          popupHtml += `<div class="popup-more">+ ${{v.events.length - 5}} more events</div>`;
+        }}
+        const mapsQuery = encodeURIComponent(`${{v.name}}, Boston MA`);
+        popupHtml += `</div>
+          <div class="popup-foot">
+            <a href="https://www.google.com/maps/search/?api=1&query=${{mapsQuery}}" target="_blank" rel="noopener" class="popup-dir-link">Google Maps Directions ↗</a>
+          </div>
+        </div>`;
+
+        marker.bindPopup(popupHtml, {{ maxWidth: 300 }});
+        marker.on('click', () => {{
+          showVenuePanel(v);
+        }});
+        markersLayer.addLayer(marker);
+      }});
+    }}
+
+    function showVenuePanel(v) {{
+      const panel = document.getElementById('map-selected-venue');
+      if (!panel) return;
+      document.getElementById('panel-venue-name').textContent = v.name;
+      document.getElementById('panel-venue-sub').textContent = v.neighborhood ? `📍 ${{v.neighborhood}} · ${{v.events.length}} event(s)` : `${{v.events.length}} event(s)`;
+
+      const list = document.getElementById('panel-events-list');
+      list.innerHTML = v.events.map(ev => `
+        <li class="popup-event-item">
+          <span class="popup-time">${{escapeHTML(ev.when)}}</span>
+          <a href="${{escapeHTML(ev.url)}}" target="_blank" rel="noopener" class="popup-title">${{escapeHTML(ev.title)}}</a>
+          ${{ev.price ? `<span class="popup-price ${{ev.isFree ? 'free' : ''}}">${{escapeHTML(ev.price)}}</span>` : ''}}
+        </li>
+      `).join('');
+      panel.style.display = 'block';
     }}
 
     function updateQuickChipsUI() {{
@@ -1767,6 +2329,7 @@ def render_page(results):
       if ((timeFilter === 'day' || timeFilter === 'week') && fmtISO(anchor) !== todayISO) {{
         params.set('d', fmtISO(anchor));
       }}
+      if (currentView !== 'list') params.set('v', currentView);
 
       const hash = params.toString();
       history.replaceState(null, '', hash ? '#' + hash : location.pathname + location.search);
@@ -1779,6 +2342,9 @@ def render_page(results):
 
       if (params.has('q')) searchInput.value = params.get('q');
       if (params.get('free') === '1' && freeOnlyChk) freeOnlyChk.checked = true;
+      if (params.get('v') === 'map') {{
+        switchView('map');
+      }}
 
       if (params.has('t')) {{
         timeFilter = params.get('t');
@@ -1895,6 +2461,9 @@ def render_page(results):
       updateLocChipsUI();
       updateSearchUI();
       updateMobileBadge();
+      if (currentView === 'map') {{
+        updateMapMarkers();
+      }}
       stateToHash();
     }}
 
@@ -2179,6 +2748,48 @@ def render_page(results):
       if (!btn) return;
       e.preventDefault();
       downloadICS(btn.dataset.title, btn.dataset.date, btn.dataset.venue, btn.dataset.url);
+    }});
+
+    const btnViewList = document.getElementById('btn-view-list');
+    if (btnViewList) btnViewList.addEventListener('click', () => switchView('list'));
+
+    const btnViewMap = document.getElementById('btn-view-map');
+    if (btnViewMap) btnViewMap.addEventListener('click', () => switchView('map'));
+
+    const mapRecenterBtn = document.getElementById('map-recenter-btn');
+    if (mapRecenterBtn) {{
+      mapRecenterBtn.addEventListener('click', () => {{
+        if (leafletMap) {{
+          leafletMap.setView([42.3601, -71.0750], 13, {{ animate: true }});
+        }}
+      }});
+    }}
+
+    const panelCloseBtn = document.getElementById('panel-close-btn');
+    if (panelCloseBtn) {{
+      panelCloseBtn.addEventListener('click', () => {{
+        const p = document.getElementById('map-selected-venue');
+        if (p) p.style.display = 'none';
+      }});
+    }}
+
+    document.addEventListener('click', (e) => {{
+      const jumpBtn = e.target.closest('.venue-map-jump');
+      if (jumpBtn) {{
+        e.preventDefault();
+        const lat = parseFloat(jumpBtn.dataset.lat);
+        const lng = parseFloat(jumpBtn.dataset.lng);
+        if (isNaN(lat) || isNaN(lng)) return;
+        switchView('map');
+        loadLeaflet(() => {{
+          initMap();
+          if (leafletMap) {{
+            leafletMap.setView([lat, lng], 15, {{ animate: true }});
+            const mapWrap = document.getElementById('map-view-wrapper');
+            if (mapWrap) mapWrap.scrollIntoView({{ behavior: 'smooth', block: 'start' }});
+          }}
+        }});
+      }}
     }});
 
     hashToState();
