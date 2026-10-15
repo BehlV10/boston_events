@@ -3136,7 +3136,7 @@ def scrape_toad(url, ua):
         events.append({
             "name": "Live Irish Music Session @ McCarthy's",
             "date": dt_night.astimezone(timezone.utc).isoformat(),
-            "url": "https://www.mccarthystoad.com/music",
+            "url": "https://www.mccarthystoad.com/calendar",
             "venue": "McCarthy's Toad",
             "price": "Free",
             "category": "music",
@@ -3146,7 +3146,7 @@ def scrape_toad(url, ua):
             events.append({
                 "name": "Scottish Session Brunch @ McCarthy's",
                 "date": dt_brunch.astimezone(timezone.utc).isoformat(),
-                "url": "https://www.mccarthystoad.com/music",
+                "url": "https://www.mccarthystoad.com/calendar",
                 "venue": "McCarthy's Toad",
                 "price": "Free",
                 "category": "music",
@@ -3211,7 +3211,7 @@ _ALL_VENUES = [
     {"name": "Somerville Theatre", "url": "https://www.somervilletheatre.com/events/", "ua": UA_CHROME, "scraper": scrape_somerville_theatre, "default_category": "film"},
     {"name": "The Sinclair", "url": "https://www.sinclaircambridge.com/events", "ua": UA_CHROME, "scraper": scrape_sinclair, "default_category": "music"},
     {"name": "Night Shift Brewing", "url": "https://nightshiftbrewing.com/events/", "ua": UA_CHROME, "scraper": scrape_night_shift, "default_category": "food"},
-    {"name": "McCarthy's Toad", "url": "https://www.mccarthystoad.com/music", "ua": UA_CHROME, "scraper": scrape_toad, "default_category": "music"},
+    {"name": "McCarthy's Toad", "url": "https://www.mccarthystoad.com/calendar", "ua": UA_CHROME, "scraper": scrape_toad, "default_category": "music"},
     {"name": "Remnant Somerville", "url": "https://www.remnantsomerville.com/live", "ua": UA_CHROME, "scraper": scrape_squarespace_events, "default_category": "music"},
     {"name": "The Burren", "url": "https://burren.com/music.html", "ua": UA_CHROME, "scraper": scrape_burren, "default_category": "music"},
     {"name": "Harvard Museum of Natural History", "url": "https://www.hmnh.harvard.edu/calendar", "ua": UA_CURL, "scraper": scrape_hmnh, "default_category": "community"},
@@ -3370,6 +3370,11 @@ MANUAL_RECURRING_EVENTS = [
     ]),
     ("Sabina Mezcalería", "https://sabinamezcaleria.com/", "dance", [
         ("Sunday Live Salsa & Social Dancing (3–6 PM)", "https://www.instagram.com/sabinamezcaleria/", 6, 15, 0, "Free admission"),
+    ]),
+    ("The Druid", "https://www.druidpub.com/", "music", [
+        ("Traditional Irish Music Session @ The Druid", "https://www.druidpub.com/", 2, 20, 0, "Free"),
+        ("Traditional Irish Music Session @ The Druid", "https://www.druidpub.com/", 5, 16, 0, "Free"),
+        ("Traditional Irish Music Brunch Session @ The Druid", "https://www.druidpub.com/", 6, 12, 0, "Free"),
     ]),
 ]
 

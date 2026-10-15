@@ -39,7 +39,7 @@ CITY_RULES = [
         "lamplighter", "roxy's arcade", "roxys arcade",
         "venture café", "venture cafe", "cic cambridge",
         "middle east", "phoenix landing", "manray", "man ray", "prospect st",
-        "regattabar", "lilypad", "inman square",
+        "regattabar", "lilypad", "inman square", "the druid", "druid",
     )),
     ("boston", (
         "city winery", "royale", "wilbur", "ica boston", "gardner", "boston public library",

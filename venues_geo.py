@@ -41,6 +41,10 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
     "lamplighter brewing": (42.3688, -71.0994, "Cambridgeport", "284 Broadway, Cambridge", "Lamplighter Brewing Co."),
     "the foundry": (42.3663, -71.0853, "East Cambridge", "101 Rogers St, Cambridge", "The Foundry"),
 
+    # Inman Square
+    "the druid": (42.3738, -71.1002, "Inman Square", "1357 Cambridge St, Cambridge", "The Druid"),
+    "druid": (42.3738, -71.1002, "Inman Square", "1357 Cambridge St, Cambridge", "The Druid"),
+
     # Kendall Square & MIT
     "mit museum": (42.3621, -71.0858, "Kendall Square", "314 Main St, Cambridge", "MIT Museum"),
     "venture café": (42.3615, -71.0870, "Kendall Square", "1 Broadway, Cambridge", "Venture Café Cambridge"),
@@ -294,6 +298,8 @@ VENUE_RULES = [
     ("hult", (42.3705, -71.0722, "East Cambridge", "1 Education St, Cambridge", "Hult International Business School")),
     ("venture café", (42.3615, -71.0870, "Kendall Square", "1 Broadway, Cambridge", "Venture Café Cambridge")),
     ("venture cafe", (42.3615, -71.0870, "Kendall Square", "1 Broadway, Cambridge", "Venture Café Cambridge")),
+    ("the druid", (42.3738, -71.1002, "Inman Square", "1357 Cambridge St, Cambridge", "The Druid")),
+    ("druid", (42.3738, -71.1002, "Inman Square", "1357 Cambridge St, Cambridge", "The Druid")),
 ]
 
 # Coordinate bounding box for valid Greater Boston / Eastern MA events
