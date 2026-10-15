@@ -1350,6 +1350,7 @@ def scrape_manray(url, ua):
     for detail in soup.select(".simcal-event-details"):
         name_el = detail.find(class_="simcal-event-title")
         date_el = detail.find(class_="simcal-event-start-date")
+        desc_el = detail.find(class_="simcal-event-description")
         link_el = detail.find("a", href=lambda h: h and "google.com/calendar/event" in h)
         if not name_el or not date_el:
             continue
@@ -1365,13 +1366,17 @@ def scrape_manray(url, ua):
         if key in seen:
             continue
         seen.add(key)
+        desc = desc_el.get_text(" ", strip=True) if desc_el else ""
+        cover_match = re.search(r"Cover\s*(\$[\d\.]+)", desc, re.IGNORECASE)
+        price = cover_match.group(1) if cover_match else None
         events.append({
             "name": name,
             "date": dt.isoformat(),
             "url": link_el["href"] if link_el else url,
             "venue": "ManRay",
-            "price": None,
+            "price": price,
             "category": "clubbing",
+            "description": desc[:200],
         })
     return events
 
@@ -2940,7 +2945,7 @@ _ALL_VENUES = [
     {"name": "Boston Symphony Orchestra", "url": "https://www.bso.org/events", "ua": UA_CHROME, "scraper": scrape_bso, "default_category": "music"},
     {"name": "Venture Café Cambridge", "url": "https://venturecafecambridge.org/events/", "ua": UA_CHROME, "scraper": scrape_venture_cafe, "default_category": "community"},
     {"name": "The Anchor Boston", "url": "https://calendar.google.com/calendar/ical/theanchorbostonma%40gmail.com/public/basic.ics", "ua": UA_CHROME, "scraper": scrape_ical, "default_category": "community"},
-    {"name": "ManRay Cambridge", "url": "https://manrayclub.com/event-calendar/", "ua": UA_CHROME, "scraper": scrape_manray, "default_category": "clubbing"},
+    {"name": "ManRay Cambridge", "url": "https://manrayclub.com/monthly-calendar/", "ua": UA_CHROME, "scraper": scrape_manray, "default_category": "clubbing"},
     {"name": "Esplanade Association", "url": "https://esplanade.org/events/", "ua": UA_CHROME, "scraper": scrape_esplanade, "default_category": "outdoors"},
     {"name": "Eventbrite Cambridge", "url": "https://www.eventbrite.com/d/ma--cambridge/events/", "ua": UA_CHROME, "scraper": scrape_eventbrite_search, "default_category": None},
     {"name": "Eventbrite Somerville", "url": "https://www.eventbrite.com/d/ma--somerville/events/", "ua": UA_CHROME, "scraper": scrape_eventbrite_search, "default_category": None},
