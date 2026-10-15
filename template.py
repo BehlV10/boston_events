@@ -1480,6 +1480,37 @@ def render_page(results):
     background: #0c0e14;
     z-index: 1;
   }}
+  .leaflet-container.osm-dark-tiles,
+  .leaflet-container.osm-dark-tiles .leaflet-tile-container {{
+    background: #0c0e14 !important;
+  }}
+  .leaflet-container.osm-dark-tiles .leaflet-tile-pane {{
+    filter: invert(100%) hue-rotate(180deg) brightness(88%) contrast(95%);
+  }}
+  .leaflet-control-attribution {{
+    background: rgba(12, 14, 20, 0.85) !important;
+    color: var(--muted) !important;
+    border-radius: var(--radius-sm);
+    font-size: 10px !important;
+    padding: 2px 6px !important;
+  }}
+  .leaflet-control-attribution a {{
+    color: var(--accent) !important;
+    text-decoration: none !important;
+  }}
+  .leaflet-control-attribution a:hover {{
+    text-decoration: underline !important;
+  }}
+  .leaflet-bar a {{
+    background-color: #141824 !important;
+    color: #eef1f8 !important;
+    border: 1px solid var(--border) !important;
+    border-bottom: 1px solid var(--border) !important;
+  }}
+  .leaflet-bar a:hover {{
+    background-color: #1e2436 !important;
+    color: var(--accent) !important;
+  }}
 
   /* Venue Map Pin in Leaflet */
   .custom-venue-icon {{
@@ -2126,11 +2157,34 @@ def render_page(results):
         maxZoom: 18,
       }});
 
-      L.tileLayer('https://{{s}}.basemaps.cartocdn.com/dark_all/{{z}}/{{x}}/{{y}}{{r}}.png', {{
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> &copy; <a href="https://carto.com/" target="_blank" rel="noopener">CARTO</a>',
-        subdomains: 'abcd',
-        maxZoom: 19
-      }}).addTo(leafletMap);
+      const hashParams = new URLSearchParams(location.search || location.hash.slice(1));
+      const cartoKey = hashParams.get('carto_key') || window.CARTO_KEY;
+
+      if (cartoKey) {{
+        L.tileLayer('https://{{s}}.basemaps.cartocdn.com/dark_all/{{z}}/{{x}}/{{y}}{{r}}.png?key=' + encodeURIComponent(cartoKey), {{
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> &copy; <a href="https://carto.com/" target="_blank" rel="noopener">CARTO</a>',
+          subdomains: 'abcd',
+          maxZoom: 19
+        }}).addTo(leafletMap);
+      }} else {{
+        mapEl.classList.add('osm-dark-tiles');
+        const osmUrl = (location.protocol === 'file:')
+          ? 'https://tile.openstreetmap.de/{{z}}/{{x}}/{{y}}.png'
+          : 'https://tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png';
+
+        const tiles = L.tileLayer(osmUrl, {{
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
+          maxZoom: 19
+        }});
+
+        tiles.on('tileerror', function(error) {{
+          if (error.tile && error.tile.src && error.tile.src.includes('openstreetmap.org')) {{
+            error.tile.src = error.tile.src.replace('tile.openstreetmap.org', 'tile.openstreetmap.de');
+          }}
+        }});
+
+        tiles.addTo(leafletMap);
+      }}
 
       markersLayer = L.layerGroup().addTo(leafletMap);
       updateMapMarkers();
