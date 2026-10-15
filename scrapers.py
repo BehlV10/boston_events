@@ -2187,7 +2187,18 @@ def scrape_porter_square_books(url, ua):
     """Porter Square Books embeds its full FullCalendar event list in the
     Drupal `drupalSettings` JSON blob on the calendar page. The rendered
     HTML only shows a handful of cards, but the JSON has the whole month."""
-    html = _SESSION.get(url, headers={"User-Agent": ua}, timeout=15).text
+    try:
+        resp = _SESSION.get(url, headers={"User-Agent": ua}, timeout=15)
+        if resp.status_code == 200:
+            html = resp.text
+        else:
+            raise ValueError(f"HTTP {resp.status_code}")
+    except Exception:
+        import subprocess
+        try:
+            html = subprocess.check_output(["curl", "-s", "-L", url], timeout=15).decode("utf-8", errors="ignore")
+        except Exception:
+            return []
     m = re.search(
         r'data-drupal-selector="drupal-settings-json"[^>]*>(.*?)</script>',
         html, re.S,
@@ -3759,18 +3770,18 @@ STATIC_LINKS = [
     ("theater", "American Repertory Theater", "https://americanrepertorytheater.org/shows-events/"),
     ("theater", "Huntington Theatre", "https://www.huntingtontheatre.org/season/"),
     ("art",     "Harvard Art Museums calendar", "https://harvardartmuseums.org/calendar"),
-    ("comedy",  "Improv Asylum (North End)", "https://www.improvasylum.com/shows"),
+    ("comedy",  "Improv Asylum (North End)", "https://calendar.improvasylum.com/"),
     ("theater", "SpeakEasy Stage Company", "https://www.speakeasystage.com/season"),
-    ("theater", "Lyric Stage Company", "https://www.lyricstage.com/productions/"),
-    ("theater", "Company One Theatre", "https://companyone.org/onstage/"),
+    ("theater", "Lyric Stage Company", "https://www.lyricstage.com/whats-on/"),
+    ("theater", "Company One Theatre", "https://companyone.org/season/"),
     ("theater", "Commonwealth Shakespeare", "https://commshakes.org/season/"),
     ("music",   "Trillium Brewing (events)", "https://trilliumbrewing.com/pages/event-calendar"),
     ("food",    "Sam Adams Boston Brewery (events)", "https://www.samadamsbrewery.com/events"),
     ("music",   "Long Live Beerworks / Roxbury", "https://www.longlivebeerworks.com"),
     ("food",    "Castle Island Brewing (events)", "https://www.castleislandbeer.com/public-events"),
-    ("music",   "Boston Lyric Opera", "https://www.blo.org/performances/"),
+    ("music",   "Boston Lyric Opera", "https://blo.org/events/"),
     ("music",   "Handel and Haydn Society", "https://handelandhaydn.org/concerts/"),
-    ("music",   "Celebrity Series of Boston", "https://www.celebrityseries.org/calendar/"),
+    ("music",   "Celebrity Series of Boston", "https://www.celebrityseries.org/live-performances/"),
     ("music",   "Berklee Performance Center", "https://www.berklee.edu/BPC"),
     ("clubbing","Middlesex Lounge (Cambridge)", "https://www.msexcambridge.com/calendar"),
     ("gaming",  "Balance Patch", "https://www.balancepatch.com/events"),
@@ -3783,8 +3794,8 @@ STATIC_LINKS = [
 # Cheap-ticket / lottery / deal aggregators. Rendered in their own sidebar block.
 DEAL_LINKS = [
     ("LuckySeat (Boston lotteries)", "https://www.luckyseat.com/"),
-    ("BosTix — same-day half-price (ArtsBoston)", "https://artsboston.org/bostix/"),
-    ("TodayTix Boston (lotteries + discounts)", "https://www.todaytix.com/boston-ma"),
+    ("BosTix — same-day half-price (ArtsBoston)", "https://bostix.org/categories/bostix-deals/"),
+    ("TodayTix Boston (lotteries + discounts)", "https://www.todaytix.com/boston"),
     ("Goldstar Boston discounts", "https://www.goldstar.com/cities/boston-ma"),
 ]
 
