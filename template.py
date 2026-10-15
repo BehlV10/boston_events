@@ -709,7 +709,8 @@ def render_page(results):
         desc = raw_desc[:180]
         desc_html = f'<div class="desc">{escape(desc)}</div>' if desc else ""
         free_flag = "true" if is_free else "false"
-        return f'''<li class="event" data-cat="{escape(cat)}" data-bucket="{escape(bucket)}" data-venue="{escape(source)}" data-city="{escape(city)}" data-recur="{recur_flag}" data-free="{free_flag}"{geo_attrs}>
+        epoch_attr = f' data-epoch="{int(e["_time"].timestamp())}"' if e.get("_time") else ''
+        return f'''<li class="event" data-cat="{escape(cat)}" data-bucket="{escape(bucket)}" data-venue="{escape(source)}" data-city="{escape(city)}" data-recur="{recur_flag}" data-free="{free_flag}"{epoch_attr}{geo_attrs}>
           <div class="when">{escape(format_when(e))}</div>
           <div class="what">{link}{price_tag}{recur_badge}
             <div class="venue-tag">{cat_tag} · {venue_html}{extra_html}{cal_html}</div>
@@ -759,9 +760,21 @@ def render_page(results):
           </div>''')
         is_today = (date_attr == today_iso)
         day_class = "day" if is_today else "day out-of-week"
+        past_banner_html = '''
+          <div class="past-events-banner" id="past-events-banner" style="display: none;">
+            <div class="past-banner-info">
+              <span class="past-banner-badge" id="past-banner-badge">⏱️ Live Tonight</span>
+              <span class="past-banner-text" id="past-banner-text"></span>
+            </div>
+            <div class="past-banner-actions">
+              <button type="button" class="past-banner-btn" id="btn-toggle-past">Show earlier today</button>
+              <button type="button" class="past-banner-btn btn-tomorrow" id="btn-banner-tomorrow" style="display: none;">See Tomorrow →</button>
+            </div>
+          </div>''' if is_today else ""
         return f'''
         <section class="{day_class}" data-date="{date_attr}">
           <h2>{heading_html}<span class="count">{len(events)}</span></h2>
+          {past_banner_html}
           <div class="cities">{"".join(city_blocks)}</div>
         </section>'''
 
@@ -1365,6 +1378,92 @@ def render_page(results):
     margin: 0 0 14px;
     font-size: 14px;
     color: var(--fg);
+  }}
+
+  /* Past Events Filter Banner */
+  .past-events-banner {{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 8px 12px;
+    margin: 8px 0 16px;
+    font-size: 12px;
+  }}
+  .past-banner-info {{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--fg);
+    flex-wrap: wrap;
+  }}
+  .past-banner-badge {{
+    background: rgba(93, 155, 255, 0.15);
+    border: 1px solid rgba(93, 155, 255, 0.3);
+    color: var(--accent);
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }}
+  .past-banner-badge.badge-all {{
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: var(--fg);
+  }}
+  .past-banner-badge.badge-done {{
+    background: rgba(242, 158, 76, 0.15);
+    border-color: rgba(242, 158, 76, 0.35);
+    color: #f29e4c;
+  }}
+  .past-banner-actions {{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }}
+  .past-banner-btn {{
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border);
+    color: var(--fg);
+    border-radius: var(--radius-sm);
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s ease;
+  }}
+  .past-banner-btn:hover {{
+    background: rgba(255, 255, 255, 0.12);
+    border-color: var(--accent);
+    color: #fff;
+  }}
+  .past-banner-btn.btn-tomorrow {{
+    background: var(--accent);
+    color: #0c0e14;
+    border-color: var(--accent);
+    font-weight: 700;
+  }}
+  .past-banner-btn.btn-tomorrow:hover {{
+    box-shadow: 0 2px 8px var(--accent-glow);
+  }}
+  .event.past-time {{
+    opacity: 0.55;
+    transition: opacity 0.15s ease;
+  }}
+  .event.past-time:hover {{
+    opacity: 0.95;
+  }}
+  .event.past-time .when::after {{
+    content: " (earlier)";
+    font-size: 10px;
+    opacity: 0.7;
+    font-weight: 400;
   }}
 
   /* View Switcher */
@@ -2046,6 +2145,7 @@ def render_page(results):
     const quickFreeChip = document.getElementById('quick-free-chip');
     let timeFilter = 'today';
     let currentView = 'list';
+    let showPastToday = false;
     let leafletMap = null;
     let markersLayer = null;
     let mapLoading = false;
@@ -2384,6 +2484,7 @@ def render_page(results):
         params.set('d', fmtISO(anchor));
       }}
       if (currentView !== 'list') params.set('v', currentView);
+      if (showPastToday) params.set('past', '1');
 
       const hash = params.toString();
       history.replaceState(null, '', hash ? '#' + hash : location.pathname + location.search);
@@ -2396,6 +2497,7 @@ def render_page(results):
 
       if (params.has('q')) searchInput.value = params.get('q');
       if (params.get('free') === '1' && freeOnlyChk) freeOnlyChk.checked = true;
+      if (params.get('past') === '1') showPastToday = true;
       if (params.get('v') === 'map') {{
         switchView('map');
       }}
@@ -2448,6 +2550,19 @@ def render_page(results):
       const freeOnly = freeOnlyChk ? freeOnlyChk.checked : false;
       const week = new Set(weekDates());
 
+      const nowEpoch = Math.floor(Date.now() / 1000);
+      const twoHoursAgoEpoch = nowEpoch - 7200;
+      const cutoffDate = new Date(Date.now() - 7200 * 1000);
+      const cutoffTimeStr = cutoffDate.toLocaleTimeString('en-US', {{
+        timeZone: 'America/New_York',
+        hour: 'numeric',
+        minute: '2-digit'
+      }});
+
+      let hiddenPastCount = 0;
+      let totalTodayEventsCount = 0;
+      let visibleTonightCount = 0;
+
       document.querySelectorAll('.event').forEach(li => {{
         const catOk = cats.has(li.dataset.bucket);
         const venueOk = venues.has(li.dataset.venue);
@@ -2455,17 +2570,80 @@ def render_page(results):
         const cityOk = cities.has(li.dataset.city);
         const freeOk = !freeOnly || li.dataset.free === 'true';
         const searchOk = !searchText || li.textContent.toLowerCase().includes(searchText);
-        li.classList.toggle('hidden', !(catOk && venueOk && recurOk && cityOk && searchOk && freeOk));
+
+        const daySec = li.closest('.day');
+        const isToday = daySec && daySec.dataset.date === todayISO;
+        const epoch = li.dataset.epoch ? parseInt(li.dataset.epoch, 10) : 0;
+        const isPast = isToday && epoch > 0 && epoch < twoHoursAgoEpoch;
+
+        if (isToday && epoch > 0) {{
+          totalTodayEventsCount++;
+        }}
+
+        li.classList.toggle('past-time', isPast);
+
+        let timePastOk = true;
+        if (isPast) {{
+          if (!showPastToday) {{
+            timePastOk = false;
+            hiddenPastCount++;
+          }}
+        }}
+
+        const isVisible = catOk && venueOk && recurOk && cityOk && searchOk && freeOk && timePastOk;
+        li.classList.toggle('hidden', !isVisible);
+
+        if (isToday && isVisible && !isPast) {{
+          visibleTonightCount++;
+        }}
       }});
 
       document.querySelectorAll('.bucket').forEach(b => {{
         const visible = b.querySelectorAll('.event:not(.hidden)').length;
         b.classList.toggle('empty', visible === 0);
+        const countSpan = b.querySelector('.bucket-head .count');
+        if (countSpan) countSpan.textContent = visible;
       }});
       document.querySelectorAll('.city-section').forEach(sec => {{
         const visible = sec.querySelectorAll('.event:not(.hidden)').length;
         sec.classList.toggle('empty', visible === 0);
+        const countSpan = sec.querySelector('.city-head .count');
+        if (countSpan) countSpan.textContent = visible;
       }});
+
+      // Update past events notice banner
+      const pastBanner = document.getElementById('past-events-banner');
+      if (pastBanner) {{
+        const showBanner = (timeFilter === 'today' || (timeFilter === 'all' && showAll)) && (hiddenPastCount > 0 || showPastToday);
+        if (showBanner && (hiddenPastCount > 0 || (showPastToday && totalTodayEventsCount > 0))) {{
+          pastBanner.style.display = 'flex';
+          const badge = document.getElementById('past-banner-badge');
+          const text = document.getElementById('past-banner-text');
+          const toggleBtn = document.getElementById('btn-toggle-past');
+          const tomorrowBtn = document.getElementById('btn-banner-tomorrow');
+
+          if (!showPastToday) {{
+            if (visibleTonightCount === 0 && hiddenPastCount > 0) {{
+              if (badge) {{ badge.textContent = 'Tonight Wrapped Up'; badge.className = 'past-banner-badge badge-done'; }}
+              if (text) {{ text.innerHTML = `All scheduled events for today have started (<strong>${{hiddenPastCount}}</strong> earlier event${{hiddenPastCount === 1 ? '' : 's'}} hidden)`; }}
+              if (toggleBtn) {{ toggleBtn.textContent = 'Show earlier today'; }}
+              if (tomorrowBtn) {{ tomorrowBtn.style.display = 'inline-block'; }}
+            }} else {{
+              if (badge) {{ badge.textContent = '⏱️ Live Tonight'; badge.className = 'past-banner-badge'; }}
+              if (text) {{ text.innerHTML = `Showing events from <strong>${{cutoffTimeStr}}</strong> onward (<strong>${{hiddenPastCount}}</strong> earlier event${{hiddenPastCount === 1 ? '' : 's'}} hidden)`; }}
+              if (toggleBtn) {{ toggleBtn.textContent = 'Show earlier today'; }}
+              if (tomorrowBtn) {{ tomorrowBtn.style.display = 'none'; }}
+            }}
+          }} else {{
+            if (badge) {{ badge.textContent = 'All Day'; badge.className = 'past-banner-badge badge-all'; }}
+            if (text) {{ text.innerHTML = `Showing all events for today (including earlier events before ${{cutoffTimeStr}})`; }}
+            if (toggleBtn) {{ toggleBtn.textContent = 'Hide earlier events'; }}
+            if (tomorrowBtn) {{ tomorrowBtn.style.display = 'none'; }}
+          }}
+        }} else {{
+          pastBanner.style.display = 'none';
+        }}
+      }}
 
       const todayDate = parseISO(todayISO);
       const dayOfWeek = todayDate.getDay();
@@ -2496,6 +2674,8 @@ def render_page(results):
         day.classList.toggle('out-of-week', !inTime);
         const visible = day.querySelectorAll('.event:not(.hidden)').length;
         day.classList.toggle('empty', visible === 0);
+        const headingCount = day.querySelector('h2 .count');
+        if (headingCount) headingCount.textContent = visible;
       }});
 
       const ongoingEl = document.querySelector('.ongoing');
@@ -2843,6 +3023,24 @@ def render_page(results):
             if (mapWrap) mapWrap.scrollIntoView({{ behavior: 'smooth', block: 'start' }});
           }}
         }});
+      }}
+    }});
+
+    document.addEventListener('click', (e) => {{
+      if (e.target && e.target.id === 'btn-toggle-past') {{
+        showPastToday = !showPastToday;
+        apply();
+      }} else if (e.target && e.target.id === 'btn-banner-tomorrow') {{
+        const tomorrowChip = document.querySelector('#quick-chips .chip[data-time="tomorrow"]');
+        if (tomorrowChip) {{
+          tomorrowChip.click();
+        }}
+      }}
+    }});
+
+    window.addEventListener('focus', () => {{
+      if (timeFilter === 'today' && !showPastToday) {{
+        apply();
       }}
     }});
 
