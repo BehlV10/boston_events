@@ -1510,14 +1510,6 @@ def render_page(results):
     font-weight: 700;
     box-shadow: 0 2px 8px var(--accent-glow);
   }}
-  .map-tag-live {{
-    font-size: 9px;
-    text-transform: uppercase;
-    background: rgba(0, 0, 0, 0.25);
-    padding: 1px 5px;
-    border-radius: 4px;
-    letter-spacing: 0.04em;
-  }}
   .map-venue-stat {{
     font-size: 12px;
     color: var(--muted);
@@ -2047,7 +2039,7 @@ def render_page(results):
             <span>📋</span> List View
           </button>
           <button type="button" class="view-btn" id="btn-view-map" data-view="map">
-            <span>🗺️</span> Map View <span class="map-tag-live">OSM</span>
+            <span>🗺️</span> Map View
           </button>
         </div>
         <div class="view-switch-right">
