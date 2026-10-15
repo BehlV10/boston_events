@@ -599,6 +599,8 @@ def group_by_date(results):
 
 
 def render_page(results):
+    today = datetime.now(EASTERN).date()
+    today_iso = today.isoformat()
     dated, tba, ongoing = group_by_date(results)
     recurring_keys = compute_recurring(dated)
     total = sum(len(v) for _, v in dated) + len(tba)
@@ -747,8 +749,10 @@ def render_page(results):
             <h3 class="city-head"><span>{escape(CITY_LABELS[cname])}</span><span class="count">{len(city_events)}</span></h3>
             <div class="buckets">{_render_buckets(city_events)}</div>
           </div>''')
+        is_today = (date_attr == today_iso)
+        day_class = "day" if is_today else "day out-of-week"
         return f'''
-        <section class="day" data-date="{date_attr}">
+        <section class="{day_class}" data-date="{date_attr}">
           <h2>{heading_html}<span class="count">{len(events)}</span></h2>
           <div class="cities">{"".join(city_blocks)}</div>
         </section>'''
@@ -832,7 +836,7 @@ def render_page(results):
     if ongoing:
         items = "\n".join(render_event(e) for e in ongoing)
         ongoing_section = f'''
-      <section class="ongoing">
+      <section class="ongoing" style="display: none;">
         <h2>Ongoing &amp; evergreen<span class="count">{len(ongoing)}</span></h2>
         <p class="hint">Listings dated before today (long-running or pinned by the source).</p>
         <ul>{items}</ul>
@@ -1340,6 +1344,20 @@ def render_page(results):
   .mini-cal-grid .d:not(.blank):hover {{ border-color: var(--accent); }}
   .event.hidden {{ display: none; }}
   .day.empty, .day.out-of-week {{ display: none; }}
+  .no-events-msg {{
+    background: var(--card);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-md);
+    padding: 36px 20px;
+    text-align: center;
+    color: var(--muted);
+    margin: 8px 0 16px;
+  }}
+  .no-events-msg p {{
+    margin: 0 0 14px;
+    font-size: 14px;
+    color: var(--fg);
+  }}
   .ongoing {{ margin-top: 4px; }}
   .ongoing h2 {{ margin: 0 0 4px; font-size: 15px; font-weight: 600; display:flex; align-items:center; gap:8px; color: var(--fg); }}
   .ongoing .hint {{ margin: 0 0 10px; color: var(--muted); font-size: 12px; }}
@@ -1561,17 +1579,17 @@ def render_page(results):
         <button type="button" class="loc-chip" data-city="other"><span class="city-dot" style="background:#9aa3b2"></span>Greater Boston</button>
       </div>
       <div class="quick-chips-bar" id="quick-chips">
-        <button type="button" class="chip active" data-time="all">All Upcoming</button>
-        <button type="button" class="chip" data-time="today">⚡ Today</button>
+        <button type="button" class="chip active" data-time="today">⚡ Today</button>
         <button type="button" class="chip" data-time="tomorrow">Tomorrow</button>
         <button type="button" class="chip" data-time="weekend">🎉 This Weekend</button>
         <button type="button" class="chip" data-time="week">📅 Next 7 Days</button>
+        <button type="button" class="chip" data-time="all">All Upcoming</button>
         <button type="button" class="chip chip-free" id="quick-free-chip">✨ Free Only</button>
       </div>
       <div class="week-nav" id="week-nav">
-        <button type="button" id="week-prev" aria-label="Previous week">← prev</button>
-        <span id="week-label">Loading…</span>
-        <button type="button" id="week-next" aria-label="Next week">next →</button>
+        <button type="button" id="week-prev" aria-label="Previous">← prev</button>
+        <span id="week-label">Today, {today.strftime("%b %d")}</span>
+        <button type="button" id="week-next" aria-label="Next">next →</button>
         <button type="button" id="week-today">today</button>
         <button type="button" id="week-all" data-mode="week">show all</button>
         <button type="button" id="cal-toggle" aria-expanded="false">📅 pick date</button>
@@ -1583,6 +1601,13 @@ def render_page(results):
           <button type="button" id="cal-next-month" aria-label="Next month">›</button>
         </div>
         <div class="mini-cal-grid" id="mini-cal-grid"></div>
+      </div>
+      <div id="no-events-msg" class="no-events-msg" style="display: none;">
+        <p>No events found for this selection.</p>
+        <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap;">
+          <button type="button" class="chip" id="no-events-week-btn">📅 View Next 7 Days</button>
+          <button type="button" class="chip" id="no-events-all-btn">All Upcoming</button>
+        </div>
       </div>
       {"".join(sections)}
       <div class="week-nav bottom">
@@ -1610,7 +1635,7 @@ def render_page(results):
     const locChips = document.querySelectorAll('#location-chips .loc-chip');
     const quickChips = document.querySelectorAll('#quick-chips .chip[data-time]');
     const quickFreeChip = document.getElementById('quick-free-chip');
-    let timeFilter = 'all';
+    let timeFilter = 'today';
 
     const mobileToggle = document.getElementById('mobile-filter-toggle');
     const mobileClose = document.getElementById('mobile-filter-close');
@@ -1628,12 +1653,13 @@ def render_page(results):
     }}
     function addDays(d, n) {{ const c = new Date(d); c.setDate(c.getDate() + n); return c; }}
     const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const DAYS_FULL = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
     function fmtShort(d) {{ return MONTHS[d.getMonth()] + ' ' + d.getDate(); }}
     function fmtMonth(d) {{ return d.toLocaleString('en-US', {{ month: 'long', year: 'numeric' }}); }}
 
-    const todayISO = fmtISO(new Date());
+    const todayISO = "{today_iso}";
     let anchor = parseISO(todayISO);
-    let showAll = true;
+    let showAll = false;
     let calMonth = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
 
     function weekDates() {{
@@ -1643,15 +1669,34 @@ def render_page(results):
     }}
     function updateWeekLabel() {{
       const end = addDays(anchor, 6);
-      const label = (timeFilter === 'all' || showAll)
-        ? 'Showing all upcoming'
-        : `${{fmtShort(anchor)}} – ${{fmtShort(end)}}, ${{end.getFullYear()}}`;
+      let label = '';
+      if (timeFilter === 'all' || showAll) {{
+        label = 'Showing all upcoming';
+      }} else if (timeFilter === 'today') {{
+        label = `Today, ${{fmtShort(anchor)}}`;
+      }} else if (timeFilter === 'tomorrow') {{
+        label = `Tomorrow, ${{fmtShort(anchor)}}`;
+      }} else if (timeFilter === 'weekend') {{
+        const todayDate = parseISO(todayISO);
+        const dayOfWeek = todayDate.getDay();
+        let daysToSat = (6 - dayOfWeek + 7) % 7;
+        if (dayOfWeek === 0) daysToSat = -1;
+        const sat = addDays(todayDate, daysToSat);
+        const sun = addDays(sat, 1);
+        label = `Weekend: ${{fmtShort(sat)}} – ${{fmtShort(sun)}}`;
+      }} else if (timeFilter === 'day') {{
+        label = `${{DAYS_FULL[anchor.getDay()]}}, ${{fmtShort(anchor)}}, ${{anchor.getFullYear()}}`;
+      }} else {{
+        label = `${{fmtShort(anchor)}} – ${{fmtShort(end)}}, ${{end.getFullYear()}}`;
+      }}
       document.getElementById('week-label').textContent = label;
       const b = document.getElementById('week-label-b');
       if (b) b.textContent = label;
       const btn = document.getElementById('week-all');
-      btn.textContent = (timeFilter === 'all' || showAll) ? 'week view' : 'show all';
-      btn.setAttribute('aria-pressed', (timeFilter === 'all' || showAll) ? 'true' : 'false');
+      if (btn) {{
+        btn.textContent = (timeFilter === 'all' || showAll) ? 'today view' : 'show all';
+        btn.setAttribute('aria-pressed', (timeFilter === 'all' || showAll) ? 'true' : 'false');
+      }}
     }}
 
     function updateQuickChipsUI() {{
@@ -1718,8 +1763,10 @@ def render_page(results):
 
       if (freeOnlyChk && freeOnlyChk.checked) params.set('free', '1');
 
-      if (timeFilter !== 'all') params.set('t', timeFilter);
-      if (!showAll && fmtISO(anchor) !== todayISO) params.set('d', fmtISO(anchor));
+      if (timeFilter !== 'today') params.set('t', timeFilter);
+      if ((timeFilter === 'day' || timeFilter === 'week') && fmtISO(anchor) !== todayISO) {{
+        params.set('d', fmtISO(anchor));
+      }}
 
       const hash = params.toString();
       history.replaceState(null, '', hash ? '#' + hash : location.pathname + location.search);
@@ -1750,8 +1797,25 @@ def render_page(results):
 
       if (params.has('d')) {{
         const d = params.get('d');
-        if (d === 'all') {{ showAll = true; timeFilter = 'all'; }}
-        else {{ anchor = parseISO(d); calMonth = new Date(anchor.getFullYear(), anchor.getMonth(), 1); }}
+        if (d === 'all') {{
+          showAll = true;
+          timeFilter = 'all';
+        }} else {{
+          anchor = parseISO(d);
+          calMonth = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
+          if (!params.has('t')) {{
+            if (d === todayISO) {{
+              timeFilter = 'today';
+              showAll = false;
+            }} else if (d === fmtISO(addDays(parseISO(todayISO), 1))) {{
+              timeFilter = 'tomorrow';
+              showAll = false;
+            }} else {{
+              timeFilter = 'day';
+              showAll = false;
+            }}
+          }}
+        }}
       }}
     }}
 
@@ -1790,6 +1854,7 @@ def render_page(results):
       const satISO = fmtISO(addDays(todayDate, daysToSat));
       const sunISO = fmtISO(addDays(todayDate, daysToSat + 1));
       const tomorrowISO = fmtISO(addDays(todayDate, 1));
+      const anchorISO = fmtISO(anchor);
 
       daySections.forEach(day => {{
         const date = day.dataset.date;
@@ -1800,8 +1865,10 @@ def render_page(results):
           inTime = (date === tomorrowISO);
         }} else if (timeFilter === 'weekend') {{
           inTime = (date === satISO || date === sunISO);
+        }} else if (timeFilter === 'day') {{
+          inTime = (date === anchorISO);
         }} else if (timeFilter === 'week') {{
-          inTime = (date === 'tba' || week.has(date));
+          inTime = week.has(date);
         }} else {{
           // 'all'
           inTime = showAll || date === 'tba' || week.has(date);
@@ -1810,6 +1877,17 @@ def render_page(results):
         const visible = day.querySelectorAll('.event:not(.hidden)').length;
         day.classList.toggle('empty', visible === 0);
       }});
+
+      const ongoingEl = document.querySelector('.ongoing');
+      if (ongoingEl) {{
+        ongoingEl.style.display = (timeFilter === 'all' || showAll) ? '' : 'none';
+      }}
+
+      const visibleDays = daySections.filter(d => !d.classList.contains('out-of-week') && !d.classList.contains('empty')).length;
+      const noEventsEl = document.getElementById('no-events-msg');
+      if (noEventsEl) {{
+        noEventsEl.style.display = (visibleDays === 0) ? 'block' : 'none';
+      }}
 
       renderCal();
       updateWeekLabel();
@@ -1836,24 +1914,50 @@ def render_page(results):
         const classes = ['d'];
         if (eventDates.has(iso)) classes.push('has-events');
         if (iso === todayISO) classes.push('today');
-        if (!showAll && week.has(iso)) classes.push('in-week');
+        if (!showAll && timeFilter === 'week' && week.has(iso)) classes.push('in-week');
         if (iso === fmtISO(anchor)) classes.push('anchor');
         html += `<div class="${{classes.join(' ')}}" data-date="${{iso}}">${{d}}</div>`;
       }}
       grid.innerHTML = html;
     }}
 
-    function shiftWeek(delta) {{
-      timeFilter = 'week';
+    function shiftNav(delta) {{
+      if (timeFilter === 'week') {{
+        anchor = addDays(anchor, delta * 7);
+      }} else if (timeFilter === 'today' || timeFilter === 'tomorrow' || timeFilter === 'day') {{
+        anchor = addDays(anchor, delta);
+        const iso = fmtISO(anchor);
+        if (iso === todayISO) {{
+          timeFilter = 'today';
+        }} else if (iso === fmtISO(addDays(parseISO(todayISO), 1))) {{
+          timeFilter = 'tomorrow';
+        }} else {{
+          timeFilter = 'day';
+        }}
+      }} else if (timeFilter === 'weekend') {{
+        anchor = addDays(anchor, delta * 7);
+      }} else {{
+        // 'all'
+        anchor = addDays(parseISO(todayISO), delta > 0 ? 1 : 0);
+        const iso = fmtISO(anchor);
+        timeFilter = (iso === todayISO) ? 'today' : (iso === fmtISO(addDays(parseISO(todayISO), 1)) ? 'tomorrow' : 'day');
+      }}
       showAll = false;
-      anchor = addDays(anchor, delta);
       calMonth = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
       apply();
     }}
+
     function setAnchor(iso) {{
-      timeFilter = 'week';
+      if (iso === todayISO) {{
+        timeFilter = 'today';
+      }} else if (iso === fmtISO(addDays(parseISO(todayISO), 1))) {{
+        timeFilter = 'tomorrow';
+      }} else {{
+        timeFilter = 'day';
+      }}
       showAll = false;
       anchor = parseISO(iso);
+      calMonth = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
       apply();
     }}
 
@@ -1930,22 +2034,51 @@ def render_page(results):
       }});
     }}
 
-    document.getElementById('week-prev').addEventListener('click', () => shiftWeek(-7));
-    document.getElementById('week-next').addEventListener('click', () => shiftWeek(7));
-    document.getElementById('week-prev-b').addEventListener('click', () => shiftWeek(-7));
-    document.getElementById('week-next-b').addEventListener('click', () => shiftWeek(7));
-    document.getElementById('week-today').addEventListener('click', () => {{ setAnchor(todayISO); calMonth = new Date(anchor.getFullYear(), anchor.getMonth(), 1); apply(); }});
+    document.getElementById('week-prev').addEventListener('click', () => shiftNav(-1));
+    document.getElementById('week-next').addEventListener('click', () => shiftNav(1));
+    const prevB = document.getElementById('week-prev-b');
+    if (prevB) prevB.addEventListener('click', () => shiftNav(-1));
+    const nextB = document.getElementById('week-next-b');
+    if (nextB) nextB.addEventListener('click', () => shiftNav(1));
+    document.getElementById('week-today').addEventListener('click', () => {{
+      timeFilter = 'today';
+      showAll = false;
+      anchor = parseISO(todayISO);
+      calMonth = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
+      apply();
+    }});
     document.getElementById('week-all').addEventListener('click', () => {{
       if (showAll || timeFilter === 'all') {{
         showAll = false;
-        timeFilter = 'week';
+        timeFilter = 'today';
         anchor = parseISO(todayISO);
       }} else {{
         showAll = true;
         timeFilter = 'all';
       }}
+      calMonth = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
       apply();
     }});
+
+    const noEventsWeek = document.getElementById('no-events-week-btn');
+    if (noEventsWeek) {{
+      noEventsWeek.addEventListener('click', () => {{
+        timeFilter = 'week';
+        showAll = false;
+        anchor = parseISO(todayISO);
+        calMonth = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
+        apply();
+      }});
+    }}
+    const noEventsAll = document.getElementById('no-events-all-btn');
+    if (noEventsAll) {{
+      noEventsAll.addEventListener('click', () => {{
+        timeFilter = 'all';
+        showAll = true;
+        calMonth = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
+        apply();
+      }});
+    }}
     document.getElementById('cal-toggle').addEventListener('click', (e) => {{
       const cal = document.getElementById('mini-cal');
       const open = cal.hasAttribute('hidden');
