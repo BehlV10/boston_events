@@ -109,6 +109,8 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
     "versus boston": (42.3536, -71.0608, "Downtown Crossing", "42 Province St, Boston", "Versus Boston"),
     "nick's comedy stop": (42.3512, -71.0664, "Theater District", "100 Warrenton St, Boston", "Nick's Comedy Stop"),
     "the tam": (42.3521, -71.0645, "Theater District", "222 Tremont St, Boston", "The Tam"),
+    "jacques cabaret": (42.3499, -71.0691, "Bay Village", "79 Broadway, Boston", "Jacques' Cabaret"),
+    "jacques' cabaret": (42.3499, -71.0691, "Bay Village", "79 Broadway, Boston", "Jacques' Cabaret"),
     "biddy early's": (42.3551, -71.0544, "Financial District", "141 Pearl St, Boston", "Biddy Early's"),
     "boston common": (42.3550, -71.0656, "Downtown", "139 Tremont St, Boston", "Boston Common"),
     "boston public garden": (42.3542, -71.0704, "Back Bay", "4 Charles St, Boston", "Boston Public Garden"),
@@ -322,6 +324,7 @@ VENUE_RULES = [
     ("kendall center", (42.3625, -71.0865, "Kendall Square", "90 Broadway, Cambridge", "Kendall Center")),
     ("urban park", (42.3625, -71.0865, "Kendall Square", "90 Broadway, Cambridge", "Urban Park Roof Garden")),
     ("somerville arts council", (42.3875, -71.0995, "Somerville", "Somerville, MA", "Somerville Arts Council")),
+    ("jacque", (42.3499, -71.0691, "Bay Village", "79 Broadway, Boston", "Jacques' Cabaret")),
 ]
 
 # Coordinate bounding box for valid Greater Boston / Eastern MA events

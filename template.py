@@ -60,6 +60,7 @@ CITY_RULES = [
         "long live", "sam adams", "trillium", "castle island",
         "copley", "sowa", "newbury", "beehive", "wally",
         "the anchor", "anchor boston", "charlestown navy",
+        "jacque", "jacques",
     )),
 ]
 

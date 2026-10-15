@@ -3669,6 +3669,20 @@ def scrape_somerville_arts_council(url, ua):
     return events
 
 
+def scrape_jacques(url, ua):
+    """Jacques' Cabaret in Bay Village — drag shows, cabaret, and live showcases via Eventbrite."""
+    evs = scrape_eventbrite_search(url, ua)
+    results = []
+    for e in evs:
+        v_low = (e.get("venue") or "").lower()
+        n_low = (e.get("name") or "").lower()
+        if "jacque" in v_low or "jacque" in n_low or "79 broadway" in v_low:
+            e["venue"] = "Jacques' Cabaret"
+            e["category"] = "theater"
+            results.append(e)
+    return results
+
+
 _ALL_VENUES = [
     {"name": "Ticketmaster", "url": "https://www.ticketmaster.com/", "ua": UA_CHROME, "scraper": scrape_ticketmaster, "default_category": "music"},
     {"name": "SeatGeek", "url": "https://seatgeek.com/cities/boston", "ua": UA_CHROME, "scraper": scrape_seatgeek, "default_category": "music"},
@@ -3752,6 +3766,7 @@ _ALL_VENUES = [
     {"name": "Bow Market", "url": "https://tickettailor.com/events/bowmarket", "ua": UA_CHROME, "scraper": scrape_bow_market, "default_category": "community"},
     {"name": "Arts at the Armory", "url": "https://artsatthearmory.org/upcoming-events/", "ua": UA_CHROME, "scraper": scrape_arts_at_the_armory, "default_category": "arts"},
     {"name": "Somerville Arts Council", "url": "https://somervilleartscouncil.org/events", "ua": UA_CHROME, "scraper": scrape_somerville_arts_council, "default_category": "arts"},
+    {"name": "Jacques' Cabaret", "url": "https://www.eventbrite.com/d/ma--boston/jacques-cabaret/", "ua": UA_CHROME, "scraper": scrape_jacques, "default_category": "theater"},
 ]
 
 # Drop venues that require env vars we don't have set — keeps the fail banner clean.
@@ -3788,6 +3803,7 @@ STATIC_LINKS = [
     ("gaming",  "MIT Strategic Games Society (Walker Memorial)", "https://calendar.mit.edu/group/mit_strategic_games_society"),
     ("music",   "Regattabar (jazz)", "https://www.regattabarjazz.com/"),
     ("music",   "Lilypad (Inman Square)", "https://www.lilypadinman.com/calendar"),
+    ("theater", "Jacques' Cabaret (historic drag & cabaret)", "http://jacquescabaret.com/v3/"),
 ]
 
 
