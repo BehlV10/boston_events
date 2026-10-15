@@ -3242,6 +3242,7 @@ STATIC_LINKS = [
     ("dance", "Loretta's Last Call (line dancing, swing)", "https://lorettaslastcall.com/events/"),
     ("dance", "Boston Swing Central", "https://www.bostonswingcentral.org/"),
     ("dance", "Sabina Mezcalería (Sunday live salsa & brunch)", "https://www.instagram.com/sabinamezcaleria/"),
+    ("dance", "Boston Outdoor Bachata & Salsa (BOBAS) — Esplanade pop-up announcements", "https://www.instagram.com/bobas.dance/"),
     ("dance", "Tango Society of Boston", "https://bostontango.org/"),
     ("theater", "American Repertory Theater", "https://americanrepertorytheater.org/shows-events/"),
     ("theater", "Huntington Theatre", "https://www.huntingtontheatre.org/season/"),
@@ -3364,9 +3365,6 @@ MANUAL_RECURRING_EVENTS = [
     ]),
     ("Everybody Dance Now", "https://www.everybodydancenow.org", "dance", [
         ("Outdoor Drop-in Dance Classes @ The Grove", "https://www.everybodydancenow.org", 2, 18, 0),
-    ]),
-    ("Boston Outdoor Bachata & Salsa (BOBAS)", "https://www.instagram.com/bobas.dance/", "dance", [
-        ("BOBAS: Outdoor Bachata & Salsa @ Hatch Shell (Esplanade)", "https://www.instagram.com/bobas.dance/", 3, 18, 0, "Free"),
     ]),
     ("Sabina Mezcalería", "https://sabinamezcaleria.com/", "dance", [
         ("Sunday Live Salsa & Social Dancing (3–6 PM)", "https://www.instagram.com/sabinamezcaleria/", 6, 15, 0, "Free admission"),
