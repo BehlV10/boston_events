@@ -1167,10 +1167,50 @@ def scrape_bso(url, ua):
 
 
 def scrape_venture_cafe(url, ua):
-    """Venture Café Cambridge — WordPress/Tribe Events Calendar with JSON-LD."""
-    soup = fetch_soup(url, ua)
+    """Venture Café Cambridge — community platform & Thursday Gatherings."""
+    fetch_url = "https://community.venturecafecambridge.org/" if "venturecafecambridge.org" in url else url
+    soup = fetch_soup(fetch_url, ua)
     events = []
+    seen = set()
     now = datetime.now(timezone.utc)
+
+    # 1. Parse community site event cards
+    for a in soup.find_all("a", href=re.compile(r"/events/[a-f0-9-]+")):
+        title_el = a.select_one("div.font-headers")
+        title = title_el.get_text(strip=True) if title_el else None
+        if not title:
+            continue
+        text = a.get_text()
+        m = re.search(r"([A-Za-z]{3}\s+\d{1,2},\s+\d{4},\s+\d{1,2}:\d{2}\s+[AP]M)", text)
+        if not m:
+            continue
+        try:
+            dt = datetime.strptime(m.group(1), "%b %d, %Y, %I:%M %p").replace(tzinfo=EASTERN)
+            if dt.astimezone(timezone.utc) < now:
+                continue
+            iso = dt.astimezone(timezone.utc).isoformat()
+        except Exception:
+            continue
+        href = a["href"]
+        if href.startswith("/"):
+            href = "https://community.venturecafecambridge.org" + href
+        key = (title.lower(), iso)
+        if key in seen:
+            continue
+        seen.add(key)
+        events.append({
+            "name": title,
+            "date": iso,
+            "url": href,
+            "venue": "Venture Café Cambridge",
+            "price": "Free",
+            "category": "community",
+        })
+
+    if events:
+        return events
+
+    # 2. Fallback to WordPress/Tribe JSON-LD
     for block in soup.find_all("script", type="application/ld+json"):
         try:
             d = json.loads(block.string or "")
@@ -1192,7 +1232,7 @@ def scrape_venture_cafe(url, ua):
                 "date": dt.isoformat(),
                 "url": ev.get("url") or url,
                 "venue": "Venture Café Cambridge",
-                "price": None,
+                "price": "Free",
                 "category": "community",
             })
     return events
@@ -1585,66 +1625,125 @@ def scrape_sinclair(url, ua):
     return events
 
 
+def scrape_bowery_boston(url, ua):
+    """Bowery Presents Boston (Roadrunner, The Sinclair, Royale, etc.) via public AEG events JSON feed."""
+    feed_url = "https://aegwebprod.blob.core.windows.net/json/resources/8/events/7301mbln09/events.json"
+    resp = _SESSION.get(feed_url, headers={"User-Agent": ua}, timeout=15)
+    resp.raise_for_status()
+    data = resp.json()
+    now = datetime.now(timezone.utc)
+    events = []
+    seen = set()
+    for e in data.get("events", []):
+        venue = e.get("venue", {})
+        state = (venue.get("state") or "").upper()
+        city = (venue.get("city") or "").lower()
+        if state not in ("MA", "MASS", "MASSACHUSETTS") and "boston" not in city and "cambridge" not in city and "somerville" not in city:
+            continue
+        iso = e.get("eventDateTimeISO")
+        if not iso:
+            continue
+        try:
+            dt = datetime.fromisoformat(iso.replace("Z", "+00:00"))
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=EASTERN)
+            if dt.astimezone(timezone.utc) < now:
+                continue
+            iso_str = dt.astimezone(timezone.utc).isoformat()
+        except Exception:
+            continue
+        title = (e.get("title", {}).get("headlinersText") or e.get("title", {}).get("eventTitleText") or "").strip()
+        if not title:
+            continue
+        ticketing = e.get("ticketing", {})
+        ticket_url = ticketing.get("ticketURL") or f"https://www.bowerypresents.com/events/detail/{e.get('eventId')}"
+        vname = venue.get("title") or "Bowery Presents"
+        key = (title.lower(), iso_str)
+        if key in seen:
+            continue
+        seen.add(key)
+        events.append({
+            "name": title,
+            "date": iso_str,
+            "url": ticket_url,
+            "venue": vname,
+            "price": ticketing.get("priceRange"),
+            "category": "music",
+        })
+    return events
+
+
 def scrape_night_shift(url, ua):
-    """Night Shift uses the Tribe Events calendar; each upcoming event renders
-    as `article.event-article` with a .article-date text line and .article-title
-    link to the event detail page."""
+    """Night Shift Brewing events in Everett Taproom."""
     soup = fetch_soup(url, ua)
     events = []
-    current_year = datetime.now(EASTERN).year
-    for art in soup.select("article.event-article"):
-        title_a = art.select_one(".article-title a")
+    now = datetime.now(EASTERN)
+    weekdays = {'monday': 0, 'tuesday': 1, 'wednesday': 2, 'thursday': 3, 'friday': 4, 'saturday': 5, 'sunday': 6}
+
+    cards = soup.select("article.card-new.type-event, article.event-article")
+    for art in cards:
+        title_a = art.select_one(".font-event-title a, .article-title a, h3 a, a.heading-link")
         if not title_a:
             continue
         name = re.sub(r"\s+", " ", title_a.get_text(" ", strip=True))
         href = title_a.get("href") or url
-        date_el = art.select_one(".article-date")
+        date_el = art.select_one(".font-event-date-time, .font-event-date, .article-date")
         if not date_el:
             continue
         date_text = re.sub(r"\s+", " ", date_el.get_text(" ", strip=True))
+
+        tm = re.search(r"(\d{1,2})(?::(\d{2}))?\s*(am|pm)", date_text, re.IGNORECASE)
+        hour, minute = 19, 0
+        if tm:
+            hour = int(tm.group(1))
+            minute = int(tm.group(2)) if tm.group(2) else 0
+            if tm.group(3).lower() == "pm" and hour != 12:
+                hour += 12
+            elif tm.group(3).lower() == "am" and hour == 12:
+                hour = 0
+
         iso = None
-        slug = re.search(r"/(\d{4}-\d{2}-\d{2})/?$", href.rstrip("/") + "/")
-        if slug:
-            try:
-                d = datetime.strptime(slug.group(1), "%Y-%m-%d").date()
-                tm = re.search(r"(\d{1,2}):(\d{2})\s*(am|pm)", date_text, re.IGNORECASE)
-                hour, minute = 19, 0
-                if tm:
-                    hour, minute = int(tm.group(1)), int(tm.group(2))
-                    if tm.group(3).lower() == "pm" and hour != 12:
-                        hour += 12
-                    elif tm.group(3).lower() == "am" and hour == 12:
-                        hour = 0
-                dt = datetime(d.year, d.month, d.day, hour, minute, tzinfo=EASTERN)
-                iso = dt.astimezone(timezone.utc).isoformat()
-            except ValueError:
-                pass
-        if not iso:
-            m = re.search(r"([A-Za-z]+)\s+(\d{1,2})(?:st|nd|rd|th)?(?:,\s*(\d{4}))?", date_text)
-            if m:
-                mname, day, yr = m.group(1), int(m.group(2)), int(m.group(3) or current_year)
-                month = _ST_MONTHS.get(mname.lower())
-                if month:
-                    tm = re.search(r"(\d{1,2}):(\d{2})\s*(am|pm)", date_text, re.IGNORECASE)
-                    hour, minute = 19, 0
-                    if tm:
-                        hour, minute = int(tm.group(1)), int(tm.group(2))
-                        if tm.group(3).lower() == "pm" and hour != 12:
-                            hour += 12
-                        elif tm.group(3).lower() == "am" and hour == 12:
-                            hour = 0
-                    try:
-                        dt = datetime(yr, month, day, hour, minute, tzinfo=EASTERN)
+        every_m = re.search(r"Every\s+(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)", date_text, re.IGNORECASE)
+        if every_m:
+            target_wd = weekdays[every_m.group(1).lower()]
+            days_ahead = (target_wd - now.weekday()) % 7
+            event_date = now.date() + timedelta(days=days_ahead)
+            dt = datetime(event_date.year, event_date.month, event_date.day, hour, minute, tzinfo=EASTERN)
+            if dt < now:
+                dt += timedelta(days=7)
+            iso = dt.astimezone(timezone.utc).isoformat()
+        else:
+            slug = re.search(r"/(\d{4}-\d{2}-\d{2})/?$", href.rstrip("/") + "/")
+            if slug:
+                try:
+                    d = datetime.strptime(slug.group(1), "%Y-%m-%d").date()
+                    dt = datetime(d.year, d.month, d.day, hour, minute, tzinfo=EASTERN)
+                    if dt.astimezone(timezone.utc) >= now.astimezone(timezone.utc):
                         iso = dt.astimezone(timezone.utc).isoformat()
-                    except ValueError:
-                        pass
-        events.append({
-            "name": name,
-            "date": iso,
-            "url": href,
-            "venue": "Night Shift Brewing",
-            "price": None,
-        })
+                except ValueError:
+                    pass
+            if not iso:
+                m = re.search(r"([A-Za-z]+)\s+(\d{1,2})(?:st|nd|rd|th)?(?:,\s*(\d{4}))?", date_text)
+                if m:
+                    mname, day, yr = m.group(1).lower(), int(m.group(2)), int(m.group(3) or now.year)
+                    month = _ST_MONTHS.get(mname)
+                    if month:
+                        try:
+                            dt = datetime(yr, month, day, hour, minute, tzinfo=EASTERN)
+                            if dt.astimezone(timezone.utc) >= now.astimezone(timezone.utc):
+                                iso = dt.astimezone(timezone.utc).isoformat()
+                        except ValueError:
+                            pass
+
+        if iso:
+            events.append({
+                "name": name,
+                "date": iso,
+                "url": href,
+                "venue": "Night Shift Brewing",
+                "price": None,
+                "category": "food",
+            })
     return events
 
 
@@ -2274,6 +2373,78 @@ def scrape_tablelist(url, ua):
     return events
 
 
+def scrape_ticketmaster_venue(url, ua):
+    """Scrapes events from Ticketmaster venue page using __NEXT_DATA__ eventsJsonLD (e.g. Mémoire Boston)."""
+    resp = _SESSION.get(url, headers={"User-Agent": ua}, timeout=15)
+    resp.raise_for_status()
+    soup = BeautifulSoup(resp.text, "html.parser")
+    tag = soup.find("script", id="__NEXT_DATA__")
+    if not tag or not tag.string:
+        return []
+    try:
+        data = json.loads(tag.string)
+    except Exception:
+        return []
+    props = data.get("props", {}).get("pageProps", {})
+    events_ld = props.get("eventsJsonLD", [])
+    flat_events = []
+    if isinstance(events_ld, list):
+        for sub in events_ld:
+            if isinstance(sub, list):
+                flat_events.extend(sub)
+            elif isinstance(sub, dict):
+                flat_events.append(sub)
+    events = []
+    seen = set()
+    now = datetime.now(timezone.utc)
+    for item in flat_events:
+        if not isinstance(item, dict):
+            continue
+        if "Cancelled" in item.get("eventStatus", ""):
+            continue
+        name = (item.get("name") or "").strip()
+        if not name or name.lower() == "test":
+            continue
+        iso_raw = item.get("startDate")
+        if not iso_raw:
+            continue
+        try:
+            dt = datetime.fromisoformat(iso_raw)
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=EASTERN)
+            if dt.astimezone(timezone.utc) < now:
+                continue
+            iso = dt.astimezone(timezone.utc).isoformat()
+        except Exception:
+            continue
+        key = (name.lower(), iso)
+        if key in seen:
+            continue
+        seen.add(key)
+        offers = item.get("offers") or {}
+        price = None
+        ticket_url = url
+        if isinstance(offers, dict):
+            if offers.get("url"):
+                ticket_url = offers["url"]
+            if offers.get("price"):
+                try:
+                    price = f"${float(offers['price']):.0f}"
+                except (ValueError, TypeError):
+                    pass
+        loc = item.get("location") or {}
+        vname = loc.get("name") if isinstance(loc, dict) else "Mémoire Boston"
+        events.append({
+            "name": name,
+            "date": iso,
+            "url": ticket_url,
+            "venue": vname or "Mémoire Boston",
+            "price": price,
+            "category": "clubbing",
+        })
+    return events
+
+
 def scrape_big_night_live(url, ua):
     """Big Night Live — upcoming show gallery cards with Ticketmaster links."""
     resp = _SESSION.get(url, headers={"User-Agent": ua}, timeout=12)
@@ -2747,18 +2918,71 @@ def _hmnh_parse_date(date_str, time_str):
 
 
 def scrape_salsavida(url, ua):
-    """Salsa Vida Massachusetts dance guide — schema.org microdata on article.event-card.
-    The startDate datetime attr has the correct local time but wrong TZ offset (-07:00
-    instead of Eastern), so we strip the offset and localize to EASTERN."""
+    """Salsa Vida Massachusetts dance guide — parses JSON-LD ItemList with fallback to microdata cards."""
+    from html import unescape
     soup = fetch_soup(url, ua)
     events = []
     seen = set()
     now = datetime.now(timezone.utc)
+
+    # 1. Parse JSON-LD ItemList
+    for script in soup.find_all("script", type="application/ld+json"):
+        try:
+            data = json.loads(script.string or "")
+            if isinstance(data, dict) and data.get("@type") == "ItemList":
+                for elem in data.get("itemListElement", []):
+                    item = elem.get("item", {})
+                    if item.get("@type") != "Event":
+                        continue
+                    name = unescape(item.get("name") or "").strip()
+                    if not name:
+                        continue
+                    start_str = item.get("startDate")
+                    if not start_str:
+                        continue
+                    try:
+                        dt = datetime.fromisoformat(start_str)
+                        if dt.tzinfo is None:
+                            dt = dt.replace(tzinfo=EASTERN)
+                        if dt.astimezone(timezone.utc) < now:
+                            continue
+                        iso = dt.astimezone(timezone.utc).isoformat()
+                    except Exception:
+                        continue
+                    vname = item.get("location", {}).get("name") or "Salsa Vida Boston"
+                    ev_url = item.get("url") or url
+                    offers = item.get("offers", {})
+                    price = None
+                    if isinstance(offers, dict) and offers.get("price"):
+                        try:
+                            pf = float(offers["price"])
+                            price = "Free" if pf == 0 else f"${pf:.0f}"
+                        except (TypeError, ValueError):
+                            pass
+                    key = (name.lower(), iso)
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    events.append({
+                        "name": name,
+                        "date": iso,
+                        "url": ev_url,
+                        "venue": vname,
+                        "price": price,
+                        "category": "dance",
+                    })
+        except Exception:
+            pass
+
+    if events:
+        return events
+
+    # 2. Fallback to HTML microdata cards
     for card in soup.select("article.event-card"):
-        name_el = card.select_one('h2[itemprop="name"]')
+        name_el = card.select_one('h3[itemprop="name"], h2[itemprop="name"], .event-title')
         if not name_el:
             continue
-        name = name_el.get_text(strip=True)
+        name = unescape(name_el.get_text(strip=True))
         if not name:
             continue
         start_el = card.find("time", itemprop="startDate")
@@ -2797,7 +3021,7 @@ def scrape_salsavida(url, ua):
             "name": name,
             "date": iso,
             "url": href,
-            "venue": venue,
+            "venue": venue or "Salsa Vida Boston",
             "price": price,
             "category": "dance",
         })
@@ -2939,11 +3163,11 @@ _ALL_VENUES = [
     {"name": "Make Friends After College (via Eventbrite)", "url": "https://www.eventbrite.com/o/make-friends-after-college-98390790901", "ua": UA_CHROME, "scraper": scrape_eventbrite_org, "default_category": "community"},
     {"name": "The Boston Calendar", "url": "https://www.thebostoncalendar.com/events", "ua": UA_CHROME, "scraper": scrape_boston_calendar, "default_category": None},
     {"name": "City Winery Boston", "url": "https://citywinery.com/pages/locations/boston", "ua": UA_CHROME, "scraper": scrape_city_winery, "default_category": "music"},
-    {"name": "Bowery Presents Boston", "url": "https://www.bowerypresents.com/boston", "ua": UA_CHROME, "scraper": scrape_jsonld, "default_category": "music"},
+    {"name": "Bowery Presents Boston", "url": "https://www.bowerypresents.com/boston", "ua": UA_CHROME, "scraper": scrape_bowery_boston, "default_category": "music"},
     {"name": "Royale Boston", "url": "https://www.royaleboston.com/events/", "ua": UA_CHROME, "scraper": scrape_royale, "default_category": "clubbing"},
     {"name": "MIT Events", "url": "https://calendar.mit.edu/", "ua": UA_CHROME, "scraper": scrape_jsonld, "default_category": "community"},
     {"name": "Boston Symphony Orchestra", "url": "https://www.bso.org/events", "ua": UA_CHROME, "scraper": scrape_bso, "default_category": "music"},
-    {"name": "Venture Café Cambridge", "url": "https://venturecafecambridge.org/events/", "ua": UA_CHROME, "scraper": scrape_venture_cafe, "default_category": "community"},
+    {"name": "Venture Café Cambridge", "url": "https://community.venturecafecambridge.org/", "ua": UA_CHROME, "scraper": scrape_venture_cafe, "default_category": "community"},
     {"name": "The Anchor Boston", "url": "https://calendar.google.com/calendar/ical/theanchorbostonma%40gmail.com/public/basic.ics", "ua": UA_CHROME, "scraper": scrape_ical, "default_category": "community"},
     {"name": "ManRay Cambridge", "url": "https://manrayclub.com/monthly-calendar/", "ua": UA_CHROME, "scraper": scrape_manray, "default_category": "clubbing"},
     {"name": "Esplanade Association", "url": "https://esplanade.org/events/", "ua": UA_CHROME, "scraper": scrape_esplanade, "default_category": "outdoors"},
@@ -3001,7 +3225,7 @@ _ALL_VENUES = [
     {"name": "Big Night Live", "url": "https://bignightlive.com/", "ua": UA_CHROME, "scraper": scrape_big_night_live, "default_category": "music"},
     {"name": "The Grand Boston", "url": "https://buy.tablelist.com/v/the-grand1", "ua": UA_CHROME, "scraper": scrape_tablelist, "default_category": "clubbing"},
     {"name": "Scorpion Bar Boston", "url": "https://buy.tablelist.com/v/scorpion-bar", "ua": UA_CHROME, "scraper": scrape_tablelist, "default_category": "clubbing"},
-    {"name": "Mémoire Boston", "url": "https://buy.tablelist.com/v/memoire", "ua": UA_CHROME, "scraper": scrape_tablelist, "default_category": "clubbing"},
+    {"name": "Mémoire Boston", "url": "https://www.ticketmaster.com/memoire-tickets-everett/venue/9388", "ua": UA_CHROME, "scraper": scrape_ticketmaster_venue, "default_category": "clubbing"},
     {"name": "Deep Cuts Medford", "url": "https://do617.com/venues/deep-cuts", "ua": UA_CHROME, "scraper": scrape_do617, "default_category": "music"},
     {"name": "Lou's Harvard Square", "url": "https://www.wearelous.com/lous-live", "ua": UA_CHROME, "scraper": scrape_lous, "default_category": "music"},
     {"name": "Boston Salsa & Bachata", "url": "https://bostonsalsa.org/", "ua": UA_CHROME, "scraper": scrape_bostonsalsa, "default_category": "dance"},

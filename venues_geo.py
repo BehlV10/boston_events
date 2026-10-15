@@ -44,6 +44,7 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
     # Kendall Square & MIT
     "mit museum": (42.3621, -71.0858, "Kendall Square", "314 Main St, Cambridge", "MIT Museum"),
     "venture café": (42.3615, -71.0870, "Kendall Square", "1 Broadway, Cambridge", "Venture Café Cambridge"),
+    "venture cafe": (42.3615, -71.0870, "Kendall Square", "1 Broadway, Cambridge", "Venture Café Cambridge"),
     "mit strategic games society": (42.3590, -71.0940, "Kendall Square / MIT", "84 Massachusetts Ave, Cambridge", "MIT Strategic Games Society"),
     "mit events": (42.3590, -71.0940, "Kendall Square / MIT", "Cambridge", "MIT Campus"),
     "kendall square farmers market": (42.3625, -71.0850, "Kendall Square", "350 Kendall St, Cambridge", "Kendall Square Farmers Market"),
@@ -171,6 +172,14 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
     "jeanie johnston pub": (42.3039, -71.1147, "Jamaica Plain", "144 South St, Jamaica Plain", "Jeanie Johnston Pub"),
     "the haven": (42.3153, -71.1042, "Jamaica Plain", "284 Amory St, Jamaica Plain", "The Haven"),
     "long live roxbury": (42.3278, -71.0763, "Roxbury", "152 Hampden St, Roxbury", "Long Live Roxbury"),
+
+    # Everett & Surrounding
+    "mémoire": (42.3956, -71.0691, "Everett", "1 Broadway, Everett (Encore Boston Harbor)", "Mémoire Boston"),
+    "memoire": (42.3956, -71.0691, "Everett", "1 Broadway, Everett (Encore Boston Harbor)", "Mémoire Boston"),
+    "night shift brewing": (42.4069, -71.0683, "Everett", "87 Santilli Hwy, Everett", "Night Shift Brewing"),
+    "night shift": (42.4069, -71.0683, "Everett", "87 Santilli Hwy, Everett", "Night Shift Brewing"),
+    "dante alighieri society": (42.3644, -71.0877, "Kendall Square", "41 Hampshire St, Cambridge", "Dante Alighieri Society"),
+    "hult international business school": (42.3705, -71.0722, "East Cambridge", "1 Education St, Cambridge", "Hult International Business School"),
 }
 
 # Substring needle rules for matching variations in scraped venue titles
@@ -279,6 +288,12 @@ VENUE_RULES = [
     ("somerville library", (42.3868, -71.0970, "Somerville", "79 Highland Ave, Somerville", "Somerville Public Library")),
     ("cambridge library", (42.3744, -71.1111, "Mid-Cambridge", "449 Broadway, Cambridge", "Cambridge Public Library")),
     ("mit ", (42.3590, -71.0940, "Kendall Square / MIT", "Cambridge", "MIT Campus")),
+    ("memoire", (42.3956, -71.0691, "Everett", "1 Broadway, Everett (Encore Boston Harbor)", "Mémoire Boston")),
+    ("night shift", (42.4069, -71.0683, "Everett", "87 Santilli Hwy, Everett", "Night Shift Brewing")),
+    ("dante alighieri", (42.3644, -71.0877, "Kendall Square", "41 Hampshire St, Cambridge", "Dante Alighieri Society")),
+    ("hult", (42.3705, -71.0722, "East Cambridge", "1 Education St, Cambridge", "Hult International Business School")),
+    ("venture café", (42.3615, -71.0870, "Kendall Square", "1 Broadway, Cambridge", "Venture Café Cambridge")),
+    ("venture cafe", (42.3615, -71.0870, "Kendall Square", "1 Broadway, Cambridge", "Venture Café Cambridge")),
 ]
 
 # Coordinate bounding box for valid Greater Boston / Eastern MA events
