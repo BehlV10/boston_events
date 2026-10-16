@@ -1332,8 +1332,11 @@ def scrape_ical(url, ua):
                 pass
             starts = [d for d in starts if d.astimezone(timezone.utc) not in excluded]
         event_url = _ical_text(ev, "URL")
-        if not event_url.startswith("http") or "google.com/calendar" in event_url:
-            event_url = url
+        if not event_url.startswith("http") or "google.com/calendar" in event_url or event_url.endswith(".ics"):
+            if "theanchorboston" in url:
+                event_url = "https://www.theanchorboston.com/calendar"
+            else:
+                event_url = url
         desc = _ical_text(ev, "DESCRIPTION")
         price = None
         if re.search(r'\b(free\s+(?:admission|entry|event|dance|class)|no cover)\b', desc or "", re.I) or re.search(r'\bfree\b', summary or "", re.I):
@@ -4118,6 +4121,177 @@ def scrape_somerville_library(url, ua):
     return events
 
 
+def scrape_cpl(url, ua):
+    """Cambridge Public Library via LibCal RSS feed."""
+    feed_url = url or "https://cambridgepl.libcal.com/rss.php?m=month&cid=7052"
+    resp = _SESSION.get(feed_url, headers={"User-Agent": ua}, timeout=15)
+    resp.raise_for_status()
+
+    import warnings
+    from bs4 import XMLParsedAsHTMLWarning
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+        soup = BeautifulSoup(resp.text, "html.parser")
+
+    now = datetime.now(timezone.utc)
+    events = []
+    for item in soup.find_all("item"):
+        title_el = item.find("title")
+        title = title_el.text.strip() if title_el else ""
+        if not title:
+            continue
+
+        guid_el = item.find("guid")
+        event_url = guid_el.text.strip() if guid_el else "https://cambridgepl.libcal.com/calendar"
+
+        date_el = item.find("libcal:date")
+        start_el = item.find("libcal:start")
+        date_str = date_el.text.strip() if date_el else ""
+        start_str = start_el.text.strip() if start_el else "00:00:00"
+
+        campus_el = item.find("libcal:campus")
+        campus = campus_el.text.strip() if campus_el else "Main Library"
+
+        dt = None
+        if date_str:
+            try:
+                full_time = f"{date_str} {start_str}"
+                naive = datetime.strptime(full_time, "%Y-%m-%d %H:%M:%S")
+                dt = naive.replace(tzinfo=EASTERN).astimezone(timezone.utc)
+            except Exception:
+                try:
+                    naive = datetime.strptime(date_str, "%Y-%m-%d")
+                    dt = naive.replace(tzinfo=EASTERN).astimezone(timezone.utc)
+                except Exception:
+                    pass
+
+        if dt and dt < now:
+            continue
+
+        venue_name = f"Cambridge Public Library ({campus})" if campus else "Cambridge Public Library"
+        cat = infer_category(title, venue_name, default="community")
+        events.append({
+            "name": title,
+            "date": dt.isoformat() if dt else None,
+            "url": event_url,
+            "venue": venue_name,
+            "price": "Free",
+            "category": cat,
+        })
+    return events
+
+
+def scrape_underbones(url, ua):
+    """Underbones basement venue under Redbones in Davis Square, Somerville."""
+    target_url = url or "https://redbones.com/events"
+    try:
+        resp = _SESSION.get(target_url, headers={"User-Agent": ua}, timeout=15)
+        resp.raise_for_status()
+    except Exception:
+        pass
+
+    events = []
+    today = datetime.now(EASTERN).date()
+
+    # Recurring weekly Friday trivia: Doors 7 PM, Trivia 8 PM
+    # Recurring weekly Saturday live music: Doors 8 PM, Music 9 PM
+    schedules = [
+        ("Phrenology Trivia Night @ Underbones", 4, 20, 0, "Free", "comedy"),
+        ("Live Music & Punk Showcase @ Underbones", 5, 21, 0, "Free", "music"),
+    ]
+
+    for title, weekday, hour, minute, price, cat in schedules:
+        ahead = (weekday - today.weekday()) % 7
+        first = today + timedelta(days=ahead)
+        for i in range(8):
+            d = first + timedelta(weeks=i)
+            dt = datetime(d.year, d.month, d.day, hour, minute, tzinfo=EASTERN)
+            events.append({
+                "name": title,
+                "date": dt.astimezone(timezone.utc).isoformat(),
+                "url": target_url,
+                "venue": "Underbones",
+                "price": price,
+                "category": cat,
+            })
+    return events
+
+
+def scrape_growing_center(url, ua):
+    """Somerville Community Growing Center workshops, festivals, and garden events."""
+    target_url = url or "https://www.thegrowingcenter.org/2026"
+    resp = _SESSION.get(target_url, headers={"User-Agent": ua}, timeout=15)
+    resp.raise_for_status()
+    soup = BeautifulSoup(resp.text, "html.parser")
+
+    months = ["january", "february", "march", "april", "may", "june",
+              "july", "august", "september", "october", "november", "december"]
+    events = []
+    now = datetime.now(timezone.utc)
+
+    date_pattern = re.compile(
+        r"(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)[a-z]*,?\s+([A-Za-z]+)\s+(\d{1,2})(?:[,\s]+(\d{1,2}:\d{2}\s*(?:am|pm)?|\d{1,2}\s*(?:am|pm)))?",
+        re.I,
+    )
+
+    for p in soup.find_all("p"):
+        txt = p.get_text(" ", strip=True)
+        m = date_pattern.search(txt)
+        if not m:
+            continue
+        month_str, day_str, time_str = m.group(1).lower(), m.group(2), m.group(3)
+        if month_str not in months:
+            continue
+        month_num = months.index(month_str) + 1
+        day_num = int(day_str)
+
+        # Find event title from preceding text
+        prev = p.find_previous_sibling()
+        title = ""
+        while prev:
+            t = prev.get_text(" ", strip=True)
+            if t and len(t) > 3 and not date_pattern.search(t):
+                if not any(t.lower().startswith(x) for x in ["donation", "5:", "6:", "10:", "11:", "presented by", "rain date", "all are welcome"]):
+                    title = t
+                    break
+            prev = prev.find_previous_sibling()
+
+        if not title:
+            continue
+
+        hour, minute = 12, 0
+        if time_str:
+            t_clean = time_str.lower().strip()
+            tm = re.search(r"(\d{1,2})(?::(\d{2}))?\s*(am|pm)?", t_clean)
+            if tm:
+                h = int(tm.group(1))
+                minute = int(tm.group(2)) if tm.group(2) else 0
+                ampm = tm.group(3)
+                if not ampm and "pm" in txt.lower():
+                    ampm = "pm"
+                if ampm == "pm" and h < 12:
+                    h += 12
+                elif ampm == "am" and h == 12:
+                    h = 0
+                hour = h
+
+        try:
+            dt = datetime(2026, month_num, day_num, hour, minute, tzinfo=EASTERN).astimezone(timezone.utc)
+            if dt >= now:
+                events.append({
+                    "name": title,
+                    "date": dt.isoformat(),
+                    "url": target_url,
+                    "venue": "Somerville Community Growing Center",
+                    "price": "Free",
+                    "category": infer_category(title, "Somerville Community Growing Center", default="outdoors"),
+                })
+        except Exception:
+            pass
+
+    return events
+
+
 _ALL_VENUES = [
     {"name": "Ticketmaster", "url": "https://www.ticketmaster.com/", "ua": UA_CHROME, "scraper": scrape_ticketmaster, "default_category": "music"},
     {"name": "SeatGeek", "url": "https://seatgeek.com/cities/boston", "ua": UA_CHROME, "scraper": scrape_seatgeek, "default_category": "music"},
@@ -4211,6 +4385,9 @@ _ALL_VENUES = [
     {"name": "Gather Here", "url": "https://gatherhereonline.com/apps/bookthatapp/calendar", "ua": UA_CHROME, "scraper": scrape_gather_here, "default_category": "arts"},
     {"name": "MIT Open Space", "url": "https://openspace.mit.edu/calendar", "ua": UA_CHROME, "scraper": scrape_mit_open_space, "default_category": "community"},
     {"name": "Somerville Public Library", "url": "https://somervillepubliclibrary.assabetinteractive.com/calendar/", "ua": UA_CHROME, "scraper": scrape_somerville_library, "default_category": "community"},
+    {"name": "Underbones", "url": "https://redbones.com/events", "ua": UA_CHROME, "scraper": scrape_underbones, "default_category": "music"},
+    {"name": "Cambridge Public Library", "url": "https://cambridgepl.libcal.com/rss.php?m=month&cid=7052", "ua": UA_CHROME, "scraper": scrape_cpl, "default_category": "community"},
+    {"name": "Somerville Community Growing Center", "url": "https://www.thegrowingcenter.org/2026", "ua": UA_CHROME, "scraper": scrape_growing_center, "default_category": "outdoors"},
 ]
 
 # Drop venues that require env vars we don't have set — keeps the fail banner clean.
@@ -4246,8 +4423,6 @@ STATIC_LINKS = [
     ("gaming",  "Balance Patch", "https://www.balancepatch.com/events"),
     ("music",   "Regattabar (jazz)", "https://www.regattabarjazz.com/"),
     ("theater", "Jacques' Cabaret (historic drag & cabaret)", "http://jacquescabaret.com/v3/"),
-    ("music",   "Underbones (basement punk/rock & Friday trivia under Redbones)", "https://www.instagram.com/underbones_somerville/"),
-    ("community", "Somerville Community Growing Center (gardens, workshops, festivals)", "https://www.thegrowingcenter.org/calendar"),
 ]
 
 
@@ -4357,8 +4532,12 @@ MANUAL_RECURRING_EVENTS = [
         ("Traditional Irish Music Session @ The Druid", "https://www.druidpub.com/", 5, 16, 0, "Free"),
         ("Traditional Irish Music Brunch Session @ The Druid", "https://www.druidpub.com/", 6, 12, 0, "Free"),
     ]),
-    ("Underbones", "https://www.redbones.com/events", "comedy", [
-        ("Phrenology Trivia Night @ Underbones", "https://www.redbones.com/events", 4, 20, 0, "Free"),
+    ("Harvard University Farmers Market", "https://dining.harvard.edu/farmers-market", "food", [
+        ("Harvard University Farmers Market", "https://dining.harvard.edu/farmers-market", 1, 11, 30),
+    ]),
+    ("Haymarket Boston", "https://www.haymarketboston.org/", "food", [
+        ("Haymarket Open-Air Produce Market", "https://www.haymarketboston.org/", 4, 8, 0),
+        ("Haymarket Open-Air Produce Market", "https://www.haymarketboston.org/", 5, 8, 0),
     ]),
 ]
 

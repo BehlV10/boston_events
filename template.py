@@ -45,7 +45,8 @@ CITY_RULES = [
         "middle east", "phoenix landing", "manray", "man ray", "prospect st",
         "regattabar", "lilypad", "inman square", "the druid", "druid",
         "plough and stars", "plough & stars", "gather here", "mit open space",
-        "remnant satellite",
+        "remnant satellite", "cambridge public library", "cambridge library",
+        "harvard university farmers market", "harvard farmers market",
     )),
     ("boston", (
         "city winery", "royale", "wilbur", "ica boston", "gardner", "boston public library",
@@ -65,7 +66,7 @@ CITY_RULES = [
         "long live", "sam adams", "trillium", "castle island",
         "copley", "sowa", "newbury", "beehive", "wally",
         "the anchor", "anchor boston", "charlestown navy",
-        "jacque", "jacques",
+        "jacque", "jacques", "haymarket", "copley square farmers market",
     )),
 ]
 
