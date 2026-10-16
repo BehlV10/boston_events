@@ -8,7 +8,7 @@ import ssl
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from urllib.parse import quote, urljoin
 from zoneinfo import ZoneInfo
 
@@ -3683,6 +3683,441 @@ def scrape_jacques(url, ua):
     return results
 
 
+def scrape_the_jungle(url, ua):
+    """The Jungle Community Music Club in Union Square, Somerville."""
+    evs = scrape_eventbrite_org(url, ua)
+    results = []
+    for e in evs:
+        name = e.get("name") or ""
+        if "private event" in name.lower():
+            continue
+        e["venue"] = "The Jungle Community Music Club"
+        e["category"] = "music"
+        results.append(e)
+    return results
+
+
+def scrape_lilypad(url, ua):
+    """The Lilypad in Inman Square, Cambridge — avant-garde, jazz, and indie music."""
+    now = datetime.now()
+    months = [(now.month, now.year)]
+    next_m = now.month + 1 if now.month < 12 else 1
+    next_y = now.year if now.month < 12 else now.year + 1
+    months.append((next_m, next_y))
+
+    events = []
+    for m, y in months:
+        api_url = f"https://www.lilypadinman.com/api/open/GetItemsByMonth?month={m:02d}-{y}&collectionId=583cce261b631b930025626c"
+        try:
+            resp = _SESSION.get(api_url, headers={"User-Agent": ua, "Accept": "application/json"}, timeout=15)
+            if resp.status_code != 200:
+                continue
+            items = resp.json()
+            for it in items:
+                title = (it.get("title") or "").strip()
+                if not title:
+                    continue
+                st = it.get("startDate") or (it.get("structuredContent") or {}).get("startDate")
+                dt = datetime.fromtimestamp(st / 1000, tz=timezone.utc) if st else None
+                full_url = "https://www.lilypadinman.com" + it.get("fullUrl", "/calendar")
+                events.append({
+                    "name": title,
+                    "date": dt.isoformat() if dt else None,
+                    "url": full_url,
+                    "venue": "The Lilypad",
+                    "category": "music",
+                })
+        except Exception:
+            continue
+    return events
+
+
+def scrape_plough_and_stars(url, ua):
+    """The Plough and Stars on Mass Ave, Cambridge — live music 7 nights a week."""
+    now = datetime.now()
+    months = [(now.month, now.year)]
+    next_m = now.month + 1 if now.month < 12 else 1
+    next_y = now.year if now.month < 12 else now.year + 1
+    months.append((next_m, next_y))
+
+    events = []
+    for m, y in months:
+        cal_url = f"https://calendar.ploughandstars.com/events/calendar?month={m}&year={y}"
+        try:
+            resp = _SESSION.get(cal_url, headers={"User-Agent": ua}, timeout=15)
+            if resp.status_code != 200:
+                continue
+            soup = BeautifulSoup(resp.text, "html.parser")
+            for day in soup.find_all("div", class_="day"):
+                day_id = day.get("id")
+                if not day_id or len(day_id) != 8 or not day_id.isdigit():
+                    continue
+                year = int(day_id[:4])
+                month = int(day_id[4:6])
+                day_num = int(day_id[6:8])
+                for row in day.find_all("div", class_="row"):
+                    time_el = row.find(class_="flex_item_left")
+                    time_str = time_el.get_text(strip=True) if time_el else ""
+                    event_el = row.find(class_="event")
+                    if not event_el:
+                        continue
+                    title = event_el.get_text(strip=True)
+                    if not title:
+                        continue
+                    link = event_el.find("a")
+                    ev_url = link["href"] if (link and link.get("href")) else "https://www.ploughandstars.com/"
+
+                    hour = 20
+                    minute = 0
+                    t_low = time_str.lower()
+                    if "10p" in t_low:
+                        hour = 22
+                    elif "7p" in t_low or "7-9p" in t_low:
+                        hour = 19
+                    elif "4p" in t_low or "4-6p" in t_low:
+                        hour = 16
+                    elif "3p" in t_low or "3-5p" in t_low:
+                        hour = 15
+                    elif "9p" in t_low:
+                        hour = 21
+                    elif "8p" in t_low:
+                        hour = 20
+
+                    dt = datetime(year, month, day_num, hour, minute)
+                    cat = "music"
+                    if "trivia" in title.lower():
+                        cat = "comedy"
+                    events.append({
+                        "name": title,
+                        "date": dt.isoformat(),
+                        "url": ev_url,
+                        "venue": "The Plough and Stars",
+                        "category": cat,
+                    })
+        except Exception:
+            continue
+    return events
+
+
+def scrape_sally_obriens(url, ua):
+    """Sally O'Brien's pub in Union Square, Somerville — live music Wed-Mon."""
+    resp = _SESSION.get(url, headers={"User-Agent": ua}, timeout=15)
+    resp.raise_for_status()
+    soup = BeautifulSoup(resp.text, "html.parser")
+    main = soup.find("main") or soup
+    lines = [p.get_text(" ", strip=True) for p in main.find_all("p") if p.get_text(strip=True)]
+
+    events = []
+    MONTHS = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
+    DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        low = line.lower().replace("novem ber", "november")
+        is_date = any(d in low for d in DAYS) and any(m in low for m in MONTHS)
+        if is_date:
+            m_match = re.search(r"(january|february|march|april|may|june|july|august|september|october|november|december)\s+(\d{1,2})", low)
+            if m_match:
+                month_name = m_match.group(1)
+                day_num = int(m_match.group(2))
+                month_idx = MONTHS.index(month_name) + 1
+                year = datetime.now().year
+
+                t_match = re.search(r"(\d{1,2})(?:[:\.]?(\d{2}))?\s*(am|pm)", low)
+                hour = 19
+                minute = 30
+                if t_match:
+                    raw_h = int(t_match.group(1))
+                    if raw_h > 100:
+                        minute = raw_h % 100
+                        raw_h = raw_h // 100
+                    elif t_match.group(2):
+                        minute = int(t_match.group(2))
+                    is_pm = t_match.group(3) == "pm"
+                    if is_pm and raw_h < 12:
+                        raw_h += 12
+                    elif not is_pm and raw_h == 12:
+                        raw_h = 0
+                    hour = raw_h
+
+                dt = datetime(year, month_idx, day_num, hour, minute)
+
+                i += 1
+                if i < len(lines):
+                    band_line = lines[i]
+                    if band_line == "followed by ...":
+                        i += 1
+                        if i < len(lines):
+                            band_line = lines[i]
+
+                    price = None
+                    p_match = re.search(r"\$(\d+)|free|no cover", band_line, re.I)
+                    if p_match:
+                        price = p_match.group(0)
+                        band_name = re.sub(r"\$(\d+)|free show\s*!*|no cover\s*!*", "", band_line, flags=re.I).strip(" \t\xa0-")
+                    else:
+                        band_name = band_line
+                        if i + 1 < len(lines):
+                            next_line = lines[i + 1]
+                            p_match2 = re.search(r"\$(\d+)|free|no cover", next_line, re.I)
+                            if p_match2:
+                                price = p_match2.group(0)
+                                i += 1
+
+                    if band_name and len(band_name) > 1 and "followed by" not in band_name.lower():
+                        events.append({
+                            "name": band_name,
+                            "date": dt.isoformat(),
+                            "url": "https://www.sallyobriensbar.com/music",
+                            "venue": "Sally O'Brien's",
+                            "price": price or "Free / $10",
+                            "category": "music",
+                        })
+        i += 1
+    return events
+
+
+def scrape_side_quest(url, ua):
+    """Side Quest Books & Games at Bow Market in Somerville — sci-fi/fantasy books & indie TTRPGs."""
+    evs = scrape_eventbrite_org(url, ua)
+    results = []
+    for e in evs:
+        e["venue"] = "Side Quest Books & Games"
+        e["category"] = "books"
+        name_low = (e.get("name") or "").lower()
+        if any(w in name_low for w in ["game", "rpg", "ttrpg", "dread", "d&d"]):
+            e["category"] = "gaming"
+        results.append(e)
+    return results
+
+
+def scrape_remnant(url, ua):
+    """Remnant Brewing — splits events between Bow Market (Somerville) and Remnant Satellite (Cambridge)."""
+    sep = "&" if "?" in url else "?"
+    resp = _SESSION.get(url + sep + "format=json", headers={"User-Agent": ua, "Accept": "application/json"}, timeout=15)
+    resp.raise_for_status()
+    data = resp.json()
+    events = []
+    for ev in data.get("upcoming", []) or []:
+        ts = ev.get("startDate")
+        iso = None
+        if isinstance(ts, (int, float)):
+            try:
+                iso = datetime.fromtimestamp(ts / 1000, tz=timezone.utc).isoformat()
+            except (OverflowError, OSError, ValueError):
+                iso = None
+        full = ev.get("fullUrl") or ""
+        href = urljoin(url, full) if full else url
+        title = ev.get("title") or ""
+        loc = ev.get("location") or {}
+        addr_title = (loc.get("addressTitle") or "").lower()
+        addr_line = (loc.get("addressLine1") or "").lower()
+
+        is_satellite = ("satellite" in addr_title or "877 cambridge" in addr_line or
+                        "satellite" in title.lower() or "satellite" in href.lower())
+        venue = "Remnant Satellite" if is_satellite else "Remnant Brewing"
+
+        cat = "music"
+        t_low = title.lower()
+        if any(w in t_low for w in ["yoga", "fitness", "swap", "workshop", "market", "faire"]):
+            cat = "community"
+        elif "trivia" in t_low:
+            cat = "comedy"
+        elif "drag" in t_low:
+            cat = "theater"
+
+        events.append({
+            "name": title,
+            "date": iso,
+            "url": href,
+            "venue": venue,
+            "price": None,
+            "category": cat,
+        })
+    return events
+
+
+def scrape_duck_duck_goofs(url, ua):
+    """Duck Duck Goofs / Goofs Comedy Club in Union Square, Somerville."""
+    evs = scrape_eventbrite_search(url, ua)
+    results = []
+    for e in evs:
+        v_low = (e.get("venue") or "").lower()
+        n_low = (e.get("name") or "").lower()
+        if "goof" in v_low or "goof" in n_low:
+            e["venue"] = "Goofs Comedy Club"
+            e["category"] = "comedy"
+            results.append(e)
+    return results
+
+
+def scrape_gather_here(url, ua):
+    """Gather Here in Inman Square, Cambridge — craft nites, sewing, and fiber arts workshops."""
+    start_date = date.today().isoformat()
+    end_date = (date.today() + timedelta(days=60)).isoformat()
+    events = []
+
+    # 1. Community events
+    try:
+        u_ev = f"https://gather-here-3.bookthatapp.com/calendar/events.json?start={start_date}&end={end_date}"
+        resp_ev = _SESSION.get(u_ev, headers={"User-Agent": ua}, timeout=15)
+        if resp_ev.status_code == 200:
+            for e in resp_ev.json().get("events", []):
+                st = e.get("start")
+                dt = None
+                if st and len(st) >= 5:
+                    dt = datetime(st[0], st[1], st[2], st[3], st[4])
+                events.append({
+                    "name": e.get("title"),
+                    "date": dt.isoformat() if dt else None,
+                    "url": e.get("url") or "https://gatherhereonline.com/",
+                    "venue": "Gather Here",
+                    "category": "arts",
+                    "price": "Free / RSVP",
+                })
+    except Exception:
+        pass
+
+    # 2. Workshops / Classes
+    try:
+        u_sch = f"https://gather-here-3.bookthatapp.com/availability/schedule.json?start={start_date}&end={end_date}"
+        resp_sch = _SESSION.get(u_sch, headers={"User-Agent": ua}, timeout=15)
+        if resp_sch.status_code == 200:
+            for s in resp_sch.json().get("schedule", []):
+                st = s.get("start")
+                dt = None
+                if st and len(st) >= 5:
+                    dt = datetime(st[0], st[1], st[2], st[3], st[4])
+                rel_url = s.get("url") or ""
+                full_url = "https://gatherhereonline.com" + rel_url if rel_url.startswith("/") else rel_url
+                events.append({
+                    "name": f"Craft Workshop: {s.get('title')}",
+                    "date": dt.isoformat() if dt else None,
+                    "url": full_url,
+                    "venue": "Gather Here",
+                    "category": "arts",
+                    "price": "Class / Workshop",
+                })
+    except Exception:
+        pass
+
+    return events
+
+
+def scrape_mit_open_space(url, ua):
+    """MIT Open Space Programming at Kendall/MIT Open Space (292 Main St)."""
+    now = datetime.now()
+    months = [(now.month, now.year)]
+    next_m = now.month + 1 if now.month < 12 else 1
+    next_y = now.year if now.month < 12 else now.year + 1
+    months.append((next_m, next_y))
+
+    events = []
+    for m, y in months:
+        api_url = f"https://openspace.mit.edu/api/open/GetItemsByMonth?month={m:02d}-{y}&collectionId=61158338e905762e4bb04ed3"
+        try:
+            resp = _SESSION.get(api_url, headers={"User-Agent": ua, "Accept": "application/json"}, timeout=15)
+            if resp.status_code != 200:
+                continue
+            for it in resp.json():
+                title = (it.get("title") or "").strip()
+                if not title:
+                    continue
+                st = it.get("startDate") or (it.get("structuredContent") or {}).get("startDate")
+                dt = datetime.fromtimestamp(st / 1000, tz=timezone.utc) if st else None
+                full_url = "https://openspace.mit.edu" + it.get("fullUrl", "/calendar")
+
+                cat = "community"
+                t_low = title.lower()
+                if "music" in t_low or "concert" in t_low:
+                    cat = "music"
+                elif "film" in t_low or "movie" in t_low or "screen" in t_low:
+                    cat = "film"
+                elif "stitch" in t_low or "art" in t_low:
+                    cat = "arts"
+
+                events.append({
+                    "name": title,
+                    "date": dt.isoformat() if dt else None,
+                    "url": full_url,
+                    "venue": "MIT Open Space",
+                    "category": cat,
+                    "price": "Free",
+                })
+        except Exception:
+            continue
+    return events
+
+
+def scrape_somerville_library(url, ua):
+    """Somerville Public Library (Central, East, West) via Assabet Interactive calendar."""
+    resp = _SESSION.get(url, headers={"User-Agent": ua}, timeout=15)
+    resp.raise_for_status()
+    soup = BeautifulSoup(resp.text, "html.parser")
+    events = []
+    for day in soup.find_all("div", class_="day-has-events"):
+        date_str = None
+        for c in day.get("class", []):
+            if c.startswith("day-20"):
+                date_str = c[4:]
+                break
+        if not date_str:
+            continue
+        for ev in day.find_all("div", class_="listing-event"):
+            h3 = ev.find("h3")
+            if not h3 or not h3.find("a"):
+                continue
+            title = h3.find("a").get_text(strip=True)
+            href = h3.find("a")["href"]
+            time_span = ev.find("span", class_="event-time")
+            time_str = time_span.get_text(strip=True) if time_span else ""
+            branch_span = ev.find("span", class_="event-location-branch")
+            branch = branch_span.get_text(strip=True) if branch_span else "Somerville Public Library"
+
+            low = title.lower()
+            if "social work: one-on-one" in low:
+                continue
+
+            # parse time
+            m_time = re.search(r"(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\s*[—–-]", time_str, re.I)
+            m_end = re.search(r"[—–-]\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)", time_str, re.I)
+            hour = 12
+            minute = 0
+            if m_time:
+                hour = int(m_time.group(1))
+                minute = int(m_time.group(2) or 0)
+                ampm = (m_time.group(3) or (m_end.group(3) if m_end else "pm")).lower()
+                if ampm == "pm" and hour < 12:
+                    hour += 12
+                elif ampm == "am" and hour == 12:
+                    hour = 0
+
+            try:
+                y, m, d = [int(x) for x in date_str.split("-")]
+                iso_dt = datetime(y, m, d, hour, minute).isoformat()
+            except Exception:
+                iso_dt = None
+
+            cat = "community"
+            if any(w in low for w in ["craft", "stitch", "sewing", "knit", "art", "collage", "tote", "mask", "draw"]):
+                cat = "arts"
+            elif any(w in low for w in ["book", "author", "read", "writer", "poet", "banned"]):
+                cat = "books"
+            elif any(w in low for w in ["music", "concert", "sing"]):
+                cat = "music"
+
+            events.append({
+                "name": title,
+                "date": iso_dt,
+                "url": href,
+                "venue": f"Somerville Public Library ({branch})",
+                "category": cat,
+                "price": "Free",
+            })
+    return events
+
+
 _ALL_VENUES = [
     {"name": "Ticketmaster", "url": "https://www.ticketmaster.com/", "ua": UA_CHROME, "scraper": scrape_ticketmaster, "default_category": "music"},
     {"name": "SeatGeek", "url": "https://seatgeek.com/cities/boston", "ua": UA_CHROME, "scraper": scrape_seatgeek, "default_category": "music"},
@@ -3741,7 +4176,7 @@ _ALL_VENUES = [
     {"name": "The Sinclair", "url": "https://www.sinclaircambridge.com/events", "ua": UA_CHROME, "scraper": scrape_sinclair, "default_category": "music"},
     {"name": "Night Shift Brewing", "url": "https://nightshiftbrewing.com/events/", "ua": UA_CHROME, "scraper": scrape_night_shift, "default_category": "food"},
     {"name": "McCarthy's Toad", "url": "https://www.mccarthystoad.com/calendar", "ua": UA_CHROME, "scraper": scrape_toad, "default_category": "music"},
-    {"name": "Remnant Somerville", "url": "https://www.remnantsomerville.com/live", "ua": UA_CHROME, "scraper": scrape_squarespace_events, "default_category": "music"},
+    {"name": "Remnant Brewing", "url": "https://www.remnantsomerville.com/live", "ua": UA_CHROME, "scraper": scrape_remnant, "default_category": "music"},
     {"name": "The Burren", "url": "https://burren.com/music.html", "ua": UA_CHROME, "scraper": scrape_burren, "default_category": "music"},
     {"name": "Harvard Museum of Natural History", "url": "https://www.hmnh.harvard.edu/calendar", "ua": UA_CURL, "scraper": scrape_hmnh, "default_category": "community"},
     {"name": "Lovestruck Books (via Eventbrite)", "url": "https://www.eventbrite.com/o/lovestruck-books-92052235443", "ua": UA_CHROME, "scraper": scrape_eventbrite_org, "default_category": "books"},
@@ -3767,6 +4202,15 @@ _ALL_VENUES = [
     {"name": "Arts at the Armory", "url": "https://artsatthearmory.org/upcoming-events/", "ua": UA_CHROME, "scraper": scrape_arts_at_the_armory, "default_category": "arts"},
     {"name": "Somerville Arts Council", "url": "https://somervilleartscouncil.org/events", "ua": UA_CHROME, "scraper": scrape_somerville_arts_council, "default_category": "arts"},
     {"name": "Jacques' Cabaret", "url": "https://www.eventbrite.com/d/ma--boston/jacques-cabaret/", "ua": UA_CHROME, "scraper": scrape_jacques, "default_category": "theater"},
+    {"name": "The Jungle", "url": "https://www.eventbrite.com/o/the-jungle-19911055529", "ua": UA_CHROME, "scraper": scrape_the_jungle, "default_category": "music"},
+    {"name": "The Lilypad", "url": "https://www.lilypadinman.com/calendar", "ua": UA_CHROME, "scraper": scrape_lilypad, "default_category": "music"},
+    {"name": "The Plough and Stars", "url": "https://calendar.ploughandstars.com/events/calendar", "ua": UA_CHROME, "scraper": scrape_plough_and_stars, "default_category": "music"},
+    {"name": "Sally O'Brien's", "url": "https://www.sallyobriensbar.com/music", "ua": UA_CHROME, "scraper": scrape_sally_obriens, "default_category": "music"},
+    {"name": "Side Quest Books & Games", "url": "https://www.eventbrite.com/o/side-quest-books-games-73153292453", "ua": UA_CHROME, "scraper": scrape_side_quest, "default_category": "books"},
+    {"name": "Duck Duck Goofs", "url": "https://www.eventbrite.com/d/ma--somerville/duck-duck-goofs/", "ua": UA_CHROME, "scraper": scrape_duck_duck_goofs, "default_category": "comedy"},
+    {"name": "Gather Here", "url": "https://gatherhereonline.com/apps/bookthatapp/calendar", "ua": UA_CHROME, "scraper": scrape_gather_here, "default_category": "arts"},
+    {"name": "MIT Open Space", "url": "https://openspace.mit.edu/calendar", "ua": UA_CHROME, "scraper": scrape_mit_open_space, "default_category": "community"},
+    {"name": "Somerville Public Library", "url": "https://somervillepubliclibrary.assabetinteractive.com/calendar/", "ua": UA_CHROME, "scraper": scrape_somerville_library, "default_category": "community"},
 ]
 
 # Drop venues that require env vars we don't have set — keeps the fail banner clean.
@@ -3800,10 +4244,10 @@ STATIC_LINKS = [
     ("music",   "Berklee Performance Center", "https://www.berklee.edu/BPC"),
     ("clubbing","Middlesex Lounge (Cambridge)", "https://www.msexcambridge.com/calendar"),
     ("gaming",  "Balance Patch", "https://www.balancepatch.com/events"),
-    ("gaming",  "MIT Strategic Games Society (Walker Memorial)", "https://calendar.mit.edu/group/mit_strategic_games_society"),
     ("music",   "Regattabar (jazz)", "https://www.regattabarjazz.com/"),
-    ("music",   "Lilypad (Inman Square)", "https://www.lilypadinman.com/calendar"),
     ("theater", "Jacques' Cabaret (historic drag & cabaret)", "http://jacquescabaret.com/v3/"),
+    ("music",   "Underbones (basement punk/rock & Friday trivia under Redbones)", "https://www.instagram.com/underbones_somerville/"),
+    ("community", "Somerville Community Growing Center (gardens, workshops, festivals)", "https://www.thegrowingcenter.org/calendar"),
 ]
 
 
@@ -3912,6 +4356,9 @@ MANUAL_RECURRING_EVENTS = [
         ("Traditional Irish Music Session @ The Druid", "https://www.druidpub.com/", 2, 20, 0, "Free"),
         ("Traditional Irish Music Session @ The Druid", "https://www.druidpub.com/", 5, 16, 0, "Free"),
         ("Traditional Irish Music Brunch Session @ The Druid", "https://www.druidpub.com/", 6, 12, 0, "Free"),
+    ]),
+    ("Underbones", "https://www.redbones.com/events", "comedy", [
+        ("Phrenology Trivia Night @ Underbones", "https://www.redbones.com/events", 4, 20, 0, "Free"),
     ]),
 ]
 

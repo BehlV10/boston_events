@@ -27,6 +27,9 @@ CITY_RULES = [
         "the burren", "burren", "mccarthy's toad", "mccarthys toad", "remnant somerville",
         "comedy studio", "bow market", "upstairs at bow", "union square",
         "armory", "arts at the armory", "somerville arts council",
+        "the jungle", "jungle", "sally o'brien", "sally obrien", "side quest",
+        "duck duck goof", "goofs comedy", "somerville library", "growing center",
+        "underbones", "remnant brewing",
     )),
     ("cambridge", (
         "mit ", "m.i.t", "harvard square", "harvard book", "porter square", "sinclair",
@@ -41,6 +44,8 @@ CITY_RULES = [
         "venture café", "venture cafe", "cic cambridge",
         "middle east", "phoenix landing", "manray", "man ray", "prospect st",
         "regattabar", "lilypad", "inman square", "the druid", "druid",
+        "plough and stars", "plough & stars", "gather here", "mit open space",
+        "remnant satellite",
     )),
     ("boston", (
         "city winery", "royale", "wilbur", "ica boston", "gardner", "boston public library",
