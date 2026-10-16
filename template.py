@@ -15,6 +15,7 @@ from scrapers import (
     category_bucket,
     fetch_boston_weather,
     fetch_luckyseat_boston,
+    _load_community_events,
 )
 from venues_geo import resolve_event_geo
 
@@ -713,6 +714,11 @@ def group_by_date(results):
 
 
 def render_page(results):
+    if not any(r.get("venue") == "Community Submissions" for r in results):
+        comm = _load_community_events()
+        if comm:
+            results = list(results) + comm
+
     today = datetime.now(EASTERN).date()
     today_iso = today.isoformat()
     dated, tba, ongoing = group_by_date(results)
@@ -796,7 +802,9 @@ def render_page(results):
                 maps_url = _maps_link(venue, city)
                 venue_link = f'<a class="venue-link" href="{escape(maps_url)}" target="_blank" rel="noopener">{escape(venue)}</a>'
 
-            if source and source.lower() != venue.lower() and not any(agg in source.lower() for agg in ["ticketmaster", "eventbrite", "do617", "boston calendar"]):
+            if e.get("_is_community"):
+                venue_html = f'{venue_link}{geo_btn} <span class="badge-community" title="Community submitted event">👤 Community</span>'
+            elif source and source.lower() != venue.lower() and not any(agg in source.lower() for agg in ["ticketmaster", "eventbrite", "do617", "boston calendar"]):
                 venue_html = f'{venue_link}{geo_btn} <span class="venue-via">(via {escape(source)})</span>'
             else:
                 venue_html = f'{venue_link}{geo_btn}'
@@ -2084,13 +2092,298 @@ def render_page(results):
       gap: 6px;
     }}
   }}
+  /* Banner Header Row & Submit Button */
+  .banner-title-row {{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }}
+  .btn-submit-event {{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #ffd866 0%, #f29e4c 100%);
+    color: #0c0e14;
+    font-weight: 750;
+    font-size: 14px;
+    padding: 10px 18px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 18px rgba(255, 216, 102, 0.35);
+    transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+  }}
+  .btn-submit-event:hover {{
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 6px 22px rgba(255, 216, 102, 0.5);
+    filter: brightness(1.06);
+  }}
+  .btn-submit-event:active {{
+    transform: translateY(1px);
+  }}
+
+  .mobile-submit-btn {{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #ffd866 0%, #f29e4c 100%);
+    color: #0c0e14;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 8px 14px;
+    border-radius: var(--radius-md);
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+  }}
+
+  /* Community Badge */
+  .badge-community {{
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: rgba(93, 155, 255, 0.15);
+    border: 1px solid rgba(93, 155, 255, 0.3);
+    color: #5d9bff;
+    vertical-align: middle;
+  }}
+
+  /* Submission Modal Overlay */
+  .modal-overlay {{
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(6, 8, 12, 0.78);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    overflow-y: auto;
+    animation: modalFadeIn 0.2s ease-out;
+  }}
+  @keyframes modalFadeIn {{
+    from {{ opacity: 0; }}
+    to {{ opacity: 1; }}
+  }}
+  .modal-card {{
+    background: #141722;
+    border: 1px solid var(--border-hover);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    width: 100%;
+    max-width: 580px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 28px 24px;
+    position: relative;
+    animation: modalCardPop 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  }}
+  @keyframes modalCardPop {{
+    from {{ transform: scale(0.95) translateY(12px); opacity: 0; }}
+    to {{ transform: scale(1) translateY(0); opacity: 1; }}
+  }}
+  .modal-header {{
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }}
+  .modal-title {{
+    margin: 0;
+    font-size: 20px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+  }}
+  .modal-sub {{
+    margin: 6px 0 0;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.4;
+  }}
+  .modal-close-btn {{
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 16px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+  }}
+  .modal-close-btn:hover {{
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+  }}
+  .modal-form {{
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }}
+  .form-row {{
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }}
+  .form-grid-2 {{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }}
+  @media (max-width: 520px) {{
+    .form-grid-2 {{
+      grid-template-columns: 1fr;
+    }}
+  }}
+  .form-label {{
+    font-size: 12px;
+    font-weight: 700;
+    color: #c9d1d9;
+    letter-spacing: 0.02em;
+  }}
+  .form-label .req {{
+    color: #e05a6b;
+  }}
+  .form-label .hint {{
+    font-weight: 400;
+    color: var(--muted);
+  }}
+  .form-input, .form-select, .form-textarea {{
+    width: 100%;
+    box-sizing: border-box;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 9px 12px;
+    color: #ffffff;
+    font-size: 13px;
+    font-family: inherit;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }}
+  .form-input:focus, .form-select:focus, .form-textarea:focus {{
+    outline: none;
+    border-color: var(--accent);
+    background: rgba(93, 155, 255, 0.08);
+  }}
+  .form-select option {{
+    background: #151822;
+    color: #ffffff;
+  }}
+  .price-input-row {{
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }}
+  .btn-pill-free {{
+    background: rgba(74, 222, 128, 0.14);
+    border: 1px solid rgba(74, 222, 128, 0.35);
+    color: #4ade80;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+  }}
+  .btn-pill-free:hover {{
+    background: rgba(74, 222, 128, 0.25);
+  }}
+  .form-status {{
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
+  }}
+  .form-status.success {{
+    background: rgba(74, 222, 128, 0.15);
+    border: 1px solid rgba(74, 222, 128, 0.4);
+    color: #4ade80;
+  }}
+  .form-status.error {{
+    background: rgba(224, 90, 107, 0.15);
+    border: 1px solid rgba(224, 90, 107, 0.4);
+    color: #ff7b8b;
+  }}
+  .form-actions {{
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 8px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+  }}
+  .btn-cancel {{
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-weight: 600;
+    font-size: 13px;
+    padding: 9px 16px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+  }}
+  .btn-cancel:hover {{
+    color: #ffffff;
+    border-color: var(--border-hover);
+  }}
+  .btn-primary-submit {{
+    background: linear-gradient(135deg, #5d9bff 0%, #3b82f6 100%);
+    border: none;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 10px 20px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+    transition: all 0.15s ease;
+  }}
+  .btn-primary-submit:hover {{
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+    filter: brightness(1.08);
+  }}
+  .form-footer-note {{
+    font-size: 11px;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 4px;
+  }}
 </style>
 </head>
 <body>
   <div class="banner">
     <div class="banner-inner">
       <div class="banner-top-tag"><span class="live-pulse"></span> GREATER BOSTON LIVE EVENTS</div>
-      <h1 class="banner-title">Wicked Boston Events</h1>
+      <div class="banner-title-row">
+        <h1 class="banner-title">Wicked Boston Events</h1>
+        <button type="button" class="btn-submit-event" id="btn-open-submit-modal" aria-haspopup="dialog" aria-expanded="false">
+          <span>＋ Add Event</span>
+        </button>
+      </div>
       <div class="banner-meta-pill">
         {weather_pill_html}
         <span class="pill-dot">·</span>
@@ -2105,8 +2398,11 @@ def render_page(results):
   <div class="layout">
     <div class="mobile-filter-bar">
       <button type="button" id="mobile-filter-toggle" class="mobile-filter-btn">
-        <span>⚙️ Filter Venues &amp; Categories</span>
+        <span>⚙️ Filter</span>
         <span id="mobile-filter-badge" class="count">All</span>
+      </button>
+      <button type="button" class="mobile-submit-btn" id="btn-open-submit-modal-mobile">
+        <span>＋ Add Event</span>
       </button>
     </div>
     <aside class="filters" id="sidebar-filters">
@@ -2232,7 +2528,125 @@ def render_page(results):
     </main>
     {useful_sidebar}
   </div>
-  <footer>Scraped live from each venue's site. Times shown in Eastern.</footer>
+  <!-- Community Event Submission Modal -->
+  <div id="submit-event-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-submit-title" style="display:none;">
+    <div class="modal-card" id="submit-modal-card">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title" id="modal-submit-title">Add an Event to Boston Events</h2>
+          <p class="modal-sub">Hosting a show, dance, meetup, or know of an event we missed? Submit it below.</p>
+        </div>
+        <button type="button" class="modal-close-btn" id="btn-close-submit-modal" aria-label="Close modal">✕</button>
+      </div>
+
+      <form id="community-event-form" class="modal-form" novalidate>
+        <!-- Anti-bot honeypot field (hidden from real users) -->
+        <input type="text" name="_hp_company" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true" style="display:none !important;">
+
+        <div class="form-row">
+          <label for="ev-title" class="form-label">
+            Event Title <span class="req">*</span>
+          </label>
+          <input type="text" id="ev-title" name="name" class="form-input" placeholder="e.g., Live Jazz Trio, Somerville Flea, Salsa Night" required maxlength="150">
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-row">
+            <label for="ev-venue" class="form-label">
+              Venue / Location <span class="req">*</span>
+            </label>
+            <input type="text" id="ev-venue" name="venue" class="form-input" placeholder="e.g., The Burren, 26 New St, Boston Common" required maxlength="150">
+          </div>
+          <div class="form-row">
+            <label for="ev-city" class="form-label">
+              City / Area <span class="req">*</span>
+            </label>
+            <select id="ev-city" name="city" class="form-select" required>
+              <option value="boston" selected>Boston (incl. Allston, Brighton, South End, Seaport, Brookline)</option>
+              <option value="cambridge">Cambridge (Harvard, Central, Kendall, Inman)</option>
+              <option value="somerville">Somerville (Davis, Union, Assembly, Spring Hill)</option>
+              <option value="other">Other / Greater Boston Suburbs</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-row">
+            <label for="ev-date" class="form-label">
+              Date <span class="req">*</span>
+            </label>
+            <input type="date" id="ev-date" name="date" class="form-input" required>
+          </div>
+          <div class="form-row">
+            <label for="ev-time" class="form-label">
+              Start Time <span class="hint">(optional)</span>
+            </label>
+            <input type="time" id="ev-time" name="time" class="form-input" value="19:00">
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="form-row">
+            <label for="ev-category" class="form-label">
+              Category <span class="req">*</span>
+            </label>
+            <select id="ev-category" name="category" class="form-select" required>
+              <option value="music">🎵 Music / Concert</option>
+              <option value="comedy">🎙️ Comedy</option>
+              <option value="dance">💃 Dance / Social</option>
+              <option value="theater">🎭 Stage &amp; Theater</option>
+              <option value="art">🎨 Art &amp; Gallery</option>
+              <option value="food">🍷 Food &amp; Drink</option>
+              <option value="fitness">🏃 Fitness &amp; Outdoors</option>
+              <option value="books">📚 Books &amp; Talks</option>
+              <option value="gaming">🎲 Trivia &amp; Games</option>
+              <option value="community">🤝 Community &amp; Markets</option>
+              <option value="clubbing">🪩 Clubbing &amp; DJ</option>
+              <option value="other" selected>✨ Other</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <label for="ev-price" class="form-label">
+              Price <span class="hint">(e.g., Free, $15, $20-$30)</span>
+            </label>
+            <div class="price-input-row">
+              <input type="text" id="ev-price" name="price" class="form-input" placeholder="e.g., Free or $15">
+              <button type="button" id="btn-quick-free" class="btn-pill-free">✨ Free</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label for="ev-url" class="form-label">
+            Event Website / Ticket URL <span class="req">*</span>
+          </label>
+          <input type="url" id="ev-url" name="url" class="form-input" placeholder="https://..." required>
+        </div>
+
+        <div class="form-row">
+          <label for="ev-desc" class="form-label">
+            Short Description / Notes <span class="hint">(optional)</span>
+          </label>
+          <textarea id="ev-desc" name="description" class="form-textarea" rows="2" placeholder="Brief note about the performers, dress code, RSVP details..." maxlength="400"></textarea>
+        </div>
+
+        <div class="form-status" id="form-submit-status" style="display:none;"></div>
+
+        <div class="form-actions">
+          <button type="button" class="btn-cancel" id="btn-cancel-submit">Cancel</button>
+          <button type="submit" class="btn-primary-submit" id="btn-submit-action">
+            <span class="btn-text">Publish Event ↗</span>
+            <span class="btn-spinner" style="display:none;">⏳ Adding...</span>
+          </button>
+        </div>
+
+        <div class="form-footer-note">
+          <span>🛡️ Submissions are instantly verified and added to the live schedule.</span>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
     const catBoxes = document.querySelectorAll('.cat-chk');
     const venueBoxes = document.querySelectorAll('.venue-chk');
@@ -3274,6 +3688,275 @@ def render_page(results):
     updateDayHeadings();
     scheduleMidnightRefresh();
     setInterval(checkDayRollover, 60000);
+
+    // --- Community Event Submission Modal Logic ---
+    const submitModal = document.getElementById('submit-event-modal');
+    const btnOpenSubmit = document.getElementById('btn-open-submit-modal');
+    const btnOpenSubmitMobile = document.getElementById('btn-open-submit-modal-mobile');
+    const btnCloseSubmit = document.getElementById('btn-close-submit-modal');
+    const btnCancelSubmit = document.getElementById('btn-cancel-submit');
+    const communityForm = document.getElementById('community-event-form');
+    const evDateInput = document.getElementById('ev-date');
+    const btnQuickFree = document.getElementById('btn-quick-free');
+    const evPriceInput = document.getElementById('ev-price');
+    const formStatus = document.getElementById('form-submit-status');
+    const btnSubmitAction = document.getElementById('btn-submit-action');
+
+    function openSubmitModal() {{
+      if (!submitModal) return;
+      submitModal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+      if (evDateInput && !evDateInput.value) {{
+        evDateInput.value = todayISO;
+      }}
+      if (formStatus) {{
+        formStatus.style.display = 'none';
+        formStatus.className = 'form-status';
+      }}
+      const titleInput = document.getElementById('ev-title');
+      if (titleInput) {{
+        setTimeout(() => titleInput.focus(), 60);
+      }}
+    }}
+
+    function closeSubmitModal() {{
+      if (!submitModal) return;
+      submitModal.style.display = 'none';
+      document.body.style.overflow = '';
+    }}
+
+    if (btnOpenSubmit) btnOpenSubmit.addEventListener('click', openSubmitModal);
+    if (btnOpenSubmitMobile) btnOpenSubmitMobile.addEventListener('click', openSubmitModal);
+    if (btnCloseSubmit) btnCloseSubmit.addEventListener('click', closeSubmitModal);
+    if (btnCancelSubmit) btnCancelSubmit.addEventListener('click', closeSubmitModal);
+
+    if (submitModal) {{
+      submitModal.addEventListener('click', (e) => {{
+        if (e.target === submitModal) {{
+          closeSubmitModal();
+        }}
+      }});
+    }}
+
+    document.addEventListener('keydown', (e) => {{
+      if (e.key === 'Escape' && submitModal && submitModal.style.display === 'flex') {{
+        closeSubmitModal();
+      }}
+    }});
+
+    if (btnQuickFree && evPriceInput) {{
+      btnQuickFree.addEventListener('click', () => {{
+        evPriceInput.value = 'Free';
+      }});
+    }}
+
+    function injectUserEventIntoDOM(ev) {{
+      const dateKey = (ev.date || todayISO).slice(0, 10);
+      let daySection = document.querySelector(`.day[data-date="${{dateKey}}"]`);
+      if (!daySection) {{
+        daySection = document.querySelector(`.day[data-date="${{todayISO}}"]`) || document.querySelector('.day');
+      }}
+      if (!daySection) return;
+
+      const city = ev.city || 'boston';
+      let citySection = daySection.querySelector(`.city-section[data-city="${{city}}"]`);
+      if (!citySection) {{
+        citySection = daySection.querySelector('.city-section') || daySection;
+      }}
+
+      let bucketSection = citySection.querySelector('.bucket');
+      let targetUl = bucketSection ? bucketSection.querySelector('ul') : null;
+      if (!targetUl) {{
+        targetUl = daySection.querySelector('ul');
+      }}
+      if (!targetUl) return;
+
+      let timeStr = 'TBA';
+      try {{
+        const dt = new Date(ev.date);
+        if (!isNaN(dt)) {{
+          let h = dt.getHours();
+          const m = dt.getMinutes();
+          const ampm = h >= 12 ? 'pm' : 'am';
+          h = h % 12 || 12;
+          timeStr = `${{h}}:${{String(m).padStart(2, '0')}}${{ampm}}`;
+        }}
+      }} catch (_) {{}}
+
+      const priceTag = ev.price ? `<span class="price ticketed">${{escapeHTML(ev.price)}}</span>` : '<span class="price free">Free</span>';
+      const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${{encodeURIComponent(ev.venue + ', MA')}}`;
+
+      const li = document.createElement('li');
+      li.className = 'event';
+      li.dataset.cat = ev.category || 'other';
+      li.dataset.bucket = 'Other';
+      li.dataset.venue = ev.venue;
+      li.dataset.city = city;
+      li.dataset.recur = 'once';
+      li.dataset.free = (!ev.price || ev.price.toLowerCase().includes('free')) ? 'true' : 'false';
+      li.innerHTML = `
+        <span class="time">${{timeStr}}</span>
+        <div class="what">
+          <a href="${{escapeHTML(ev.url || '#')}}" target="_blank" rel="noopener">${{escapeHTML(ev.name)}}</a>
+          ${{priceTag}}
+          <span class="cat-pill" style="--cat-c:#4ade80; background:#4ade8018; border-color:#4ade8033; color:#4ade80">✨ Added Just Now</span>
+          <div class="venue-tag">
+            <a class="venue-link" href="${{mapsUrl}}" target="_blank" rel="noopener">${{escapeHTML(ev.venue)}}</a>
+            <span class="badge-community">👤 Community</span>
+          </div>
+        </div>
+      `;
+
+      targetUl.prepend(li);
+    }}
+
+    function escapeHTML(str) {{
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }}
+
+    function loadLocalCommunityEvents() {{
+      try {{
+        const raw = localStorage.getItem('boston_community_events');
+        if (!raw) return;
+        const events = JSON.parse(raw);
+        if (!Array.isArray(events)) return;
+        const nowMs = Date.now();
+        events.forEach(ev => {{
+          try {{
+            const evMs = new Date(ev.date).getTime();
+            if (evMs >= nowMs - (24 * 3600 * 1000)) {{
+              injectUserEventIntoDOM(ev);
+            }}
+          }} catch (_) {{}}
+        }});
+      }} catch (_) {{}}
+    }}
+
+    if (communityForm) {{
+      communityForm.addEventListener('submit', async (e) => {{
+        e.preventDefault();
+
+        const hp = communityForm.querySelector('input[name="_hp_company"]');
+        if (hp && hp.value) {{
+          closeSubmitModal();
+          return;
+        }}
+
+        const nameInput = document.getElementById('ev-title');
+        const venueInput = document.getElementById('ev-venue');
+        const dateInput = document.getElementById('ev-date');
+        const timeInput = document.getElementById('ev-time');
+        const citySelect = document.getElementById('ev-city');
+        const categorySelect = document.getElementById('ev-category');
+        const priceInput = document.getElementById('ev-price');
+        const urlInput = document.getElementById('ev-url');
+        const descInput = document.getElementById('ev-desc');
+
+        const name = (nameInput.value || '').trim();
+        const venue = (venueInput.value || '').trim();
+        const dateVal = (dateInput.value || '').trim();
+        const timeVal = (timeInput.value || '19:00').trim();
+        const city = citySelect ? citySelect.value : 'boston';
+        const category = categorySelect ? categorySelect.value : 'other';
+        const price = (priceInput.value || '').trim();
+        const url = (urlInput.value || '').trim();
+        const desc = (descInput.value || '').trim();
+
+        if (!name || name.length < 2) {{
+          showFormStatus('Please enter an event title (at least 2 characters).', 'error');
+          nameInput.focus();
+          return;
+        }}
+        if (!venue || venue.length < 2) {{
+          showFormStatus('Please enter a venue or location.', 'error');
+          venueInput.focus();
+          return;
+        }}
+        if (!dateVal) {{
+          showFormStatus('Please choose an event date.', 'error');
+          dateInput.focus();
+          return;
+        }}
+        if (!url || !url.startsWith('http')) {{
+          showFormStatus('Please enter a valid website link (starting with http:// or https://).', 'error');
+          urlInput.focus();
+          return;
+        }}
+
+        const isoDate = `${{dateVal}}T${{timeVal}}:00-04:00`;
+
+        const newEvent = {{
+          name: name,
+          venue: venue,
+          date: isoDate,
+          url: url,
+          category: category,
+          city: city,
+          price: price || null,
+          description: desc,
+          _is_community: true,
+          submitted_at: new Date().toISOString(),
+        }};
+
+        if (btnSubmitAction) {{
+          btnSubmitAction.disabled = true;
+          const btnText = btnSubmitAction.querySelector('.btn-text');
+          const btnSpinner = btnSubmitAction.querySelector('.btn-spinner');
+          if (btnText) btnText.style.display = 'none';
+          if (btnSpinner) btnSpinner.style.display = 'inline';
+        }}
+
+        try {{
+          const stored = JSON.parse(localStorage.getItem('boston_community_events') || '[]');
+          stored.push(newEvent);
+          localStorage.setItem('boston_community_events', JSON.stringify(stored.slice(-20)));
+        }} catch (_) {{}}
+
+        injectUserEventIntoDOM(newEvent);
+        apply();
+
+        const submitEndpoint = window.EVENT_SUBMISSION_ENDPOINT || '';
+        if (submitEndpoint) {{
+          try {{
+            await fetch(submitEndpoint, {{
+              method: 'POST',
+              headers: {{ 'Content-Type': 'application/json' }},
+              body: JSON.stringify(newEvent),
+            }});
+          }} catch (err) {{
+            console.warn('Backend submission failed, kept locally:', err);
+          }}
+        }}
+
+        showFormStatus('🎉 Event successfully added! It is now live in your feed.', 'success');
+
+        setTimeout(() => {{
+          closeSubmitModal();
+          communityForm.reset();
+          if (btnSubmitAction) {{
+            btnSubmitAction.disabled = false;
+            const btnText = btnSubmitAction.querySelector('.btn-text');
+            const btnSpinner = btnSubmitAction.querySelector('.btn-spinner');
+            if (btnText) btnText.style.display = 'inline';
+            if (btnSpinner) btnSpinner.style.display = 'none';
+          }}
+        }}, 1400);
+      }});
+    }}
+
+    function showFormStatus(msg, type) {{
+      if (!formStatus) return;
+      formStatus.textContent = msg;
+      formStatus.className = `form-status ${{type}}`;
+      formStatus.style.display = 'block';
+    }}
+
+    loadLocalCommunityEvents();
 
     hashToState();
     apply();

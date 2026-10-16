@@ -4907,6 +4907,42 @@ def _expand_manual_recurring(weeks=8):
     return results
 
 
+def _load_community_events():
+    """Load community-submitted events from community_events.json."""
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "community_events.json")
+    if not os.path.exists(path):
+        return []
+    try:
+        with open(path) as f:
+            data = json.load(f)
+        if not isinstance(data, list) or not data:
+            return []
+
+        events = []
+        for e in data:
+            if not e.get("name") or not e.get("venue"):
+                continue
+            cat = e.get("category") or infer_category(e["name"], e["venue"])
+            events.append({
+                "name": str(e["name"]).strip(),
+                "date": e.get("date"),
+                "url": e.get("url") or "",
+                "venue": str(e["venue"]).strip(),
+                "price": e.get("price"),
+                "category": cat,
+                "_is_community": True,
+                "_source_venue": "Community Submission",
+                "address": e.get("address") or "",
+            })
+        if not events:
+            return []
+        return [{"venue": "Community Submissions", "url": "", "events": events, "error": None}]
+    except Exception as err:
+        print(f"Warning: could not load community events: {err}")
+        return []
+
+
+
 CATEGORY_KEYWORDS = [
     ("dance",     ["dance", "dancing", "dancers", "salsa", "bachata", "kizomba", "merengue", "tango", "swing dance", "swing dancing",
                    "lindy hop", "balboa", "blues dance", "contra dance", "zouk", "cha-cha", "cha cha",
@@ -5193,6 +5229,7 @@ def _do_scrape_all():
     order = {v["name"]: i for i, v in enumerate(VENUES)}
     results.sort(key=lambda r: order.get(r["venue"], 999))
     results.extend(_expand_manual_recurring())
+    results.extend(_load_community_events())
     with _cache_lock:
         _cache["data"] = results
         _cache["ts"] = time.time()
