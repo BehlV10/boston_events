@@ -69,6 +69,7 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
     "kendall center": (42.3625, -71.0865, "Kendall Square", "90 Broadway, Cambridge", "Kendall Center"),
     "urban park roof garden": (42.3625, -71.0865, "Kendall Square", "90 Broadway, Cambridge", "Urban Park Roof Garden"),
     "cambridge crossing": (42.3712, -71.0768, "Cambridge Crossing", "222 Jacobs St, Cambridge", "Cambridge Crossing"),
+    "batifol": (42.3639, -71.0829, "Kendall Square", "291 3rd St, Cambridge", "Batifol"),
 
     # Cambridgeport & Central Square
     "the plough and stars": (42.3685, -71.1118, "Cambridgeport", "912 Massachusetts Ave, Cambridge", "The Plough and Stars"),
@@ -140,6 +141,7 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
     "versus boston": (42.3536, -71.0608, "Downtown Crossing", "42 Province St, Boston", "Versus Boston"),
     "nick's comedy stop": (42.3512, -71.0664, "Theater District", "100 Warrenton St, Boston", "Nick's Comedy Stop"),
     "the tam": (42.3521, -71.0645, "Theater District", "222 Tremont St, Boston", "The Tam"),
+    "bsmnt": (42.3524, -71.0664, "Theater District", "140 Boylston St, Boston", "bsmnt"),
     "jacques cabaret": (42.3499, -71.0691, "Bay Village", "79 Broadway, Boston", "Jacques' Cabaret"),
     "jacques' cabaret": (42.3499, -71.0691, "Bay Village", "79 Broadway, Boston", "Jacques' Cabaret"),
     "biddy early's": (42.3551, -71.0544, "Financial District", "141 Pearl St, Boston", "Biddy Early's"),
@@ -166,6 +168,10 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
     "the grand boston": (42.3524, -71.0475, "Seaport", "58 Seaport Blvd, Boston", "The Grand"),
     "scorpion bar boston": (42.3524, -71.0475, "Seaport", "58 Seaport Blvd, Boston", "Scorpion Bar Boston"),
     "trillium fort point": (42.3518, -71.0494, "Fort Point", "50 Thomson Pl, Boston", "Trillium Fort Point"),
+    "kings seaport": (42.3516, -71.0448, "Seaport", "60 Seaport Blvd, Boston", "Kings Dining & Entertainment (Seaport)"),
+    "kings - seaport": (42.3516, -71.0448, "Seaport", "60 Seaport Blvd, Boston", "Kings Dining & Entertainment (Seaport)"),
+    "kings dining and entertainment": (42.3516, -71.0448, "Seaport", "60 Seaport Blvd, Boston", "Kings Dining & Entertainment (Seaport)"),
+    "kings dining & entertainment": (42.3516, -71.0448, "Seaport", "60 Seaport Blvd, Boston", "Kings Dining & Entertainment (Seaport)"),
 
     # Back Bay & South End
     "boston public library": (42.3496, -71.0779, "Copley Square", "700 Boylston St, Boston", "Boston Public Library"),
@@ -383,6 +389,11 @@ VENUE_RULES = [
     ("mit open space", (42.3621, -71.0864, "Kendall Square", "292 Main St, Cambridge", "MIT Open Space")),
     ("underbones", (42.3967, -71.1215, "Davis Square", "55 Chester St, Somerville", "Underbones")),
     ("growing center", (42.3828, -71.0980, "Spring Hill", "22 Vinal Ave, Somerville", "Somerville Community Growing Center")),
+    ("bsmnt", (42.3524, -71.0664, "Theater District", "140 Boylston St, Boston", "bsmnt")),
+    ("batifol", (42.3639, -71.0829, "Kendall Square", "291 3rd St, Cambridge", "Batifol")),
+    ("kings seaport", (42.3516, -71.0448, "Seaport", "60 Seaport Blvd, Boston", "Kings Dining & Entertainment (Seaport)")),
+    ("kings - seaport", (42.3516, -71.0448, "Seaport", "60 Seaport Blvd, Boston", "Kings Dining & Entertainment (Seaport)")),
+    ("kings dining", (42.3516, -71.0448, "Seaport", "60 Seaport Blvd, Boston", "Kings Dining & Entertainment (Seaport)")),
 ]
 
 # Coordinate bounding box for valid Greater Boston / Eastern MA events

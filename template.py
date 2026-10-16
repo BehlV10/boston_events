@@ -21,7 +21,7 @@ from venues_geo import resolve_event_geo
 
 CITY_RULES = [
     ("somerville", (
-        "aeronaut", "crystal ballroom", "somerville theatre", "somerville theater",
+        "somerville", "aeronaut", "crystal ballroom", "somerville theatre", "somerville theater",
         "somerville, ma", "(somerville)", ", somerville",
         "davis square", "assembly row", "union square, somerville",
         "the burren", "burren", "mccarthy's toad", "mccarthys toad", "remnant somerville",
@@ -32,7 +32,7 @@ CITY_RULES = [
         "underbones", "remnant brewing",
     )),
     ("cambridge", (
-        "mit ", "m.i.t", "harvard square", "harvard book", "porter square", "sinclair",
+        "cambridge", "batifol", "mit ", "m.i.t", "harvard square", "harvard book", "porter square", "sinclair",
         "brattle", "cambridge, ma", "(cambridge)", ", cambridge",
         "kendall", "kendall center", "urban park", "central square", "inman square", "cantab",
         "havetodance", "have to dance", "ywca cambridge",
@@ -49,6 +49,7 @@ CITY_RULES = [
         "harvard university farmers market", "harvard farmers market",
     )),
     ("boston", (
+        "bsmnt", "kings seaport", "kings - seaport", "kings dining",
         "city winery", "royale", "wilbur", "ica boston", "gardner", "boston public library",
         "laugh boston", "big night live", "house of blues", "paradise rock", "orpheum",
         "td garden", "mgm music hall", "citizens house of blues", "fenway", "back bay",
