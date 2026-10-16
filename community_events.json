@@ -1,1 +1,30 @@
-[]
+[
+  {
+    "name": "Harvard Crimson Madness",
+    "venue": "Lavietes Pavilion",
+    "date": "2026-10-16T19:00:00-04:00",
+    "url": "https://gocrimson.com",
+    "category": "fitness",
+    "price": "Free",
+    "city": "boston",
+    "address": "65 N Harvard St, Boston, MA 02163",
+    "description": "Harvard Basketball kickoff with team scrimmages, dunk contest with guest judge Michael Bivins, and giveaways.",
+    "_is_community": true,
+    "_source_venue": "Community Submission",
+    "submitted_at": "2026-10-16T16:59:20.256223+00:00"
+  },
+  {
+    "name": "Varla Jean Merman - Unlike a Virgin",
+    "venue": "Club Caf\u00e9",
+    "date": "2026-10-16T20:00:00-04:00",
+    "url": "https://www.clubcafe.com",
+    "category": "comedy",
+    "price": "$35 - $45",
+    "city": "boston",
+    "address": "209 Columbus Ave, Boston, MA 02116",
+    "description": "Drag comedy sensation Varla Jean Merman in the Moonshine Room at Club Caf\u00e9.",
+    "_is_community": true,
+    "_source_venue": "Community Submission",
+    "submitted_at": "2026-10-16T16:59:28.488130+00:00"
+  }
+]
