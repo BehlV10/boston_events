@@ -4292,6 +4292,109 @@ def scrape_growing_center(url, ua):
     return events
 
 
+def scrape_comedy_studio(url, ua):
+    """The Comedy Studio via SeatEngine GraphQL API.
+
+    Extracts all distinct show performances (e.g. 7:15 PM and 9:30 PM shows),
+    their individual checkout URLs, and inventory pricing.
+    """
+    venue_uuid = "cf2b1561-bf36-40b8-8380-9c2a3bd0e4e3"
+    storefront_token = "3c7de746-6bc2-4efb-8e91-16da6155edce"
+    api_url = "https://services.seatengine.com/api/v3/public"
+
+    now = datetime.now(EASTERN)
+    start_date = (now - timedelta(days=1)).strftime("%Y-%m-%d")
+    end_date = (now + timedelta(weeks=10)).strftime("%Y-%m-%d")
+
+    query = """
+    query EventsList($venue_uuid: UUID4!, $start_date: String!, $end_date: String!) {
+      eventsList(venueUuid: $venue_uuid, startDate: $start_date, endDate: $end_date) {
+        events {
+          uuid
+          name
+          page { path }
+          shows {
+            uuid
+            start_date_time
+            doortime
+            venueDate
+            cancelledAt
+            status
+            soldOut
+            inventories {
+              title
+              price
+            }
+          }
+        }
+      }
+    }
+    """
+    payload = {
+        "query": query,
+        "variables": {
+            "venue_uuid": venue_uuid,
+            "start_date": start_date,
+            "end_date": end_date,
+        },
+    }
+    headers = {
+        "User-Agent": ua,
+        "Content-Type": "application/json",
+        "x-storefront-token": storefront_token,
+    }
+
+    try:
+        resp = _SESSION.post(api_url, json=payload, headers=headers, timeout=15)
+        resp.raise_for_status()
+        data = resp.json()
+        events_raw = (data.get("data") or {}).get("eventsList", {}).get("events", [])
+    except Exception:
+        return []
+
+    out = []
+    now_utc = datetime.now(timezone.utc)
+    for ev in events_raw:
+        ev_name = (ev.get("name") or "").strip()
+        path = (ev.get("page") or {}).get("path")
+        for show in ev.get("shows", []):
+            if show.get("status") == "CANCELLED" or show.get("cancelledAt"):
+                continue
+            raw_dt = show.get("start_date_time")
+            if not raw_dt:
+                continue
+            try:
+                # SeatEngine start_date_time is in UTC
+                dt_utc = datetime.fromisoformat(raw_dt.replace("Z", "+00:00")).replace(tzinfo=timezone.utc)
+            except Exception:
+                continue
+            if dt_utc < now_utc - timedelta(hours=6):
+                continue
+
+            show_uuid = show.get("uuid")
+            show_url = f"https://www.thecomedystudio.com/checkout/{show_uuid}" if show_uuid else (f"https://www.thecomedystudio.com{path}" if path else "https://www.thecomedystudio.com/calendar")
+
+            invs = show.get("inventories") or []
+            prices = [i.get("price") for i in invs if i.get("price") is not None]
+            price = None
+            if prices:
+                min_p = min(prices) / 100.0
+                max_p = max(prices) / 100.0
+                price = "Free" if max_p == 0 else (f"${min_p:.0f}" if min_p == max_p else f"${min_p:.0f}–${max_p:.0f}")
+            elif "free" in ev_name.lower():
+                price = "Free"
+
+            out.append({
+                "name": ev_name,
+                "date": dt_utc.isoformat(),
+                "url": show_url,
+                "venue": "The Comedy Studio",
+                "price": price,
+                "category": "comedy",
+            })
+    return out
+
+
 _ALL_VENUES = [
     {"name": "Ticketmaster", "url": "https://www.ticketmaster.com/", "ua": UA_CHROME, "scraper": scrape_ticketmaster, "default_category": "music"},
     {"name": "SeatGeek", "url": "https://seatgeek.com/cities/boston", "ua": UA_CHROME, "scraper": scrape_seatgeek, "default_category": "music"},
@@ -4354,7 +4457,7 @@ _ALL_VENUES = [
     {"name": "The Burren", "url": "https://burren.com/music.html", "ua": UA_CHROME, "scraper": scrape_burren, "default_category": "music"},
     {"name": "Harvard Museum of Natural History", "url": "https://www.hmnh.harvard.edu/calendar", "ua": UA_CURL, "scraper": scrape_hmnh, "default_category": "community"},
     {"name": "Lovestruck Books (via Eventbrite)", "url": "https://www.eventbrite.com/o/lovestruck-books-92052235443", "ua": UA_CHROME, "scraper": scrape_eventbrite_org, "default_category": "books"},
-    {"name": "The Comedy Studio", "url": "https://thecomedystudio.com/", "ua": UA_CHROME, "scraper": scrape_jsonld, "default_category": "comedy"},
+    {"name": "The Comedy Studio", "url": "https://www.thecomedystudio.com/calendar", "ua": UA_CHROME, "scraper": scrape_comedy_studio, "default_category": "comedy"},
     {"name": "Salsa Vida Boston", "url": "https://www.salsavida.com/guides/massachusetts/", "ua": UA_CHROME, "scraper": scrape_salsavida, "default_category": "dance"},
     {"name": "Laugh Boston", "url": "https://laughboston.com", "ua": UA_CHROME, "scraper": scrape_laugh_boston, "default_category": "comedy"},
     {"name": "Boch Center (Wang & Shubert)", "url": "https://www.bochcenter.org/events", "ua": UA_CHROME, "scraper": scrape_boch_center, "default_category": "theater"},

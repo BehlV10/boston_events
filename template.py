@@ -520,12 +520,30 @@ def _merge_duplicates(events):
     """Collapse events sharing a normalized name or head title within the same day bucket.
 
     Preserves the best physical venue, merges prices across primary and alt sources,
-    and attaches alt sources so users can compare providers.
+    and attaches alt sources so users can compare providers. Preserves distinct
+    showtimes (e.g. 7:15 PM and 9:30 PM performances of the same comedy show).
     """
     seen_exact = {}
     seen_head = {}
     out = []
     generic_sources = {"ticketmaster", "seatgeek", "the boston calendar", "eventbrite boston", "eventbrite cambridge", "eventbrite somerville", "do617"}
+
+    def _is_different_show(e1, e2):
+        t1 = e1.get("_time")
+        t2 = e2.get("_time")
+        if not t1 or not t2:
+            return False
+        # If either time is EDT midnight (00:00), it's likely an untimed/all-day placeholder
+        if (t1.hour == 0 and t1.minute == 0) or (t2.hour == 0 and t2.minute == 0):
+            return False
+        diff_mins = abs((t1 - t2).total_seconds()) / 60.0
+        s1 = (e1.get("_source_venue") or "").lower()
+        s2 = (e2.get("_source_venue") or "").lower()
+        if s1 and s1 == s2 and diff_mins >= 30:
+            return True
+        if diff_mins >= 75:
+            return True
+        return False
 
     for e in events:
         raw_name = e.get("name") or ""
@@ -535,15 +553,20 @@ def _merge_duplicates(events):
 
         match = None
         if full and len(full) >= 4 and full in seen_exact:
-            match = seen_exact[full]
+            for cand in seen_exact[full]:
+                if not _is_different_show(e, cand):
+                    match = cand
+                    break
         elif head and len(head) >= 4 and head not in GENERIC_HEADS and head in seen_head:
-            candidate = seen_head[head]
-            c_venue = (candidate.get("venue") or "").lower()
-            v_words1 = set(re.findall(r"\w+", venue))
-            v_words2 = set(re.findall(r"\w+", c_venue))
-            common_words = v_words1 & v_words2 - {"the", "at", "in", "of", "and", "boston", "presented", "by", "citizens"}
-            if common_words or not venue or not c_venue or (venue in generic_sources) or (c_venue in generic_sources):
-                match = candidate
+            for cand in seen_head[head]:
+                c_venue = (cand.get("venue") or "").lower()
+                v_words1 = set(re.findall(r"\w+", venue))
+                v_words2 = set(re.findall(r"\w+", c_venue))
+                common_words = v_words1 & v_words2 - {"the", "at", "in", "of", "and", "boston", "presented", "by", "citizens"}
+                if common_words or not venue or not c_venue or (venue in generic_sources) or (c_venue in generic_sources):
+                    if not _is_different_show(e, cand):
+                        match = cand
+                        break
 
         if match:
             match.setdefault("_alt_sources", [])
@@ -566,9 +589,9 @@ def _merge_duplicates(events):
                 match["description"] = e["description"]
         else:
             if full and len(full) >= 4:
-                seen_exact[full] = e
+                seen_exact.setdefault(full, []).append(e)
             if head and len(head) >= 4 and head not in GENERIC_HEADS:
-                seen_head[head] = e
+                seen_head.setdefault(head, []).append(e)
             out.append(e)
 
     return out
