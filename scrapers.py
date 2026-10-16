@@ -16,6 +16,7 @@ import requests
 from requests.adapters import HTTPAdapter
 from bs4 import BeautifulSoup
 from dateutil.rrule import rrulestr
+from dateutil import parser
 
 
 CACHE_SECONDS = 15 * 60
@@ -1507,23 +1508,67 @@ def scrape_wilbur(url, ua):
     soup = fetch_soup(url, ua)
     events = []
     seen = set()
-    for a in soup.select('a[href*="/event/"]'):
-        href = a.get("href", "").split("?")[0]
-        if not href or href in seen:
-            continue
-        seen.add(href)
-        img = a.select_one("img")
-        name = a.get_text(strip=True) or (img.get("alt") if img else "")
-        if not name or name.lower() in ("buy tickets", "tickets", "info", "more"):
-            slug = href.rstrip("/").split("/")[-1]
-            name = slug.replace("-", " ").title()
-        events.append({
-            "name": name[:160],
-            "date": None,
-            "url": href,
-            "venue": "Wilbur Theatre",
-            "price": None,
-        })
+    post_items = soup.select('.post-item')
+    if post_items:
+        for item in post_items:
+            link = item.select_one('a[href*="/event/"]')
+            if not link:
+                continue
+            href = link.get("href", "").split("?")[0]
+            if not href or href in seen:
+                continue
+            seen.add(href)
+
+            h2 = item.select_one("h2")
+            img = item.select_one("img")
+            name = (h2.get_text(strip=True) if h2 else "") or (img.get("alt") if img else "")
+            if not name or name.lower() in ("buy tickets", "tickets", "info", "more"):
+                slug = href.rstrip("/").split("/")[-1]
+                name = slug.replace("-", " ").title()
+
+            date_iso = None
+            date_el = item.select_one(".date")
+            if date_el:
+                raw_date = date_el.get_text(strip=True)
+                if raw_date:
+                    try:
+                        ym = re.search(r'\b(202\d)\b', raw_date)
+                        year = ym.group(1) if ym else str(datetime.now().year)
+                        start_part = raw_date.split(" - ")[0].strip()
+                        if year not in start_part:
+                            start_part = f"{start_part}, {year}"
+                        dt = parser.parse(start_part)
+                        date_iso = dt.replace(hour=19, minute=30).astimezone(EASTERN).isoformat()
+                    except Exception:
+                        pass
+
+            events.append({
+                "name": name[:160],
+                "date": date_iso,
+                "url": href,
+                "venue": "Wilbur Theatre",
+                "price": None,
+                "category": "comedy",
+            })
+    else:
+        for a in soup.select('a[href*="/event/"]'):
+            href = a.get("href", "").split("?")[0]
+            if not href or href in seen:
+                continue
+            seen.add(href)
+            img = a.select_one("img")
+            name = a.get_text(strip=True) or (img.get("alt") if img else "")
+            if not name or name.lower() in ("buy tickets", "tickets", "info", "more"):
+                slug = href.rstrip("/").split("/")[-1]
+                name = slug.replace("-", " ").title()
+            events.append({
+                "name": name[:160],
+                "date": None,
+                "url": href,
+                "venue": "Wilbur Theatre",
+                "price": None,
+                "category": "comedy",
+            })
     return events
 
 

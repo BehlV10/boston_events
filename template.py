@@ -2248,9 +2248,43 @@ def render_page(results):
     align-items: flex-start;
     justify-content: space-between;
     gap: 16px;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
     padding-bottom: 14px;
     border-bottom: 1px solid var(--border);
+  }}
+  .modal-tabs {{
+    display: flex;
+    gap: 6px;
+    margin-bottom: 18px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 4px;
+  }}
+  .modal-tab {{
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 700;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }}
+  .modal-tab:hover {{
+    color: #ffffff;
+  }}
+  .modal-tab.active {{
+    background: var(--accent);
+    color: #0c0e14;
+    box-shadow: 0 2px 8px var(--accent-glow);
   }}
   .modal-title {{
     margin: 0;
@@ -2588,117 +2622,216 @@ def render_page(results):
     <div class="modal-card" id="submit-modal-card">
       <div class="modal-header">
         <div>
-          <h2 class="modal-title" id="modal-submit-title">Add an Event to Boston Events</h2>
-          <p class="modal-sub">Hosting a show, dance, meetup, or know of an event we missed? Submit it below.</p>
+          <h2 class="modal-title" id="modal-submit-title">Add to Boston Events</h2>
+          <p class="modal-sub" id="modal-submit-sub">Share an event or suggest a new venue / space for automatic tracking.</p>
         </div>
         <button type="button" class="modal-close-btn" id="btn-close-submit-modal" aria-label="Close modal">✕</button>
       </div>
 
-      <form id="community-event-form" class="modal-form" novalidate>
-        <!-- Anti-bot honeypot field (hidden from real users) -->
-        <input type="text" name="_hp_company" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true" style="display:none !important;">
+      <div class="modal-tabs" role="tablist">
+        <button type="button" class="modal-tab active" id="tab-btn-event" role="tab" aria-selected="true">
+          <span>📅</span> Add an Event
+        </button>
+        <button type="button" class="modal-tab" id="tab-btn-venue" role="tab" aria-selected="false">
+          <span>📍</span> Suggest a Venue
+        </button>
+      </div>
 
-        <div class="form-row">
-          <label for="ev-title" class="form-label">
-            Event Title <span class="req">*</span>
-          </label>
-          <input type="text" id="ev-title" name="name" class="form-input" placeholder="e.g., Live Jazz Trio, Somerville Flea, Salsa Night" required maxlength="150">
-        </div>
+      <!-- Tab 1: Submit an Event Form -->
+      <div id="modal-view-event">
+        <form id="community-event-form" class="modal-form" novalidate>
+          <!-- Anti-bot honeypot field (hidden from real users) -->
+          <input type="text" name="_hp_company" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true" style="display:none !important;">
 
-        <div class="form-grid-2">
           <div class="form-row">
-            <label for="ev-venue" class="form-label">
-              Venue / Location <span class="req">*</span>
+            <label for="ev-title" class="form-label">
+              Event Title <span class="req">*</span>
             </label>
-            <input type="text" id="ev-venue" name="venue" class="form-input" placeholder="e.g., The Burren, 26 New St, Boston Common" required maxlength="150">
+            <input type="text" id="ev-title" name="name" class="form-input" placeholder="e.g., Live Jazz Trio, Somerville Flea, Salsa Night" required maxlength="150">
           </div>
-          <div class="form-row">
-            <label for="ev-city" class="form-label">
-              City / Area <span class="req">*</span>
-            </label>
-            <select id="ev-city" name="city" class="form-select" required>
-              <option value="boston" selected>Boston (incl. Allston, Brighton, South End, Seaport, Brookline)</option>
-              <option value="cambridge">Cambridge (Harvard, Central, Kendall, Inman)</option>
-              <option value="somerville">Somerville (Davis, Union, Assembly, Spring Hill)</option>
-              <option value="other">Other / Greater Boston Suburbs</option>
-            </select>
-          </div>
-        </div>
 
-        <div class="form-grid-2">
-          <div class="form-row">
-            <label for="ev-date" class="form-label">
-              Date <span class="req">*</span>
-            </label>
-            <input type="date" id="ev-date" name="date" class="form-input" required>
-          </div>
-          <div class="form-row">
-            <label for="ev-time" class="form-label">
-              Start Time <span class="hint">(optional)</span>
-            </label>
-            <input type="time" id="ev-time" name="time" class="form-input" value="19:00">
-          </div>
-        </div>
-
-        <div class="form-grid-2">
-          <div class="form-row">
-            <label for="ev-category" class="form-label">
-              Category <span class="req">*</span>
-            </label>
-            <select id="ev-category" name="category" class="form-select" required>
-              <option value="music">🎵 Music / Concert</option>
-              <option value="comedy">🎙️ Comedy</option>
-              <option value="dance">💃 Dance / Social</option>
-              <option value="theater">🎭 Stage &amp; Theater</option>
-              <option value="art">🎨 Art &amp; Gallery</option>
-              <option value="food">🍷 Food &amp; Drink</option>
-              <option value="fitness">🏃 Fitness &amp; Outdoors</option>
-              <option value="books">📚 Books &amp; Talks</option>
-              <option value="gaming">🎲 Trivia &amp; Games</option>
-              <option value="community">🤝 Community &amp; Markets</option>
-              <option value="clubbing">🪩 Clubbing &amp; DJ</option>
-              <option value="other" selected>✨ Other</option>
-            </select>
-          </div>
-          <div class="form-row">
-            <label for="ev-price" class="form-label">
-              Price <span class="hint">(e.g., Free, $15, $20-$30)</span>
-            </label>
-            <div class="price-input-row">
-              <input type="text" id="ev-price" name="price" class="form-input" placeholder="e.g., Free or $15">
-              <button type="button" id="btn-quick-free" class="btn-pill-free">✨ Free</button>
+          <div class="form-grid-2">
+            <div class="form-row">
+              <label for="ev-venue" class="form-label">
+                Venue / Location <span class="req">*</span>
+              </label>
+              <input type="text" id="ev-venue" name="venue" class="form-input" placeholder="e.g., The Burren, 26 New St, Boston Common" required maxlength="150">
+            </div>
+            <div class="form-row">
+              <label for="ev-city" class="form-label">
+                City / Area <span class="req">*</span>
+              </label>
+              <select id="ev-city" name="city" class="form-select" required>
+                <option value="boston" selected>Boston (incl. Allston, Brighton, South End, Seaport, Brookline)</option>
+                <option value="cambridge">Cambridge (Harvard, Central, Kendall, Inman)</option>
+                <option value="somerville">Somerville (Davis, Union, Assembly, Spring Hill)</option>
+                <option value="other">Other / Greater Boston Suburbs</option>
+              </select>
             </div>
           </div>
-        </div>
 
-        <div class="form-row">
-          <label for="ev-url" class="form-label">
-            Event Website / Ticket URL <span class="req">*</span>
-          </label>
-          <input type="url" id="ev-url" name="url" class="form-input" placeholder="https://..." required>
-        </div>
+          <div class="form-row">
+            <label for="ev-address" class="form-label">
+              Street Address / Neighborhood <span class="hint">(optional, helps map accurately)</span>
+            </label>
+            <input type="text" id="ev-address" name="address" class="form-input" placeholder="e.g., 247 Elm St, Davis Square" maxlength="150">
+          </div>
 
-        <div class="form-row">
-          <label for="ev-desc" class="form-label">
-            Short Description / Notes <span class="hint">(optional)</span>
-          </label>
-          <textarea id="ev-desc" name="description" class="form-textarea" rows="2" placeholder="Brief note about the performers, dress code, RSVP details..." maxlength="400"></textarea>
-        </div>
+          <div class="form-grid-2">
+            <div class="form-row">
+              <label for="ev-date" class="form-label">
+                Date <span class="req">*</span>
+              </label>
+              <input type="date" id="ev-date" name="date" class="form-input" required>
+            </div>
+            <div class="form-row">
+              <label for="ev-time" class="form-label">
+                Start Time <span class="hint">(optional)</span>
+              </label>
+              <input type="time" id="ev-time" name="time" class="form-input" value="19:00">
+            </div>
+          </div>
 
-        <div class="form-status" id="form-submit-status" style="display:none;"></div>
+          <div class="form-grid-2">
+            <div class="form-row">
+              <label for="ev-category" class="form-label">
+                Category <span class="req">*</span>
+              </label>
+              <select id="ev-category" name="category" class="form-select" required>
+                <option value="music">🎵 Music / Concert</option>
+                <option value="comedy">🎙️ Comedy</option>
+                <option value="dance">💃 Dance / Social</option>
+                <option value="theater">🎭 Stage &amp; Theater</option>
+                <option value="art">🎨 Art &amp; Gallery</option>
+                <option value="food">🍷 Food &amp; Drink</option>
+                <option value="fitness">🏃 Fitness &amp; Outdoors</option>
+                <option value="books">📚 Books &amp; Talks</option>
+                <option value="gaming">🎲 Trivia &amp; Games</option>
+                <option value="community">🤝 Community &amp; Markets</option>
+                <option value="clubbing">🪩 Clubbing &amp; DJ</option>
+                <option value="other" selected>✨ Other</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label for="ev-price" class="form-label">
+                Price <span class="hint">(e.g., Free, $15, $20-$30)</span>
+              </label>
+              <div class="price-input-row">
+                <input type="text" id="ev-price" name="price" class="form-input" placeholder="e.g., Free or $15">
+                <button type="button" id="btn-quick-free" class="btn-pill-free">✨ Free</button>
+              </div>
+            </div>
+          </div>
 
-        <div class="form-actions">
-          <button type="button" class="btn-cancel" id="btn-cancel-submit">Cancel</button>
-          <button type="submit" class="btn-primary-submit" id="btn-submit-action">
-            <span class="btn-text">Publish Event ↗</span>
-            <span class="btn-spinner" style="display:none;">⏳ Adding...</span>
-          </button>
-        </div>
+          <div class="form-row">
+            <label for="ev-url" class="form-label">
+              Event Website / Ticket URL <span class="req">*</span>
+            </label>
+            <input type="url" id="ev-url" name="url" class="form-input" placeholder="https://..." required>
+          </div>
 
-        <div class="form-footer-note">
-          <span>🛡️ Submissions are instantly verified and added to the live schedule.</span>
-        </div>
-      </form>
+          <div class="form-row">
+            <label for="ev-desc" class="form-label">
+              Short Description / Notes <span class="hint">(optional)</span>
+            </label>
+            <textarea id="ev-desc" name="description" class="form-textarea" rows="2" placeholder="Brief note about the performers, dress code, RSVP details..." maxlength="400"></textarea>
+          </div>
+
+          <div class="form-status" id="form-submit-status" style="display:none;"></div>
+
+          <div class="form-actions">
+            <button type="button" class="btn-cancel" id="btn-cancel-submit">Cancel</button>
+            <button type="submit" class="btn-primary-submit" id="btn-submit-action">
+              <span class="btn-text">Publish Event ↗</span>
+              <span class="btn-spinner" style="display:none;">⏳ Adding...</span>
+            </button>
+          </div>
+
+          <div class="form-footer-note">
+            <span>🛡️ Submissions are instantly verified and added to the live schedule.</span>
+          </div>
+        </form>
+      </div>
+
+      <!-- Tab 2: Suggest a Venue Form -->
+      <div id="modal-view-venue" style="display:none;">
+        <form id="suggest-venue-form" class="modal-form" novalidate>
+          <input type="text" name="_hp_company" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true" style="display:none !important;">
+
+          <div class="form-row">
+            <label for="vn-name" class="form-label">
+              Venue / Space Name <span class="req">*</span>
+            </label>
+            <input type="text" id="vn-name" name="name" class="form-input" placeholder="e.g., The Burren, Lilypad, Faces Brewing" required maxlength="150">
+          </div>
+
+          <div class="form-row">
+            <label for="vn-url" class="form-label">
+              Venue Website or Calendar Page <span class="req">*</span>
+            </label>
+            <input type="url" id="vn-url" name="url" class="form-input" placeholder="https://..." required>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-row">
+              <label for="vn-city" class="form-label">
+                City / Area <span class="req">*</span>
+              </label>
+              <select id="vn-city" name="city" class="form-select" required>
+                <option value="boston" selected>Boston (Allston, Brighton, South End, Seaport, Brookline)</option>
+                <option value="cambridge">Cambridge (Harvard, Central, Kendall, Inman)</option>
+                <option value="somerville">Somerville (Davis, Union, Assembly, Spring Hill)</option>
+                <option value="other">Other / Greater Boston Suburbs</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label for="vn-category" class="form-label">
+                Primary Genre / Type
+              </label>
+              <select id="vn-category" name="category" class="form-select">
+                <option value="music" selected>🎵 Live Music &amp; Concerts</option>
+                <option value="comedy">🎙️ Comedy</option>
+                <option value="theater">🎭 Stage &amp; Theater</option>
+                <option value="dance">💃 Dance / Social</option>
+                <option value="food">🍺 Brewery / Bar / Food</option>
+                <option value="books">📚 Books &amp; Talks</option>
+                <option value="art">🎨 Gallery &amp; Art Space</option>
+                <option value="clubbing">🪩 Clubbing &amp; DJ</option>
+                <option value="community">🤝 Community &amp; Pop-up</option>
+                <option value="other">✨ Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label for="vn-address" class="form-label">
+              Address / Neighborhood <span class="hint">(optional)</span>
+            </label>
+            <input type="text" id="vn-address" name="address" class="form-input" placeholder="e.g., 247 Elm St, Davis Square, Somerville" maxlength="150">
+          </div>
+
+          <div class="form-row">
+            <label for="vn-notes" class="form-label">
+              Notes / Events to Scrape <span class="hint">(optional)</span>
+            </label>
+            <textarea id="vn-notes" name="notes" class="form-textarea" rows="2" placeholder="e.g., Live traditional sessions every Wednesday and jazz on weekends..." maxlength="400"></textarea>
+          </div>
+
+          <div class="form-status" id="form-venue-status" style="display:none;"></div>
+
+          <div class="form-actions">
+            <button type="button" class="btn-cancel" id="btn-cancel-venue">Cancel</button>
+            <button type="submit" class="btn-primary-submit" id="btn-submit-venue">
+              <span class="btn-text">Submit Suggestion ↗</span>
+              <span class="btn-spinner" style="display:none;">⏳ Submitting...</span>
+            </button>
+          </div>
+
+          <div class="form-footer-note">
+            <span>💡 Suggested venues are reviewed and plugged into our automated 30-minute scrapers!</span>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 
@@ -3858,7 +3991,7 @@ def render_page(results):
     scheduleMidnightRefresh();
     setInterval(checkDayRollover, 60000);
 
-    // --- Community Event Submission Modal Logic ---
+    // --- Community Event & Venue Submission Modal Logic ---
     const submitModal = document.getElementById('submit-event-modal');
     const btnOpenSubmit = document.getElementById('btn-open-submit-modal');
     const btnOpenSubmitMobile = document.getElementById('btn-open-submit-modal-mobile');
@@ -3871,10 +4004,47 @@ def render_page(results):
     const formStatus = document.getElementById('form-submit-status');
     const btnSubmitAction = document.getElementById('btn-submit-action');
 
-    function openSubmitModal() {{
+    const tabBtnEvent = document.getElementById('tab-btn-event');
+    const tabBtnVenue = document.getElementById('tab-btn-venue');
+    const modalViewEvent = document.getElementById('modal-view-event');
+    const modalViewVenue = document.getElementById('modal-view-venue');
+    const modalSubmitTitle = document.getElementById('modal-submit-title');
+    const modalSubmitSub = document.getElementById('modal-submit-sub');
+    const formVenueStatus = document.getElementById('form-venue-status');
+    const suggestVenueForm = document.getElementById('suggest-venue-form');
+    const btnCancelVenue = document.getElementById('btn-cancel-venue');
+    const btnSubmitVenue = document.getElementById('btn-submit-venue');
+
+    function switchModalTab(tab) {{
+      if (tab === 'venue') {{
+        if (tabBtnVenue) {{ tabBtnVenue.classList.add('active'); tabBtnVenue.setAttribute('aria-selected', 'true'); }}
+        if (tabBtnEvent) {{ tabBtnEvent.classList.remove('active'); tabBtnEvent.setAttribute('aria-selected', 'false'); }}
+        if (modalViewVenue) modalViewVenue.style.display = 'block';
+        if (modalViewEvent) modalViewEvent.style.display = 'none';
+        if (modalSubmitTitle) modalSubmitTitle.textContent = 'Suggest a Venue to Track';
+        if (modalSubmitSub) modalSubmitSub.textContent = 'Know a music venue, comedy club, theater, or community space we should automatically scrape?';
+        const vnInput = document.getElementById('vn-name');
+        if (vnInput) setTimeout(() => vnInput.focus(), 60);
+      }} else {{
+        if (tabBtnEvent) {{ tabBtnEvent.classList.add('active'); tabBtnEvent.setAttribute('aria-selected', 'true'); }}
+        if (tabBtnVenue) {{ tabBtnVenue.classList.remove('active'); tabBtnVenue.setAttribute('aria-selected', 'false'); }}
+        if (modalViewEvent) modalViewEvent.style.display = 'block';
+        if (modalViewVenue) modalViewVenue.style.display = 'none';
+        if (modalSubmitTitle) modalSubmitTitle.textContent = 'Add an Event to Boston Events';
+        if (modalSubmitSub) modalSubmitSub.textContent = 'Hosting a show, dance, meetup, or know of an event we missed? Submit it below.';
+        const evInput = document.getElementById('ev-title');
+        if (evInput) setTimeout(() => evInput.focus(), 60);
+      }}
+    }}
+
+    if (tabBtnEvent) tabBtnEvent.addEventListener('click', () => switchModalTab('event'));
+    if (tabBtnVenue) tabBtnVenue.addEventListener('click', () => switchModalTab('venue'));
+
+    function openSubmitModal(initialTab) {{
       if (!submitModal) return;
       submitModal.style.display = 'flex';
       document.body.style.overflow = 'hidden';
+      switchModalTab(initialTab === 'venue' ? 'venue' : 'event');
       if (evDateInput && !evDateInput.value) {{
         evDateInput.value = todayISO;
       }}
@@ -3882,9 +4052,9 @@ def render_page(results):
         formStatus.style.display = 'none';
         formStatus.className = 'form-status';
       }}
-      const titleInput = document.getElementById('ev-title');
-      if (titleInput) {{
-        setTimeout(() => titleInput.focus(), 60);
+      if (formVenueStatus) {{
+        formVenueStatus.style.display = 'none';
+        formVenueStatus.className = 'form-status';
       }}
     }}
 
@@ -3892,12 +4062,15 @@ def render_page(results):
       if (!submitModal) return;
       submitModal.style.display = 'none';
       document.body.style.overflow = '';
+      if (formStatus) formStatus.style.display = 'none';
+      if (formVenueStatus) formVenueStatus.style.display = 'none';
     }}
 
-    if (btnOpenSubmit) btnOpenSubmit.addEventListener('click', openSubmitModal);
-    if (btnOpenSubmitMobile) btnOpenSubmitMobile.addEventListener('click', openSubmitModal);
+    if (btnOpenSubmit) btnOpenSubmit.addEventListener('click', () => openSubmitModal('event'));
+    if (btnOpenSubmitMobile) btnOpenSubmitMobile.addEventListener('click', () => openSubmitModal('event'));
     if (btnCloseSubmit) btnCloseSubmit.addEventListener('click', closeSubmitModal);
     if (btnCancelSubmit) btnCancelSubmit.addEventListener('click', closeSubmitModal);
+    if (btnCancelVenue) btnCancelVenue.addEventListener('click', closeSubmitModal);
 
     if (submitModal) {{
       submitModal.addEventListener('click', (e) => {{
@@ -4036,6 +4209,9 @@ def render_page(results):
         const url = (urlInput.value || '').trim();
         const desc = (descInput.value || '').trim();
 
+        const addressInput = document.getElementById('ev-address');
+        const address = (addressInput ? addressInput.value : '').trim();
+
         if (!name || name.length < 2) {{
           showFormStatus('Please enter an event title (at least 2 characters).', 'error');
           nameInput.focus();
@@ -4066,6 +4242,7 @@ def render_page(results):
           url: url,
           category: category,
           city: city,
+          address: address,
           price: price || null,
           description: desc,
           _is_community: true,
@@ -4123,6 +4300,102 @@ def render_page(results):
       formStatus.textContent = msg;
       formStatus.className = `form-status ${{type}}`;
       formStatus.style.display = 'block';
+    }}
+
+    function showVenueFormStatus(msg, type) {{
+      if (!formVenueStatus) return;
+      formVenueStatus.textContent = msg;
+      formVenueStatus.className = `form-status ${{type}}`;
+      formVenueStatus.style.display = 'block';
+    }}
+
+    if (suggestVenueForm) {{
+      suggestVenueForm.addEventListener('submit', async (e) => {{
+        e.preventDefault();
+
+        const hp = suggestVenueForm.querySelector('input[name="_hp_company"]');
+        if (hp && hp.value) {{
+          closeSubmitModal();
+          return;
+        }}
+
+        const nameInput = document.getElementById('vn-name');
+        const urlInput = document.getElementById('vn-url');
+        const citySelect = document.getElementById('vn-city');
+        const catSelect = document.getElementById('vn-category');
+        const addrInput = document.getElementById('vn-address');
+        const notesInput = document.getElementById('vn-notes');
+
+        const name = (nameInput.value || '').trim();
+        const url = (urlInput.value || '').trim();
+        const city = citySelect ? citySelect.value : 'boston';
+        const category = catSelect ? catSelect.value : 'music';
+        const address = (addrInput ? addrInput.value : '').trim();
+        const notes = (notesInput ? notesInput.value : '').trim();
+
+        if (!name || name.length < 2) {{
+          showVenueFormStatus('Please enter a venue or space name.', 'error');
+          nameInput.focus();
+          return;
+        }}
+        if (!url || !url.startsWith('http')) {{
+          showVenueFormStatus('Please enter a valid website link (starting with http:// or https://).', 'error');
+          urlInput.focus();
+          return;
+        }}
+
+        const newVenue = {{
+          type: 'suggest_venue',
+          name: name,
+          url: url,
+          city: city,
+          category: category,
+          address: address,
+          notes: notes,
+          submitted_at: new Date().toISOString(),
+        }};
+
+        if (btnSubmitVenue) {{
+          btnSubmitVenue.disabled = true;
+          const btnText = btnSubmitVenue.querySelector('.btn-text');
+          const btnSpinner = btnSubmitVenue.querySelector('.btn-spinner');
+          if (btnText) btnText.style.display = 'none';
+          if (btnSpinner) btnSpinner.style.display = 'inline';
+        }}
+
+        try {{
+          const stored = JSON.parse(localStorage.getItem('boston_suggested_venues') || '[]');
+          stored.push(newVenue);
+          localStorage.setItem('boston_suggested_venues', JSON.stringify(stored.slice(-20)));
+        }} catch (_) {{}}
+
+        const submitEndpoint = window.EVENT_SUBMISSION_ENDPOINT || '';
+        if (submitEndpoint) {{
+          try {{
+            await fetch(submitEndpoint, {{
+              method: 'POST',
+              headers: {{ 'Content-Type': 'application/json' }},
+              body: JSON.stringify(newVenue),
+            }});
+          }} catch (err) {{
+            console.warn('Backend venue submission failed, kept locally:', err);
+          }}
+        }}
+
+        showVenueFormStatus('🎉 Venue suggestion received! Thank you for helping Boston Events grow.', 'success');
+
+        setTimeout(() => {{
+          closeSubmitModal();
+          suggestVenueForm.reset();
+          if (btnSubmitVenue) {{
+            btnSubmitVenue.disabled = false;
+            const btnText = btnSubmitVenue.querySelector('.btn-text');
+            const btnSpinner = btnSubmitVenue.querySelector('.btn-spinner');
+            if (btnText) btnText.style.display = 'inline';
+            if (btnSpinner) btnSpinner.style.display = 'none';
+          }}
+        }}, 1600);
+      }});
     }}
 
     loadLocalCommunityEvents();

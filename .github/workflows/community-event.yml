@@ -1,12 +1,16 @@
-name: Process Community Event Submission
+name: Process Community Submission
 
 on:
   repository_dispatch:
-    types: [community-event]
+    types: [community-event, suggest-venue]
   workflow_dispatch:
     inputs:
-      event_json:
-        description: "Event JSON payload"
+      submission_type:
+        description: "Type: event or venue"
+        required: true
+        default: "event"
+      payload_json:
+        description: "JSON payload"
         required: true
 
 permissions:
@@ -19,7 +23,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  add_event:
+  process_submission:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -32,29 +36,45 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      - name: Add event from repository_dispatch
-        if: github.event_name == 'repository_dispatch'
+      # Event submission branch
+      - name: Process community event (repository_dispatch)
+        if: github.event_name == 'repository_dispatch' && github.event.action == 'community-event'
         env:
           EVENT_PAYLOAD: ${{ toJson(github.event.client_payload) }}
         run: |
           python scripts/add_community_event.py "$EVENT_PAYLOAD"
 
-      - name: Add event from workflow_dispatch
-        if: github.event_name == 'workflow_dispatch'
+      - name: Process community event (workflow_dispatch)
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.submission_type == 'event'
         env:
-          EVENT_PAYLOAD: ${{ github.event.inputs.event_json }}
+          EVENT_PAYLOAD: ${{ github.event.inputs.payload_json }}
         run: |
           python scripts/add_community_event.py "$EVENT_PAYLOAD"
 
-      - name: Commit updated community events and site
+      # Venue suggestion branch
+      - name: Process venue suggestion (repository_dispatch)
+        if: github.event_name == 'repository_dispatch' && github.event.action == 'suggest-venue'
+        env:
+          VENUE_PAYLOAD: ${{ toJson(github.event.client_payload) }}
+        run: |
+          python scripts/add_suggested_venue.py "$VENUE_PAYLOAD"
+
+      - name: Process venue suggestion (workflow_dispatch)
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.submission_type == 'venue'
+        env:
+          VENUE_PAYLOAD: ${{ github.event.inputs.payload_json }}
+        run: |
+          python scripts/add_suggested_venue.py "$VENUE_PAYLOAD"
+
+      - name: Commit updated files and site
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add community_events.json events.json index.html events.html
+          git add community_events.json suggested_venues.json events.json index.html events.html
           if git diff --staged --quiet; then
             echo "no changes"
           else
-            git commit -m "Add community event: $(date -u +%Y-%m-%dT%H:%MZ) [skip ci]"
+            git commit -m "Process community submission: $(date -u +%Y-%m-%dT%H:%MZ) [skip ci]"
             git push
           fi
 
@@ -64,7 +84,7 @@ jobs:
           path: '.'
 
   deploy:
-    needs: add_event
+    needs: process_submission
     permissions:
       pages: write
       id-token: write
