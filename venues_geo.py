@@ -45,6 +45,7 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
     "manray": (42.3662, -71.1027, "Central Square", "40 Prospect St, Cambridge", "ManRay"),
     "middlesex lounge": (42.3619, -71.0988, "Central Square", "315 Massachusetts Ave, Cambridge", "Middlesex Lounge"),
     "the phoenix landing": (42.3655, -71.1042, "Central Square", "512 Massachusetts Ave, Cambridge", "The Phoenix Landing"),
+    "the mad monkfish": (42.3654, -71.1042, "Central Square", "524 Massachusetts Ave, Cambridge", "The Mad Monkfish"),
     "la fabrica central": (42.3633, -71.1011, "Central Square", "450 Massachusetts Ave, Cambridge", "La Fabrica Central"),
     "central square farmers market": (42.3653, -71.1033, "Central Square", "76 Bishop Allen Dr, Cambridge", "Central Square Farmers Market"),
     "ywca cambridge": (42.3644, -71.1021, "Central Square", "7 Temple St, Cambridge", "YWCA Cambridge"),
@@ -89,6 +90,7 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
     "somerville theatre": (42.3968, -71.1228, "Davis Square", "55 Davis Sq, Somerville", "Somerville Theatre"),
     "crystal ballroom": (42.3968, -71.1228, "Davis Square", "55 Davis Sq, Somerville", "Crystal Ballroom"),
     "the comedy studio": (42.3968, -71.1228, "Davis Square", "55 Davis Sq, Somerville", "The Comedy Studio"),
+    "the rockwell": (42.3963, -71.1224, "Davis Square", "255 Elm St, Somerville", "The Rockwell"),
     "underbones": (42.3967, -71.1215, "Davis Square", "55 Chester St, Somerville", "Underbones"),
     "painted burro somerville": (42.3961, -71.1220, "Davis Square", "219 Elm St, Somerville", "Painted Burro"),
     "davis square farmers market": (42.3968, -71.1228, "Davis Square", "Day St & Herbert St, Somerville", "Davis Square Farmers Market"),
@@ -197,6 +199,9 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
     "bleacher bar": (42.3468, -71.0975, "Fenway", "82A Lansdowne St, Boston", "Bleacher Bar"),
     "cask 'n flagon": (42.3469, -71.0989, "Fenway", "62 Brookline Ave, Boston", "Cask 'n Flagon"),
     "symphony hall": (42.3428, -71.0858, "Fenway / Symphony", "301 Massachusetts Ave, Boston", "Symphony Hall"),
+    "jordan hall": (42.3418, -71.0864, "Fenway / Symphony", "30 Gainsborough St, Boston", "Jordan Hall (NEC)"),
+    "jordan hall (nec)": (42.3418, -71.0864, "Fenway / Symphony", "30 Gainsborough St, Boston", "Jordan Hall (NEC)"),
+    "new england conservatory": (42.3418, -71.0864, "Fenway / Symphony", "290 Huntington Ave, Boston", "New England Conservatory"),
     "berklee performance center": (42.3479, -71.0886, "Back Bay / Fenway", "136 Massachusetts Ave, Boston", "Berklee Performance Center"),
     "bebop": (42.3472, -71.0886, "Back Bay / Fenway", "1116 Boylston St, Boston", "The Bebop"),
     "huntington theatre": (42.3421, -71.0853, "Symphony", "264 Huntington Ave, Boston", "Huntington Theatre"),
@@ -208,6 +213,8 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
     "the fenway": (42.3429, -71.1003, "Fenway", "401 Park Dr, Boston", "The Fenway"),
 
     # Allston & Brighton
+    "o'brien's pub": (42.3533, -71.1305, "Allston", "3 Harvard Ave, Allston", "O'Brien's Pub"),
+    "obriens pub": (42.3533, -71.1305, "Allston", "3 Harvard Ave, Allston", "O'Brien's Pub"),
     "paradise rock club": (42.3519, -71.1201, "Allston", "967 Commonwealth Ave, Boston", "Paradise Rock Club"),
     "brighton music hall": (42.3533, -71.1373, "Allston", "158 Brighton Ave, Allston", "Brighton Music Hall"),
     "roadrunner": (42.3582, -71.1492, "Boston Landing", "89 Guest St, Brighton", "Roadrunner"),
@@ -394,6 +401,12 @@ VENUE_RULES = [
     ("kings seaport", (42.3516, -71.0448, "Seaport", "60 Seaport Blvd, Boston", "Kings Dining & Entertainment (Seaport)")),
     ("kings - seaport", (42.3516, -71.0448, "Seaport", "60 Seaport Blvd, Boston", "Kings Dining & Entertainment (Seaport)")),
     ("kings dining", (42.3516, -71.0448, "Seaport", "60 Seaport Blvd, Boston", "Kings Dining & Entertainment (Seaport)")),
+    ("rockwell", (42.3963, -71.1224, "Davis Square", "255 Elm St, Somerville", "The Rockwell")),
+    ("monkfish", (42.3654, -71.1042, "Central Square", "524 Massachusetts Ave, Cambridge", "The Mad Monkfish")),
+    ("o'brien", (42.3533, -71.1305, "Allston", "3 Harvard Ave, Allston", "O'Brien's Pub")),
+    ("obrien", (42.3533, -71.1305, "Allston", "3 Harvard Ave, Allston", "O'Brien's Pub")),
+    ("jordan hall", (42.3418, -71.0864, "Fenway / Symphony", "30 Gainsborough St, Boston", "Jordan Hall (NEC)")),
+    ("new england conservatory", (42.3418, -71.0864, "Fenway / Symphony", "290 Huntington Ave, Boston", "New England Conservatory")),
 ]
 
 # Coordinate bounding box for valid Greater Boston / Eastern MA events

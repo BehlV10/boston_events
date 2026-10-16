@@ -4395,7 +4395,243 @@ def scrape_comedy_studio(url, ua):
     return out
 
 
+def scrape_obriens_pub(url, ua):
+    """O'Brien's Pub in Allston — daily punk, rock, metal & indie lineups."""
+    try:
+        resp = _SESSION.get("https://obrienspubboston.com/", headers={"User-Agent": ua}, timeout=15)
+        resp.raise_for_status()
+    except Exception:
+        return []
+
+    soup = BeautifulSoup(resp.text, "html.parser")
+    now = datetime.now(EASTERN)
+    seen_urls = set()
+    out = []
+
+    for tag in soup.find_all(["h3", "h4"], class_="t-entry-title"):
+        a = tag.find("a")
+        if not a or not a.get("href") or "/show/" not in a["href"]:
+            continue
+        full_url = a["href"].split("?")[0]
+        if full_url in seen_urls:
+            continue
+        title = a.get_text(strip=True)
+        if not title:
+            continue
+
+        block = tag.find_parent("div", class_="t-inside-post-table") or tag.find_parent("div", class_="t-inside") or tag.find_parent("div", class_="t-entry")
+        block_text = block.get_text(separator=" ", strip=True) if block else ""
+        m = re.search(r"([A-Za-z]+),\s+([A-Za-z]+)\s+(\d+)\s+(\d+)(AM|PM|am|pm)", block_text)
+        if not m:
+            m = re.search(r"([A-Za-z]+)\s+(\d+)\s+(\d+)(AM|PM|am|pm)", block_text)
+            if not m:
+                continue
+            month, day, hour, ampm = m.groups()
+        else:
+            weekday, month, day, hour, ampm = m.groups()
+
+        try:
+            dt_str = f"{month} {day} {now.year} {hour}:00 {ampm.upper()}"
+            dt = datetime.strptime(dt_str, "%B %d %Y %I:%M %p").replace(tzinfo=EASTERN)
+            if dt < now - timedelta(days=1):
+                dt = dt.replace(year=now.year + 1)
+        except Exception:
+            continue
+
+        seen_urls.add(full_url)
+        out.append({
+            "name": title,
+            "date": dt.isoformat(),
+            "url": full_url,
+            "venue": "O'Brien's Pub",
+            "price": None,
+            "category": "music",
+        })
+    return out
+
+
+def scrape_nec_trumba(url, ua):
+    """Jordan Hall and New England Conservatory (NEC) via official Trumba calendar feed."""
+    api_url = "https://www.trumba.com/calendars/nec.json"
+    try:
+        resp = _SESSION.get(api_url, headers={"User-Agent": ua}, timeout=15)
+        resp.raise_for_status()
+        data = resp.json()
+    except Exception:
+        return []
+
+    now = datetime.now(EASTERN)
+    out = []
+    for item in data:
+        title = html.unescape(item.get("title") or "").strip()
+        start_raw = item.get("startDateTime")
+        if not title or not start_raw:
+            continue
+        try:
+            dt = datetime.fromisoformat(start_raw).replace(tzinfo=EASTERN)
+        except Exception:
+            continue
+        if dt < now - timedelta(hours=6):
+            continue
+
+        loc = (item.get("location") or "").strip()
+        venue_name = "Jordan Hall (NEC)" if "jordan" in loc.lower() else (f"NEC ({loc})" if loc else "New England Conservatory (NEC)")
+        link = item.get("eventActionUrl") or "https://necmusic.edu/concerts"
+
+        out.append({
+            "name": title,
+            "date": dt.isoformat(),
+            "url": link,
+            "venue": venue_name,
+            "price": None,
+            "category": "classical",
+        })
+    return out
+
+
+def scrape_mad_monkfish(url, ua):
+    """The Mad Monkfish jazz calendar in Central Square Cambridge."""
+    endpoint = "https://www.themadmonkfish.com/jazz-schedule/"
+    try:
+        resp = _SESSION.get(endpoint, headers={"User-Agent": ua}, timeout=15)
+        resp.raise_for_status()
+    except Exception:
+        return []
+
+    soup = BeautifulSoup(resp.text, "html.parser")
+    now = datetime.now(EASTERN)
+    out = []
+    seen = set()
+
+    for a in soup.find_all("a"):
+        href = a.get("href") or ""
+        if "/event/" not in href:
+            continue
+        text = a.get_text(strip=True)
+        m = re.match(r"^(\d{1,2})/(\d{1,2})\s+(.+)$", text)
+        if not m:
+            continue
+        month, day, artist = m.groups()
+        full_url = urljoin("https://www.themadmonkfish.com", href)
+        if full_url in seen:
+            continue
+        seen.add(full_url)
+
+        hour = 19
+        minute = 0
+        tm = re.search(r"(\d{1,2})(?::(\d{2}))?\s*(am|pm)", artist, re.I)
+        if tm:
+            h = int(tm.group(1))
+            mn = int(tm.group(2) or 0)
+            ampm = tm.group(3).lower()
+            if ampm == "pm" and h < 12:
+                h += 12
+            elif ampm == "am" and h == 12:
+                h = 0
+            hour, minute = h, mn
+
+        try:
+            dt = datetime(now.year, int(month), int(day), hour, minute, tzinfo=EASTERN)
+            if dt < now - timedelta(days=1):
+                dt = dt.replace(year=now.year + 1)
+        except Exception:
+            continue
+
+        clean_artist = re.sub(r"\s+\d+(?:-\d+)?(?:am|pm)\b", "", artist, flags=re.I).strip()
+        out.append({
+            "name": f"Live Jazz: {clean_artist}",
+            "date": dt.isoformat(),
+            "url": full_url,
+            "venue": "The Mad Monkfish",
+            "price": None,
+            "category": "music",
+        })
+    return out
+
+
+def scrape_club_passim(url, ua):
+    """Club Passim in Harvard Square — historic folk, acoustic & roots listening room."""
+    now = datetime.now(EASTERN)
+    out = []
+    seen = set()
+
+    for offset in (0, 7, 14, 21, 28, 35):
+        page_url = f"https://www.passim.org/live-music/?ped={offset}"
+        try:
+            resp = _SESSION.get(page_url, headers={"User-Agent": ua}, timeout=10)
+            if resp.status_code != 200:
+                continue
+            html_text = resp.text
+        except Exception:
+            continue
+
+        soup = BeautifulSoup(html_text, "html.parser")
+        for card in soup.find_all("div", class_="date_time_tickets"):
+            parent = card.find_parent("li")
+            if not parent:
+                continue
+            title_el = parent.find(["h2", "h3", "h4", "h5", "h1"])
+            title = title_el.get_text(strip=True) if title_el else ""
+            if not title:
+                continue
+            a = parent.find("a")
+            link = a["href"] if a and "href" in a.attrs else "https://www.passim.org/live-music/"
+            if link in seen:
+                continue
+
+            card_text = card.get_text(separator=" ", strip=True)
+            dm = re.search(r"([A-Za-z]{3,9})\s+(\d+)(?:st|nd|rd|th)?", card_text)
+            tm = re.search(r"Show\s+(\d{1,2})(?::(\d{2}))?\s*(AM|PM|am|pm)", card_text)
+            if not tm:
+                tm = re.search(r"(\d{1,2})(?::(\d{2}))?\s*(AM|PM|am|pm)", card_text)
+            if not dm:
+                continue
+
+            month_str, day_str = dm.groups()
+            month_abbr = month_str[:3].capitalize()
+            hour = 20
+            minute = 0
+            if tm:
+                h = int(tm.group(1))
+                mn = int(tm.group(2) or 0)
+                ampm = tm.group(3).lower()
+                if ampm == "pm" and h < 12:
+                    h += 12
+                elif ampm == "am" and h == 12:
+                    h = 0
+                hour, minute = h, mn
+
+            try:
+                dt_str = f"{month_abbr} {day_str} {now.year} {hour}:{minute:02d}"
+                dt = datetime.strptime(dt_str, "%b %d %Y %H:%M").replace(tzinfo=EASTERN)
+                if dt < now - timedelta(days=1):
+                    dt = dt.replace(year=now.year + 1)
+            except Exception:
+                continue
+
+            cost_m = re.search(r"\$(\d+)", card_text)
+            price = f"${cost_m.group(1)}" if cost_m else ("Free" if "free" in card_text.lower() else None)
+
+            seen.add(link)
+            out.append({
+                "name": title,
+                "date": dt.isoformat(),
+                "url": link,
+                "venue": "Club Passim",
+                "price": price,
+                "category": "music",
+            })
+    return out
+
+
 _ALL_VENUES = [
+    {"name": "Midway Cafe", "url": "https://tockify.com/api/feeds/ics/midwaycafejp", "ua": UA_CHROME, "scraper": scrape_ical, "default_category": "music"},
+    {"name": "The Beehive", "url": "https://tockify.com/api/feeds/ics/beehive", "ua": UA_CHROME, "scraper": scrape_ical, "default_category": "music"},
+    {"name": "The Rockwell", "url": "https://therockwell.org/calendar/?ical=1", "ua": UA_CHROME, "scraper": scrape_ical, "default_category": "theater"},
+    {"name": "O'Brien's Pub", "url": "https://obrienspubboston.com/", "ua": UA_CHROME, "scraper": scrape_obriens_pub, "default_category": "music"},
+    {"name": "Jordan Hall (NEC)", "url": "https://www.trumba.com/calendars/nec.json", "ua": UA_CHROME, "scraper": scrape_nec_trumba, "default_category": "classical"},
+    {"name": "The Mad Monkfish", "url": "https://www.themadmonkfish.com/jazz-schedule/", "ua": UA_CHROME, "scraper": scrape_mad_monkfish, "default_category": "music"},
+    {"name": "Club Passim", "url": "https://www.passim.org/live-music/", "ua": UA_CHROME, "scraper": scrape_club_passim, "default_category": "music"},
     {"name": "Ticketmaster", "url": "https://www.ticketmaster.com/", "ua": UA_CHROME, "scraper": scrape_ticketmaster, "default_category": "music"},
     {"name": "SeatGeek", "url": "https://seatgeek.com/cities/boston", "ua": UA_CHROME, "scraper": scrape_seatgeek, "default_category": "music"},
     {"name": "Eventbrite Boston", "url": "https://www.eventbrite.com/d/ma--boston/events/", "ua": UA_CHROME, "scraper": scrape_eventbrite_search, "default_category": None},

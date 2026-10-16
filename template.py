@@ -29,10 +29,11 @@ CITY_RULES = [
         "armory", "arts at the armory", "somerville arts council",
         "the jungle", "jungle", "sally o'brien", "sally obrien", "side quest",
         "duck duck goof", "goofs comedy", "somerville library", "growing center",
-        "underbones", "remnant brewing",
+        "underbones", "remnant brewing", "the rockwell", "rockwell",
     )),
     ("cambridge", (
-        "cambridge", "batifol", "mit ", "m.i.t", "harvard square", "harvard book", "porter square", "sinclair",
+        "cambridge", "batifol", "passim", "club passim", "monkfish", "mad monkfish",
+        "mit ", "m.i.t", "harvard square", "harvard book", "porter square", "sinclair",
         "brattle", "cambridge, ma", "(cambridge)", ", cambridge",
         "kendall", "kendall center", "urban park", "central square", "inman square", "cantab",
         "havetodance", "have to dance", "ywca cambridge",
@@ -50,6 +51,8 @@ CITY_RULES = [
     )),
     ("boston", (
         "bsmnt", "kings seaport", "kings - seaport", "kings dining",
+        "midway cafe", "o'brien's pub", "obriens pub", "o'brien's", "obriens",
+        "jordan hall", "new england conservatory",
         "city winery", "royale", "wilbur", "ica boston", "gardner", "boston public library",
         "laugh boston", "big night live", "house of blues", "paradise rock", "orpheum",
         "td garden", "mgm music hall", "citizens house of blues", "fenway", "back bay",
