@@ -23,13 +23,19 @@ CITY_RULES = [
     ("somerville", (
         "somerville", "aeronaut", "crystal ballroom", "somerville theatre", "somerville theater",
         "somerville, ma", "(somerville)", ", somerville",
-        "davis square", "assembly row", "union square, somerville",
+        "davis square", "assembly row", "union square",
         "the burren", "burren", "mccarthy's toad", "mccarthys toad", "remnant somerville",
-        "comedy studio", "bow market", "upstairs at bow", "union square",
+        "comedy studio", "bow market", "upstairs at bow",
         "armory", "arts at the armory", "somerville arts council",
         "the jungle", "jungle", "sally o'brien", "sally obrien", "side quest",
         "duck duck goof", "goofs comedy", "somerville library", "growing center",
         "underbones", "remnant brewing", "the rockwell", "rockwell",
+        "vera's", "veras", "craft loft", "the chester tavern", "chester tavern",
+        "all she wrote books", "portico brewing", "portico", "dance union",
+        "winter hill brewing", "the independent", "olde magoun", "magoun's saloon",
+        "somart", "wyllo", "jean appolon", "the biltmore", "diversity consignment",
+        "boston figurative art center", "perry park", "nathan tufts park", "ward 4",
+        "the painted burro", "orlean's restaurant", "orleans restaurant",
     )),
     ("cambridge", (
         "cambridge", "batifol", "passim", "club passim", "monkfish", "mad monkfish",
@@ -38,21 +44,29 @@ CITY_RULES = [
         "kendall", "kendall center", "urban park", "central square", "inman square", "cantab",
         "havetodance", "have to dance", "ywca cambridge",
         "middle east", "sonia", "regattabar", "arrow street",
-        "harvard museum of natural history", "hmnh",
+        "harvard museum", "hmnh",
         "lovestruck", "lovestruck books",
         "havana club", "lou's", "wearelous", "lizard lounge",
         "lamplighter", "roxy's arcade", "roxys arcade",
         "venture café", "venture cafe", "cic cambridge",
-        "middle east", "phoenix landing", "manray", "man ray", "prospect st",
-        "regattabar", "lilypad", "inman square", "the druid", "druid",
+        "phoenix landing", "manray", "man ray", "prospect st",
+        "lilypad", "inman square", "the druid", "druid",
         "plough and stars", "plough & stars", "gather here", "mit open space",
-        "remnant satellite", "cambridge public library", "cambridge library",
+        "remnant satellite", "satellite", "cambridge public library", "cambridge library",
         "harvard university farmers market", "harvard farmers market",
+        "q ballroom", "ccae", "cambridge center for adult education",
+        "harvard art museum", "peabody museum", "the foundry", "memorial drive",
+        "swing in the square", "bluesy tuesy", "blues union", "41 hampshire", "dante alighieri",
+        "everybody dance now", "multicultural arts center", "the dance complex", "dance complex",
+        "first street market", "la fábrica", "la fabrica", "kathryn schultz",
+        "an sibin", "an sibín", "the coop", "forage", "52 church", "farkas hall",
+        "loeb ex", "pemberton farms", "fusey bluesy", "graymist", "the grove",
+        "cambridge art association",
     )),
     ("boston", (
         "bsmnt", "kings seaport", "kings - seaport", "kings dining",
         "midway cafe", "o'brien's pub", "obriens pub", "o'brien's", "obriens",
-        "jordan hall", "new england conservatory",
+        "jordan hall", "new england conservatory", "nec (", "nec:", "nec ", "nec hall",
         "city winery", "royale", "wilbur", "ica boston", "gardner", "boston public library",
         "laugh boston", "big night live", "house of blues", "paradise rock", "orpheum",
         "td garden", "mgm music hall", "citizens house of blues", "fenway", "back bay",
@@ -62,15 +76,43 @@ CITY_RULES = [
         "downtown crossing", "seaport", "boston, ma", "(boston)", ", boston",
         "boston common", "trident booksellers", "mfa", "museum of fine arts",
         "brookline booksmith", "esplanade", "hatch shell", "sabina",
-        "loretta", "versus boston", "opera house", "symphony hall", "brighton music hall",
+        "loretta", "versus boston", "versus", "opera house", "symphony hall", "brighton music hall",
         "boch center", "wang theatre", "boston conservatory", "the beehive", "play boston",
-        "petit robert", "the grand", "scorpion bar", "scorpion", "memoire",
+        "petit robert", "the grand", "scorpion bar", "scorpion", "memoire", "mémoire",
         "roxbury", "jamaica plain", "south end", "fort point", "south boston",
         "allston", "brighton", "dorchester", "mattapan", "roslindale", "west roxbury",
         "long live", "sam adams", "trillium", "castle island",
         "copley", "sowa", "newbury", "beehive", "wally",
-        "the anchor", "anchor boston", "charlestown navy",
+        "the anchor", "anchor boston", "charlestown",
         "jacque", "jacques", "haymarket", "copley square farmers market",
+        "head of the charles", "charles river", "bu sailing", "sailing pavilion",
+        "roadrunner", "colonial theatre", "colonial theater", "emerson colonial",
+        "paramount center", "emerson paramount", "shubert theatre", "sports museum",
+        "the sports museum", "huntington theatre", "huntington theater", "huntington ave",
+        "calderwood", "club cafe", "reunion bbq", "439 tremont", "urbanity dance",
+        "berklee", "cafe 939", "wbur cityspace", "cityspace", "beacon hill",
+        "the phoenix boston", "fourth presbyterian", "boston fun run", "arlington street church",
+        "tony demarco", "kadampa", "ula cafe", "artisans asylum", "walter brown arena",
+        "agganis arena", "scullers", "eliot hall", "bill's bar", "bills bar",
+        "charles playhouse", "charlesgate", "fiedler field", "museum of science",
+        "bloomberg public science", "east boston", "trinity church", "park street church",
+        "boston nature center", "carrie nation", "blondie's", "alexander hamilton",
+        "the greatest bar", "the bebop", "shore leave", "sidebar boston", "roundhead brewery",
+        "petula's", "old south", "oak long bar", "massachusetts historical society",
+        "loco taqueria", "high street place", "gray's hall", "flight club", "empire",
+        "arnold arboretum", "224 boston", "yellow door taqueria", "wyndham boston beacon hill",
+        "white bull tavern", "west end johnnie", "view boston", "the superette",
+        "the substation", "the rocks at harbor way", "the harp", "the alley bar",
+        "telegraph hill", "simmons university", "rocco's cucina", "reggie lewis",
+        "red cross of greater boston", "rebel's guild", "raffles boston", "pkl boston",
+        "old state house", "offsuit", "new england aquarium", "luckys lounge", "lucky's lounge",
+        "lower mills tavern", "lincoln tavern", "lansdowne pub", "grubstreet",
+        "freedom trail", "franklin park zoo", "fat baby", "emmanuel church", "dudley town",
+        "democracy brewing", "deluca", "community boating", "city tap house",
+        "church of the covenant", "capo restaurant", "bell in hand", "ashmont farmers market",
+        "alumni stadium", "adams park", "adam park", "nathálie", "nathalie",
+        "goethe-institut", "goethe institut", "broken records", "lifebloom",
+        "winthrop center", "overlook st gabriel", "harvard stadium", "bright-landry",
     )),
 ]
 
@@ -82,16 +124,49 @@ CITY_LABELS = {
 }
 
 
-def _event_city(venue, source):
-    for target in [(venue or "").strip().lower(), (source or "").strip().lower()]:
+def _event_city(venue, source, event=None):
+    targets = []
+    if isinstance(venue, dict):
+        event = venue
+        v_str = (event.get("venue") or "").strip().lower()
+        s_str = (event.get("_source_venue") or "").strip().lower()
+        t_str = (event.get("title") or event.get("name") or "").strip().lower()
+        targets = [v_str, s_str, t_str]
+    else:
+        v_str = (venue or "").strip().lower()
+        s_str = (source or "").strip().lower()
+        targets = [v_str, s_str]
+        if isinstance(event, dict):
+            t_str = (event.get("title") or event.get("name") or "").strip().lower()
+            if t_str:
+                targets.append(t_str)
+
+    combined = " ".join(t for t in targets if t)
+    is_waltham_museum = "charles river museum" in combined or "waltham" in combined
+
+    for target in targets:
         if not target:
             continue
         if target == "boston":
             return "boston"
         for city, needles in CITY_RULES:
+            if city == "boston" and is_waltham_museum and not any(k in target for k in ["charles river speedway", "esplanade"]):
+                continue
             for n in needles:
                 if n in target:
                     return city
+
+    ev_dict = event if isinstance(event, dict) else {"venue": venue, "_source_venue": source}
+    geo = resolve_event_geo(ev_dict)
+    if geo and geo.get("address"):
+        addr = geo["address"].lower()
+        if ", cambridge" in addr:
+            return "cambridge"
+        if ", somerville" in addr:
+            return "somerville"
+        if any(b in addr for b in [", boston", ", allston", ", brighton", ", charlestown", ", jamaica plain", ", dorchester", ", roxbury", ", south boston", ", mattapan", ", roslindale", ", hyde park"]):
+            return "boston"
+
     return "other"
 
 
@@ -688,7 +763,7 @@ def render_page(results):
         cat_tag = f'<span class="cat-pill" style="--cat-c:{color}; background:{color}18; border-color:{color}33; color:{color}">{icon} {escape(cat)}</span>'
         venue = e.get("venue") or ""
         source = e.get("_source_venue") or ""
-        city = _event_city(venue, source)
+        city = _event_city(venue, source, e)
         recurring = is_recurring(e)
         recur_flag = "weekly" if recurring else "once"
         recur_badge = '<span class="recur">↻ weekly</span>' if recurring else ""
@@ -784,7 +859,7 @@ def render_page(results):
     def _render_day_section(heading_html, events, date_attr=""):
         by_city = {c: [] for c in city_day_order}
         for e in events:
-            c = _event_city(e.get("venue"), e.get("_source_venue"))
+            c = _event_city(e.get("venue"), e.get("_source_venue"), e)
             by_city.setdefault(c, []).append(e)
         city_blocks = []
         for cname in city_day_order:
@@ -953,7 +1028,7 @@ def render_page(results):
     city_order = ["boston", "cambridge", "somerville", "other"]
     city_counts = {c: 0 for c in city_order}
     for e in all_events_flat:
-        c = _event_city(e.get("venue"), e.get("_source_venue"))
+        c = _event_city(e.get("venue"), e.get("_source_venue"), e)
         city_counts[c] = city_counts.get(c, 0) + 1
 
     CITY_COLORS = {"boston": "#5d9bff", "cambridge": "#e05a6b", "somerville": "#f29e4c", "other": "#9aa3b2"}
