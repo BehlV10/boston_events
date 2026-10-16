@@ -2259,55 +2259,85 @@ def scrape_meetup(url, ua):
 
 def scrape_porter_square_books(url, ua):
     """Porter Square Books embeds its full FullCalendar event list in the
-    Drupal `drupalSettings` JSON blob on the calendar page. The rendered
-    HTML only shows a handful of cards, but the JSON has the whole month."""
-    try:
-        resp = _SESSION.get(url, headers={"User-Agent": ua}, timeout=15)
-        if resp.status_code == 200:
-            html = resp.text
-        else:
-            raise ValueError(f"HTTP {resp.status_code}")
-    except Exception:
-        import subprocess
-        try:
-            html = subprocess.check_output(["curl", "-s", "-L", url], timeout=15).decode("utf-8", errors="ignore")
-        except Exception:
-            return []
-    m = re.search(
-        r'data-drupal-selector="drupal-settings-json"[^>]*>(.*?)</script>',
-        html, re.S,
-    )
-    if not m:
-        return []
-    settings = json.loads(m.group(1))
-    fcv = (settings.get("fullCalendarView") or [{}])[0]
-    calendar_opts = fcv.get("calendar_options") or {}
-    if isinstance(calendar_opts, str):
-        calendar_opts = json.loads(calendar_opts)
-    events = []
+    Drupal `drupalSettings` JSON blob on the calendar page. We fetch both
+    the current month and the upcoming months so events do not truncate at month-end."""
+    import subprocess
     now = datetime.now(timezone.utc)
-    for ev in calendar_opts.get("events") or []:
-        start = ev.get("start")
-        if not start:
+    base_url = url.split("?")[0].rstrip("/")
+    base_url = re.sub(r"/\d{4}/\d{1,2}$", "", base_url)
+
+    urls = [base_url]
+    y, m = now.year, now.month
+    for _ in range(2):
+        m += 1
+        if m > 12:
+            m = 1
+            y += 1
+        urls.append(f"{base_url}/{y}/{m:02d}")
+
+    events = []
+    seen = set()
+    for target_url in urls:
+        html = None
+        try:
+            resp = _SESSION.get(target_url, headers={"User-Agent": ua}, timeout=15)
+            if resp.status_code == 200:
+                html = resp.text
+        except Exception:
+            pass
+
+        if not html:
+            try:
+                html = subprocess.check_output(
+                    ["curl", "-s", "-L", target_url], timeout=15
+                ).decode("utf-8", errors="ignore")
+            except Exception:
+                continue
+
+        m_tag = re.search(
+            r'data-drupal-selector="drupal-settings-json"[^>]*>(.*?)</script>',
+            html, re.S,
+        )
+        if not m_tag:
             continue
         try:
-            when = datetime.fromisoformat(start)
-        except ValueError:
+            settings = json.loads(m_tag.group(1))
+        except Exception:
             continue
-        if when.astimezone(timezone.utc) < now:
-            continue
-        title_html = ev.get("title") or ""
-        title_soup = BeautifulSoup(title_html, "html.parser")
-        span = title_soup.find("span")
-        name = re.sub(r"\s+", " ", (span or title_soup).get_text(" ", strip=True))
-        href = ev.get("url") or ""
-        events.append({
-            "name": name,
-            "date": when.astimezone(timezone.utc).isoformat(),
-            "url": urljoin(url, href) if href else url,
-            "venue": "Porter Square Books",
-            "price": None,
-        })
+        fcv = (settings.get("fullCalendarView") or [{}])[0]
+        calendar_opts = fcv.get("calendar_options") or {}
+        if isinstance(calendar_opts, str):
+            try:
+                calendar_opts = json.loads(calendar_opts)
+            except Exception:
+                calendar_opts = {}
+        for ev in calendar_opts.get("events") or []:
+            start = ev.get("start")
+            if not start:
+                continue
+            try:
+                when = datetime.fromisoformat(start)
+            except ValueError:
+                continue
+            if when.astimezone(timezone.utc) < now:
+                continue
+            title_html = ev.get("title") or ""
+            title_soup = BeautifulSoup(title_html, "html.parser")
+            span = title_soup.find("span")
+            name = re.sub(r"\s+", " ", (span or title_soup).get_text(" ", strip=True))
+            href = ev.get("url") or ""
+            ev_url = urljoin(target_url, href) if href else target_url
+            key = (name.lower(), when.isoformat())
+            if key in seen:
+                continue
+            seen.add(key)
+            events.append({
+                "name": name,
+                "date": when.astimezone(timezone.utc).isoformat(),
+                "url": ev_url,
+                "venue": "Porter Square Books",
+                "price": None,
+            })
     return events
 
 
