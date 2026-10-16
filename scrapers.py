@@ -553,13 +553,20 @@ def scrape_boston_calendar(url, ua):
 
 _TUNEHATCH_VENUE_IDS = {
     "cantab": "968ae511-dae2-43a9-a916-15ae44ef47b8",
+    "cantab_underground": "6126dd7d-0e07-4aad-92ef-3b52c0955bd4",
 }
 
 
 def scrape_tunehatch(url, ua):
-    """TuneHatch venue shows API. `url` encodes the venue slug in the query string, e.g. ?venue=cantab."""
+    """TuneHatch venue shows API. Supports ?venue=slug or detects underground from URL."""
     m = re.search(r"[?&]venue=([^&]+)", url)
-    slug = m.group(1) if m else "cantab"
+    if m:
+        slug = m.group(1)
+    elif "underground" in url.lower():
+        slug = "cantab_underground"
+    else:
+        slug = "cantab"
+
     venue_id = _TUNEHATCH_VENUE_IDS.get(slug)
     if not venue_id:
         r = _SESSION.get(f"https://tunehatch.com/api/v1/entities/venue/{slug}", timeout=15,
@@ -568,13 +575,21 @@ def scrape_tunehatch(url, ua):
         venue_id = (r.json() or {}).get("id")
         if not venue_id:
             return []
-    r = _SESSION.get("https://tunehatch.com/api/v1/shows", params={"venue_id": venue_id}, timeout=15,
+
+    now = datetime.now(timezone.utc)
+    params = {
+        "venue_id": venue_id,
+        "limit": 300,
+        "offset": 0,
+        "published": "true",
+        "starts_after": now.isoformat(),
+    }
+    r = _SESSION.get("https://tunehatch.com/api/v1/shows", params=params, timeout=15,
                      headers={"User-Agent": ua, "Accept": "application/json"})
     r.raise_for_status()
     payload = r.json() or {}
     shows = payload.get("data") or payload.get("shows") if isinstance(payload, dict) else payload
     shows = shows or []
-    now = datetime.now(timezone.utc)
     events = []
     for s in shows:
         iso = s.get("startsAt")
@@ -592,12 +607,23 @@ def scrape_tunehatch(url, ua):
         name = s.get("name") or lineup or "TuneHatch show"
         if lineup and lineup not in name:
             name = f"{name} — {lineup}"
+
+        desc = ""
+        about_html = s.get("about") or ""
+        if about_html:
+            desc = re.sub(r"<[^>]+>", " ", about_html).strip()
+            desc = re.sub(r"\s+", " ", desc)
+
+        v_name = s.get("venueName") or ("Cantab Underground" if slug == "cantab_underground" else "The Cantab Lounge")
+
         events.append({
             "name": name,
             "date": when.astimezone(timezone.utc).isoformat(),
             "url": f"https://tunehatch.com/e/shows/{slug_s}" if slug_s else None,
-            "venue": s.get("venueName"),
+            "venue": v_name,
             "price": None,
+            "description": desc or None,
+            "category": "music",
         })
     return events
 
@@ -4772,6 +4798,8 @@ _ALL_VENUES = [
     {"name": "Underbones", "url": "https://redbones.com/events", "ua": UA_CHROME, "scraper": scrape_underbones, "default_category": "music"},
     {"name": "Cambridge Public Library", "url": "https://cambridgepl.libcal.com/rss.php?m=month&cid=7052", "ua": UA_CHROME, "scraper": scrape_cpl, "default_category": "community"},
     {"name": "Somerville Community Growing Center", "url": "https://www.thegrowingcenter.org/2026", "ua": UA_CHROME, "scraper": scrape_growing_center, "default_category": "outdoors"},
+    {"name": "The Cantab Lounge", "url": "https://thecantablounge.com/", "ua": UA_CHROME, "scraper": scrape_tunehatch, "default_category": "music"},
+    {"name": "Cantab Underground", "url": "https://thecantablounge.com/cantab/underground", "ua": UA_CHROME, "scraper": scrape_tunehatch, "default_category": "music"},
 ]
 
 # Drop venues that require env vars we don't have set — keeps the fail banner clean.
@@ -4833,15 +4861,6 @@ MANUAL_RECURRING_EVENTS = [
         ("Live Music Weekend Brunch", "https://www.beehiveboston.com/calendar", 5, 10, 0),
         ("Live Music Weekend Brunch", "https://www.beehiveboston.com/calendar", 6, 10, 0),
         ("Blues on Sunday with Bruce Bears & Friends", "https://www.beehiveboston.com/calendar", 6, 19, 30),
-    ]),
-    ("The Cantab Lounge", "https://thecantablounge.com/", "music", [
-        ("Open Mic & Acoustic Showcase", "https://thecantablounge.com/", 0, 19, 30),
-        ("Jazz Jam @ Cantab", "https://thecantablounge.com/", 0, 22, 0),
-        ("Bluegrass Night @ Cantab", "https://thecantablounge.com/", 1, 20, 0),
-        ("R&B & Soul Jam", "https://thecantablounge.com/", 2, 20, 30),
-        ("Funk & Soul Party", "https://thecantablounge.com/", 4, 21, 30),
-        ("Live Band Night @ Cantab", "https://thecantablounge.com/", 5, 21, 30),
-        ("Sunday R&B Jam", "https://thecantablounge.com/", 6, 20, 30),
     ]),
     ("Loretta's Last Call", "https://www.lorettaslastcall.com/events/", "dance", [
         ("Partner Swing Dancing", "https://www.lorettaslastcall.com/event/partner-swing-dancing-on-mondays/", 0, 20, 0),
