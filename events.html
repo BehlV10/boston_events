@@ -762,6 +762,29 @@
     background: #0c0e14;
     color: #fff;
   }
+  /* Compact numbers-only mode */
+  .leaflet-map.hide-pin-names .venue-marker {
+    min-width: 24px;
+    height: 24px;
+    padding: 0 4px;
+    border-radius: 999px;
+    justify-content: center;
+    gap: 0;
+  }
+  .leaflet-map.hide-pin-names .venue-marker .pin-name {
+    display: none !important;
+  }
+  .leaflet-map.hide-pin-names .venue-marker .pin-count {
+    background: transparent;
+    color: var(--accent);
+    padding: 0;
+    font-size: 11px;
+    font-weight: 800;
+  }
+  .leaflet-map.hide-pin-names .venue-marker:hover .pin-count,
+  .leaflet-map.hide-pin-names .venue-marker.highlighted .pin-count {
+    color: #0c0e14;
+  }
   .venue-map-jump {
     background: none;
     border: none;
@@ -1084,6 +1107,45 @@
       flex-direction: column;
       align-items: flex-start;
       gap: 6px;
+    }
+    /* Mobile: Default to compact numbers-only pins to prevent clutter */
+    .venue-marker {
+      min-width: 24px;
+      height: 24px;
+      padding: 0 4px;
+      border-radius: 999px;
+      justify-content: center;
+      gap: 0;
+    }
+    .venue-marker .pin-name {
+      display: none;
+    }
+    .venue-marker .pin-count {
+      background: transparent;
+      color: var(--accent);
+      padding: 0;
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .venue-marker:hover .pin-count,
+    .venue-marker.highlighted .pin-count {
+      color: #0c0e14;
+    }
+    /* Mobile: If user toggles names on */
+    .leaflet-map.show-pin-names-mobile .venue-marker {
+      min-width: auto;
+      height: auto;
+      padding: 3px 8px;
+      border-radius: 999px;
+      gap: 5px;
+    }
+    .leaflet-map.show-pin-names-mobile .venue-marker .pin-name {
+      display: inline !important;
+    }
+    .leaflet-map.show-pin-names-mobile .venue-marker .pin-count {
+      background: var(--accent);
+      color: #0c0e14;
+      padding: 1px 6px;
     }
   }
   /* Banner Header Row & Submit Button */
@@ -1467,7 +1529,7 @@
           </label>
 <label class="chk">
             <input type="checkbox" class="cat-chk" value="Stage" checked>
-            <span>☺ 🎭 Stage <span class="count">542</span></span>
+            <span>☺ 🎭 Stage <span class="count">541</span></span>
           </label>
 <label class="chk">
             <input type="checkbox" class="cat-chk" value="Arts &amp; culture" checked>
@@ -1475,7 +1537,7 @@
           </label>
 <label class="chk">
             <input type="checkbox" class="cat-chk" value="Play" checked>
-            <span>◆ ⚑ ⛰ ✦ Play <span class="count">773</span></span>
+            <span>◆ ⚑ ⛰ ✦ Play <span class="count">767</span></span>
           </label>
 <label class="chk">
             <input type="checkbox" class="cat-chk" value="Food &amp; drink" checked>
@@ -1483,14 +1545,14 @@
           </label>
 <label class="chk">
             <input type="checkbox" class="cat-chk" value="Community" checked>
-            <span>◯ · Community <span class="count">1543</span></span>
+            <span>◯ · Community <span class="count">1545</span></span>
           </label></div>
       </div>
       <div class="filter-group">
         <h3>City <span class="spacer"></span> <button type="button" id="city-all">all</button> <button type="button" id="city-none">none</button></h3>
         <div class="chk-grid"><label class="chk">
             <input type="checkbox" class="city-chk" value="boston" checked>
-            <span><span class="city-swatch" style="background:#5d9bff"></span>Boston <span class="count">2545</span></span>
+            <span><span class="city-swatch" style="background:#5d9bff"></span>Boston <span class="count">2544</span></span>
           </label>
 <label class="chk">
             <input type="checkbox" class="city-chk" value="cambridge" checked>
@@ -1737,7 +1799,7 @@
           </label>
 <label class="chk">
             <input type="checkbox" class="venue-chk" value="Coolidge Corner Theatre" checked>
-            <span>Coolidge Corner Theatre <span class="count">92</span></span>
+            <span>Coolidge Corner Theatre <span class="count">91</span></span>
           </label>
 <label class="chk">
             <input type="checkbox" class="venue-chk" value="Trident Booksellers &amp; Cafe" checked>
@@ -1921,7 +1983,7 @@
           </label>
 <label class="chk">
             <input type="checkbox" class="venue-chk" value="Cambridge Public Library" checked>
-            <span>Cambridge Public Library <span class="count">284</span></span>
+            <span>Cambridge Public Library <span class="count">286</span></span>
           </label>
 <label class="chk">
             <input type="checkbox" class="venue-chk" value="Somerville Community Growing Center" checked>
@@ -2083,6 +2145,7 @@
             <span class="map-hint">· OpenStreetMap · Pins update with your date &amp; filters</span>
           </div>
           <div class="map-header-actions">
+            <button type="button" id="map-label-toggle-btn" class="map-tool-btn" title="Toggle between venue names and numbers only">🏷️ Names: On</button>
             <button type="button" id="map-recenter-btn" class="map-tool-btn" title="Center map on Boston">🎯 Center Boston</button>
           </div>
         </div>
@@ -2535,7 +2598,7 @@
             <div class="bucket" data-bucket="Community">
               <div class="bucket-head" style="--accent:#8fa1b3">
                 <span class="bucket-name">Community</span>
-                <span class="count">15</span>
+                <span class="count">17</span>
               </div>
               <ul><li class="event" data-cat="arts" data-bucket="Community" data-venue="Gather Here" data-city="cambridge" data-recur="once" data-free="false" data-epoch="1792152000" data-lat="42.3736" data-lng="-71.1" data-venue-name="Gather Here" data-neighborhood="Inman Square">
           <div class="when">8:00 AM</div>
@@ -2548,13 +2611,6 @@
           <div class="when">9:00 AM</div>
           <div class="what"><a href="https://calendar.mit.edu/event/copy-of-build-up-healthy-writing-habits-with-writing-together-online-challenge-1-9495" target="_blank" rel="noopener">Build Up Healthy Writing Habits with Writing Together Online (Challenge 1)</a><span class="price free">0</span>
             <div class="venue-tag"><span class="cat-pill" style="--cat-c:#8fa1b3; background:#8fa1b318; border-color:#8fa1b333; color:#8fa1b3">◯ community</span> · <a class="venue-link" href="https://www.google.com/maps/search/?api=1&amp;query=MIT%20Events%2C%20Cambridge%2C%20MA" target="_blank" rel="noopener">MIT Events</a> <button type="button" class="venue-map-jump" data-lat="42.359" data-lng="-71.094" data-venue="MIT Campus" title="View MIT Campus on Map">📍</button><span class="cal-links"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Build%20Up%20Healthy%20Writing%20Habits%20with%20Writing%20Together%20Online%20%28Challenge%201%29&amp;dates=20261016T130000Z/20261016T150000Z&amp;details=Details%20%26%20Tickets%3A%20https%3A//calendar.mit.edu/event/copy-of-build-up-healthy-writing-habits-with-writing-together-online-challenge-1-9495%0A%0ADiscovered%20on%20Wicked%20Boston%20Events&amp;location=MIT%20Events%2C%20Cambridge%2C%20MA" target="_blank" rel="noopener" title="Add to Google Calendar">+ GCal</a> <button type="button" class="cal-btn ics-btn" data-title="Build Up Healthy Writing Habits with Writing Together Online (Challenge 1)" data-date="2026-10-16T13:00:00+00:00" data-venue="MIT Events" data-url="https://calendar.mit.edu/event/copy-of-build-up-healthy-writing-habits-with-writing-together-online-challenge-1-9495" title="Download .ics for Apple/Outlook">+ .ics</button></span></div>
-            
-          </div>
-        </li>
-<li class="event" data-cat="arts" data-bucket="Community" data-venue="Gather Here" data-city="cambridge" data-recur="weekly" data-free="false" data-epoch="1792159200" data-lat="42.3736" data-lng="-71.1" data-venue-name="Gather Here" data-neighborhood="Inman Square">
-          <div class="when">10:00 AM</div>
-          <div class="what"><a href="https://gatherhereonline.com/products/sewing-basics?start=2026-10-01T00:00&amp;select=2026-10-16T14:00" target="_blank" rel="noopener">Craft Workshop: Sewing Basics</a><span class="price">Class / Workshop</span><span class="recur">↻ weekly</span>
-            <div class="venue-tag"><span class="cat-pill" style="--cat-c:#6b7280; background:#6b728018; border-color:#6b728033; color:#6b7280">· arts</span> · <a class="venue-link" href="https://www.google.com/maps/search/?api=1&amp;query=Gather%20Here%2C%20Cambridge%2C%20MA" target="_blank" rel="noopener">Gather Here</a> <button type="button" class="venue-map-jump" data-lat="42.3736" data-lng="-71.1" data-venue="Gather Here" title="View Gather Here on Map">📍</button><span class="cal-links"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Craft%20Workshop%3A%20Sewing%20Basics&amp;dates=20261016T140000Z/20261016T160000Z&amp;details=Details%20%26%20Tickets%3A%20https%3A//gatherhereonline.com/products/sewing-basics%3Fstart%3D2026-10-01T00%3A00%26select%3D2026-10-16T14%3A00%0A%0ADiscovered%20on%20Wicked%20Boston%20Events&amp;location=Gather%20Here%2C%20Cambridge%2C%20MA" target="_blank" rel="noopener" title="Add to Google Calendar">+ GCal</a> <button type="button" class="cal-btn ics-btn" data-title="Craft Workshop: Sewing Basics" data-date="2026-10-16T14:00:00" data-venue="Gather Here" data-url="https://gatherhereonline.com/products/sewing-basics?start=2026-10-01T00:00&amp;select=2026-10-16T14:00" title="Download .ics for Apple/Outlook">+ .ics</button></span></div>
             
           </div>
         </li>
@@ -6349,15 +6405,15 @@ We use AI chats and coding tools every day. This session explores what happens w
         </li>
 <li class="event" data-cat="community" data-bucket="Community" data-venue="The Anchor Boston" data-city="boston" data-recur="once" data-free="false" data-epoch="1792252800" data-lat="42.3734" data-lng="-71.0505" data-venue-name="The Anchor Boston" data-neighborhood="Charlestown Navy Yard">
           <div class="when">12:00 PM</div>
-          <div class="what"><a href="https://www.theanchorboston.com/calendar" target="_blank" rel="noopener">Ohio State V. Indiana</a>
-            <div class="venue-tag"><span class="cat-pill" style="--cat-c:#8fa1b3; background:#8fa1b318; border-color:#8fa1b333; color:#8fa1b3">◯ community</span> · <a class="venue-link" href="https://www.google.com/maps/search/?api=1&amp;query=The%20Anchor%20Boston%2C%20Boston%2C%20MA" target="_blank" rel="noopener">The Anchor Boston</a> <button type="button" class="venue-map-jump" data-lat="42.3734" data-lng="-71.0505" data-venue="The Anchor Boston" title="View The Anchor Boston on Map">📍</button><span class="cal-links"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Ohio%20State%20V.%20Indiana&amp;dates=20261017T160000Z/20261017T180000Z&amp;details=Details%20%26%20Tickets%3A%20https%3A//www.theanchorboston.com/calendar%0A%0ADiscovered%20on%20Wicked%20Boston%20Events&amp;location=The%20Anchor%20Boston%2C%20Boston%2C%20MA" target="_blank" rel="noopener" title="Add to Google Calendar">+ GCal</a> <button type="button" class="cal-btn ics-btn" data-title="Ohio State V. Indiana" data-date="2026-10-17T16:00:00+00:00" data-venue="The Anchor Boston" data-url="https://www.theanchorboston.com/calendar" title="Download .ics for Apple/Outlook">+ .ics</button></span></div>
+          <div class="what"><a href="https://www.theanchorboston.com/calendar" target="_blank" rel="noopener">Florida v Texas</a>
+            <div class="venue-tag"><span class="cat-pill" style="--cat-c:#8fa1b3; background:#8fa1b318; border-color:#8fa1b333; color:#8fa1b3">◯ community</span> · <a class="venue-link" href="https://www.google.com/maps/search/?api=1&amp;query=The%20Anchor%20Boston%2C%20Boston%2C%20MA" target="_blank" rel="noopener">The Anchor Boston</a> <button type="button" class="venue-map-jump" data-lat="42.3734" data-lng="-71.0505" data-venue="The Anchor Boston" title="View The Anchor Boston on Map">📍</button><span class="cal-links"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Florida%20v%20Texas&amp;dates=20261017T160000Z/20261017T180000Z&amp;details=Details%20%26%20Tickets%3A%20https%3A//www.theanchorboston.com/calendar%0A%0ADiscovered%20on%20Wicked%20Boston%20Events&amp;location=The%20Anchor%20Boston%2C%20Boston%2C%20MA" target="_blank" rel="noopener" title="Add to Google Calendar">+ GCal</a> <button type="button" class="cal-btn ics-btn" data-title="Florida v Texas" data-date="2026-10-17T16:00:00+00:00" data-venue="The Anchor Boston" data-url="https://www.theanchorboston.com/calendar" title="Download .ics for Apple/Outlook">+ .ics</button></span></div>
             
           </div>
         </li>
 <li class="event" data-cat="community" data-bucket="Community" data-venue="The Anchor Boston" data-city="boston" data-recur="once" data-free="false" data-epoch="1792252800" data-lat="42.3734" data-lng="-71.0505" data-venue-name="The Anchor Boston" data-neighborhood="Charlestown Navy Yard">
           <div class="when">12:00 PM</div>
-          <div class="what"><a href="https://www.theanchorboston.com/calendar" target="_blank" rel="noopener">Florida v Texas</a>
-            <div class="venue-tag"><span class="cat-pill" style="--cat-c:#8fa1b3; background:#8fa1b318; border-color:#8fa1b333; color:#8fa1b3">◯ community</span> · <a class="venue-link" href="https://www.google.com/maps/search/?api=1&amp;query=The%20Anchor%20Boston%2C%20Boston%2C%20MA" target="_blank" rel="noopener">The Anchor Boston</a> <button type="button" class="venue-map-jump" data-lat="42.3734" data-lng="-71.0505" data-venue="The Anchor Boston" title="View The Anchor Boston on Map">📍</button><span class="cal-links"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Florida%20v%20Texas&amp;dates=20261017T160000Z/20261017T180000Z&amp;details=Details%20%26%20Tickets%3A%20https%3A//www.theanchorboston.com/calendar%0A%0ADiscovered%20on%20Wicked%20Boston%20Events&amp;location=The%20Anchor%20Boston%2C%20Boston%2C%20MA" target="_blank" rel="noopener" title="Add to Google Calendar">+ GCal</a> <button type="button" class="cal-btn ics-btn" data-title="Florida v Texas" data-date="2026-10-17T16:00:00+00:00" data-venue="The Anchor Boston" data-url="https://www.theanchorboston.com/calendar" title="Download .ics for Apple/Outlook">+ .ics</button></span></div>
+          <div class="what"><a href="https://www.theanchorboston.com/calendar" target="_blank" rel="noopener">Ohio State V. Indiana</a>
+            <div class="venue-tag"><span class="cat-pill" style="--cat-c:#8fa1b3; background:#8fa1b318; border-color:#8fa1b333; color:#8fa1b3">◯ community</span> · <a class="venue-link" href="https://www.google.com/maps/search/?api=1&amp;query=The%20Anchor%20Boston%2C%20Boston%2C%20MA" target="_blank" rel="noopener">The Anchor Boston</a> <button type="button" class="venue-map-jump" data-lat="42.3734" data-lng="-71.0505" data-venue="The Anchor Boston" title="View The Anchor Boston on Map">📍</button><span class="cal-links"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Ohio%20State%20V.%20Indiana&amp;dates=20261017T160000Z/20261017T180000Z&amp;details=Details%20%26%20Tickets%3A%20https%3A//www.theanchorboston.com/calendar%0A%0ADiscovered%20on%20Wicked%20Boston%20Events&amp;location=The%20Anchor%20Boston%2C%20Boston%2C%20MA" target="_blank" rel="noopener" title="Add to Google Calendar">+ GCal</a> <button type="button" class="cal-btn ics-btn" data-title="Ohio State V. Indiana" data-date="2026-10-17T16:00:00+00:00" data-venue="The Anchor Boston" data-url="https://www.theanchorboston.com/calendar" title="Download .ics for Apple/Outlook">+ .ics</button></span></div>
             
           </div>
         </li>
@@ -17301,17 +17357,17 @@ Please join us for good vibes and fun games. The goal here is to meet people and
             
           </div>
         </li>
-<li class="event" data-cat="comedy" data-bucket="Stage" data-venue="SeatGeek" data-city="boston" data-recur="once" data-free="false" data-epoch="1792798200" data-lat="42.3503" data-lng="-71.065" data-venue-name="Boch Center Wang Theatre" data-neighborhood="">
-          <div class="when">7:30 PM</div>
-          <div class="what"><a href="https://seatgeek.com/jim-gaffigan-tickets/comedy/2026-10-23-7-30-pm/18115555" target="_blank" rel="noopener">Jim Gaffigan</a><span class="price ticketed">Live Pricing ↗</span>
-            <div class="venue-tag"><span class="cat-pill" style="--cat-c:#f0a07a; background:#f0a07a18; border-color:#f0a07a33; color:#f0a07a">☺ comedy</span> · <a class="venue-link" href="https://www.google.com/maps/search/?api=1&amp;query=Boch%20Center%20Wang%20Theatre%2C%20Boston%2C%20MA" target="_blank" rel="noopener">Boch Center Wang Theatre</a> <button type="button" class="venue-map-jump" data-lat="42.3503" data-lng="-71.065" data-venue="Boch Center Wang Theatre" title="View Boch Center Wang Theatre on Map">📍</button> <span class="venue-via">(via SeatGeek)</span> · <span class="alt-sources">also on <a href="https://www.thebostoncalendar.com/events/jim-gaffigan-boston-ma-everything-is-wonderful-tour" target="_blank" rel="noopener">The Boston Calendar</a> · <a href="https://www.bochcenter.org/events/detail/jimgaffigan" target="_blank" rel="noopener">Boch Center (Wang &amp; Shubert)</a></span> · <span class="compare-tickets">live prices: <a href="https://gametime.co/search?q=Jim+Gaffigan" target="_blank" rel="noopener">Gametime</a> · <a href="https://www.stubhub.com/search?q=Jim+Gaffigan" target="_blank" rel="noopener">StubHub</a></span><span class="cal-links"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Jim%20Gaffigan&amp;dates=20261023T233000Z/20261024T013000Z&amp;details=Details%20%26%20Tickets%3A%20https%3A//seatgeek.com/jim-gaffigan-tickets/comedy/2026-10-23-7-30-pm/18115555%0A%0ADiscovered%20on%20Wicked%20Boston%20Events&amp;location=Boch%20Center%20Wang%20Theatre%2C%20Boston%2C%20MA" target="_blank" rel="noopener" title="Add to Google Calendar">+ GCal</a> <button type="button" class="cal-btn ics-btn" data-title="Jim Gaffigan" data-date="2026-10-23T23:30:00Z" data-venue="Boch Center Wang Theatre" data-url="https://seatgeek.com/jim-gaffigan-tickets/comedy/2026-10-23-7-30-pm/18115555" title="Download .ics for Apple/Outlook">+ .ics</button></span></div>
-            
-          </div>
-        </li>
 <li class="event" data-cat="theater" data-bucket="Stage" data-venue="SeatGeek" data-city="boston" data-recur="once" data-free="false" data-epoch="1792798200" data-lat="42.34" data-lng="-71.06" data-venue-name="Huntington Avenue Theatre" data-neighborhood="">
           <div class="when">7:30 PM</div>
           <div class="what"><a href="https://seatgeek.com/to-kill-a-mockingbird-tickets/broadway/2026-10-23-7-30-pm/18663415" target="_blank" rel="noopener">To Kill a Mockingbird - Boston</a><span class="price ticketed">Live Pricing ↗</span>
             <div class="venue-tag"><span class="cat-pill" style="--cat-c:#f7768e; background:#f7768e18; border-color:#f7768e33; color:#f7768e">🎭 theater</span> · <a class="venue-link" href="https://www.google.com/maps/search/?api=1&amp;query=Huntington%20Avenue%20Theatre%2C%20Boston%2C%20MA" target="_blank" rel="noopener">Huntington Avenue Theatre</a> <button type="button" class="venue-map-jump" data-lat="42.34" data-lng="-71.06" data-venue="Huntington Avenue Theatre" title="View Huntington Avenue Theatre on Map">📍</button> <span class="venue-via">(via SeatGeek)</span> · <span class="compare-tickets">live prices: <a href="https://gametime.co/search?q=To+Kill+a+Mockingbird" target="_blank" rel="noopener">Gametime</a> · <a href="https://www.stubhub.com/search?q=To+Kill+a+Mockingbird" target="_blank" rel="noopener">StubHub</a></span><span class="cal-links"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=To%20Kill%20a%20Mockingbird%20-%20Boston&amp;dates=20261023T233000Z/20261024T013000Z&amp;details=Details%20%26%20Tickets%3A%20https%3A//seatgeek.com/to-kill-a-mockingbird-tickets/broadway/2026-10-23-7-30-pm/18663415%0A%0ADiscovered%20on%20Wicked%20Boston%20Events&amp;location=Huntington%20Avenue%20Theatre%2C%20Boston%2C%20MA" target="_blank" rel="noopener" title="Add to Google Calendar">+ GCal</a> <button type="button" class="cal-btn ics-btn" data-title="To Kill a Mockingbird - Boston" data-date="2026-10-23T23:30:00Z" data-venue="Huntington Avenue Theatre" data-url="https://seatgeek.com/to-kill-a-mockingbird-tickets/broadway/2026-10-23-7-30-pm/18663415" title="Download .ics for Apple/Outlook">+ .ics</button></span></div>
+            
+          </div>
+        </li>
+<li class="event" data-cat="comedy" data-bucket="Stage" data-venue="SeatGeek" data-city="boston" data-recur="once" data-free="false" data-epoch="1792798200" data-lat="42.3503" data-lng="-71.065" data-venue-name="Boch Center Wang Theatre" data-neighborhood="">
+          <div class="when">7:30 PM</div>
+          <div class="what"><a href="https://seatgeek.com/jim-gaffigan-tickets/comedy/2026-10-23-7-30-pm/18115555" target="_blank" rel="noopener">Jim Gaffigan</a><span class="price ticketed">Live Pricing ↗</span>
+            <div class="venue-tag"><span class="cat-pill" style="--cat-c:#f0a07a; background:#f0a07a18; border-color:#f0a07a33; color:#f0a07a">☺ comedy</span> · <a class="venue-link" href="https://www.google.com/maps/search/?api=1&amp;query=Boch%20Center%20Wang%20Theatre%2C%20Boston%2C%20MA" target="_blank" rel="noopener">Boch Center Wang Theatre</a> <button type="button" class="venue-map-jump" data-lat="42.3503" data-lng="-71.065" data-venue="Boch Center Wang Theatre" title="View Boch Center Wang Theatre on Map">📍</button> <span class="venue-via">(via SeatGeek)</span> · <span class="alt-sources">also on <a href="https://www.thebostoncalendar.com/events/jim-gaffigan-boston-ma-everything-is-wonderful-tour" target="_blank" rel="noopener">The Boston Calendar</a> · <a href="https://www.bochcenter.org/events/detail/jimgaffigan" target="_blank" rel="noopener">Boch Center (Wang &amp; Shubert)</a></span> · <span class="compare-tickets">live prices: <a href="https://gametime.co/search?q=Jim+Gaffigan" target="_blank" rel="noopener">Gametime</a> · <a href="https://www.stubhub.com/search?q=Jim+Gaffigan" target="_blank" rel="noopener">StubHub</a></span><span class="cal-links"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Jim%20Gaffigan&amp;dates=20261023T233000Z/20261024T013000Z&amp;details=Details%20%26%20Tickets%3A%20https%3A//seatgeek.com/jim-gaffigan-tickets/comedy/2026-10-23-7-30-pm/18115555%0A%0ADiscovered%20on%20Wicked%20Boston%20Events&amp;location=Boch%20Center%20Wang%20Theatre%2C%20Boston%2C%20MA" target="_blank" rel="noopener" title="Add to Google Calendar">+ GCal</a> <button type="button" class="cal-btn ics-btn" data-title="Jim Gaffigan" data-date="2026-10-23T23:30:00Z" data-venue="Boch Center Wang Theatre" data-url="https://seatgeek.com/jim-gaffigan-tickets/comedy/2026-10-23-7-30-pm/18115555" title="Download .ics for Apple/Outlook">+ .ics</button></span></div>
             
           </div>
         </li>
@@ -36760,6 +36816,20 @@ Please join us for good vibes and fun games. The goal here is to meet people and
               </div>
               <ul><li class="event" data-cat="community" data-bucket="Community" data-venue="The Anchor Boston" data-city="boston" data-recur="once" data-free="false" data-epoch="1794632400" data-lat="42.3734" data-lng="-71.0505" data-venue-name="The Anchor Boston" data-neighborhood="Charlestown Navy Yard">
           <div class="when">12:00 AM</div>
+          <div class="what"><a href="https://www.theanchorboston.com/calendar" target="_blank" rel="noopener">Ole Miss V. Oklahoma Time: TBA</a>
+            <div class="venue-tag"><span class="cat-pill" style="--cat-c:#8fa1b3; background:#8fa1b318; border-color:#8fa1b333; color:#8fa1b3">◯ community</span> · <a class="venue-link" href="https://www.google.com/maps/search/?api=1&amp;query=The%20Anchor%20Boston%2C%20Boston%2C%20MA" target="_blank" rel="noopener">The Anchor Boston</a> <button type="button" class="venue-map-jump" data-lat="42.3734" data-lng="-71.0505" data-venue="The Anchor Boston" title="View The Anchor Boston on Map">📍</button><span class="cal-links"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Ole%20Miss%20V.%20Oklahoma%20Time%3A%20TBA&amp;dates=20261114T050000Z/20261114T070000Z&amp;details=Details%20%26%20Tickets%3A%20https%3A//www.theanchorboston.com/calendar%0A%0ADiscovered%20on%20Wicked%20Boston%20Events&amp;location=The%20Anchor%20Boston%2C%20Boston%2C%20MA" target="_blank" rel="noopener" title="Add to Google Calendar">+ GCal</a> <button type="button" class="cal-btn ics-btn" data-title="Ole Miss V. Oklahoma Time: TBA" data-date="2026-11-14T05:00:00+00:00" data-venue="The Anchor Boston" data-url="https://www.theanchorboston.com/calendar" title="Download .ics for Apple/Outlook">+ .ics</button></span></div>
+            
+          </div>
+        </li>
+<li class="event" data-cat="community" data-bucket="Community" data-venue="The Anchor Boston" data-city="boston" data-recur="once" data-free="false" data-epoch="1794632400" data-lat="42.3734" data-lng="-71.0505" data-venue-name="The Anchor Boston" data-neighborhood="Charlestown Navy Yard">
+          <div class="when">12:00 AM</div>
+          <div class="what"><a href="https://www.theanchorboston.com/calendar" target="_blank" rel="noopener">Oregon V. Michigan Time: TBA</a>
+            <div class="venue-tag"><span class="cat-pill" style="--cat-c:#8fa1b3; background:#8fa1b318; border-color:#8fa1b333; color:#8fa1b3">◯ community</span> · <a class="venue-link" href="https://www.google.com/maps/search/?api=1&amp;query=The%20Anchor%20Boston%2C%20Boston%2C%20MA" target="_blank" rel="noopener">The Anchor Boston</a> <button type="button" class="venue-map-jump" data-lat="42.3734" data-lng="-71.0505" data-venue="The Anchor Boston" title="View The Anchor Boston on Map">📍</button><span class="cal-links"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Oregon%20V.%20Michigan%20Time%3A%20TBA&amp;dates=20261114T050000Z/20261114T070000Z&amp;details=Details%20%26%20Tickets%3A%20https%3A//www.theanchorboston.com/calendar%0A%0ADiscovered%20on%20Wicked%20Boston%20Events&amp;location=The%20Anchor%20Boston%2C%20Boston%2C%20MA" target="_blank" rel="noopener" title="Add to Google Calendar">+ GCal</a> <button type="button" class="cal-btn ics-btn" data-title="Oregon V. Michigan Time: TBA" data-date="2026-11-14T05:00:00+00:00" data-venue="The Anchor Boston" data-url="https://www.theanchorboston.com/calendar" title="Download .ics for Apple/Outlook">+ .ics</button></span></div>
+            
+          </div>
+        </li>
+<li class="event" data-cat="community" data-bucket="Community" data-venue="The Anchor Boston" data-city="boston" data-recur="once" data-free="false" data-epoch="1794632400" data-lat="42.3734" data-lng="-71.0505" data-venue-name="The Anchor Boston" data-neighborhood="Charlestown Navy Yard">
+          <div class="when">12:00 AM</div>
           <div class="what"><a href="https://www.theanchorboston.com/calendar" target="_blank" rel="noopener">USC V. Indiana Time: TBA</a>
             <div class="venue-tag"><span class="cat-pill" style="--cat-c:#8fa1b3; background:#8fa1b318; border-color:#8fa1b333; color:#8fa1b3">◯ community</span> · <a class="venue-link" href="https://www.google.com/maps/search/?api=1&amp;query=The%20Anchor%20Boston%2C%20Boston%2C%20MA" target="_blank" rel="noopener">The Anchor Boston</a> <button type="button" class="venue-map-jump" data-lat="42.3734" data-lng="-71.0505" data-venue="The Anchor Boston" title="View The Anchor Boston on Map">📍</button><span class="cal-links"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=USC%20V.%20Indiana%20Time%3A%20TBA&amp;dates=20261114T050000Z/20261114T070000Z&amp;details=Details%20%26%20Tickets%3A%20https%3A//www.theanchorboston.com/calendar%0A%0ADiscovered%20on%20Wicked%20Boston%20Events&amp;location=The%20Anchor%20Boston%2C%20Boston%2C%20MA" target="_blank" rel="noopener" title="Add to Google Calendar">+ GCal</a> <button type="button" class="cal-btn ics-btn" data-title="USC V. Indiana Time: TBA" data-date="2026-11-14T05:00:00+00:00" data-venue="The Anchor Boston" data-url="https://www.theanchorboston.com/calendar" title="Download .ics for Apple/Outlook">+ .ics</button></span></div>
             
@@ -43007,7 +43077,7 @@ Join Boston New Technology and Startup Grind Boston every Thursday for a welcomi
             </div></div>
           </div>
           <div class="city-section" data-city="boston">
-            <h3 class="city-head"><span>Boston</span><span class="count">18</span></h3>
+            <h3 class="city-head"><span>Boston</span><span class="count">17</span></h3>
             <div class="buckets">
             <div class="bucket" data-bucket="Music &amp; nightlife">
               <div class="bucket-head" style="--accent:#7aa2f7">
@@ -43067,19 +43137,12 @@ Join Boston New Technology and Startup Grind Boston every Thursday for a welcomi
             <div class="bucket" data-bucket="Stage">
               <div class="bucket-head" style="--accent:#f0a07a">
                 <span class="bucket-name">Stage</span>
-                <span class="count">2</span>
+                <span class="count">1</span>
               </div>
               <ul><li class="event" data-cat="theater" data-bucket="Stage" data-venue="Coolidge Corner Theatre" data-city="boston" data-recur="once" data-free="false" data-epoch="1796342400" data-lat="42.3424" data-lng="-71.1215" data-venue-name="Coolidge Corner Theatre" data-neighborhood="Coolidge Corner">
           <div class="when">7:00 PM</div>
           <div class="what"><a href="https://coolidge.org/films/lion-winter" target="_blank" rel="noopener">The Lion in Winter</a>
             <div class="venue-tag"><span class="cat-pill" style="--cat-c:#f7768e; background:#f7768e18; border-color:#f7768e33; color:#f7768e">🎭 theater</span> · <a class="venue-link" href="https://www.google.com/maps/search/?api=1&amp;query=Coolidge%20Corner%20Theatre%2C%20Boston%2C%20MA" target="_blank" rel="noopener">Coolidge Corner Theatre</a> <button type="button" class="venue-map-jump" data-lat="42.3424" data-lng="-71.1215" data-venue="Coolidge Corner Theatre" title="View Coolidge Corner Theatre on Map">📍</button><span class="cal-links"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=The%20Lion%20in%20Winter&amp;dates=20261204T000000Z/20261204T020000Z&amp;details=Details%20%26%20Tickets%3A%20https%3A//coolidge.org/films/lion-winter%0A%0ADiscovered%20on%20Wicked%20Boston%20Events&amp;location=Coolidge%20Corner%20Theatre%2C%20Boston%2C%20MA" target="_blank" rel="noopener" title="Add to Google Calendar">+ GCal</a> <button type="button" class="cal-btn ics-btn" data-title="The Lion in Winter" data-date="2026-12-04T00:00:00+00:00" data-venue="Coolidge Corner Theatre" data-url="https://coolidge.org/films/lion-winter" title="Download .ics for Apple/Outlook">+ .ics</button></span></div>
-            
-          </div>
-        </li>
-<li class="event" data-cat="theater" data-bucket="Stage" data-venue="Coolidge Corner Theatre" data-city="boston" data-recur="once" data-free="false" data-epoch="1796342400" data-lat="42.3424" data-lng="-71.1215" data-venue-name="Coolidge Corner Theatre" data-neighborhood="Coolidge Corner">
-          <div class="when">7:00 PM</div>
-          <div class="what"><a href="https://coolidge.org/films/clifford" target="_blank" rel="noopener">Clifford</a>
-            <div class="venue-tag"><span class="cat-pill" style="--cat-c:#f7768e; background:#f7768e18; border-color:#f7768e33; color:#f7768e">🎭 theater</span> · <a class="venue-link" href="https://www.google.com/maps/search/?api=1&amp;query=Coolidge%20Corner%20Theatre%2C%20Boston%2C%20MA" target="_blank" rel="noopener">Coolidge Corner Theatre</a> <button type="button" class="venue-map-jump" data-lat="42.3424" data-lng="-71.1215" data-venue="Coolidge Corner Theatre" title="View Coolidge Corner Theatre on Map">📍</button><span class="cal-links"><a class="cal-btn" href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Clifford&amp;dates=20261204T000000Z/20261204T020000Z&amp;details=Details%20%26%20Tickets%3A%20https%3A//coolidge.org/films/clifford%0A%0ADiscovered%20on%20Wicked%20Boston%20Events&amp;location=Coolidge%20Corner%20Theatre%2C%20Boston%2C%20MA" target="_blank" rel="noopener" title="Add to Google Calendar">+ GCal</a> <button type="button" class="cal-btn ics-btn" data-title="Clifford" data-date="2026-12-04T00:00:00+00:00" data-venue="Coolidge Corner Theatre" data-url="https://coolidge.org/films/clifford" title="Download .ics for Apple/Outlook">+ .ics</button></span></div>
             
           </div>
         </li></ul>
@@ -57288,13 +57351,6 @@ Join Boston New Technology and Startup Grind Boston every Thursday for a welcomi
         </li>
 <li class="event" data-cat="theater" data-bucket="Stage" data-venue="Coolidge Corner Theatre" data-city="boston" data-recur="once" data-free="false" data-lat="42.3424" data-lng="-71.1215" data-venue-name="Coolidge Corner Theatre" data-neighborhood="Coolidge Corner">
           <div class="when">TBA</div>
-          <div class="what"><a href="https://coolidge.org/films/sense-and-sensibility-2026" target="_blank" rel="noopener">Sense and Sensibility (2026)</a>
-            <div class="venue-tag"><span class="cat-pill" style="--cat-c:#f7768e; background:#f7768e18; border-color:#f7768e33; color:#f7768e">🎭 theater</span> · <a class="venue-link" href="https://www.google.com/maps/search/?api=1&amp;query=Coolidge%20Corner%20Theatre%2C%20Boston%2C%20MA" target="_blank" rel="noopener">Coolidge Corner Theatre</a> <button type="button" class="venue-map-jump" data-lat="42.3424" data-lng="-71.1215" data-venue="Coolidge Corner Theatre" title="View Coolidge Corner Theatre on Map">📍</button></div>
-            
-          </div>
-        </li>
-<li class="event" data-cat="theater" data-bucket="Stage" data-venue="Coolidge Corner Theatre" data-city="boston" data-recur="once" data-free="false" data-lat="42.3424" data-lng="-71.1215" data-venue-name="Coolidge Corner Theatre" data-neighborhood="Coolidge Corner">
-          <div class="when">TBA</div>
           <div class="what"><a href="https://coolidge.org/films/you-can-see-everything" target="_blank" rel="noopener">You Can See Everything</a>
             <div class="venue-tag"><span class="cat-pill" style="--cat-c:#f7768e; background:#f7768e18; border-color:#f7768e33; color:#f7768e">🎭 theater</span> · <a class="venue-link" href="https://www.google.com/maps/search/?api=1&amp;query=Coolidge%20Corner%20Theatre%2C%20Boston%2C%20MA" target="_blank" rel="noopener">Coolidge Corner Theatre</a> <button type="button" class="venue-map-jump" data-lat="42.3424" data-lng="-71.1215" data-venue="Coolidge Corner Theatre" title="View Coolidge Corner Theatre on Map">📍</button></div>
             
@@ -57309,7 +57365,7 @@ Join Boston New Technology and Startup Grind Boston every Thursday for a welcomi
         </li>
 <li class="event" data-cat="theater" data-bucket="Stage" data-venue="Coolidge Corner Theatre" data-city="boston" data-recur="once" data-free="false" data-lat="42.3424" data-lng="-71.1215" data-venue-name="Coolidge Corner Theatre" data-neighborhood="Coolidge Corner">
           <div class="when">TBA</div>
-          <div class="what"><a href="https://coolidge.org/films/wicker" target="_blank" rel="noopener">Wicker</a>
+          <div class="what"><a href="https://coolidge.org/films/sense-and-sensibility-2026" target="_blank" rel="noopener">Sense and Sensibility (2026)</a>
             <div class="venue-tag"><span class="cat-pill" style="--cat-c:#f7768e; background:#f7768e18; border-color:#f7768e33; color:#f7768e">🎭 theater</span> · <a class="venue-link" href="https://www.google.com/maps/search/?api=1&amp;query=Coolidge%20Corner%20Theatre%2C%20Boston%2C%20MA" target="_blank" rel="noopener">Coolidge Corner Theatre</a> <button type="button" class="venue-map-jump" data-lat="42.3424" data-lng="-71.1215" data-venue="Coolidge Corner Theatre" title="View Coolidge Corner Theatre on Map">📍</button></div>
             
           </div>
@@ -57317,6 +57373,20 @@ Join Boston New Technology and Startup Grind Boston every Thursday for a welcomi
 <li class="event" data-cat="theater" data-bucket="Stage" data-venue="Coolidge Corner Theatre" data-city="boston" data-recur="once" data-free="false" data-lat="42.3424" data-lng="-71.1215" data-venue-name="Coolidge Corner Theatre" data-neighborhood="Coolidge Corner">
           <div class="when">TBA</div>
           <div class="what"><a href="https://coolidge.org/films/fjord" target="_blank" rel="noopener">Fjord</a>
+            <div class="venue-tag"><span class="cat-pill" style="--cat-c:#f7768e; background:#f7768e18; border-color:#f7768e33; color:#f7768e">🎭 theater</span> · <a class="venue-link" href="https://www.google.com/maps/search/?api=1&amp;query=Coolidge%20Corner%20Theatre%2C%20Boston%2C%20MA" target="_blank" rel="noopener">Coolidge Corner Theatre</a> <button type="button" class="venue-map-jump" data-lat="42.3424" data-lng="-71.1215" data-venue="Coolidge Corner Theatre" title="View Coolidge Corner Theatre on Map">📍</button></div>
+            
+          </div>
+        </li>
+<li class="event" data-cat="theater" data-bucket="Stage" data-venue="Coolidge Corner Theatre" data-city="boston" data-recur="once" data-free="false" data-lat="42.3424" data-lng="-71.1215" data-venue-name="Coolidge Corner Theatre" data-neighborhood="Coolidge Corner">
+          <div class="when">TBA</div>
+          <div class="what"><a href="https://coolidge.org/films/wicker" target="_blank" rel="noopener">Wicker</a>
+            <div class="venue-tag"><span class="cat-pill" style="--cat-c:#f7768e; background:#f7768e18; border-color:#f7768e33; color:#f7768e">🎭 theater</span> · <a class="venue-link" href="https://www.google.com/maps/search/?api=1&amp;query=Coolidge%20Corner%20Theatre%2C%20Boston%2C%20MA" target="_blank" rel="noopener">Coolidge Corner Theatre</a> <button type="button" class="venue-map-jump" data-lat="42.3424" data-lng="-71.1215" data-venue="Coolidge Corner Theatre" title="View Coolidge Corner Theatre on Map">📍</button></div>
+            
+          </div>
+        </li>
+<li class="event" data-cat="theater" data-bucket="Stage" data-venue="Coolidge Corner Theatre" data-city="boston" data-recur="once" data-free="false" data-lat="42.3424" data-lng="-71.1215" data-venue-name="Coolidge Corner Theatre" data-neighborhood="Coolidge Corner">
+          <div class="when">TBA</div>
+          <div class="what"><a href="https://coolidge.org/films/once-upon-time-harlem" target="_blank" rel="noopener">Once Upon a Time in Harlem</a>
             <div class="venue-tag"><span class="cat-pill" style="--cat-c:#f7768e; background:#f7768e18; border-color:#f7768e33; color:#f7768e">🎭 theater</span> · <a class="venue-link" href="https://www.google.com/maps/search/?api=1&amp;query=Coolidge%20Corner%20Theatre%2C%20Boston%2C%20MA" target="_blank" rel="noopener">Coolidge Corner Theatre</a> <button type="button" class="venue-map-jump" data-lat="42.3424" data-lng="-71.1215" data-venue="Coolidge Corner Theatre" title="View Coolidge Corner Theatre on Map">📍</button></div>
             
           </div>
@@ -57337,7 +57407,7 @@ Join Boston New Technology and Startup Grind Boston every Thursday for a welcomi
         </li>
 <li class="event" data-cat="theater" data-bucket="Stage" data-venue="Coolidge Corner Theatre" data-city="boston" data-recur="once" data-free="false" data-lat="42.3424" data-lng="-71.1215" data-venue-name="Coolidge Corner Theatre" data-neighborhood="Coolidge Corner">
           <div class="when">TBA</div>
-          <div class="what"><a href="https://coolidge.org/films/once-upon-time-harlem" target="_blank" rel="noopener">Once Upon a Time in Harlem</a>
+          <div class="what"><a href="https://coolidge.org/films/fatherland-2026" target="_blank" rel="noopener">Fatherland (2026)</a>
             <div class="venue-tag"><span class="cat-pill" style="--cat-c:#f7768e; background:#f7768e18; border-color:#f7768e33; color:#f7768e">🎭 theater</span> · <a class="venue-link" href="https://www.google.com/maps/search/?api=1&amp;query=Coolidge%20Corner%20Theatre%2C%20Boston%2C%20MA" target="_blank" rel="noopener">Coolidge Corner Theatre</a> <button type="button" class="venue-map-jump" data-lat="42.3424" data-lng="-71.1215" data-venue="Coolidge Corner Theatre" title="View Coolidge Corner Theatre on Map">📍</button></div>
             
           </div>
@@ -57351,7 +57421,7 @@ Join Boston New Technology and Startup Grind Boston every Thursday for a welcomi
         </li>
 <li class="event" data-cat="theater" data-bucket="Stage" data-venue="Coolidge Corner Theatre" data-city="boston" data-recur="once" data-free="false" data-lat="42.3424" data-lng="-71.1215" data-venue-name="Coolidge Corner Theatre" data-neighborhood="Coolidge Corner">
           <div class="when">TBA</div>
-          <div class="what"><a href="https://coolidge.org/films/fatherland-2026" target="_blank" rel="noopener">Fatherland (2026)</a>
+          <div class="what"><a href="https://coolidge.org/films/i-play-rocky" target="_blank" rel="noopener">I Play Rocky</a>
             <div class="venue-tag"><span class="cat-pill" style="--cat-c:#f7768e; background:#f7768e18; border-color:#f7768e33; color:#f7768e">🎭 theater</span> · <a class="venue-link" href="https://www.google.com/maps/search/?api=1&amp;query=Coolidge%20Corner%20Theatre%2C%20Boston%2C%20MA" target="_blank" rel="noopener">Coolidge Corner Theatre</a> <button type="button" class="venue-map-jump" data-lat="42.3424" data-lng="-71.1215" data-venue="Coolidge Corner Theatre" title="View Coolidge Corner Theatre on Map">📍</button></div>
             
           </div>
@@ -57359,13 +57429,6 @@ Join Boston New Technology and Startup Grind Boston every Thursday for a welcomi
 <li class="event" data-cat="theater" data-bucket="Stage" data-venue="Coolidge Corner Theatre" data-city="boston" data-recur="once" data-free="false" data-lat="42.3424" data-lng="-71.1215" data-venue-name="Coolidge Corner Theatre" data-neighborhood="Coolidge Corner">
           <div class="when">TBA</div>
           <div class="what"><a href="https://coolidge.org/films/being-heumann" target="_blank" rel="noopener">Being Heumann</a>
-            <div class="venue-tag"><span class="cat-pill" style="--cat-c:#f7768e; background:#f7768e18; border-color:#f7768e33; color:#f7768e">🎭 theater</span> · <a class="venue-link" href="https://www.google.com/maps/search/?api=1&amp;query=Coolidge%20Corner%20Theatre%2C%20Boston%2C%20MA" target="_blank" rel="noopener">Coolidge Corner Theatre</a> <button type="button" class="venue-map-jump" data-lat="42.3424" data-lng="-71.1215" data-venue="Coolidge Corner Theatre" title="View Coolidge Corner Theatre on Map">📍</button></div>
-            
-          </div>
-        </li>
-<li class="event" data-cat="theater" data-bucket="Stage" data-venue="Coolidge Corner Theatre" data-city="boston" data-recur="once" data-free="false" data-lat="42.3424" data-lng="-71.1215" data-venue-name="Coolidge Corner Theatre" data-neighborhood="Coolidge Corner">
-          <div class="when">TBA</div>
-          <div class="what"><a href="https://coolidge.org/films/i-play-rocky" target="_blank" rel="noopener">I Play Rocky</a>
             <div class="venue-tag"><span class="cat-pill" style="--cat-c:#f7768e; background:#f7768e18; border-color:#f7768e33; color:#f7768e">🎭 theater</span> · <a class="venue-link" href="https://www.google.com/maps/search/?api=1&amp;query=Coolidge%20Corner%20Theatre%2C%20Boston%2C%20MA" target="_blank" rel="noopener">Coolidge Corner Theatre</a> <button type="button" class="venue-map-jump" data-lat="42.3424" data-lng="-71.1215" data-venue="Coolidge Corner Theatre" title="View Coolidge Corner Theatre on Map">📍</button></div>
             
           </div>
@@ -63319,6 +63382,54 @@ Boston, Massach</div>
       stateToHash();
     }
 
+    function shortenVenueName(name) {
+      if (!name) return '';
+      const OVERRIDES = {
+        'Museum of Fine Arts (MFA)': 'MFA',
+        'Harvard Museum of Natural History': 'Harvard Nat History',
+        'Peabody Museum of Archaeology & Ethnology': 'Peabody Museum',
+        'Boch Center (Wang & Shubert)': 'Boch Center',
+        'Somerville Community Growing Center': 'Growing Center',
+        'The Fenway (Time Out Market & 401 Park)': 'The Fenway',
+        'Trident Booksellers & Cafe': 'Trident Books',
+        'Crystal Ballroom at Somerville Theatre': 'Crystal Ballroom',
+        'Emerson Paramount Center': 'Paramount',
+        'Emerson Colonial Theatre': 'Colonial Theatre',
+        'Citizens House of Blues': 'House of Blues',
+        'Somerville Public Library': 'Somerville Library',
+        'Cambridge Public Library': 'Cambridge Library',
+        'Boston Public Library': 'BPL',
+        'Charles River Speedway': 'Speedway',
+        "McCarthy's Toad": 'Toad',
+        'Versus Boston (via Eventbrite)': 'Versus',
+        'Make Friends After College (via Eventbrite)': 'Make Friends',
+        'Arts at the Armory': 'Armory',
+        "Moves n' Vibes Dance and Entertainment Company": 'Moves & Vibes',
+        'New England Conservatory': 'NEC',
+        'Jordan Hall (NEC)': 'Jordan Hall',
+        'Kings Dining & Entertainment (Seaport)': 'Kings Seaport',
+        'The Jungle Community Music Club': 'The Jungle',
+        'Boston Symphony Orchestra': 'BSO',
+        'Central Square Farmers Market': 'Central Sq Market',
+        'Copley Square Farmers Market': 'Copley Market',
+        'Davis Square Farmers Market': 'Davis Sq Market',
+        'Harvard University Farmers Market': 'Harvard Market',
+      };
+      if (OVERRIDES[name]) return OVERRIDES[name];
+      let s = name;
+      s = s.replace(/\s*\((?:via\s+[^)]+|Wang\s*&.*|Time\s*Out.*|NEC)\)/gi, '');
+      s = s.replace(/,?\s*(?:Boston|Cambridge|Somerville|Brookline|Allston)$/gi, '');
+      s = s.replace(/\s+(?:Brewing(?:\s+Co\.?)?|Brewery|Booksellers(?:\s*&\s*Cafe)?|Music\s+Hall|Jazz\s+Club|Center\s+for\s+the\s+Arts)$/gi, '');
+      s = s.trim();
+      if (s.length > 18 && s.startsWith('The ')) {
+        s = s.slice(4).trim();
+      }
+      if (s.length > 18) {
+        s = s.slice(0, 16).trim() + '…';
+      }
+      return s;
+    }
+
     function updateMapMarkers() {
       if (!leafletMap || !markersLayer) return;
       markersLayer.clearLayers();
@@ -63362,9 +63473,10 @@ Boston, Massach</div>
 
       venueMap.forEach(v => {
         const count = v.events.length;
+        const shortName = shortenVenueName(v.name);
         const icon = L.divIcon({
           className: 'custom-venue-icon',
-          html: `<div class="venue-marker" title="${escapeHTML(v.name)} (${count} events)"><span class="pin-name">${escapeHTML(v.name)}</span><span class="pin-count">${count}</span></div>`,
+          html: `<div class="venue-marker" title="${escapeHTML(v.name)} (${count} event${count === 1 ? '' : 's'})"><span class="pin-name">${escapeHTML(shortName)}</span><span class="pin-count">${count}</span></div>`,
           iconSize: null,
           iconAnchor: [0, 0],
         });
@@ -64119,6 +64231,37 @@ Boston, Massach</div>
           leafletMap.setView([42.3601, -71.0750], 13, { animate: true });
         }
       });
+    }
+
+    const mapLabelToggleBtn = document.getElementById('map-label-toggle-btn');
+    const mapEl = document.getElementById('leaflet-map');
+
+    function updateLabelToggleState() {
+      if (!mapLabelToggleBtn || !mapEl) return;
+      const isMobile = window.innerWidth <= 860;
+      if (isMobile) {
+        const namesOn = mapEl.classList.contains('show-pin-names-mobile');
+        mapLabelToggleBtn.textContent = namesOn ? '🏷️ Names: On' : '🔢 Numbers Only';
+        mapLabelToggleBtn.title = namesOn ? 'Switch to compact numbers only' : 'Show venue names on pins';
+      } else {
+        const namesOff = mapEl.classList.contains('hide-pin-names');
+        mapLabelToggleBtn.textContent = namesOff ? '🔢 Numbers Only' : '🏷️ Names: On';
+        mapLabelToggleBtn.title = namesOff ? 'Show venue names on pins' : 'Switch to compact numbers only';
+      }
+    }
+
+    if (mapLabelToggleBtn && mapEl) {
+      mapLabelToggleBtn.addEventListener('click', () => {
+        const isMobile = window.innerWidth <= 860;
+        if (isMobile) {
+          mapEl.classList.toggle('show-pin-names-mobile');
+        } else {
+          mapEl.classList.toggle('hide-pin-names');
+        }
+        updateLabelToggleState();
+      });
+      window.addEventListener('resize', updateLabelToggleState);
+      updateLabelToggleState();
     }
 
     const panelCloseBtn = document.getElementById('panel-close-btn');

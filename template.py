@@ -1816,6 +1816,29 @@ def render_page(results):
     background: #0c0e14;
     color: #fff;
   }}
+  /* Compact numbers-only mode */
+  .leaflet-map.hide-pin-names .venue-marker {{
+    min-width: 24px;
+    height: 24px;
+    padding: 0 4px;
+    border-radius: 999px;
+    justify-content: center;
+    gap: 0;
+  }}
+  .leaflet-map.hide-pin-names .venue-marker .pin-name {{
+    display: none !important;
+  }}
+  .leaflet-map.hide-pin-names .venue-marker .pin-count {{
+    background: transparent;
+    color: var(--accent);
+    padding: 0;
+    font-size: 11px;
+    font-weight: 800;
+  }}
+  .leaflet-map.hide-pin-names .venue-marker:hover .pin-count,
+  .leaflet-map.hide-pin-names .venue-marker.highlighted .pin-count {{
+    color: #0c0e14;
+  }}
   .venue-map-jump {{
     background: none;
     border: none;
@@ -2138,6 +2161,45 @@ def render_page(results):
       flex-direction: column;
       align-items: flex-start;
       gap: 6px;
+    }}
+    /* Mobile: Default to compact numbers-only pins to prevent clutter */
+    .venue-marker {{
+      min-width: 24px;
+      height: 24px;
+      padding: 0 4px;
+      border-radius: 999px;
+      justify-content: center;
+      gap: 0;
+    }}
+    .venue-marker .pin-name {{
+      display: none;
+    }}
+    .venue-marker .pin-count {{
+      background: transparent;
+      color: var(--accent);
+      padding: 0;
+      font-size: 11px;
+      font-weight: 800;
+    }}
+    .venue-marker:hover .pin-count,
+    .venue-marker.highlighted .pin-count {{
+      color: #0c0e14;
+    }}
+    /* Mobile: If user toggles names on */
+    .leaflet-map.show-pin-names-mobile .venue-marker {{
+      min-width: auto;
+      height: auto;
+      padding: 3px 8px;
+      border-radius: 999px;
+      gap: 5px;
+    }}
+    .leaflet-map.show-pin-names-mobile .venue-marker .pin-name {{
+      display: inline !important;
+    }}
+    .leaflet-map.show-pin-names-mobile .venue-marker .pin-count {{
+      background: var(--accent);
+      color: #0c0e14;
+      padding: 1px 6px;
     }}
   }}
   /* Banner Header Row & Submit Button */
@@ -2584,6 +2646,7 @@ def render_page(results):
             <span class="map-hint">· OpenStreetMap · Pins update with your date &amp; filters</span>
           </div>
           <div class="map-header-actions">
+            <button type="button" id="map-label-toggle-btn" class="map-tool-btn" title="Toggle between venue names and numbers only">🏷️ Names: On</button>
             <button type="button" id="map-recenter-btn" class="map-tool-btn" title="Center map on Boston">🎯 Center Boston</button>
           </div>
         </div>
@@ -3132,6 +3195,54 @@ def render_page(results):
       stateToHash();
     }}
 
+    function shortenVenueName(name) {{
+      if (!name) return '';
+      const OVERRIDES = {{
+        'Museum of Fine Arts (MFA)': 'MFA',
+        'Harvard Museum of Natural History': 'Harvard Nat History',
+        'Peabody Museum of Archaeology & Ethnology': 'Peabody Museum',
+        'Boch Center (Wang & Shubert)': 'Boch Center',
+        'Somerville Community Growing Center': 'Growing Center',
+        'The Fenway (Time Out Market & 401 Park)': 'The Fenway',
+        'Trident Booksellers & Cafe': 'Trident Books',
+        'Crystal Ballroom at Somerville Theatre': 'Crystal Ballroom',
+        'Emerson Paramount Center': 'Paramount',
+        'Emerson Colonial Theatre': 'Colonial Theatre',
+        'Citizens House of Blues': 'House of Blues',
+        'Somerville Public Library': 'Somerville Library',
+        'Cambridge Public Library': 'Cambridge Library',
+        'Boston Public Library': 'BPL',
+        'Charles River Speedway': 'Speedway',
+        "McCarthy's Toad": 'Toad',
+        'Versus Boston (via Eventbrite)': 'Versus',
+        'Make Friends After College (via Eventbrite)': 'Make Friends',
+        'Arts at the Armory': 'Armory',
+        "Moves n' Vibes Dance and Entertainment Company": 'Moves & Vibes',
+        'New England Conservatory': 'NEC',
+        'Jordan Hall (NEC)': 'Jordan Hall',
+        'Kings Dining & Entertainment (Seaport)': 'Kings Seaport',
+        'The Jungle Community Music Club': 'The Jungle',
+        'Boston Symphony Orchestra': 'BSO',
+        'Central Square Farmers Market': 'Central Sq Market',
+        'Copley Square Farmers Market': 'Copley Market',
+        'Davis Square Farmers Market': 'Davis Sq Market',
+        'Harvard University Farmers Market': 'Harvard Market',
+      }};
+      if (OVERRIDES[name]) return OVERRIDES[name];
+      let s = name;
+      s = s.replace(/\\s*\\((?:via\\s+[^)]+|Wang\\s*&.*|Time\\s*Out.*|NEC)\\)/gi, '');
+      s = s.replace(/,?\\s*(?:Boston|Cambridge|Somerville|Brookline|Allston)$/gi, '');
+      s = s.replace(/\\s+(?:Brewing(?:\\s+Co\\.?)?|Brewery|Booksellers(?:\\s*&\\s*Cafe)?|Music\\s+Hall|Jazz\\s+Club|Center\\s+for\\s+the\\s+Arts)$/gi, '');
+      s = s.trim();
+      if (s.length > 18 && s.startsWith('The ')) {{
+        s = s.slice(4).trim();
+      }}
+      if (s.length > 18) {{
+        s = s.slice(0, 16).trim() + '…';
+      }}
+      return s;
+    }}
+
     function updateMapMarkers() {{
       if (!leafletMap || !markersLayer) return;
       markersLayer.clearLayers();
@@ -3175,9 +3286,10 @@ def render_page(results):
 
       venueMap.forEach(v => {{
         const count = v.events.length;
+        const shortName = shortenVenueName(v.name);
         const icon = L.divIcon({{
           className: 'custom-venue-icon',
-          html: `<div class="venue-marker" title="${{escapeHTML(v.name)}} (${{count}} events)"><span class="pin-name">${{escapeHTML(v.name)}}</span><span class="pin-count">${{count}}</span></div>`,
+          html: `<div class="venue-marker" title="${{escapeHTML(v.name)}} (${{count}} event${{count === 1 ? '' : 's'}})"><span class="pin-name">${{escapeHTML(shortName)}}</span><span class="pin-count">${{count}}</span></div>`,
           iconSize: null,
           iconAnchor: [0, 0],
         }});
@@ -3932,6 +4044,37 @@ def render_page(results):
           leafletMap.setView([42.3601, -71.0750], 13, {{ animate: true }});
         }}
       }});
+    }}
+
+    const mapLabelToggleBtn = document.getElementById('map-label-toggle-btn');
+    const mapEl = document.getElementById('leaflet-map');
+
+    function updateLabelToggleState() {{
+      if (!mapLabelToggleBtn || !mapEl) return;
+      const isMobile = window.innerWidth <= 860;
+      if (isMobile) {{
+        const namesOn = mapEl.classList.contains('show-pin-names-mobile');
+        mapLabelToggleBtn.textContent = namesOn ? '🏷️ Names: On' : '🔢 Numbers Only';
+        mapLabelToggleBtn.title = namesOn ? 'Switch to compact numbers only' : 'Show venue names on pins';
+      }} else {{
+        const namesOff = mapEl.classList.contains('hide-pin-names');
+        mapLabelToggleBtn.textContent = namesOff ? '🔢 Numbers Only' : '🏷️ Names: On';
+        mapLabelToggleBtn.title = namesOff ? 'Show venue names on pins' : 'Switch to compact numbers only';
+      }}
+    }}
+
+    if (mapLabelToggleBtn && mapEl) {{
+      mapLabelToggleBtn.addEventListener('click', () => {{
+        const isMobile = window.innerWidth <= 860;
+        if (isMobile) {{
+          mapEl.classList.toggle('show-pin-names-mobile');
+        }} else {{
+          mapEl.classList.toggle('hide-pin-names');
+        }}
+        updateLabelToggleState();
+      }});
+      window.addEventListener('resize', updateLabelToggleState);
+      updateLabelToggleState();
     }}
 
     const panelCloseBtn = document.getElementById('panel-close-btn');
