@@ -75,7 +75,7 @@ CITY_RULES = [
         "greenway", "rose kennedy greenway",
         "downtown crossing", "seaport", "boston, ma", "(boston)", ", boston",
         "boston common", "trident booksellers", "mfa", "museum of fine arts",
-        "brookline booksmith", "esplanade", "hatch shell", "sabina",
+        "brookline", "coolidge corner", "puppet showplace", "esplanade", "hatch shell", "sabina",
         "loretta", "versus boston", "versus", "opera house", "symphony hall", "brighton music hall",
         "boch center", "wang theatre", "boston conservatory", "the beehive", "play boston",
         "petit robert", "the grand", "scorpion bar", "scorpion", "memoire", "mémoire",
@@ -164,7 +164,7 @@ def _event_city(venue, source, event=None):
             return "cambridge"
         if ", somerville" in addr:
             return "somerville"
-        if any(b in addr for b in [", boston", ", allston", ", brighton", ", charlestown", ", jamaica plain", ", dorchester", ", roxbury", ", south boston", ", mattapan", ", roslindale", ", hyde park"]):
+        if any(b in addr for b in [", boston", ", allston", ", brighton", ", charlestown", ", jamaica plain", ", dorchester", ", roxbury", ", south boston", ", mattapan", ", roslindale", ", hyde park", ", brookline"]):
             return "boston"
 
     return "other"

@@ -279,7 +279,10 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
 
     # Brookline & Coolidge Corner
     "coolidge corner theatre": (42.3424, -71.1215, "Coolidge Corner", "290 Harvard St, Brookline", "Coolidge Corner Theatre"),
+    "coolidge corner theater": (42.3424, -71.1215, "Coolidge Corner", "290 Harvard St, Brookline", "Coolidge Corner Theatre"),
     "brookline booksmith": (42.3422, -71.1218, "Coolidge Corner", "279 Harvard St, Brookline", "Brookline Booksmith"),
+    "puppet showplace theater": (42.3323, -71.1172, "Brookline Village", "32 Station St, Brookline", "Puppet Showplace Theater"),
+    "puppet showplace": (42.3323, -71.1172, "Brookline Village", "32 Station St, Brookline", "Puppet Showplace Theater"),
 
     # Jamaica Plain & Roxbury
     "midway cafe": (42.3089, -71.1090, "Jamaica Plain", "3496 Washington St, Jamaica Plain", "Midway Cafe"),
@@ -482,6 +485,8 @@ VENUE_RULES = [
     ("broken records", (42.3572, -71.1415, "Brighton", "85 Guest St, Boston", "Broken Records")),
     ("goethe", (42.3526, -71.0772, "Back Bay", "170 Beacon St, Boston", "Goethe-Institut Boston")),
     ("graymist", (42.3804, -71.1348, "West Cambridge", "364 Huron Ave, Cambridge", "GrayMist Studio & Shop")),
+    ("coolidge corner", (42.3424, -71.1215, "Coolidge Corner", "290 Harvard St, Brookline", "Coolidge Corner Theatre")),
+    ("puppet showplace", (42.3323, -71.1172, "Brookline Village", "32 Station St, Brookline", "Puppet Showplace Theater")),
 ]
 
 # Coordinate bounding box for valid Greater Boston / Eastern MA events
