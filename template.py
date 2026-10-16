@@ -1439,6 +1439,30 @@ def render_page(results):
   .filter-group h3 .spacer {{ flex:1; }}
   .filter-group h3 button {{ background: none; border: 1px solid var(--border); color: var(--muted); font-size: 10px; padding: 1px 8px; border-radius: 999px; cursor: pointer; font-family: inherit; letter-spacing: 0; text-transform: none; }}
   .filter-group h3 button:hover {{ color: var(--fg); border-color: var(--fg); }}
+  .filter-badge {{ background: var(--accent); color: #0d1117; font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 999px; text-transform: none; letter-spacing: 0; }}
+  .reset-filters-bar {{ margin-bottom: 8px; }}
+  .btn-reset-filters {{
+    width: 100%;
+    background: rgba(224, 90, 107, 0.12);
+    border: 1px solid rgba(224, 90, 107, 0.35);
+    color: #ff7b72;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }}
+  .btn-reset-filters:hover {{
+    background: rgba(224, 90, 107, 0.22);
+    border-color: #ff7b72;
+    color: #ffffff;
+  }}
   .filter-group.venues .chk-grid {{ max-height: 280px; overflow-y: auto; }}
   .chk-grid {{ display:flex; flex-direction: column; gap:2px; }}
   .chk {{ display: flex; align-items: center; gap: 6px; font-size: 12px; cursor: pointer; padding: 3px 4px; border-radius: 6px; }}
@@ -1630,6 +1654,30 @@ def render_page(results):
     color: #0c0e14;
     font-weight: 700;
     box-shadow: 0 2px 8px var(--accent-glow);
+  }}
+  .share-filter-btn {{
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.15s ease;
+  }}
+  .share-filter-btn:hover {{
+    color: var(--fg);
+    border-color: var(--accent);
+  }}
+  .share-filter-btn.copied {{
+    background: rgba(35, 134, 54, 0.2);
+    border-color: #238636;
+    color: #3fb950;
   }}
   .map-venue-stat {{
     font-size: 12px;
@@ -2407,6 +2455,9 @@ def render_page(results):
     </div>
     <aside class="filters" id="sidebar-filters">
       <button type="button" id="mobile-filter-close" class="mobile-filter-close">✕ Done Filtering</button>
+      <div id="reset-filters-bar" class="reset-filters-bar" style="display: none;">
+        <button type="button" id="btn-reset-filters" class="btn-reset-filters">↺ Reset All Filters</button>
+      </div>
       <div class="filter-group">
         <h3>Search</h3>
         <div class="search-input-wrap">
@@ -2437,7 +2488,7 @@ def render_page(results):
         <div class="chk-grid">{recur_boxes}</div>
       </div>
       <div class="filter-group venues">
-        <h3>Venue <span class="spacer"></span> <button type="button" id="venue-all">all</button> <button type="button" id="venue-none">none</button></h3>
+        <h3>Venue <span id="venue-filter-count" class="filter-badge" style="display:none;"></span><span class="spacer"></span> <button type="button" id="venue-all">all</button> <button type="button" id="venue-none">none</button></h3>
         <div class="chk-grid">{venue_boxes}</div>
       </div>
     </aside>
@@ -2452,6 +2503,9 @@ def render_page(results):
           </button>
         </div>
         <div class="view-switch-right">
+          <button type="button" id="btn-share-filter" class="share-filter-btn" title="Copy shareable link with current filters">
+            <span>🔗</span> <span id="share-btn-text">Share View</span>
+          </button>
           <span id="map-venue-stat" class="map-venue-stat" style="display: none;">
             <strong id="map-venue-count">0</strong> venues on map
           </span>
@@ -2516,6 +2570,7 @@ def render_page(results):
         <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap;">
           <button type="button" class="chip" id="no-events-week-btn">📅 View Next 7 Days</button>
           <button type="button" class="chip" id="no-events-all-btn">All Upcoming</button>
+          <button type="button" class="chip" id="no-events-reset-btn" style="display: none;">↺ Reset All Filters</button>
         </div>
       </div>
       {"".join(sections)}
@@ -3083,15 +3138,40 @@ def render_page(results):
     }}
 
     function updateMobileBadge() {{
-      if (!mobileBadge) return;
       const allCats = catBoxes.length;
       const chkCats = Array.from(catBoxes).filter(b => b.checked).length;
       const allVenues = venueBoxes.length;
       const chkVenues = Array.from(venueBoxes).filter(b => b.checked).length;
+      const allCities = cityBoxes.length;
+      const chkCities = Array.from(cityBoxes).filter(b => b.checked).length;
+      const allRecurs = recurBoxes.length;
+      const chkRecurs = Array.from(recurBoxes).filter(b => b.checked).length;
       const isFree = freeOnlyChk && freeOnlyChk.checked;
-      const isFiltered = (chkCats < allCats) || (chkVenues < allVenues) || isFree || searchInput.value.trim();
-      mobileBadge.textContent = isFiltered ? 'Active' : 'All';
-      mobileBadge.style.color = isFiltered ? 'var(--accent)' : '';
+      const isFiltered = (chkCats < allCats) || (chkVenues < allVenues) || (chkCities < allCities) || (chkRecurs < allRecurs) || isFree || (searchInput && !!searchInput.value.trim());
+
+      if (mobileBadge) {{
+        mobileBadge.textContent = isFiltered ? 'Active' : 'All';
+        mobileBadge.style.color = isFiltered ? 'var(--accent)' : '';
+      }}
+
+      const resetBar = document.getElementById('reset-filters-bar');
+      if (resetBar) {{
+        resetBar.style.display = isFiltered ? 'block' : 'none';
+      }}
+      const noEventsResetBtn = document.getElementById('no-events-reset-btn');
+      if (noEventsResetBtn) {{
+        noEventsResetBtn.style.display = isFiltered ? 'inline-block' : 'none';
+      }}
+
+      const venueFilterCount = document.getElementById('venue-filter-count');
+      if (venueFilterCount) {{
+        if (chkVenues > 0 && chkVenues < allVenues) {{
+          venueFilterCount.textContent = `${{chkVenues}} selected`;
+          venueFilterCount.style.display = 'inline';
+        }} else {{
+          venueFilterCount.style.display = 'none';
+        }}
+      }}
     }}
 
     function stateToHash() {{
@@ -3106,6 +3186,14 @@ def render_page(results):
       const allCities = Array.from(cityBoxes).map(b => b.value);
       const checkedCities = Array.from(cityBoxes).filter(b => b.checked).map(b => b.value);
       if (checkedCities.length > 0 && checkedCities.length < allCities.length) params.set('city', checkedCities.join(','));
+
+      const allRecurs = Array.from(recurBoxes).map(b => b.value);
+      const checkedRecurs = Array.from(recurBoxes).filter(b => b.checked).map(b => b.value);
+      if (checkedRecurs.length > 0 && checkedRecurs.length < allRecurs.length) params.set('recur', checkedRecurs.join(','));
+
+      const allVenues = Array.from(venueBoxes).map(b => b.value);
+      const checkedVenues = Array.from(venueBoxes).filter(b => b.checked).map(b => b.value);
+      if (checkedVenues.length > 0 && checkedVenues.length < allVenues.length) params.set('venues', checkedVenues.join(';'));
 
       if (freeOnlyChk && freeOnlyChk.checked) params.set('free', '1');
 
@@ -3122,52 +3210,77 @@ def render_page(results):
 
     function hashToState() {{
       const hash = location.hash.slice(1);
-      if (!hash) return;
-      const params = new URLSearchParams(hash);
+      const params = hash ? new URLSearchParams(hash) : null;
 
-      if (params.has('q')) searchInput.value = params.get('q');
-      if (params.get('free') === '1' && freeOnlyChk) freeOnlyChk.checked = true;
-      if (params.get('past') === '1') showPastToday = true;
-      if (params.get('v') === 'map') {{
-        switchView('map');
-      }}
+      if (params) {{
+        if (params.has('q')) searchInput.value = params.get('q');
+        if (params.get('free') === '1' && freeOnlyChk) freeOnlyChk.checked = true;
+        if (params.get('past') === '1') showPastToday = true;
+        if (params.get('v') === 'map') {{
+          switchView('map');
+        }}
 
-      if (params.has('t')) {{
-        timeFilter = params.get('t');
-        showAll = (timeFilter === 'all');
-      }}
+        if (params.has('t')) {{
+          timeFilter = params.get('t');
+          showAll = (timeFilter === 'all');
+        }}
 
-      if (params.has('cat')) {{
-        const vals = new Set(params.get('cat').split(','));
-        catBoxes.forEach(b => {{ b.checked = vals.has(b.value); }});
-      }}
+        if (params.has('cat')) {{
+          const vals = new Set(params.get('cat').split(','));
+          catBoxes.forEach(b => {{ b.checked = vals.has(b.value); }});
+        }}
 
-      if (params.has('city')) {{
-        const vals = new Set(params.get('city').split(','));
-        cityBoxes.forEach(b => {{ b.checked = vals.has(b.value); }});
-      }}
+        if (params.has('city')) {{
+          const vals = new Set(params.get('city').split(','));
+          cityBoxes.forEach(b => {{ b.checked = vals.has(b.value); }});
+        }}
 
-      if (params.has('d')) {{
-        const d = params.get('d');
-        if (d === 'all') {{
-          showAll = true;
-          timeFilter = 'all';
-        }} else {{
-          anchor = parseISO(d);
-          calMonth = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
-          if (!params.has('t')) {{
-            if (d === todayISO) {{
-              timeFilter = 'today';
-              showAll = false;
-            }} else if (d === fmtISO(addDays(parseISO(todayISO), 1))) {{
-              timeFilter = 'tomorrow';
-              showAll = false;
-            }} else {{
-              timeFilter = 'day';
-              showAll = false;
+        if (params.has('recur')) {{
+          const vals = new Set(params.get('recur').split(','));
+          recurBoxes.forEach(b => {{ b.checked = vals.has(b.value); }});
+        }}
+
+        if (params.has('venues')) {{
+          const rawVenues = params.get('venues').split(';').map(s => s.trim()).filter(Boolean);
+          const vals = new Set(rawVenues);
+          venueBoxes.forEach(b => {{ b.checked = vals.has(b.value); }});
+          try {{
+            localStorage.setItem('boston_saved_venues', JSON.stringify(Array.from(vals)));
+          }} catch (_) {{}}
+        }}
+
+        if (params.has('d')) {{
+          const d = params.get('d');
+          if (d === 'all') {{
+            showAll = true;
+            timeFilter = 'all';
+          }} else {{
+            anchor = parseISO(d);
+            calMonth = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
+            if (!params.has('t')) {{
+              if (d === todayISO) {{
+                timeFilter = 'today';
+                showAll = false;
+              }} else if (d === fmtISO(addDays(parseISO(todayISO), 1))) {{
+                timeFilter = 'tomorrow';
+                showAll = false;
+              }} else {{
+                timeFilter = 'day';
+                showAll = false;
+              }}
             }}
           }}
         }}
+      }}
+
+      if (!params || !params.has('venues')) {{
+        try {{
+          const saved = JSON.parse(localStorage.getItem('boston_saved_venues') || 'null');
+          if (Array.isArray(saved) && saved.length > 0 && saved.length < venueBoxes.length) {{
+            const savedSet = new Set(saved);
+            venueBoxes.forEach(b => {{ b.checked = savedSet.has(b.value); }});
+          }}
+        }} catch (_) {{}}
       }}
     }}
 
@@ -3327,6 +3440,18 @@ def render_page(results):
       updateQuickChipsUI();
       updateLocChipsUI();
       updateSearchUI();
+      const allVenues = venueBoxes.length;
+      const checkedVenuesList = Array.from(venueBoxes).filter(b => b.checked).map(b => b.value);
+      if (checkedVenuesList.length > 0 && checkedVenuesList.length < allVenues) {{
+        try {{
+          localStorage.setItem('boston_saved_venues', JSON.stringify(checkedVenuesList));
+        }} catch (_) {{}}
+      }} else if (checkedVenuesList.length === allVenues) {{
+        try {{
+          localStorage.removeItem('boston_saved_venues');
+        }} catch (_) {{}}
+      }}
+
       updateMobileBadge();
       if (currentView === 'map') {{
         updateMapMarkers();
@@ -3543,10 +3668,54 @@ def render_page(results):
     searchInput.addEventListener('input', apply);
     document.getElementById('cat-all').addEventListener('click', () => {{ catBoxes.forEach(b => b.checked = true); apply(); }});
     document.getElementById('cat-none').addEventListener('click', () => {{ catBoxes.forEach(b => b.checked = false); apply(); }});
-    document.getElementById('venue-all').addEventListener('click', () => {{ venueBoxes.forEach(b => b.checked = true); apply(); }});
+    document.getElementById('venue-all').addEventListener('click', () => {{
+      venueBoxes.forEach(b => b.checked = true);
+      try {{ localStorage.removeItem('boston_saved_venues'); }} catch (_) {{}}
+      apply();
+    }});
     document.getElementById('venue-none').addEventListener('click', () => {{ venueBoxes.forEach(b => b.checked = false); apply(); }});
     document.getElementById('city-all').addEventListener('click', () => {{ cityBoxes.forEach(b => b.checked = true); apply(); }});
     document.getElementById('city-none').addEventListener('click', () => {{ cityBoxes.forEach(b => b.checked = false); apply(); }});
+
+    function resetAllFilters() {{
+      if (searchInput) searchInput.value = '';
+      if (freeOnlyChk) freeOnlyChk.checked = false;
+      catBoxes.forEach(b => b.checked = true);
+      cityBoxes.forEach(b => b.checked = true);
+      recurBoxes.forEach(b => b.checked = true);
+      venueBoxes.forEach(b => b.checked = true);
+      try {{ localStorage.removeItem('boston_saved_venues'); }} catch (_) {{}}
+      apply();
+    }}
+
+    const btnResetFilters = document.getElementById('btn-reset-filters');
+    if (btnResetFilters) btnResetFilters.addEventListener('click', resetAllFilters);
+
+    const noEventsResetBtn = document.getElementById('no-events-reset-btn');
+    if (noEventsResetBtn) noEventsResetBtn.addEventListener('click', resetAllFilters);
+
+    const btnShareFilter = document.getElementById('btn-share-filter');
+    if (btnShareFilter) {{
+      btnShareFilter.addEventListener('click', async () => {{
+        try {{
+          await navigator.clipboard.writeText(location.href);
+          const shareText = document.getElementById('share-btn-text');
+          if (shareText) shareText.textContent = '✓ Copied Link!';
+          btnShareFilter.classList.add('copied');
+          setTimeout(() => {{
+            if (shareText) shareText.textContent = 'Share View';
+            btnShareFilter.classList.remove('copied');
+          }}, 2000);
+        }} catch (_) {{
+          prompt('Copy this link to share your filtered view:', location.href);
+        }}
+      }});
+    }}
+
+    window.addEventListener('hashchange', () => {{
+      hashToState();
+      apply();
+    }});
 
     locChips.forEach(chip => {{
       chip.addEventListener('click', () => {{
