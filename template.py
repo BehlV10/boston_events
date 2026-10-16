@@ -1,5 +1,6 @@
 """Boston Events — HTML rendering and template logic."""
 
+import json
 import re
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
@@ -169,6 +170,111 @@ def _event_city(venue, source, event=None):
             return "boston"
 
     return "other"
+
+
+SUBAREAS_BY_CITY = {
+    "cambridge": [
+        ("central_sq", "Central Square", "🏛️"),
+        ("harvard_sq", "Harvard Square", "🎓"),
+        ("kendall_mit", "Kendall / MIT", "🚀"),
+        ("inman_sq", "Inman Square", "🎷"),
+        ("porter_sq", "Porter Square", "📚"),
+        ("east_cambridge", "East Cambridge", "⛵"),
+        ("cambridge_other", "Other Cambridge", "📍"),
+    ],
+    "somerville": [
+        ("davis_sq", "Davis Square", "🎭"),
+        ("union_sq", "Union Square", "🎨"),
+        ("spring_winter_hill", "Spring & Winter Hill", "🌿"),
+        ("assembly_east", "Assembly & East Somerville", "🛍️"),
+        ("somerville_other", "Other Somerville", "📍"),
+    ],
+    "boston": [
+        ("theater_downtown", "Downtown & Theater Dist.", "🎭"),
+        ("fenway_kenmore", "Fenway & Kenmore", "⚾"),
+        ("south_end", "South End", "🎺"),
+        ("back_bay", "Back Bay & Copley", "🏛️"),
+        ("seaport_waterfront", "Seaport & Waterfront", "🌊"),
+        ("allston_brighton", "Allston & Brighton", "🎸"),
+        ("brookline", "Brookline / Coolidge", "🎬"),
+        ("jp_dorchester", "JP & Dorchester", "🌳"),
+        ("charlestown_eastie", "Charlestown & Eastie", "⚓"),
+        ("boston_other", "Other Boston", "📍"),
+    ],
+    "other": [
+        ("everett_north", "Everett & North Shore", "🌃"),
+        ("medford_malden", "Medford & Malden", "🎪"),
+        ("metrowest", "Metrowest & South", "🌲"),
+        ("suburbs_other", "Outer Suburbs", "📍"),
+    ]
+}
+
+
+def resolve_subarea(city, event, geo=None):
+    if not geo:
+        geo = resolve_event_geo(event)
+    vn = (event.get("venue") or "").lower()
+    src = (event.get("_source_venue") or "").lower()
+    title = (event.get("title") or event.get("name") or "").lower()
+    loc = (event.get("location") or event.get("address") or "").lower()
+    neigh = (geo.get("neighborhood") or "").lower() if geo else ""
+    blob = f"{vn} {src} {title} {loc} {neigh}"
+
+    if city == "cambridge":
+        if any(k in blob for k in ["central square", "cantab", "middle east", "sonia", "manray", "man ray", "middlesex", "phoenix landing", "plough and stars", "plough & stars", "dance complex", "mad monkfish", "la fabrica", "havana club"]):
+            return ("Central Square", "central_sq")
+        if any(k in blob for k in ["harvard square", "sinclair", "brattle", "passim", "harvard book", "harvard museum", "peabody museum", "lou's", "wearelous", "sanders", "farkas", "harvard university", "ccae", "harvard art museum", "main library", "449 broadway"]):
+            return ("Harvard Square", "harvard_sq")
+        if any(k in blob for k in ["kendall", "mit ", "m.i.t", "venture café", "venture cafe", "cambridge crossing", "starlight", "broadway", "urban park"]):
+            return ("Kendall / MIT", "kendall_mit")
+        if any(k in blob for k in ["inman", "lilypad", "lily pad", "druid", "gather here"]):
+            return ("Inman Square", "inman_sq")
+        if any(k in blob for k in ["porter", "toad", "pemberton", "cambridge common", "lizard lounge", "mccarthys"]):
+            return ("Porter Square", "porter_sq")
+        if any(k in blob for k in ["east cambridge", "remnant satellite", "valente"]):
+            return ("East Cambridge", "east_cambridge")
+        return ("Other Cambridge", "cambridge_other")
+
+    elif city == "somerville":
+        if any(k in blob for k in ["davis", "somerville theatre", "crystal ballroom", "burren", "rockwell", "comedy studio", "underbones", "painted burro", "west branch"]):
+            return ("Davis Square", "davis_sq")
+        if any(k in blob for k in ["union square", "bow market", "armory", "arts at the armory", "jungle", "remnant", "sally o'brien", "sally obrien", "side quest", "duck duck goof", "dance union", "goofs comedy", "vera's"]):
+            return ("Union Square", "union_sq")
+        if any(k in blob for k in ["growing center", "spring hill", "winter hill", "magoun", "highland", "central library", "79 highland", "chester tavern"]):
+            return ("Spring & Winter Hill", "spring_winter_hill")
+        if any(k in blob for k in ["assembly", "portico", "aeronaut", "east somerville", "boynton", "east branch", "craft loft", "all she wrote"]):
+            return ("Assembly & East Somerville", "assembly_east")
+        return ("Other Somerville", "somerville_other")
+
+    elif city == "boston":
+        if any(k in blob for k in ["fenway", "symphony", "house of blues", "mgm music", "mfa", "museum of fine arts", "jordan hall", "nec ", "nec:", "nec (", "new england conservatory", "berklee", "cafe 939", "time out", "401 park", "bill's bar", "bills bar", "loretta"]):
+            return ("Fenway & Kenmore", "fenway_kenmore")
+        if any(k in blob for k in ["theater district", "theatre district", "boch", "wang", "shubert", "paramount", "colonial", "royale", "charles playhouse", "downtown", "common", "orpheum", "bsmnt", "city winery", "big night live", "td garden", "wilbur", "sports museum", "versus", "west end"]):
+            return ("Downtown & Theater Dist.", "theater_downtown")
+        if any(k in blob for k in ["south end", "beehive", "wally", "club cafe", "club café", "sowa", "reunion bbq", "calderwood"]):
+            return ("South End", "south_end")
+        if any(k in blob for k in ["back bay", "copley", "boston public library", "bpl", "trident", "newbury", "prudential"]):
+            return ("Back Bay & Copley", "back_bay")
+        if any(k in blob for k in ["seaport", "leader bank", "ica boston", "kings seaport", "kings dining", "greenway", "harbor", "scorpion", "laugh boston"]):
+            return ("Seaport & Waterfront", "seaport_waterfront")
+        if any(k in blob for k in ["allston", "brighton", "o'brien", "obrien", "brighton music", "speedway", "roadrunner", "lavietes", "notch brewing", "harvard stadium"]):
+            return ("Allston & Brighton", "allston_brighton")
+        if any(k in blob for k in ["jamaica plain", "jp", "midway cafe", "arboretum", "dorchester", "roxbury"]):
+            return ("JP & Dorchester", "jp_dorchester")
+        if any(k in blob for k in ["charlestown", "anchor", "navy yard", "east boston", "eastie"]):
+            return ("Charlestown & Eastie", "charlestown_eastie")
+        if any(k in blob for k in ["brookline", "coolidge", "puppet showplace", "booksmith"]):
+            return ("Brookline / Coolidge", "brookline")
+        return ("Other Boston", "boston_other")
+
+    else:
+        if any(k in blob for k in ["everett", "mémoire", "memoire", "encore", "night shift"]):
+            return ("Everett & North Shore", "everett_north")
+        if any(k in blob for k in ["medford", "malden", "deep cuts", "chevalier"]):
+            return ("Medford & Malden", "medford_malden")
+        if any(k in blob for k in ["waltham", "gore place", "foxborough", "gillette", "natick"]):
+            return ("Metrowest & South", "metrowest")
+        return ("Outer Suburbs", "suburbs_other")
 
 
 def _maps_link(venue, city):
@@ -795,6 +901,10 @@ def render_page(results):
             geo_attrs = f' data-lat="{geo["lat"]}" data-lng="{geo["lng"]}" data-venue-name="{escape(geo["venue"])}" data-neighborhood="{escape(geo["neighborhood"])}"'
             geo_btn = f' <button type="button" class="venue-map-jump" data-lat="{geo["lat"]}" data-lng="{geo["lng"]}" data-venue="{escape(geo["venue"])}" title="View {escape(geo["venue"])} on Map">📍</button>'
 
+        sub_name, sub_slug = resolve_subarea(city, e, geo)
+        sub_attrs = f' data-subarea="{escape(sub_slug)}" data-subarea-name="{escape(sub_name)}"'
+        sub_tag = f' <span class="subarea-tag">· {escape(sub_name)}</span>'
+
         if venue:
             if venue.lower() in ("zoom", "online", "virtual"):
                 venue_link = f'<span class="venue-online">💻 {escape(venue)}</span>'
@@ -831,10 +941,10 @@ def render_page(results):
         desc_html = f'<div class="desc">{escape(desc)}</div>' if desc else ""
         free_flag = "true" if is_free else "false"
         epoch_attr = f' data-epoch="{int(e["_time"].timestamp())}"' if e.get("_time") else ''
-        return f'''<li class="event" data-cat="{escape(cat)}" data-bucket="{escape(bucket)}" data-venue="{escape(source)}" data-city="{escape(city)}" data-recur="{recur_flag}" data-free="{free_flag}"{epoch_attr}{geo_attrs}>
+        return f'''<li class="event" data-cat="{escape(cat)}" data-bucket="{escape(bucket)}" data-venue="{escape(source)}" data-city="{escape(city)}"{sub_attrs} data-recur="{recur_flag}" data-free="{free_flag}"{epoch_attr}{geo_attrs}>
           <div class="when">{escape(format_when(e))}</div>
           <div class="what">{link}{price_tag}{recur_badge}
-            <div class="venue-tag">{cat_tag} · {venue_html}{extra_html}{cal_html}</div>
+            <div class="venue-tag">{cat_tag}{f" · {venue_html}" if venue_html else ""}{sub_tag}{extra_html}{cal_html}</div>
             {desc_html}
           </div>
         </li>'''
@@ -1304,6 +1414,60 @@ def render_page(results):
     border-radius: 50%;
     display: inline-block;
     flex-shrink: 0;
+  }}
+
+  /* Secondary Subarea Chips Bar */
+  .subarea-chips-bar {{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius-md);
+    padding: 6px 10px;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    max-width: 100%;
+  }}
+  .subarea-chips-bar::-webkit-scrollbar {{
+    display: none;
+  }}
+  .sub-chip {{
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 4px 11px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+  }}
+  .sub-chip:hover {{
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #fff;
+  }}
+  .sub-chip.active {{
+    background: rgba(93, 155, 255, 0.16);
+    border-color: var(--accent);
+    color: #fff;
+    font-weight: 700;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
+  }}
+  .subarea-tag {{
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 500;
   }}
 
   /* Quick-Access Chips Bar */
@@ -2088,6 +2252,14 @@ def render_page(results):
       padding: 5px 12px;
       font-size: 12px;
     }}
+    .subarea-chips-bar {{
+      padding: 5px 8px;
+      gap: 5px;
+    }}
+    .sub-chip {{
+      padding: 3px 9px;
+      font-size: 11px;
+    }}
     .quick-chips-bar {{
       flex-wrap: nowrap;
       overflow-x: auto;
@@ -2614,6 +2786,7 @@ def render_page(results):
         <button type="button" class="loc-chip" data-city="somerville"><span class="city-dot" style="background:#f29e4c"></span>Somerville</button>
         <button type="button" class="loc-chip" data-city="other"><span class="city-dot" style="background:#9aa3b2"></span>Greater Boston</button>
       </div>
+      <div class="subarea-chips-bar" id="subarea-chips-bar" style="display: none;"></div>
       <div class="quick-chips-bar" id="quick-chips">
         <button type="button" class="chip active" data-time="today">⚡ Today</button>
         <button type="button" class="chip" data-time="tomorrow">Tomorrow</button>
@@ -2911,6 +3084,11 @@ def render_page(results):
     const freeOnlyChk = document.getElementById('free-only-chk');
 
     const locChips = document.querySelectorAll('#location-chips .loc-chip');
+    const subareaBar = document.getElementById('subarea-chips-bar');
+    const SUBAREAS_DATA = {json.dumps(SUBAREAS_BY_CITY)};
+    const CITY_LABELS_MAP = {json.dumps(CITY_LABELS)};
+    let activeSubarea = 'all';
+    let renderedSubareaCity = null;
     const quickChips = document.querySelectorAll('#quick-chips .chip[data-time]');
     const quickFreeChip = document.getElementById('quick-free-chip');
     let timeFilter = 'today';
@@ -3263,7 +3441,7 @@ def render_page(results):
             venueMap.set(key, {{
               lat, lng,
               name: vName,
-              neighborhood: li.dataset.neighborhood || '',
+              neighborhood: li.dataset.neighborhood || li.dataset.subareaName || '',
               events: []
             }});
           }}
@@ -3354,6 +3532,53 @@ def render_page(results):
       }}
     }}
 
+    function renderSubareaChips(city) {{
+      if (!subareaBar) return;
+      if (!city || city === 'all' || !SUBAREAS_DATA[city]) {{
+        subareaBar.style.display = 'none';
+        subareaBar.innerHTML = '';
+        renderedSubareaCity = null;
+        activeSubarea = 'all';
+        return;
+      }}
+
+      if (renderedSubareaCity === city) {{
+        subareaBar.querySelectorAll('.sub-chip').forEach(b => {{
+          b.classList.toggle('active', b.dataset.subarea === activeSubarea);
+        }});
+        return;
+      }}
+
+      renderedSubareaCity = city;
+      const subs = SUBAREAS_DATA[city] || [];
+      const cityLabel = (CITY_LABELS_MAP && CITY_LABELS_MAP[city]) || city;
+      let html = `<button type="button" class="sub-chip ${{activeSubarea === 'all' ? 'active' : ''}}" data-subarea="all">📍 All ${{cityLabel}}</button>`;
+      subs.forEach(s => {{
+        const slug = s[0];
+        const name = s[1];
+        const icon = s[2] || '📍';
+        const isAct = (activeSubarea === slug);
+        html += `<button type="button" class="sub-chip ${{isAct ? 'active' : ''}}" data-subarea="${{slug}}">${{icon}} ${{name}}</button>`;
+      }});
+      subareaBar.innerHTML = html;
+      subareaBar.style.display = 'flex';
+
+      subareaBar.querySelectorAll('.sub-chip').forEach(btn => {{
+        btn.addEventListener('click', () => {{
+          const targetSub = btn.dataset.subarea;
+          if (activeSubarea === targetSub && targetSub !== 'all') {{
+            activeSubarea = 'all';
+          }} else {{
+            activeSubarea = targetSub;
+          }}
+          subareaBar.querySelectorAll('.sub-chip').forEach(b => {{
+            b.classList.toggle('active', b.dataset.subarea === activeSubarea);
+          }});
+          apply();
+        }});
+      }});
+    }}
+
     function updateLocChipsUI() {{
       const allCities = cityBoxes.length;
       const checkedCities = Array.from(cityBoxes).filter(b => b.checked).map(b => b.value);
@@ -3365,6 +3590,11 @@ def render_page(results):
           chip.classList.toggle('active', checkedCities.length === 1 && checkedCities[0] === city);
         }}
       }});
+      if (checkedCities.length === 1) {{
+        renderSubareaChips(checkedCities[0]);
+      }} else {{
+        renderSubareaChips('all');
+      }}
     }}
 
     function updateSearchUI() {{
@@ -3392,7 +3622,7 @@ def render_page(results):
       const allRecurs = recurBoxes.length;
       const chkRecurs = Array.from(recurBoxes).filter(b => b.checked).length;
       const isFree = freeOnlyChk && freeOnlyChk.checked;
-      const isFiltered = (chkCats < allCats) || (chkVenues < allVenues) || (chkCities < allCities) || (chkRecurs < allRecurs) || isFree || (searchInput && !!searchInput.value.trim());
+      const isFiltered = (chkCats < allCats) || (chkVenues < allVenues) || (chkCities < allCities) || (chkRecurs < allRecurs) || isFree || (activeSubarea !== 'all') || (searchInput && !!searchInput.value.trim());
 
       if (mobileBadge) {{
         mobileBadge.textContent = isFiltered ? 'Active' : 'All';
@@ -3431,6 +3661,7 @@ def render_page(results):
       const allCities = Array.from(cityBoxes).map(b => b.value);
       const checkedCities = Array.from(cityBoxes).filter(b => b.checked).map(b => b.value);
       if (checkedCities.length > 0 && checkedCities.length < allCities.length) params.set('city', checkedCities.join(','));
+      if (activeSubarea && activeSubarea !== 'all') params.set('sub', activeSubarea);
 
       const allRecurs = Array.from(recurBoxes).map(b => b.value);
       const checkedRecurs = Array.from(recurBoxes).filter(b => b.checked).map(b => b.value);
@@ -3478,6 +3709,12 @@ def render_page(results):
         if (params.has('city')) {{
           const vals = new Set(params.get('city').split(','));
           cityBoxes.forEach(b => {{ b.checked = vals.has(b.value); }});
+        }}
+
+        if (params.has('sub')) {{
+          activeSubarea = params.get('sub');
+        }} else {{
+          activeSubarea = 'all';
         }}
 
         if (params.has('recur')) {{
@@ -3556,6 +3793,7 @@ def render_page(results):
         const venueOk = venues.has(li.dataset.venue);
         const recurOk = recurs.has(li.dataset.recur);
         const cityOk = cities.has(li.dataset.city);
+        const subareaOk = (activeSubarea === 'all') || (li.dataset.subarea === activeSubarea);
         const freeOk = !freeOnly || li.dataset.free === 'true';
         const searchOk = !searchText || li.textContent.toLowerCase().includes(searchText);
 
@@ -3581,7 +3819,7 @@ def render_page(results):
           }}
         }}
 
-        const isVisible = catOk && venueOk && recurOk && cityOk && searchOk && freeOk && timePastOk;
+        const isVisible = catOk && venueOk && recurOk && cityOk && subareaOk && searchOk && freeOk && timePastOk;
         li.classList.toggle('hidden', !isVisible);
 
         if (isToday && isVisible && !isPast) {{
@@ -3919,12 +4157,13 @@ def render_page(results):
       apply();
     }});
     document.getElementById('venue-none').addEventListener('click', () => {{ venueBoxes.forEach(b => b.checked = false); apply(); }});
-    document.getElementById('city-all').addEventListener('click', () => {{ cityBoxes.forEach(b => b.checked = true); apply(); }});
-    document.getElementById('city-none').addEventListener('click', () => {{ cityBoxes.forEach(b => b.checked = false); apply(); }});
+    document.getElementById('city-all').addEventListener('click', () => {{ activeSubarea = 'all'; cityBoxes.forEach(b => b.checked = true); apply(); }});
+    document.getElementById('city-none').addEventListener('click', () => {{ activeSubarea = 'all'; cityBoxes.forEach(b => b.checked = false); apply(); }});
 
     function resetAllFilters() {{
       if (searchInput) searchInput.value = '';
       if (freeOnlyChk) freeOnlyChk.checked = false;
+      activeSubarea = 'all';
       catBoxes.forEach(b => b.checked = true);
       cityBoxes.forEach(b => b.checked = true);
       recurBoxes.forEach(b => b.checked = true);
@@ -3965,6 +4204,7 @@ def render_page(results):
     locChips.forEach(chip => {{
       chip.addEventListener('click', () => {{
         const targetCity = chip.dataset.city;
+        activeSubarea = 'all';
         if (targetCity === 'all') {{
           cityBoxes.forEach(b => {{ b.checked = true; }});
         }} else {{

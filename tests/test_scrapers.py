@@ -16,7 +16,7 @@ if BASE_DIR not in sys.path:
 
 from scrapers import _ALL_VENUES, VENUES, UA_CHROME
 from venues_geo import VENUE_COORDINATES, MIN_LAT, MAX_LAT, MIN_LNG, MAX_LNG, resolve_event_geo
-from template import render_page
+from template import render_page, SUBAREAS_BY_CITY, resolve_subarea, _event_city
 from scripts.add_community_event import validate_and_normalize as validate_event
 from scripts.add_suggested_venue import validate_and_normalize as validate_venue
 
@@ -138,6 +138,45 @@ class TestBostonEvents(unittest.TestCase):
         self.assertIn("Indie Rock Night", html)
         self.assertIn("modal-view-venue", html)  # Suggest a venue form present
         self.assertIn("Suggest a Venue", html)
+        self.assertIn('data-subarea="harvard_sq"', html)
+        self.assertIn('id="subarea-chips-bar"', html)
+
+    def test_subarea_mapping_and_coverage(self):
+        """All defined subareas must be valid and all scraped events must map cleanly."""
+        self.assertIn("cambridge", SUBAREAS_BY_CITY)
+        self.assertIn("somerville", SUBAREAS_BY_CITY)
+        self.assertIn("boston", SUBAREAS_BY_CITY)
+        self.assertIn("other", SUBAREAS_BY_CITY)
+
+        # Test specific canonical venues
+        self.assertEqual(resolve_subarea("cambridge", {"venue": "The Sinclair"})[1], "harvard_sq")
+        self.assertEqual(resolve_subarea("cambridge", {"venue": "The Middle East"})[1], "central_sq")
+        self.assertEqual(resolve_subarea("somerville", {"venue": "The Burren"})[1], "davis_sq")
+        self.assertEqual(resolve_subarea("somerville", {"venue": "Bow Market"})[1], "union_sq")
+        self.assertEqual(resolve_subarea("boston", {"venue": "Leader Bank Pavilion"})[1], "seaport_waterfront")
+        self.assertEqual(resolve_subarea("boston", {"venue": "MGM Music Hall at Fenway"})[1], "fenway_kenmore")
+
+        # Test full dataset coverage if events.json is present
+        events_json = os.path.join(BASE_DIR, "events.json")
+        if os.path.exists(events_json):
+            import json
+            with open(events_json, "r") as f:
+                data = json.load(f)
+            total_events = 0
+            for v in data.get("venues", []):
+                vname = v.get("venue", "")
+                for e in v.get("events", []):
+                    total_events += 1
+                    city = _event_city(e.get("venue"), vname, e)
+                    geo = resolve_event_geo(e)
+                    sname, sslug = resolve_subarea(city, e, geo)
+                    valid_slugs = {s[0] for s in SUBAREAS_BY_CITY[city]}
+                    self.assertIn(
+                        sslug,
+                        valid_slugs,
+                        f"Event '{e.get('name')}' at '{e.get('venue')}' produced unmapped slug '{sslug}' in '{city}'"
+                    )
+            self.assertGreater(total_events, 5000, "Expected at least 5000 events in events.json")
 
 
 if __name__ == "__main__":
