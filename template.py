@@ -2173,10 +2173,121 @@ def render_page(results):
     function fmtShort(d) {{ return MONTHS[d.getMonth()] + ' ' + d.getDate(); }}
     function fmtMonth(d) {{ return d.toLocaleString('en-US', {{ month: 'long', year: 'numeric' }}); }}
 
-    const todayISO = "{today_iso}";
+    function getEasternTodayISO() {{
+      try {{
+        const formatter = new Intl.DateTimeFormat('en-CA', {{
+          timeZone: 'America/New_York',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit'
+        }});
+        return formatter.format(new Date());
+      }} catch (e) {{
+        return "{today_iso}";
+      }}
+    }}
+
+    let todayISO = getEasternTodayISO();
     let anchor = parseISO(todayISO);
     let showAll = false;
     let calMonth = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
+
+    function updateDayHeadings() {{
+      const tDate = parseISO(todayISO);
+      daySections.forEach(day => {{
+        const dStr = day.dataset.date;
+        if (!dStr || dStr === 'tba') return;
+        const dObj = parseISO(dStr);
+        const diffDays = Math.round((dObj - tDate) / 86400000);
+        const h2 = day.querySelector('h2');
+        if (!h2) return;
+        const countSpan = h2.querySelector('.count');
+        const countHtml = countSpan ? countSpan.outerHTML : '';
+        const dayName = DAYS_FULL[dObj.getDay()];
+        const shortStr = `${{MONTHS[dObj.getMonth()]}} ${{dObj.getDate()}}`;
+        let prefix = dayName;
+        if (diffDays === 0) {{
+          prefix = 'Today';
+        }} else if (diffDays === 1) {{
+          prefix = 'Tomorrow';
+        }} else if (diffDays === -1) {{
+          prefix = 'Yesterday';
+        }}
+        h2.innerHTML = `${{prefix}} · ${{dayName}}, ${{shortStr}}${{countHtml}}`;
+      }});
+    }}
+
+    function repositionPastBanner() {{
+      let pastBanner = document.getElementById('past-events-banner');
+      const todaySec = document.querySelector(`.day[data-date="${{todayISO}}"]`);
+      if (!todaySec) return;
+      const h2 = todaySec.querySelector('h2');
+      if (!h2) return;
+      if (!pastBanner) {{
+        pastBanner = document.createElement('div');
+        pastBanner.className = 'past-events-banner';
+        pastBanner.id = 'past-events-banner';
+        pastBanner.style.display = 'none';
+        pastBanner.innerHTML = `
+          <div class="past-banner-info">
+            <span class="past-banner-badge" id="past-banner-badge">⏱️ Live Tonight</span>
+            <span class="past-banner-text" id="past-banner-text"></span>
+          </div>
+          <div class="past-banner-actions">
+            <button type="button" class="past-banner-btn" id="btn-toggle-past">Show earlier today</button>
+            <button type="button" class="past-banner-btn btn-tomorrow" id="btn-banner-tomorrow" style="display: none;">See Tomorrow →</button>
+          </div>
+        `;
+        h2.insertAdjacentElement('afterend', pastBanner);
+      }} else if (pastBanner.parentElement !== todaySec) {{
+        h2.insertAdjacentElement('afterend', pastBanner);
+      }}
+    }}
+
+    function msUntilEasternMidnight() {{
+      try {{
+        const now = new Date();
+        const parts = new Intl.DateTimeFormat('en-US', {{
+          timeZone: 'America/New_York',
+          hour12: false,
+          hour: 'numeric',
+          minute: 'numeric',
+          second: 'numeric'
+        }}).formatToParts(now);
+        const h = parseInt(parts.find(p => p.type === 'hour').value, 10) % 24;
+        const m = parseInt(parts.find(p => p.type === 'minute').value, 10);
+        const s = parseInt(parts.find(p => p.type === 'second').value, 10);
+        const ms = now.getMilliseconds();
+        const secondsPassed = h * 3600 + m * 60 + s;
+        const secondsUntilMidnight = 86400 - secondsPassed;
+        return Math.max(1000, (secondsUntilMidnight * 1000) - ms + 1000);
+      }} catch (e) {{
+        return 60000;
+      }}
+    }}
+
+    function checkDayRollover() {{
+      const currentEasternISO = getEasternTodayISO();
+      if (currentEasternISO && currentEasternISO !== todayISO) {{
+        const wasToday = (timeFilter === 'today');
+        todayISO = currentEasternISO;
+        if (wasToday) {{
+          anchor = parseISO(todayISO);
+          calMonth = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
+        }}
+        repositionPastBanner();
+        updateDayHeadings();
+        apply();
+      }}
+    }}
+
+    function scheduleMidnightRefresh() {{
+      const ms = msUntilEasternMidnight();
+      setTimeout(() => {{
+        checkDayRollover();
+        scheduleMidnightRefresh();
+      }}, Math.min(ms, 2147483647));
+    }}
 
     function weekDates() {{
       const out = [];
@@ -2575,9 +2686,12 @@ def render_page(results):
         const searchOk = !searchText || li.textContent.toLowerCase().includes(searchText);
 
         const daySec = li.closest('.day');
-        const isToday = daySec && daySec.dataset.date === todayISO;
+        const dayDate = daySec ? daySec.dataset.date : '';
+        const isToday = daySec && dayDate === todayISO;
+        const isPastDay = dayDate && dayDate !== 'tba' && dayDate < todayISO;
         const epoch = li.dataset.epoch ? parseInt(li.dataset.epoch, 10) : 0;
-        const isPast = isToday && epoch > 0 && epoch < twoHoursAgoEpoch;
+        const isPastTime = isToday && epoch > 0 && epoch < twoHoursAgoEpoch;
+        const isPast = isPastDay || isPastTime;
 
         if (isToday && epoch > 0) {{
           totalTodayEventsCount++;
@@ -3042,10 +3156,22 @@ def render_page(results):
     }});
 
     window.addEventListener('focus', () => {{
+      checkDayRollover();
       if (timeFilter === 'today' && !showPastToday) {{
         apply();
       }}
     }});
+
+    document.addEventListener('visibilitychange', () => {{
+      if (document.visibilityState === 'visible') {{
+        checkDayRollover();
+      }}
+    }});
+
+    repositionPastBanner();
+    updateDayHeadings();
+    scheduleMidnightRefresh();
+    setInterval(checkDayRollover, 60000);
 
     hashToState();
     apply();
