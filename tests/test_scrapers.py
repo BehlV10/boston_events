@@ -60,6 +60,14 @@ class TestBostonEvents(unittest.TestCase):
         self.assertIsNotNone(res_clubcafe)
         self.assertEqual(res_clubcafe["neighborhood"], "South End")
 
+        res_sunset = resolve_event_geo({"venue": "Sunset Cantina"})
+        self.assertIsNotNone(res_sunset)
+        self.assertIn("Allston", res_sunset["neighborhood"])
+
+        res_feral = resolve_event_geo({"venue": "FERAL"})
+        self.assertIsNotNone(res_feral)
+        self.assertIn("Theater District", res_feral["neighborhood"])
+
         res_virtual = resolve_event_geo({"venue": "Online / Zoom"})
         self.assertIsNone(res_virtual)
 
@@ -166,6 +174,8 @@ class TestBostonEvents(unittest.TestCase):
         self.assertEqual(resolve_subarea("boston", {"venue": "Dani's Queer Bar"})[1], "back_bay")
         self.assertEqual(resolve_subarea("boston", {"venue": "Club Café"})[1], "south_end")
         self.assertEqual(resolve_subarea("boston", {"venue": "Club Cafe"})[1], "south_end")
+        self.assertEqual(resolve_subarea("boston", {"venue": "Sunset Cantina"})[1], "allston_brighton")
+        self.assertEqual(resolve_subarea("boston", {"venue": "FERAL", "name": "FERAL : ASSQUAKE"})[1], "theater_downtown")
 
         # Test full dataset coverage if events.json is present
         events_json = os.path.join(BASE_DIR, "events.json")

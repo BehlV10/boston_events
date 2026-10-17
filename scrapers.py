@@ -4878,9 +4878,82 @@ def scrape_boston_queer_nightlife(url, ua):
     return results
 
 
+def scrape_feral(url, ua):
+    """FERAL (@feral.party) — Boston's iconic queer & trans dance party and rager series."""
+    results = []
+    seen = set()
+
+    # 1. Official Eventbrite organizer profile (__NEXT_DATA__)
+    try:
+        soup = fetch_soup("https://www.eventbrite.com/o/feral-events-71015854393", ua)
+        tag = soup.find("script", id="__NEXT_DATA__")
+        if tag:
+            data = json.loads(tag.string)
+            evs = data.get("props", {}).get("pageProps", {}).get("upcomingEvents", [])
+            for e in evs:
+                name = (e.get("name") or "").strip()
+                if not name or e.get("is_cancelled"):
+                    continue
+                display_name = name if "feral" in name.lower() else f"FERAL: {name}"
+                s_date = e.get("start_date")
+                s_time = e.get("start_time") or "22:00:00"
+                if not s_date:
+                    continue
+                try:
+                    dt = datetime.strptime(f"{s_date} {s_time}", "%Y-%m-%d %H:%M:%S")
+                    dt_iso = dt.replace(tzinfo=EASTERN).astimezone(timezone.utc).isoformat()
+                except Exception:
+                    dt_iso = f"{s_date}T22:00:00-04:00"
+                pv = e.get("primary_venue") or {}
+                vname = pv.get("name") or "Legacy Boston"
+                if "legacy" in vname.lower():
+                    vname = "Legacy Boston"
+                tix = e.get("ticket_availability") or {}
+                if tix.get("is_free"):
+                    price = "Free"
+                else:
+                    min_tix = tix.get("minimum_ticket_price") or {}
+                    val = min_tix.get("major_value")
+                    price = f"${int(float(val))}" if val else "$25"
+                key = (name.lower(), s_date)
+                if key not in seen:
+                    seen.add(key)
+                    results.append({
+                        "name": display_name,
+                        "date": dt_iso,
+                        "url": e.get("url") or url,
+                        "venue": vname,
+                        "price": price,
+                        "category": "clubbing",
+                    })
+    except Exception:
+        pass
+
+    # 2. Eventbrite discovery search for any other FERAL events
+    try:
+        search_evs = scrape_eventbrite_search("https://www.eventbrite.com/d/ma--boston/feral/", ua)
+        for e in search_evs:
+            n_low = (e.get("name") or "").lower()
+            if "feral" in n_low or "tara dikhof" in n_low or "sinthetic" in n_low:
+                if any(w in n_low for w in ["5k", "10k", "marathon", "running", "race"]):
+                    continue
+                key = (e["name"].lower(), (e.get("date") or "")[:10])
+                if key not in seen and e.get("date"):
+                    seen.add(key)
+                    e["category"] = "clubbing"
+                    if "legacy" in (e.get("venue") or "").lower():
+                        e["venue"] = "Legacy Boston"
+                    results.append(e)
+    except Exception:
+        pass
+
+    return results
+
+
 _ALL_VENUES = [
     {"name": "Dani's Queer Bar", "url": "https://www.eventbrite.com/d/ma--boston/danis-queer-bar/", "ua": UA_CHROME, "scraper": scrape_danis_queer_bar, "default_category": "clubbing"},
     {"name": "Club Café", "url": "https://www.clubcafe.com/full-calendar/", "ua": UA_CHROME, "scraper": scrape_club_cafe, "default_category": "clubbing"},
+    {"name": "FERAL", "url": "https://www.eventbrite.com/o/feral-events-71015854393", "ua": UA_CHROME, "scraper": scrape_feral, "default_category": "clubbing"},
     {"name": "Boston LGBTQ+ Nightlife", "url": "https://www.eventbrite.com/d/ma--boston/lgbtq-nightlife/", "ua": UA_CHROME, "scraper": scrape_boston_queer_nightlife, "default_category": "clubbing"},
     {"name": "Midway Cafe", "url": "https://tockify.com/api/feeds/ics/midwaycafejp", "ua": UA_CHROME, "scraper": scrape_ical, "default_category": "music"},
     {"name": "The Beehive", "url": "https://tockify.com/api/feeds/ics/beehive", "ua": UA_CHROME, "scraper": scrape_ical, "default_category": "music"},
@@ -5026,6 +5099,7 @@ STATIC_LINKS = [
     ("clubbing","The Alley Bar (Downtown bear & leather bar)", "http://www.thealleybar.com/"),
     ("clubbing","Gay Mafia Boston (Legacy & Candystrip parties)", "https://www.gaymafiaboston.com"),
     ("clubbing","LesbianNightLife (tea dances & queer parties)", "https://www.lesbiannightlife.com"),
+    ("clubbing","FERAL (@feral.party · queer/trans rager)", "https://www.instagram.com/feral.party"),
 ]
 
 
