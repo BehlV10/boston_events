@@ -836,7 +836,7 @@ def render_page(results):
     weather = fetch_boston_weather()
     weather_pill_html = ""
     if weather:
-        weather_pill_html = f'<span class="pill-weather" title="{weather.get("label", "")} in Boston">{weather.get("icon", "🌤️")} {weather.get("temp", "--")}°F <span class="weather-label">{weather.get("label", "")}</span></span>'
+        weather_pill_html = f'<span class="pill-weather" title="{weather.get("label", "")} in Boston">{weather.get("icon", "🌤️")} {weather.get("temp", "--")}°F <span class="weather-label">{weather.get("label", "")}</span></span><span class="pill-dot">·</span>'
         weather_html = f'{weather["icon"]} {weather["temp"]}°F {weather["label"]} · '
     else:
         weather_html = ""
@@ -1278,9 +1278,32 @@ def render_page(results):
   .pill-weather {{ display: inline-flex; align-items: center; gap: 4px; font-weight: 600; color: #fff; }}
   .weather-label {{ font-weight: 400; color: var(--muted); }}
   .pill-dot {{ color: var(--muted); opacity: 0.6; }}
-  .pill-stat {{ color: var(--fg); }}
-  .pill-refresh {{ color: #ffd866; text-decoration: none; font-weight: 600; font-size: 12px; }}
-  .pill-refresh:hover {{ text-decoration: underline; }}
+  .pill-submit-btn {{
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: linear-gradient(135deg, #ffd866 0%, #f29e4c 100%);
+    color: #0c0e14;
+    font-weight: 750;
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    box-shadow: 0 2px 8px rgba(255, 216, 102, 0.3);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
+    line-height: 1.3;
+    vertical-align: middle;
+  }}
+  .pill-submit-btn:hover {{
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 4px 12px rgba(255, 216, 102, 0.45);
+    filter: brightness(1.06);
+  }}
+  .pill-submit-btn:active {{
+    transform: translateY(1px);
+  }}
 
   /* Layout */
   .layout {{
@@ -2374,51 +2397,11 @@ def render_page(results):
       padding: 1px 6px;
     }}
   }}
-  /* Banner Header Row & Submit Button */
+  /* Banner Header Row */
   .banner-title-row {{
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 16px;
-    flex-wrap: wrap;
-  }}
-  .btn-submit-event {{
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: linear-gradient(135deg, #ffd866 0%, #f29e4c 100%);
-    color: #0c0e14;
-    font-weight: 750;
-    font-size: 14px;
-    padding: 10px 18px;
-    border-radius: 999px;
-    border: none;
-    cursor: pointer;
-    box-shadow: 0 4px 18px rgba(255, 216, 102, 0.35);
-    transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
-  }}
-  .btn-submit-event:hover {{
-    transform: translateY(-1px) scale(1.02);
-    box-shadow: 0 6px 22px rgba(255, 216, 102, 0.5);
-    filter: brightness(1.06);
-  }}
-  .btn-submit-event:active {{
-    transform: translateY(1px);
-  }}
-
-  .mobile-submit-btn {{
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(135deg, #ffd866 0%, #f29e4c 100%);
-    color: #0c0e14;
-    font-weight: 700;
-    font-size: 13px;
-    padding: 8px 14px;
-    border-radius: var(--radius-md);
-    border: none;
-    cursor: pointer;
-    white-space: nowrap;
   }}
 
   /* Community Badge */
@@ -2696,16 +2679,14 @@ def render_page(results):
       <div class="banner-top-tag"><span class="live-pulse"></span> GREATER BOSTON LIVE EVENTS</div>
       <div class="banner-title-row">
         <h1 class="banner-title">Wicked Boston Events</h1>
-        <button type="button" class="btn-submit-event" id="btn-open-submit-modal" aria-haspopup="dialog" aria-expanded="false">
-          <span>＋ Add Event</span>
-        </button>
       </div>
       <div class="banner-meta-pill">
         {weather_pill_html}
-        <span class="pill-dot">·</span>
         <span class="pill-stat"><strong>{total:,}</strong> events · <strong>{len(results)}</strong> venues</span>
         <span class="pill-dot">·</span>
-        <a href="?refresh=1" class="pill-refresh" title="Force refresh live feeds">↻ Refresh</a>
+        <button type="button" class="pill-submit-btn" id="btn-open-submit-modal" aria-haspopup="dialog" aria-expanded="false">
+          <span>＋ Add Event</span>
+        </button>
       </div>
     </div>
   </div>
@@ -2716,9 +2697,6 @@ def render_page(results):
       <button type="button" id="mobile-filter-toggle" class="mobile-filter-btn">
         <span>⚙️ Filter</span>
         <span id="mobile-filter-badge" class="count">All</span>
-      </button>
-      <button type="button" class="mobile-submit-btn" id="btn-open-submit-modal-mobile">
-        <span>＋ Add Event</span>
       </button>
     </div>
     <aside class="filters" id="sidebar-filters">
@@ -4377,7 +4355,6 @@ def render_page(results):
     // --- Community Event & Venue Submission Modal Logic ---
     const submitModal = document.getElementById('submit-event-modal');
     const btnOpenSubmit = document.getElementById('btn-open-submit-modal');
-    const btnOpenSubmitMobile = document.getElementById('btn-open-submit-modal-mobile');
     const btnCloseSubmit = document.getElementById('btn-close-submit-modal');
     const btnCancelSubmit = document.getElementById('btn-cancel-submit');
     const communityForm = document.getElementById('community-event-form');
@@ -4450,7 +4427,6 @@ def render_page(results):
     }}
 
     if (btnOpenSubmit) btnOpenSubmit.addEventListener('click', () => openSubmitModal('event'));
-    if (btnOpenSubmitMobile) btnOpenSubmitMobile.addEventListener('click', () => openSubmitModal('event'));
     if (btnCloseSubmit) btnCloseSubmit.addEventListener('click', closeSubmitModal);
     if (btnCancelSubmit) btnCancelSubmit.addEventListener('click', closeSubmitModal);
     if (btnCancelVenue) btnCancelVenue.addEventListener('click', closeSubmitModal);
