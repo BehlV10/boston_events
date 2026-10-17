@@ -91,7 +91,7 @@ CITY_RULES = [
         "roadrunner", "colonial theatre", "colonial theater", "emerson colonial",
         "paramount center", "emerson paramount", "shubert theatre", "sports museum",
         "the sports museum", "huntington theatre", "huntington theater", "huntington ave",
-        "calderwood", "club cafe", "reunion bbq", "439 tremont", "urbanity dance",
+        "calderwood", "club cafe", "club café", "dani's", "danis", "dani's queer bar", "danis queer bar", "legacy", "reunion bbq", "439 tremont", "urbanity dance",
         "berklee", "cafe 939", "wbur cityspace", "cityspace", "beacon hill",
         "the phoenix boston", "fourth presbyterian", "boston fun run", "arlington street church",
         "tony demarco", "kadampa", "ula cafe", "artisans asylum", "walter brown arena",
@@ -249,11 +249,11 @@ def resolve_subarea(city, event, geo=None):
     elif city == "boston":
         if any(k in blob for k in ["fenway", "symphony", "house of blues", "mgm music", "mfa", "museum of fine arts", "jordan hall", "nec ", "nec:", "nec (", "new england conservatory", "berklee", "cafe 939", "time out", "401 park", "bill's bar", "bills bar", "loretta"]):
             return ("Fenway & Kenmore", "fenway_kenmore")
-        if any(k in blob for k in ["theater district", "theatre district", "boch", "wang", "shubert", "paramount", "colonial", "royale", "charles playhouse", "downtown", "common", "orpheum", "bsmnt", "city winery", "big night live", "td garden", "wilbur", "sports museum", "versus", "west end"]):
+        if any(k in blob for k in ["theater district", "theatre district", "boch", "wang", "shubert", "paramount", "colonial", "royale", "charles playhouse", "downtown", "common", "orpheum", "bsmnt", "city winery", "big night live", "td garden", "wilbur", "sports museum", "versus", "west end", "legacy"]):
             return ("Downtown & Theater Dist.", "theater_downtown")
         if any(k in blob for k in ["south end", "beehive", "wally", "club cafe", "club café", "sowa", "reunion bbq", "calderwood"]):
             return ("South End", "south_end")
-        if any(k in blob for k in ["back bay", "copley", "boston public library", "bpl", "trident", "newbury", "prudential"]):
+        if any(k in blob for k in ["back bay", "copley", "boston public library", "bpl", "trident", "newbury", "prudential", "dani", "danis"]):
             return ("Back Bay & Copley", "back_bay")
         if any(k in blob for k in ["seaport", "leader bank", "ica boston", "kings seaport", "kings dining", "greenway", "harbor", "scorpion", "laugh boston"]):
             return ("Seaport & Waterfront", "seaport_waterfront")

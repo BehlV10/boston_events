@@ -4725,7 +4725,163 @@ def scrape_club_passim(url, ua):
     return out
 
 
+def scrape_danis_queer_bar(url, ua):
+    """Dani's Queer Bar in Back Bay — Boston's premier lesbian & queer bar.
+
+    Combines ticketed special events via Eventbrite with their regular weekly programming:
+    Drag Bingo (Tuesdays), Front2Back (Wednesdays), No Cover Karaoke (Thursdays),
+    Friday Queer Dance Party, Saturday & Sunday Drag Brunches, and Weekend Dance Parties.
+    """
+    results = []
+    seen = set()
+
+    # 1. Ticketed special events from Eventbrite
+    try:
+        eb_evs = scrape_eventbrite_search(url, ua)
+        for e in eb_evs:
+            v_low = (e.get("venue") or "").lower()
+            n_low = (e.get("name") or "").lower()
+            if "dani" in v_low or "dani" in n_low or "909 boylston" in v_low:
+                e["venue"] = "Dani's Queer Bar"
+                if any(w in n_low for w in ["comedy", "quiz", "trivia"]):
+                    e["category"] = "comedy"
+                elif any(w in n_low for w in ["drag", "brunch", "cabaret"]):
+                    e["category"] = "theater"
+                else:
+                    e["category"] = "clubbing"
+                results.append(e)
+                if e.get("date"):
+                    seen.add((e.get("date")[:10], e["name"].lower()))
+    except Exception:
+        pass
+
+    # 2. Weekly recurring programming for the next 4 weeks
+    today = datetime.now(EASTERN).date()
+    recurring_specs = [
+        (1, 20, 0, "No Cover Drag Bingo with Wilhelmina", "Free", "comedy", "https://danisqueerbar.com/"),
+        (2, 19, 0, "Front2Back Listening Party", "Free", "music", "https://danisqueerbar.com/"),
+        (3, 22, 0, "No Cover Karaoke w/ Miss Jade Rock", "Free", "music", "https://danisqueerbar.com/"),
+        (4, 22, 0, "Friday Night Queer Dance Party", "Free", "clubbing", "https://danisqueerbar.com/"),
+        (5, 11, 30, "Dani's Drag Brunch w/ Shakaren", "Free", "theater", "https://danisqueerbar.com/"),
+        (5, 22, 0, "Weekend Queer Dance Party", "Free", "clubbing", "https://danisqueerbar.com/"),
+        (6, 11, 30, "Sunday Drag Brunch", "Free", "theater", "https://danisqueerbar.com/"),
+    ]
+
+    for day_offset in range(28):
+        cur_day = today + timedelta(days=day_offset)
+        dow = cur_day.weekday()
+        for r_dow, r_hr, r_min, r_name, r_price, r_cat, r_url in recurring_specs:
+            if dow == r_dow:
+                dt_obj = datetime(cur_day.year, cur_day.month, cur_day.day, r_hr, r_min, tzinfo=EASTERN)
+                results.append({
+                    "name": r_name,
+                    "date": dt_obj.astimezone(timezone.utc).isoformat(),
+                    "url": r_url,
+                    "venue": "Dani's Queer Bar",
+                    "price": r_price,
+                    "category": r_cat,
+                })
+
+    return results
+
+
+def scrape_club_cafe(url, ua):
+    """Club Café in South End — historic LGBT nightlife, cabaret, piano bar & dance club."""
+    soup = fetch_soup(url, ua)
+    events = []
+    seen = set()
+    for a in soup.find_all("article", class_=lambda c: c and "mec-event-article" in c):
+        title_el = a.find(class_="mec-event-title")
+        if not title_el:
+            continue
+        a_link = title_el.find("a")
+        name = html.unescape(a_link.get_text(strip=True) if a_link else title_el.get_text(strip=True))
+        href = a_link["href"] if a_link and a_link.has_attr("href") else ""
+
+        m_occ = re.search(r"occurrence=(\d{4}-\d{2}-\d{2})", href)
+        date_str = m_occ.group(1) if m_occ else None
+        if not date_str:
+            continue
+
+        time_el = a.find(class_="mec-event-time")
+        time_str = time_el.get_text(" ", strip=True) if time_el else ""
+        m_time = re.search(r"(\d{1,2}:\d{2}\s*(?:am|pm))", time_str, re.I)
+        t_part = m_time.group(1).lower().replace(" ", "") if m_time else None
+
+        if t_part:
+            try:
+                parsed_dt = datetime.strptime(f"{date_str} {t_part}", "%Y-%m-%d %I:%M%p")
+                dt = parsed_dt.replace(tzinfo=EASTERN).astimezone(timezone.utc)
+                dt_iso = dt.isoformat()
+            except Exception:
+                dt_iso = f"{date_str}T20:00:00-04:00"
+        else:
+            dt_iso = f"{date_str}T20:00:00-04:00"
+
+        loc_el = a.find(class_="mec-event-loc-place")
+        loc = loc_el.get_text(strip=True) if loc_el else "Club Café"
+        venue_name = f"Club Café ({loc})" if loc and loc != "Club Café Boston" else "Club Café"
+
+        low = name.lower()
+        if any(w in low for w in ["drag", "bingo"]):
+            cat = "comedy" if "bingo" in low else "theater"
+        elif any(w in low for w in ["tea dance", "dance", "dj", "party", "fridays", "maxxing", "house party"]):
+            cat = "clubbing"
+        elif any(w in low for w in ["cabaret", "broadway", "tribute", "burlesque"]):
+            cat = "theater"
+        else:
+            cat = "music"
+
+        price = "Free" if any(w in low for w in ["free", "no cover", "tea dance", "karaoke", "trivia", "drag bingo"]) else None
+
+        key = (name, dt_iso)
+        if key in seen:
+            continue
+        seen.add(key)
+
+        events.append({
+            "name": name,
+            "date": dt_iso,
+            "url": href,
+            "venue": venue_name,
+            "price": price,
+            "category": cat,
+        })
+    return events
+
+
+def scrape_boston_queer_nightlife(url, ua):
+    """Boston LGBTQ+ Nightlife & Parties — pop-up queer dance parties, tea dances, drag and circuit events."""
+    evs = scrape_eventbrite_search(url, ua)
+    results = []
+    seen = set()
+    for e in evs:
+        name = e.get("name") or ""
+        low = name.lower()
+        v_low = (e.get("venue") or "").lower()
+        if not e.get("date") or not name:
+            continue
+        # Avoid duplicating dedicated venues
+        if "dani" in v_low or "club caf" in v_low or "jacque" in v_low:
+            continue
+        if any(w in low or w in v_low for w in ["queer", "lgbt", "gay", "trans ", "sapphic", "lesbian", "drag", "pride", "tea dance", "sinthetic"]):
+            if any(w in low for w in ["drag", "cabaret", "burlesque"]):
+                e["category"] = "theater"
+            elif any(w in low for w in ["comedy", "quiz", "trivia"]):
+                e["category"] = "comedy"
+            else:
+                e["category"] = "clubbing"
+            key = (name, e["date"][:10])
+            if key not in seen:
+                seen.add(key)
+                results.append(e)
+    return results
+
+
 _ALL_VENUES = [
+    {"name": "Dani's Queer Bar", "url": "https://www.eventbrite.com/d/ma--boston/danis-queer-bar/", "ua": UA_CHROME, "scraper": scrape_danis_queer_bar, "default_category": "clubbing"},
+    {"name": "Club Café", "url": "https://www.clubcafe.com/full-calendar/", "ua": UA_CHROME, "scraper": scrape_club_cafe, "default_category": "clubbing"},
+    {"name": "Boston LGBTQ+ Nightlife", "url": "https://www.eventbrite.com/d/ma--boston/lgbtq-nightlife/", "ua": UA_CHROME, "scraper": scrape_boston_queer_nightlife, "default_category": "clubbing"},
     {"name": "Midway Cafe", "url": "https://tockify.com/api/feeds/ics/midwaycafejp", "ua": UA_CHROME, "scraper": scrape_ical, "default_category": "music"},
     {"name": "The Beehive", "url": "https://tockify.com/api/feeds/ics/beehive", "ua": UA_CHROME, "scraper": scrape_ical, "default_category": "music"},
     {"name": "The Rockwell", "url": "https://therockwell.org/calendar/?ical=1", "ua": UA_CHROME, "scraper": scrape_ical, "default_category": "theater"},
@@ -4865,6 +5021,11 @@ STATIC_LINKS = [
     ("gaming",  "Balance Patch", "https://www.balancepatch.com/events"),
     ("music",   "Regattabar (jazz)", "https://www.regattabarjazz.com/"),
     ("theater", "Jacques' Cabaret (historic drag & cabaret)", "http://jacquescabaret.com/v3/"),
+    ("clubbing","Dani's Queer Bar (Back Bay lesbian/queer bar)", "https://danisqueerbar.com/"),
+    ("clubbing","Club Café (historic South End LGBT nightclub & cabaret)", "https://www.clubcafe.com/"),
+    ("clubbing","The Alley Bar (Downtown bear & leather bar)", "http://www.thealleybar.com/"),
+    ("clubbing","Gay Mafia Boston (Legacy & Candystrip parties)", "https://www.gaymafiaboston.com"),
+    ("clubbing","LesbianNightLife (tea dances & queer parties)", "https://www.lesbiannightlife.com"),
 ]
 
 
