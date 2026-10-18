@@ -645,17 +645,45 @@ EXCLUDE_VENUES_OR_SOURCES = {
 }
 
 
+GENERIC_DESCRIPTOR_PREFIXES = {
+    "recital", "concert", "workshop", "screening", "lecture", "class",
+    "showcase", "exhibition", "panel", "presentation", "meeting",
+    "discussion", "reception", "webinar", "seminar", "film", "movie",
+    "book launch", "reading"
+}
+
+
 def _normalize_title_head(title):
     t = (title or "").lower().strip()
-    t = re.sub(r"[\(\[][^\)\]]*(?:touring|18\+|21\+|sold out|ages|rescheduled|presale|preseason)[^\)\]]*[\)\]]", "", t)
-    t = re.sub(r"\s*-\s*boston(\b.*)?", "", t)
-    t = re.sub(r"^(?:broadway in boston|presents|live nation presents|bowery presents):\s*", "", t)
+    t = re.sub(r"^(?:broadway in boston|presents|live nation presents|bowery presents|bowery boston presents):\s*", "", t)
     t = re.sub(r"^(?:nba\s+|mlb\s+|nhl\s+|nfl\s+)?(?:preseason|rescheduled|postponed):\s*", "", t)
+    t = re.sub(r"\s*[\(\[][^\)\]]*(?:touring|18\+|21\+|sold out|ages|rescheduled|presale|preseason|preview|week\s*\d+)[^\)\]]*[\)\]]", "", t)
+    t = re.sub(r"\s+at\s+(?:the\s+)?[a-z0-9\x27\s\.\&\-]+$", "", t)
+    t = re.sub(r"\s*-\s*202\d\s+tour.*$", "", t)
+    t = re.sub(r"\s*-\s*tour.*$", "", t)
+    t = re.sub(r"\s*-\s*boston(\b.*)?$", "", t)
+
+    # If title starts with a generic descriptor prefix like "Recital:", strip it so the performer is the head
+    for p in GENERIC_DESCRIPTOR_PREFIXES:
+        if t.startswith(p + ":") or t.startswith(p + " -"):
+            t = t[len(p) + 1:].strip()
+            break
+
+    GENERIC_CATEGORY_SUFFIXES = (
+        "workshop", "class", "clinic", "tour", "screening", "recital",
+        "lecture", "discussion", "series", "market", "night", "trivia", "brunch", "show"
+    )
+
     for sep in [":", " with ", " feat. ", " feat ", " ft. ", " ft ", " - ", " – ", " — ", " “", " \"", "”", "“", "\""]:
         if sep in t:
             parts = t.split(sep, 1)
-            if len(parts[0].strip()) >= 3 and not any(gen in parts[0].strip() for gen in ["an evening", "a night", "special"]):
-                t = parts[0].strip()
+            left = parts[0].strip()
+            if any(left.endswith(suff) for suff in GENERIC_CATEGORY_SUFFIXES):
+                if len(parts[1].strip()) >= 3:
+                    t = parts[1].strip()
+                    continue
+            if len(left) >= 3 and left not in GENERIC_DESCRIPTOR_PREFIXES and not any(gen in left for gen in ["an evening", "a night", "special"]):
+                t = left
                 break
     if "," in t:
         parts = t.split(",", 1)
@@ -722,12 +750,22 @@ def _build_compare_links(e, raw_title):
     return f'<span class="compare-tickets">{label}: <a href="{escape(gt_url)}" target="_blank" rel="noopener">Gametime</a> · <a href="{escape(sh_url)}" target="_blank" rel="noopener">StubHub</a></span>'
 
 
+def _source_priority(s):
+    s = (s or "").lower()
+    if s in ("ticketmaster", "seatgeek", "eventbrite", "eventbrite boston", "eventbrite cambridge", "eventbrite somerville"):
+        return 1
+    if s in ("the boston calendar", "do617"):
+        return 5
+    return 10
+
+
 def _merge_duplicates(events):
     """Collapse events sharing a normalized name or head title within the same day bucket.
 
     Preserves the best physical venue, merges prices across primary and alt sources,
     and attaches alt sources so users can compare providers. Preserves distinct
-    showtimes (e.g. 7:15 PM and 9:30 PM performances of the same comedy show).
+    showtimes from the same primary source (e.g. 7:00 PM and 9:30 PM performances),
+    while merging cross-source postings of the same show.
     """
     seen_exact = {}
     seen_head = {}
@@ -739,16 +777,46 @@ def _merge_duplicates(events):
         t2 = e2.get("_time")
         if not t1 or not t2:
             return False
-        # If either time is EDT midnight (00:00), it's likely an untimed/all-day placeholder
+        # If either time is EDT midnight (00:00), it is likely an untimed/all-day placeholder
         if (t1.hour == 0 and t1.minute == 0) or (t2.hour == 0 and t2.minute == 0):
             return False
         diff_mins = abs((t1 - t2).total_seconds()) / 60.0
         s1 = (e1.get("_source_venue") or "").lower()
         s2 = (e2.get("_source_venue") or "").lower()
-        if s1 and s1 == s2 and diff_mins >= 30:
+        # Same source with >= 45m diff: distinct show sets (e.g. 7:00 PM and 9:30 PM)
+        if s1 and s1 == s2 and diff_mins >= 45:
             return True
-        if diff_mins >= 75:
+        # Different sources within 90m (doors vs show time): same show
+        if s1 != s2 and diff_mins <= 90:
+            return False
+        # If diff > 90m: separate shows
+        if diff_mins > 90:
             return True
+        return False
+
+    def _venue_match(v1, v2, e1, e2):
+        if not v1 or not v2:
+            return True
+        v1_low = v1.lower()
+        v2_low = v2.lower()
+        if v1_low in generic_sources or v2_low in generic_sources:
+            return True
+        if v1_low == v2_low:
+            return True
+        generic_vwords = {
+            "the", "at", "in", "of", "and", "boston", "cambridge", "somerville",
+            "theatre", "theater", "tavern", "pub", "bar", "lounge", "brewery",
+            "brewing", "cafe", "café", "center", "hall", "club", "studio", "house", "room"
+        }
+        w1 = set(re.findall(r"\w+", v1_low)) - generic_vwords
+        w2 = set(re.findall(r"\w+", v2_low)) - generic_vwords
+        if w1 and w2 and (w1 & w2):
+            return True
+        if e1 and e2:
+            g1 = resolve_event_geo(e1)
+            g2 = resolve_event_geo(e2)
+            if g1 and g2 and g1.get("venue") and g1.get("venue") == g2.get("venue"):
+                return True
         return False
 
     for e in events:
@@ -758,18 +826,18 @@ def _merge_duplicates(events):
         venue = (e.get("venue") or "").lower()
 
         match = None
+        # 1. Exact match check
         if full and len(full) >= 4 and full in seen_exact:
             for cand in seen_exact[full]:
                 if not _is_different_show(e, cand):
                     match = cand
                     break
-        elif head and len(head) >= 4 and head not in GENERIC_HEADS and head in seen_head:
+
+        # 2. Normalized head match check
+        if not match and head and len(head) >= 4 and head not in GENERIC_HEADS and head in seen_head:
             for cand in seen_head[head]:
                 c_venue = (cand.get("venue") or "").lower()
-                v_words1 = set(re.findall(r"\w+", venue))
-                v_words2 = set(re.findall(r"\w+", c_venue))
-                common_words = v_words1 & v_words2 - {"the", "at", "in", "of", "and", "boston", "presented", "by", "citizens"}
-                if common_words or not venue or not c_venue or (venue in generic_sources) or (c_venue in generic_sources):
+                if _venue_match(venue, c_venue, e, cand):
                     if not _is_different_show(e, cand):
                         match = cand
                         break
@@ -780,6 +848,21 @@ def _merge_duplicates(events):
             src_name = e.get("_source_venue") or e.get("venue") or "source"
             if src_url and not any(a.get("url") == src_url for a in match["_alt_sources"]) and src_url != match.get("url"):
                 match["_alt_sources"].append({"venue": src_name, "url": src_url, "price": e.get("price")})
+
+            # If the newly arrived event has higher priority (e.g. direct venue vs aggregator), upgrade primary info
+            cur_prio = _source_priority(match.get("_source_venue"))
+            new_prio = _source_priority(e.get("_source_venue"))
+            if new_prio > cur_prio:
+                old_url = match.get("url")
+                old_src = match.get("_source_venue")
+                if old_url and not any(a.get("url") == old_url for a in match["_alt_sources"]):
+                    match["_alt_sources"].append({"venue": old_src, "url": old_url, "price": match.get("price")})
+                match["url"] = e.get("url")
+                match["name"] = e.get("name")
+                match["venue"] = e.get("venue")
+                match["_source_venue"] = e.get("_source_venue")
+                if e.get("_time") and (e["_time"].hour != 0 or e["_time"].minute != 0):
+                    match["_time"] = e["_time"]
 
             if not match.get("price") and e.get("price"):
                 match["price"] = e["price"]
