@@ -407,6 +407,23 @@ def _parse_bc_admission(text):
     return None
 
 
+def _bc_extract_url_from_p(p):
+    a = p.find("a", href=True)
+    if a and a.get("href"):
+        href = a["href"].strip()
+        if not href.startswith("#") and "thebostoncalendar.com" not in href:
+            return href
+    text = p.get_text(" ", strip=True)
+    clean = re.sub(r"^(?:event\s*website|tickets?|registration|rsvp|more\s*info)\s*:?\s*", "", text, flags=re.I).strip()
+    match = re.search(r"(https?://\S+|www\.\S+|[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:/[^\s<>\"']*)?)", clean)
+    if match:
+        url = match.group(1).rstrip(".,;)")
+        if not url.startswith("http"):
+            url = "https://" + url
+        return url
+    return None
+
+
 def _bc_detail_info(bc_url, ua):
     """Fetch detail page for The Boston Calendar event and extract (external_url, admission_price)."""
     soup = None
@@ -428,12 +445,25 @@ def _bc_detail_info(bc_url, ua):
         if not b:
             continue
         label = b.get_text(" ", strip=True).lower()
-        if _BC_EXTERNAL_RE.search(label):
-            a = p.find("a", href=True)
-            if a and a.get("href"):
-                ext_url = a["href"]
-        elif "admission" in label:
+        if _BC_EXTERNAL_RE.search(label) or any(k in label for k in ["ticket", "registration", "rsvp", "more info", "website"]):
+            u = _bc_extract_url_from_p(p)
+            if u and not ext_url:
+                ext_url = u
+        elif "admission" in label or "price" in label:
             price = _parse_bc_admission(p.get_text(" ", strip=True))
+
+    if not ext_url:
+        for a in soup.find_all("a", href=True):
+            href = a["href"].strip()
+            if not href.startswith("http"):
+                continue
+            if any(k in href for k in ["thebostoncalendar.com", "facebook.com/sharer", "twitter.com", "instagram.com"]):
+                continue
+            text = a.get_text(" ", strip=True).lower()
+            if any(k in text for k in ["buy ticket", "get ticket", "ticket", "event website", "official website", "more info", "register"]):
+                ext_url = href
+                break
+
     return ext_url, price
 
 
@@ -540,8 +570,15 @@ def scrape_boston_calendar(url, ua):
                 entry["ends"] = f"{end_year:04d}-{end_month:02d}-{end_day:02d}"
             events.append(entry)
     if events:
-        top = events[:60]
-        with ThreadPoolExecutor(max_workers=12) as ex:
+        # Prioritize upcoming events in the immediate future for detail fetching
+        # so users get direct primary source links for all near-term happenings
+        def _bc_sort_key(e):
+            d = e.get("date")
+            return d if d else "9999"
+
+        sorted_events = sorted(events, key=_bc_sort_key)
+        top = sorted_events[:180]
+        with ThreadPoolExecutor(max_workers=20) as ex:
             details = list(ex.map(lambda e: _bc_detail_info(e["url"], ua), top))
         for e, (ext, p) in zip(top, details):
             if ext:
@@ -4950,7 +4987,228 @@ def scrape_feral(url, ua):
     return results
 
 
+def scrape_warehouse_xi(url, ua):
+    """Warehouse XI (11 Sanborn Ct, Union Square, Somerville).
+
+    Scrapes upcoming indie concerts & performances from Boston Shows
+    (with direct Eventim ticket links and pricing) and community forums / art
+    gatherings from Eventbrite.
+    """
+    events = []
+    now = datetime.now(timezone.utc)
+    current_year = datetime.now(EASTERN).year
+
+    # 1. Shows via bostonshows.org
+    try:
+        bs_url = "https://bostonshows.org/venues/warehouse-xi.html"
+        soup = fetch_soup(bs_url, ua)
+        for tr in soup.find_all("tr", class_="event"):
+            start_td = tr.find("td", class_="event-start")
+            details_td = tr.find("td", class_="event-details")
+            if not start_td or not details_td:
+                continue
+
+            divs = [d.get_text(strip=True) for d in start_td.find_all("div") if d.get_text(strip=True)]
+            if not divs:
+                continue
+            date_str = divs[0]
+            time_str = divs[1] if len(divs) > 1 else "8:00pm"
+
+            m = re.search(r"([A-Za-z]+)\s+(\d{1,2})", date_str)
+            if not m:
+                continue
+            month_str, day_str = m.group(1), m.group(2)
+            try:
+                dt_naive = datetime.strptime(f"{current_year} {month_str} {day_str} {time_str}", "%Y %b %d %I:%M%p")
+            except Exception:
+                try:
+                    dt_naive = datetime.strptime(f"{current_year} {month_str} {day_str}", "%Y %b %d")
+                except Exception:
+                    continue
+
+            dt_eastern = dt_naive.replace(tzinfo=EASTERN)
+            if dt_eastern.astimezone(timezone.utc) < now - timedelta(days=1):
+                dt_eastern = dt_eastern.replace(year=current_year + 1)
+
+            title_a = details_td.find("div", class_="event-title").find("a") if details_td.find("div", class_="event-title") else None
+            title = title_a.get_text(strip=True) if title_a else "Concert at Warehouse XI"
+            ticket_url = title_a.get("href") if title_a else url
+
+            info_div = details_td.find("div", class_="event-info")
+            info_text = info_div.get_text(" ", strip=True) if info_div else ""
+            price = None
+            price_match = re.search(r"\$(\d+(?:\.\d{2})?)", info_text)
+            if price_match:
+                price = f"${price_match.group(1)}"
+            elif "free" in info_text.lower():
+                price = "Free"
+
+            events.append({
+                "name": title,
+                "date": dt_eastern.astimezone(timezone.utc).isoformat(),
+                "url": ticket_url,
+                "venue": "Warehouse XI",
+                "price": price,
+                "category": "music",
+            })
+    except Exception:
+        pass
+
+    # 2. Eventbrite for community / forum events
+    try:
+        eb_url = "https://www.eventbrite.com/d/ma--somerville/warehouse-xi/"
+        eb_soup = fetch_soup(eb_url, ua)
+        for s in eb_soup.find_all("script", type="application/ld+json"):
+            try:
+                data = json.loads(s.string)
+                if isinstance(data, dict) and data.get("@type") == "ItemList":
+                    for item in data.get("itemListElement", []):
+                        it = item.get("item", {})
+                        loc = it.get("location", {})
+                        loc_name = loc.get("name", "").lower()
+                        addr = str(loc.get("address", "")).lower()
+                        if "warehouse xi" in loc_name or "sanborn" in addr:
+                            ev_name = it.get("name")
+                            ev_start = it.get("startDate")
+                            ev_url = it.get("url")
+                            if ev_name and ev_start:
+                                events.append({
+                                    "name": ev_name,
+                                    "date": ev_start if "T" in ev_start else f"{ev_start}T19:00:00-04:00",
+                                    "url": ev_url or url,
+                                    "venue": "Warehouse XI",
+                                    "price": None,
+                                    "category": "community",
+                                })
+            except Exception:
+                pass
+    except Exception:
+        pass
+
+    return events
+
+
+def scrape_downtown_boston(url, ua):
+    """Downtown Boston BID (downtownboston.org).
+
+    Fetches public calendar via WordPress Tribe Events REST API for Downtown Crossing,
+    Financial District, and Theater District happenings.
+    """
+    events = []
+    today = datetime.now(EASTERN).date().isoformat()
+    api_url = f"https://www.downtownboston.org/wp-json/tribe/events/v1/events?start_date={today}&per_page=50"
+    headers = {"User-Agent": ua}
+
+    try:
+        resp = _SESSION.get(api_url, headers=headers, timeout=12)
+        resp.raise_for_status()
+        data = resp.json()
+        for ev in data.get("events", []):
+            raw_title = ev.get("title", "")
+            title = BeautifulSoup(raw_title, "html.parser").get_text(strip=True)
+            if not title:
+                continue
+
+            start_str = ev.get("start_date")
+            if not start_str:
+                continue
+            try:
+                dt = datetime.strptime(start_str, "%Y-%m-%d %H:%M:%S").replace(tzinfo=EASTERN)
+                iso = dt.astimezone(timezone.utc).isoformat()
+            except Exception:
+                continue
+
+            event_url = ev.get("website") or ev.get("url") or url
+            venue_obj = ev.get("venue") or {}
+            venue_name = venue_obj.get("venue") or "Downtown Boston"
+
+            cost = ev.get("cost")
+            price = cost.strip() if cost else None
+
+            events.append({
+                "name": title,
+                "date": iso,
+                "url": event_url,
+                "venue": f"Downtown Boston - {venue_name}" if "downtown" not in venue_name.lower() else venue_name,
+                "price": price,
+                "category": infer_category(title, venue_name, default="community"),
+            })
+    except Exception:
+        pass
+
+    return events
+
+
+def scrape_joyraft(url, ua):
+    """Joyraft Curated Experiences (joyraft.com).
+
+    Extracts high-interest curated 'Hot & new' and 'Happening this weekend' events.
+    """
+    events = []
+    try:
+        soup = fetch_soup("https://joyraft.com", ua)
+        script = soup.find("script", id="__NEXT_DATA__")
+        if not script:
+            return events
+        data = json.loads(script.string)
+        queries = data.get("props", {}).get("pageProps", {}).get("dehydratedState", {}).get("queries", [])
+
+        seen = set()
+        for q in queries:
+            query_data = q.get("state", {}).get("data", {})
+            pages = query_data.get("pages", [])
+            for page in pages:
+                items = page.get("data", []) if isinstance(page, dict) else (page if isinstance(page, list) else [])
+                for it in items:
+                    name = it.get("name")
+                    if not name:
+                        continue
+                    when = it.get("when", {})
+                    start_date = when.get("startDate")
+                    start_time = when.get("startTime") or "19:00"
+                    if not start_date:
+                        continue
+
+                    try:
+                        dt = datetime.strptime(f"{start_date} {start_time}", "%Y-%m-%d %H:%M").replace(tzinfo=EASTERN)
+                        iso = dt.astimezone(timezone.utc).isoformat()
+                    except Exception:
+                        continue
+
+                    where = it.get("where", {})
+                    venue_name = where.get("name") or "Boston"
+                    city = where.get("city")
+                    if city and city.lower() not in venue_name.lower():
+                        venue_display = f"{venue_name} ({city})"
+                    else:
+                        venue_display = venue_name
+
+                    slug = it.get("slug")
+                    event_url = f"https://joyraft.com/experience/{slug}" if slug else url
+
+                    key = (name.lower(), iso[:10])
+                    if key in seen:
+                        continue
+                    seen.add(key)
+
+                    events.append({
+                        "name": name,
+                        "date": iso,
+                        "url": event_url,
+                        "venue": venue_display,
+                        "price": None,
+                        "category": infer_category(name, venue_display, default="community"),
+                    })
+    except Exception:
+        pass
+
+    return events
+
+
 _ALL_VENUES = [
+    {"name": "Warehouse XI", "url": "https://bostonshows.org/venues/warehouse-xi.html", "ua": UA_CHROME, "scraper": scrape_warehouse_xi, "default_category": "music"},
+    {"name": "Downtown Boston BID", "url": "https://www.downtownboston.org/events/", "ua": UA_CHROME, "scraper": scrape_downtown_boston, "default_category": "community"},
+    {"name": "Joyraft Curated", "url": "https://joyraft.com/", "ua": UA_CHROME, "scraper": scrape_joyraft, "default_category": "community"},
     {"name": "Dani's Queer Bar", "url": "https://www.eventbrite.com/d/ma--boston/danis-queer-bar/", "ua": UA_CHROME, "scraper": scrape_danis_queer_bar, "default_category": "clubbing"},
     {"name": "Club Café", "url": "https://www.clubcafe.com/full-calendar/", "ua": UA_CHROME, "scraper": scrape_club_cafe, "default_category": "clubbing"},
     {"name": "FERAL", "url": "https://www.eventbrite.com/o/feral-events-71015854393", "ua": UA_CHROME, "scraper": scrape_feral, "default_category": "clubbing"},

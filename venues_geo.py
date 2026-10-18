@@ -108,6 +108,7 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
     "blues union": (42.3995, -71.1278, "Teele Square", "160 Holland St, Somerville", "Blues Union"),
 
     # Union Square & Somerville
+    "warehouse xi": (42.3807, -71.0957, "Union Square", "11 Sanborn Ct, Somerville", "Warehouse XI"),
     "the jungle": (42.3807, -71.0955, "Union Square", "6 Sanborn Ct, Somerville", "The Jungle Community Music Club"),
     "the jungle community music club": (42.3807, -71.0955, "Union Square", "6 Sanborn Ct, Somerville", "The Jungle Community Music Club"),
     "sally o'brien's": (42.3822, -71.0998, "Union Square", "335 Somerville Ave, Somerville", "Sally O'Brien's"),
@@ -229,6 +230,12 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
     "legacy boston": (42.3512, -71.0660, "Theater District", "79 Warrenton St, Boston", "Legacy Boston"),
     "the alley bar": (42.3582, -71.0592, "Downtown", "14 Pi Alley, Boston", "The Alley Bar"),
     "alley bar": (42.3582, -71.0592, "Downtown", "14 Pi Alley, Boston", "The Alley Bar"),
+    "downtown boston": (42.3555, -71.0601, "Downtown / Financial District", "Downtown Crossing, Boston", "Downtown Boston"),
+    "downtown crossing": (42.3555, -71.0601, "Downtown / Financial District", "Downtown Crossing, Boston", "Downtown Crossing"),
+    "downtown boston bid": (42.3555, -71.0601, "Downtown / Financial District", "Downtown Crossing, Boston", "Downtown Boston BID"),
+    "joyraft curated": (42.3555, -71.0601, "Downtown / Financial District", "Boston, MA", "Joyraft Curated"),
+    "old state house": (42.3587, -71.0578, "Downtown / Financial District", "206 Washington St, Boston", "Old State House"),
+    "old south meeting house": (42.3569, -71.0594, "Downtown / Financial District", "310 Washington St, Boston", "Old South Meeting House"),
     "sunset cantina": (42.3503, -71.1187, "Allston / BU", "916 Commonwealth Ave, Boston", "Sunset Cantina"),
     "calderwood pavilion": (42.3448, -71.0701, "South End", "527 Tremont St, Boston", "Calderwood Pavilion"),
     "sowa open market": (42.3425, -71.0673, "South End", "530 Harrison Ave, Boston", "SoWa Open Market"),
@@ -504,6 +511,11 @@ VENUE_RULES = [
     ("graymist", (42.3804, -71.1348, "West Cambridge", "364 Huron Ave, Cambridge", "GrayMist Studio & Shop")),
     ("coolidge corner", (42.3424, -71.1215, "Coolidge Corner", "290 Harvard St, Brookline", "Coolidge Corner Theatre")),
     ("puppet showplace", (42.3323, -71.1172, "Brookline Village", "32 Station St, Brookline", "Puppet Showplace Theater")),
+    ("warehouse xi", (42.3807, -71.0957, "Union Square", "11 Sanborn Ct, Somerville", "Warehouse XI")),
+    ("downtown boston", (42.3555, -71.0601, "Downtown / Financial District", "Downtown Crossing, Boston", "Downtown Boston")),
+    ("downtown crossing", (42.3555, -71.0601, "Downtown / Financial District", "Downtown Crossing, Boston", "Downtown Crossing")),
+    ("old state house", (42.3587, -71.0578, "Downtown / Financial District", "206 Washington St, Boston", "Old State House")),
+    ("old south meeting house", (42.3569, -71.0594, "Downtown / Financial District", "310 Washington St, Boston", "Old South Meeting House")),
 ]
 
 # Coordinate bounding box for valid Greater Boston / Eastern MA events

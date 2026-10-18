@@ -36,6 +36,7 @@ CITY_RULES = [
         "underbones", "remnant brewing", "the rockwell", "rockwell",
         "vera's", "veras", "craft loft", "the chester tavern", "chester tavern",
         "all she wrote books", "portico brewing", "portico", "dance union",
+        "warehouse xi", "warehouse 11", "warehouse-xi",
         "winter hill brewing", "the independent", "olde magoun", "magoun's saloon",
         "somart", "wyllo", "jean appolon", "the biltmore", "diversity consignment",
         "boston figurative art center", "perry park", "nathan tufts park", "ward 4",
@@ -240,7 +241,7 @@ def resolve_subarea(city, event, geo=None):
     elif city == "somerville":
         if any(k in blob for k in ["davis", "somerville theatre", "crystal ballroom", "burren", "rockwell", "comedy studio", "underbones", "painted burro", "west branch"]):
             return ("Davis Square", "davis_sq")
-        if any(k in blob for k in ["union square", "bow market", "armory", "arts at the armory", "jungle", "remnant", "sally o'brien", "sally obrien", "side quest", "duck duck goof", "dance union", "goofs comedy", "vera's"]):
+        if any(k in blob for k in ["union square", "bow market", "armory", "arts at the armory", "jungle", "remnant", "sally o'brien", "sally obrien", "side quest", "duck duck goof", "dance union", "goofs comedy", "vera's", "warehouse xi", "warehouse 11", "warehouse-xi"]):
             return ("Union Square", "union_sq")
         if any(k in blob for k in ["growing center", "spring hill", "winter hill", "magoun", "highland", "central library", "79 highland", "chester tavern"]):
             return ("Spring & Winter Hill", "spring_winter_hill")
