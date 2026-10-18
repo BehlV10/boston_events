@@ -958,34 +958,16 @@ def render_page(results):
             cal_actions.append(f'<button type="button" class="cal-btn ics-btn" data-title="{escape(raw_title)}" data-date="{escape(e["date"])}" data-venue="{escape(venue)}" data-url="{escape(e.get("url") or "")}" title="Download .ics for Apple/Outlook">+ .ics</button>')
         cal_html = f'<span class="cal-links">{" ".join(cal_actions)}</span>' if cal_actions else ""
 
-        ev_id = _event_stable_id(e)
-        votes = int(e.get("upvotes") or e.get("votes") or upvotes_map.get(ev_id, 0))
-        ev_classes = ["event"]
-        pop_badge = ""
-        if votes >= 5:
-            ev_classes.append("glowing")
-            pop_badge = '<span class="badge-glowing">⚡ Trending</span>'
-        elif votes >= 3:
-            ev_classes.append("popular")
-            pop_badge = '<span class="badge-popular">🔥 Popular</span>'
-        badge_prefix = f"{pop_badge} " if pop_badge else ""
-
         raw_desc = (e.get("description") or "").replace("***", "").replace("**", "").replace("__", "").replace("`", "").strip()
         desc = raw_desc[:180]
         desc_html = f'<div class="desc">{escape(desc)}</div>' if desc else ""
         free_flag = "true" if is_free else "false"
         epoch_attr = f' data-epoch="{int(e["_time"].timestamp())}"' if e.get("_time") else ''
-        return f'''<li class="{' '.join(ev_classes)}" data-cat="{escape(cat)}" data-bucket="{escape(bucket)}" data-venue="{escape(source)}" data-city="{escape(city)}"{sub_attrs} data-recur="{recur_flag}" data-free="{free_flag}"{epoch_attr}{geo_attrs} data-event-id="{ev_id}" data-votes="{votes}">
+        return f'''<li class="event" data-cat="{escape(cat)}" data-bucket="{escape(bucket)}" data-venue="{escape(source)}" data-city="{escape(city)}"{sub_attrs} data-recur="{recur_flag}" data-free="{free_flag}"{epoch_attr}{geo_attrs}>
           <div class="when">{escape(format_when(e))}</div>
           <div class="what">{link}{price_tag}{recur_badge}
-            <div class="venue-tag">{badge_prefix}{cat_tag}{f" · {venue_html}" if venue_html else ""}{sub_tag}{extra_html}{cal_html}</div>
+            <div class="venue-tag">{cat_tag}{f" · {venue_html}" if venue_html else ""}{sub_tag}{extra_html}{cal_html}</div>
             {desc_html}
-          </div>
-          <div class="vote-wrap">
-            <button type="button" class="btn-upvote" data-id="{ev_id}" aria-label="Upvote this event" title="Upvote event">
-              <span class="upvote-arrow">▲</span>
-              <span class="upvote-count">{votes}</span>
-            </button>
           </div>
         </li>'''
 
@@ -1627,7 +1609,7 @@ def render_page(results):
     border: 1px solid rgba(255, 255, 255, 0.04);
     margin-bottom: 6px;
     display: grid;
-    grid-template-columns: 78px minmax(0, 1fr) auto;
+    grid-template-columns: 78px minmax(0, 1fr);
     align-items: start;
     gap: 12px;
     font-size: 14px;
@@ -2956,7 +2938,6 @@ def render_page(results):
         <button type="button" class="chip" data-time="weekend">🎉 This Weekend</button>
         <button type="button" class="chip" data-time="week">📅 Next 7 Days</button>
         <button type="button" class="chip" data-time="all">All Upcoming</button>
-        <button type="button" class="chip chip-popular" id="quick-popular-chip" title="Show only popular events with 3+ votes">🔥 Popular (3+)</button>
         <button type="button" class="chip chip-free" id="quick-free-chip">✨ Free Only</button>
       </div>
       <div class="week-nav" id="week-nav">

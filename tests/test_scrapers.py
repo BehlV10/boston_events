@@ -214,7 +214,7 @@ class TestBostonEvents(unittest.TestCase):
         self.assertNotEqual(id1, id3, "Different events must have different IDs")
 
     def test_upvoting_rendering_and_thresholds(self):
-        """render_page must render upvote buttons and popular/glowing badges based on vote thresholds."""
+        """render_page should keep upvotes and popular badges hidden cleanly."""
         today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         mock_venues = [
             {
@@ -238,35 +238,14 @@ class TestBostonEvents(unittest.TestCase):
                         "url": "https://burren.com/e2",
                         "votes": 3,
                     },
-                    {
-                        "name": "Glowing Event",
-                        "venue": "The Burren",
-                        "date": f"{today}T22:00:00",
-                        "price": "$15",
-                        "url": "https://burren.com/e3",
-                        "votes": 6,
-                    },
                 ],
             }
         ]
         html = render_page(mock_venues)
 
-        # Quick chips popular filter present
-        self.assertIn('id="quick-popular-chip"', html)
-        self.assertIn("Popular (3+)", html)
-
-        # Upvote buttons present
-        self.assertIn('class="btn-upvote"', html)
-        self.assertIn('class="upvote-arrow"', html)
-
-        # Threshold checks:
-        # 3 votes -> popular class and Popular badge
-        self.assertIn('badge-popular', html)
-        self.assertIn('🔥 Popular', html)
-
-        # 6 votes -> glowing class and Trending badge
-        self.assertIn('badge-glowing', html)
-        self.assertIn('⚡ Trending', html)
+        # Quick chips popular filter is hidden for now
+        self.assertNotIn('id="quick-popular-chip"', html)
+        self.assertNotIn('class="btn-upvote"', html)
 
     def test_server_upvotes_api(self):
         """Server API /api/upvotes and /api/upvote must correctly manage vote counts."""
