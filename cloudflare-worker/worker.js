@@ -8,12 +8,78 @@ export default {
   async fetch(request, env, ctx) {
     const corsHeaders = {
       "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
     };
 
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: corsHeaders });
+    }
+
+    const url = new URL(request.url);
+
+    // 1. Upvotes API (GET /api/upvotes)
+    if (url.pathname === "/api/upvotes" && request.method === "GET") {
+      let upvotes = {};
+      if (env.UPVOTES) {
+        try {
+          const stored = await env.UPVOTES.get("upvotes_map", { type: "json" });
+          if (stored && typeof stored === "object") upvotes = stored;
+        } catch (_) {}
+      }
+      return new Response(JSON.stringify(upvotes), {
+        status: 200,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    // 2. Upvote action (POST /api/upvote)
+    if (url.pathname === "/api/upvote" && request.method === "POST") {
+      try {
+        const body = await request.json();
+        const evId = body.id;
+        const action = body.action || "add";
+        if (!evId || typeof evId !== "string") {
+          return new Response(JSON.stringify({ error: "Missing event id" }), {
+            status: 400,
+            headers: { "Content-Type": "application/json", ...corsHeaders },
+          });
+        }
+
+        let votes = (action === "remove") ? 0 : 1;
+        if (env.UPVOTES) {
+          let map = {};
+          try {
+            const raw = await env.UPVOTES.get("upvotes_map", { type: "json" });
+            if (raw && typeof raw === "object") map = raw;
+          } catch (_) {}
+
+          const current = parseInt(map[evId] || "0", 10);
+          if (action === "remove") {
+            votes = Math.max(0, current - 1);
+          } else {
+            votes = current + 1;
+          }
+
+          if (votes === 0) {
+            delete map[evId];
+          } else {
+            map[evId] = votes;
+          }
+
+          await env.UPVOTES.put("upvotes_map", JSON.stringify(map));
+        }
+
+        return new Response(JSON.stringify({ success: true, id: evId, votes }), {
+          status: 200,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        });
+      } catch (err) {
+        return new Response(JSON.stringify({ error: err.message }), {
+          status: 500,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        });
+      }
     }
 
     if (request.method !== "POST") {

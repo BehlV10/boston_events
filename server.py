@@ -46,6 +46,37 @@ PORT = int(os.environ.get("PORT", 3000))
 app = Flask(__name__)
 
 
+UPVOTES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "upvotes.json")
+
+
+def _read_upvotes():
+    if os.path.exists(UPVOTES_FILE):
+        try:
+            with open(UPVOTES_FILE, "r") as f:
+                data = json.load(f)
+                if isinstance(data, dict):
+                    return data
+        except Exception:
+            pass
+    return {}
+
+
+def _write_upvotes(data):
+    try:
+        with open(UPVOTES_FILE, "w") as f:
+            json.dump(data, f, indent=2)
+    except Exception as e:
+        print(f"Error saving upvotes: {e}")
+
+
+@app.after_request
+def add_cors_headers(response):
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    return response
+
+
 @app.get("/banner.jpg")
 @app.get("/static/banner.jpg")
 def banner_img():
@@ -62,6 +93,35 @@ def api_events():
     return jsonify(get_all_events(force="refresh" in request.args))
 
 
+@app.get("/api/upvotes")
+def api_get_upvotes():
+    return jsonify(_read_upvotes())
+
+
+@app.post("/api/upvote")
+def api_post_upvote():
+    body = request.get_json(silent=True) or {}
+    ev_id = body.get("id")
+    action = body.get("action", "add")
+    if not ev_id or not isinstance(ev_id, str):
+        return jsonify({"error": "Missing or invalid event id"}), 400
+
+    data = _read_upvotes()
+    current = int(data.get(ev_id, 0))
+    if action == "remove":
+        new_votes = max(0, current - 1)
+    else:
+        new_votes = current + 1
+
+    if new_votes == 0:
+        data.pop(ev_id, None)
+    else:
+        data[ev_id] = new_votes
+
+    _write_upvotes(data)
+    return jsonify({"success": True, "id": ev_id, "votes": new_votes})
+
+
 def export_json(path):
     """Run all scrapers and write a single JSON bundle for the static frontend."""
     payload = {
@@ -69,6 +129,7 @@ def export_json(path):
         "venues": get_all_events(force=True),
         "weather": fetch_boston_weather(),
         "luckyseat": fetch_luckyseat_boston(),
+        "upvotes": _read_upvotes(),
     }
     with open(path, "w") as f:
         json.dump(payload, f, separators=(",", ":"))

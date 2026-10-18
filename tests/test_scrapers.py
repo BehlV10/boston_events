@@ -16,7 +16,7 @@ if BASE_DIR not in sys.path:
 
 from scrapers import _ALL_VENUES, VENUES, UA_CHROME
 from venues_geo import VENUE_COORDINATES, MIN_LAT, MAX_LAT, MIN_LNG, MAX_LNG, resolve_event_geo
-from template import render_page, SUBAREAS_BY_CITY, resolve_subarea, _event_city
+from template import render_page, SUBAREAS_BY_CITY, resolve_subarea, _event_city, _event_stable_id
 from scripts.add_community_event import validate_and_normalize as validate_event
 from scripts.add_suggested_venue import validate_and_normalize as validate_venue
 
@@ -198,6 +198,113 @@ class TestBostonEvents(unittest.TestCase):
                         f"Event '{e.get('name')}' at '{e.get('venue')}' produced unmapped slug '{sslug}' in '{city}'"
                     )
             self.assertGreater(total_events, 5000, "Expected at least 5000 events in events.json")
+
+    def test_event_stable_id(self):
+        """_event_stable_id must produce deterministic IDs starting with 'ev_'."""
+        e1 = {"name": "Jazz Brunch", "venue": "The Beehive", "date": "2026-10-25T11:00:00"}
+        e2 = {"name": "jazz brunch", "venue": "the beehive", "date": "2026-10-25T19:00:00"}
+        e3 = {"name": "Rock Show", "venue": "The Sinclair", "date": "2026-10-25T20:00:00"}
+
+        id1 = _event_stable_id(e1)
+        id2 = _event_stable_id(e2)
+        id3 = _event_stable_id(e3)
+
+        self.assertTrue(id1.startswith("ev_"))
+        self.assertEqual(id1, id2, "Identical normalized title, venue, and date must generate identical ID")
+        self.assertNotEqual(id1, id3, "Different events must have different IDs")
+
+    def test_upvoting_rendering_and_thresholds(self):
+        """render_page must render upvote buttons and popular/glowing badges based on vote thresholds."""
+        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        mock_venues = [
+            {
+                "venue": "The Burren",
+                "url": "https://burren.com",
+                "error": None,
+                "events": [
+                    {
+                        "name": "Normal Event",
+                        "venue": "The Burren",
+                        "date": f"{today}T18:00:00",
+                        "price": "Free",
+                        "url": "https://burren.com/e1",
+                        "votes": 0,
+                    },
+                    {
+                        "name": "Popular Event",
+                        "venue": "The Burren",
+                        "date": f"{today}T20:00:00",
+                        "price": "$10",
+                        "url": "https://burren.com/e2",
+                        "votes": 3,
+                    },
+                    {
+                        "name": "Glowing Event",
+                        "venue": "The Burren",
+                        "date": f"{today}T22:00:00",
+                        "price": "$15",
+                        "url": "https://burren.com/e3",
+                        "votes": 6,
+                    },
+                ],
+            }
+        ]
+        html = render_page(mock_venues)
+
+        # Quick chips popular filter present
+        self.assertIn('id="quick-popular-chip"', html)
+        self.assertIn("Popular (3+)", html)
+
+        # Upvote buttons present
+        self.assertIn('class="btn-upvote"', html)
+        self.assertIn('class="upvote-arrow"', html)
+
+        # Threshold checks:
+        # 3 votes -> popular class and Popular badge
+        self.assertIn('badge-popular', html)
+        self.assertIn('🔥 Popular', html)
+
+        # 6 votes -> glowing class and Trending badge
+        self.assertIn('badge-glowing', html)
+        self.assertIn('⚡ Trending', html)
+
+    def test_server_upvotes_api(self):
+        """Server API /api/upvotes and /api/upvote must correctly manage vote counts."""
+        from server import app, UPVOTES_FILE
+        client = app.test_client()
+
+        # GET /api/upvotes
+        resp = client.get("/api/upvotes")
+        self.assertEqual(resp.status_code, 200)
+        self.assertIsInstance(resp.get_json(), dict)
+
+        test_id = "ev_test_unittest_99"
+
+        # POST /api/upvote add
+        resp_add = client.post("/api/upvote", json={"id": test_id, "action": "add"})
+        self.assertEqual(resp_add.status_code, 200)
+        data_add = resp_add.get_json()
+        self.assertTrue(data_add["success"])
+        self.assertGreaterEqual(data_add["votes"], 1)
+
+        # POST /api/upvote remove
+        resp_rem = client.post("/api/upvote", json={"id": test_id, "action": "remove"})
+        self.assertEqual(resp_rem.status_code, 200)
+        data_rem = resp_rem.get_json()
+        self.assertTrue(data_rem["success"])
+
+        # Clean up test entry if present in upvotes.json
+        if os.path.exists(UPVOTES_FILE):
+            import json
+            try:
+                with open(UPVOTES_FILE, "r") as f:
+                    u_data = json.load(f)
+                if test_id in u_data:
+                    del u_data[test_id]
+                    with open(UPVOTES_FILE, "w") as f:
+                        json.dump(u_data, f, indent=2)
+            except Exception:
+                pass
 
 
 if __name__ == "__main__":

@@ -1,6 +1,8 @@
 """Boston Events — HTML rendering and template logic."""
 
+import hashlib
 import json
+import os
 import re
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
@@ -364,6 +366,24 @@ def _is_event_free(e):
 
     return False
 
+
+def _event_stable_id(e):
+    title = (e.get("name") or "").strip().lower()
+    venue = (e.get("venue") or e.get("_source_venue") or "").strip().lower()
+    date_str = (e.get("date") or "")[:10]
+    raw = f"{venue}|{title}|{date_str}"
+    return "ev_" + hashlib.md5(raw.encode("utf-8")).hexdigest()[:12]
+
+
+def _load_upvotes_map():
+    upvotes_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "upvotes.json")
+    if os.path.exists(upvotes_file):
+        try:
+            with open(upvotes_file, "r") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return {}
 
 
 def _build_gcal_link(e, title, venue, city):
@@ -830,8 +850,10 @@ def render_page(results):
     dated, tba, ongoing = group_by_date(results)
     recurring_keys = compute_recurring(dated)
     total = sum(len(v) for _, v in dated) + len(tba)
-    failed = [r for r in results if r["error"]]
+    failed = [r for r in results if r.get("error")]
     all_venue_names = [r["venue"] for r in results]
+
+    upvotes_map = _load_upvotes_map()
 
     weather = fetch_boston_weather()
     weather_pill_html = ""
@@ -936,16 +958,34 @@ def render_page(results):
             cal_actions.append(f'<button type="button" class="cal-btn ics-btn" data-title="{escape(raw_title)}" data-date="{escape(e["date"])}" data-venue="{escape(venue)}" data-url="{escape(e.get("url") or "")}" title="Download .ics for Apple/Outlook">+ .ics</button>')
         cal_html = f'<span class="cal-links">{" ".join(cal_actions)}</span>' if cal_actions else ""
 
+        ev_id = _event_stable_id(e)
+        votes = int(e.get("upvotes") or e.get("votes") or upvotes_map.get(ev_id, 0))
+        ev_classes = ["event"]
+        pop_badge = ""
+        if votes >= 5:
+            ev_classes.append("glowing")
+            pop_badge = '<span class="badge-glowing">⚡ Trending</span>'
+        elif votes >= 3:
+            ev_classes.append("popular")
+            pop_badge = '<span class="badge-popular">🔥 Popular</span>'
+        badge_prefix = f"{pop_badge} " if pop_badge else ""
+
         raw_desc = (e.get("description") or "").replace("***", "").replace("**", "").replace("__", "").replace("`", "").strip()
         desc = raw_desc[:180]
         desc_html = f'<div class="desc">{escape(desc)}</div>' if desc else ""
         free_flag = "true" if is_free else "false"
         epoch_attr = f' data-epoch="{int(e["_time"].timestamp())}"' if e.get("_time") else ''
-        return f'''<li class="event" data-cat="{escape(cat)}" data-bucket="{escape(bucket)}" data-venue="{escape(source)}" data-city="{escape(city)}"{sub_attrs} data-recur="{recur_flag}" data-free="{free_flag}"{epoch_attr}{geo_attrs}>
+        return f'''<li class="{' '.join(ev_classes)}" data-cat="{escape(cat)}" data-bucket="{escape(bucket)}" data-venue="{escape(source)}" data-city="{escape(city)}"{sub_attrs} data-recur="{recur_flag}" data-free="{free_flag}"{epoch_attr}{geo_attrs} data-event-id="{ev_id}" data-votes="{votes}">
           <div class="when">{escape(format_when(e))}</div>
           <div class="what">{link}{price_tag}{recur_badge}
-            <div class="venue-tag">{cat_tag}{f" · {venue_html}" if venue_html else ""}{sub_tag}{extra_html}{cal_html}</div>
+            <div class="venue-tag">{badge_prefix}{cat_tag}{f" · {venue_html}" if venue_html else ""}{sub_tag}{extra_html}{cal_html}</div>
             {desc_html}
+          </div>
+          <div class="vote-wrap">
+            <button type="button" class="btn-upvote" data-id="{ev_id}" aria-label="Upvote this event" title="Upvote event">
+              <span class="upvote-arrow">▲</span>
+              <span class="upvote-count">{votes}</span>
+            </button>
           </div>
         </li>'''
 
@@ -1528,11 +1568,28 @@ def render_page(results):
     font-weight: 700;
     box-shadow: 0 2px 10px var(--accent-glow);
   }}
+  .chip-popular {{
+    color: #f29e4c;
+    border-color: rgba(242, 158, 76, 0.4);
+    background: rgba(242, 158, 76, 0.08);
+    margin-left: auto;
+  }}
+  .chip-popular:hover {{
+    background: rgba(242, 158, 76, 0.16);
+    border-color: #f29e4c;
+    color: #ffd866;
+  }}
+  .chip-popular.active {{
+    background: linear-gradient(135deg, #f29e4c 0%, #ffd866 100%);
+    color: #0c0e14;
+    border-color: #ffd866;
+    font-weight: 700;
+    box-shadow: 0 2px 10px rgba(242, 158, 76, 0.35);
+  }}
   .chip-free {{
     color: var(--green);
     border-color: var(--green-border);
     background: var(--green-bg);
-    margin-left: auto;
   }}
   .chip-free.active {{
     background: var(--green);
@@ -1570,7 +1627,8 @@ def render_page(results):
     border: 1px solid rgba(255, 255, 255, 0.04);
     margin-bottom: 6px;
     display: grid;
-    grid-template-columns: 78px minmax(0, 1fr);
+    grid-template-columns: 78px minmax(0, 1fr) auto;
+    align-items: start;
     gap: 12px;
     font-size: 14px;
     min-width: 0;
@@ -1581,6 +1639,133 @@ def render_page(results):
     border-color: rgba(93, 155, 255, 0.3);
     transform: translateY(-1px);
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+  }}
+
+  /* Upvote Button & Vote Wrap */
+  .vote-wrap {{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 1px;
+    min-width: 40px;
+  }}
+  .btn-upvote {{
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 38px;
+    padding: 4px 6px;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    line-height: 1.15;
+    transition: all 0.15s ease;
+    user-select: none;
+    -webkit-user-select: none;
+  }}
+  .btn-upvote:hover {{
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--accent);
+    color: var(--fg);
+    transform: translateY(-1px);
+  }}
+  .btn-upvote .upvote-arrow {{
+    font-size: 10px;
+    line-height: 1;
+    margin-bottom: 2px;
+    transition: transform 0.15s ease;
+  }}
+  .btn-upvote:hover .upvote-arrow {{
+    transform: translateY(-1px);
+    color: var(--accent);
+  }}
+  .btn-upvote.voted {{
+    background: rgba(255, 216, 102, 0.14);
+    border-color: #ffd866;
+    color: #ffd866;
+    box-shadow: 0 0 10px rgba(255, 216, 102, 0.25);
+  }}
+  .btn-upvote.voted .upvote-arrow {{
+    color: #ffd866;
+  }}
+  .btn-upvote.anim-bounce {{
+    animation: upvote-pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }}
+  @keyframes upvote-pop {{
+    0% {{ transform: scale(1); }}
+    50% {{ transform: scale(1.22); }}
+    100% {{ transform: scale(1); }}
+  }}
+
+  /* Popular State (3 to 4 votes) */
+  .event.popular {{
+    border-color: rgba(242, 158, 76, 0.38);
+    background: rgba(242, 158, 76, 0.025);
+  }}
+  .event.popular .btn-upvote {{
+    border-color: rgba(242, 158, 76, 0.45);
+    color: #f29e4c;
+  }}
+  .badge-popular {{
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    background: rgba(242, 158, 76, 0.15);
+    border: 1px solid rgba(242, 158, 76, 0.4);
+    color: #f29e4c;
+    vertical-align: middle;
+  }}
+
+  /* Glowing State (5+ votes) */
+  .event.glowing {{
+    border-color: rgba(255, 216, 102, 0.65);
+    background: linear-gradient(135deg, rgba(255, 216, 102, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
+    box-shadow: 0 0 18px rgba(255, 216, 102, 0.2), 0 2px 10px rgba(0, 0, 0, 0.3);
+    position: relative;
+  }}
+  .event.glowing:hover {{
+    border-color: rgba(255, 216, 102, 0.9);
+    box-shadow: 0 0 26px rgba(255, 216, 102, 0.35), 0 4px 16px rgba(0, 0, 0, 0.4);
+  }}
+  .event.glowing .btn-upvote {{
+    background: linear-gradient(135deg, rgba(255, 216, 102, 0.22) 0%, rgba(242, 158, 76, 0.22) 100%);
+    border-color: #ffd866;
+    color: #ffd866;
+    box-shadow: 0 0 12px rgba(255, 216, 102, 0.45);
+  }}
+  .badge-glowing {{
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: linear-gradient(135deg, #ffd866 0%, #f29e4c 100%);
+    color: #0c0e14;
+    border: none;
+    box-shadow: 0 0 10px rgba(255, 216, 102, 0.5);
+    vertical-align: middle;
+    animation: badge-pulse-glow 2.5s infinite;
+  }}
+  @keyframes badge-pulse-glow {{
+    0%, 100% {{ box-shadow: 0 0 8px rgba(255, 216, 102, 0.4); transform: scale(1); }}
+    50% {{ box-shadow: 0 0 16px rgba(255, 216, 102, 0.7); transform: scale(1.03); }}
   }}
   .when {{ color: var(--muted); font-size: 12px; font-variant-numeric: tabular-nums; padding-top: 2px; font-weight: 500; }}
   .what {{ min-width: 0; overflow-wrap: break-word; word-break: break-word; }}
@@ -2301,7 +2486,7 @@ def render_page(results):
       padding: 5px 12px;
       font-size: 12px;
     }}
-    .chip-free {{ margin-left: 0; }}
+    .chip-free, .chip-popular {{ margin-left: 0; }}
 
     .week-nav {{
       justify-content: space-between;
@@ -2771,6 +2956,7 @@ def render_page(results):
         <button type="button" class="chip" data-time="weekend">🎉 This Weekend</button>
         <button type="button" class="chip" data-time="week">📅 Next 7 Days</button>
         <button type="button" class="chip" data-time="all">All Upcoming</button>
+        <button type="button" class="chip chip-popular" id="quick-popular-chip" title="Show only popular events with 3+ votes">🔥 Popular (3+)</button>
         <button type="button" class="chip chip-free" id="quick-free-chip">✨ Free Only</button>
       </div>
       <div class="week-nav" id="week-nav">
@@ -3069,6 +3255,10 @@ def render_page(results):
     let renderedSubareaCity = null;
     const quickChips = document.querySelectorAll('#quick-chips .chip[data-time]');
     const quickFreeChip = document.getElementById('quick-free-chip');
+    const quickPopularChip = document.getElementById('quick-popular-chip');
+    let popularOnly = false;
+    let userUpvotes = new Set();
+    let cachedVotes = {{}};
     let timeFilter = 'today';
     let currentView = 'list';
     let showPastToday = false;
@@ -3508,6 +3698,9 @@ def render_page(results):
       if (quickFreeChip) {{
         quickFreeChip.classList.toggle('active', freeOnlyChk ? freeOnlyChk.checked : false);
       }}
+      if (quickPopularChip) {{
+        quickPopularChip.classList.toggle('active', popularOnly);
+      }}
     }}
 
     function renderSubareaChips(city) {{
@@ -3600,7 +3793,7 @@ def render_page(results):
       const allRecurs = recurBoxes.length;
       const chkRecurs = Array.from(recurBoxes).filter(b => b.checked).length;
       const isFree = freeOnlyChk && freeOnlyChk.checked;
-      const isFiltered = (chkCats < allCats) || (chkVenues < allVenues) || (chkCities < allCities) || (chkRecurs < allRecurs) || isFree || (activeSubarea !== 'all') || (searchInput && !!searchInput.value.trim());
+      const isFiltered = (chkCats < allCats) || (chkVenues < allVenues) || (chkCities < allCities) || (chkRecurs < allRecurs) || isFree || popularOnly || (activeSubarea !== 'all') || (searchInput && !!searchInput.value.trim());
 
       if (mobileBadge) {{
         mobileBadge.textContent = isFiltered ? 'Active' : 'All';
@@ -3650,6 +3843,7 @@ def render_page(results):
       if (checkedVenues.length > 0 && checkedVenues.length < allVenues.length) params.set('venues', checkedVenues.join(';'));
 
       if (freeOnlyChk && freeOnlyChk.checked) params.set('free', '1');
+      if (popularOnly) params.set('pop', '1');
 
       if (timeFilter !== 'today') params.set('t', timeFilter);
       if ((timeFilter === 'day' || timeFilter === 'week') && fmtISO(anchor) !== todayISO) {{
@@ -3669,6 +3863,7 @@ def render_page(results):
       if (params) {{
         if (params.has('q')) searchInput.value = params.get('q');
         if (params.get('free') === '1' && freeOnlyChk) freeOnlyChk.checked = true;
+        if (params.get('pop') === '1') popularOnly = true;
         if (params.get('past') === '1') showPastToday = true;
         if (params.get('v') === 'map') {{
           switchView('map');
@@ -3773,6 +3968,7 @@ def render_page(results):
         const cityOk = cities.has(li.dataset.city);
         const subareaOk = (activeSubarea === 'all') || (li.dataset.subarea === activeSubarea);
         const freeOk = !freeOnly || li.dataset.free === 'true';
+        const popularOk = !popularOnly || parseInt(li.dataset.votes || '0', 10) >= 3;
         const searchOk = !searchText || li.textContent.toLowerCase().includes(searchText);
 
         const daySec = li.closest('.day');
@@ -3797,7 +3993,7 @@ def render_page(results):
           }}
         }}
 
-        const isVisible = catOk && venueOk && recurOk && cityOk && subareaOk && searchOk && freeOk && timePastOk;
+        const isVisible = catOk && venueOk && recurOk && cityOk && subareaOk && searchOk && freeOk && timePastOk && popularOk;
         li.classList.toggle('hidden', !isVisible);
 
         if (isToday && isVisible && !isPast) {{
@@ -4021,6 +4217,13 @@ def render_page(results):
       }});
     }}
 
+    if (quickPopularChip) {{
+      quickPopularChip.addEventListener('click', () => {{
+        popularOnly = !popularOnly;
+        apply();
+      }});
+    }}
+
     document.addEventListener('keydown', (e) => {{
       if ((e.key === '/' || ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k')) &&
           document.activeElement !== searchInput &&
@@ -4141,6 +4344,7 @@ def render_page(results):
     function resetAllFilters() {{
       if (searchInput) searchInput.value = '';
       if (freeOnlyChk) freeOnlyChk.checked = false;
+      popularOnly = false;
       activeSubarea = 'all';
       catBoxes.forEach(b => b.checked = true);
       cityBoxes.forEach(b => b.checked = true);
@@ -4451,6 +4655,149 @@ def render_page(results):
       }});
     }}
 
+    function loadUpvoteState() {{
+      try {{
+        const saved = JSON.parse(localStorage.getItem('boston_user_upvotes') || '[]');
+        if (Array.isArray(saved)) userUpvotes = new Set(saved);
+      }} catch (_) {{}}
+      try {{
+        const cv = JSON.parse(localStorage.getItem('boston_cached_votes') || '{{}}');
+        if (cv && typeof cv === 'object') cachedVotes = cv;
+      }} catch (_) {{}}
+    }}
+
+    function applyVoteToCard(li, count, hasVoted) {{
+      li.dataset.votes = String(count);
+      const btn = li.querySelector('.btn-upvote');
+      if (btn) {{
+        btn.classList.toggle('voted', !!hasVoted);
+        btn.setAttribute('aria-pressed', hasVoted ? 'true' : 'false');
+        const cntSpan = btn.querySelector('.upvote-count');
+        if (cntSpan) cntSpan.textContent = String(count);
+      }}
+      li.classList.toggle('popular', count >= 3 && count < 5);
+      li.classList.toggle('glowing', count >= 5);
+
+      const venueTag = li.querySelector('.venue-tag');
+      if (venueTag) {{
+        let pBadge = venueTag.querySelector('.badge-popular, .badge-glowing');
+        if (count >= 5) {{
+          if (!pBadge) {{
+            pBadge = document.createElement('span');
+            venueTag.prepend(pBadge);
+          }}
+          pBadge.className = 'badge-glowing';
+          pBadge.textContent = '⚡ Trending';
+        }} else if (count >= 3) {{
+          if (!pBadge) {{
+            pBadge = document.createElement('span');
+            venueTag.prepend(pBadge);
+          }}
+          pBadge.className = 'badge-popular';
+          pBadge.textContent = '🔥 Popular';
+        }} else if (pBadge) {{
+          pBadge.remove();
+        }}
+      }}
+    }}
+
+    function syncInitialUpvotes() {{
+      document.querySelectorAll('.event[data-event-id]').forEach(li => {{
+        const evId = li.dataset.eventId;
+        let count = parseInt(li.dataset.votes || '0', 10);
+        if (cachedVotes[evId] !== undefined) {{
+          count = Math.max(count, cachedVotes[evId]);
+        }}
+        const hasVoted = userUpvotes.has(evId);
+        applyVoteToCard(li, count, hasVoted);
+      }});
+    }}
+
+    async function handleUpvoteClick(btn) {{
+      const li = btn.closest('.event');
+      if (!li) return;
+      const evId = btn.dataset.id || li.dataset.eventId;
+      if (!evId) return;
+
+      let currentVotes = parseInt(li.dataset.votes || '0', 10);
+      const wasVoted = userUpvotes.has(evId);
+
+      btn.classList.remove('anim-bounce');
+      void btn.offsetWidth;
+      btn.classList.add('anim-bounce');
+      setTimeout(() => btn.classList.remove('anim-bounce'), 350);
+
+      let newVotes;
+      if (wasVoted) {{
+        userUpvotes.delete(evId);
+        newVotes = Math.max(0, currentVotes - 1);
+      }} else {{
+        userUpvotes.add(evId);
+        newVotes = currentVotes + 1;
+      }}
+
+      cachedVotes[evId] = newVotes;
+      try {{
+        localStorage.setItem('boston_user_upvotes', JSON.stringify(Array.from(userUpvotes)));
+        localStorage.setItem('boston_cached_votes', JSON.stringify(cachedVotes));
+      }} catch (_) {{}}
+
+      applyVoteToCard(li, newVotes, !wasVoted);
+      if (popularOnly) {{
+        apply();
+      }}
+
+      try {{
+        const resp = await fetch('/api/upvote', {{
+          method: 'POST',
+          headers: {{ 'Content-Type': 'application/json' }},
+          body: JSON.stringify({{ id: evId, action: wasVoted ? 'remove' : 'add' }})
+        }});
+        if (resp.ok) {{
+          const data = await resp.json();
+          if (typeof data.votes === 'number') {{
+            cachedVotes[evId] = data.votes;
+            try {{ localStorage.setItem('boston_cached_votes', JSON.stringify(cachedVotes)); }} catch (_) {{}}
+            applyVoteToCard(li, data.votes, !wasVoted);
+            if (popularOnly) apply();
+          }}
+        }}
+      }} catch (err) {{
+        console.warn('Upvote sync failed:', err);
+      }}
+    }}
+
+    async function fetchLiveUpvotes() {{
+      try {{
+        const resp = await fetch('/api/upvotes');
+        if (!resp.ok) return;
+        const data = await resp.json();
+        if (!data || typeof data !== 'object') return;
+        let changed = false;
+        document.querySelectorAll('.event[data-event-id]').forEach(li => {{
+          const evId = li.dataset.eventId;
+          if (data[evId] !== undefined) {{
+            const serverCount = data[evId];
+            cachedVotes[evId] = serverCount;
+            const hasVoted = userUpvotes.has(evId);
+            applyVoteToCard(li, serverCount, hasVoted);
+            changed = true;
+          }}
+        }});
+        try {{ localStorage.setItem('boston_cached_votes', JSON.stringify(cachedVotes)); }} catch (_) {{}}
+        if (changed && popularOnly) apply();
+      }} catch (_) {{}}
+    }}
+
+    document.addEventListener('click', (e) => {{
+      const btn = e.target.closest('.btn-upvote');
+      if (btn) {{
+        e.preventDefault();
+        e.stopPropagation();
+        handleUpvoteClick(btn);
+      }}
+    }});
+
     function injectUserEventIntoDOM(ev) {{
       const dateKey = (ev.date || todayISO).slice(0, 10);
       let daySection = document.querySelector(`.day[data-date="${{dateKey}}"]`);
@@ -4487,6 +4834,20 @@ def render_page(results):
       const priceTag = ev.price ? `<span class="price ticketed">${{escapeHTML(ev.price)}}</span>` : '<span class="price free">Free</span>';
       const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${{encodeURIComponent(ev.venue + ', MA')}}`;
 
+      let evId = ev.id;
+      if (!evId) {{
+        const raw = `${{ev.venue || ''}}|${{ev.name || ''}}|${{dateKey}}`.toLowerCase();
+        let hash = 0;
+        for (let i = 0; i < raw.length; i++) {{
+          hash = ((hash << 5) - hash) + raw.charCodeAt(i);
+          hash |= 0;
+        }}
+        evId = 'ev_' + (hash >>> 0).toString(16);
+      }}
+
+      const votes = cachedVotes[evId] || 0;
+      const hasVoted = userUpvotes.has(evId);
+
       const li = document.createElement('li');
       li.className = 'event';
       li.dataset.cat = ev.category || 'other';
@@ -4495,8 +4856,11 @@ def render_page(results):
       li.dataset.city = city;
       li.dataset.recur = 'once';
       li.dataset.free = (!ev.price || ev.price.toLowerCase().includes('free')) ? 'true' : 'false';
+      li.dataset.eventId = evId;
+      li.dataset.votes = String(votes);
+
       li.innerHTML = `
-        <span class="time">${{timeStr}}</span>
+        <div class="when">${{timeStr}}</div>
         <div class="what">
           <a href="${{escapeHTML(ev.url || '#')}}" target="_blank" rel="noopener">${{escapeHTML(ev.name)}}</a>
           ${{priceTag}}
@@ -4506,9 +4870,16 @@ def render_page(results):
             <span class="badge-community">👤 Community</span>
           </div>
         </div>
+        <div class="vote-wrap">
+          <button type="button" class="btn-upvote${{hasVoted ? ' voted' : ''}}" data-id="${{evId}}" aria-label="Upvote this event" title="Upvote event" aria-pressed="${{hasVoted ? 'true' : 'false'}}">
+            <span class="upvote-arrow">▲</span>
+            <span class="upvote-count">${{votes}}</span>
+          </button>
+        </div>
       `;
 
       targetUl.prepend(li);
+      applyVoteToCard(li, votes, hasVoted);
     }}
 
     function escapeHTML(str) {{
@@ -4757,7 +5128,10 @@ def render_page(results):
       }});
     }}
 
+    loadUpvoteState();
     loadLocalCommunityEvents();
+    syncInitialUpvotes();
+    fetchLiveUpvotes();
 
     hashToState();
     apply();
