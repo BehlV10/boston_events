@@ -655,6 +655,127 @@ class TestBostonEvents(unittest.TestCase):
             self.assertEqual(bebop_events[0]["price"], "Free")
             self.assertEqual(bebop_events[0]["category"], "music")
 
+        # 3. Test Ticketmaster Discovery API scraper
+        from scrapers import (
+            scrape_ticketmaster_discovery,
+            scrape_ticketweb,
+            scrape_trumba,
+            scrape_squarespace,
+        )
+
+        mock_tm_discovery = {
+            "_embedded": {
+                "events": [
+                    {
+                        "name": "Interpol - Antics 20th Anniversary Tour",
+                        "url": "https://www.ticketmaster.com/event/01006095AABBCCDD",
+                        "dates": {
+                            "start": {
+                                "localDate": "2026-11-15",
+                                "localTime": "19:00:00",
+                            }
+                        },
+                        "priceRanges": [
+                            {"min": 45.0, "max": 75.0}
+                        ],
+                        "_embedded": {
+                            "venues": [{"name": "Paradise Rock Club"}]
+                        }
+                    }
+                ]
+            }
+        }
+        with patch("scrapers._SESSION.get") as mock_get:
+            mock_resp = MagicMock()
+            mock_resp.status_code = 200
+            mock_resp.json.return_value = mock_tm_discovery
+            mock_get.return_value = mock_resp
+
+            tm_events = scrape_ticketmaster_discovery("https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZpZA11JtA", "TestUA")
+            self.assertEqual(len(tm_events), 1)
+            self.assertEqual(tm_events[0]["name"], "Interpol - Antics 20th Anniversary Tour")
+            self.assertEqual(tm_events[0]["venue"], "Paradise Rock Club")
+            self.assertEqual(tm_events[0]["price"], "$45-$75")
+
+        # 4. Test TicketWeb LD+JSON scraper
+        mock_tw_html = """
+        <html><head>
+        <script type="application/ld+json">
+        [
+          {
+            "@type": "MusicEvent",
+            "name": "The Lemonheads Live at Sonia",
+            "startDate": "2026-11-20T20:00",
+            "url": "https://www.ticketweb.com/event/lemonheads-sonia-tickets/123456",
+            "location": {"name": "Sonia"}
+          }
+        ]
+        </script>
+        </head><body></body></html>
+        """
+        with patch("scrapers._SESSION.get") as mock_get:
+            mock_resp = MagicMock()
+            mock_resp.status_code = 200
+            mock_resp.text = mock_tw_html
+            mock_get.return_value = mock_resp
+
+            tw_events = scrape_ticketweb("https://www.ticketweb.com/venue/sonia-cambridge-ma/435615", "TestUA")
+            self.assertEqual(len(tw_events), 1)
+            self.assertEqual(tw_events[0]["name"], "The Lemonheads Live at Sonia")
+            self.assertEqual(tw_events[0]["venue"], "Sonia")
+
+        # 5. Test Trumba feed scraper (Tufts / NEC)
+        mock_trumba_json = [
+            {
+                "title": "Tufts Wind Ensemble Fall Concert",
+                "startDateTime": "2026-11-18T20:00:00",
+                "permaLinkUrl": "https://as.tufts.edu/music/events/fall-concert",
+                "location": "Granoff Music Center"
+            }
+        ]
+        with patch("scrapers._SESSION.get") as mock_get:
+            mock_resp = MagicMock()
+            mock_resp.status_code = 200
+            mock_resp.json.return_value = mock_trumba_json
+            mock_get.return_value = mock_resp
+
+            trumba_events = scrape_trumba("https://www.trumba.com/calendars/tts-wms-managed-music.json", "TestUA")
+            self.assertEqual(len(trumba_events), 1)
+            self.assertEqual(trumba_events[0]["name"], "Tufts Wind Ensemble Fall Concert")
+            self.assertEqual(trumba_events[0]["venue"], "Granoff Music Center")
+
+        # 6. Test Squarespace scraper (Remnant Satellite / Portico)
+        mock_sq_json = {
+            "upcoming": [
+                {
+                    "title": "Jazz Jam Session at Satellite",
+                    "startDate": 1793462400000,
+                    "fullUrl": "/live/jazz-jam-session",
+                }
+            ]
+        }
+        with patch("scrapers._SESSION.get") as mock_get:
+            mock_resp = MagicMock()
+            mock_resp.status_code = 200
+            mock_resp.json.return_value = mock_sq_json
+            mock_get.return_value = mock_resp
+
+            sq_events = scrape_squarespace("https://www.remnantsomerville.com/live", "TestUA")
+            self.assertEqual(len(sq_events), 1)
+            self.assertEqual(sq_events[0]["name"], "Jazz Jam Session at Satellite")
+            self.assertIn("remnantsomerville.com", sq_events[0]["url"])
+
+        # 7. Verify all newly added venues exist in _ALL_VENUES
+        for target in [
+            "Paradise Rock Club", "Brighton Music Hall", "MGM Music Hall at Fenway",
+            "Citizens House of Blues Boston", "Orpheum Theatre", "Leader Bank Pavilion",
+            "Chevalier Theatre", "Sonia", "Scullers Jazz Club", "Regattabar",
+            "Off the Rails Boston", "Mr. Dooley's", "The Green Dragon Tavern",
+            "Hennessy's Bar", "UnCommon Corner", "Roundhead Brewing",
+            "Tufts Music (Granoff Music Center)", "Remnant Satellite", "Portico Brewing"
+        ]:
+            self.assertIn(target, venue_names, f"Missing {target} in _ALL_VENUES")
+
 
 if __name__ == "__main__":
     unittest.main()

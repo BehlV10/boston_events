@@ -9,7 +9,7 @@ import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timedelta, timezone
-from urllib.parse import quote, urljoin
+from urllib.parse import quote, urljoin, urlparse
 from zoneinfo import ZoneInfo
 
 import requests
@@ -5463,7 +5463,256 @@ def scrape_the_bebop(url, ua):
     return events
 
 
+def scrape_ticketmaster_discovery(url, ua):
+    """Scrape official events from Ticketmaster Discovery API.
+
+    Supports venueId queries for major Boston music halls and venues
+    (Paradise Rock Club, Brighton Music Hall, MGM Music Hall, House of Blues,
+    Orpheum Theatre, Leader Bank Pavilion, Chevalier Theatre).
+    """
+    api_url = url
+    if "apikey=" not in api_url:
+        sep = "&" if "?" in api_url else "?"
+        api_url = f"{api_url}{sep}apikey=oo1qd0wzLe7WJpm61ALQuUCTMXGK7U5z"
+
+    try:
+        resp = _SESSION.get(
+            api_url,
+            headers={"User-Agent": ua or UA_CHROME, "Accept": "application/json"},
+            timeout=15,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+    except Exception:
+        return []
+
+    raw_events = data.get("_embedded", {}).get("events", [])
+    now = datetime.now(EASTERN)
+    events = []
+    seen = set()
+
+    for ev in raw_events:
+        name = (ev.get("name") or "").strip()
+        if not name or is_placeholder_or_closed_event(name):
+            continue
+
+        start_date = ev.get("dates", {}).get("start", {}).get("localDate")
+        start_time = ev.get("dates", {}).get("start", {}).get("localTime") or "19:00:00"
+        if not start_date:
+            continue
+        try:
+            dt = datetime.fromisoformat(f"{start_date}T{start_time}").replace(tzinfo=EASTERN)
+        except Exception:
+            continue
+
+        if (now - dt).total_seconds() > 24 * 3600:
+            continue
+
+        link = ev.get("url") or ""
+        v_embedded = (ev.get("_embedded", {}).get("venues") or [{}])[0]
+        vname = v_embedded.get("name")
+
+        price = None
+        price_ranges = ev.get("priceRanges", [])
+        if price_ranges:
+            p_min = price_ranges[0].get("min")
+            p_max = price_ranges[0].get("max")
+            if p_min is not None and p_max is not None:
+                if p_min == p_max:
+                    price = f"${int(p_min)}" if p_min == int(p_min) else f"${p_min:.2f}"
+                else:
+                    price = f"${int(p_min)}-${int(p_max)}"
+            elif p_min is not None:
+                price = f"From ${int(p_min)}"
+
+        key = (name.lower(), dt.strftime("%Y-%m-%d"))
+        if key in seen:
+            continue
+        seen.add(key)
+
+        events.append({
+            "name": name,
+            "date": dt.astimezone(timezone.utc).isoformat(),
+            "url": link,
+            "venue": vname,
+            "price": price,
+            "category": "music",
+        })
+
+    return events
+
+
+def scrape_ticketweb(url, ua):
+    """Scrape upcoming live shows from TicketWeb venue pages using schema.org MusicEvent LD+JSON."""
+    try:
+        resp = _SESSION.get(url, headers={"User-Agent": ua or UA_CHROME}, timeout=15)
+        resp.raise_for_status()
+        soup = BeautifulSoup(resp.text, "html.parser")
+    except Exception:
+        return []
+
+    scripts = soup.find_all("script", type="application/ld+json")
+    events = []
+    seen = set()
+    now = datetime.now(EASTERN)
+
+    for s in scripts:
+        try:
+            items = json.loads(s.string)
+            if not isinstance(items, list):
+                items = [items]
+            for it in items:
+                if not isinstance(it, dict) or it.get("@type") != "MusicEvent":
+                    continue
+                name = (it.get("name") or "").strip()
+                if not name or is_placeholder_or_closed_event(name):
+                    continue
+                start_str = it.get("startDate")
+                if not start_str:
+                    continue
+                try:
+                    dt = datetime.fromisoformat(start_str).replace(tzinfo=EASTERN)
+                except Exception:
+                    continue
+                if (now - dt).total_seconds() > 24 * 3600:
+                    continue
+
+                link = it.get("url") or url
+                loc = it.get("location", {})
+                vname = loc.get("name") if isinstance(loc, dict) else None
+
+                key = (name.lower(), dt.strftime("%Y-%m-%d"))
+                if key in seen:
+                    continue
+                seen.add(key)
+
+                events.append({
+                    "name": name,
+                    "date": dt.astimezone(timezone.utc).isoformat(),
+                    "url": link,
+                    "venue": vname,
+                    "price": None,
+                    "category": "music",
+                })
+        except Exception:
+            continue
+
+    return events
+
+
+def scrape_trumba(url, ua):
+    """Fetch and parse events from official Trumba JSON feeds (NEC, Tufts Music, etc.)."""
+    try:
+        resp = _SESSION.get(url, headers={"User-Agent": ua or UA_CHROME}, timeout=15)
+        resp.raise_for_status()
+        data = resp.json()
+    except Exception:
+        return []
+
+    now = datetime.now(EASTERN)
+    out = []
+    seen = set()
+
+    for item in data:
+        title = html.unescape(item.get("title") or "").strip()
+        start_raw = item.get("startDateTime")
+        if not title or not start_raw or is_placeholder_or_closed_event(title):
+            continue
+        try:
+            dt = datetime.fromisoformat(start_raw).replace(tzinfo=EASTERN)
+        except Exception:
+            continue
+        if dt < now - timedelta(hours=6):
+            continue
+
+        link = item.get("permaLinkUrl") or url
+        loc = (item.get("location") or "").strip()
+
+        key = (title.lower(), dt.strftime("%Y-%m-%d"))
+        if key in seen:
+            continue
+        seen.add(key)
+
+        out.append({
+            "name": title,
+            "date": dt.astimezone(timezone.utc).isoformat(),
+            "url": link,
+            "venue": loc if loc else None,
+            "price": None,
+            "category": "classical",
+        })
+
+    return out
+
+
+def scrape_squarespace(url, ua):
+    """Generic Squarespace calendar scraper (e.g. The Bebop, Remnant Satellite, Portico Brewing)."""
+    target_url = url if "format=json" in url else (f"{url}?format=json" if "?" not in url else f"{url}&format=json")
+    try:
+        resp = _SESSION.get(target_url, headers={"User-Agent": ua or UA_CHROME}, timeout=10)
+        resp.raise_for_status()
+        data = resp.json()
+    except Exception:
+        return []
+
+    parsed = urlparse(url)
+    base = f"{parsed.scheme or 'https'}://{parsed.netloc}"
+
+    events = []
+    now = datetime.now(timezone.utc)
+    cutoff = now + timedelta(days=90)
+    seen = set()
+    items = data.get("upcoming", []) or data.get("items", [])
+    for item in items:
+        title = re.sub(r"\s+", " ", (item.get("title") or "").strip())
+        if not title or is_placeholder_or_closed_event(title):
+            continue
+        ms = item.get("startDate")
+        if not ms:
+            continue
+        dt = datetime.fromtimestamp(ms / 1000, tz=timezone.utc)
+        if dt < now - timedelta(days=1) or dt > cutoff:
+            continue
+        full_url = item.get("fullUrl")
+        ev_url = f"{base}{full_url}" if full_url else url
+
+        key = (title.lower(), dt.strftime("%Y-%m-%d"))
+        if key in seen:
+            continue
+        seen.add(key)
+
+        events.append({
+            "name": title,
+            "date": dt.isoformat(),
+            "url": ev_url,
+            "venue": None,
+            "price": None,
+            "description": None,
+            "category": "music",
+        })
+    return events
+
+
 _ALL_VENUES = [
+    {"name": "Paradise Rock Club", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZpZA11JtA&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
+    {"name": "Brighton Music Hall", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZpapwne&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
+    {"name": "MGM Music Hall at Fenway", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZ917AEJz&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
+    {"name": "Citizens House of Blues Boston", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZpZAEA7eA&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
+    {"name": "Orpheum Theatre", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZpZA1J7JA&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
+    {"name": "Leader Bank Pavilion", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZ917AxdQ&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
+    {"name": "Chevalier Theatre", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZpZAJd6aA&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
+    {"name": "Sonia", "url": "https://www.ticketweb.com/venue/sonia-cambridge-ma/435615", "ua": UA_CHROME, "scraper": scrape_ticketweb, "default_category": "music"},
+    {"name": "Scullers Jazz Club", "url": "https://www.ticketweb.com/venue/scullers-jazz-club-boston-ma/18647", "ua": UA_CHROME, "scraper": scrape_ticketweb, "default_category": "music"},
+    {"name": "Regattabar", "url": "https://www.ticketweb.com/venue/regattabar-cambridge-ma/748814", "ua": UA_CHROME, "scraper": scrape_ticketweb, "default_category": "music"},
+    {"name": "Off the Rails Boston", "url": "https://www.ticketweb.com/venue/off-the-rails-boston-boston-ma/797374", "ua": UA_CHROME, "scraper": scrape_ticketweb, "default_category": "music"},
+    {"name": "Mr. Dooley's", "url": "https://www.mrdooleys.com/events/list/?ical=1", "ua": UA_CHROME, "scraper": scrape_ical, "default_category": "music"},
+    {"name": "The Green Dragon Tavern", "url": "https://www.greendragonboston.com/events/list/?ical=1", "ua": UA_CHROME, "scraper": scrape_ical, "default_category": "music"},
+    {"name": "Hennessy's Bar", "url": "https://hennessysboston.com/events/list/?ical=1", "ua": UA_CHROME, "scraper": scrape_ical, "default_category": "music"},
+    {"name": "UnCommon Corner", "url": "https://uncommoncorner.org/events/list/?ical=1", "ua": UA_CHROME, "scraper": scrape_ical, "default_category": "music"},
+    {"name": "Roundhead Brewing", "url": "https://roundheadbrewing.com/events/list/?ical=1", "ua": UA_CHROME, "scraper": scrape_ical, "default_category": "music"},
+    {"name": "Tufts Music (Granoff Music Center)", "url": "https://www.trumba.com/calendars/tts-wms-managed-music.json", "ua": UA_CHROME, "scraper": scrape_trumba, "default_category": "classical"},
+    {"name": "Remnant Satellite", "url": "https://www.remnantsomerville.com/live", "ua": UA_CHROME, "scraper": scrape_squarespace, "default_category": "music"},
+    {"name": "Portico Brewing", "url": "https://porticobrewing.com/upcoming-events", "ua": UA_CHROME, "scraper": scrape_squarespace, "default_category": "music"},
     {"name": "Symphony Hall", "url": "https://www.bso.org/events", "ua": UA_CHROME, "scraper": scrape_symphony_hall, "default_category": "classical"},
     {"name": "Berklee College of Music", "url": "https://www.berklee.edu/events", "ua": UA_CHROME, "scraper": scrape_berklee, "default_category": "music"},
     {"name": "The Bebop", "url": "https://thebebopboston.com/new-events", "ua": UA_CHROME, "scraper": scrape_the_bebop, "default_category": "music"},
@@ -5726,6 +5975,35 @@ MANUAL_RECURRING_EVENTS = [
     ("Haymarket Boston", "https://www.haymarketboston.org/", "food", [
         ("Haymarket Open-Air Produce Market", "https://www.haymarketboston.org/", 4, 8, 0),
         ("Haymarket Open-Air Produce Market", "https://www.haymarketboston.org/", 5, 8, 0),
+    ]),
+    ("The Black Rose", "https://www.blackroseboston.com/live-music1/", "music", [
+        ("Live Irish & Acoustic Music", "https://www.blackroseboston.com/live-music1/", 0, 20, 0, "Free"),
+        ("Live Irish & Acoustic Music", "https://www.blackroseboston.com/live-music1/", 1, 20, 0, "Free"),
+        ("Live Irish & Acoustic Music", "https://www.blackroseboston.com/live-music1/", 2, 20, 0, "Free"),
+        ("Live Irish & Acoustic Music", "https://www.blackroseboston.com/live-music1/", 3, 20, 0, "Free"),
+        ("Afternoon Acoustic Session", "https://www.blackroseboston.com/live-music1/", 4, 16, 0, "Free"),
+        ("Friday Night Live Band", "https://www.blackroseboston.com/live-music1/", 4, 21, 0, "Free"),
+        ("Saturday Afternoon Acoustic", "https://www.blackroseboston.com/live-music1/", 5, 16, 0, "Free"),
+        ("Saturday Night Live Band", "https://www.blackroseboston.com/live-music1/", 5, 21, 0, "Free"),
+        ("Sunday Traditional Irish Session", "https://www.blackroseboston.com/live-music1/", 6, 17, 0, "Free"),
+        ("Sunday Night Live Band", "https://www.blackroseboston.com/live-music1/", 6, 20, 0, "Free"),
+    ]),
+    ("Emmets Irish Pub", "https://www.emmetsirishpubandrestaurant.com", "music", [
+        ("Saturday Afternoon Irish Session", "https://www.emmetsirishpubandrestaurant.com", 5, 15, 0, "Free"),
+        ("Saturday Night Live Music", "https://www.emmetsirishpubandrestaurant.com", 5, 21, 0, "Free"),
+        ("Sunday Afternoon Irish Session", "https://www.emmetsirishpubandrestaurant.com", 6, 15, 0, "Free"),
+    ]),
+    ("The Brendan Behan Pub", "https://brendanbehanjp.com", "music", [
+        ("Live Traditional Irish Session", "https://brendanbehanjp.com", 5, 17, 0, "Free"),
+    ]),
+    ("Emmanuel Church", "https://www.emmanuelmusic.org/performance-info/2026-2027-cantata-schedule", "classical", [
+        ("Emmanuel Music Weekly Bach Cantata Series", "https://www.emmanuelmusic.org/performance-info/2026-2027-cantata-schedule", 6, 11, 0, "Free"),
+    ]),
+    ("Redbones", "https://redbones.com/events", "music", [
+        ("Phrenology Trivia Night @ Underbones", "https://redbones.com/events", 4, 20, 0, "Free"),
+        ("Live Music & Showcase @ Underbones", "https://redbones.com/events", 5, 21, 0, "Free"),
+        ("ONCE Upon A Time: Indie Music Series @ Underbones", "https://redbones.com/events", 6, 16, 0, "$15"),
+        ("Bluegrass & Roots Night @ Underbones", "https://redbones.com/events", 3, 20, 0, "Free"),
     ]),
 ]
 
