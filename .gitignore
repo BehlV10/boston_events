@@ -5,3 +5,4 @@ old_files/
 __pycache__/
 *.pyc
 .DS_Store
+.cache/

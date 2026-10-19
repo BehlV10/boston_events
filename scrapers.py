@@ -22,6 +22,58 @@ from dateutil import parser
 CACHE_SECONDS = 15 * 60
 EASTERN = ZoneInfo("America/New_York")
 
+CACHE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".cache", "venues")
+os.makedirs(CACHE_DIR, exist_ok=True)
+
+DEFAULT_VENUE_TTL = 3 * 3600    # 3 hours for standard venue feeds
+FAST_VENUE_TTL = 1 * 3600       # 1 hour for high-turnover feeds (Ticketmaster, SeatGeek, Eventbrite, Do617, Boston Calendar, Boston Shows)
+SLOW_VENUE_TTL = 12 * 3600      # 12 hours for evergreen/institutional feeds (Libraries, Museums, Bookstores, Parks)
+
+
+def _get_venue_ttl(vname):
+    low = (vname or "").lower()
+    if any(k in low for k in ["ticketmaster", "seatgeek", "eventbrite", "do617", "boston calendar", "boston shows"]):
+        return FAST_VENUE_TTL
+    if any(k in low for k in ["library", "museum", "harvard", "mit", "books", "growing center", "esplanade", "arts council", "have to dance", "bida"]):
+        return SLOW_VENUE_TTL
+    return DEFAULT_VENUE_TTL
+
+
+def _venue_cache_path(vname):
+    slug = re.sub(r"[^a-zA-Z0-9_\-]+", "_", vname).strip("_").lower()
+    return os.path.join(CACHE_DIR, f"{slug}.json")
+
+
+def _load_venue_cache(vname, max_age=None):
+    path = _venue_cache_path(vname)
+    if not os.path.exists(path):
+        return None
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            cached = json.load(f)
+        if max_age is not None:
+            age = time.time() - cached.get("ts", 0)
+            if age > max_age:
+                return None
+        return cached
+    except Exception:
+        return None
+
+
+def _save_venue_cache(vname, events, duration=0.0):
+    path = _venue_cache_path(vname)
+    try:
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump({
+                "ts": time.time(),
+                "venue": vname,
+                "duration": duration,
+                "events": events
+            }, f, ensure_ascii=False)
+    except Exception:
+        pass
+
+
 UA_SAFARI = (
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
     "AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15"
@@ -5745,28 +5797,80 @@ _is_refreshing = False
 
 
 def _init_warm_cache():
-    """Warm in-memory cache and last-known-good map from events.json on disk if available."""
+    """Warm in-memory cache, last-known-good map, and disk venue cache from events.json on disk if available."""
     json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "events.json")
-    if os.path.exists(json_path) and not _cache["data"]:
-        try:
-            with open(json_path) as f:
-                payload = json.load(f)
-            venues = payload.get("venues") if isinstance(payload, dict) else payload
-            if venues and isinstance(venues, list):
+    if not os.path.exists(json_path):
+        return
+
+    try:
+        with open(json_path, "r", encoding="utf-8") as f:
+            payload = json.load(f)
+        venues = payload.get("venues") if isinstance(payload, dict) else payload
+        generated_at = payload.get("generated_at") if isinstance(payload, dict) else None
+
+        file_ts = os.path.getmtime(json_path)
+        if generated_at:
+            try:
+                dt = datetime.fromisoformat(generated_at.replace("Z", "+00:00"))
+                file_ts = dt.timestamp()
+            except Exception:
+                pass
+
+        if venues and isinstance(venues, list):
+            if not _cache["data"]:
                 _cache["data"] = venues
-                _cache["ts"] = time.time() - (CACHE_SECONDS / 2)  # half-fresh so it updates gracefully
-                for v in venues:
-                    if v.get("venue") and v.get("events"):
-                        _last_known_good[v["venue"]] = v["events"]
-        except Exception:
-            pass
+                _cache["ts"] = file_ts
+            for v in venues:
+                vname = v.get("venue")
+                evs = v.get("events")
+                if vname and evs is not None:
+                    _last_known_good[vname] = evs
+                    # If venue cache does not exist on disk, seed it with events and timestamp from events.json
+                    cpath = _venue_cache_path(vname)
+                    if not os.path.exists(cpath):
+                        try:
+                            with open(cpath, "w", encoding="utf-8") as cf:
+                                json.dump({
+                                    "ts": file_ts,
+                                    "venue": vname,
+                                    "duration": v.get("duration", 0.0),
+                                    "events": evs
+                                }, cf, ensure_ascii=False)
+                        except Exception:
+                            pass
+    except Exception:
+        pass
 
 
 _init_warm_cache()
 
 
-def _scrape_one(v):
+def _scrape_one(v, force=False):
     name = v["name"]
+    ttl = _get_venue_ttl(name)
+    t0 = time.time()
+
+    # 1. Check if cached data exists and is within TTL
+    if not force:
+        cached = _load_venue_cache(name, max_age=ttl)
+        if cached and cached.get("events") is not None:
+            events = cached["events"]
+            for e in events:
+                if not e.get("venue"):
+                    e["venue"] = name
+                if not e.get("category"):
+                    e["category"] = infer_category(e.get("name"), e.get("venue"), v.get("default_category"))
+            events.sort(key=_sort_key)
+            return {
+                "venue": name,
+                "url": v["url"],
+                "events": events,
+                "error": None,
+                "duration": cached.get("duration", 0.0),
+                "cached": True,
+            }
+
+    # 2. Live scrape from external website
     try:
         events = dedupe(v["scraper"](v["url"], v["ua"]))
         for e in events:
@@ -5775,24 +5879,47 @@ def _scrape_one(v):
             if not e.get("category"):
                 e["category"] = infer_category(e.get("name"), e.get("venue"), v.get("default_category"))
         events.sort(key=_sort_key)
-        
-        # If scraper succeeded and returned events, update last known good
+        dur = round(time.time() - t0, 2)
+
+        # Update last known good and save to disk cache
         if events:
             _last_known_good[name] = events
+            _save_venue_cache(name, events, duration=dur)
         elif name in _last_known_good and not events:
             # Scraper returned 0 events but previously had events: fall back to preserve data
             events = _last_known_good[name]
-            
-        return {"venue": name, "url": v["url"], "events": events, "error": None}
+        else:
+            _save_venue_cache(name, events, duration=dur)
+
+        return {
+            "venue": name,
+            "url": v["url"],
+            "events": events,
+            "error": None,
+            "duration": dur,
+            "cached": False,
+        }
     except Exception as e:
-        # Fall back to previous events if available on network error/timeout
-        prev = _last_known_good.get(name, [])
-        return {"venue": name, "url": v["url"], "events": prev, "error": str(e), "fallback": bool(prev)}
+        # Fall back to stale cache or previous events if available on network error/timeout
+        stale = _load_venue_cache(name, max_age=None)
+        prev = (stale.get("events") if stale else None) or _last_known_good.get(name, [])
+        return {
+            "venue": name,
+            "url": v["url"],
+            "events": prev,
+            "error": str(e),
+            "fallback": bool(prev),
+            "duration": round(time.time() - t0, 2),
+            "cached": bool(prev),
+        }
 
 
-def _do_scrape_all():
+def _do_scrape_all(force=False):
+    def _worker(v):
+        return _scrape_one(v, force=force)
+
     with ThreadPoolExecutor(max_workers=min(16, len(VENUES))) as ex:
-        results = list(ex.map(_scrape_one, VENUES))
+        results = list(ex.map(_worker, VENUES))
     order = {v["name"]: i for i, v in enumerate(VENUES)}
     results.sort(key=lambda r: order.get(r["venue"], 999))
     results.extend(_expand_manual_recurring())
@@ -5810,7 +5937,7 @@ def _background_refresh():
             return
         _is_refreshing = True
     try:
-        _do_scrape_all()
+        _do_scrape_all(force=False)
     finally:
         with _refresh_lock:
             _is_refreshing = False
@@ -5818,9 +5945,9 @@ def _background_refresh():
 
 def get_all_events(force=False):
     """Return all scraped events.
-    
-    Uses Stale-While-Revalidate: If cached data exists, returns immediately (instant load)
-    and asynchronously launches a background scraper update if the cache has expired.
+
+    Uses per-venue TTL caching (1h for fast-turnover, 3h standard, 12h evergreen)
+    backed by persistent disk cache and fallback error resilience.
     """
     now = time.time()
     with _cache_lock:
@@ -5828,13 +5955,10 @@ def get_all_events(force=False):
         is_stale = (now - _cache["ts"]) >= CACHE_SECONDS
 
     if force:
-        return _do_scrape_all()
+        return _do_scrape_all(force=True)
 
-    if cached is not None:
-        if is_stale and not _is_refreshing:
-            threading.Thread(target=_background_refresh, daemon=True).start()
+    if cached is not None and not is_stale:
         return cached
 
-    # Cold start with no events.json on disk: scrape synchronously
-    return _do_scrape_all()
+    return _do_scrape_all(force=False)
 

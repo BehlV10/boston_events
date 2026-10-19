@@ -345,6 +345,53 @@ class TestBostonEvents(unittest.TestCase):
         self.assertIsNotNone(geo)
         self.assertEqual(geo["venue"], "The Burren")
 
+    def test_venue_ttl_and_disk_cache(self):
+        """Test per-venue TTL categorization, cache saving, and loading."""
+        from scrapers import (
+            _get_venue_ttl, FAST_VENUE_TTL, SLOW_VENUE_TTL, DEFAULT_VENUE_TTL,
+            _venue_cache_path, _save_venue_cache, _load_venue_cache, _scrape_one
+        )
+
+        # 1. TTL checks
+        self.assertEqual(_get_venue_ttl("Ticketmaster"), FAST_VENUE_TTL)
+        self.assertEqual(_get_venue_ttl("Boston Shows"), FAST_VENUE_TTL)
+        self.assertEqual(_get_venue_ttl("Boston Public Library"), SLOW_VENUE_TTL)
+        self.assertEqual(_get_venue_ttl("The Sinclair"), DEFAULT_VENUE_TTL)
+
+        # 2. Cache save and load
+        test_vname = "Test Venue TTL"
+        test_events = [{"name": "Test Band", "date": "2026-10-25T20:00:00Z"}]
+        cpath = _venue_cache_path(test_vname)
+
+        try:
+            _save_venue_cache(test_vname, test_events, duration=0.5)
+            self.assertTrue(os.path.exists(cpath))
+
+            # Fresh load
+            loaded = _load_venue_cache(test_vname, max_age=3600)
+            self.assertIsNotNone(loaded)
+            self.assertEqual(len(loaded["events"]), 1)
+            self.assertEqual(loaded["events"][0]["name"], "Test Band")
+
+            # Expired load
+            expired = _load_venue_cache(test_vname, max_age=-1)
+            self.assertIsNone(expired)
+
+            # Test _scrape_one using cache
+            mock_venue = {
+                "name": test_vname,
+                "url": "https://example.com",
+                "ua": "TestUA",
+                "scraper": lambda u, a: self.fail("Scraper should not be invoked when cache is valid!"),
+                "default_category": "music"
+            }
+            res = _scrape_one(mock_venue, force=False)
+            self.assertTrue(res.get("cached"))
+            self.assertEqual(len(res["events"]), 1)
+        finally:
+            if os.path.exists(cpath):
+                os.remove(cpath)
+
 
 if __name__ == "__main__":
     unittest.main()

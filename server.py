@@ -122,26 +122,53 @@ def api_post_upvote():
     return jsonify({"success": True, "id": ev_id, "votes": new_votes})
 
 
-def export_json(path):
-    """Run all scrapers and write a single JSON bundle for the static frontend."""
+def export_json(path="events.json", force=False):
+    """Run scrapers with per-venue TTL caching and write events.json bundle."""
+    force = force or (os.environ.get("FORCE_SCRAPE", "").lower() in ("1", "true"))
+    venues = get_all_events(force=force)
+    new_total = sum(len(v["events"]) for v in venues)
+
+    # Guard against degraded cloud scrapes (preserving existing data if scrape yields < 50% events)
+    if os.path.exists(path):
+        try:
+            with open(path, "r", encoding="utf-8") as existing_file:
+                existing_payload = json.load(existing_file)
+            existing_venues = existing_payload.get("venues") or []
+            old_total = sum(len(v.get("events", [])) for v in existing_venues)
+            if new_total < old_total * 0.50 and new_total < 3000:
+                print(f"Preserving existing {path} ({old_total} events) — new scrape yielded only {new_total} events (likely rate-limited)")
+                return
+        except Exception:
+            pass
+
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "venues": get_all_events(force=True),
+        "venues": venues,
         "weather": fetch_boston_weather(),
         "luckyseat": fetch_luckyseat_boston(),
         "upvotes": _read_upvotes(),
     }
-    with open(path, "w") as f:
+    with open(path, "w", encoding="utf-8") as f:
         json.dump(payload, f, separators=(",", ":"))
-    total = sum(len(v["events"]) for v in payload["venues"])
-    print(f"wrote {path}: {total} events across {len(payload['venues'])} venues")
+    print(f"wrote {path}: {new_total} events across {len(venues)} venues")
 
 
-def export_html(path, force=False):
+def export_html(path="index.html", force=False, source_json="events.json"):
     """Render and write a static self-contained HTML page."""
-    venues = get_all_events(force=force)
+    venues = None
+    if not force and os.path.exists(source_json):
+        try:
+            with open(source_json, "r", encoding="utf-8") as f:
+                payload = json.load(f)
+            venues = payload.get("venues") if isinstance(payload, dict) else payload
+        except Exception:
+            venues = None
+
+    if not venues:
+        venues = get_all_events(force=force)
+
     html = render_page(venues)
-    with open(path, "w") as f:
+    with open(path, "w", encoding="utf-8") as f:
         f.write(html)
     print(f"wrote {path}: {len(html):,} bytes")
 
@@ -197,7 +224,7 @@ def _start_background_refresher():
         while True:
             time.sleep(30 * 60)
             try:
-                get_all_events(force=True)
+                get_all_events(force=False)
             except Exception:
                 pass
 
@@ -210,12 +237,14 @@ if __name__ == "__main__":
         filter_arg = sys.argv[2] if len(sys.argv) > 2 else None
         run_diagnostics(filter_arg)
     elif len(sys.argv) > 1 and sys.argv[1] == "export":
-        out = sys.argv[2] if len(sys.argv) > 2 else "events.json"
-        if out.endswith(".html") or (len(sys.argv) > 2 and sys.argv[2] == "html"):
-            target = sys.argv[3] if len(sys.argv) > 3 else "events.html"
-            export_html(target)
+        force_flag = ("--force" in sys.argv) or (os.environ.get("FORCE_SCRAPE", "").lower() in ("1", "true"))
+        args = [a for a in sys.argv[2:] if a != "--force"]
+        out = args[0] if args else "events.json"
+        if out.endswith(".html") or (args and args[0] == "html"):
+            target = args[1] if len(args) > 1 else "events.html"
+            export_html(target, force=force_flag)
         else:
-            export_json(out)
+            export_json(out, force=force_flag)
     else:
         _start_background_refresher()
         host = "0.0.0.0" if os.environ.get("PORT") else "127.0.0.1"
