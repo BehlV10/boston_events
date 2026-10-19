@@ -1583,39 +1583,116 @@ def scrape_do617(url, ua):
 
 
 def scrape_middle_east(url, ua):
-    """Middle East Cambridge — TicketWeb plugin embeds event list as static HTML."""
-    soup = fetch_soup(url, ua)
+    """Middle East Cambridge — TicketWeb plugin embeds event list as static HTML.
+    
+    Scrapes upcoming shows across all Middle East rooms (Downstairs, Upstairs,
+    Corner/Bakery, ZuZu, Sonia) across up to 5 pages with precise showtimes and pricing.
+    """
     events = []
+    seen_keys = set()
     now = datetime.now(EASTERN)
     year = now.year
-    for section in soup.select(".tw-section"):
-        link = section.find("a", href=lambda h: h and "ticketweb.com" in h)
-        if not link:
-            continue
-        label = link.get("aria-label", "")
-        m = re.match(r"Event Image Link-\s*(.*?)\s*\|", label)
-        name = m.group(1).strip() if m else section.get_text(" ", strip=True)[:80]
-        if not name:
-            continue
-        date_el = section.select_one(".tw-event-date")
-        if not date_el:
-            continue
-        raw = date_el.get_text(strip=True)  # "5.19"
+    base_url = url.rstrip("/")
+
+    for page in range(1, 6):
+        purl = f"{base_url}/page/{page}/" if page > 1 else url
         try:
-            month, day = (int(x) for x in raw.split("."))
-            candidate = datetime(year, month, day, 19, 0, tzinfo=EASTERN)
-            if candidate.date() < now.date():
-                candidate = datetime(year + 1, month, day, 19, 0, tzinfo=EASTERN)
-        except (ValueError, AttributeError):
-            continue
-        events.append({
-            "name": name,
-            "date": candidate.astimezone(timezone.utc).isoformat(),
-            "url": link.get("href", url),
-            "venue": "Middle East",
-            "price": None,
-            "category": "music",
-        })
+            soup = fetch_soup(purl, ua)
+        except Exception:
+            break
+        sections = soup.select(".tw-section")
+        if not sections:
+            break
+
+        for section in sections:
+            link = section.find("a", href=lambda h: h and "ticketweb.com" in h)
+            if not link:
+                link = section.select_one("a.tw-buy-tix-btn")
+            event_url = link.get("href", url) if link else url
+            label = link.get("aria-label", "") if link else ""
+
+            name_el = section.select_one(".tw-name")
+            name = name_el.get_text(strip=True) if name_el else ""
+            if not name and label:
+                m = re.match(r"Event Image Link-\s*(.*?)\s*\|", label)
+                name = m.group(1).strip() if m else ""
+            if not name:
+                name = section.get_text(" ", strip=True)[:80]
+            if not name:
+                continue
+
+            date_el = section.select_one(".tw-event-date")
+            if not date_el:
+                continue
+            raw_date = date_el.get_text(strip=True)
+            try:
+                month, day = (int(x) for x in raw_date.split("."))
+            except (ValueError, AttributeError):
+                continue
+
+            # Parse exact showtime
+            time_el = section.select_one(".tw-event-time")
+            raw_time = time_el.get_text(" ", strip=True) if time_el else ""
+            if not raw_time:
+                raw_time = label
+
+            hour, minute = 19, 0
+            tm = re.search(r"(\d{1,2}):(\d{2})\s*(am|pm)", raw_time, re.I)
+            if tm:
+                h = int(tm.group(1))
+                m_min = int(tm.group(2))
+                mer = tm.group(3).lower()
+                if mer == "pm" and h != 12:
+                    h += 12
+                elif mer == "am" and h == 12:
+                    h = 0
+                hour, minute = h, m_min
+            else:
+                tm_hr = re.search(r"(\d{1,2})\s*(am|pm)", raw_time, re.I)
+                if tm_hr:
+                    h = int(tm_hr.group(1))
+                    mer = tm_hr.group(2).lower()
+                    if mer == "pm" and h != 12:
+                        h += 12
+                    elif mer == "am" and h == 12:
+                        h = 0
+                    hour, minute = h, 0
+
+            try:
+                candidate = datetime(year, month, day, hour, minute, tzinfo=EASTERN)
+                if candidate.date() < now.date() - timedelta(days=2):
+                    candidate = datetime(year + 1, month, day, hour, minute, tzinfo=EASTERN)
+            except (ValueError, OverflowError):
+                continue
+
+            venue_el = section.select_one(".tw-venue-name")
+            v_name = "Middle East"
+            if venue_el:
+                clean_v = re.sub(r"^@\s*", "", venue_el.get_text(strip=True)).strip()
+                if clean_v:
+                    v_name = clean_v
+
+            price = None
+            price_el = section.select_one(".tw-price")
+            if price_el:
+                p_text = price_el.get_text(strip=True)
+                if p_text:
+                    price = p_text
+
+            dedup_key = (name.lower(), candidate.isoformat(), v_name.lower())
+            if dedup_key in seen_keys:
+                continue
+            seen_keys.add(dedup_key)
+
+            events.append({
+                "name": name,
+                "date": candidate.astimezone(timezone.utc).isoformat(),
+                "url": event_url,
+                "venue": v_name,
+                "price": price,
+                "category": "music",
+            })
+
     return events
 
 

@@ -30,6 +30,7 @@ _load_dotenv()
 from scrapers import (  # noqa: E402
     VENUES,
     get_all_events,
+    _do_scrape_all,
     fetch_boston_weather,
     fetch_luckyseat_boston,
 )
@@ -125,7 +126,7 @@ def api_post_upvote():
 def export_json(path="events.json", force=False):
     """Run scrapers with per-venue TTL caching and write events.json bundle."""
     force = force or (os.environ.get("FORCE_SCRAPE", "").lower() in ("1", "true"))
-    venues = get_all_events(force=force)
+    venues = _do_scrape_all(force=force)
     new_total = sum(len(v["events"]) for v in venues)
 
     # Guard against degraded cloud scrapes (preserving existing data if scrape yields < 50% events)

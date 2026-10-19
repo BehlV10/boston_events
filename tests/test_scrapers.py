@@ -393,5 +393,84 @@ class TestBostonEvents(unittest.TestCase):
                 os.remove(cpath)
 
 
+    def test_middle_east_scraper_and_geo(self):
+        """Test Middle East Cambridge scraper extracts exact showtimes, rooms, and geocodes accurately."""
+        from unittest.mock import patch
+        from bs4 import BeautifulSoup
+        from scrapers import scrape_middle_east, EASTERN
+
+        sample_html = """
+        <div class="tw-section">
+            <a class="tw-buy-tix-btn" href="https://www.ticketweb.com/event/trivia" aria-label="Event Image Link- Trivia Night | 18 October 5:00 PM">Buy Tickets</a>
+            <div class="tw-name">Trivia Night</div>
+            <span class="tw-event-date">10.18</span>
+            <span class="tw-event-time">Show: 5:00PM</span>
+            <span class="tw-venue-name">@ Middle East - Corner/Bakery</span>
+            <span class="tw-price">$15.00</span>
+        </div>
+        <div class="tw-section">
+            <a class="tw-buy-tix-btn" href="https://www.ticketweb.com/event/rock-show" aria-label="Event Image Link- Rock Band | 18 October 9:30 PM">Buy Tickets</a>
+            <div class="tw-name">Rock Band</div>
+            <span class="tw-event-date">10.18</span>
+            <span class="tw-event-time">Show: 9:30PM</span>
+            <span class="tw-venue-name">@ Middle East - Downstairs</span>
+            <span class="tw-price">$25.00</span>
+        </div>
+        <div class="tw-section">
+            <a class="tw-buy-tix-btn" href="https://www.ticketweb.com/event/sonia-show" aria-label="Event Image Link- Indie Pop | 18 October 8:00 PM">Buy Tickets</a>
+            <div class="tw-name">Indie Pop</div>
+            <span class="tw-event-date">10.18</span>
+            <span class="tw-event-time">Show: 8:00PM</span>
+            <span class="tw-venue-name">@ Sonia</span>
+            <span class="tw-price">$20.00</span>
+        </div>
+        """
+        def mock_fetch(url, ua):
+            if "page/2" in url:
+                return BeautifulSoup("", "html.parser")
+            return BeautifulSoup(sample_html, "html.parser")
+
+        with patch("scrapers.fetch_soup", side_effect=mock_fetch):
+            events = scrape_middle_east("https://mideastoffers.com", "TestUA")
+
+        self.assertEqual(len(events), 3)
+
+        # Event 1: Trivia at 5:00 PM in Corner/Bakery
+        e1 = events[0]
+        self.assertEqual(e1["name"], "Trivia Night")
+        self.assertEqual(e1["venue"], "Middle East - Corner/Bakery")
+        self.assertEqual(e1["price"], "$15.00")
+        dt1 = datetime.fromisoformat(e1["date"]).astimezone(EASTERN)
+        self.assertEqual(dt1.hour, 17)
+        self.assertEqual(dt1.minute, 0)
+        geo1 = resolve_event_geo(e1)
+        self.assertIsNotNone(geo1)
+        self.assertAlmostEqual(geo1["lat"], 42.3638, places=3)
+        self.assertEqual(geo1["neighborhood"], "Central Square")
+
+        # Event 2: Rock Band at 9:30 PM in Downstairs
+        e2 = events[1]
+        self.assertEqual(e2["name"], "Rock Band")
+        self.assertEqual(e2["venue"], "Middle East - Downstairs")
+        self.assertEqual(e2["price"], "$25.00")
+        dt2 = datetime.fromisoformat(e2["date"]).astimezone(EASTERN)
+        self.assertEqual(dt2.hour, 21)
+        self.assertEqual(dt2.minute, 30)
+        geo2 = resolve_event_geo(e2)
+        self.assertIsNotNone(geo2)
+        self.assertEqual(geo2["venue"], "Middle East - Downstairs")
+
+        # Event 3: Sonia at 8:00 PM
+        e3 = events[2]
+        self.assertEqual(e3["name"], "Indie Pop")
+        self.assertEqual(e3["venue"], "Sonia")
+        dt3 = datetime.fromisoformat(e3["date"]).astimezone(EASTERN)
+        self.assertEqual(dt3.hour, 20)
+        self.assertEqual(dt3.minute, 0)
+        geo3 = resolve_event_geo(e3)
+        self.assertIsNotNone(geo3)
+        self.assertEqual(geo3["venue"], "Sonia")
+
+
 if __name__ == "__main__":
     unittest.main()
