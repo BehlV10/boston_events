@@ -515,6 +515,23 @@ VENUE_RULES = [
     ("downtown crossing", (42.3555, -71.0601, "Downtown / Financial District", "Downtown Crossing, Boston", "Downtown Crossing")),
     ("old state house", (42.3587, -71.0578, "Downtown / Financial District", "206 Washington St, Boston", "Old State House")),
     ("old south meeting house", (42.3569, -71.0594, "Downtown / Financial District", "310 Washington St, Boston", "Old South Meeting House")),
+    ("mccarthy", (42.3892, -71.1195, "Porter Square", "1920 Massachusetts Ave, Cambridge", "Toad / McCarthy's")),
+    ("museum of science", (42.3672, -71.0711, "West End", "1 Science Park, Boston", "Museum of Science")),
+    ("central rock", (42.3912, -71.1512, "North Cambridge", "127 Smith Pl, Cambridge", "Central Rock Gym")),
+    ("democracy brewing", (42.3548, -71.0617, "Downtown Crossing", "35 Temple Pl, Boston", "Democracy Brewing")),
+    ("288 green", (42.3649, -71.1026, "Central Square", "288 Green St, Cambridge", "Havana Club")),
+    ("hatch shell", (42.3582, -71.0717, "Esplanade", "47 David G Mugar Way, Boston", "Hatch Memorial Shell")),
+    ("moves & vibes", (42.3820, -71.1030, "Somerville", "44 Park St, Somerville", "Moves & Vibes Dance")),
+    ("umass boston", (42.3129, -71.0378, "Dorchester", "100 William T Morrissey Blvd, Boston", "UMass Boston")),
+    ("beacon hill", (42.3588, -71.0678, "Beacon Hill", "Beacon Hill, Boston", "Beacon Hill")),
+    ("phoenix boston", (42.3262, -71.0754, "Roxbury", "54 Shirley St, Boston", "The Phoenix Boston")),
+    ("fourth presbyterian", (42.3332, -71.0478, "South Boston", "340 Dorchester St, Boston", "Fourth Presbyterian Church")),
+    ("kadampa", (42.3962, -71.1306, "North Cambridge", "2298 Massachusetts Ave, Cambridge", "Kadampa Meditation Center")),
+    ("chevalier", (42.4178, -71.1064, "Medford Square", "30 Forest St, Medford", "Chevalier Theatre")),
+    ("arrow street arts", (42.3725, -71.1165, "Harvard Square", "2 Arrow St, Cambridge", "Arrow Street Arts")),
+    ("brendan behan", (42.3147, -71.1118, "Jamaica Plain", "378 Centre St, Jamaica Plain", "The Brendan Behan Pub")),
+    ("emmanuel church", (42.3523, -71.0734, "Back Bay", "15 Newbury St, Boston", "Emmanuel Church")),
+    ("church of the covenant", (42.3524, -71.0722, "Back Bay", "67 Newbury St, Boston", "Church of the Covenant")),
 ]
 
 # Coordinate bounding box for valid Greater Boston / Eastern MA events
