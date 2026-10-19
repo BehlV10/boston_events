@@ -295,6 +295,56 @@ class TestBostonEvents(unittest.TestCase):
             except Exception:
                 pass
 
+    def test_boston_shows_feed_and_mapping(self):
+        """Boston Shows scraper must parse events with coordinates and neighborhood."""
+        from unittest.mock import patch, MagicMock
+        from scrapers import scrape_boston_shows
+        import json
+
+        mock_payload = {
+            "venues": {
+                "The Burren": {
+                    "city": "Somerville",
+                    "lat": 42.3963,
+                    "lng": -71.1215,
+                    "neighborhood": "Davis Square",
+                    "address": "247 Elm St, Somerville",
+                    "link": "https://burren.com"
+                }
+            },
+            "events": [
+                {
+                    "venue": "The Burren",
+                    "city": "Somerville",
+                    "title": "Traditional Irish Session",
+                    "link": "https://burren.com/irish-session",
+                    "start": "2026-10-25T19:00:00",
+                    "genre": "folk"
+                }
+            ]
+        }
+        mock_resp = MagicMock()
+        mock_resp.json.return_value = mock_payload
+        mock_resp.raise_for_status.return_value = None
+
+        with patch("scrapers._SESSION.get", return_value=mock_resp):
+            events = scrape_boston_shows("https://bostonshows.org/events.json", UA_CHROME)
+
+        self.assertEqual(len(events), 1)
+        ev = events[0]
+        self.assertEqual(ev["name"], "Traditional Irish Session")
+        self.assertEqual(ev["venue"], "The Burren")
+        self.assertEqual(ev["neighborhood"], "Davis Square")
+        self.assertEqual(ev["category"], "music")
+        self.assertAlmostEqual(ev["lat"], 42.3963, places=3)
+        self.assertAlmostEqual(ev["lng"], -71.1215, places=3)
+        self.assertTrue(ev["date"].endswith("+00:00") or ev["date"].endswith("Z"))
+
+        # Test resolve_event_geo on Boston Shows event
+        geo = resolve_event_geo(ev)
+        self.assertIsNotNone(geo)
+        self.assertEqual(geo["venue"], "The Burren")
+
 
 if __name__ == "__main__":
     unittest.main()

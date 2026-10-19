@@ -755,7 +755,7 @@ def _source_priority(s):
     s = (s or "").lower()
     if s in ("ticketmaster", "seatgeek", "eventbrite", "eventbrite boston", "eventbrite cambridge", "eventbrite somerville"):
         return 1
-    if s in ("the boston calendar", "do617"):
+    if s in ("the boston calendar", "do617", "boston shows"):
         return 5
     return 10
 
@@ -771,7 +771,7 @@ def _merge_duplicates(events):
     seen_exact = {}
     seen_head = {}
     out = []
-    generic_sources = {"ticketmaster", "seatgeek", "the boston calendar", "eventbrite boston", "eventbrite cambridge", "eventbrite somerville", "do617"}
+    generic_sources = {"ticketmaster", "seatgeek", "the boston calendar", "eventbrite boston", "eventbrite cambridge", "eventbrite somerville", "do617", "boston shows"}
 
     def _is_different_show(e1, e2):
         t1 = e1.get("_time")
@@ -1020,7 +1020,7 @@ def render_page(results):
 
             if e.get("_is_community"):
                 venue_html = f'{venue_link}{geo_btn} <span class="badge-community" title="Community submitted event">👤 Community</span>'
-            elif source and source.lower() != venue.lower() and not any(agg in source.lower() for agg in ["ticketmaster", "eventbrite", "do617", "boston calendar"]):
+            elif source and source.lower() != venue.lower() and not any(agg in source.lower() for agg in ["ticketmaster", "eventbrite", "do617", "boston calendar", "boston shows"]):
                 venue_html = f'{venue_link}{geo_btn} <span class="venue-via">(via {escape(source)})</span>'
             else:
                 venue_html = f'{venue_link}{geo_btn}'
@@ -3082,6 +3082,10 @@ def render_page(results):
     </main>
     {useful_sidebar}
   </div>
+  <footer>
+    <p>Boston Events · Live local music, comedy, arts, outdoors &amp; community events across Greater Boston.</p>
+    <p style="margin-top:6px; font-size:11px; opacity:0.85;">Data compiled directly from venue calendars, community submissions, and local open event feeds including <a href="https://bostonshows.org" target="_blank" rel="noopener" style="color:var(--muted); text-decoration:underline;">Boston Shows</a>. Not affiliated with any commercial ticketing broker.</p>
+  </footer>
   <!-- Community Event Submission Modal -->
   <div id="submit-event-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-submit-title" style="display:none;">
     <div class="modal-card" id="submit-modal-card">

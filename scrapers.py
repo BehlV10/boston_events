@@ -5122,7 +5122,70 @@ def scrape_downtown_boston(url, ua):
     return events
 
 
+def scrape_boston_shows(url, ua):
+    """Scrape upcoming live shows from Boston Shows (bostonshows.org/events.json).
+
+    Provides comprehensive coverage across 200 Greater Boston music venues with
+    exact coordinates, neighborhoods, and direct event ticketing links.
+    """
+    try:
+        resp = _SESSION.get(
+            url,
+            headers={
+                "User-Agent": ua or UA_CHROME,
+                "Accept": "application/json",
+            },
+            timeout=15,
+        )
+        resp.raise_for_status()
+        data = resp.json()
+    except Exception:
+        return []
+
+    venues = data.get("venues", {})
+    raw_events = data.get("events", [])
+    now = datetime.now(EASTERN)
+
+    events = []
+    for ev in raw_events:
+        start_str = ev.get("start")
+        if not start_str:
+            continue
+        try:
+            dt = datetime.fromisoformat(start_str).replace(tzinfo=EASTERN)
+        except Exception:
+            continue
+
+        if (now - dt).total_seconds() > 24 * 3600:
+            continue
+
+        vname = (ev.get("venue") or "").strip()
+        vmeta = venues.get(vname, {})
+
+        title = (ev.get("title") or "").strip()
+        if not title:
+            continue
+
+        genre = (ev.get("genre") or "").lower()
+        cat = "classical" if genre == "classical" else "music"
+
+        events.append({
+            "name": title,
+            "date": dt.astimezone(timezone.utc).isoformat(),
+            "url": ev.get("link") or vmeta.get("link") or url,
+            "venue": vname or "Boston Shows",
+            "lat": vmeta.get("lat"),
+            "lng": vmeta.get("lng"),
+            "neighborhood": vmeta.get("neighborhood") or "",
+            "address": vmeta.get("address") or "",
+            "category": cat,
+        })
+
+    return events
+
+
 _ALL_VENUES = [
+    {"name": "Boston Shows", "url": "https://bostonshows.org/events.json", "ua": UA_CHROME, "scraper": scrape_boston_shows, "default_category": "music"},
     {"name": "Warehouse XI", "url": "https://www.wxi.space", "ua": UA_CHROME, "scraper": scrape_warehouse_xi, "default_category": "music"},
     {"name": "Downtown Boston BID", "url": "https://www.downtownboston.org/events/", "ua": UA_CHROME, "scraper": scrape_downtown_boston, "default_category": "community"},
     {"name": "Dani's Queer Bar", "url": "https://www.eventbrite.com/d/ma--boston/danis-queer-bar/", "ua": UA_CHROME, "scraper": scrape_danis_queer_bar, "default_category": "clubbing"},
@@ -5274,6 +5337,7 @@ STATIC_LINKS = [
     ("clubbing","Gay Mafia Boston (Legacy & Candystrip parties)", "https://www.gaymafiaboston.com"),
     ("clubbing","LesbianNightLife (tea dances & queer parties)", "https://www.lesbiannightlife.com"),
     ("clubbing","FERAL (@feral.party · queer/trans rager)", "https://www.instagram.com/feral.party"),
+    ("music",   "Boston Shows (bostonshows.org — live music calendar)", "https://bostonshows.org"),
 ]
 
 
