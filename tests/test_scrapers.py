@@ -295,55 +295,42 @@ class TestBostonEvents(unittest.TestCase):
             except Exception:
                 pass
 
-    def test_boston_shows_feed_and_mapping(self):
-        """Boston Shows scraper must parse events with coordinates and neighborhood."""
-        from unittest.mock import patch, MagicMock
-        from scrapers import scrape_boston_shows
-        import json
+    def test_berklee_scraper_and_mapping(self):
+        """Berklee scraper must parse events with proper date/time, sub-venues, and mapping."""
+        from unittest.mock import patch
+        from bs4 import BeautifulSoup
+        from scrapers import scrape_berklee
 
-        mock_payload = {
-            "venues": {
-                "The Burren": {
-                    "city": "Somerville",
-                    "lat": 42.3963,
-                    "lng": -71.1215,
-                    "neighborhood": "Davis Square",
-                    "address": "247 Elm St, Somerville",
-                    "link": "https://burren.com"
-                }
-            },
-            "events": [
-                {
-                    "venue": "The Burren",
-                    "city": "Somerville",
-                    "title": "Traditional Irish Session",
-                    "link": "https://burren.com/irish-session",
-                    "start": "2026-10-25T19:00:00",
-                    "genre": "folk"
-                }
-            ]
-        }
-        mock_resp = MagicMock()
-        mock_resp.json.return_value = mock_payload
-        mock_resp.raise_for_status.return_value = None
+        sample_html = """
+        <div class="event teaser">
+            <a href="/events/trio-narae-recital">
+                <div class="title">Trio Narae Recital</div>
+            </a>
+            <div class="field--name-field-event-instance-date">
+                <div class="daterange">Saturday / October 24, 2026 / 7:30 p.m.(EDT)</div>
+            </div>
+            <div class="fieldgroup-event-venue">
+                <div class="field--name-field-event-venue-title">Berklee Performance Center</div>
+                <div class="venue-address">136 Massachusetts Avenue, Boston, MA 02115</div>
+            </div>
+        </div>
+        """
+        def mock_fetch(url, ua):
+            if "page=1" in url or "page=2" in url or "page=3" in url:
+                return BeautifulSoup("", "html.parser")
+            return BeautifulSoup(sample_html, "html.parser")
 
-        with patch("scrapers._SESSION.get", return_value=mock_resp):
-            events = scrape_boston_shows("https://bostonshows.org/events.json", UA_CHROME)
+        with patch("scrapers.fetch_soup", side_effect=mock_fetch):
+            events = scrape_berklee("https://www.berklee.edu/events", UA_CHROME)
 
         self.assertEqual(len(events), 1)
         ev = events[0]
-        self.assertEqual(ev["name"], "Traditional Irish Session")
-        self.assertEqual(ev["venue"], "The Burren")
-        self.assertEqual(ev["neighborhood"], "Davis Square")
+        self.assertEqual(ev["name"], "Trio Narae Recital")
+        self.assertEqual(ev["venue"], "Berklee Performance Center")
         self.assertEqual(ev["category"], "music")
-        self.assertAlmostEqual(ev["lat"], 42.3963, places=3)
-        self.assertAlmostEqual(ev["lng"], -71.1215, places=3)
-        self.assertTrue(ev["date"].endswith("+00:00") or ev["date"].endswith("Z"))
-
-        # Test resolve_event_geo on Boston Shows event
         geo = resolve_event_geo(ev)
         self.assertIsNotNone(geo)
-        self.assertEqual(geo["venue"], "The Burren")
+        self.assertEqual(geo["venue"], "Berklee Performance Center")
 
     def test_venue_ttl_and_disk_cache(self):
         """Test per-venue TTL categorization, cache saving, and loading."""
@@ -354,7 +341,7 @@ class TestBostonEvents(unittest.TestCase):
 
         # 1. TTL checks
         self.assertEqual(_get_venue_ttl("Ticketmaster"), FAST_VENUE_TTL)
-        self.assertEqual(_get_venue_ttl("Boston Shows"), FAST_VENUE_TTL)
+        self.assertEqual(_get_venue_ttl("Do617"), FAST_VENUE_TTL)
         self.assertEqual(_get_venue_ttl("Boston Public Library"), SLOW_VENUE_TTL)
         self.assertEqual(_get_venue_ttl("The Sinclair"), DEFAULT_VENUE_TTL)
 
@@ -544,7 +531,7 @@ class TestBostonEvents(unittest.TestCase):
                 "date": dt_5pm,
                 "venue": "Club Passim",
                 "url": "https://www.passim.org/live-music/events/will-varley/",
-                "source": "boston shows",
+                "source": "the boston calendar",
             },
             {
                 "name": "Will Varley (Will Lawrence opens)",
@@ -572,7 +559,7 @@ class TestBostonEvents(unittest.TestCase):
                 "date": dt_7pm,
                 "venue": "McCarthy's",
                 "url": "https://www.mccarthystoad.com/calendar#event-1",
-                "source": "boston shows",
+                "source": "do617",
             },
             {
                 "name": "McCarthys Cambridge Irish Session",
@@ -605,7 +592,71 @@ class TestBostonEvents(unittest.TestCase):
         self.assertEqual(item["_time"].hour, 19)
         self.assertEqual(item["_time"].minute, 30)
 
+    def test_direct_music_scrapers(self):
+        """Test Symphony Hall, Berklee, and The Bebop direct scrapers and verify aggregator removal."""
+        from scrapers import _ALL_VENUES, scrape_symphony_hall, scrape_the_bebop, scrape_berklee
+        from unittest.mock import patch, MagicMock
+
+        # Verify Boston Shows aggregator is not in configured venues
+        venue_names = [v["name"] for v in _ALL_VENUES]
+        self.assertNotIn("Boston Shows", venue_names)
+        self.assertIn("Symphony Hall", venue_names)
+        self.assertIn("Berklee College of Music", venue_names)
+        self.assertIn("The Bebop", venue_names)
+        self.assertIn("Longy School of Music", venue_names)
+
+        # 1. Test Symphony Hall scraper
+        mock_typesense = {
+            "hits": [
+                {
+                    "document": {
+                        "title": "Andris Nelsons conducts Mahler 5",
+                        "performance_date": 1792625400,
+                        "performance_link": "https://www.bso.org/events/mahler-5",
+                        "performance_venue": [{"name": "Symphony Hall"}],
+                        "subhead": "BSO Masterworks Series",
+                    }
+                }
+            ]
+        }
+        with patch("scrapers._SESSION.get") as mock_get:
+            mock_resp = MagicMock()
+            mock_resp.status_code = 200
+            mock_resp.json.return_value = mock_typesense
+            mock_get.return_value = mock_resp
+
+            bso_events = scrape_symphony_hall("https://www.bso.org/events", "TestUA")
+            self.assertEqual(len(bso_events), 1)
+            self.assertEqual(bso_events[0]["name"], "Andris Nelsons conducts Mahler 5")
+            self.assertEqual(bso_events[0]["venue"], "Symphony Hall")
+            self.assertEqual(bso_events[0]["category"], "classical")
+
+        # 2. Test The Bebop scraper
+        mock_bebop = {
+            "items": [
+                {
+                    "title": "Gypsy Jazz Brunch",
+                    "startDate": 1793462400000,
+                    "fullUrl": "/new-events/gypsy-jazz-brunch",
+                    "excerpt": "Live acoustic gypsy jazz every Sunday.",
+                }
+            ]
+        }
+        with patch("scrapers._SESSION.get") as mock_get:
+            mock_resp = MagicMock()
+            mock_resp.status_code = 200
+            mock_resp.json.return_value = mock_bebop
+            mock_get.return_value = mock_resp
+
+            bebop_events = scrape_the_bebop("https://thebebopboston.com/new-events", "TestUA")
+            self.assertEqual(len(bebop_events), 1)
+            self.assertEqual(bebop_events[0]["name"], "Gypsy Jazz Brunch")
+            self.assertEqual(bebop_events[0]["venue"], "The Bebop")
+            self.assertEqual(bebop_events[0]["price"], "Free")
+            self.assertEqual(bebop_events[0]["category"], "music")
+
 
 if __name__ == "__main__":
     unittest.main()
+
 

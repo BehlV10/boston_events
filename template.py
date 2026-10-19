@@ -3170,7 +3170,7 @@ def render_page(results):
   </div>
   <footer>
     <p>Boston Events · Live local music, comedy, arts, outdoors &amp; community events across Greater Boston.</p>
-    <p style="margin-top:6px; font-size:11px; opacity:0.85;">Data compiled directly from venue calendars, community submissions, and local open event feeds including <a href="https://bostonshows.org" target="_blank" rel="noopener" style="color:var(--muted); text-decoration:underline;">Boston Shows</a>. Not affiliated with any commercial ticketing broker.</p>
+    <p style="margin-top:6px; font-size:11px; opacity:0.85;">Data compiled directly from venue calendars and official local community feeds. Not affiliated with any commercial ticketing broker.</p>
   </footer>
   <!-- Community Event Submission Modal -->
   <div id="submit-event-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-submit-title" style="display:none;">

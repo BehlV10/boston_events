@@ -584,6 +584,14 @@ VENUE_RULES = [
     ("morningside", (42.3308, -71.0837, "Roxbury", "2307 Washington St, Roxbury", "Morningside Annex")),
     ("smfa", (42.3365, -71.0963, "Fenway", "230 Fenway, Boston", "SMFA at Tufts")),
     ("sowa", (42.3435, -71.0664, "South End", "530 Harrison Ave, Boston", "SoWa Open Market")),
+    ("longy", (42.3785, -71.1235, "Harvard Square", "27 Garden St, Cambridge", "Longy School of Music")),
+    ("pickman", (42.3785, -71.1235, "Harvard Square", "27 Garden St, Cambridge", "Pickman Hall (Longy)")),
+    ("boston symphony", (42.3428, -71.0858, "Fenway / Symphony", "301 Massachusetts Ave, Boston", "Symphony Hall")),
+    ("bso", (42.3428, -71.0858, "Fenway / Symphony", "301 Massachusetts Ave, Boston", "Symphony Hall")),
+    ("boston conservatory", (42.3458, -71.0898, "Fenway", "31 Hemenway St, Boston", "Boston Conservatory Theater")),
+    ("seully hall", (42.3466, -71.0895, "Fenway", "8 Fenway, Boston", "Seully Hall (Berklee)")),
+    ("houston hall", (42.3466, -71.0895, "Fenway", "8 Fenway, Boston", "Houston Hall (Berklee)")),
+    ("berk recital hall", (42.3466, -71.0895, "Fenway", "1140 Boylston St, Boston", "Berk Recital Hall (Berklee)")),
 ]
 
 # Coordinate bounding box for valid Greater Boston / Eastern MA events

@@ -5299,70 +5299,175 @@ def scrape_downtown_boston(url, ua):
     return events
 
 
-def scrape_boston_shows(url, ua):
-    """Scrape upcoming live shows from Boston Shows (bostonshows.org/events.json).
-
-    Provides comprehensive coverage across 200 Greater Boston music venues with
-    exact coordinates, neighborhoods, and direct event ticketing links.
-    """
+def scrape_symphony_hall(url, ua):
+    """Boston Symphony Orchestra, Boston Pops, and Symphony Hall concerts via official Typesense API."""
+    now = int(time.time())
+    api_url = "https://go8f04wi19tuvlyrp-1.a1.typesense.net/collections/performances/documents/search"
+    params = {
+        "q": "*",
+        "query_by": "title",
+        "sort_by": "performance_date:asc",
+        "filter_by": f"show_in_cal:true && performance_date:>={now}",
+        "per_page": 250,
+    }
+    headers = {
+        "X-TYPESENSE-API-KEY": "qoWHCTjesGfIaxdXbw9vOgod1VToEXNI",
+        "User-Agent": ua or UA_CHROME,
+    }
     try:
-        resp = _SESSION.get(
-            url,
-            headers={
-                "User-Agent": ua or UA_CHROME,
-                "Accept": "application/json",
-            },
-            timeout=15,
-        )
+        resp = _SESSION.get(api_url, params=params, headers=headers, timeout=12)
         resp.raise_for_status()
         data = resp.json()
     except Exception:
         return []
 
-    venues = data.get("venues", {})
-    raw_events = data.get("events", [])
-    now = datetime.now(EASTERN)
-
     events = []
-    for ev in raw_events:
-        start_str = ev.get("start")
-        if not start_str:
+    seen = set()
+    for hit in data.get("hits", []):
+        doc = hit.get("document", {})
+        title = (doc.get("title") or "").strip()
+        ts = doc.get("performance_date")
+        if not title or not ts:
             continue
-        try:
-            dt = datetime.fromisoformat(start_str).replace(tzinfo=EASTERN)
-        except Exception:
+        dt = datetime.fromtimestamp(ts, tz=timezone.utc)
+        link = doc.get("performance_link") or doc.get("event_link") or doc.get("ticket_link") or url
+        key = (title.lower(), dt.isoformat())
+        if key in seen:
             continue
-
-        if (now - dt).total_seconds() > 24 * 3600:
-            continue
-
-        vname = (ev.get("venue") or "").strip()
-        vmeta = venues.get(vname, {})
-
-        title = (ev.get("title") or "").strip()
-        if not title:
-            continue
-
-        genre = (ev.get("genre") or "").lower()
-        cat = "classical" if genre == "classical" else "music"
-
+        seen.add(key)
+        venues = doc.get("performance_venue", [])
+        vname = venues[0].get("name", "Symphony Hall") if venues else "Symphony Hall"
+        desc = doc.get("subhead") or re.sub(r"<[^>]+>", " ", doc.get("excerpt") or "").strip()
         events.append({
             "name": title,
-            "date": dt.astimezone(timezone.utc).isoformat(),
-            "url": ev.get("link") or vmeta.get("link") or url,
-            "venue": vname or "Boston Shows",
-            "lat": vmeta.get("lat"),
-            "lng": vmeta.get("lng"),
-            "neighborhood": vmeta.get("neighborhood") or "",
-            "address": vmeta.get("address") or "",
-            "category": cat,
+            "date": dt.isoformat(),
+            "url": link,
+            "venue": vname,
+            "price": None,
+            "description": desc[:300] if desc else None,
+            "category": "classical",
         })
+    return events
+
+
+def scrape_berklee(url, ua):
+    """Berklee College of Music and Boston Conservatory concerts, recitals, and masterclasses."""
+    base_url = "https://www.berklee.edu"
+    events = []
+    seen = set()
+    now = datetime.now(EASTERN)
+
+    for page in range(4):
+        page_url = f"{url}?page={page}" if page > 0 else url
+        soup = fetch_soup(page_url, ua)
+        if not soup:
+            break
+
+        cards = soup.select(".event.teaser")
+        if not cards:
+            break
+
+        for card in cards:
+            title_el = card.select_one(".title") or card.find(["h3", "h2"])
+            if not title_el:
+                continue
+            name = re.sub(r"\s+", " ", title_el.get_text(strip=True))
+            if not name:
+                continue
+
+            a = card.find("a", href=True)
+            link = urljoin(base_url, a["href"]) if a else page_url
+            if link in seen:
+                continue
+
+            date_el = card.select_one(".field--name-field-event-instance-date") or card.select_one(".daterange") or card.select_one(".date")
+            if not date_el:
+                continue
+            date_raw = date_el.get_text(strip=True)
+
+            dm = re.search(r"([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})\s*/\s*(\d{1,2}):(\d{2})\s*(a\.m\.|p\.m\.|am|pm)", date_raw, re.I)
+            if not dm:
+                continue
+
+            m_str, d_str, y_str, h_str, mn_str, ampm = dm.groups()
+            try:
+                month_num = datetime.strptime(m_str[:3], "%b").month
+                h = int(h_str)
+                mn = int(mn_str)
+                if "p" in ampm.lower() and h < 12:
+                    h += 12
+                elif "a" in ampm.lower() and h == 12:
+                    h = 0
+                dt = datetime(int(y_str), month_num, int(d_str), h, mn, tzinfo=EASTERN)
+                if (now - dt).total_seconds() > 24 * 3600:
+                    continue
+            except Exception:
+                continue
+
+            v_el = card.select_one(".field--name-field-event-venue-title")
+            vname = v_el.get_text(strip=True) if v_el else "Berklee Performance Center"
+
+            seen.add(link)
+            events.append({
+                "name": name,
+                "date": dt.astimezone(timezone.utc).isoformat(),
+                "url": link,
+                "venue": vname,
+                "price": "Free" if "free" in card.get_text().lower() else None,
+                "category": "music",
+            })
 
     return events
 
 
+def scrape_the_bebop(url, ua):
+    """The Bebop — live music bar next to Berklee on Boylston St (jazz, blues, folk, funk)."""
+    target_url = "https://www.thebebopboston.com/new-events?format=json"
+    try:
+        resp = _SESSION.get(target_url, headers={"User-Agent": ua or UA_CHROME}, timeout=10)
+        resp.raise_for_status()
+        data = resp.json()
+    except Exception:
+        return []
+
+    events = []
+    now = datetime.now(timezone.utc)
+    cutoff = now + timedelta(days=90)
+    seen = set()
+    for item in data.get("items", []):
+        title = re.sub(r"\s+", " ", (item.get("title") or "").strip())
+        if not title:
+            continue
+        ms = item.get("startDate")
+        if not ms:
+            continue
+        dt = datetime.fromtimestamp(ms / 1000, tz=timezone.utc)
+        if dt < now - timedelta(days=1) or dt > cutoff:
+            continue
+        full_url = item.get("fullUrl")
+        ev_url = f"https://thebebopboston.com{full_url}" if full_url else "https://thebebopboston.com/new-events"
+        key = (title.lower(), dt.isoformat())
+        if key in seen:
+            continue
+        seen.add(key)
+        desc = re.sub(r"<[^>]+>", " ", item.get("excerpt") or item.get("body") or "").strip()
+        events.append({
+            "name": title,
+            "date": dt.isoformat(),
+            "url": ev_url,
+            "venue": "The Bebop",
+            "price": "Free",
+            "description": desc[:300] if desc else None,
+            "category": "music",
+        })
+    return events
+
+
 _ALL_VENUES = [
-    {"name": "Boston Shows", "url": "https://bostonshows.org/events.json", "ua": UA_CHROME, "scraper": scrape_boston_shows, "default_category": "music"},
+    {"name": "Symphony Hall", "url": "https://www.bso.org/events", "ua": UA_CHROME, "scraper": scrape_symphony_hall, "default_category": "classical"},
+    {"name": "Berklee College of Music", "url": "https://www.berklee.edu/events", "ua": UA_CHROME, "scraper": scrape_berklee, "default_category": "music"},
+    {"name": "The Bebop", "url": "https://thebebopboston.com/new-events", "ua": UA_CHROME, "scraper": scrape_the_bebop, "default_category": "music"},
+    {"name": "Longy School of Music", "url": "https://longy.edu/calendar/list/?ical=1", "ua": UA_CHROME, "scraper": scrape_ical, "default_category": "classical"},
     {"name": "Warehouse XI", "url": "https://www.wxi.space", "ua": UA_CHROME, "scraper": scrape_warehouse_xi, "default_category": "music"},
     {"name": "Downtown Boston BID", "url": "https://www.downtownboston.org/events/", "ua": UA_CHROME, "scraper": scrape_downtown_boston, "default_category": "community"},
     {"name": "Dani's Queer Bar", "url": "https://www.eventbrite.com/d/ma--boston/danis-queer-bar/", "ua": UA_CHROME, "scraper": scrape_danis_queer_bar, "default_category": "clubbing"},
@@ -5514,7 +5619,7 @@ STATIC_LINKS = [
     ("clubbing","Gay Mafia Boston (Legacy & Candystrip parties)", "https://www.gaymafiaboston.com"),
     ("clubbing","LesbianNightLife (tea dances & queer parties)", "https://www.lesbiannightlife.com"),
     ("clubbing","FERAL (@feral.party · queer/trans rager)", "https://www.instagram.com/feral.party"),
-    ("music",   "Boston Shows (bostonshows.org — live music calendar)", "https://bostonshows.org"),
+    ("music",   "Boston Symphony Orchestra / Symphony Hall", "https://www.bso.org/events"),
 ]
 
 
