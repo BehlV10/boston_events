@@ -19,6 +19,7 @@ from scrapers import (
     fetch_boston_weather,
     fetch_luckyseat_boston,
     _load_community_events,
+    is_placeholder_or_closed_event,
 )
 from venues_geo import resolve_event_geo
 
@@ -899,6 +900,9 @@ def group_by_date(results):
     ongoing = []
     for r in results:
         for e in r["events"]:
+            name = e.get("name") or ""
+            if is_placeholder_or_closed_event(name):
+                continue
             entry = {"venue_url": r["url"], **e, "_source_venue": r["venue"]}
             entry["venue"] = e.get("venue") or r["venue"]
             raw = e.get("date")

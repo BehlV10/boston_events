@@ -128,6 +128,47 @@ def fetch_soup(url, ua):
     return BeautifulSoup(resp.text, "html.parser")
 
 
+def is_placeholder_or_closed_event(title: str) -> bool:
+    """Detect dummy calendar placeholders, cancellations, closures, and private events."""
+    if not title:
+        return True
+    t = title.strip()
+
+    # 1. Explicit cancellation or postponement at start of title
+    if re.match(r"^\s*(\*{1,3}|\[|\()?\s*(canceled|cancelled|postponed)\b", t, re.I):
+        return True
+
+    # 2. "No event / no show / no music / no jam / no gypsy jazz"
+    if re.search(r"\bno\s+([\w\s]+\s+)?(event|events|show|shows|live\s+music|music|performance|performances|band|bands|jam|jams|open\s+mic|dancing|dance|jazz)\b", t, re.I):
+        # Guard against band/show names like "No Cover", "No Bad Chords", "No Static", "No Pressure", "No Friends"
+        if not re.search(r"\bno\s+(cover|bad|pressure|static|relation|doubt|friends|more|guarantee|limit|worries|regrets|stopping)\b", t, re.I):
+            return True
+
+    # 3. Check calendar placeholder
+    if re.search(r"\bcheck\s+(our\s+)?calendar\b", t, re.I):
+        return True
+
+    # 4. Standalone or holiday closures: "club closed", "closed for Thanksgiving", "closed for private event"
+    if re.search(r"\b(closed|closing)\b.*(for\s+.*(holiday|thanksgiving|christmas|new\s+year|private)|private\s+(event|party))", t, re.I):
+        return True
+    if re.search(r"^\s*(club|venue|room|lounge|bar|taproom|brewery|kitchen)?\s*closed(\s+today|\s+tonight)?\s*$", t, re.I):
+        return True
+    if re.search(r"\bclosed\s+for\s+(the\s+)?holiday\b", t, re.I):
+        return True
+
+    # 5. Standalone Private event / Private party
+    if re.search(r"^\s*(\*{1,3}|\[|\()?\s*private\s+(event|party|rental|function)\s*(\*{1,3}|\]|\))?\s*$", t, re.I):
+        return True
+    if re.search(r"\bclosed\s+for\s+(a\s+)?private\s+(event|party)\b", t, re.I):
+        return True
+
+    # 6. Generic single-word / short placeholder
+    if t.lower() in ("tba", "tbd", "to be announced", "placeholder", "no title", "closed", "dark"):
+        return True
+
+    return False
+
+
 def parse_crystal_ballroom_date(text):
     """Parse 'Tue, Apr 21, 2026 Show 7:00 pm Doors 6:30 pm All Ages'."""
     if not text:
@@ -3480,7 +3521,7 @@ def scrape_tribe_rest(url, ua, default_venue=None, default_category=None):
 
     for item in data.get("events", []):
         name = html.unescape(item.get("title", "")).strip()
-        if not name:
+        if not name or is_placeholder_or_closed_event(name):
             continue
         start_str = item.get("start_date")
         if not start_str:
@@ -5851,7 +5892,10 @@ def dedupe(events):
     seen = set()
     out = []
     for e in events:
-        key = ((e.get("name") or "").lower(), e.get("date") or "")
+        name = e.get("name") or ""
+        if is_placeholder_or_closed_event(name):
+            continue
+        key = ((name).lower(), e.get("date") or "")
         if key in seen:
             continue
         seen.add(key)
@@ -5894,6 +5938,9 @@ def _init_warm_cache():
                 pass
 
         if venues and isinstance(venues, list):
+            for v in venues:
+                if v.get("events"):
+                    v["events"] = [e for e in v["events"] if not is_placeholder_or_closed_event(e.get("name"))]
             if not _cache["data"]:
                 _cache["data"] = venues
                 _cache["ts"] = file_ts
@@ -5901,6 +5948,7 @@ def _init_warm_cache():
                 vname = v.get("venue")
                 evs = v.get("events")
                 if vname and evs is not None:
+                    evs = [e for e in evs if not is_placeholder_or_closed_event(e.get("name"))]
                     _last_known_good[vname] = evs
                     # If venue cache does not exist on disk, seed it with events and timestamp from events.json
                     cpath = _venue_cache_path(vname)
@@ -5931,7 +5979,7 @@ def _scrape_one(v, force=False):
     if not force:
         cached = _load_venue_cache(name, max_age=ttl)
         if cached and cached.get("events") is not None:
-            events = cached["events"]
+            events = [e for e in cached["events"] if not is_placeholder_or_closed_event(e.get("name"))]
             for e in events:
                 if not e.get("venue"):
                     e["venue"] = name

@@ -472,5 +472,50 @@ class TestBostonEvents(unittest.TestCase):
         self.assertEqual(geo3["venue"], "Sonia")
 
 
+    def test_is_placeholder_or_closed_event(self):
+        """Ensure dummy calendar placeholders, closures, and cancellations are caught while preserving real shows."""
+        from scrapers import is_placeholder_or_closed_event
+
+        # Must be detected as placeholders / closures
+        placeholders = [
+            "No Event Tonight-Check Our Calendar For Upcoming Events",
+            "No Live Music",
+            "No Gypsy Jazz",
+            "No Bluegrass Jam Due To Thanksgiving",
+            "club closed",
+            "Closed for the Thanksgiving Holiday",
+            "Closed for the Christmas Holiday",
+            "Closed for New Year's Day",
+            "** Private Event **",
+            "*PRIVATE EVENT*",
+            "SATELLITE: Closed for a Private Event",
+            "[Satellite] CLOSING at 5 pm for a Private Party",
+            "CANCELED Andy Gross",
+            "POSTPONED Recital: Max Ignas",
+            "CANCELLED: Free Drop-in Tutoring for Teens",
+            "Tbd",
+            "TBA",
+        ]
+        for title in placeholders:
+            self.assertTrue(is_placeholder_or_closed_event(title), f"Failed to detect placeholder: {title}")
+
+        # Must NOT be detected as placeholders (real events)
+        real_events = [
+            "Vince Staples, Private School",
+            "Diles que no me maten",
+            "Straight No Chaser",
+            "No Static: Celebrating the 50th anniversary of Aja",
+            "No Cover Drag Bingo with Wilhelmina",
+            "No Cover Karaoke w/ Miss Jade Rock",
+            "Jimmy O. Yang Has No Friends Tour",
+            "No Relation Hidden Sushi Bar",
+            "Your Own Private Bookstore 11_20_26",
+            "No Grave / Violabajo / Do Whatever Die Whenever",
+            "Down in Davis Presents DOLLY PARTON SING ALONG BRUNCH (Postponed from Sept 25)",
+        ]
+        for title in real_events:
+            self.assertFalse(is_placeholder_or_closed_event(title), f"False positive on real event: {title}")
+
+
 if __name__ == "__main__":
     unittest.main()
