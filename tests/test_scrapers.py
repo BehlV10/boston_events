@@ -516,6 +516,96 @@ class TestBostonEvents(unittest.TestCase):
         for title in real_events:
             self.assertFalse(is_placeholder_or_closed_event(title), f"False positive on real event: {title}")
 
+    def test_deduplication_and_timezones(self):
+        """Verify URL matching, cross-source venue deduplication, and timezone handling."""
+        from template import _merge_duplicates, _clean_event_url, _normalize_title_head, group_by_date, EASTERN
+
+        # 1. Clean event url test
+        self.assertEqual(_clean_event_url("https://www.passim.org/live-music/events/will-varley/"), "https://www.passim.org/live-music/events/will-varley")
+        self.assertEqual(_clean_event_url("https://www.passim.org/live-music/events/will-varley/#buy-tix?ref=1"), "https://www.passim.org/live-music/events/will-varley")
+        self.assertEqual(_clean_event_url("https://www.passim.org/live-music"), "")
+        self.assertEqual(_clean_event_url("https://burren.com/music.html"), "")
+        self.assertEqual(_clean_event_url("https://bostonshows.org"), "")
+
+        # 2. Will Varley deduplication (Passim vs Boston Shows at 5 PM, preserving 8 PM)
+        dt_5pm = datetime(2026, 10, 19, 17, 0, tzinfo=EASTERN).astimezone(timezone.utc).isoformat()
+        dt_8pm = datetime(2026, 10, 19, 20, 0, tzinfo=EASTERN).astimezone(timezone.utc).isoformat()
+        passim_events = [
+            {
+                "name": "Will Varley (Will Lawrence opens)",
+                "date": dt_5pm,
+                "venue": "Club Passim",
+                "price": "$30",
+                "url": "https://www.passim.org/live-music/events/will-varley/",
+                "source": "club passim",
+            },
+            {
+                "name": "Will Varley",
+                "date": dt_5pm,
+                "venue": "Club Passim",
+                "url": "https://www.passim.org/live-music/events/will-varley/",
+                "source": "boston shows",
+            },
+            {
+                "name": "Will Varley (Will Lawrence opens)",
+                "date": dt_8pm,
+                "venue": "Club Passim",
+                "price": "$30",
+                "url": "https://www.passim.org/live-music/events/will-varley-late-show/",
+                "source": "club passim",
+            },
+        ]
+        merged_passim = _merge_duplicates(passim_events)
+        self.assertEqual(len(merged_passim), 2, "5 PM and 8 PM shows should result in 2 separate events")
+        ev_5pm = next(e for e in merged_passim if "17:00" in datetime.fromisoformat(e["date"]).astimezone(EASTERN).strftime("%H:%M"))
+        ev_8pm = next(e for e in merged_passim if "20:00" in datetime.fromisoformat(e["date"]).astimezone(EASTERN).strftime("%H:%M"))
+        self.assertEqual(ev_5pm["price"], "$30")
+        self.assertEqual(ev_5pm["name"], "Will Varley (Will Lawrence opens)")
+        # Identical canonical URLs deduplicate cleanly without redundant self-referencing alt link
+        self.assertEqual(len(ev_5pm.get("_alt_sources", [])), 0)
+
+        # 3. McCarthy's Irish Session title & venue normalization deduplication
+        dt_7pm = datetime(2026, 10, 19, 19, 0, tzinfo=EASTERN).astimezone(timezone.utc).isoformat()
+        mccarthys_events = [
+            {
+                "name": "Irish Session with Eamonn Sefton and friends",
+                "date": dt_7pm,
+                "venue": "McCarthy's",
+                "url": "https://www.mccarthystoad.com/calendar#event-1",
+                "source": "boston shows",
+            },
+            {
+                "name": "McCarthys Cambridge Irish Session",
+                "date": dt_7pm,
+                "venue": "McCarthys Cambridge",
+                "url": "https://www.thebostoncalendar.com/events/mccarthys-cambridge-irish-session--345",
+                "source": "the boston calendar",
+            },
+            {
+                "name": "Live Irish Music Session @ McCarthy's",
+                "date": dt_7pm,
+                "venue": "McCarthy's Toad",
+                "url": "https://www.mccarthystoad.com/calendar#event-2",
+                "source": "mccarthy's toad",
+            },
+        ]
+        merged_mccarthys = _merge_duplicates(mccarthys_events)
+        self.assertEqual(len(merged_mccarthys), 1, "All 3 McCarthy's Irish session entries should merge into 1")
+        self.assertEqual(len(merged_mccarthys[0].get("_alt_sources", [])), 2)
+
+        # 4. Sally O'Brien's 7:30 PM timezone verification
+        # 19:30 EDT = 23:30 UTC. When grouped by date, it must resolve to 19:30 EDT (7:30 PM), never 15:30 (3:30 PM).
+        sally_date_utc = "2026-10-19T23:30:00+00:00"
+        venue_res = [{"venue": "Sally O'Brien's", "url": "https://www.sallyobriensbar.com/music", "events": [{"name": "The White Owls", "date": sally_date_utc, "venue": "Sally O'Brien's"}]}]
+        dated, _, _ = group_by_date(venue_res)
+        target_date = datetime(2026, 10, 19).date()
+        date_map = dict(dated)
+        self.assertIn(target_date, date_map)
+        item = date_map[target_date][0]
+        self.assertEqual(item["_time"].hour, 19)
+        self.assertEqual(item["_time"].minute, 30)
+
 
 if __name__ == "__main__":
     unittest.main()
+

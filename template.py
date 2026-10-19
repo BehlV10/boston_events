@@ -655,11 +655,28 @@ GENERIC_DESCRIPTOR_PREFIXES = {
 }
 
 
-def _normalize_title_head(title):
+def _normalize_title_head(title, venue=None):
     t = (title or "").lower().strip()
+
+    # 1. Strip venue name from title if title starts with venue (e.g. "McCarthys Cambridge Irish Session")
+    if venue:
+        v_clean = re.sub(r"[^a-z0-9]+", " ", venue.lower()).strip()
+        v_core = re.sub(r"^the\s+", "", v_clean).strip()
+        t_clean = re.sub(r"[^a-z0-9]+", " ", t).strip()
+        for v_cand in [v_clean, v_core]:
+            if v_cand and len(v_cand) >= 4 and t_clean.startswith(v_cand):
+                t = t_clean[len(v_cand):].strip()
+                break
+
+    # 2. Strip leading generic words: "live ", "traditional ", "weekly ", "annual "
+    t = re.sub(r"^(?:live|traditional|weekly|annual)\s+", "", t, flags=re.I)
+
+    # 3. Strip parentheses / brackets with openers, support, guest, tour, etc.
+    t = re.sub(r"\s*[\(\[][^\)\]]*(?:touring|18\+|21\+|sold out|ages|rescheduled|presale|preseason|preview|week\s*\d+|opens|opener|support|guest|special guest|featuring)[^\)\]]*[\)\]]", "", t, flags=re.I)
+
+    # 4. Standard prefixes & suffixes
     t = re.sub(r"^(?:broadway in boston|presents|live nation presents|bowery presents|bowery boston presents):\s*", "", t)
     t = re.sub(r"^(?:nba\s+|mlb\s+|nhl\s+|nfl\s+)?(?:preseason|rescheduled|postponed):\s*", "", t)
-    t = re.sub(r"\s*[\(\[][^\)\]]*(?:touring|18\+|21\+|sold out|ages|rescheduled|presale|preseason|preview|week\s*\d+)[^\)\]]*[\)\]]", "", t)
     t = re.sub(r"\s+at\s+(?:the\s+)?[a-z0-9\x27\s\.\&\-]+$", "", t)
     t = re.sub(r"\s*-\s*202\d\s+tour.*$", "", t)
     t = re.sub(r"\s*-\s*tour.*$", "", t)
@@ -676,7 +693,7 @@ def _normalize_title_head(title):
         "lecture", "discussion", "series", "market", "night", "trivia", "brunch", "show"
     )
 
-    for sep in [":", " with ", " feat. ", " feat ", " ft. ", " ft ", " - ", " – ", " — ", " “", " \"", "”", "“", "\""]:
+    for sep in [":", " @ ", " @", " with ", " feat. ", " feat ", " ft. ", " ft ", " - ", " – ", " — ", " “", " \"", "”", "“", "\""]:
         if sep in t:
             parts = t.split(sep, 1)
             left = parts[0].strip()
@@ -691,6 +708,9 @@ def _normalize_title_head(title):
         parts = t.split(",", 1)
         if len(parts[0].strip()) >= 3:
             t = parts[0].strip()
+
+    t = re.sub(r"^(?:live|traditional|weekly|annual)\s+", "", t, flags=re.I)
+    t = re.sub(r"\bmusic\s+", "", t, flags=re.I)
     t = re.sub(r"[^a-z0-9]+", " ", t).strip()
     return t
 
@@ -761,6 +781,25 @@ def _source_priority(s):
     return 10
 
 
+def _clean_event_url(u):
+    if not u or not isinstance(u, str):
+        return ""
+    u = re.sub(r"[?#].*$", "", u).strip().rstrip("/")
+    generic = {
+        "https://www.passim.org/live-music",
+        "https://burren.com/music.html",
+        "https://www.sallyobriensbar.com/music",
+        "https://www.mccarthystoad.com/calendar",
+        "https://www.thebostoncalendar.com",
+        "https://bostonshows.org",
+        "https://facebook.com",
+        "https://instagram.com",
+    }
+    if u in generic or len(u.split("/")) <= 3:
+        return ""
+    return u
+
+
 def _merge_duplicates(events):
     """Collapse events sharing a normalized name or head title within the same day bucket.
 
@@ -771,20 +810,39 @@ def _merge_duplicates(events):
     """
     seen_exact = {}
     seen_head = {}
+    seen_url = {}
     out = []
     generic_sources = {"ticketmaster", "seatgeek", "the boston calendar", "eventbrite boston", "eventbrite cambridge", "eventbrite somerville", "do617", "boston shows"}
 
     def _is_different_show(e1, e2):
         t1 = e1.get("_time")
         t2 = e2.get("_time")
+        if not t1 and e1.get("date"):
+            try:
+                t1 = datetime.fromisoformat(str(e1["date"]).replace("Z", "+00:00"))
+            except Exception:
+                pass
+        if not t2 and e2.get("date"):
+            try:
+                t2 = datetime.fromisoformat(str(e2["date"]).replace("Z", "+00:00"))
+            except Exception:
+                pass
         if not t1 or not t2:
             return False
+        if t1.tzinfo is None:
+            t1 = t1.replace(tzinfo=EASTERN)
+        else:
+            t1 = t1.astimezone(EASTERN)
+        if t2.tzinfo is None:
+            t2 = t2.replace(tzinfo=EASTERN)
+        else:
+            t2 = t2.astimezone(EASTERN)
         # If either time is EDT midnight (00:00), it is likely an untimed/all-day placeholder
         if (t1.hour == 0 and t1.minute == 0) or (t2.hour == 0 and t2.minute == 0):
             return False
         diff_mins = abs((t1 - t2).total_seconds()) / 60.0
-        s1 = (e1.get("_source_venue") or "").lower()
-        s2 = (e2.get("_source_venue") or "").lower()
+        s1 = (e1.get("_source_venue") or e1.get("source") or "").lower()
+        s2 = (e2.get("_source_venue") or e2.get("source") or "").lower()
         # Same source with >= 45m diff: distinct show sets (e.g. 7:00 PM and 9:30 PM)
         if s1 and s1 == s2 and diff_mins >= 45:
             return True
@@ -810,8 +868,8 @@ def _merge_duplicates(events):
             "theatre", "theater", "tavern", "pub", "bar", "lounge", "brewery",
             "brewing", "cafe", "café", "center", "hall", "club", "studio", "house", "room"
         }
-        w1 = set(re.findall(r"\w+", v1_low)) - generic_vwords
-        w2 = set(re.findall(r"\w+", v2_low)) - generic_vwords
+        w1 = {re.sub(r"s$", "", w) for w in re.findall(r"\w+", v1_low)} - generic_vwords
+        w2 = {re.sub(r"s$", "", w) for w in re.findall(r"\w+", v2_low)} - generic_vwords
         if w1 and w2 and (w1 & w2):
             return True
         if e1 and e2:
@@ -824,12 +882,21 @@ def _merge_duplicates(events):
     for e in events:
         raw_name = e.get("name") or ""
         full = re.sub(r"[^a-z0-9]+", " ", raw_name.lower()).strip()
-        head = _normalize_title_head(raw_name)
-        venue = (e.get("venue") or "").lower()
+        venue_str = e.get("venue") or ""
+        head = _normalize_title_head(raw_name, venue=venue_str)
+        venue = venue_str.lower()
+        curl = _clean_event_url(e.get("url"))
 
         match = None
+        # 0. Canonical specific URL match check
+        if curl and curl in seen_url:
+            for cand in seen_url[curl]:
+                if not _is_different_show(e, cand):
+                    match = cand
+                    break
+
         # 1. Exact match check
-        if full and len(full) >= 4 and full in seen_exact:
+        if not match and full and len(full) >= 4 and full in seen_exact:
             for cand in seen_exact[full]:
                 if not _is_different_show(e, cand):
                     match = cand
@@ -843,6 +910,17 @@ def _merge_duplicates(events):
                     if not _is_different_show(e, cand):
                         match = cand
                         break
+
+        # 3. Same physical venue title prefix/containment match
+        if not match and head and len(head) >= 4 and head not in GENERIC_HEADS:
+            for cand in out:
+                c_venue = (cand.get("venue") or "").lower()
+                if _venue_match(venue, c_venue, e, cand) and not _is_different_show(e, cand):
+                    cand_head = _normalize_title_head(cand.get("name") or "", venue=cand.get("venue"))
+                    if cand_head and cand_head not in GENERIC_HEADS:
+                        if (cand_head.startswith(head) or head.startswith(cand_head)) and min(len(head), len(cand_head)) >= 6:
+                            match = cand
+                            break
 
         if match:
             match.setdefault("_alt_sources", [])
@@ -879,6 +957,8 @@ def _merge_duplicates(events):
             if not match.get("description") and e.get("description"):
                 match["description"] = e["description"]
         else:
+            if curl:
+                seen_url.setdefault(curl, []).append(e)
             if full and len(full) >= 4:
                 seen_exact.setdefault(full, []).append(e)
             if head and len(head) >= 4 and head not in GENERIC_HEADS:
@@ -909,7 +989,11 @@ def group_by_date(results):
             key = None
             if raw:
                 try:
-                    dt = datetime.fromisoformat(raw.replace("Z", "+00:00")).astimezone(EASTERN)
+                    dt = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+                    if dt.tzinfo is None:
+                        dt = dt.replace(tzinfo=EASTERN)
+                    else:
+                        dt = dt.astimezone(EASTERN)
                     key = dt.date()
                     entry["_time"] = dt
                 except (TypeError, ValueError):

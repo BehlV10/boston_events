@@ -4152,7 +4152,7 @@ def scrape_sally_obriens(url, ua):
                         raw_h = 0
                     hour = raw_h
 
-                dt = datetime(year, month_idx, day_num, hour, minute)
+                dt = datetime(year, month_idx, day_num, hour, minute, tzinfo=EASTERN)
 
                 i += 1
                 if i < len(lines):
@@ -4179,7 +4179,7 @@ def scrape_sally_obriens(url, ua):
                     if band_name and len(band_name) > 1 and "followed by" not in band_name.lower():
                         events.append({
                             "name": band_name,
-                            "date": dt.isoformat(),
+                            "date": dt.astimezone(timezone.utc).isoformat(),
                             "url": "https://www.sallyobriensbar.com/music",
                             "venue": "Sally O'Brien's",
                             "price": price or "Free / $10",
@@ -4406,7 +4406,7 @@ def scrape_somerville_library(url, ua):
 
             try:
                 y, m, d = [int(x) for x in date_str.split("-")]
-                iso_dt = datetime(y, m, d, hour, minute).isoformat()
+                iso_dt = datetime(y, m, d, hour, minute, tzinfo=EASTERN).astimezone(timezone.utc).isoformat()
             except Exception:
                 iso_dt = None
 
@@ -4879,10 +4879,17 @@ def scrape_club_passim(url, ua):
             if not parent:
                 continue
             title_el = parent.find(["h2", "h3", "h4", "h5", "h1"])
-            title = title_el.get_text(strip=True) if title_el else ""
+            if not title_el:
+                continue
+            a = title_el.find("a") or parent.find("a")
+            if a and a.find("em"):
+                em_text = a.find("em").get_text(strip=True)
+                main_text = "".join(c for c in a.contents if isinstance(c, str)).strip()
+                title = f"{main_text} ({em_text})" if main_text and em_text else a.get_text(" ", strip=True)
+            else:
+                title = title_el.get_text(" ", strip=True)
             if not title:
                 continue
-            a = parent.find("a")
             link = a["href"] if a and "href" in a.attrs else "https://www.passim.org/live-music/"
             if link in seen:
                 continue
@@ -4923,7 +4930,7 @@ def scrape_club_passim(url, ua):
             seen.add(link)
             out.append({
                 "name": title,
-                "date": dt.isoformat(),
+                "date": dt.astimezone(timezone.utc).isoformat(),
                 "url": link,
                 "venue": "Club Passim",
                 "price": price,
