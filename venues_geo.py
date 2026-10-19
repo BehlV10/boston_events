@@ -233,7 +233,6 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
     "downtown boston": (42.3555, -71.0601, "Downtown / Financial District", "Downtown Crossing, Boston", "Downtown Boston"),
     "downtown crossing": (42.3555, -71.0601, "Downtown / Financial District", "Downtown Crossing, Boston", "Downtown Crossing"),
     "downtown boston bid": (42.3555, -71.0601, "Downtown / Financial District", "Downtown Crossing, Boston", "Downtown Boston BID"),
-    "joyraft curated": (42.3555, -71.0601, "Downtown / Financial District", "Boston, MA", "Joyraft Curated"),
     "old state house": (42.3587, -71.0578, "Downtown / Financial District", "206 Washington St, Boston", "Old State House"),
     "old south meeting house": (42.3569, -71.0594, "Downtown / Financial District", "310 Washington St, Boston", "Old South Meeting House"),
     "sunset cantina": (42.3503, -71.1187, "Allston / BU", "916 Commonwealth Ave, Boston", "Sunset Cantina"),

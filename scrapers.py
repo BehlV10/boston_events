@@ -4990,67 +4990,50 @@ def scrape_feral(url, ua):
 def scrape_warehouse_xi(url, ua):
     """Warehouse XI (11 Sanborn Ct, Union Square, Somerville).
 
-    Scrapes upcoming indie concerts & performances from Boston Shows
-    (with direct Eventim ticket links and pricing) and community forums / art
-    gatherings from Eventbrite.
+    Direct primary scraper: pulls upcoming concerts & live shows straight from
+    in-house promoter Get To The Gig Boston (with Eventim checkout links) and
+    community forums / arts gatherings from Eventbrite.
     """
     events = []
     now = datetime.now(timezone.utc)
-    current_year = datetime.now(EASTERN).year
 
-    # 1. Shows via bostonshows.org
+    # 1. Shows directly from in-house promoter Get To The Gig Boston
     try:
-        bs_url = "https://bostonshows.org/venues/warehouse-xi.html"
-        soup = fetch_soup(bs_url, ua)
-        for tr in soup.find_all("tr", class_="event"):
-            start_td = tr.find("td", class_="event-start")
-            details_td = tr.find("td", class_="event-details")
-            if not start_td or not details_td:
-                continue
+        g2g_url = "https://core.service.elfsight.com/p/boot/?page=https%3A%2F%2Fget2thegigbos.com%2Fhome&w=4e09de31-e966-4802-8dbe-53cecc8533ca"
+        resp = _SESSION.get(g2g_url, headers={"User-Agent": ua}, timeout=12)
+        resp.raise_for_status()
+        data = resp.json()
+        widgets = data.get("data", {}).get("widgets", {})
+        if widgets:
+            w = list(widgets.values())[0]
+            for ev in w.get("data", {}).get("settings", {}).get("events", []):
+                # 'loew1wfv' is Get To The Gig's venue ID for Warehouse XI
+                if "loew1wfv" in ev.get("location", []):
+                    name = ev.get("name")
+                    start = ev.get("start", {})
+                    s_date = start.get("date")
+                    s_time = start.get("time") or "20:00"
+                    if not name or not s_date:
+                        continue
+                    try:
+                        dt = datetime.strptime(f"{s_date} {s_time}", "%Y-%m-%d %H:%M").replace(tzinfo=EASTERN)
+                        if dt.astimezone(timezone.utc) < now - timedelta(days=1):
+                            continue
+                        iso = dt.astimezone(timezone.utc).isoformat()
+                    except Exception:
+                        continue
 
-            divs = [d.get_text(strip=True) for d in start_td.find_all("div") if d.get_text(strip=True)]
-            if not divs:
-                continue
-            date_str = divs[0]
-            time_str = divs[1] if len(divs) > 1 else "8:00pm"
+                    actions = ev.get("actions", [])
+                    ticket_url = actions[0].get("link", {}).get("value") if actions else "https://www.wxi.space"
 
-            m = re.search(r"([A-Za-z]+)\s+(\d{1,2})", date_str)
-            if not m:
-                continue
-            month_str, day_str = m.group(1), m.group(2)
-            try:
-                dt_naive = datetime.strptime(f"{current_year} {month_str} {day_str} {time_str}", "%Y %b %d %I:%M%p")
-            except Exception:
-                try:
-                    dt_naive = datetime.strptime(f"{current_year} {month_str} {day_str}", "%Y %b %d")
-                except Exception:
-                    continue
-
-            dt_eastern = dt_naive.replace(tzinfo=EASTERN)
-            if dt_eastern.astimezone(timezone.utc) < now - timedelta(days=1):
-                dt_eastern = dt_eastern.replace(year=current_year + 1)
-
-            title_a = details_td.find("div", class_="event-title").find("a") if details_td.find("div", class_="event-title") else None
-            title = title_a.get_text(strip=True) if title_a else "Concert at Warehouse XI"
-            ticket_url = title_a.get("href") if title_a else url
-
-            info_div = details_td.find("div", class_="event-info")
-            info_text = info_div.get_text(" ", strip=True) if info_div else ""
-            price = None
-            price_match = re.search(r"\$(\d+(?:\.\d{2})?)", info_text)
-            if price_match:
-                price = f"${price_match.group(1)}"
-            elif "free" in info_text.lower():
-                price = "Free"
-
-            events.append({
-                "name": title,
-                "date": dt_eastern.astimezone(timezone.utc).isoformat(),
-                "url": ticket_url,
-                "venue": "Warehouse XI",
-                "price": price,
-                "category": "music",
-            })
+                    events.append({
+                        "name": name,
+                        "date": iso,
+                        "url": ticket_url,
+                        "venue": "Warehouse XI",
+                        "price": None,
+                        "category": "music",
+                    })
     except Exception:
         pass
 
@@ -5075,7 +5058,7 @@ def scrape_warehouse_xi(url, ua):
                                 events.append({
                                     "name": ev_name,
                                     "date": ev_start if "T" in ev_start else f"{ev_start}T19:00:00-04:00",
-                                    "url": ev_url or url,
+                                    "url": ev_url or "https://www.wxi.space",
                                     "venue": "Warehouse XI",
                                     "price": None,
                                     "category": "community",
@@ -5139,76 +5122,9 @@ def scrape_downtown_boston(url, ua):
     return events
 
 
-def scrape_joyraft(url, ua):
-    """Joyraft Curated Experiences (joyraft.com).
-
-    Extracts high-interest curated 'Hot & new' and 'Happening this weekend' events.
-    """
-    events = []
-    try:
-        soup = fetch_soup("https://joyraft.com", ua)
-        script = soup.find("script", id="__NEXT_DATA__")
-        if not script:
-            return events
-        data = json.loads(script.string)
-        queries = data.get("props", {}).get("pageProps", {}).get("dehydratedState", {}).get("queries", [])
-
-        seen = set()
-        for q in queries:
-            query_data = q.get("state", {}).get("data", {})
-            pages = query_data.get("pages", [])
-            for page in pages:
-                items = page.get("data", []) if isinstance(page, dict) else (page if isinstance(page, list) else [])
-                for it in items:
-                    name = it.get("name")
-                    if not name:
-                        continue
-                    when = it.get("when", {})
-                    start_date = when.get("startDate")
-                    start_time = when.get("startTime") or "19:00"
-                    if not start_date:
-                        continue
-
-                    try:
-                        dt = datetime.strptime(f"{start_date} {start_time}", "%Y-%m-%d %H:%M").replace(tzinfo=EASTERN)
-                        iso = dt.astimezone(timezone.utc).isoformat()
-                    except Exception:
-                        continue
-
-                    where = it.get("where", {})
-                    venue_name = where.get("name") or "Boston"
-                    city = where.get("city")
-                    if city and city.lower() not in venue_name.lower():
-                        venue_display = f"{venue_name} ({city})"
-                    else:
-                        venue_display = venue_name
-
-                    slug = it.get("slug")
-                    event_url = f"https://joyraft.com/experience/{slug}" if slug else url
-
-                    key = (name.lower(), iso[:10])
-                    if key in seen:
-                        continue
-                    seen.add(key)
-
-                    events.append({
-                        "name": name,
-                        "date": iso,
-                        "url": event_url,
-                        "venue": venue_display,
-                        "price": None,
-                        "category": infer_category(name, venue_display, default="community"),
-                    })
-    except Exception:
-        pass
-
-    return events
-
-
 _ALL_VENUES = [
-    {"name": "Warehouse XI", "url": "https://bostonshows.org/venues/warehouse-xi.html", "ua": UA_CHROME, "scraper": scrape_warehouse_xi, "default_category": "music"},
+    {"name": "Warehouse XI", "url": "https://www.wxi.space", "ua": UA_CHROME, "scraper": scrape_warehouse_xi, "default_category": "music"},
     {"name": "Downtown Boston BID", "url": "https://www.downtownboston.org/events/", "ua": UA_CHROME, "scraper": scrape_downtown_boston, "default_category": "community"},
-    {"name": "Joyraft Curated", "url": "https://joyraft.com/", "ua": UA_CHROME, "scraper": scrape_joyraft, "default_category": "community"},
     {"name": "Dani's Queer Bar", "url": "https://www.eventbrite.com/d/ma--boston/danis-queer-bar/", "ua": UA_CHROME, "scraper": scrape_danis_queer_bar, "default_category": "clubbing"},
     {"name": "Club Café", "url": "https://www.clubcafe.com/full-calendar/", "ua": UA_CHROME, "scraper": scrape_club_cafe, "default_category": "clubbing"},
     {"name": "FERAL", "url": "https://www.eventbrite.com/o/feral-events-71015854393", "ua": UA_CHROME, "scraper": scrape_feral, "default_category": "clubbing"},
