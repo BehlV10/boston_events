@@ -13,9 +13,11 @@ from scrapers import (
     EASTERN,
     CATEGORY_BUCKETS,
     CATEGORY_STYLES,
+    MUSIC_GENRES,
     DEAL_LINKS,
     STATIC_LINKS,
     category_bucket,
+    infer_music_genre,
     fetch_boston_weather,
     fetch_luckyseat_boston,
     _load_community_events,
@@ -954,6 +956,9 @@ def _merge_duplicates(events):
             if (not match.get("category") or match.get("category") in ("other", "community")) and e.get("category") and e.get("category") not in ("other", "community"):
                 match["category"] = e["category"]
 
+            if not match.get("genre") and e.get("genre"):
+                match["genre"] = e["genre"]
+
             if not match.get("description") and e.get("description"):
                 match["description"] = e["description"]
         else:
@@ -1061,9 +1066,21 @@ def render_page(results):
             price_tag = ""
 
         cat = e.get("category") or "other"
+        genre = e.get("genre")
+        if not genre and cat in ("music", "clubbing"):
+            genre = infer_music_genre(e.get("name"), e.get("venue"), description=e.get("description"), category=cat)
+            e["genre"] = genre
+
         bucket = category_bucket(cat)
-        color, icon = CATEGORY_STYLES.get(cat, CATEGORY_STYLES["other"])
-        cat_tag = f'<span class="cat-pill" style="--cat-c:{color}; background:{color}18; border-color:{color}33; color:{color}">{icon} {escape(cat)}</span>'
+        if genre and genre in MUSIC_GENRES:
+            ginfo = MUSIC_GENRES[genre]
+            gcolor = ginfo["color"]
+            gicon = ginfo["icon"]
+            glabel = ginfo["label"]
+            cat_tag = f'<span class="cat-pill genre-pill" data-genre="{escape(genre)}" title="Music Genre: {escape(glabel)}" style="--cat-c:{gcolor}; background:{gcolor}18; border-color:{gcolor}33; color:{gcolor}">{gicon} {escape(glabel)}</span>'
+        else:
+            color, icon = CATEGORY_STYLES.get(cat, CATEGORY_STYLES["other"])
+            cat_tag = f'<span class="cat-pill" style="--cat-c:{color}; background:{color}18; border-color:{color}33; color:{color}">{icon} {escape(cat)}</span>'
         venue = e.get("venue") or ""
         source = e.get("_source_venue") or ""
         city = _event_city(venue, source, e)
@@ -1132,7 +1149,8 @@ def render_page(results):
         desc_html = f'<div class="desc">{escape(desc)}</div>' if desc else ""
         free_flag = "true" if is_free else "false"
         epoch_attr = f' data-epoch="{int(e["_time"].timestamp())}"' if e.get("_time") else ''
-        return f'''<li class="event" data-cat="{escape(cat)}" data-bucket="{escape(bucket)}" data-venue="{escape(source)}" data-city="{escape(city)}"{sub_attrs} data-recur="{recur_flag}" data-free="{free_flag}"{epoch_attr}{geo_attrs}>
+        genre_attr = f' data-genre="{escape(genre)}"' if genre else ''
+        return f'''<li class="event" data-cat="{escape(cat)}" data-bucket="{escape(bucket)}"{genre_attr} data-venue="{escape(source)}" data-city="{escape(city)}"{sub_attrs} data-recur="{recur_flag}" data-free="{free_flag}"{epoch_attr}{geo_attrs}>
           <div class="when">{escape(format_when(e))}</div>
           <div class="what">{link}{price_tag}{recur_badge}
             <div class="venue-tag">{cat_tag}{f" · {venue_html}" if venue_html else ""}{sub_tag}{extra_html}{cal_html}</div>
@@ -1310,6 +1328,24 @@ def render_page(results):
             <span>{_bucket_icon_row(b)} {escape(b)} <span class="count">{bucket_counts.get(b, 0)}</span></span>
           </label>'''
         for b in bucket_order
+    )
+
+    genre_order = list(MUSIC_GENRES.keys())
+    genre_counts = {g: 0 for g in genre_order}
+    for e in all_events_flat:
+        g = e.get("genre")
+        if not g and (e.get("category") or "") in ("music", "clubbing"):
+            g = infer_music_genre(e.get("name"), e.get("venue"), description=e.get("description"), category=e.get("category"))
+            e["genre"] = g
+        if g in genre_counts:
+            genre_counts[g] += 1
+
+    genre_boxes = "\n".join(
+        f'''<label class="chk">
+            <input type="checkbox" class="genre-chk" value="{escape(gid)}" checked>
+            <span><span class="genre-swatch" style="background:{ginfo['color']}"></span>{ginfo['icon']} {escape(ginfo['label'])} <span class="count">{genre_counts.get(gid, 0)}</span></span>
+          </label>'''
+        for gid, ginfo in MUSIC_GENRES.items()
     )
 
     recur_boxes = f'''
@@ -1682,6 +1718,81 @@ def render_page(results):
     color: var(--muted);
     font-size: 11px;
     font-weight: 500;
+  }}
+
+  /* Music Genre Chips Bar */
+  .genre-chips-bar {{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 6px 10px;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    max-width: 100%;
+  }}
+  .genre-chips-bar::-webkit-scrollbar {{
+    display: none;
+  }}
+  .genre-chip {{
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+    user-select: none;
+  }}
+  .genre-chip:hover {{
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #fff;
+  }}
+  .genre-chip.active {{
+    background: rgba(122, 162, 247, 0.18);
+    border-color: rgba(122, 162, 247, 0.5);
+    color: #fff;
+    font-weight: 700;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
+  }}
+  .genre-chip.active[data-genre="rock_indie"] {{ border-color: #ff708d; background: rgba(255, 112, 141, 0.2); color: #ff94ab; }}
+  .genre-chip.active[data-genre="jazz_blues"] {{ border-color: #f29e4c; background: rgba(242, 158, 76, 0.2); color: #ffb169; }}
+  .genre-chip.active[data-genre="folk_trad"] {{ border-color: #9ece6a; background: rgba(158, 206, 106, 0.2); color: #b4e67d; }}
+  .genre-chip.active[data-genre="electronic"] {{ border-color: #bb9af7; background: rgba(187, 154, 247, 0.2); color: #cfb7ff; }}
+  .genre-chip.active[data-genre="classical"] {{ border-color: #7aa2f7; background: rgba(122, 162, 247, 0.2); color: #9abaff; }}
+  .genre-chip.active[data-genre="hiphop_rnb"] {{ border-color: #f0a07a; background: rgba(240, 160, 122, 0.2); color: #ffb799; }}
+  .genre-chip.active[data-genre="latin_global"] {{ border-color: #ffb8d1; background: rgba(255, 184, 209, 0.2); color: #ffd1e3; }}
+  .genre-chip.active[data-genre="pop"] {{ border-color: #ffd866; background: rgba(255, 216, 102, 0.2); color: #ffe68f; }}
+
+  .genre-pill {{
+    cursor: pointer;
+    transition: transform 0.12s ease, filter 0.12s ease;
+  }}
+  .genre-pill:hover {{
+    transform: translateY(-1px);
+    filter: brightness(1.25);
+  }}
+  .genre-swatch {{
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 4px;
+    vertical-align: middle;
   }}
 
   /* Quick-Access Chips Bar */
@@ -2620,6 +2731,14 @@ def render_page(results):
       padding: 3px 9px;
       font-size: 11px;
     }}
+    .genre-chips-bar {{
+      padding: 5px 8px;
+      gap: 5px;
+    }}
+    .genre-chip {{
+      padding: 3px 10px;
+      font-size: 11px;
+    }}
     .quick-chips-bar {{
       flex-wrap: nowrap;
       overflow-x: auto;
@@ -3062,6 +3181,10 @@ def render_page(results):
         <h3>Category <span class="spacer"></span> <button type="button" id="cat-all">all</button> <button type="button" id="cat-none">none</button></h3>
         <div class="chk-grid">{bucket_boxes}</div>
       </div>
+      <div class="filter-group" id="filter-group-genre">
+        <h3>Music Genre <span class="spacer"></span> <button type="button" id="genre-all">all</button> <button type="button" id="genre-none">none</button></h3>
+        <div class="chk-grid">{genre_boxes}</div>
+      </div>
       <div class="filter-group">
         <h3>City <span class="spacer"></span> <button type="button" id="city-all">all</button> <button type="button" id="city-none">none</button></h3>
         <div class="chk-grid">{city_boxes}</div>
@@ -3102,6 +3225,17 @@ def render_page(results):
         <button type="button" class="loc-chip" data-city="other"><span class="city-dot" style="background:#9aa3b2"></span>Greater Boston</button>
       </div>
       <div class="subarea-chips-bar" id="subarea-chips-bar" style="display: none;"></div>
+      <div class="genre-chips-bar" id="genre-chips-bar">
+        <button type="button" class="genre-chip active" data-genre="all">♪ All Music</button>
+        <button type="button" class="genre-chip" data-genre="rock_indie">🎸 Rock &amp; Indie</button>
+        <button type="button" class="genre-chip" data-genre="jazz_blues">🎷 Jazz &amp; Blues</button>
+        <button type="button" class="genre-chip" data-genre="folk_trad">🪕 Folk &amp; Trad</button>
+        <button type="button" class="genre-chip" data-genre="electronic">🎛 Electronic</button>
+        <button type="button" class="genre-chip" data-genre="classical">🎻 Classical</button>
+        <button type="button" class="genre-chip" data-genre="hiphop_rnb">🎤 Hip-Hop &amp; R&B</button>
+        <button type="button" class="genre-chip" data-genre="latin_global">🪇 Latin &amp; Global</button>
+        <button type="button" class="genre-chip" data-genre="pop">✨ Pop</button>
+      </div>
       <div class="quick-chips-bar" id="quick-chips">
         <button type="button" class="chip active" data-time="today">⚡ Today</button>
         <button type="button" class="chip" data-time="tomorrow">Tomorrow</button>
@@ -3392,6 +3526,7 @@ def render_page(results):
 
   <script>
     const catBoxes = document.querySelectorAll('.cat-chk');
+    const genreBoxes = document.querySelectorAll('.genre-chk');
     const venueBoxes = document.querySelectorAll('.venue-chk');
     const recurBoxes = document.querySelectorAll('.recur-chk');
     const cityBoxes = document.querySelectorAll('.city-chk');
@@ -3404,6 +3539,8 @@ def render_page(results):
 
     const locChips = document.querySelectorAll('#location-chips .loc-chip');
     const subareaBar = document.getElementById('subarea-chips-bar');
+    const genreChips = document.querySelectorAll('#genre-chips-bar .genre-chip');
+    let activeGenre = 'all';
     const SUBAREAS_DATA = {json.dumps(SUBAREAS_BY_CITY)};
     const CITY_LABELS_MAP = {json.dumps(CITY_LABELS)};
     let activeSubarea = 'all';
@@ -3941,6 +4078,8 @@ def render_page(results):
     function updateMobileBadge() {{
       const allCats = catBoxes.length;
       const chkCats = Array.from(catBoxes).filter(b => b.checked).length;
+      const allGenres = genreBoxes.length;
+      const chkGenres = Array.from(genreBoxes).filter(b => b.checked).length;
       const allVenues = venueBoxes.length;
       const chkVenues = Array.from(venueBoxes).filter(b => b.checked).length;
       const allCities = cityBoxes.length;
@@ -3948,7 +4087,7 @@ def render_page(results):
       const allRecurs = recurBoxes.length;
       const chkRecurs = Array.from(recurBoxes).filter(b => b.checked).length;
       const isFree = freeOnlyChk && freeOnlyChk.checked;
-      const isFiltered = (chkCats < allCats) || (chkVenues < allVenues) || (chkCities < allCities) || (chkRecurs < allRecurs) || isFree || popularOnly || (activeSubarea !== 'all') || (searchInput && !!searchInput.value.trim());
+      const isFiltered = (chkCats < allCats) || (chkGenres < allGenres) || (activeGenre !== 'all') || (chkVenues < allVenues) || (chkCities < allCities) || (chkRecurs < allRecurs) || isFree || popularOnly || (activeSubarea !== 'all') || (searchInput && !!searchInput.value.trim());
 
       if (mobileBadge) {{
         mobileBadge.textContent = isFiltered ? 'Active' : 'All';
@@ -3983,6 +4122,14 @@ def render_page(results):
       const allCats = Array.from(catBoxes).map(b => b.value);
       const checkedCats = Array.from(catBoxes).filter(b => b.checked).map(b => b.value);
       if (checkedCats.length > 0 && checkedCats.length < allCats.length) params.set('cat', checkedCats.join(','));
+
+      if (activeGenre && activeGenre !== 'all') {{
+        params.set('genre', activeGenre);
+      }} else {{
+        const allGenres = Array.from(genreBoxes).map(b => b.value);
+        const checkedGenres = Array.from(genreBoxes).filter(b => b.checked).map(b => b.value);
+        if (checkedGenres.length > 0 && checkedGenres.length < allGenres.length) params.set('genre', checkedGenres.join(','));
+      }}
 
       const allCities = Array.from(cityBoxes).map(b => b.value);
       const checkedCities = Array.from(cityBoxes).filter(b => b.checked).map(b => b.value);
@@ -4032,6 +4179,19 @@ def render_page(results):
         if (params.has('cat')) {{
           const vals = new Set(params.get('cat').split(','));
           catBoxes.forEach(b => {{ b.checked = vals.has(b.value); }});
+        }}
+
+        if (params.has('genre')) {{
+          const gVal = params.get('genre');
+          if (gVal.includes(',')) {{
+            const vals = new Set(gVal.split(','));
+            genreBoxes.forEach(b => {{ b.checked = vals.has(b.value); }});
+          }} else {{
+            activeGenre = gVal;
+            genreChips.forEach(c => {{
+              c.classList.toggle('active', c.dataset.genre === activeGenre);
+            }});
+          }}
         }}
 
         if (params.has('city')) {{
@@ -4096,6 +4256,7 @@ def render_page(results):
 
     function apply() {{
       const cats = new Set(Array.from(catBoxes).filter(b => b.checked).map(b => b.value));
+      const checkedGenres = new Set(Array.from(genreBoxes).filter(b => b.checked).map(b => b.value));
       const venues = new Set(Array.from(venueBoxes).filter(b => b.checked).map(b => b.value));
       const recurs = new Set(Array.from(recurBoxes).filter(b => b.checked).map(b => b.value));
       const cities = new Set(Array.from(cityBoxes).filter(b => b.checked).map(b => b.value));
@@ -4126,6 +4287,15 @@ def render_page(results):
         const popularOk = !popularOnly || parseInt(li.dataset.votes || '0', 10) >= 3;
         const searchOk = !searchText || li.textContent.toLowerCase().includes(searchText);
 
+        const evGenre = li.dataset.genre;
+        const isMusicEv = li.dataset.bucket === 'Music & nightlife' || !!evGenre;
+        let genreOk = true;
+        if (activeGenre !== 'all') {{
+          genreOk = (evGenre === activeGenre);
+        }} else if (isMusicEv && evGenre) {{
+          genreOk = checkedGenres.has(evGenre);
+        }}
+
         const daySec = li.closest('.day');
         const dayDate = daySec ? daySec.dataset.date : '';
         const isToday = daySec && dayDate === todayISO;
@@ -4148,7 +4318,7 @@ def render_page(results):
           }}
         }}
 
-        const isVisible = catOk && venueOk && recurOk && cityOk && subareaOk && searchOk && freeOk && timePastOk && popularOk;
+        const isVisible = catOk && genreOk && venueOk && recurOk && cityOk && subareaOk && searchOk && freeOk && timePastOk && popularOk;
         li.classList.toggle('hidden', !isVisible);
 
         if (isToday && isVisible && !isPast) {{
@@ -4481,12 +4651,29 @@ def render_page(results):
 
     if (freeOnlyChk) freeOnlyChk.addEventListener('change', apply);
     catBoxes.forEach(b => b.addEventListener('change', apply));
+    genreBoxes.forEach(b => b.addEventListener('change', () => {{ apply(); stateToHash(); }}));
     venueBoxes.forEach(b => b.addEventListener('change', apply));
     recurBoxes.forEach(b => b.addEventListener('change', apply));
     cityBoxes.forEach(b => b.addEventListener('change', apply));
     searchInput.addEventListener('input', apply);
     document.getElementById('cat-all').addEventListener('click', () => {{ catBoxes.forEach(b => b.checked = true); apply(); }});
     document.getElementById('cat-none').addEventListener('click', () => {{ catBoxes.forEach(b => b.checked = false); apply(); }});
+    const genreAllBtn = document.getElementById('genre-all');
+    if (genreAllBtn) genreAllBtn.addEventListener('click', () => {{
+      genreBoxes.forEach(b => b.checked = true);
+      activeGenre = 'all';
+      genreChips.forEach(c => c.classList.toggle('active', c.dataset.genre === 'all'));
+      apply();
+      stateToHash();
+    }});
+    const genreNoneBtn = document.getElementById('genre-none');
+    if (genreNoneBtn) genreNoneBtn.addEventListener('click', () => {{
+      genreBoxes.forEach(b => b.checked = false);
+      activeGenre = 'all';
+      genreChips.forEach(c => c.classList.toggle('active', c.dataset.genre === 'all'));
+      apply();
+      stateToHash();
+    }});
     document.getElementById('venue-all').addEventListener('click', () => {{
       venueBoxes.forEach(b => b.checked = true);
       try {{ localStorage.removeItem('boston_saved_venues'); }} catch (_) {{}}
@@ -4496,11 +4683,42 @@ def render_page(results):
     document.getElementById('city-all').addEventListener('click', () => {{ activeSubarea = 'all'; cityBoxes.forEach(b => b.checked = true); apply(); }});
     document.getElementById('city-none').addEventListener('click', () => {{ activeSubarea = 'all'; cityBoxes.forEach(b => b.checked = false); apply(); }});
 
+    function setGenre(genre) {{
+      if (activeGenre === genre) {{
+        activeGenre = 'all';
+      }} else {{
+        activeGenre = genre;
+      }}
+      genreChips.forEach(c => {{
+        c.classList.toggle('active', c.dataset.genre === activeGenre);
+      }});
+      apply();
+      stateToHash();
+    }}
+    genreChips.forEach(c => {{
+      c.addEventListener('click', () => {{
+        setGenre(c.dataset.genre);
+      }});
+    }});
+
+    document.addEventListener('click', (e) => {{
+      const pill = e.target.closest('.genre-pill');
+      if (pill && pill.dataset.genre) {{
+        e.preventDefault();
+        setGenre(pill.dataset.genre);
+        const bar = document.getElementById('genre-chips-bar');
+        if (bar) bar.scrollIntoView({{ behavior: 'smooth', block: 'nearest' }});
+      }}
+    }});
+
     function resetAllFilters() {{
       if (searchInput) searchInput.value = '';
       if (freeOnlyChk) freeOnlyChk.checked = false;
       popularOnly = false;
       activeSubarea = 'all';
+      activeGenre = 'all';
+      genreChips.forEach(c => c.classList.toggle('active', c.dataset.genre === 'all'));
+      genreBoxes.forEach(b => b.checked = true);
       catBoxes.forEach(b => b.checked = true);
       cityBoxes.forEach(b => b.checked = true);
       recurBoxes.forEach(b => b.checked = true);

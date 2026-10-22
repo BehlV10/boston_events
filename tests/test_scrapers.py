@@ -582,10 +582,11 @@ class TestBostonEvents(unittest.TestCase):
 
         # 4. Sally O'Brien's 7:30 PM timezone verification
         # 19:30 EDT = 23:30 UTC. When grouped by date, it must resolve to 19:30 EDT (7:30 PM), never 15:30 (3:30 PM).
-        sally_date_utc = "2026-10-19T23:30:00+00:00"
+        target_date = datetime.now(EASTERN).date() + timedelta(days=1)
+        target_dt = datetime(target_date.year, target_date.month, target_date.day, 19, 30, tzinfo=EASTERN)
+        sally_date_utc = target_dt.astimezone(timezone.utc).isoformat()
         venue_res = [{"venue": "Sally O'Brien's", "url": "https://www.sallyobriensbar.com/music", "events": [{"name": "The White Owls", "date": sally_date_utc, "venue": "Sally O'Brien's"}]}]
         dated, _, _ = group_by_date(venue_res)
-        target_date = datetime(2026, 10, 19).date()
         date_map = dict(dated)
         self.assertIn(target_date, date_map)
         item = date_map[target_date][0]
@@ -776,8 +777,70 @@ class TestBostonEvents(unittest.TestCase):
         ]:
             self.assertIn(target, venue_names, f"Missing {target} in _ALL_VENUES")
 
+    def test_music_genre_classification_and_rendering(self):
+        """Verify music genre mapping, rule inference, negative filters, and HTML badge rendering."""
+        from scrapers import infer_music_genre, map_native_genre, MUSIC_GENRES, EASTERN
+        from template import render_page
+
+        # 1. Test native genre mapping
+        self.assertEqual(map_native_genre("Rock"), "rock_indie")
+        self.assertEqual(map_native_genre("Alternative"), "rock_indie")
+        self.assertEqual(map_native_genre("Hip-Hop/Rap"), "hiphop_rnb")
+        self.assertEqual(map_native_genre("Trap"), "hiphop_rnb")
+        self.assertEqual(map_native_genre("Pop"), "pop")
+        self.assertEqual(map_native_genre("Electro Pop"), "pop")
+        self.assertEqual(map_native_genre("Jazz"), "jazz_blues")
+        self.assertEqual(map_native_genre("Blues"), "jazz_blues")
+        self.assertEqual(map_native_genre("Folk"), "folk_trad")
+        self.assertEqual(map_native_genre("Bluegrass"), "folk_trad")
+        self.assertEqual(map_native_genre("Dance/Electronic"), "electronic")
+        self.assertEqual(map_native_genre("Techno"), "electronic")
+        self.assertEqual(map_native_genre("Classical"), "classical")
+        self.assertEqual(map_native_genre("Latin"), "latin_global")
+        self.assertEqual(map_native_genre("Bachata"), "latin_global")
+        self.assertIsNone(map_native_genre("Undefined"))
+
+        # 2. Test venue anchor inference
+        self.assertEqual(infer_music_genre("Evening Concert", "Boston Symphony Orchestra"), "classical")
+        self.assertEqual(infer_music_genre("Friday Jam", "Wally's Cafe"), "jazz_blues")
+        self.assertEqual(infer_music_genre("Acoustic Night", "Club Passim"), "folk_trad")
+        self.assertEqual(infer_music_genre("Industrial Night", "ManRay"), "electronic")
+
+        # 3. Test keyword rules & negative exceptions
+        self.assertEqual(infer_music_genre("Dark Star Orchestra", "Paradise Rock Club"), "rock_indie")
+        self.assertEqual(infer_music_genre("Beethoven Symphony No. 5", "Random Hall"), "classical")
+        self.assertEqual(infer_music_genre("Irish Trad Session", "Local Pub"), "folk_trad")
+        self.assertEqual(infer_music_genre("Techno Dance Party", "Local Club"), "electronic")
+        self.assertEqual(infer_music_genre("Hip-Hop Showcase", "Underground Lounge"), "hiphop_rnb")
+        self.assertEqual(infer_music_genre("Maestros de la Bachata", "Music Hall"), "latin_global")
+        self.assertEqual(infer_music_genre("Taylor Swift Night", "Lounge"), "pop")
+
+        # 4. Test HTML output includes genre chips bar and sidebar group
+        sample_results = [
+            {
+                "venue": "Wally's Cafe",
+                "url": "https://wallyscafe.com",
+                "events": [
+                    {
+                        "name": "Live Jazz Trio",
+                        "date": (datetime.now(EASTERN) + timedelta(hours=3)).isoformat(),
+                        "url": "https://wallyscafe.com/shows",
+                        "venue": "Wally's Cafe",
+                        "category": "music",
+                    }
+                ]
+            }
+        ]
+        html = render_page(sample_results)
+        self.assertIn("genre-chips-bar", html)
+        self.assertIn("filter-group-genre", html)
+        self.assertIn('data-genre="jazz_blues"', html)
+        self.assertIn("Jazz &amp; Blues", html)
+        self.assertIn("genre-pill", html)
+
 
 if __name__ == "__main__":
     unittest.main()
+
 
 

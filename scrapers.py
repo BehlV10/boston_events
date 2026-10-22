@@ -1961,7 +1961,12 @@ def scrape_bowery_boston(url, ua):
         key = (title.lower(), iso_str)
         if key in seen:
             continue
-        seen.add(key)
+        bio_raw = e.get("bio") or e.get("description") or ""
+        bio_clean = re.sub(r"<[^>]+>", " ", bio_raw)
+        bio_clean = re.sub(r"\s+", " ", bio_clean).strip()
+        desc = bio_clean[:300] if bio_clean else None
+        genre = infer_music_genre(title, vname, description=bio_clean)
+
         events.append({
             "name": title,
             "date": iso_str,
@@ -1969,6 +1974,8 @@ def scrape_bowery_boston(url, ua):
             "venue": vname,
             "price": ticketing.get("priceRange"),
             "category": "music",
+            "genre": genre,
+            "description": desc,
         })
     return events
 
@@ -3092,6 +3099,19 @@ def scrape_seatgeek(_url, _ua):
                 elif any(m in all_tags for m in ["concert", "music", "orchestral", "classical", "band", "festival_music"]):
                     cat = "music"
 
+                genre = None
+                if cat == "music":
+                    native_g = None
+                    for p in ev.get("performers", []):
+                        for g_obj in p.get("genres", []):
+                            g_str = g_obj.get("name") if isinstance(g_obj, dict) else str(g_obj)
+                            native_g = map_native_genre(g_str)
+                            if native_g:
+                                break
+                        if native_g:
+                            break
+                    genre = infer_music_genre(ev.get("title") or ev.get("short_title"), venue, native_genre=native_g)
+
                 events.append({
                     "name": ev.get("title") or ev.get("short_title"),
                     "date": iso,
@@ -3099,6 +3119,7 @@ def scrape_seatgeek(_url, _ua):
                     "venue": venue,
                     "price": price,
                     "category": cat,
+                    "genre": genre,
                     "lat": lat,
                     "lng": lng,
                 })
@@ -5525,6 +5546,15 @@ def scrape_ticketmaster_discovery(url, ua):
             elif p_min is not None:
                 price = f"From ${int(p_min)}"
 
+        classifications = ev.get("classifications") or []
+        g_name = ""
+        sg_name = ""
+        if classifications:
+            g_name = classifications[0].get("genre", {}).get("name") or ""
+            sg_name = classifications[0].get("subGenre", {}).get("name") or ""
+        native_g = map_native_genre(g_name) or map_native_genre(sg_name)
+        genre = infer_music_genre(name, vname, native_genre=native_g)
+
         key = (name.lower(), dt.strftime("%Y-%m-%d"))
         if key in seen:
             continue
@@ -5537,6 +5567,7 @@ def scrape_ticketmaster_discovery(url, ua):
             "venue": vname,
             "price": price,
             "category": "music",
+            "genre": genre,
         })
 
     return events
@@ -6022,6 +6053,7 @@ def _expand_manual_recurring(weeks=8):
             for i in range(weeks):
                 d = first + timedelta(weeks=i)
                 dt = datetime(d.year, d.month, d.day, hour, minute, tzinfo=EASTERN)
+                genre = infer_music_genre(name, venue, category=default_cat) if default_cat in ("music", "clubbing") else None
                 events.append({
                     "name": name,
                     "date": dt.astimezone(timezone.utc).isoformat(),
@@ -6029,6 +6061,7 @@ def _expand_manual_recurring(weeks=8):
                     "venue": venue,
                     "price": price,
                     "category": default_cat,
+                    "genre": genre,
                 })
         results.append({"venue": venue, "url": venue_url, "events": events, "error": None})
     return results
@@ -6050,6 +6083,9 @@ def _load_community_events():
             if not e.get("name") or not e.get("venue"):
                 continue
             cat = e.get("category") or infer_category(e["name"], e["venue"])
+            genre = e.get("genre")
+            if not genre and cat in ("music", "clubbing"):
+                genre = infer_music_genre(e["name"], e["venue"], description=e.get("description"), category=cat)
             events.append({
                 "name": str(e["name"]).strip(),
                 "date": e.get("date"),
@@ -6057,6 +6093,7 @@ def _load_community_events():
                 "venue": str(e["venue"]).strip(),
                 "price": e.get("price"),
                 "category": cat,
+                "genre": genre,
                 "_is_community": True,
                 "_source_venue": "Community Submission",
                 "address": e.get("address") or "",
@@ -6193,6 +6230,217 @@ _CAT_TO_BUCKET = {cat: name for name, cats in CATEGORY_BUCKETS for cat in cats}
 
 def category_bucket(cat):
     return _CAT_TO_BUCKET.get(cat or "other", "Community")
+
+
+MUSIC_GENRES = {
+    "rock_indie": {
+        "id": "rock_indie",
+        "label": "Rock & Indie",
+        "icon": "🎸",
+        "color": "#ff708d",
+    },
+    "folk_trad": {
+        "id": "folk_trad",
+        "label": "Folk & Trad",
+        "icon": "🪕",
+        "color": "#9ece6a",
+    },
+    "jazz_blues": {
+        "id": "jazz_blues",
+        "label": "Jazz & Blues",
+        "icon": "🎷",
+        "color": "#f29e4c",
+    },
+    "electronic": {
+        "id": "electronic",
+        "label": "Electronic & Club",
+        "icon": "🎛",
+        "color": "#bb9af7",
+    },
+    "classical": {
+        "id": "classical",
+        "label": "Classical",
+        "icon": "🎻",
+        "color": "#7aa2f7",
+    },
+    "hiphop_rnb": {
+        "id": "hiphop_rnb",
+        "label": "Hip-Hop & R&B",
+        "icon": "🎤",
+        "color": "#f0a07a",
+    },
+    "latin_global": {
+        "id": "latin_global",
+        "label": "Latin & Global",
+        "icon": "🪇",
+        "color": "#ffb8d1",
+    },
+    "pop": {
+        "id": "pop",
+        "label": "Pop",
+        "icon": "✨",
+        "color": "#ffd866",
+    },
+}
+
+def map_native_genre(name):
+    """Maps raw external genre strings (e.g. from Ticketmaster or SeatGeek) into our standard MUSIC_GENRES."""
+    if not name or not isinstance(name, str):
+        return None
+    s = name.strip().lower()
+    if s in ("undefined", "other", "music", "concert"):
+        return None
+    if any(k in s for k in ["classical", "orchestr", "symphon", "opera", "chamber"]):
+        return "classical"
+    if any(k in s for k in ["jazz", "blues"]):
+        return "jazz_blues"
+    if any(k in s for k in ["folk", "country", "americana", "bluegrass", "celtic", "irish", "traditional", "acoustic"]):
+        return "folk_trad"
+    if any(k in s for k in ["dance", "electronic", "edm", "house", "techno", "club", "trance", "drum & bass", "dubstep", "synth"]):
+        return "electronic"
+    if any(k in s for k in ["hip-hop", "hip hop", "rap", "r&b", "rhythm and blues", "urban", "soul", "trap"]):
+        return "hiphop_rnb"
+    if any(k in s for k in ["latin", "salsa", "reggaeton", "bachata", "cumbia", "world", "reggae", "afrobeat", "dancehall", "ska"]):
+        return "latin_global"
+    if any(k in s for k in ["rock", "alternative", "punk", "metal", "indie", "grunge", "emo", "hardcore"]):
+        return "rock_indie"
+    if any(k in s for k in ["pop", "k-pop", "j-pop"]):
+        return "pop"
+    return None
+
+MUSIC_VENUE_ANCHORS = {
+    # Classical institutions
+    "boston symphony orchestra": "classical",
+    "symphony hall": "classical",
+    "new england conservatory": "classical",
+    "jordan hall": "classical",
+    "longy school of music": "classical",
+    "tufts music": "classical",
+    "boston lyric opera": "classical",
+    "boston baroque": "classical",
+    "handel and haydn society": "classical",
+    "emmanuel music": "classical",
+    "cantata singers": "classical",
+    "a far cry": "classical",
+
+    # Jazz & Blues anchors
+    "wally": "jazz_blues",
+    "scullers jazz club": "jazz_blues",
+    "regattabar": "jazz_blues",
+    "the bebop": "jazz_blues",
+    "mad monkfish": "jazz_blues",
+    "the beehive": "jazz_blues",
+    "the lilypad": "jazz_blues",
+    "lilypad": "jazz_blues",
+
+    # Folk & Trad anchors
+    "club passim": "folk_trad",
+    "passim": "folk_trad",
+    "the burren": "folk_trad",
+    "the druid": "folk_trad",
+    "druid": "folk_trad",
+    "the black rose": "folk_trad",
+    "black rose": "folk_trad",
+    "mr. dooley": "folk_trad",
+    "sally o": "folk_trad",
+    "mccarthy": "folk_trad",
+    "banter bar": "folk_trad",
+    "emmet": "folk_trad",
+    "brendan behan": "folk_trad",
+    "canadian american club": "folk_trad",
+    "the plough and stars": "folk_trad",
+    "plough and stars": "folk_trad",
+
+    # Electronic / Nightlife anchors
+    "manray": "electronic",
+    "mémoire": "electronic",
+    "memoire": "electronic",
+    "phoenix landing": "electronic",
+    "middlesex lounge": "electronic",
+    "zuzu": "electronic",
+}
+
+MUSIC_VENUE_DEFAULTS = {
+    "o'brien": "rock_indie",
+    "sinclair": "rock_indie",
+    "roadrunner": "rock_indie",
+    "paradise rock": "rock_indie",
+    "brighton music": "rock_indie",
+    "middle east": "rock_indie",
+    "sonia": "rock_indie",
+    "deep cuts": "rock_indie",
+    "faces brewing": "rock_indie",
+    "silhouette": "rock_indie",
+    "square root": "rock_indie",
+    "midway cafe": "rock_indie",
+    "big night live": "electronic",
+    "royale": "electronic",
+    "redbones": "rock_indie",
+    "lizard lounge": "rock_indie",
+}
+
+MUSIC_GENRE_RULES = [
+    ("classical", [
+        r"\b(symphony(\s+no\b|\s+orchestra|\s+hall)?|philharmonic|concerto|sonata|chamber\s+(orchestra|music|ensemble)|opera\b(?!(\s+(house|theatre|theater|pop|rock)))|soprano|tenor\s+solo|mezzo-soprano|baritone\s+solo|choral\s+(society|concert|works)|requiem|cantata|oratorio|sinfonia|allegro|adagio|beethoven|mozart|\bbach\b(?!ata)|chopin|brahms|tchaikovsky|vivaldi|mahler|handel(\s+and\s+haydn)?|haydn\b|debussy|ravel\b|rachmaninoff|shostakovich|stravinsky|dvorak|mendelssohn|schubert|schumann|puccini|verdi\b|string\s+quartet|piano\s+trio|brass\s+quintet|wind\s+quintet|organ\s+recital|flute\s+recital|cello\s+recital|violin\s+recital|harpsichord)\b"
+    ]),
+    ("jazz_blues", [
+        r"\b(jazz|blues\b(?!(\s+screens|ky))|bebop|post-bop|hard\s+bop|dixieland|big\s+band|trad\s+jazz|jazz\s+fusion|delta\s+blues|chicago\s+blues|rhythm\s+and\s+blues|boogie\s+woogie|stride\s+piano|saxophone\s+(quartet|solo)|coltrane|thelonious|miles\s+davis|charlie\s+parker|bill\s+evans|ella\s+fitzgerald|billie\s+holiday|muddy\s+waters|b\.b\.\s+king|buddy\s+guy|howlin['\''’]?\s*wolf|straight-ahead\s+jazz|jazz\s+(trio|quartet|quintet|ensemble|orchestra|jam|collective|brunch|lounge))\b"
+    ]),
+    ("folk_trad", [
+        r"\b(folk\b(?!(\s+art))|bluegrass|americana|celtic|irish\s+(session|trad|traditional|music|tunes)|seisi[uú]n|fiddle|banjo|mandolin|singer-songwriter|old-time|flatpicking|sea\s+shant(y|ies)|appalachian|honky\s*tonk|outlaw\s+country|country\s+music|acoustic\s+(folk|guitar|showcase|open\s+mic)|woody\s+guthrie|john\s+prine|townes\s+van\s+zandt|doc\s+watson|cape\s+breton)\b"
+    ]),
+    ("electronic", [
+        r"\b(electronic(a)?|edm\b|techno\b|house\s+music|deep\s+house|tech\s+house|drum\s*&\s*bass|drum\s+and\s+bass|\bdnb\b|\bd&b\b|dubstep|synthwave|darkwave|ebm\b|industrial\s+(dance|music)|trance\b|psytrance|ambient\s+music|dj\s+(set|night|party)|all-night\s+dance|dance\s+party|rave\b|turntabli(sm|st)|boiler\s+room|club\s+night|modular\s+synth|synthesizer\s+music|nightclub|electro-pop|electronic\s+dance)\b"
+    ]),
+    ("hiphop_rnb", [
+        r"\b(hip[- ]?hop|rap\b(?!ture|id)|rapper|emcee|\bmc\s+[a-z]+|trap\s+music|boom\s+bap|r&b\b|rhythm\s+&\s+blues|neo-soul|soul\s+music|motown|afrobeat|freestyle\s+(rap|session)|cypher|drill\s+music|grime\b)\b"
+    ]),
+    ("latin_global", [
+        r"\b(latin\b(?!o?\s+(america|studies))|salsa\b|bachata|cumbia|merengue|reggaeton|tango\b|flamenco|bossa\s+nova|samba\b|mariachi|ranchera|corrido|latin\s+jazz|afro-cuban|calypso|reggae|dancehall|rocksteady|afrobeats|klezmer|balkan|flamenco\s+guitar|middle\s+eastern\s+music|oud\s+recital|\bsitar\b|\btabla\b|bollywood)\b"
+    ]),
+    ("rock_indie", [
+        r"\b(rock(\s+and\s+roll|\s*'\''n'\''\s*roll)?|indie\s+rock|indie\s+pop|alternative(\s+rock)?|punk(\s+rock)?|hardcore(\s+punk)?|post-punk|post-hardcore|emo\b|metal(\s+band)?|heavy\s+metal|death\s+metal|black\s+metal|thrash(\s+metal)?|doom\s+metal|sludge(\s+metal)?|stoner\s+rock|grunge|shoegaze|dream\s+pop|math\s+rock|psychedelic(\s+rock)?|garage\s+rock|noise\s+rock|art\s+rock|prog\s+rock|progressive\s+rock|glam\s+rock|classic\s+rock|hard\s+rock|tribute\s+band|cover\s+band|screamo|pop-punk|riot\s+grrrl|surf\s+rock|dark\s+star\s+orchestra)\b"
+    ]),
+    ("pop", [
+        r"\b(pop\s+music|electropop|synth-pop|synthpop|k-pop|kpop|j-pop|jpop|boy\s+band|girl\s+group|dance\s+pop|teen\s+pop|hyperpop|taylor\s+swift|swiftie|beatles\s+tribute|disco(\s+night|\s+party)?|abba\s+night|britpop)\b"
+    ]),
+]
+
+def infer_music_genre(name, venue=None, description=None, native_genre=None, category=None):
+    """Infers music subgenre from native tags, venue signature, event title, and description."""
+    if native_genre:
+        mapped = map_native_genre(native_genre)
+        if mapped:
+            return mapped
+
+    v_str = (venue or "").lower()
+    t_str = f"{name or ''} {description or ''}".lower()
+
+    # Negative exclusions
+    if "dark star orchestra" in t_str or "night at the opera" in t_str:
+        return "rock_indie"
+
+    # Institutional anchor venues (BSO, Wally's, Passim, ManRay, etc.)
+    for anchor, g in MUSIC_VENUE_ANCHORS.items():
+        if anchor in v_str:
+            return g
+
+    # Pattern matching on title & description
+    for genre, patterns in MUSIC_GENRE_RULES:
+        for p in patterns:
+            if re.search(p, t_str, re.IGNORECASE):
+                return genre
+
+    # Clubbing fallback
+    if category == "clubbing" or "clubbing" in v_str:
+        return "electronic"
+
+    # Signature venue defaults
+    for v_prefix, g in MUSIC_VENUE_DEFAULTS.items():
+        if v_prefix in v_str:
+            return g
+
+    return "rock_indie"
 
 
 _cache = {"data": None, "ts": 0.0}
@@ -6375,6 +6623,8 @@ def _scrape_one(v, force=False):
                     e["venue"] = name
                 if not e.get("category"):
                     e["category"] = infer_category(e.get("name"), e.get("venue"), v.get("default_category"))
+                if e.get("category") in ("music", "clubbing") and not e.get("genre"):
+                    e["genre"] = infer_music_genre(e.get("name"), e.get("venue"), description=e.get("description"), native_genre=e.get("genre"), category=e.get("category"))
             events.sort(key=_sort_key)
             return {
                 "venue": name,
@@ -6393,6 +6643,8 @@ def _scrape_one(v, force=False):
                 e["venue"] = name
             if not e.get("category"):
                 e["category"] = infer_category(e.get("name"), e.get("venue"), v.get("default_category"))
+            if e.get("category") in ("music", "clubbing") and not e.get("genre"):
+                e["genre"] = infer_music_genre(e.get("name"), e.get("venue"), description=e.get("description"), native_genre=e.get("genre"), category=e.get("category"))
         events.sort(key=_sort_key)
         dur = round(time.time() - t0, 2)
 
