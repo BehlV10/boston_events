@@ -32,7 +32,7 @@ SLOW_VENUE_TTL = 12 * 3600      # 12 hours for evergreen/institutional feeds (Li
 
 def _get_venue_ttl(vname):
     low = (vname or "").lower()
-    if any(k in low for k in ["ticketmaster", "seatgeek", "eventbrite", "do617", "boston calendar", "boston shows"]):
+    if any(k in low for k in ["ticketmaster", "seatgeek", "eventbrite", "do617", "boston calendar", "boston shows", "luma"]):
         return FAST_VENUE_TTL
     if any(k in low for k in ["library", "museum", "harvard", "mit", "books", "growing center", "esplanade", "arts council", "have to dance", "bida"]):
         return SLOW_VENUE_TTL
@@ -2468,6 +2468,125 @@ def scrape_meetup(url, ua):
                 "price": None,
                 "description": (ev.get("description") or "")[:200],
             })
+    return events
+
+
+def scrape_luma(url, ua):
+    """Scrape curated Boston tech, AI, startup, and community events from Luma."""
+    api_url = "https://api.lu.ma/discover/get-paginated-events?discover_place_api_id=discplace-VWeZ1zUvnawYHMj"
+    headers = {
+        "User-Agent": ua,
+        "Accept": "application/json",
+    }
+    events = []
+    seen = set()
+    now = datetime.now(timezone.utc)
+    cursor = None
+
+    for _ in range(5):
+        req_url = api_url
+        if cursor:
+            req_url += f"&pagination_cursor={cursor}"
+        try:
+            resp = _SESSION.get(req_url, headers=headers, timeout=15)
+            resp.raise_for_status()
+            data = resp.json()
+        except Exception:
+            break
+
+        entries = data.get("entries") or []
+        for entry in entries:
+            ev = entry.get("event") or {}
+            name = (ev.get("name") or "").strip()
+            if not name or is_placeholder_or_closed_event(name):
+                continue
+
+            start_at = ev.get("start_at")
+            if not start_at:
+                continue
+            try:
+                dt = datetime.fromisoformat(start_at.replace("Z", "+00:00"))
+                if dt.astimezone(timezone.utc) < now:
+                    continue
+                iso_date = dt.astimezone(timezone.utc).isoformat()
+            except Exception:
+                continue
+
+            slug = ev.get("url") or ""
+            link = slug if slug.startswith("http") else f"https://lu.ma/{slug}"
+
+            key = (name.lower(), iso_date[:10])
+            if key in seen:
+                continue
+            seen.add(key)
+
+            geo = ev.get("geo_address_info") or {}
+            cal = entry.get("calendar") or {}
+
+            if geo.get("mode") == "shown" and (geo.get("address") or geo.get("short_address")):
+                addr = geo.get("address") or geo.get("short_address")
+                city = geo.get("city") or "Boston"
+                venue = addr if city.lower() in addr.lower() else f"{addr}, {city}"
+            elif geo.get("sublocality") or geo.get("city"):
+                subloc = geo.get("sublocality") or geo.get("city")
+                venue = f"{subloc} (RSVP for address)"
+            elif cal.get("name") and cal.get("name").lower() != "personal":
+                venue = cal.get("name")
+            else:
+                venue = "Boston"
+
+            coord = ev.get("coordinate") or geo.get("place_coordinate") or {}
+            lat = coord.get("latitude")
+            lng = coord.get("longitude")
+            address = geo.get("full_address") or geo.get("address") or ""
+            neighborhood = geo.get("sublocality") or ""
+
+            t_info = entry.get("ticket_info") or {}
+            price = None
+            if t_info.get("is_free"):
+                price = "Free"
+            elif t_info.get("price"):
+                cents = t_info["price"].get("cents")
+                if cents == 0:
+                    price = "Free"
+                elif cents is not None:
+                    price = f"${cents / 100:.2f}".rstrip("0").rstrip(".")
+
+            hosts = [h.get("name") for h in (entry.get("hosts") or []) if h.get("name")]
+            cal_desc = cal.get("description_short")
+            desc_parts = []
+            if hosts:
+                h_str = ", ".join(hosts[:3])
+                desc_parts.append(f"Hosted by {h_str}")
+            if cal_desc:
+                desc_parts.append(cal_desc)
+            desc = " • ".join(desc_parts)[:250] if desc_parts else None
+
+            cat = infer_category(name, venue, default="community")
+
+            ev_dict = {
+                "name": name,
+                "date": iso_date,
+                "url": link,
+                "venue": venue,
+                "price": price,
+                "category": cat,
+                "description": desc,
+            }
+            if lat is not None and lng is not None:
+                ev_dict["lat"] = lat
+                ev_dict["lng"] = lng
+            if address:
+                ev_dict["address"] = address
+            if neighborhood:
+                ev_dict["neighborhood"] = neighborhood
+
+            events.append(ev_dict)
+
+        if not data.get("has_more") or not data.get("next_cursor"):
+            break
+        cursor = data.get("next_cursor")
+
     return events
 
 
@@ -5788,6 +5907,7 @@ _ALL_VENUES = [
     {"name": "Gardner Museum", "url": "https://www.gardnermuseum.org/calendar", "ua": UA_CHROME, "scraper": scrape_gardner, "default_category": "community"},
     {"name": "ICA Boston", "url": "https://www.icaboston.org/events", "ua": UA_CHROME, "scraper": scrape_ica, "default_category": "community"},
     {"name": "Brattle Theatre", "url": "https://www.brattlefilm.org/", "ua": UA_CHROME, "scraper": scrape_brattle, "default_category": "film"},
+    {"name": "Luma Boston", "url": "https://lu.ma/boston", "ua": UA_CHROME, "scraper": scrape_luma, "default_category": "community"},
     {"name": "Meetup Boston", "url": "https://www.meetup.com/find/?location=us--ma--boston&source=EVENTS&eventType=inPerson&distance=tenMiles", "ua": UA_CHROME, "scraper": scrape_meetup, "default_category": "community"},
     {"name": "Somerville Board Games Meetup", "url": "https://www.meetup.com/somerville-board-games-meetup-group/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "gaming"},
     {"name": "Beantown Gamers", "url": "https://www.meetup.com/boardgames-boston/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "gaming"},
@@ -6192,8 +6312,12 @@ CATEGORY_KEYWORDS = [
 def infer_category(name, venue, default=None):
     text = f"{name or ''} {venue or ''}".lower()
     for cat, kws in CATEGORY_KEYWORDS:
-        if any(k in text for k in kws):
-            return cat
+        for k in kws:
+            if k in ("art", "arts"):
+                if re.search(r"\barts?\b", text):
+                    return cat
+            elif k in text:
+                return cat
     return default or "other"
 
 

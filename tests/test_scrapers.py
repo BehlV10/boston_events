@@ -14,7 +14,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
 
-from scrapers import _ALL_VENUES, VENUES, UA_CHROME
+from scrapers import _ALL_VENUES, VENUES, UA_CHROME, scrape_luma
 from venues_geo import VENUE_COORDINATES, MIN_LAT, MAX_LAT, MIN_LNG, MAX_LNG, resolve_event_geo
 from template import render_page, SUBAREAS_BY_CITY, resolve_subarea, _event_city, _event_stable_id
 from scripts.add_community_event import validate_and_normalize as validate_event
@@ -837,6 +837,89 @@ class TestBostonEvents(unittest.TestCase):
         self.assertIn('data-genre="jazz_blues"', html)
         self.assertIn("Jazz &amp; Blues", html)
         self.assertIn("genre-pill", html)
+
+    def test_luma_scraper_and_geo(self):
+        """Luma Boston scraper should extract structured tech & community events with coordinates."""
+        mock_payload = {
+            "entries": [
+                {
+                    "api_id": "evt-mock1",
+                    "event": {
+                        "name": "Boston AI & Hard Tech Summit",
+                        "start_at": (datetime.now(timezone.utc) + timedelta(days=2)).isoformat(),
+                        "url": "boston-ai-summit-2026",
+                        "geo_address_info": {
+                            "mode": "shown",
+                            "address": "100 Main St",
+                            "city": "Cambridge",
+                            "full_address": "100 Main St, Cambridge, MA 02142",
+                            "sublocality": "Kendall Square",
+                        },
+                        "coordinate": {"latitude": 42.3615, "longitude": -71.0855},
+                    },
+                    "calendar": {
+                        "name": "Cambridge Tech Hub",
+                        "description_short": "Premier community for builders and AI founders in Kendall Square.",
+                    },
+                    "hosts": [{"name": "Kendall Tech Collective"}],
+                    "ticket_info": {"is_free": False, "price": {"cents": 1500}},
+                },
+                {
+                    "api_id": "evt-mock2",
+                    "event": {
+                        "name": "Biotech Founder Mixer & Fireside",
+                        "start_at": (datetime.now(timezone.utc) + timedelta(days=3)).isoformat(),
+                        "url": "biotech-mixer-oct",
+                        "geo_address_info": {
+                            "mode": "obfuscated",
+                            "city": "Boston",
+                            "sublocality": "Seaport",
+                        },
+                        "coordinate": {"latitude": 42.3512, "longitude": -71.0435},
+                    },
+                    "calendar": {"name": "Personal"},
+                    "hosts": [{"name": "BioVentures"}],
+                    "ticket_info": {"is_free": True},
+                }
+            ],
+            "has_more": False,
+            "next_cursor": None,
+        }
+
+        from unittest.mock import patch, MagicMock
+        mock_resp = MagicMock()
+        mock_resp.json.return_value = mock_payload
+        mock_resp.raise_for_status = MagicMock()
+
+        with patch("scrapers._SESSION.get", return_value=mock_resp):
+            events = scrape_luma("https://lu.ma/boston", UA_CHROME)
+
+        self.assertEqual(len(events), 2)
+        ev1, ev2 = events[0], events[1]
+
+        # Check event 1 (shown address, paid ticket, custom calendar)
+        self.assertEqual(ev1["name"], "Boston AI & Hard Tech Summit")
+        self.assertEqual(ev1["venue"], "100 Main St, Cambridge")
+        self.assertEqual(ev1["price"], "$15")
+        self.assertEqual(ev1["url"], "https://lu.ma/boston-ai-summit-2026")
+        self.assertEqual(ev1["category"], "community")
+        self.assertEqual(ev1["lat"], 42.3615)
+        self.assertEqual(ev1["lng"], -71.0855)
+        self.assertIn("Hosted by Kendall Tech Collective", ev1["description"])
+        self.assertIn("Kendall Square", ev1["description"])
+
+        # Check event 2 (obfuscated RSVP address, free ticket)
+        self.assertEqual(ev2["name"], "Biotech Founder Mixer & Fireside")
+        self.assertEqual(ev2["venue"], "Seaport (RSVP for address)")
+        self.assertEqual(ev2["price"], "Free")
+        self.assertEqual(ev2["category"], "community")
+
+        # Check geo resolution
+        geo1 = resolve_event_geo(ev1)
+        self.assertIsNotNone(geo1)
+        self.assertEqual(geo1["lat"], 42.3615)
+        self.assertEqual(geo1["lng"], -71.0855)
+        self.assertEqual(geo1["neighborhood"], "Kendall Square")
 
 
 if __name__ == "__main__":
