@@ -165,6 +165,20 @@ class TestBostonEvents(unittest.TestCase):
         self.assertIn('data-subarea="harvard_sq"', html)
         self.assertIn('id="subarea-chips-bar"', html)
 
+        # Verify inline <script> has valid JavaScript syntax
+        import re, shutil, subprocess, tempfile
+        if shutil.which("node"):
+            scripts = re.findall(r"<script>(.*?)</script>", html, re.S)
+            self.assertGreaterEqual(len(scripts), 1)
+            with tempfile.NamedTemporaryFile("w", suffix=".js", delete=False) as tf:
+                tf.write(scripts[-1])
+                tf_path = tf.name
+            try:
+                proc = subprocess.run(["node", "--check", tf_path], capture_output=True, text=True)
+                self.assertEqual(proc.returncode, 0, f"Invalid JS syntax in rendered template:\n{proc.stderr}")
+            finally:
+                os.remove(tf_path)
+
     def test_subarea_mapping_and_coverage(self):
         """All defined subareas must be valid and all scraped events must map cleanly."""
         self.assertIn("cambridge", SUBAREAS_BY_CITY)

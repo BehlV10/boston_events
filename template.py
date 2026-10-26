@@ -4900,6 +4900,15 @@ def render_page(results):
         c.classList.toggle('active', c.dataset.genre === activeGenre);
       }});
       apply();
+      if (activeGenre !== 'all' && timeFilter === 'today') {{
+        const vis = document.querySelectorAll('.day:not(.out-of-week) .event:not(.hidden)').length;
+        if (vis === 0) {{
+          timeFilter = 'week';
+          showAll = false;
+          anchor = parseISO(todayISO);
+          apply();
+        }}
+      }}
       stateToHash();
     }}
     genreChips.forEach(c => {{
@@ -5075,7 +5084,8 @@ def render_page(results):
           items.push(`• ${{dateLabel}} (${{when}}) — ${{title}} @ ${{vName}}${{url ? ' ' + url : ''}}`);
         }});
         if (!items.length) return;
-        const planText = `My Boston Events Plan (${{items.length}}):\n` + items.join('\n');
+        const nl = String.fromCharCode(10);
+        const planText = `My Boston Events Plan (${{items.length}}):` + nl + items.join(nl);
         try {{
           await navigator.clipboard.writeText(planText);
           const orig = btnCopyPlan.textContent;
@@ -5154,7 +5164,8 @@ def render_page(results):
         const start = toCalUTC(m.dt);
         const end = toCalUTC(new Date(m.dt.getTime() + 2 * 3600 * 1000));
         const loc = `${{m.venue}}, ${{m.city.charAt(0).toUpperCase() + m.city.slice(1)}}, MA`;
-        const details = `Details & Tickets: ${{m.url}}\n\nDiscovered on Wicked Boston Events`;
+        const nl = String.fromCharCode(10);
+        const details = `Details & Tickets: ${{m.url}}` + nl + nl + `Discovered on Wicked Boston Events`;
         const gUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${{encodeURIComponent(m.title)}}&dates=${{start}}/${{end}}&details=${{encodeURIComponent(details)}}&location=${{encodeURIComponent(loc)}}`;
         window.open(gUrl, '_blank', 'noopener');
         return;
