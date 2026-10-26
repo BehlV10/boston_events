@@ -301,13 +301,15 @@ class TestBostonEvents(unittest.TestCase):
         from bs4 import BeautifulSoup
         from scrapers import scrape_berklee
 
-        sample_html = """
+        fut_dt = datetime.now(timezone.utc) + timedelta(days=5)
+        fut_str = fut_dt.strftime("%A / %B %-d, %Y / 7:30 p.m.(EDT)")
+        sample_html = f"""
         <div class="event teaser">
             <a href="/events/trio-narae-recital">
                 <div class="title">Trio Narae Recital</div>
             </a>
             <div class="field--name-field-event-instance-date">
-                <div class="daterange">Saturday / October 24, 2026 / 7:30 p.m.(EDT)</div>
+                <div class="daterange">{fut_str}</div>
             </div>
             <div class="fieldgroup-event-venue">
                 <div class="field--name-field-event-venue-title">Berklee Performance Center</div>
@@ -347,7 +349,8 @@ class TestBostonEvents(unittest.TestCase):
 
         # 2. Cache save and load
         test_vname = "Test Venue TTL"
-        test_events = [{"name": "Test Band", "date": "2026-10-25T20:00:00Z"}]
+        fut_iso = (datetime.now(timezone.utc) + timedelta(days=3)).strftime("%Y-%m-%dT20:00:00Z")
+        test_events = [{"name": "Test Band", "date": fut_iso}]
         cpath = _venue_cache_path(test_vname)
 
         try:
@@ -630,7 +633,8 @@ class TestBostonEvents(unittest.TestCase):
             self.assertEqual(len(bso_events), 1)
             self.assertEqual(bso_events[0]["name"], "Andris Nelsons conducts Mahler 5")
             self.assertEqual(bso_events[0]["venue"], "Symphony Hall")
-            self.assertEqual(bso_events[0]["category"], "classical")
+            self.assertEqual(bso_events[0]["category"], "music")
+            self.assertEqual(bso_events[0]["genre"], "classical")
 
         # 2. Test The Bebop scraper
         mock_bebop = {
@@ -920,6 +924,64 @@ class TestBostonEvents(unittest.TestCase):
         self.assertEqual(geo1["lat"], 42.3615)
         self.assertEqual(geo1["lng"], -71.0855)
         self.assertEqual(geo1["neighborhood"], "Kendall Square")
+
+    def test_improvements_bookstores_categories_and_filters(self):
+        """Verify Harvard Book Store multi-month/offsite parsing, word-boundary categories, and transit/tod/star rendering."""
+        from unittest.mock import patch
+        from bs4 import BeautifulSoup
+        from scrapers import scrape_event_list, infer_category, category_bucket, UA_CURL
+        from template import resolve_transit_lines
+
+        # 1. Word-boundary category classification (no substring false positives)
+        self.assertNotEqual(infer_category("Scientific Discoveries Lecture", "Harvard Science Center"), "clubbing")
+        self.assertNotEqual(infer_category("Street Photography Workshop", "Cambridge Public Library"), "music")
+        self.assertNotEqual(infer_category("Historic Walking Tour of Beacon Hill", "Boston Common"), "music")
+        self.assertEqual(category_bucket("classical"), "Music & nightlife")
+        self.assertEqual(category_bucket("arts"), "Arts & culture")
+        self.assertEqual(category_bucket("fitness"), "Play")
+
+        # 2. Harvard Book Store multi-month & offsite venue extraction
+        fut_dt = datetime.now(timezone.utc) + timedelta(days=10)
+        fut_str = fut_dt.strftime("%B %-d, %Y - 7:00 pm")
+        hbs_html = f"""
+        <article class="event-list">
+            <h3 class="event-list__title">
+                <a class="event-list__title-link" href="/event/author-talk-first-parish">
+                    Author Talk at First Parish Church
+                </a>
+            </h3>
+            <div class="event-list__details--item">
+                <span class="event-list__details--label">Date:</span> {fut_str}
+            </div>
+            <div class="event-list__body">Join us for an evening book discussion in Harvard Square.</div>
+        </article>
+        """
+        with patch("scrapers.fetch_soup", return_value=BeautifulSoup(hbs_html, "html.parser")), \
+             patch("scrapers.scrape_eventbrite_org", return_value=[]):
+            hbs_events = scrape_event_list("https://www.harvard.com/events", UA_CURL)
+
+        self.assertGreaterEqual(len(hbs_events), 1)
+        self.assertEqual(hbs_events[0]["venue"], "First Parish Church")
+        geo_fp = resolve_event_geo(hbs_events[0])
+        self.assertIsNotNone(geo_fp)
+        self.assertEqual(geo_fp["venue"], "First Parish in Cambridge")
+        self.assertEqual(geo_fp["neighborhood"], "Harvard Square")
+
+        # 3. Transit line & Time-of-Day & Starred Shortlist rendering
+        self.assertIn("red", resolve_transit_lines("cambridge", "harvard_sq", hbs_events[0], geo_fp))
+        html = render_page([
+            {
+                "venue": "Harvard Book Store",
+                "url": "https://www.harvard.com/events",
+                "error": None,
+                "events": hbs_events,
+            }
+        ])
+        self.assertIn('data-transit="red"', html)
+        self.assertIn('data-tod="night"', html)
+        self.assertIn('class="star-btn"', html)
+        self.assertIn('id="quick-starred-chip"', html)
+        self.assertIn('data-transit="green"', html)
 
 
 if __name__ == "__main__":

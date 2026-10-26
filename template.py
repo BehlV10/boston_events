@@ -283,6 +283,59 @@ def resolve_subarea(city, event, geo=None):
         return ("Outer Suburbs", "suburbs_other")
 
 
+def resolve_transit_lines(city, sub_slug, event, geo=None):
+    """Return comma-separated MBTA Rapid Transit lines ('red', 'green', 'orange', 'blue') serving the event."""
+    lines = []
+    vn = (event.get("venue") or "").lower()
+    src = (event.get("_source_venue") or "").lower()
+    neigh = (geo.get("neighborhood") or "").lower() if geo else ""
+    blob = f"{vn} {src} {neigh}"
+
+    if sub_slug in ("harvard_sq", "central_sq", "kendall_mit", "porter_sq", "davis_sq"):
+        lines.append("red")
+    elif sub_slug in ("union_sq", "inman_sq", "east_cambridge", "spring_winter_hill", "fenway_kenmore", "allston_brighton", "brookline"):
+        lines.append("green")
+    elif sub_slug in ("assembly_east", "south_end"):
+        lines.append("orange")
+    elif sub_slug == "back_bay":
+        lines.extend(["green", "orange"])
+    elif sub_slug == "theater_downtown":
+        if any(k in blob for k in ["td garden", "big night live", "west end", "sports museum", "city winery"]):
+            lines.extend(["green", "orange"])
+        else:
+            lines.extend(["red", "green", "orange"])
+    elif sub_slug == "seaport_waterfront":
+        if any(k in blob for k in ["aquarium", "harbor", "greenway", "faneuil", "comedy", "improvasylum"]):
+            lines.extend(["blue", "red"])
+        else:
+            lines.append("red")
+    elif sub_slug == "jp_dorchester":
+        if "dorchester" in blob or "ashmont" in blob or "jfk" in blob or "savin" in blob:
+            lines.append("red")
+        else:
+            lines.append("orange")
+    elif sub_slug == "charlestown_eastie":
+        if "east boston" in blob or "eastie" in blob or "maverick" in blob or "tall ship" in blob or "zumix" in blob:
+            lines.append("blue")
+        else:
+            lines.append("orange")
+    elif sub_slug == "medford_malden":
+        if "malden" in blob:
+            lines.append("orange")
+        else:
+            lines.append("green")
+    elif city == "cambridge":
+        lines.append("red")
+    elif city == "somerville":
+        lines.append("green")
+    elif city == "boston":
+        if "beacon hill" in blob or "mgh" in blob or "south boston" in blob or "broadway" in blob:
+            lines.append("red")
+        else:
+            lines.append("green")
+    return ",".join(dict.fromkeys(lines))
+
+
 def _maps_link(venue, city):
     if not venue or venue.strip().lower() in ("zoom", "online", "virtual"):
         return ""
@@ -980,6 +1033,7 @@ def group_by_date(results):
     (useful long-running or evergreen listings that sources flag as upcoming/pinned).
     """
     today = datetime.now(EASTERN).date()
+    horizon = today + timedelta(days=120)
     buckets = {}
     tba = []
     ongoing = []
@@ -1007,7 +1061,7 @@ def group_by_date(results):
                 tba.append(entry)
             elif key < today:
                 ongoing.append(entry)
-            else:
+            elif key <= horizon:
                 buckets.setdefault(key, []).append(entry)
     for date_key, events in list(buckets.items()):
         events.sort(key=lambda e: e["_time"])
@@ -1035,8 +1089,11 @@ def render_page(results):
     weather = fetch_boston_weather()
     weather_pill_html = ""
     if weather:
-        weather_pill_html = f'<span class="pill-weather" title="{weather.get("label", "")} in Boston">{weather.get("icon", "🌤️")} {weather.get("temp", "--")}°F <span class="weather-label">{weather.get("label", "")}</span></span><span class="pill-dot">·</span>'
-        weather_html = f'{weather["icon"]} {weather["temp"]}°F {weather["label"]} · '
+        w_label = weather.get("label", "")
+        w_icon = weather.get("icon", "🌤️")
+        w_temp = weather.get("temp", "--")
+        weather_pill_html = f'<span class="pill-weather" title="{w_label} in Boston">{w_icon} {w_temp}°F <span class="weather-label">{w_label}</span></span><span class="pill-dot">·</span>'
+        weather_html = f'{w_icon} {w_temp}°F {w_label} · '
     else:
         weather_html = ""
 
@@ -1049,6 +1106,7 @@ def render_page(results):
     def render_event(e):
         raw_title = e.get("name") or "Untitled"
         title = escape(raw_title)
+        ev_id = _event_stable_id(e)
         link = (
             f'<a href="{escape(e["url"])}" target="_blank" rel="noopener">{title}</a>'
             if e.get("url") else title
@@ -1098,7 +1156,8 @@ def render_page(results):
                 a_price = f" ({escape(a['price'])})" if a.get("price") and a["price"] != e.get("price") else ""
                 alt_parts.append(f'<a href="{escape(a["url"])}" target="_blank" rel="noopener">{v_name}{a_price}</a>')
             if alt_parts:
-                alt_html = f'<span class="alt-sources">also on {" · ".join(alt_parts)}</span>'
+                alt_joined = " · ".join(alt_parts)
+                alt_html = f'<span class="alt-sources">also on {alt_joined}</span>'
 
         compare_html = _build_compare_links(e, raw_title)
 
@@ -1107,11 +1166,21 @@ def render_page(results):
         geo_btn = ""
         if geo:
             geo_attrs = f' data-lat="{geo["lat"]}" data-lng="{geo["lng"]}" data-venue-name="{escape(geo["venue"])}" data-neighborhood="{escape(geo["neighborhood"])}"'
-            geo_btn = f' <button type="button" class="venue-map-jump" data-lat="{geo["lat"]}" data-lng="{geo["lng"]}" data-venue="{escape(geo["venue"])}" title="View {escape(geo["venue"])} on Map">📍</button>'
+            geo_btn = ' <button type="button" class="venue-map-jump" title="View on Map">📍</button>'
 
         sub_name, sub_slug = resolve_subarea(city, e, geo)
-        sub_attrs = f' data-subarea="{escape(sub_slug)}" data-subarea-name="{escape(sub_name)}"'
+        sub_attrs = f' data-subarea="{escape(sub_slug)}"'
         sub_tag = f' <span class="subarea-tag">· {escape(sub_name)}</span>'
+
+        transit_str = resolve_transit_lines(city, sub_slug, e, geo)
+        transit_attr = f' data-transit="{escape(transit_str)}"' if transit_str else ""
+
+        t_obj = e.get("_time")
+        if t_obj:
+            tod_val = "day" if t_obj.hour < 17 else "night"
+        else:
+            tod_val = "all"
+        tod_attr = f' data-tod="{tod_val}"'
 
         if venue:
             if venue.lower() in ("zoom", "online", "virtual"):
@@ -1136,27 +1205,25 @@ def render_page(results):
             extra_tags.append(compare_html)
         extra_html = (" · " + " · ".join(extra_tags)) if extra_tags else ""
 
-        gcal_url = _build_gcal_link(e, raw_title, venue, city)
-        cal_actions = []
-        if gcal_url:
-            cal_actions.append(f'<a class="cal-btn" href="{escape(gcal_url)}" target="_blank" rel="noopener" title="Add to Google Calendar">+ GCal</a>')
-        if e.get("date"):
-            cal_actions.append(f'<button type="button" class="cal-btn ics-btn" data-title="{escape(raw_title)}" data-date="{escape(e["date"])}" data-venue="{escape(venue)}" data-url="{escape(e.get("url") or "")}" title="Download .ics for Apple/Outlook">+ .ics</button>')
-        cal_html = f'<span class="cal-links">{" ".join(cal_actions)}</span>' if cal_actions else ""
+        cal_html = '<span class="cal-links"><button type="button" class="cal-btn gcal-btn" title="Add to Google Calendar">+ GCal</button> <button type="button" class="cal-btn ics-btn" title="Download .ics">+ .ics</button></span>' if e.get("date") else ""
+        star_btn = '<button type="button" class="star-btn" title="Save to My Shortlist" aria-label="Save event">☆</button>'
 
         raw_desc = (e.get("description") or "").replace("***", "").replace("**", "").replace("__", "").replace("`", "").strip()
         desc = raw_desc[:180]
         desc_html = f'<div class="desc">{escape(desc)}</div>' if desc else ""
         free_flag = "true" if is_free else "false"
-        epoch_attr = f' data-epoch="{int(e["_time"].timestamp())}"' if e.get("_time") else ''
+        epoch_attr = f' data-epoch="{int(t_obj.timestamp())}"' if t_obj else ''
         genre_attr = f' data-genre="{escape(genre)}"' if genre else ''
-        return f'''<li class="event" data-cat="{escape(cat)}" data-bucket="{escape(bucket)}"{genre_attr} data-venue="{escape(source)}" data-city="{escape(city)}"{sub_attrs} data-recur="{recur_flag}" data-free="{free_flag}"{epoch_attr}{geo_attrs}>
-          <div class="when">{escape(format_when(e))}</div>
-          <div class="what">{link}{price_tag}{recur_badge}
-            <div class="venue-tag">{cat_tag}{f" · {venue_html}" if venue_html else ""}{sub_tag}{extra_html}{cal_html}</div>
-            {desc_html}
-          </div>
-        </li>'''
+        v_prefix = f" · {venue_html}" if venue_html else ""
+        return (
+            f'<li class="event" data-id="{ev_id}" data-cat="{escape(cat)}" data-bucket="{escape(bucket)}"{genre_attr} '
+            f'data-venue="{escape(source)}" data-city="{escape(city)}"{sub_attrs}{transit_attr}{tod_attr} '
+            f'data-recur="{recur_flag}" data-free="{free_flag}"{epoch_attr}{geo_attrs}>'
+            f'<div class="when">{escape(format_when(e))}</div>'
+            f'<div class="what">{star_btn}{link}{price_tag}{recur_badge}'
+            f'<div class="venue-tag">{cat_tag}{v_prefix}{sub_tag}{extra_html}{cal_html}</div>'
+            f'{desc_html}</div></li>'
+        )
 
     bucket_name_order = [b for b, _ in CATEGORY_BUCKETS]
     city_day_order = ["cambridge", "somerville", "boston", "other"]
@@ -1859,6 +1926,92 @@ def render_page(results):
     border-color: var(--green);
     font-weight: 700;
     box-shadow: 0 2px 10px rgba(74, 222, 128, 0.3);
+  }}
+  .chip-starred {{
+    color: #ffd866;
+    border-color: rgba(255, 216, 102, 0.35);
+    background: rgba(255, 216, 102, 0.08);
+  }}
+  .chip-starred:hover {{
+    background: rgba(255, 216, 102, 0.16);
+    border-color: #ffd866;
+    color: #fff;
+  }}
+  .chip-starred.active {{
+    background: #ffd866;
+    color: #0c0e14;
+    border-color: #ffd866;
+    font-weight: 700;
+    box-shadow: 0 2px 10px rgba(255, 216, 102, 0.35);
+  }}
+  .chip-copy-plan {{
+    color: #79aeff;
+    border-color: rgba(121, 174, 255, 0.35);
+    background: rgba(121, 174, 255, 0.1);
+    font-weight: 600;
+  }}
+  .chip-copy-plan:hover {{
+    background: rgba(121, 174, 255, 0.22);
+    border-color: #79aeff;
+    color: #fff;
+  }}
+  .star-btn {{
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    padding: 0 5px 0 0;
+    vertical-align: baseline;
+    opacity: 0.55;
+    transition: transform 0.12s ease, color 0.12s ease, opacity 0.12s ease;
+  }}
+  .star-btn:hover {{
+    opacity: 1;
+    color: #ffd866;
+    transform: scale(1.2);
+  }}
+  .star-btn.starred {{
+    opacity: 1;
+    color: #ffd866;
+    text-shadow: 0 0 8px rgba(255, 216, 102, 0.45);
+  }}
+  .transit-sep {{
+    width: 1px;
+    height: 18px;
+    background: var(--border);
+    margin: 0 2px;
+  }}
+  .transit-chip {{
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.15s ease;
+  }}
+  .transit-chip:hover {{
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.28);
+    background: rgba(255, 255, 255, 0.08);
+  }}
+  .transit-chip.active[data-transit="red"]    {{ background: rgba(218, 41, 28, 0.22); border-color: #da291c; color: #ff7b72; }}
+  .transit-chip.active[data-transit="green"]  {{ background: rgba(0, 132, 61, 0.24); border-color: #00843d; color: #4ade80; }}
+  .transit-chip.active[data-transit="orange"] {{ background: rgba(237, 139, 0, 0.22); border-color: #ed8b00; color: #ffb169; }}
+  .transit-chip.active[data-transit="blue"]   {{ background: rgba(0, 61, 165, 0.28); border-color: #3b82f6; color: #93c5fd; }}
+  .t-dot {{
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
   }}
 
   /* Day Section */
@@ -3223,6 +3376,11 @@ def render_page(results):
         <button type="button" class="loc-chip" data-city="cambridge"><span class="city-dot" style="background:#e05a6b"></span>Cambridge</button>
         <button type="button" class="loc-chip" data-city="somerville"><span class="city-dot" style="background:#f29e4c"></span>Somerville</button>
         <button type="button" class="loc-chip" data-city="other"><span class="city-dot" style="background:#9aa3b2"></span>Greater Boston</button>
+        <span class="transit-sep" aria-hidden="true"></span>
+        <button type="button" class="transit-chip" data-transit="red" title="MBTA Red Line (Harvard, Central, Kendall, Porter, Davis, Downtown, Dorchester)"><span class="t-dot" style="background:#da291c"></span>Red Line</button>
+        <button type="button" class="transit-chip" data-transit="green" title="MBTA Green Line (Back Bay, Fenway, Allston, Brookline, Union Sq, Inman, Medford)"><span class="t-dot" style="background:#00843d"></span>Green Line</button>
+        <button type="button" class="transit-chip" data-transit="orange" title="MBTA Orange Line (South End, Back Bay, Jamaica Plain, Roxbury, Assembly, Charlestown)"><span class="t-dot" style="background:#ed8b00"></span>Orange Line</button>
+        <button type="button" class="transit-chip" data-transit="blue" title="MBTA Blue Line (East Boston, Waterfront, Aquarium)"><span class="t-dot" style="background:#003da5"></span>Blue Line</button>
       </div>
       <div class="subarea-chips-bar" id="subarea-chips-bar" style="display: none;"></div>
       <div class="genre-chips-bar" id="genre-chips-bar">
@@ -3242,7 +3400,11 @@ def render_page(results):
         <button type="button" class="chip" data-time="weekend">🎉 This Weekend</button>
         <button type="button" class="chip" data-time="week">📅 Next 7 Days</button>
         <button type="button" class="chip" data-time="all">All Upcoming</button>
+        <button type="button" class="chip chip-tod" data-tod="day" title="Daytime events before 5:00 PM">☀️ Daytime</button>
+        <button type="button" class="chip chip-tod" data-tod="night" title="Evening &amp; nightlife events 5:00 PM+">🌙 Evening</button>
         <button type="button" class="chip chip-free" id="quick-free-chip">✨ Free Only</button>
+        <button type="button" class="chip chip-starred" id="quick-starred-chip" title="Filter to your saved events">⭐ Saved <span id="starred-count" style="display:none;">(0)</span></button>
+        <button type="button" class="chip chip-copy-plan" id="btn-copy-plan" style="display:none;" title="Copy your saved events as a shareable text itinerary">📋 Copy Plan</button>
       </div>
       <div class="week-nav" id="week-nav">
         <button type="button" id="week-prev" aria-label="Previous">← prev</button>
@@ -3538,16 +3700,25 @@ def render_page(results):
     const freeOnlyChk = document.getElementById('free-only-chk');
 
     const locChips = document.querySelectorAll('#location-chips .loc-chip');
+    const transitChips = document.querySelectorAll('#location-chips .transit-chip');
     const subareaBar = document.getElementById('subarea-chips-bar');
     const genreChips = document.querySelectorAll('#genre-chips-bar .genre-chip');
     let activeGenre = 'all';
+    let activeTransit = 'all';
+    let activeTod = 'all';
+    let starredOnly = false;
+    let starredEvents = new Set();
     const SUBAREAS_DATA = {json.dumps(SUBAREAS_BY_CITY)};
     const CITY_LABELS_MAP = {json.dumps(CITY_LABELS)};
     let activeSubarea = 'all';
     let renderedSubareaCity = null;
     const quickChips = document.querySelectorAll('#quick-chips .chip[data-time]');
+    const todChips = document.querySelectorAll('#quick-chips .chip-tod');
     const quickFreeChip = document.getElementById('quick-free-chip');
     const quickPopularChip = document.getElementById('quick-popular-chip');
+    const quickStarredChip = document.getElementById('quick-starred-chip');
+    const starredCountEl = document.getElementById('starred-count');
+    const btnCopyPlan = document.getElementById('btn-copy-plan');
     let popularOnly = false;
     let userUpvotes = new Set();
     let cachedVotes = {{}};
@@ -3987,11 +4158,25 @@ def render_page(results):
       quickChips.forEach(chip => {{
         chip.classList.toggle('active', chip.dataset.time === timeFilter);
       }});
+      todChips.forEach(chip => {{
+        chip.classList.toggle('active', chip.dataset.tod === activeTod);
+      }});
       if (quickFreeChip) {{
         quickFreeChip.classList.toggle('active', freeOnlyChk ? freeOnlyChk.checked : false);
       }}
       if (quickPopularChip) {{
         quickPopularChip.classList.toggle('active', popularOnly);
+      }}
+      if (quickStarredChip) {{
+        quickStarredChip.classList.toggle('active', starredOnly);
+      }}
+      if (starredCountEl) {{
+        const n = starredEvents.size;
+        starredCountEl.textContent = `(${{n}})`;
+        starredCountEl.style.display = n > 0 ? 'inline' : 'none';
+      }}
+      if (btnCopyPlan) {{
+        btnCopyPlan.style.display = starredEvents.size > 0 ? 'inline-flex' : 'none';
       }}
     }}
 
@@ -4048,10 +4233,13 @@ def render_page(results):
       locChips.forEach(chip => {{
         const city = chip.dataset.city;
         if (city === 'all') {{
-          chip.classList.toggle('active', checkedCities.length === allCities || checkedCities.length === 0);
+          chip.classList.toggle('active', (checkedCities.length === allCities || checkedCities.length === 0) && activeTransit === 'all');
         }} else {{
           chip.classList.toggle('active', checkedCities.length === 1 && checkedCities[0] === city);
         }}
+      }});
+      transitChips.forEach(chip => {{
+        chip.classList.toggle('active', chip.dataset.transit === activeTransit);
       }});
       if (checkedCities.length === 1) {{
         renderSubareaChips(checkedCities[0]);
@@ -4087,7 +4275,7 @@ def render_page(results):
       const allRecurs = recurBoxes.length;
       const chkRecurs = Array.from(recurBoxes).filter(b => b.checked).length;
       const isFree = freeOnlyChk && freeOnlyChk.checked;
-      const isFiltered = (chkCats < allCats) || (chkGenres < allGenres) || (activeGenre !== 'all') || (chkVenues < allVenues) || (chkCities < allCities) || (chkRecurs < allRecurs) || isFree || popularOnly || (activeSubarea !== 'all') || (searchInput && !!searchInput.value.trim());
+      const isFiltered = (chkCats < allCats) || (chkGenres < allGenres) || (activeGenre !== 'all') || (chkVenues < allVenues) || (chkCities < allCities) || (chkRecurs < allRecurs) || isFree || popularOnly || starredOnly || (activeTransit !== 'all') || (activeTod !== 'all') || (activeSubarea !== 'all') || (searchInput && !!searchInput.value.trim());
 
       if (mobileBadge) {{
         mobileBadge.textContent = isFiltered ? 'Active' : 'All';
@@ -4135,6 +4323,8 @@ def render_page(results):
       const checkedCities = Array.from(cityBoxes).filter(b => b.checked).map(b => b.value);
       if (checkedCities.length > 0 && checkedCities.length < allCities.length) params.set('city', checkedCities.join(','));
       if (activeSubarea && activeSubarea !== 'all') params.set('sub', activeSubarea);
+      if (activeTransit && activeTransit !== 'all') params.set('line', activeTransit);
+      if (activeTod && activeTod !== 'all') params.set('tod', activeTod);
 
       const allRecurs = Array.from(recurBoxes).map(b => b.value);
       const checkedRecurs = Array.from(recurBoxes).filter(b => b.checked).map(b => b.value);
@@ -4146,6 +4336,7 @@ def render_page(results):
 
       if (freeOnlyChk && freeOnlyChk.checked) params.set('free', '1');
       if (popularOnly) params.set('pop', '1');
+      if (starredOnly) params.set('saved', '1');
 
       if (timeFilter !== 'today') params.set('t', timeFilter);
       if ((timeFilter === 'day' || timeFilter === 'week') && fmtISO(anchor) !== todayISO) {{
@@ -4166,6 +4357,7 @@ def render_page(results):
         if (params.has('q')) searchInput.value = params.get('q');
         if (params.get('free') === '1' && freeOnlyChk) freeOnlyChk.checked = true;
         if (params.get('pop') === '1') popularOnly = true;
+        if (params.get('saved') === '1') starredOnly = true;
         if (params.get('past') === '1') showPastToday = true;
         if (params.get('v') === 'map') {{
           switchView('map');
@@ -4203,6 +4395,18 @@ def render_page(results):
           activeSubarea = params.get('sub');
         }} else {{
           activeSubarea = 'all';
+        }}
+
+        if (params.has('line')) {{
+          activeTransit = params.get('line');
+        }} else {{
+          activeTransit = 'all';
+        }}
+
+        if (params.has('tod')) {{
+          activeTod = params.get('tod');
+        }} else {{
+          activeTod = 'all';
         }}
 
         if (params.has('recur')) {{
@@ -4283,8 +4487,11 @@ def render_page(results):
         const recurOk = recurs.has(li.dataset.recur);
         const cityOk = cities.has(li.dataset.city);
         const subareaOk = (activeSubarea === 'all') || (li.dataset.subarea === activeSubarea);
+        const transitOk = (activeTransit === 'all') || ((li.dataset.transit || '').split(',').includes(activeTransit));
+        const todOk = (activeTod === 'all') || (li.dataset.tod === activeTod) || (li.dataset.tod === 'all');
         const freeOk = !freeOnly || li.dataset.free === 'true';
         const popularOk = !popularOnly || parseInt(li.dataset.votes || '0', 10) >= 3;
+        const starredOk = !starredOnly || starredEvents.has(li.dataset.id || li.dataset.eventId || '');
         const searchOk = !searchText || li.textContent.toLowerCase().includes(searchText);
 
         const evGenre = li.dataset.genre;
@@ -4318,7 +4525,7 @@ def render_page(results):
           }}
         }}
 
-        const isVisible = catOk && genreOk && venueOk && recurOk && cityOk && subareaOk && searchOk && freeOk && timePastOk && popularOk;
+        const isVisible = catOk && genreOk && venueOk && recurOk && cityOk && subareaOk && transitOk && todOk && searchOk && freeOk && timePastOk && popularOk && starredOk;
         li.classList.toggle('hidden', !isVisible);
 
         if (isToday && isVisible && !isPast) {{
@@ -4715,7 +4922,10 @@ def render_page(results):
       if (searchInput) searchInput.value = '';
       if (freeOnlyChk) freeOnlyChk.checked = false;
       popularOnly = false;
+      starredOnly = false;
       activeSubarea = 'all';
+      activeTransit = 'all';
+      activeTod = 'all';
       activeGenre = 'all';
       genreChips.forEach(c => c.classList.toggle('active', c.dataset.genre === 'all'));
       genreBoxes.forEach(b => b.checked = true);
@@ -4761,6 +4971,7 @@ def render_page(results):
         const targetCity = chip.dataset.city;
         activeSubarea = 'all';
         if (targetCity === 'all') {{
+          activeTransit = 'all';
           cityBoxes.forEach(b => {{ b.checked = true; }});
         }} else {{
           const checked = Array.from(cityBoxes).filter(b => b.checked).map(b => b.value);
@@ -4776,18 +4987,131 @@ def render_page(results):
       }});
     }});
 
-    function downloadICS(title, dateStr, venue, url) {{
-      if (!dateStr) return;
-      let dt;
-      try {{ dt = new Date(dateStr); }} catch(e) {{ return; }}
-      if (isNaN(dt.getTime())) return;
-      function pad(n) {{ return n < 10 ? '0' + n : n; }}
-      function toICS(d) {{
-        return d.getUTCFullYear() + pad(d.getUTCMonth()+1) + pad(d.getUTCDate()) + 'T' +
-               pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + pad(d.getUTCSeconds()) + 'Z';
+    transitChips.forEach(chip => {{
+      chip.addEventListener('click', () => {{
+        const line = chip.dataset.transit;
+        activeTransit = (activeTransit === line) ? 'all' : line;
+        apply();
+      }});
+    }});
+
+    todChips.forEach(chip => {{
+      chip.addEventListener('click', () => {{
+        const tod = chip.dataset.tod;
+        activeTod = (activeTod === tod) ? 'all' : tod;
+        apply();
+      }});
+    }});
+
+    if (quickStarredChip) {{
+      quickStarredChip.addEventListener('click', () => {{
+        starredOnly = !starredOnly;
+        if (starredOnly && timeFilter === 'today') {{
+          timeFilter = 'all';
+          showAll = true;
+        }}
+        apply();
+      }});
+    }}
+
+    function loadStarredState() {{
+      try {{
+        const raw = JSON.parse(localStorage.getItem('boston_starred_events') || '[]');
+        if (Array.isArray(raw)) starredEvents = new Set(raw);
+      }} catch (_) {{}}
+      document.querySelectorAll('.event[data-id]').forEach(li => {{
+        const isStar = starredEvents.has(li.dataset.id);
+        const btn = li.querySelector('.star-btn');
+        if (btn) {{
+          btn.classList.toggle('starred', isStar);
+          btn.textContent = isStar ? '★' : '☆';
+          btn.setAttribute('aria-pressed', isStar ? 'true' : 'false');
+        }}
+      }});
+    }}
+
+    document.addEventListener('click', (e) => {{
+      const sBtn = e.target.closest('.star-btn');
+      if (!sBtn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const li = sBtn.closest('.event');
+      if (!li) return;
+      const evId = li.dataset.id || li.dataset.eventId;
+      if (!evId) return;
+      const nowStarred = !starredEvents.has(evId);
+      if (nowStarred) starredEvents.add(evId);
+      else starredEvents.delete(evId);
+      try {{
+        localStorage.setItem('boston_starred_events', JSON.stringify(Array.from(starredEvents)));
+      }} catch (_) {{}}
+      document.querySelectorAll(`.event[data-id="${{evId}}"] .star-btn`).forEach(b => {{
+        b.classList.toggle('starred', nowStarred);
+        b.textContent = nowStarred ? '★' : '☆';
+        b.setAttribute('aria-pressed', nowStarred ? 'true' : 'false');
+      }});
+      if (starredOnly && starredEvents.size === 0) {{
+        starredOnly = false;
       }}
-      const start = toICS(dt);
-      const end = toICS(new Date(dt.getTime() + 2 * 3600 * 1000));
+      updateQuickChipsUI();
+      if (starredOnly) apply();
+    }});
+
+    if (btnCopyPlan) {{
+      btnCopyPlan.addEventListener('click', async () => {{
+        const items = [];
+        const seen = new Set();
+        document.querySelectorAll('.event[data-id]').forEach(li => {{
+          const id = li.dataset.id;
+          if (!starredEvents.has(id) || seen.has(id)) return;
+          seen.add(id);
+          const daySec = li.closest('.day');
+          const dateLabel = daySec ? (daySec.querySelector('h2')?.childNodes[0]?.textContent || daySec.dataset.date || '').trim() : '';
+          const when = (li.querySelector('.when')?.textContent || '').trim();
+          const aEl = li.querySelector('.what a');
+          const title = aEl ? aEl.textContent.trim() : '';
+          const url = aEl ? aEl.href : '';
+          const vName = li.dataset.venueName || (li.querySelector('.venue-link')?.textContent || li.dataset.venue || '').trim();
+          items.push(`• ${{dateLabel}} (${{when}}) — ${{title}} @ ${{vName}}${{url ? ' ' + url : ''}}`);
+        }});
+        if (!items.length) return;
+        const planText = `My Boston Events Plan (${{items.length}}):\n` + items.join('\n');
+        try {{
+          await navigator.clipboard.writeText(planText);
+          const orig = btnCopyPlan.textContent;
+          btnCopyPlan.textContent = '✓ Copied Plan!';
+          setTimeout(() => {{ btnCopyPlan.textContent = orig; }}, 2000);
+        }} catch (_) {{
+          prompt('Copy your event plan:', planText);
+        }}
+      }});
+    }}
+
+    function extractEventMetaFromLi(li) {{
+      const aEl = li.querySelector('.what > a') || li.querySelector('.what a');
+      const title = aEl ? aEl.textContent.trim() : 'Event';
+      const url = aEl ? aEl.href : location.href;
+      const venue = li.dataset.venueName || (li.querySelector('.venue-link')?.textContent || li.dataset.venue || 'Boston, MA').trim();
+      const city = li.dataset.city || 'boston';
+      const epoch = li.dataset.epoch ? parseInt(li.dataset.epoch, 10) : 0;
+      let dt = epoch > 0 ? new Date(epoch * 1000) : null;
+      if (!dt || isNaN(dt.getTime())) {{
+        const dStr = li.closest('.day')?.dataset.date;
+        if (dStr && dStr !== 'tba') dt = new Date(dStr + 'T19:00:00-04:00');
+      }}
+      return {{ title, url, venue, city, dt }};
+    }}
+
+    function toCalUTC(d) {{
+      function pad(n) {{ return n < 10 ? '0' + n : '' + n; }}
+      return d.getUTCFullYear() + pad(d.getUTCMonth()+1) + pad(d.getUTCDate()) + 'T' +
+             pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + pad(d.getUTCSeconds()) + 'Z';
+    }}
+
+    function downloadICS(title, dt, venue, url) {{
+      if (!dt || isNaN(dt.getTime())) return;
+      const start = toCalUTC(dt);
+      const end = toCalUTC(new Date(dt.getTime() + 2 * 3600 * 1000));
       function cleanText(str) {{
         return (str || '').split(String.fromCharCode(10)).join(' ')
                           .split(String.fromCharCode(13)).join('')
@@ -4820,10 +5144,28 @@ def render_page(results):
     }}
 
     document.addEventListener('click', (e) => {{
+      const gBtn = e.target.closest('.gcal-btn');
+      if (gBtn) {{
+        e.preventDefault();
+        const li = gBtn.closest('.event');
+        if (!li) return;
+        const m = extractEventMetaFromLi(li);
+        if (!m.dt) return;
+        const start = toCalUTC(m.dt);
+        const end = toCalUTC(new Date(m.dt.getTime() + 2 * 3600 * 1000));
+        const loc = `${{m.venue}}, ${{m.city.charAt(0).toUpperCase() + m.city.slice(1)}}, MA`;
+        const details = `Details & Tickets: ${{m.url}}\n\nDiscovered on Wicked Boston Events`;
+        const gUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${{encodeURIComponent(m.title)}}&dates=${{start}}/${{end}}&details=${{encodeURIComponent(details)}}&location=${{encodeURIComponent(loc)}}`;
+        window.open(gUrl, '_blank', 'noopener');
+        return;
+      }}
       const btn = e.target.closest('.ics-btn');
       if (!btn) return;
       e.preventDefault();
-      downloadICS(btn.dataset.title, btn.dataset.date, btn.dataset.venue, btn.dataset.url);
+      const li = btn.closest('.event');
+      if (!li) return;
+      const m = extractEventMetaFromLi(li);
+      downloadICS(m.title, m.dt, m.venue, m.url);
     }});
 
     const btnViewList = document.getElementById('btn-view-list');
@@ -4884,8 +5226,9 @@ def render_page(results):
       const jumpBtn = e.target.closest('.venue-map-jump');
       if (jumpBtn) {{
         e.preventDefault();
-        const lat = parseFloat(jumpBtn.dataset.lat);
-        const lng = parseFloat(jumpBtn.dataset.lng);
+        const li = jumpBtn.closest('.event');
+        const lat = parseFloat(jumpBtn.dataset.lat || (li && li.dataset.lat));
+        const lng = parseFloat(jumpBtn.dataset.lng || (li && li.dataset.lng));
         if (isNaN(lat) || isNaN(lng)) return;
         switchView('map');
         loadLeaflet(() => {{
@@ -5505,6 +5848,7 @@ def render_page(results):
     loadLocalCommunityEvents();
     syncInitialUpvotes();
     fetchLiveUpvotes();
+    loadStarredState();
 
     hashToState();
     apply();

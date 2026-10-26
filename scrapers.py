@@ -374,7 +374,17 @@ def scrape_eventbrite_org(url, ua):
 
 def scrape_eventbrite_search(url, ua):
     """Parse Eventbrite Boston discovery page via ItemList JSON-LD."""
-    soup = fetch_soup(url, ua)
+    import subprocess
+    try:
+        soup = fetch_soup(url, ua)
+    except Exception:
+        res = subprocess.run(
+            ["curl", "-sL", "-A", ua or UA_CHROME, "--max-time", "12", url],
+            capture_output=True, text=True, check=False,
+        )
+        if not res.stdout or "application/ld+json" not in res.stdout:
+            raise
+        soup = BeautifulSoup(res.stdout, "html.parser")
     events = []
     for block in soup.find_all("script", type="application/ld+json"):
         try:
@@ -850,132 +860,222 @@ def scrape_jsonld(url, ua):
 
 def scrape_event_list(url, ua):
     """Shared scraper for Drupal sites that use `article.event-list` markup
-    (Brookline Booksmith, Trident Booksellers, etc.). Venue name is filled
-    in by group_by_date from the registering source name."""
-    soup = fetch_soup(url, ua)
+    (Brookline Booksmith, Harvard Book Store, Trident Booksellers).
+    Fetches current month and upcoming 2 months, filters past events, and for
+    Harvard Book Store merges its Eventbrite organizer feed for prices & resilience.
+    """
+    import subprocess
+    now_est = datetime.now(EASTERN)
+    today_start = datetime(now_est.year, now_est.month, now_est.day, 0, 0, tzinfo=EASTERN)
+
+    base_url = url.split("?")[0].rstrip("/")
+    base_url = re.sub(r"/\d{4}/\d{1,2}$", "", base_url)
+    page_urls = [base_url]
+    y_cur, m_cur = now_est.year, now_est.month
+    for _ in range(2):
+        m_cur += 1
+        if m_cur > 12:
+            m_cur = 1
+            y_cur += 1
+        page_urls.append(f"{base_url}/{y_cur}/{m_cur:02d}")
+
     events = []
-    for art in soup.select("article.event-list"):
-        a = art.select_one(".event-list__title a") or art.select_one("a[href*='/event/']")
-        if not a:
-            continue
-        href = a.get("href", "")
+    seen = set()
 
-        # Extract time from .event-list__details--item or article text
-        hour, minute = 19, 0
-        time_text = None
-        date_text = None
-        for item in art.select(".event-list__details--item"):
-            label = item.select_one(".event-list__details--label")
-            if label and "time" in label.get_text().lower():
-                time_text = item.get_text(" ", strip=True).replace(label.get_text(strip=True), "").strip()
-            elif label and "date" in label.get_text().lower():
-                date_text = item.get_text(" ", strip=True).replace(label.get_text(strip=True), "").strip()
-            elif "time:" in item.get_text().lower():
-                time_text = re.sub(r"(?i)^.*?time:\s*", "", item.get_text(" ", strip=True)).strip()
-            elif "date:" in item.get_text().lower():
-                date_text = re.sub(r"(?i)^.*?date:\s*", "", item.get_text(" ", strip=True)).strip()
-
-        if not time_text:
-            m_tm = re.search(r"(?:Time:\s*)(\d{1,2}(?::\d{2})?\s*(?:am|pm))", art.get_text(" ", strip=True), re.IGNORECASE)
-            if m_tm:
-                time_text = m_tm.group(1)
-
-        if time_text:
-            m_time = re.search(r"(\d{1,2})(?::(\d{2}))?\s*(am|pm)", time_text, re.IGNORECASE)
-            if m_time:
-                h = int(m_time.group(1))
-                mn = int(m_time.group(2) or 0)
-                ampm = m_time.group(3).lower()
-                if ampm == "pm" and h != 12:
-                    h += 12
-                elif ampm == "am" and h == 12:
-                    h = 0
-                hour, minute = h, mn
-
-        m = re.search(r"/(\d{4})-(\d{2})-(\d{2})/", href)
-        iso = None
-        if m:
-            y, mo, d = map(int, m.groups())
+    for page_url in page_urls:
+        soup = None
+        try:
+            soup = fetch_soup(page_url, ua)
+        except Exception:
             try:
-                dt = datetime(y, mo, d, hour, minute, tzinfo=EASTERN)
-                iso = dt.astimezone(timezone.utc).isoformat()
-            except ValueError:
-                pass
-        elif date_text:
-            dm = re.search(r"(\d{1,2})/(\d{1,2})/(\d{4})", date_text)
-            if dm:
-                mo, d, y = map(int, dm.groups())
+                res = subprocess.run(
+                    ["curl", "-sL", "-A", ua or UA_CURL, "--max-time", "12", page_url],
+                    capture_output=True, text=True, check=False,
+                )
+                if res.stdout and "article" in res.stdout:
+                    soup = BeautifulSoup(res.stdout, "html.parser")
+            except Exception:
+                soup = None
+        if not soup:
+            continue
+
+        for art in soup.select("article.event-list"):
+            a = art.select_one(".event-list__title a") or art.select_one("a[href*='/event/']")
+            if not a:
+                continue
+            href = a.get("href", "")
+
+            # Extract time from .event-list__details--item or article text
+            hour, minute = 19, 0
+            time_text = None
+            date_text = None
+            for item in art.select(".event-list__details--item"):
+                label = item.select_one(".event-list__details--label")
+                if label and "time" in label.get_text().lower():
+                    time_text = item.get_text(" ", strip=True).replace(label.get_text(strip=True), "").strip()
+                elif label and "date" in label.get_text().lower():
+                    date_text = item.get_text(" ", strip=True).replace(label.get_text(strip=True), "").strip()
+                elif "time:" in item.get_text().lower():
+                    time_text = re.sub(r"(?i)^.*?time:\s*", "", item.get_text(" ", strip=True)).strip()
+                elif "date:" in item.get_text().lower():
+                    date_text = re.sub(r"(?i)^.*?date:\s*", "", item.get_text(" ", strip=True)).strip()
+
+            if not time_text:
+                m_tm = re.search(r"(?:Time:\s*)(\d{1,2}(?::\d{2})?\s*(?:am|pm))", art.get_text(" ", strip=True), re.IGNORECASE)
+                if m_tm:
+                    time_text = m_tm.group(1)
+
+            if time_text:
+                m_time = re.search(r"(\d{1,2})(?::(\d{2}))?\s*(am|pm)", time_text, re.IGNORECASE)
+                if m_time:
+                    h = int(m_time.group(1))
+                    mn = int(m_time.group(2) or 0)
+                    ampm = m_time.group(3).lower()
+                    if ampm == "pm" and h != 12:
+                        h += 12
+                    elif ampm == "am" and h == 12:
+                        h = 0
+                    hour, minute = h, mn
+
+            m = re.search(r"/(\d{4})-(\d{2})-(\d{2})/", href)
+            dt = None
+            iso = None
+            if m:
+                y, mo, d = map(int, m.groups())
                 try:
                     dt = datetime(y, mo, d, hour, minute, tzinfo=EASTERN)
                     iso = dt.astimezone(timezone.utc).isoformat()
                 except ValueError:
                     pass
+            elif date_text:
+                dm = re.search(r"(\d{1,2})/(\d{1,2})/(\d{4})", date_text)
+                if dm:
+                    mo, d, y = map(int, dm.groups())
+                    try:
+                        dt = datetime(y, mo, d, hour, minute, tzinfo=EASTERN)
+                        iso = dt.astimezone(timezone.utc).isoformat()
+                    except ValueError:
+                        pass
 
-        if not iso:
-            mon = art.select_one(".event-list__date--month")
-            day = art.select_one(".event-list__date--day")
-            if mon and day:
-                try:
-                    year = datetime.now(EASTERN).year
-                    dt = datetime.strptime(f"{mon.get_text(strip=True)} {day.get_text(strip=True)} {year} {hour:02d}:{minute:02d}", "%b %d %Y %H:%M").replace(tzinfo=EASTERN)
-                    if dt < datetime.now(EASTERN):
-                        dt = dt.replace(year=year + 1)
-                    iso = dt.astimezone(timezone.utc).isoformat()
-                except ValueError:
-                    pass
+            if not iso:
+                mon = art.select_one(".event-list__date--month")
+                day = art.select_one(".event-list__date--day")
+                if mon and day:
+                    try:
+                        year = now_est.year
+                        dt = datetime.strptime(f"{mon.get_text(strip=True)} {day.get_text(strip=True)} {year} {hour:02d}:{minute:02d}", "%b %d %Y %H:%M").replace(tzinfo=EASTERN)
+                        if dt < today_start:
+                            dt = dt.replace(year=year + 1)
+                        iso = dt.astimezone(timezone.utc).isoformat()
+                    except ValueError:
+                        pass
 
-        # Extract offsite venue location if present
-        venue_name = None
-        loc_item = art.select_one(".event-details__location--location")
-        if not loc_item:
-            for item in art.select(".event-list__details--item"):
-                label = item.select_one(".event-list__details--label")
-                if label and "place" in label.get_text().lower():
-                    loc_item = item
-                    break
+            if dt and dt < today_start:
+                continue
 
-        if loc_item:
-            line1 = loc_item.select_one(".address-line1")
-            if line1:
-                text = line1.get_text(strip=True)
-                if text and not re.match(r"^\d+\s+[A-Za-z]", text):
-                    venue_name = text
-            if not venue_name:
-                addr = loc_item.select_one("address")
-                if addr:
-                    lines = [l.strip() for l in addr.get_text("\n").split("\n") if l.strip()]
-                    if lines and not re.match(r"^\d+\s+[A-Za-z]", lines[0]):
-                        venue_name = lines[0]
-            if not venue_name:
-                lbl = loc_item.select_one(".event-list__details--label")
-                lbl_txt = lbl.get_text(strip=True) if lbl else ""
-                txt = loc_item.get_text(" ", strip=True).replace(lbl_txt, "").strip()
-                if txt and not re.match(r"^\d+\s+[A-Za-z]", txt) and txt.lower() not in ("place:", ""):
-                    venue_name = txt
+            # Extract offsite venue location if present
+            venue_name = None
+            loc_item = art.select_one(".event-details__location--location")
+            if not loc_item:
+                for item in art.select(".event-list__details--item"):
+                    label = item.select_one(".event-list__details--label")
+                    if label and "place" in label.get_text().lower():
+                        loc_item = item
+                        break
 
-        if venue_name:
-            v_low = venue_name.lower()
-            u_low = url.lower()
-            if "brookline" in u_low and "brookline booksmith" in v_low:
-                venue_name = None
-            elif "harvard" in u_low and "harvard book" in v_low:
-                venue_name = None
-            elif "trident" in u_low and "trident" in v_low:
-                venue_name = None
+            if loc_item:
+                line1 = loc_item.select_one(".address-line1")
+                if line1:
+                    text = line1.get_text(strip=True)
+                    if text and not re.match(r"^\d+\s+[A-Za-z]", text):
+                        venue_name = text
+                if not venue_name:
+                    addr = loc_item.select_one("address")
+                    if addr:
+                        lines = [l.strip() for l in addr.get_text("\n").split("\n") if l.strip()]
+                        if lines and not re.match(r"^\d+\s+[A-Za-z]", lines[0]):
+                            venue_name = lines[0]
+                if not venue_name:
+                    lbl = loc_item.select_one(".event-list__details--label")
+                    lbl_txt = lbl.get_text(strip=True) if lbl else ""
+                    txt = loc_item.get_text(" ", strip=True).replace(lbl_txt, "").strip()
+                    if txt and not re.match(r"^\d+\s+[A-Za-z]", txt) and txt.lower() not in ("place:", ""):
+                        venue_name = txt
 
-        price = None
-        body = art.select_one(".event-list__body")
-        body_text = body.get_text(" ", strip=True) if body else ""
-        p = re.search(r"(Free|FREE|\$\d+(?:\.\d{2})?(?:\s*[–-]\s*\$?\d+(?:\.\d{2})?)?)", body_text)
-        if p:
-            price = "Free" if p.group(1).lower() == "free" else p.group(1)
-        events.append({
-            "name": a.get_text(strip=True),
-            "date": iso,
-            "url": urljoin(url, href),
-            "venue": venue_name,
-            "price": price,
-        })
+            title_str = a.get_text(strip=True)
+            if not venue_name and " at " in title_str:
+                m_at = re.search(r"\bat\s+(?:the\s+)?(First Parish Church|Brattle Theatre|Cambridge Public Library|Harvard Science Center|Harvard Book Store)\b", title_str, re.I)
+                if m_at and "harvard book" not in m_at.group(1).lower():
+                    venue_name = m_at.group(1)
+
+            if venue_name:
+                v_low = venue_name.lower()
+                u_low = url.lower()
+                if "brookline" in u_low and "brookline booksmith" in v_low:
+                    venue_name = None
+                elif "harvard" in u_low and v_low in ("harvard book store", "harvard bookstore"):
+                    venue_name = None
+                elif "trident" in u_low and "trident" in v_low:
+                    venue_name = None
+
+            price = None
+            body = art.select_one(".event-list__body")
+            body_text = body.get_text(" ", strip=True) if body else ""
+            art_text = art.get_text(" ", strip=True)
+            p = re.search(r"(Free|FREE|\$\d+(?:\.\d{2})?(?:\s*[–-]\s*\$?\d+(?:\.\d{2})?)?)", body_text or art_text)
+            if p:
+                price = "Free" if p.group(1).lower() == "free" else p.group(1)
+
+            key = (title_str.lower(), (iso or "")[:10])
+            if key in seen:
+                continue
+            seen.add(key)
+
+            events.append({
+                "name": title_str,
+                "date": iso,
+                "url": urljoin(url, href),
+                "venue": venue_name,
+                "price": price,
+            })
+
+    # For Harvard Book Store, also merge their official Eventbrite organizer feed
+    if "harvard.com" in url.lower():
+        try:
+            eb_evs = scrape_eventbrite_org("https://www.eventbrite.com/o/harvard-book-store-74507930", UA_CHROME)
+            by_date = {}
+            for ev in events:
+                if ev.get("date"):
+                    by_date.setdefault(ev["date"][:10], []).append(ev)
+            for eb in eb_evs:
+                eb_date = (eb.get("date") or "")[:10]
+                eb_name = (eb.get("name") or "").strip()
+                if not eb_date or not eb_name:
+                    continue
+                matched = False
+                for existing in by_date.get(eb_date, []):
+                    if existing["name"].lower()[:18] in eb_name.lower() or eb_name.lower()[:18] in existing["name"].lower():
+                        if not existing.get("price") and eb.get("price"):
+                            existing["price"] = eb["price"]
+                        matched = True
+                        break
+                if not matched:
+                    v_eb = eb.get("venue")
+                    if v_eb and "harvard book" not in v_eb.lower():
+                        v_eb = f"Harvard Book Store ({v_eb})"
+                    else:
+                        v_eb = "Harvard Book Store"
+                    events.append({
+                        "name": eb_name,
+                        "date": eb.get("date"),
+                        "url": eb.get("url"),
+                        "venue": v_eb,
+                        "price": eb.get("price"),
+                        "category": "books",
+                    })
+        except Exception:
+            pass
+
     return events
 
 
@@ -1308,10 +1408,13 @@ def scrape_bso(url, ua):
     events = []
     for hit in resp.json().get("hits", []):
         doc = hit.get("document", {})
-        if doc.get("event_brand") == "Tanglewood":
+        brand = (doc.get("event_brand") or "").lower()
+        if "tanglewood" in brand:
             continue
         venues = doc.get("performance_venue") or []
         venue_display = venues[0].get("display_name", "Symphony Hall") if venues else "Symphony Hall"
+        if any(w in venue_display.lower() for w in ["linde center", "tanglewood", "ozawa", "koussevitzky", "lenox"]):
+            continue
         link = doc.get("event_link") or ""
         events.append({
             "name": doc.get("title"),
@@ -1320,6 +1423,7 @@ def scrape_bso(url, ua):
             "venue": venue_display,
             "price": None,
             "category": "music",
+            "genre": "classical",
         })
     return events
 
@@ -2094,7 +2198,18 @@ def scrape_laugh_boston(url, ua):
 
 def scrape_boch_center(url, ua):
     """Boch Center (Wang Theatre & Shubert Theatre) in Boston Theater District."""
-    soup = fetch_soup(url, ua)
+    tm_url = "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZpZAJd6FA,KovZpZA1EEJA&size=100&sort=date,asc"
+    tm_events = scrape_ticketmaster_discovery(tm_url, ua)
+    if tm_events:
+        for e in tm_events:
+            if not e.get("category"):
+                e["category"] = infer_category(e.get("name"), e.get("venue"), default="theater")
+        return tm_events
+
+    try:
+        soup = fetch_soup(url, ua)
+    except Exception:
+        return []
     events = []
     for s in soup.find_all("script", type="application/ld+json"):
         raw = s.get_text().strip()
@@ -2841,9 +2956,23 @@ def scrape_tablelist(url, ua):
 
 
 def scrape_ticketmaster_venue(url, ua):
-    """Scrapes events from Ticketmaster venue page using __NEXT_DATA__ eventsJsonLD (e.g. Mémoire Boston)."""
-    resp = _SESSION.get(url, headers={"User-Agent": ua}, timeout=15)
-    resp.raise_for_status()
+    """Scrapes events from Ticketmaster venue page using Discovery API or __NEXT_DATA__ eventsJsonLD (e.g. Mémoire Boston)."""
+    if "memoire" in (url or "").lower() or "9388" in (url or ""):
+        tm_evs = scrape_ticketmaster_discovery(
+            "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZ917AJPk&size=100&sort=date,asc",
+            ua,
+        )
+        if tm_evs:
+            for e in tm_evs:
+                e["venue"] = "Mémoire Boston"
+                e["category"] = "clubbing"
+            return tm_evs
+
+    try:
+        resp = _SESSION.get(url, headers={"User-Agent": ua}, timeout=15)
+        resp.raise_for_status()
+    except Exception:
+        return []
     soup = BeautifulSoup(resp.text, "html.parser")
     tag = soup.find("script", id="__NEXT_DATA__")
     if not tag or not tag.string:
@@ -4122,12 +4251,30 @@ def scrape_somerville_arts_council(url, ua):
 
 def scrape_jacques(url, ua):
     """Jacques' Cabaret in Bay Village — drag shows, cabaret, and live showcases via Eventbrite."""
-    evs = scrape_eventbrite_search(url, ua)
+    evs = []
+    try:
+        evs.extend(scrape_eventbrite_search(url, ua))
+    except Exception:
+        pass
+    for org_url in [
+        "https://www.eventbrite.com/o/the-vampire-leslut-65543514293",
+        "https://www.eventbrite.com/o/patty-bourree-53423796003",
+        "https://www.eventbrite.com/o/graveyard-brat-121779050661",
+    ]:
+        try:
+            evs.extend(scrape_eventbrite_org(org_url, ua))
+        except Exception:
+            pass
     results = []
+    seen = set()
     for e in evs:
         v_low = (e.get("venue") or "").lower()
         n_low = (e.get("name") or "").lower()
         if "jacque" in v_low or "jacque" in n_low or "79 broadway" in v_low:
+            key = (n_low, (e.get("date") or "")[:10])
+            if key in seen:
+                continue
+            seen.add(key)
             e["venue"] = "Jacques' Cabaret"
             e["category"] = "theater"
             results.append(e)
@@ -4391,12 +4538,25 @@ def scrape_remnant(url, ua):
 
 def scrape_duck_duck_goofs(url, ua):
     """Duck Duck Goofs / Goofs Comedy Club in Union Square, Somerville."""
-    evs = scrape_eventbrite_search(url, ua)
+    evs = []
+    try:
+        evs.extend(scrape_eventbrite_org("https://www.eventbrite.com/o/duck-duck-goofs-39699614543", ua))
+    except Exception:
+        pass
+    try:
+        evs.extend(scrape_eventbrite_search(url, ua))
+    except Exception:
+        pass
     results = []
+    seen = set()
     for e in evs:
         v_low = (e.get("venue") or "").lower()
         n_low = (e.get("name") or "").lower()
-        if "goof" in v_low or "goof" in n_low:
+        if "goof" in v_low or "goof" in n_low or "duck-duck-goofs" in (e.get("url") or ""):
+            key = (n_low, (e.get("date") or "")[:10])
+            if key in seen:
+                continue
+            seen.add(key)
             e["venue"] = "Goofs Comedy Club"
             e["category"] = "comedy"
             results.append(e)
@@ -5465,18 +5625,25 @@ def scrape_symphony_hall(url, ua):
     seen = set()
     for hit in data.get("hits", []):
         doc = hit.get("document", {})
+        brand = (doc.get("event_brand") or "").lower()
+        if "tanglewood" in brand:
+            continue
         title = (doc.get("title") or "").strip()
         ts = doc.get("performance_date")
         if not title or not ts:
             continue
         dt = datetime.fromtimestamp(ts, tz=timezone.utc)
         link = doc.get("performance_link") or doc.get("event_link") or doc.get("ticket_link") or url
+        if link and link.startswith("/"):
+            link = f"https://www.bso.org{link}"
         key = (title.lower(), dt.isoformat())
         if key in seen:
             continue
         seen.add(key)
         venues = doc.get("performance_venue", [])
         vname = venues[0].get("name", "Symphony Hall") if venues else "Symphony Hall"
+        if any(w in vname.lower() for w in ["linde center", "tanglewood", "ozawa", "koussevitzky", "lenox"]):
+            continue
         desc = doc.get("subhead") or re.sub(r"<[^>]+>", " ", doc.get("excerpt") or "").strip()
         events.append({
             "name": title,
@@ -5485,7 +5652,8 @@ def scrape_symphony_hall(url, ua):
             "venue": vname,
             "price": None,
             "description": desc[:300] if desc else None,
-            "category": "classical",
+            "category": "music",
+            "genre": "classical",
         })
     return events
 
@@ -6251,7 +6419,7 @@ CATEGORY_KEYWORDS = [
                    "industrial night", "goth night", "darkwave", "new wave night",
                    "party", "parties", "bash", "after party", "afterparty", "soiree", "rooftop", "halloween ball",
                    "costume party", "speakeasy", "piano bar", "dueling piano"]),
-    ("music",     ["music", "musical", "musician", "tour", "concert", " band ", "live music", "music series", "music hall", "orchestra",
+    ("music",     ["music", "musical", "musician", "concert", " band ", "live music", "music series", "music hall", "orchestra",
                    "symphony", "karaoke", "jazz", "hip hop", "rap", "bluegrass", "country music",
                    "country night", "folk music", "acoustic", "open mic", "irish session", "jam session",
                    "music session", "singer-songwriter", "singer songwriter", "soul music", "r&b",
@@ -6308,44 +6476,65 @@ CATEGORY_KEYWORDS = [
                    "open studios", "small business", "startup", "tarot"]),
 ]
 
+_WORD_BOUNDARY_KEYWORDS = {
+    "art", "arts", "rap", "disco", "disko", "pop", "funk", "punk", "metal",
+    "bash", "rave", "edm", "jam", "fest", "tour", "expo", "gala", "poet",
+    "clay", "sake", "maki", "menu", "chef", "bbq", "gym", "golf", "kids",
+    "baby", "lego", "hike", "yoga", "farm", "beer", "wine", "film", "match",
+}
+_WORD_BOUNDARY_PATTERNS = {
+    k: re.compile(rf"\b{re.escape(k)}\b", re.I) for k in _WORD_BOUNDARY_KEYWORDS
+}
+
 
 def infer_category(name, venue, default=None):
     text = f"{name or ''} {venue or ''}".lower()
     for cat, kws in CATEGORY_KEYWORDS:
         for k in kws:
-            if k in ("art", "arts"):
-                if re.search(r"\barts?\b", text):
+            pat = _WORD_BOUNDARY_PATTERNS.get(k)
+            if pat is not None:
+                if pat.search(text):
                     return cat
             elif k in text:
                 return cat
+    if default == "classical":
+        return "music"
+    if default == "arts":
+        return "art"
+    if default == "fitness":
+        return "sports"
     return default or "other"
 
 
 CATEGORY_STYLES = {
-    "music":    ("#7aa2f7", "♪"),
-    "dance":    ("#ff7ab2", "💃"),
-    "comedy":   ("#f0a07a", "☺"),
-    "theater":  ("#f7768e", "🎭"),
-    "books":    ("#9ece6a", "📖"),
-    "gaming":   ("#bb9af7", "◆"),
-    "clubbing": ("#e06c75", "◉"),
-    "film":     ("#e0af68", "▶"),
-    "sports":   ("#73daca", "⚑"),
-    "outdoors": ("#4fbf8f", "⛰"),
-    "food":     ("#c678dd", "🍺"),
-    "family":   ("#ffb8d1", "✦"),
-    "art":      ("#ffd866", "✦"),
-    "community":("#8fa1b3", "◯"),
-    "other":    ("#6b7280", "·"),
+    "music":     ("#7aa2f7", "♪"),
+    "classical": ("#7aa2f7", "♪"),
+    "dance":     ("#ff7ab2", "💃"),
+    "comedy":    ("#f0a07a", "☺"),
+    "theater":   ("#f7768e", "🎭"),
+    "stage":     ("#f7768e", "🎭"),
+    "books":     ("#9ece6a", "📖"),
+    "gaming":    ("#bb9af7", "◆"),
+    "clubbing":  ("#e06c75", "◉"),
+    "film":      ("#e0af68", "▶"),
+    "sports":    ("#73daca", "⚑"),
+    "fitness":   ("#73daca", "⚑"),
+    "outdoors":  ("#4fbf8f", "⛰"),
+    "food":      ("#c678dd", "🍺"),
+    "family":    ("#ffb8d1", "✦"),
+    "art":       ("#ffd866", "✦"),
+    "arts":      ("#ffd866", "✦"),
+    "community": ("#8fa1b3", "◯"),
+    "other":     ("#6b7280", "·"),
 }
 
 
 CATEGORY_BUCKETS = [
-    ("Music & nightlife", ["music", "clubbing"]),
+    ("Music & nightlife", ["music", "clubbing", "classical"]),
     ("Dance",             ["dance"]),
-    ("Stage",             ["comedy", "theater"]),
-    ("Arts & culture",    ["books", "film", "art"]),
-    ("Play",              ["gaming", "sports", "outdoors", "family"]),
+    ("Stage",             ["comedy", "theater", "stage"]),
+    ("Arts & culture",    ["books", "film", "art", "arts"]),
+    ("Play",              ["gaming", "sports", "fitness", "outdoors", "family"]),
     ("Food & drink",      ["food"]),
     ("Community",         ["community", "other"]),
 ]
@@ -6732,6 +6921,84 @@ def _init_warm_cache():
 _init_warm_cache()
 
 
+_AGGREGATOR_VENUES = {
+    "The Boston Calendar", "Eventbrite Boston", "Eventbrite Cambridge",
+    "Eventbrite Somerville", "Do617", "Meetup Boston", "Luma Boston",
+}
+
+
+def _normalize_and_filter_events(raw_events, v):
+    """Filter out placeholders, past events (>18h ago), virtual events, and far-away venues,
+    and normalize category & music genre."""
+    name = v["name"]
+    default_cat = v.get("default_category")
+    is_agg = (default_cat is None) or (name in _AGGREGATOR_VENUES)
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=18)
+    out = []
+
+    for e in (raw_events or []):
+        title = (e.get("name") or "").strip()
+        if not title or is_placeholder_or_closed_event(title):
+            continue
+
+        v_raw = (e.get("venue") or "").strip()
+        v_low = v_raw.lower()
+        t_low = title.lower()
+
+        # Filter virtual/online events
+        if v_low in ("online", "online event", "virtual", "zoom") or "(virtual)" in v_low or t_low.startswith(("virtual -", "virtual:", "online -", "online:")):
+            continue
+
+        # Filter far out-of-region venues (Western Mass, Cape Ann, Fall River, NH)
+        if any(far in v_low for far in ("linde center", "tanglewood", "ozawa hall", "hammond castle", "lizzie borden house", "exeter nh", "scenic railriders")):
+            continue
+
+        # Filter past events (>18h ago)
+        d_str = e.get("date")
+        if d_str and d_str != "tba":
+            try:
+                dt = datetime.fromisoformat(d_str.replace("Z", "+00:00"))
+                if dt.tzinfo is None:
+                    dt = dt.replace(tzinfo=EASTERN)
+                if dt.astimezone(timezone.utc) < cutoff:
+                    continue
+            except Exception:
+                pass
+
+        if not v_raw:
+            e["venue"] = name
+
+        cat = e.get("category")
+        if cat == "classical" or (not cat and default_cat == "classical"):
+            e["category"] = "music"
+            if not e.get("genre"):
+                e["genre"] = "classical"
+        elif cat == "arts" or (not cat and default_cat == "arts"):
+            e["category"] = "art"
+        elif cat == "fitness":
+            e["category"] = "sports"
+        elif cat == "stage":
+            e["category"] = "theater"
+        elif is_agg or not cat:
+            e["category"] = infer_category(e.get("name"), e.get("venue"), default_cat)
+
+        if e.get("category") in ("music", "clubbing"):
+            if not e.get("genre"):
+                e["genre"] = infer_music_genre(
+                    e.get("name"), e.get("venue"),
+                    description=e.get("description"),
+                    native_genre=e.get("genre"),
+                    category=e.get("category"),
+                )
+        else:
+            e.pop("genre", None)
+
+        out.append(e)
+
+    out.sort(key=_sort_key)
+    return out
+
+
 def _scrape_one(v, force=False):
     name = v["name"]
     ttl = _get_venue_ttl(name)
@@ -6741,15 +7008,7 @@ def _scrape_one(v, force=False):
     if not force:
         cached = _load_venue_cache(name, max_age=ttl)
         if cached and cached.get("events") is not None:
-            events = [e for e in cached["events"] if not is_placeholder_or_closed_event(e.get("name"))]
-            for e in events:
-                if not e.get("venue"):
-                    e["venue"] = name
-                if not e.get("category"):
-                    e["category"] = infer_category(e.get("name"), e.get("venue"), v.get("default_category"))
-                if e.get("category") in ("music", "clubbing") and not e.get("genre"):
-                    e["genre"] = infer_music_genre(e.get("name"), e.get("venue"), description=e.get("description"), native_genre=e.get("genre"), category=e.get("category"))
-            events.sort(key=_sort_key)
+            events = _normalize_and_filter_events(cached["events"], v)
             return {
                 "venue": name,
                 "url": v["url"],
@@ -6762,14 +7021,7 @@ def _scrape_one(v, force=False):
     # 2. Live scrape from external website
     try:
         events = dedupe(v["scraper"](v["url"], v["ua"]))
-        for e in events:
-            if not e.get("venue"):
-                e["venue"] = name
-            if not e.get("category"):
-                e["category"] = infer_category(e.get("name"), e.get("venue"), v.get("default_category"))
-            if e.get("category") in ("music", "clubbing") and not e.get("genre"):
-                e["genre"] = infer_music_genre(e.get("name"), e.get("venue"), description=e.get("description"), native_genre=e.get("genre"), category=e.get("category"))
-        events.sort(key=_sort_key)
+        events = _normalize_and_filter_events(events, v)
         dur = round(time.time() - t0, 2)
 
         # Update last known good and save to disk cache
@@ -6778,7 +7030,7 @@ def _scrape_one(v, force=False):
             _save_venue_cache(name, events, duration=dur)
         elif name in _last_known_good and not events:
             # Scraper returned 0 events but previously had events: fall back to preserve data
-            events = _last_known_good[name]
+            events = _normalize_and_filter_events(_last_known_good[name], v)
         else:
             _save_venue_cache(name, events, duration=dur)
 
@@ -6794,6 +7046,7 @@ def _scrape_one(v, force=False):
         # Fall back to stale cache or previous events if available on network error/timeout
         stale = _load_venue_cache(name, max_age=None)
         prev = (stale.get("events") if stale else None) or _last_known_good.get(name, [])
+        prev = _normalize_and_filter_events(prev, v)
         return {
             "venue": name,
             "url": v["url"],

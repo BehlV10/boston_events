@@ -632,6 +632,29 @@ VENUE_RULES = [
     ("black rose", (42.3596, -71.0543, "Faneuil Hall", "160 State St, Boston", "The Black Rose")),
     ("emmet", (42.3582, -71.0617, "Beacon Hill", "6 Beacon St, Boston", "Emmets Irish Pub")),
     ("portico", (42.3768, -71.0911, "Ward Two", "101 South St, Somerville", "Portico Brewing")),
+    ("nec (", (42.3412, -71.0866, "Fenway / Symphony", "290 Huntington Ave, Boston", "New England Conservatory (NEC)")),
+    ("williams hall", (42.3412, -71.0866, "Fenway / Symphony", "290 Huntington Ave, Boston", "Williams Hall (NEC)")),
+    ("burnes hall", (42.3412, -71.0866, "Fenway / Symphony", "290 Huntington Ave, Boston", "Burnes Hall (NEC)")),
+    ("brown hall", (42.3412, -71.0866, "Fenway / Symphony", "290 Huntington Ave, Boston", "Brown Hall (NEC)")),
+    ("keller room", (42.3412, -71.0866, "Fenway / Symphony", "290 Huntington Ave, Boston", "Keller Room (NEC)")),
+    ("plimpton shattuck", (42.3412, -71.0866, "Fenway / Symphony", "290 Huntington Ave, Boston", "Plimpton Shattuck Black Box (NEC)")),
+    ("oliver colvin", (42.3466, -71.0895, "Fenway", "1140 Boylston St, Boston", "Oliver Colvin Recital Hall (Berklee)")),
+    ("david friend recital", (42.3466, -71.0895, "Fenway", "921 Boylston St, Boston", "David Friend Recital Hall (Berklee)")),
+    ("notch brewing", (42.3631, -71.1396, "Brighton", "525 Western Ave, Brighton", "Notch Brewing (Brighton)")),
+    ("medford/somerville campus", (42.4055, -71.1165, "Medford / Somerville", "20 Talbot Ave, Medford", "Tufts University")),
+    ("orpheum theatre", (42.3562, -71.0610, "Downtown Crossing", "1 Hamilton Pl, Boston", "Orpheum Theatre")),
+    ("phoenix landing", (42.3646, -71.1021, "Central Square", "512 Massachusetts Ave, Cambridge", "The Phoenix Landing")),
+    ("325 main", (42.3626, -71.0864, "Kendall Square", "325 Main St, Cambridge", "Kendall Center (325 Main St)")),
+    ("memorial drive", (42.3688, -71.1152, "Harvard Square", "Memorial Drive, Cambridge", "Memorial Drive Riverbend Park")),
+    ("harvard square", (42.3736, -71.1190, "Harvard Square", "Harvard Square, Cambridge", "Harvard Square")),
+    ("first parish", (42.3746, -71.1190, "Harvard Square", "3 Church St, Cambridge", "First Parish in Cambridge")),
+    ("science center", (42.3764, -71.1166, "Harvard Square", "1 Oxford St, Cambridge", "Harvard Science Center")),
+    ("tony demarco", (42.3632, -71.0548, "North End", "193 Hanover St, Boston", "North End (Tony DeMarco Statue)")),
+    ("439 tremont", (42.3468, -71.0685, "South End", "439 Tremont St, Boston", "439 Tremont St (South End)")),
+    ("swing in the square", (42.3797, -71.0952, "Union Square", "Union Square Plaza, Somerville", "Union Square Plaza")),
+    ("wang theatre", (42.3502, -71.0649, "Theater District", "270 Tremont St, Boston", "Boch Center Wang Theatre")),
+    ("shubert theatre", (42.3504, -71.0652, "Theater District", "265 Tremont St, Boston", "Boch Center Shubert Theatre")),
+    ("memoire", (42.3949, -71.0706, "Everett", "1 Broadway, Everett", "Mémoire Boston")),
 ]
 
 # Coordinate bounding box for valid Greater Boston / Eastern MA events
@@ -652,7 +675,7 @@ def resolve_event_geo(event: Dict[str, Any]) -> Optional[Dict[str, Any]]:
 
     # Discard non-physical venues
     v_lower = venue_raw.lower()
-    if not v_lower or v_lower in ("zoom", "online", "virtual", "online event", "tba", "various"):
+    if not v_lower or v_lower in ("zoom", "online", "virtual", "online event", "tba", "various") or "(virtual)" in v_lower or "online event" in v_lower:
         return None
 
     # 1. Check if event has native coordinates
