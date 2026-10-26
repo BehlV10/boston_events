@@ -52,7 +52,12 @@ jobs:
             echo "no changes"
           else
             git commit -m "Update events and site: $(date -u +%Y-%m-%dT%H:%MZ) [skip ci]"
-            git push
+            for i in 1 2 3; do
+              git push && break
+              echo "git push attempt $i failed; waiting before retry..."
+              sleep $((i * 5))
+              git pull --rebase -X ours origin main || true
+            done
           fi
 
       - name: Upload Pages artifact
