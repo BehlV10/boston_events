@@ -1285,11 +1285,18 @@ def render_page(results):
           <div class="cities">{"".join(city_blocks)}</div>
         </section>'''
 
-    sections = []
-    for date_obj, events in dated:
-        sections.append(_render_day_section(escape(format_date_heading(date_obj)), events, date_obj.isoformat()))
+    initial_sections = []
+    deferred_sections = []
+    for idx, (date_obj, events) in enumerate(dated):
+        sec_html = _render_day_section(escape(format_date_heading(date_obj)), events, date_obj.isoformat())
+        if idx < 7:
+            initial_sections.append(sec_html)
+        else:
+            deferred_sections.append(sec_html)
     if tba:
-        sections.append(_render_day_section("Date TBA", tba, "tba"))
+        deferred_sections.append(_render_day_section("Date TBA", tba, "tba"))
+
+    all_event_dates = [d.isoformat() for d, _ in dated]
 
     useful_sidebar = ""
     if STATIC_LINKS or DEAL_LINKS:
@@ -2015,7 +2022,14 @@ def render_page(results):
   }}
 
   /* Day Section */
-  .day {{ background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px 18px 12px; }}
+  .day {{
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 14px 18px 12px;
+    content-visibility: auto;
+    contain-intrinsic-size: auto 600px;
+  }}
   .day h2 {{ margin: 0 0 12px; font-size: 17px; font-weight: 700; display:flex; align-items:center; gap:8px; color: var(--fg); position: sticky; top: 0; background: var(--card); padding: 4px 0 8px; z-index: 2; }}
   .count {{ background: rgba(255, 255, 255, 0.06); color: var(--muted); font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 500; }}
   .cities {{ display: flex; flex-direction: column; gap: 14px; }}
@@ -3454,7 +3468,10 @@ def render_page(results):
           <button type="button" class="chip" id="no-events-reset-btn" style="display: none;">↺ Reset All Filters</button>
         </div>
       </div>
-      {"".join(sections)}
+      {"".join(initial_sections)}
+      <template id="deferred-days">
+      {"".join(deferred_sections)}
+      </template>
       <div class="week-nav bottom">
         <button type="button" id="week-prev-b" aria-label="Previous week">← prev</button>
         <span id="week-label-b"></span>
@@ -3734,10 +3751,26 @@ def render_page(results):
     const sidebarFilters = document.getElementById('sidebar-filters');
     const mobileBadge = document.getElementById('mobile-filter-badge');
 
-    const daySections = Array.from(document.querySelectorAll('.day[data-date]'));
-    const eventDates = new Set(
-      daySections.map(d => d.dataset.date).filter(s => s && s !== 'tba')
-    );
+    let daySections = Array.from(document.querySelectorAll('.day[data-date]'));
+    const ALL_EVENT_DATES = {json.dumps(all_event_dates)};
+    const eventDates = new Set(ALL_EVENT_DATES);
+
+    let deferredHydrated = false;
+    function ensureDeferredDaysHydrated() {{
+      if (deferredHydrated) return;
+      deferredHydrated = true;
+      const tmpl = document.getElementById('deferred-days');
+      if (!tmpl) return;
+      const bottomNav = document.querySelector('.week-nav.bottom');
+      if (bottomNav && bottomNav.parentNode) {{
+        bottomNav.parentNode.insertBefore(tmpl.content, bottomNav);
+      }}
+      tmpl.remove();
+      daySections = Array.from(document.querySelectorAll('.day[data-date]'));
+      updateDayHeadings();
+      syncInitialUpvotes();
+      loadStarredState();
+    }}
     function parseISO(s) {{ const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); }}
     function fmtISO(d) {{
       const y = d.getFullYear(), m = String(d.getMonth() + 1).padStart(2, '0'), da = String(d.getDate()).padStart(2, '0');
@@ -4468,6 +4501,40 @@ def render_page(results):
       const freeOnly = freeOnlyChk ? freeOnlyChk.checked : false;
       const week = new Set(weekDates());
 
+      const todayDate = parseISO(todayISO);
+      const dayOfWeek = todayDate.getDay();
+      let daysToSat = (6 - dayOfWeek + 7) % 7;
+      if (dayOfWeek === 0) daysToSat = -1;
+      const satISO = fmtISO(addDays(todayDate, daysToSat));
+      const sunISO = fmtISO(addDays(todayDate, daysToSat + 1));
+      const tomorrowISO = fmtISO(addDays(todayDate, 1));
+      const anchorISO = fmtISO(anchor);
+
+      // Hydrate deferred days if needed
+      let needsHydration = (
+        timeFilter === 'all' ||
+        showAll ||
+        starredOnly ||
+        popularOnly ||
+        activeTransit !== 'all' ||
+        searchText.length > 0
+      );
+      if (!needsHydration) {{
+        if (timeFilter === 'day') {{
+          needsHydration = !daySections.some(d => d.dataset.date === anchorISO);
+        }} else if (timeFilter === 'week') {{
+          for (const wDate of week) {{
+            if (!daySections.some(d => d.dataset.date === wDate)) {{
+              needsHydration = true;
+              break;
+            }}
+          }}
+        }}
+      }}
+      if (needsHydration) {{
+        ensureDeferredDaysHydrated();
+      }}
+
       const nowEpoch = Math.floor(Date.now() / 1000);
       const twoHoursAgoEpoch = nowEpoch - 7200;
       const cutoffDate = new Date(Date.now() - 7200 * 1000);
@@ -4481,69 +4548,101 @@ def render_page(results):
       let totalTodayEventsCount = 0;
       let visibleTonightCount = 0;
 
-      document.querySelectorAll('.event').forEach(li => {{
-        const catOk = cats.has(li.dataset.bucket);
-        const venueOk = venues.has(li.dataset.venue);
-        const recurOk = recurs.has(li.dataset.recur);
-        const cityOk = cities.has(li.dataset.city);
-        const subareaOk = (activeSubarea === 'all') || (li.dataset.subarea === activeSubarea);
-        const transitOk = (activeTransit === 'all') || ((li.dataset.transit || '').split(',').includes(activeTransit));
-        const todOk = (activeTod === 'all') || (li.dataset.tod === activeTod) || (li.dataset.tod === 'all');
-        const freeOk = !freeOnly || li.dataset.free === 'true';
-        const popularOk = !popularOnly || parseInt(li.dataset.votes || '0', 10) >= 3;
-        const starredOk = !starredOnly || starredEvents.has(li.dataset.id || li.dataset.eventId || '');
-        const searchOk = !searchText || li.textContent.toLowerCase().includes(searchText);
-
-        const evGenre = li.dataset.genre;
-        const isMusicEv = li.dataset.bucket === 'Music & nightlife' || !!evGenre;
-        let genreOk = true;
-        if (activeGenre !== 'all') {{
-          genreOk = (evGenre === activeGenre);
-        }} else if (isMusicEv && evGenre) {{
-          genreOk = checkedGenres.has(evGenre);
+      const activeDays = [];
+      daySections.forEach(day => {{
+        const date = day.dataset.date;
+        let inTime = true;
+        if (timeFilter === 'today') {{
+          inTime = (date === todayISO);
+        }} else if (timeFilter === 'tomorrow') {{
+          inTime = (date === tomorrowISO);
+        }} else if (timeFilter === 'weekend') {{
+          inTime = (date === satISO || date === sunISO);
+        }} else if (timeFilter === 'day') {{
+          inTime = (date === anchorISO);
+        }} else if (timeFilter === 'week') {{
+          inTime = week.has(date);
+        }} else {{
+          // 'all'
+          inTime = showAll || date === 'tba' || week.has(date);
         }}
+        day.classList.toggle('out-of-week', !inTime);
+        if (inTime) {{
+          activeDays.push(day);
+        }}
+      }});
 
-        const daySec = li.closest('.day');
-        const dayDate = daySec ? daySec.dataset.date : '';
-        const isToday = daySec && dayDate === todayISO;
+      activeDays.forEach(day => {{
+        const dayDate = day.dataset.date || '';
+        const isToday = dayDate === todayISO;
         const isPastDay = dayDate && dayDate !== 'tba' && dayDate < todayISO;
-        const epoch = li.dataset.epoch ? parseInt(li.dataset.epoch, 10) : 0;
-        const isPastTime = isToday && epoch > 0 && epoch < twoHoursAgoEpoch;
-        const isPast = isPastDay || isPastTime;
 
-        if (isToday && epoch > 0) {{
-          totalTodayEventsCount++;
-        }}
+        day.querySelectorAll('.event').forEach(li => {{
+          const catOk = cats.has(li.dataset.bucket);
+          const venueOk = venues.has(li.dataset.venue);
+          const recurOk = recurs.has(li.dataset.recur);
+          const cityOk = cities.has(li.dataset.city);
+          const subareaOk = (activeSubarea === 'all') || (li.dataset.subarea === activeSubarea);
+          const transitOk = (activeTransit === 'all') || ((li.dataset.transit || '').split(',').includes(activeTransit));
+          const todOk = (activeTod === 'all') || (li.dataset.tod === activeTod) || (li.dataset.tod === 'all');
+          const freeOk = !freeOnly || li.dataset.free === 'true';
+          const popularOk = !popularOnly || parseInt(li.dataset.votes || '0', 10) >= 3;
+          const starredOk = !starredOnly || starredEvents.has(li.dataset.id || li.dataset.eventId || '');
+          const searchOk = !searchText || li.textContent.toLowerCase().includes(searchText);
 
-        li.classList.toggle('past-time', isPast);
-
-        let timePastOk = true;
-        if (isPast) {{
-          if (!showPastToday) {{
-            timePastOk = false;
-            hiddenPastCount++;
+          const evGenre = li.dataset.genre;
+          const isMusicEv = li.dataset.bucket === 'Music & nightlife' || !!evGenre;
+          let genreOk = true;
+          if (activeGenre !== 'all') {{
+            genreOk = (evGenre === activeGenre);
+          }} else if (isMusicEv && evGenre) {{
+            genreOk = checkedGenres.has(evGenre);
           }}
-        }}
 
-        const isVisible = catOk && genreOk && venueOk && recurOk && cityOk && subareaOk && transitOk && todOk && searchOk && freeOk && timePastOk && popularOk && starredOk;
-        li.classList.toggle('hidden', !isVisible);
+          const epoch = li.dataset.epoch ? parseInt(li.dataset.epoch, 10) : 0;
+          const isPastTime = isToday && epoch > 0 && epoch < twoHoursAgoEpoch;
+          const isPast = isPastDay || isPastTime;
 
-        if (isToday && isVisible && !isPast) {{
-          visibleTonightCount++;
-        }}
-      }});
+          if (isToday && epoch > 0) {{
+            totalTodayEventsCount++;
+          }}
 
-      document.querySelectorAll('.bucket').forEach(b => {{
-        const visible = b.querySelectorAll('.event:not(.hidden)').length;
-        b.classList.toggle('empty', visible === 0);
-        const countSpan = b.querySelector('.bucket-head .count');
-        if (countSpan) countSpan.textContent = visible;
-      }});
-      document.querySelectorAll('.city-section').forEach(sec => {{
-        const visible = sec.querySelectorAll('.event:not(.hidden)').length;
-        sec.classList.toggle('empty', visible === 0);
-        const countSpan = sec.querySelector('.city-head .count');
-        if (countSpan) countSpan.textContent = visible;
+          li.classList.toggle('past-time', isPast);
+
+          let timePastOk = true;
+          if (isPast) {{
+            if (!showPastToday) {{
+              timePastOk = false;
+              hiddenPastCount++;
+            }}
+          }}
+
+          const isVisible = catOk && genreOk && venueOk && recurOk && cityOk && subareaOk && transitOk && todOk && searchOk && freeOk && timePastOk && popularOk && starredOk;
+          li.classList.toggle('hidden', !isVisible);
+
+          if (isToday && isVisible && !isPast) {{
+            visibleTonightCount++;
+          }}
+        }});
+
+        day.querySelectorAll('.bucket').forEach(b => {{
+          const visible = b.querySelectorAll('.event:not(.hidden)').length;
+          b.classList.toggle('empty', visible === 0);
+          const countSpan = b.querySelector('.bucket-head .count');
+          if (countSpan) countSpan.textContent = visible;
+        }});
+
+        day.querySelectorAll('.city-section').forEach(sec => {{
+          const visible = sec.querySelectorAll('.event:not(.hidden)').length;
+          sec.classList.toggle('empty', visible === 0);
+          const countSpan = sec.querySelector('.city-head .count');
+          if (countSpan) countSpan.textContent = visible;
+        }});
+
+        const visible = day.querySelectorAll('.event:not(.hidden)').length;
+        day.classList.toggle('empty', visible === 0);
+        const headingCount = day.querySelector('h2 .count');
+        if (headingCount) headingCount.textContent = visible;
       }});
 
       // Update past events notice banner
@@ -4580,45 +4679,12 @@ def render_page(results):
         }}
       }}
 
-      const todayDate = parseISO(todayISO);
-      const dayOfWeek = todayDate.getDay();
-      let daysToSat = (6 - dayOfWeek + 7) % 7;
-      if (dayOfWeek === 0) daysToSat = -1;
-      const satISO = fmtISO(addDays(todayDate, daysToSat));
-      const sunISO = fmtISO(addDays(todayDate, daysToSat + 1));
-      const tomorrowISO = fmtISO(addDays(todayDate, 1));
-      const anchorISO = fmtISO(anchor);
-
-      daySections.forEach(day => {{
-        const date = day.dataset.date;
-        let inTime = true;
-        if (timeFilter === 'today') {{
-          inTime = (date === todayISO);
-        }} else if (timeFilter === 'tomorrow') {{
-          inTime = (date === tomorrowISO);
-        }} else if (timeFilter === 'weekend') {{
-          inTime = (date === satISO || date === sunISO);
-        }} else if (timeFilter === 'day') {{
-          inTime = (date === anchorISO);
-        }} else if (timeFilter === 'week') {{
-          inTime = week.has(date);
-        }} else {{
-          // 'all'
-          inTime = showAll || date === 'tba' || week.has(date);
-        }}
-        day.classList.toggle('out-of-week', !inTime);
-        const visible = day.querySelectorAll('.event:not(.hidden)').length;
-        day.classList.toggle('empty', visible === 0);
-        const headingCount = day.querySelector('h2 .count');
-        if (headingCount) headingCount.textContent = visible;
-      }});
-
       const ongoingEl = document.querySelector('.ongoing');
       if (ongoingEl) {{
         ongoingEl.style.display = (timeFilter === 'all' || showAll) ? '' : 'none';
       }}
 
-      const visibleDays = daySections.filter(d => !d.classList.contains('out-of-week') && !d.classList.contains('empty')).length;
+      const visibleDays = activeDays.filter(d => !d.classList.contains('empty')).length;
       const noEventsEl = document.getElementById('no-events-msg');
       if (noEventsEl) {{
         noEventsEl.style.display = (visibleDays === 0) ? 'block' : 'none';
@@ -5068,6 +5134,7 @@ def render_page(results):
 
     if (btnCopyPlan) {{
       btnCopyPlan.addEventListener('click', async () => {{
+        ensureDeferredDaysHydrated();
         const items = [];
         const seen = new Set();
         document.querySelectorAll('.event[data-id]').forEach(li => {{
@@ -5863,6 +5930,12 @@ def render_page(results):
 
     hashToState();
     apply();
+
+    if ('requestIdleCallback' in window) {{
+      requestIdleCallback(() => {{ ensureDeferredDaysHydrated(); }}, {{ timeout: 2500 }});
+    }} else {{
+      setTimeout(() => {{ ensureDeferredDaysHydrated(); }}, 2500);
+    }}
   </script>
 </body>
 </html>"""
