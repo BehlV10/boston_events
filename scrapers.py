@@ -1551,6 +1551,23 @@ def _ical_text(event, key):
     return vals[0][1].replace("\\n", " ").replace("\\,", ",").strip()
 
 
+def _clean_ical_description(desc):
+    if not desc:
+        return None
+    # Strip WordPress / WPBakery / Visual Composer shortcodes like [vc_row ...], [/vc_row]
+    text = re.sub(r'\[/?[a-zA-Z0-9_-]+[^\]]*\]', ' ', desc)
+    # Strip any remaining unclosed or broken brackets
+    text = re.sub(r'\[[^\]]*\]?', ' ', text)
+    # Strip HTML tags
+    text = re.sub(r'<[^>]+>', ' ', text)
+    # Clean unescaped iCal backslashes
+    text = text.replace(r'\,', ',').replace(r'\;', ';').replace(r'\n', ' ')
+    text = html.unescape(text)
+    # Normalize whitespace
+    text = re.sub(r'\s+', ' ', text).strip()
+    return text[:250] if text else None
+
+
 def scrape_ical(url, ua):
     """Fetch and parse a public iCal (.ics) feed — works for Google Calendar and others."""
     resp = _SESSION.get(url, headers={"User-Agent": ua, "Accept": "text/calendar,*/*"}, timeout=15)
@@ -1599,6 +1616,7 @@ def scrape_ical(url, ua):
             else:
                 event_url = url
         desc = _ical_text(ev, "DESCRIPTION")
+        clean_desc = _clean_ical_description(desc)
         price = None
         if re.search(r'\b(free\s+(?:admission|entry|event|dance|class)|no cover)\b', desc or "", re.I) or re.search(r'\bfree\b', summary or "", re.I):
             price = "Free"
@@ -1613,7 +1631,7 @@ def scrape_ical(url, ua):
                 "venue": None,
                 "location": _ical_text(ev, "LOCATION"),
                 "price": price,
-                "description": desc[:200] if desc else None,
+                "description": clean_desc,
             })
     return events
 

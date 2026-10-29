@@ -1279,6 +1279,11 @@ def render_page(results, weather=None, luckyseat_shows=None):
         star_btn = '<button type="button" class="star-btn" title="Save to My Shortlist" aria-label="Save event">☆</button>'
 
         raw_desc = (e.get("description") or "").replace("***", "").replace("**", "").replace("__", "").replace("`", "").strip()
+        if "[" in raw_desc:
+            raw_desc = re.sub(r'\[/?[a-zA-Z0-9_-]+[^\]]*\]?', ' ', raw_desc)
+        if "<" in raw_desc:
+            raw_desc = re.sub(r'<[^>]+>', ' ', raw_desc)
+        raw_desc = re.sub(r'\s+', ' ', raw_desc).strip()
         desc = raw_desc[:180]
         desc_html = f'<div class="desc">{escape(desc)}</div>' if desc else ""
         free_flag = "true" if is_free else "false"
