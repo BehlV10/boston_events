@@ -64,7 +64,7 @@ CITY_RULES = [
         "harvard university farmers market", "harvard farmers market",
         "q ballroom", "ccae", "cambridge center for adult education",
         "harvard art museum", "peabody museum", "the foundry", "memorial drive",
-        "swing in the square", "bluesy tuesy", "blues union", "41 hampshire", "dante alighieri",
+        "bluesy tuesy", "blues union", "41 hampshire", "dante alighieri",
         "everybody dance now", "multicultural arts center", "the dance complex", "dance complex",
         "first street market", "la fábrica", "la fabrica", "kathryn schultz",
         "an sibin", "an sibín", "the coop", "forage", "52 church", "farkas hall",
@@ -75,7 +75,7 @@ CITY_RULES = [
         "bsmnt", "kings seaport", "kings - seaport", "kings dining",
         "midway cafe", "o'brien's pub", "obriens pub", "o'brien's", "obriens",
         "jordan hall", "new england conservatory", "nec (", "nec:", "nec ", "nec hall",
-        "city winery", "royale", "wilbur", "ica boston", "gardner", "boston public library",
+        "improv asylum", "city winery", "royale", "wilbur", "ica boston", "gardner", "boston public library",
         "laugh boston", "big night live", "house of blues", "paradise rock", "orpheum",
         "td garden", "mgm music hall", "citizens house of blues", "fenway", "back bay",
         "the fenway", "401 park", "time out market",
@@ -1070,7 +1070,67 @@ def group_by_date(results):
     return sorted(buckets.items()), tba, ongoing
 
 
+def _load_highlights():
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "highlights.json")
+    if os.path.exists(path):
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, list):
+                    now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+                    active = []
+                    for h in data:
+                        exp = h.get("expires")
+                        if exp and exp < now_str:
+                            continue
+                        active.append(h)
+                    return active
+        except Exception:
+            pass
+    return []
+
+
+def _get_event_highlight(e, highlights):
+    if not highlights:
+        return None
+    name = (e.get("name") or "").lower()
+    venue = (e.get("venue") or e.get("_source_venue") or "").lower()
+    t_obj = e.get("_time")
+    if t_obj:
+        if getattr(t_obj, "tzinfo", None) is None:
+            date_str = t_obj.date().isoformat()
+        else:
+            date_str = t_obj.astimezone(EASTERN).date().isoformat()
+    else:
+        raw_d = e.get("date") or ""
+        date_str = raw_d[:10]
+        try:
+            dt = datetime.fromisoformat(raw_d)
+            if dt.tzinfo:
+                date_str = dt.astimezone(EASTERN).date().isoformat()
+        except Exception:
+            pass
+
+    for h in highlights:
+        m = h.get("match", {})
+        nc = m.get("name_contains", "").lower()
+        vc = m.get("venue_contains", "").lower()
+        if nc and nc not in name:
+            continue
+        if vc and vc not in venue:
+            continue
+        sd = h.get("start_date")
+        if sd and date_str and sd > date_str:
+            continue
+        exp = h.get("expires")
+        if exp and date_str and exp < date_str:
+            continue
+        return h
+    return None
+
+
 def render_page(results, weather=None, luckyseat_shows=None):
+    highlights = _load_highlights()
     if not any(r.get("venue") == "Community Submissions" for r in results):
         comm = _load_community_events()
         if comm:
@@ -1177,8 +1237,17 @@ def render_page(results, weather=None, luckyseat_shows=None):
         transit_attr = f' data-transit="{escape(transit_str)}"' if transit_str else ""
 
         t_obj = e.get("_time")
-        if t_obj:
-            tod_val = "day" if t_obj.hour < 17 else "night"
+        raw_date = e.get("date") or ""
+        is_date_only = "T" not in raw_date and " " not in raw_date
+        if t_obj and not is_date_only:
+            h = t_obj.hour
+            # 6:00 AM to 4:59 PM is daytime; 5:00 PM to 5:59 AM is evening / night
+            if 6 <= h < 17:
+                tod_val = "day"
+            elif h >= 17 or h > 0:
+                tod_val = "night"
+            else:
+                tod_val = "night" if ("00:00" in raw_date or "12:00" in raw_date) else "all"
         else:
             tod_val = "all"
         tod_attr = f' data-tod="{tod_val}"'
@@ -1216,14 +1285,23 @@ def render_page(results, weather=None, luckyseat_shows=None):
         epoch_attr = f' data-epoch="{int(t_obj.timestamp())}"' if t_obj else ''
         genre_attr = f' data-genre="{escape(genre)}"' if genre else ''
         v_prefix = f" · {venue_html}" if venue_html else ""
+
+        hl = _get_event_highlight(e, highlights)
+        hl_class = " highlighted" if hl else ""
+        hl_attr = ' data-highlight="true"' if hl else ""
+        b_text = (hl.get("badge") or "Editor's Pick") if hl else ""
+        hl_badge = f' <span class="badge-highlight" title="Curated recommendation"><span class="chip-icon">✨ </span>{escape(b_text)}</span>' if hl else ""
+        note = hl.get("note") if hl else None
+        note_html = f'<div class="curator-note"><span class="note-label">Why we recommend:</span> {escape(note)}</div>' if note else ""
+
         return (
-            f'<li class="event" data-id="{ev_id}" data-cat="{escape(cat)}" data-bucket="{escape(bucket)}"{genre_attr} '
+            f'<li class="event{hl_class}" data-id="{ev_id}" data-cat="{escape(cat)}" data-bucket="{escape(bucket)}"{genre_attr} '
             f'data-venue="{escape(source)}" data-city="{escape(city)}"{sub_attrs}{transit_attr}{tod_attr} '
-            f'data-recur="{recur_flag}" data-free="{free_flag}"{epoch_attr}{geo_attrs}>'
+            f'data-recur="{recur_flag}" data-free="{free_flag}"{epoch_attr}{geo_attrs}{hl_attr}>'
             f'<div class="when">{escape(format_when(e))}</div>'
-            f'<div class="what">{star_btn}{link}{price_tag}{recur_badge}'
+            f'<div class="what">{star_btn}{link}{price_tag}{recur_badge}{hl_badge}'
             f'<div class="venue-tag">{cat_tag}{v_prefix}{sub_tag}{extra_html}{cal_html}</div>'
-            f'{desc_html}</div></li>'
+            f'{desc_html}{note_html}</div></li>'
         )
 
     bucket_name_order = [b for b, _ in CATEGORY_BUCKETS]
@@ -1238,6 +1316,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
             bucket_events = by_bucket.get(bname) or []
             if not bucket_events:
                 continue
+            bucket_events.sort(key=lambda ev: (0 if _get_event_highlight(ev, highlights) else 1, ev.get("_time") or datetime.max.replace(tzinfo=EASTERN)))
             cats = dict(CATEGORY_BUCKETS).get(bname, [])
             accent = CATEGORY_STYLES.get(cats[0], CATEGORY_STYLES["other"])[0] if cats else CATEGORY_STYLES["other"][0]
             items = "\n".join(render_event(e) for e in bucket_events)
@@ -1463,6 +1542,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
     fail_banner = ""
     # In live mode, we keep fail_banner and internal notes silent for visitors
     other_note = ""
+    genres_map = {gid: {"label": ginfo["label"], "icon": ginfo["icon"], "color": ginfo["color"]} for gid, ginfo in MUSIC_GENRES.items()}
 
     return f"""<!doctype html>
 <html lang="en">
@@ -1837,71 +1917,24 @@ def render_page(results, weather=None, luckyseat_shows=None):
     font-weight: 500;
   }}
 
-  /* Music Genre Chips Bar */
-  .genre-chips-bar {{
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    padding: 6px 10px;
-    overflow-x: auto;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    max-width: 100%;
-  }}
-  .genre-chips-bar::-webkit-scrollbar {{
-    display: none;
-  }}
-  .genre-chip {{
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid var(--border);
-    color: var(--muted);
-    padding: 4px 12px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    font-family: inherit;
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    flex-shrink: 0;
-    white-space: nowrap;
-    transition: all 0.15s ease;
-    user-select: none;
-  }}
-  .genre-chip:hover {{
-    background: rgba(255, 255, 255, 0.08);
-    border-color: rgba(255, 255, 255, 0.3);
-    color: #fff;
-  }}
-  .genre-chip.active {{
-    background: rgba(122, 162, 247, 0.18);
-    border-color: rgba(122, 162, 247, 0.5);
-    color: #fff;
-    font-weight: 700;
-    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
-  }}
-  .genre-chip.active[data-genre="rock_indie"] {{ border-color: #ff708d; background: rgba(255, 112, 141, 0.2); color: #ff94ab; }}
-  .genre-chip.active[data-genre="jazz_blues"] {{ border-color: #f29e4c; background: rgba(242, 158, 76, 0.2); color: #ffb169; }}
-  .genre-chip.active[data-genre="folk_trad"] {{ border-color: #9ece6a; background: rgba(158, 206, 106, 0.2); color: #b4e67d; }}
-  .genre-chip.active[data-genre="electronic"] {{ border-color: #bb9af7; background: rgba(187, 154, 247, 0.2); color: #cfb7ff; }}
-  .genre-chip.active[data-genre="classical"] {{ border-color: #7aa2f7; background: rgba(122, 162, 247, 0.2); color: #9abaff; }}
-  .genre-chip.active[data-genre="hiphop_rnb"] {{ border-color: #f0a07a; background: rgba(240, 160, 122, 0.2); color: #ffb799; }}
-  .genre-chip.active[data-genre="latin_global"] {{ border-color: #ffb8d1; background: rgba(255, 184, 209, 0.2); color: #ffd1e3; }}
-  .genre-chip.active[data-genre="pop"] {{ border-color: #ffd866; background: rgba(255, 216, 102, 0.2); color: #ffe68f; }}
-
   .genre-pill {{
     cursor: pointer;
-    transition: transform 0.12s ease, filter 0.12s ease;
+    transition: transform 0.12s ease, filter 0.12s ease, box-shadow 0.12s ease;
   }}
   .genre-pill:hover {{
     transform: translateY(-1px);
     filter: brightness(1.25);
+  }}
+  .genre-pill.active,
+  .genre-pill.genre-pill-active {{
+    box-shadow: 0 0 0 2px #fff, 0 0 10px currentColor;
+    font-weight: 700;
+  }}
+  .chip-active-genre {{
+    background: rgba(122, 162, 247, 0.25) !important;
+    border-color: #7aa2f7 !important;
+    color: #fff !important;
+    font-weight: 700;
   }}
   .genre-swatch {{
     display: inline-block;
@@ -1969,6 +2002,13 @@ def render_page(results, weather=None, luckyseat_shows=None):
     color: #ffd866;
   }}
   .chip-popular.active {{
+    background: linear-gradient(135deg, #f29e4c 0%, #ffd866 100%);
+    color: #0c0e14;
+    border-color: #ffd866;
+    font-weight: 700;
+    box-shadow: 0 2px 10px rgba(242, 158, 76, 0.35);
+  }}
+  .chip-tod.active {{
     background: linear-gradient(135deg, #f29e4c 0%, #ffd866 100%);
     color: #0c0e14;
     border-color: #ffd866;
@@ -2951,14 +2991,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
       padding: 3px 9px;
       font-size: 11px;
     }}
-    .genre-chips-bar {{
-      padding: 5px 8px;
-      gap: 5px;
-    }}
-    .genre-chip {{
-      padding: 3px 10px;
-      font-size: 11px;
-    }}
     .quick-chips-bar {{
       flex-wrap: nowrap;
       overflow-x: auto;
@@ -3095,6 +3127,73 @@ def render_page(results, weather=None, luckyseat_shows=None):
     border: 1px solid rgba(93, 155, 255, 0.3);
     color: #5d9bff;
     vertical-align: middle;
+  }}
+
+  /* Curated Highlights / Editor's Picks */
+  .event.highlighted {{
+    background: linear-gradient(90deg, rgba(255, 184, 0, 0.14) 0%, rgba(255, 120, 0, 0.05) 50%, var(--card) 100%);
+    border: 1.5px solid rgba(255, 184, 0, 0.65);
+    box-shadow: 0 4px 20px rgba(255, 184, 0, 0.16), 0 0 1px rgba(255, 184, 0, 0.4);
+    position: relative;
+  }}
+  .event.highlighted:hover {{
+    background: linear-gradient(90deg, rgba(255, 184, 0, 0.2) 0%, rgba(255, 120, 0, 0.08) 50%, var(--card) 100%);
+    border-color: rgba(255, 184, 0, 0.95);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 26px rgba(255, 184, 0, 0.28);
+  }}
+  .event.highlighted::before {{
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: linear-gradient(180deg, #ffe066 0%, #ff8a00 100%);
+    border-radius: 4px 0 0 4px;
+    box-shadow: 0 0 8px rgba(255, 184, 0, 0.7);
+  }}
+  .badge-highlight {{
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    background: linear-gradient(135deg, rgba(255, 184, 0, 0.32) 0%, rgba(255, 120, 0, 0.24) 100%);
+    border: 1px solid rgba(255, 184, 0, 0.8);
+    color: #ffe885;
+    text-shadow: 0 0 8px rgba(255, 184, 0, 0.5);
+    box-shadow: 0 0 12px rgba(255, 184, 0, 0.35);
+    vertical-align: middle;
+    margin-left: 6px;
+    animation: badge-pulse-glow 3s infinite ease-in-out;
+  }}
+  .curator-note {{
+    font-size: 12.5px;
+    color: #ffebb8;
+    background: rgba(255, 184, 0, 0.09);
+    border: 1px solid rgba(255, 184, 0, 0.28);
+    border-left: 3px solid #ffb800;
+    padding: 6px 10px;
+    border-radius: 4px;
+    margin-top: 8px;
+    font-style: italic;
+    line-height: 1.45;
+  }}
+  .curator-note .note-label {{
+    font-weight: 700;
+    font-style: normal;
+    color: #ffca47;
+    margin-right: 5px;
+  }}
+  .chip-featured.active {{
+    background: linear-gradient(135deg, rgba(255, 184, 0, 0.35), rgba(255, 138, 0, 0.28)) !important;
+    border-color: #ffb800 !important;
+    color: #fff !important;
+    box-shadow: 0 0 12px rgba(255, 184, 0, 0.35);
   }}
 
   /* Submission Modal Overlay */
@@ -3837,7 +3936,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
         </label>
       </div>
       <div class="filter-group">
-        <h3>Time of Day</h3>
+        <h3>Time of Day <span class="spacer"></span> <button type="button" id="tod-reset">all</button></h3>
         <div class="chk-grid">
           <label class="chk">
             <input type="radio" name="tod-filter" class="tod-radio" value="all" checked>
@@ -3845,11 +3944,11 @@ def render_page(results, weather=None, luckyseat_shows=None):
           </label>
           <label class="chk">
             <input type="radio" name="tod-filter" class="tod-radio" value="day">
-            <span>Daytime (&lt; 5 PM)</span>
+            <span><span class="chip-icon">☀️ </span>Daytime (&lt; 5 PM)</span>
           </label>
           <label class="chk">
             <input type="radio" name="tod-filter" class="tod-radio" value="night">
-            <span>Evening (5 PM+)</span>
+            <span><span class="chip-icon">🌙 </span>Evening (5 PM+)</span>
           </label>
         </div>
       </div>
@@ -3906,23 +4005,16 @@ def render_page(results, weather=None, luckyseat_shows=None):
         <button type="button" class="transit-chip" data-transit="blue" title="MBTA Blue Line (East Boston, Waterfront, Aquarium)"><span class="t-dot" style="background:#003da5"></span>Blue Line</button>
       </div>
       <div class="subarea-chips-bar" id="subarea-chips-bar" style="display: none;"></div>
-      <div class="genre-chips-bar" id="genre-chips-bar">
-        <button type="button" class="genre-chip active" data-genre="all"><span class="chip-icon">♪ </span>All Music</button>
-        <button type="button" class="genre-chip" data-genre="rock_indie"><span class="chip-icon">🎸 </span>Rock &amp; Indie</button>
-        <button type="button" class="genre-chip" data-genre="jazz_blues"><span class="chip-icon">🎷 </span>Jazz &amp; Blues</button>
-        <button type="button" class="genre-chip" data-genre="folk_trad"><span class="chip-icon">🪕 </span>Folk &amp; Trad</button>
-        <button type="button" class="genre-chip" data-genre="electronic"><span class="chip-icon">🎛 </span>Electronic</button>
-        <button type="button" class="genre-chip" data-genre="classical"><span class="chip-icon">🎻 </span>Classical</button>
-        <button type="button" class="genre-chip" data-genre="hiphop_rnb"><span class="chip-icon">🎤 </span>Hip-Hop &amp; R&B</button>
-        <button type="button" class="genre-chip" data-genre="latin_global"><span class="chip-icon">🪇 </span>Latin &amp; Global</button>
-        <button type="button" class="genre-chip" data-genre="pop"><span class="chip-icon">✨ </span>Pop</button>
-      </div>
       <div class="quick-chips-bar" id="quick-chips">
         <button type="button" class="chip active" data-time="today"><span class="chip-icon">⚡ </span>Today</button>
         <button type="button" class="chip" data-time="tomorrow">Tomorrow</button>
         <button type="button" class="chip" data-time="weekend"><span class="chip-icon">🎉 </span>This Weekend</button>
         <button type="button" class="chip" data-time="week"><span class="chip-icon">📅 </span>Next 7 Days</button>
         <button type="button" class="chip" data-time="all">All Upcoming</button>
+        <button type="button" class="chip chip-tod" id="quick-day-chip" data-tod="day" title="Filter to daytime events (before 5 PM)"><span class="chip-icon">☀️ </span>Daytime</button>
+        <button type="button" class="chip chip-tod" id="quick-night-chip" data-tod="night" title="Filter to evening events (5 PM and later)"><span class="chip-icon">🌙 </span>Evening</button>
+        <button type="button" class="chip chip-featured" id="quick-featured-chip" title="Filter to Editor's Picks"><span class="chip-icon">✨ </span>Picks <span id="featured-count" style="display:none;">(0)</span></button>
+        <button type="button" class="chip chip-active-genre" id="quick-active-genre-chip" style="display:none;" title="Click to clear genre filter"><span id="active-genre-label"></span> <span class="chip-icon" style="margin-left:4px;">✕</span></button>
         <button type="button" class="chip chip-starred" id="quick-starred-chip" title="Filter to your saved events"><span class="chip-icon">⭐ </span>Saved <span id="starred-count" style="display:none;">(0)</span></button>
         <button type="button" class="chip chip-copy-plan" id="btn-copy-plan" style="display:none;" title="Copy your saved events as a shareable text itinerary"><span class="chip-icon">📋 </span>Copy Plan</button>
       </div>
@@ -4225,7 +4317,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
     const locChips = document.querySelectorAll('#location-chips .loc-chip');
     const transitChips = document.querySelectorAll('#location-chips .transit-chip');
     const subareaBar = document.getElementById('subarea-chips-bar');
-    const genreChips = document.querySelectorAll('#genre-chips-bar .genre-chip');
+    const GENRES_DATA = {json.dumps(genres_map)};
     let activeGenre = 'all';
     let activeTransit = 'all';
     let activeTod = 'all';
@@ -4237,11 +4329,18 @@ def render_page(results, weather=None, luckyseat_shows=None):
     let renderedSubareaCity = null;
     const quickChips = document.querySelectorAll('#quick-chips .chip[data-time]');
     const todRadios = document.querySelectorAll('.tod-radio');
+    const quickDayChip = document.getElementById('quick-day-chip');
+    const quickNightChip = document.getElementById('quick-night-chip');
     const quickPopularChip = document.getElementById('quick-popular-chip');
+    const quickFeaturedChip = document.getElementById('quick-featured-chip');
+    const quickActiveGenreChip = document.getElementById('quick-active-genre-chip');
+    const activeGenreLabel = document.getElementById('active-genre-label');
+    const featuredCountEl = document.getElementById('featured-count');
     const quickStarredChip = document.getElementById('quick-starred-chip');
     const starredCountEl = document.getElementById('starred-count');
     const btnCopyPlan = document.getElementById('btn-copy-plan');
     let popularOnly = false;
+    let featuredOnly = false;
     let userUpvotes = new Set();
     let cachedVotes = {{}};
     let timeFilter = 'today';
@@ -4696,11 +4795,25 @@ def render_page(results, weather=None, luckyseat_shows=None):
       quickChips.forEach(chip => {{
         chip.classList.toggle('active', chip.dataset.time === timeFilter);
       }});
+      if (quickDayChip) {{
+        quickDayChip.classList.toggle('active', activeTod === 'day');
+      }}
+      if (quickNightChip) {{
+        quickNightChip.classList.toggle('active', activeTod === 'night');
+      }}
       todRadios.forEach(radio => {{
         radio.checked = (radio.value === activeTod);
       }});
       if (quickPopularChip) {{
         quickPopularChip.classList.toggle('active', popularOnly);
+      }}
+      if (quickFeaturedChip) {{
+        quickFeaturedChip.classList.toggle('active', featuredOnly);
+      }}
+      if (featuredCountEl) {{
+        const totalPicks = document.querySelectorAll('.event.highlighted').length;
+        featuredCountEl.textContent = `(${{totalPicks}})`;
+        featuredCountEl.style.display = totalPicks > 0 ? 'inline' : 'none';
       }}
       if (quickStarredChip) {{
         quickStarredChip.classList.toggle('active', starredOnly);
@@ -4712,6 +4825,15 @@ def render_page(results, weather=None, luckyseat_shows=None):
       }}
       if (btnCopyPlan) {{
         btnCopyPlan.style.display = starredEvents.size > 0 ? 'inline-flex' : 'none';
+      }}
+      if (quickActiveGenreChip && activeGenreLabel) {{
+        if (activeGenre !== 'all' && GENRES_DATA && GENRES_DATA[activeGenre]) {{
+          const gi = GENRES_DATA[activeGenre];
+          activeGenreLabel.innerHTML = `<span class="chip-icon">${{gi.icon}} </span>${{gi.label}}`;
+          quickActiveGenreChip.style.display = 'inline-flex';
+        }} else {{
+          quickActiveGenreChip.style.display = 'none';
+        }}
       }}
     }}
 
@@ -4770,13 +4892,13 @@ def render_page(results, weather=None, luckyseat_shows=None):
         if (city === 'all') {{
           chip.classList.toggle('active', (checkedCities.length === allCities || checkedCities.length === 0) && activeTransit === 'all');
         }} else {{
-          chip.classList.toggle('active', checkedCities.length === 1 && checkedCities[0] === city);
+          chip.classList.toggle('active', checkedCities.length === 1 && checkedCities[0] === city && activeTransit === 'all');
         }}
       }});
       transitChips.forEach(chip => {{
         chip.classList.toggle('active', chip.dataset.transit === activeTransit);
       }});
-      if (checkedCities.length === 1) {{
+      if (checkedCities.length === 1 && activeTransit === 'all') {{
         renderSubareaChips(checkedCities[0]);
       }} else {{
         renderSubareaChips('all');
@@ -4871,6 +4993,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
 
       if (freeOnlyChk && freeOnlyChk.checked) params.set('free', '1');
       if (popularOnly) params.set('pop', '1');
+      if (featuredOnly) params.set('picks', '1');
       if (starredOnly) params.set('saved', '1');
 
       if (timeFilter !== 'today') params.set('t', timeFilter);
@@ -4892,6 +5015,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
         if (params.has('q')) searchInput.value = params.get('q');
         if (params.get('free') === '1' && freeOnlyChk) freeOnlyChk.checked = true;
         if (params.get('pop') === '1') popularOnly = true;
+        if (params.get('picks') === '1') featuredOnly = true;
         if (params.get('saved') === '1') starredOnly = true;
         if (params.get('past') === '1') showPastToday = true;
         if (params.get('v') === 'map') {{
@@ -4915,9 +5039,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
             genreBoxes.forEach(b => {{ b.checked = vals.has(b.value); }});
           }} else {{
             activeGenre = gVal;
-            genreChips.forEach(c => {{
-              c.classList.toggle('active', c.dataset.genre === activeGenre);
-            }});
           }}
         }}
 
@@ -4944,6 +5065,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
           activeTod = 'all';
         }}
         todRadios.forEach(r => {{ r.checked = (r.value === activeTod); }});
+        if (quickDayChip) quickDayChip.classList.toggle('active', activeTod === 'day');
+        if (quickNightChip) quickNightChip.classList.toggle('active', activeTod === 'night');
 
         if (params.has('recur')) {{
           const vals = new Set(params.get('recur').split(','));
@@ -5019,7 +5142,10 @@ def render_page(results, weather=None, luckyseat_shows=None):
         showAll ||
         starredOnly ||
         popularOnly ||
+        featuredOnly ||
         activeTransit !== 'all' ||
+        activeGenre !== 'all' ||
+        activeTod !== 'all' ||
         searchText.length > 0
       );
       if (!needsHydration) {{
@@ -5087,7 +5213,12 @@ def render_page(results, weather=None, luckyseat_shows=None):
           const cityOk = cities.has(li.dataset.city);
           const subareaOk = (activeSubarea === 'all') || (li.dataset.subarea === activeSubarea);
           const transitOk = (activeTransit === 'all') || ((li.dataset.transit || '').split(',').includes(activeTransit));
-          const todOk = (activeTod === 'all') || (li.dataset.tod === activeTod) || (li.dataset.tod === 'all');
+          let todOk = true;
+          if (activeTod === 'day') {{
+            todOk = (li.dataset.tod === 'day');
+          }} else if (activeTod === 'night') {{
+            todOk = (li.dataset.tod === 'night');
+          }}
           const freeOk = !freeOnly || li.dataset.free === 'true';
           const popularOk = !popularOnly || parseInt(li.dataset.votes || '0', 10) >= 3;
           const starredOk = !starredOnly || starredEvents.has(li.dataset.id || li.dataset.eventId || '');
@@ -5114,13 +5245,14 @@ def render_page(results, weather=None, luckyseat_shows=None):
 
           let timePastOk = true;
           if (isPast) {{
-            if (!showPastToday) {{
+            if (!showPastToday && activeTod !== 'day') {{
               timePastOk = false;
               hiddenPastCount++;
             }}
           }}
 
-          const isVisible = catOk && genreOk && venueOk && recurOk && cityOk && subareaOk && transitOk && todOk && searchOk && freeOk && timePastOk && popularOk && starredOk;
+          const featuredOk = !featuredOnly || li.classList.contains('highlighted');
+          const isVisible = catOk && genreOk && venueOk && recurOk && cityOk && subareaOk && transitOk && todOk && searchOk && freeOk && timePastOk && popularOk && starredOk && featuredOk;
           li.classList.toggle('hidden', !isVisible);
 
           if (isToday && isVisible && !isPast) {{
@@ -5195,6 +5327,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
 
       renderCal();
       updateWeekLabel();
+      document.querySelectorAll('.genre-pill').forEach(p => {{
+        p.classList.toggle('genre-pill-active', activeGenre !== 'all' && p.dataset.genre === activeGenre);
+      }});
       updateQuickChipsUI();
       updateLocChipsUI();
       updateSearchUI();
@@ -5311,13 +5446,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
       }});
     }});
 
-    if (quickFreeChip && freeOnlyChk) {{
-      quickFreeChip.addEventListener('click', () => {{
-        freeOnlyChk.checked = !freeOnlyChk.checked;
-        apply();
-      }});
-    }}
-
     if (quickPopularChip) {{
       quickPopularChip.addEventListener('click', () => {{
         popularOnly = !popularOnly;
@@ -5427,7 +5555,11 @@ def render_page(results, weather=None, luckyseat_shows=None):
 
     if (freeOnlyChk) freeOnlyChk.addEventListener('change', apply);
     catBoxes.forEach(b => b.addEventListener('change', apply));
-    genreBoxes.forEach(b => b.addEventListener('change', () => {{ apply(); stateToHash(); }}));
+    genreBoxes.forEach(b => b.addEventListener('change', () => {{
+      activeGenre = 'all';
+      apply();
+      stateToHash();
+    }}));
     venueBoxes.forEach(b => b.addEventListener('change', apply));
     recurBoxes.forEach(b => b.addEventListener('change', apply));
     cityBoxes.forEach(b => b.addEventListener('change', apply));
@@ -5438,7 +5570,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
     if (genreAllBtn) genreAllBtn.addEventListener('click', () => {{
       genreBoxes.forEach(b => b.checked = true);
       activeGenre = 'all';
-      genreChips.forEach(c => c.classList.toggle('active', c.dataset.genre === 'all'));
       apply();
       stateToHash();
     }});
@@ -5446,7 +5577,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
     if (genreNoneBtn) genreNoneBtn.addEventListener('click', () => {{
       genreBoxes.forEach(b => b.checked = false);
       activeGenre = 'all';
-      genreChips.forEach(c => c.classList.toggle('active', c.dataset.genre === 'all'));
       apply();
       stateToHash();
     }});
@@ -5456,8 +5586,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
       apply();
     }});
     document.getElementById('venue-none').addEventListener('click', () => {{ venueBoxes.forEach(b => b.checked = false); apply(); }});
-    document.getElementById('city-all').addEventListener('click', () => {{ activeSubarea = 'all'; cityBoxes.forEach(b => b.checked = true); apply(); }});
-    document.getElementById('city-none').addEventListener('click', () => {{ activeSubarea = 'all'; cityBoxes.forEach(b => b.checked = false); apply(); }});
+    document.getElementById('city-all').addEventListener('click', () => {{ activeSubarea = 'all'; activeTransit = 'all'; cityBoxes.forEach(b => b.checked = true); apply(); }});
+    document.getElementById('city-none').addEventListener('click', () => {{ activeSubarea = 'all'; activeTransit = 'all'; cityBoxes.forEach(b => b.checked = false); apply(); }});
 
     function setGenre(genre) {{
       if (activeGenre === genre) {{
@@ -5465,9 +5595,14 @@ def render_page(results, weather=None, luckyseat_shows=None):
       }} else {{
         activeGenre = genre;
       }}
-      genreChips.forEach(c => {{
-        c.classList.toggle('active', c.dataset.genre === activeGenre);
-      }});
+      if (activeGenre === 'all') {{
+        genreBoxes.forEach(b => {{ b.checked = true; }});
+      }} else {{
+        catBoxes.forEach(cb => {{
+          if (cb.value === 'Music & nightlife') cb.checked = true;
+        }});
+        genreBoxes.forEach(b => {{ b.checked = (b.value === activeGenre); }});
+      }}
       apply();
       if (activeGenre !== 'all' && timeFilter === 'today') {{
         const vis = document.querySelectorAll('.day:not(.out-of-week) .event:not(.hidden)').length;
@@ -5480,19 +5615,19 @@ def render_page(results, weather=None, luckyseat_shows=None):
       }}
       stateToHash();
     }}
-    genreChips.forEach(c => {{
-      c.addEventListener('click', () => {{
-        setGenre(c.dataset.genre);
+
+    if (quickActiveGenreChip) {{
+      quickActiveGenreChip.addEventListener('click', () => {{
+        setGenre('all');
       }});
-    }});
+    }}
 
     document.addEventListener('click', (e) => {{
       const pill = e.target.closest('.genre-pill');
       if (pill && pill.dataset.genre) {{
         e.preventDefault();
+        e.stopPropagation();
         setGenre(pill.dataset.genre);
-        const bar = document.getElementById('genre-chips-bar');
-        if (bar) bar.scrollIntoView({{ behavior: 'smooth', block: 'nearest' }});
       }}
     }});
 
@@ -5500,13 +5635,15 @@ def render_page(results, weather=None, luckyseat_shows=None):
       if (searchInput) searchInput.value = '';
       if (freeOnlyChk) freeOnlyChk.checked = false;
       popularOnly = false;
+      featuredOnly = false;
       starredOnly = false;
       activeSubarea = 'all';
       activeTransit = 'all';
       activeTod = 'all';
       todRadios.forEach(r => {{ r.checked = (r.value === 'all'); }});
+      if (quickDayChip) quickDayChip.classList.remove('active');
+      if (quickNightChip) quickNightChip.classList.remove('active');
       activeGenre = 'all';
-      genreChips.forEach(c => c.classList.toggle('active', c.dataset.genre === 'all'));
       genreBoxes.forEach(b => b.checked = true);
       catBoxes.forEach(b => b.checked = true);
       cityBoxes.forEach(b => b.checked = true);
@@ -5549,8 +5686,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
       chip.addEventListener('click', () => {{
         const targetCity = chip.dataset.city;
         activeSubarea = 'all';
+        activeTransit = 'all';
         if (targetCity === 'all') {{
-          activeTransit = 'all';
           cityBoxes.forEach(b => {{ b.checked = true; }});
         }} else {{
           const checked = Array.from(cityBoxes).filter(b => b.checked).map(b => b.value);
@@ -5569,19 +5706,64 @@ def render_page(results, weather=None, luckyseat_shows=None):
     transitChips.forEach(chip => {{
       chip.addEventListener('click', () => {{
         const line = chip.dataset.transit;
-        activeTransit = (activeTransit === line) ? 'all' : line;
+        if (activeTransit === line) {{
+          activeTransit = 'all';
+        }} else {{
+          activeTransit = line;
+          activeSubarea = 'all';
+          cityBoxes.forEach(b => {{ b.checked = true; }});
+        }}
         apply();
       }});
     }});
 
+    function setTod(tod) {{
+      if (activeTod === tod) {{
+        activeTod = 'all';
+      }} else {{
+        activeTod = tod;
+      }}
+      if (activeTod === 'day' && timeFilter === 'today') {{
+        showPastToday = true;
+      }}
+      apply();
+      stateToHash();
+    }}
+
+    if (quickDayChip) {{
+      quickDayChip.addEventListener('click', () => setTod('day'));
+    }}
+    if (quickNightChip) {{
+      quickNightChip.addEventListener('click', () => setTod('night'));
+    }}
+
     todRadios.forEach(radio => {{
+      radio.addEventListener('click', (e) => {{
+        if (activeTod === radio.value && radio.value !== 'all') {{
+          e.preventDefault();
+          setTod('all');
+        }}
+      }});
       radio.addEventListener('change', () => {{
         if (radio.checked) {{
-          activeTod = radio.value;
-          apply();
+          setTod(radio.value);
         }}
       }});
     }});
+
+    const todResetBtn = document.getElementById('tod-reset');
+    if (todResetBtn) todResetBtn.addEventListener('click', () => setTod('all'));
+
+    if (quickFeaturedChip) {{
+      quickFeaturedChip.addEventListener('click', () => {{
+        featuredOnly = !featuredOnly;
+        if (featuredOnly && timeFilter === 'today') {{
+          timeFilter = 'all';
+          showAll = true;
+        }}
+        apply();
+      }});
+    }}
 
     if (quickStarredChip) {{
       quickStarredChip.addEventListener('click', () => {{

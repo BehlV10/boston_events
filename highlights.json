@@ -1,0 +1,770 @@
+[
+  {
+    "id": "2026-10-29-passim",
+    "match": {
+      "name_contains": "Lamplighter Sessions",
+      "venue_contains": "Passim"
+    },
+    "badge": "\u2b50 Folk Gem",
+    "note": "Peter Mulvey's beloved annual songwriter residency in Harvard Square's historic basement listening room.",
+    "start_date": "2026-10-29",
+    "expires": "2026-10-29"
+  },
+  {
+    "id": "2026-10-29-ia",
+    "match": {
+      "name_contains": "Nightmare on Hanover Street",
+      "venue_contains": "Improv Asylum"
+    },
+    "badge": "\ud83c\udf83 Comedy Pick",
+    "note": "North End's hilarious flagship Halloween sketch revue and fast-paced improv.",
+    "start_date": "2026-10-29",
+    "expires": "2026-10-29"
+  },
+  {
+    "id": "2026-10-29-sinclair",
+    "match": {
+      "name_contains": "Blake Whiten",
+      "venue_contains": "Sinclair"
+    },
+    "badge": "\ud83c\udfb8 Indie Pick",
+    "note": "Gritty, broken-glass vocals and raw blues-rock songwriting in Harvard Square.",
+    "start_date": "2026-10-29",
+    "expires": "2026-10-29"
+  },
+  {
+    "id": "2026-10-29-symphony",
+    "match": {
+      "name_contains": "Day of the Dead",
+      "venue_contains": "Symphony Hall"
+    },
+    "badge": "\ud83c\udfbb Orchestral Spotlight",
+    "note": "Festive symphonic concert honoring D\u00eda de los Muertos traditions at Boston Symphony Hall.",
+    "start_date": "2026-10-29",
+    "expires": "2026-10-29"
+  },
+  {
+    "id": "2026-10-29-cantab",
+    "match": {
+      "name_contains": "Halloweekend Kickoff",
+      "venue_contains": "Cantab"
+    },
+    "badge": "\ud83c\udf89 Local Scene",
+    "note": "Cosmic Rush and Pink Tax throw down for night one of Halloweekend dancing in Central Sq.",
+    "start_date": "2026-10-29",
+    "expires": "2026-10-29"
+  },
+  {
+    "id": "2026-10-29-remnant",
+    "match": {
+      "name_contains": "Queen for a Day",
+      "venue_contains": "Remnant Satellite"
+    },
+    "badge": "\ud83d\udc51 Glam & Fun",
+    "note": "High-glam local drag revue paired with craft beers in East Cambridge.",
+    "start_date": "2026-10-29",
+    "expires": "2026-10-29"
+  },
+  {
+    "id": "2026-10-29-longy",
+    "match": {
+      "name_contains": "Longy Composers",
+      "venue_contains": "Longy"
+    },
+    "badge": "\ud83c\udfbc Contemporary Classical",
+    "note": "Intimate chamber premieres by cutting-edge Longy School composers in Harvard Square.",
+    "start_date": "2026-10-29",
+    "expires": "2026-10-29"
+  },
+  {
+    "id": "2026-10-29-monkfish",
+    "match": {
+      "name_contains": "100 Miles",
+      "venue_contains": "Mad Monkfish"
+    },
+    "badge": "\ud83c\udfb7 Jazz & Bites",
+    "note": "Smooth jazz fusion and savory Asian bites in the heart of Central Square.",
+    "start_date": "2026-10-29",
+    "expires": "2026-10-29"
+  },
+  {
+    "id": "2026-10-29-wallys",
+    "match": {
+      "name_contains": "Live Jazz @ Wally's",
+      "venue_contains": "Wally"
+    },
+    "badge": "\ud83c\udfba Boston Heritage",
+    "note": "Legendary South End jazz dive running since 1947: no cover, world-class Berklee chops.",
+    "start_date": "2026-10-29",
+    "expires": "2026-10-29"
+  },
+  {
+    "id": "2026-10-29-phoenix",
+    "match": {
+      "name_contains": "Elements Drum & Bass"
+    },
+    "badge": "\ud83c\udfa7 Underground Electronic",
+    "note": "Boston's longest-running weekly drum & bass session shaking Cambridge since 1999.",
+    "start_date": "2026-10-29",
+    "expires": "2026-10-29"
+  },
+  {
+    "id": "2026-10-30-armory",
+    "match": {
+      "name_contains": "Cirque of the Dead",
+      "venue_contains": "Armory"
+    },
+    "badge": "\ud83c\udfaa Spotlight",
+    "note": "Boston Circus Guild's dark Halloween spectacle with aerialists, acrobatics, and live music.",
+    "start_date": "2026-10-30",
+    "expires": "2026-10-30"
+  },
+  {
+    "id": "2026-10-30-rockwell",
+    "match": {
+      "name_contains": "Skalloween",
+      "venue_contains": "Rockwell"
+    },
+    "badge": "\ud83c\udfba Local Favorite",
+    "note": "Davis Square underground venue transformed into a high-energy ska and brass blowout.",
+    "start_date": "2026-10-30",
+    "expires": "2026-10-30"
+  },
+  {
+    "id": "2026-10-30-mgm",
+    "match": {
+      "name_contains": "RAWAYANA",
+      "venue_contains": "MGM Music Hall"
+    },
+    "badge": "\ud83c\udf34 Latin Groove",
+    "note": "Grammy-nominated Venezuelan powerhouse bringing psychedelic reggae-funk to Fenway.",
+    "start_date": "2026-10-30",
+    "expires": "2026-10-30"
+  },
+  {
+    "id": "2026-10-30-nekro",
+    "match": {
+      "name_contains": "Nekrogoblikon",
+      "venue_contains": "Paradise Rock"
+    },
+    "badge": "\u26a1 Metal Spectacle",
+    "note": "Melodic goblin metal madness and high-octane riffs rocking Commonwealth Ave.",
+    "start_date": "2026-10-30",
+    "expires": "2026-10-30"
+  },
+  {
+    "id": "2026-10-30-scullers",
+    "match": {
+      "name_contains": "SANTI DEBRIANO",
+      "venue_contains": "Scullers"
+    },
+    "badge": "\ud83c\udfb7 Afro-Cuban Jazz",
+    "note": "Master bassist Debriano and his Arkestra Bembe ignite Scullers overlooking the Charles.",
+    "start_date": "2026-10-30",
+    "expires": "2026-10-30"
+  },
+  {
+    "id": "2026-10-30-chevalier",
+    "match": {
+      "name_contains": "Paul Anka",
+      "venue_contains": "Chevalier"
+    },
+    "badge": "\ud83c\udfa4 Living Legend",
+    "note": "Seven decades of timeless songwriting and classic pop crooning in Medford's historic hall.",
+    "start_date": "2026-10-30",
+    "expires": "2026-10-30"
+  },
+  {
+    "id": "2026-10-30-lebowski",
+    "match": {
+      "name_contains": "LEBOWSKI Party",
+      "venue_contains": "Remnant Satellite"
+    },
+    "badge": "\ud83c\udfb3 Quirky Nightlife",
+    "note": "Costumes, White Russians, and funk grooves by Spoondrift in East Cambridge.",
+    "start_date": "2026-10-30",
+    "expires": "2026-10-30"
+  },
+  {
+    "id": "2026-10-30-tufts",
+    "match": {
+      "name_contains": "Tufts Composers",
+      "venue_contains": "Tufts"
+    },
+    "badge": "\ud83c\udfbc Free Midday Chamber",
+    "note": "Free lunchtime concert of world premieres by Tufts composers at Granoff Music Center.",
+    "start_date": "2026-10-30",
+    "expires": "2026-10-30"
+  },
+  {
+    "id": "2026-10-30-hob",
+    "match": {
+      "name_contains": "Punchis Punchis",
+      "venue_contains": "House of Blues"
+    },
+    "badge": "\ud83e\ude87 Banda Rave",
+    "note": "Electric Mexican brass-band energy fused with heavy electronic dance beats on Lansdowne St.",
+    "start_date": "2026-10-30",
+    "expires": "2026-10-30"
+  },
+  {
+    "id": "2026-10-30-ia-fri",
+    "match": {
+      "name_contains": "Nightmare on Hanover Street",
+      "venue_contains": "Improv Asylum"
+    },
+    "badge": "\ud83c\udf83 Late-Night Comedy",
+    "note": "North End's Halloween improv and sketch revue in full stride for Halloweekend.",
+    "start_date": "2026-10-30",
+    "expires": "2026-10-30"
+  },
+  {
+    "id": "2026-10-31-coolidge",
+    "match": {
+      "name_contains": "Halloween Horror Marathon",
+      "venue_contains": "Coolidge"
+    },
+    "badge": "\ud83c\udfac Legendary",
+    "note": "The 25th annual dusk-to-dawn 12-hour 35mm cult horror marathon. A Boston cinema rite of passage.",
+    "start_date": "2026-10-31",
+    "expires": "2026-10-31"
+  },
+  {
+    "id": "2026-10-31-punkoween",
+    "match": {
+      "name_contains": "Punkoween",
+      "venue_contains": "Middle East"
+    },
+    "badge": "\ud83c\udfb8 Underground Pick",
+    "note": "Local punk heroes cover Bad Brains, Dead Kennedys, Black Flag, and Slapshot in Central Square.",
+    "start_date": "2026-10-31",
+    "expires": "2026-10-31"
+  },
+  {
+    "id": "2026-10-31-scaryoke",
+    "match": {
+      "name_contains": "SCARY-OKE",
+      "venue_contains": "Lilypad"
+    },
+    "badge": "\ud83c\udfa4 Quirky Gem",
+    "note": "Inman Square's intimate micro-venue hosts eccentric psychedelic karaoke with live synthesizer backup.",
+    "start_date": "2026-10-31",
+    "expires": "2026-10-31"
+  },
+  {
+    "id": "2026-10-31-coco",
+    "match": {
+      "name_contains": "Coco in Concert",
+      "venue_contains": "Symphony Hall"
+    },
+    "badge": "\ud83c\udfbb Film & Symphony",
+    "note": "Pixar's vibrant Day of the Dead classic with Michael Giacchino's score performed live by a 50-piece orchestra.",
+    "start_date": "2026-10-31",
+    "expires": "2026-10-31"
+  },
+  {
+    "id": "2026-10-31-rockwell-fright",
+    "match": {
+      "name_contains": "Fright Night",
+      "venue_contains": "Rockwell"
+    },
+    "badge": "\ud83c\udf83 Davis Sq Horror Show",
+    "note": "Special Halloween night horror comedy showcase in Davis Square\u2019s underground stage.",
+    "start_date": "2026-10-31",
+    "expires": "2026-10-31"
+  },
+  {
+    "id": "2026-10-31-sueco",
+    "match": {
+      "name_contains": "Sueco",
+      "venue_contains": "Paradise Rock"
+    },
+    "badge": "\u26a1 Alt-Rock Energy",
+    "note": "Screaming alt-pop/punk powerhouse bringing raw electricity to Commonwealth Ave.",
+    "start_date": "2026-10-31",
+    "expires": "2026-10-31"
+  },
+  {
+    "id": "2026-10-31-bennygreen",
+    "match": {
+      "name_contains": "BENNY GREEN",
+      "venue_contains": "Scullers"
+    },
+    "badge": "\ud83c\udfb9 Jazz Royalty",
+    "note": "Hard-bop piano master and former Jazz Messenger delivering world-class swing overlooking Boston.",
+    "start_date": "2026-10-31",
+    "expires": "2026-10-31"
+  },
+  {
+    "id": "2026-10-31-danis",
+    "match": {
+      "name_contains": "Drag Brunch",
+      "venue_contains": "Dani's"
+    },
+    "badge": "\ud83c\udf83 Spooky Drag",
+    "note": "Back Bay's bustling queer bar Halloween costume party and high-energy drag extravaganza.",
+    "start_date": "2026-10-31",
+    "expires": "2026-10-31"
+  },
+  {
+    "id": "2026-10-31-broadwayrave",
+    "match": {
+      "name_contains": "Broadway Rave",
+      "venue_contains": "Brighton Music Hall"
+    },
+    "badge": "\ud83c\udfad Theatrical Dance",
+    "note": "Costumed musical theater blowout where everyone belts Wicked, Hamilton, and Rent hits all night.",
+    "start_date": "2026-10-31",
+    "expires": "2026-10-31"
+  },
+  {
+    "id": "2026-10-31-divaland",
+    "match": {
+      "name_contains": "DIVALAND",
+      "venue_contains": "Sinclair"
+    },
+    "badge": "\ud83d\udc83 Halloween Dance",
+    "note": "Pop diva dance blowout and costumed dance floor in Harvard Square.",
+    "start_date": "2026-10-31",
+    "expires": "2026-10-31"
+  },
+  {
+    "id": "2026-11-01-sinclair",
+    "match": {
+      "name_contains": "The Gringos",
+      "venue_contains": "Sinclair"
+    },
+    "badge": "\ud83c\udfb8 Local Indie Showcase",
+    "note": "High-energy Cambridge indie rock quartet headline the premier room in Harvard Square.",
+    "start_date": "2026-11-01",
+    "expires": "2026-11-01"
+  },
+  {
+    "id": "2026-11-01-gardner",
+    "match": {
+      "name_contains": "Eleanor Alberga"
+    },
+    "badge": "\ud83c\udfdb\ufe0f Palace Chamber Music",
+    "note": "Jamaican-British composer Eleanor Alberga's quartets performed amidst the Gardner courtyard palace.",
+    "start_date": "2026-11-01",
+    "expires": "2026-11-01"
+  },
+  {
+    "id": "2026-11-01-somerville-eleventh",
+    "match": {
+      "name_contains": "The Eleventh Year",
+      "venue_contains": "Somerville Theatre"
+    },
+    "badge": "\ud83c\udfac Silent Film & Live Score",
+    "note": "1928 Soviet avant-garde documentary with a live world-premiere psychedelic cinema orchestra score.",
+    "start_date": "2026-11-01",
+    "expires": "2026-11-01"
+  },
+  {
+    "id": "2026-11-01-eivor",
+    "match": {
+      "name_contains": "Eiv\u00f8r",
+      "venue_contains": "Paradise Rock"
+    },
+    "badge": "\ud83c\udf0c Nordic Dark-Folk",
+    "note": "Haunting Faroese throat-singing, dramatic cinematic folk, and thunderous Nordic drums on Comm Ave.",
+    "start_date": "2026-11-01",
+    "expires": "2026-11-01"
+  },
+  {
+    "id": "2026-11-01-bludetiger",
+    "match": {
+      "name_contains": "Blu DeTiger",
+      "venue_contains": "Brighton Music Hall"
+    },
+    "badge": "\ud83c\udfb8 Funky Bass Prodigy",
+    "note": "Viral bass virtuoso and disco-funk indie-pop sensation bringing grooves to Allston-Brighton.",
+    "start_date": "2026-11-01",
+    "expires": "2026-11-01"
+  },
+  {
+    "id": "2026-11-01-regattabar",
+    "match": {
+      "name_contains": "Ciara Moser",
+      "venue_contains": "Regattabar"
+    },
+    "badge": "\ud83c\udfb7 Jazz & Fusion",
+    "note": "Blind bass phenom and Berklee sensation performs 'The Rose of Battle' in Harvard Square.",
+    "start_date": "2026-11-01",
+    "expires": "2026-11-01"
+  },
+  {
+    "id": "2026-11-01-beehive-blues",
+    "match": {
+      "name_contains": "Bruce Bears",
+      "venue_contains": "Beehive"
+    },
+    "badge": "\ud83c\udfb7 South End Blues",
+    "note": "Duke Robillard keyboard veteran Bruce Bears leads an all-star Sunday evening blues jam.",
+    "start_date": "2026-11-01",
+    "expires": "2026-11-01"
+  },
+  {
+    "id": "2026-11-01-coolidge-noir",
+    "match": {
+      "name_contains": "On Dangerous Ground",
+      "venue_contains": "Coolidge"
+    },
+    "badge": "\ud83d\udcfd\ufe0f 35mm Noir Classics",
+    "note": "Nicholas Ray and Ida Lupino's snowy noir projected on 35mm with Bernard Herrmann's score.",
+    "start_date": "2026-11-01",
+    "expires": "2026-11-01"
+  },
+  {
+    "id": "2026-11-01-cantab-postpunk",
+    "match": {
+      "name_contains": "Mister 33",
+      "venue_contains": "Cantab"
+    },
+    "badge": "\u26a1 Post-Punk Basement",
+    "note": "Dark wave, post-punk, and heavy atmospheric guitars down in Cantab Underground.",
+    "start_date": "2026-11-01",
+    "expires": "2026-11-01"
+  },
+  {
+    "id": "2026-11-01-midway-residency",
+    "match": {
+      "name_contains": "Martin / Morell / Fredette",
+      "venue_contains": "Midway"
+    },
+    "badge": "\ud83e\ude95 Americana Sunday",
+    "note": "JP's beloved weekend roots residency: heartfelt acoustic melodies and neighborhood dive vibes.",
+    "start_date": "2026-11-01",
+    "expires": "2026-11-01"
+  },
+  {
+    "id": "2026-11-02-jordan",
+    "match": {
+      "name_contains": "First Monday at Jordan Hall",
+      "venue_contains": "Jordan Hall"
+    },
+    "badge": "\ud83c\udfbb World-Class Classical",
+    "note": "Free master chamber concert at Jordan Hall: Bart\u00f3k, Ligeti, and Appalachian folk roots.",
+    "start_date": "2026-11-02",
+    "expires": "2026-11-02"
+  },
+  {
+    "id": "2026-11-02-coolidge-network",
+    "match": {
+      "name_contains": "Network",
+      "venue_contains": "Coolidge"
+    },
+    "badge": "\ud83c\udfac Cult Cinema",
+    "note": "Sidney Lumet's razor-sharp 1976 media satire ('Mad as hell') restored in stunning 4K.",
+    "start_date": "2026-11-02",
+    "expires": "2026-11-02"
+  },
+  {
+    "id": "2026-11-02-somerville-basterds",
+    "match": {
+      "name_contains": "Inglourious Basterds",
+      "venue_contains": "Somerville Theatre"
+    },
+    "badge": "\ud83d\udcfd\ufe0f 35mm Masterpiece",
+    "note": "Quentin Tarantino's cinema-saving revenge epic projected on genuine 35mm film in Davis Sq.",
+    "start_date": "2026-11-02",
+    "expires": "2026-11-02"
+  },
+  {
+    "id": "2026-11-02-mico",
+    "match": {
+      "name_contains": "MICO",
+      "venue_contains": "Paradise Rock"
+    },
+    "badge": "\ud83c\udfb8 Alt-Pop/Rock",
+    "note": "Canadian viral alt-rock dynamo bringing infectious hooks and punchy guitar riffs to Comm Ave.",
+    "start_date": "2026-11-02",
+    "expires": "2026-11-02"
+  },
+  {
+    "id": "2026-11-02-rockwell-menopunks",
+    "match": {
+      "name_contains": "Menopunks",
+      "venue_contains": "Rockwell"
+    },
+    "badge": "\ud83c\udfad Underground Comedy",
+    "note": "A riotous, no-holds-barred punk rock musical cabaret breaking taboos in Davis Square.",
+    "start_date": "2026-11-02",
+    "expires": "2026-11-02"
+  },
+  {
+    "id": "2026-11-02-lilypad-fringe",
+    "match": {
+      "name_contains": "The Fringe",
+      "venue_contains": "Lilypad"
+    },
+    "badge": "\ud83c\udfb7 50-Year Jazz Tradition",
+    "note": "Boston's historic free-jazz pioneers George Garzone and The Fringe light up Monday night in Inman.",
+    "start_date": "2026-11-02",
+    "expires": "2026-11-02"
+  },
+  {
+    "id": "2026-11-02-citywinery-aubrey",
+    "match": {
+      "name_contains": "Aubrey O'Day",
+      "venue_contains": "City Winery"
+    },
+    "badge": "\ud83c\udfa4 Pop Intimate",
+    "note": "Danity Kane superstar shares an intimate acoustic retrospective and unfiltered stories.",
+    "start_date": "2026-11-02",
+    "expires": "2026-11-02"
+  },
+  {
+    "id": "2026-11-02-remnant-bluegrass",
+    "match": {
+      "name_contains": "Royer Family Band",
+      "venue_contains": "Remnant"
+    },
+    "badge": "\ud83e\ude95 Bluegrass Monday",
+    "note": "Hot bluegrass fiddling, banjo, and tight family harmonies with craft beer in Somerville.",
+    "start_date": "2026-11-02",
+    "expires": "2026-11-02"
+  },
+  {
+    "id": "2026-11-02-versus-arcade",
+    "match": {
+      "name_contains": "VERSUS",
+      "venue_contains": "Versus"
+    },
+    "badge": "\ud83d\udd79\ufe0f Retro Gaming Night",
+    "note": "Downtown Boston's arcade bar with free unlimited classic pinball, Mario Kart, and arcade cabinets.",
+    "start_date": "2026-11-02",
+    "expires": "2026-11-02"
+  },
+  {
+    "id": "2026-11-02-beehive-hoedown",
+    "match": {
+      "name_contains": "HOEDOWN",
+      "venue_contains": "Beehive"
+    },
+    "badge": "\ud83c\udfbb Honky Tonk & Soul",
+    "note": "South End subterranean lounge turns into a lively roots, Americana, and country swing blowout.",
+    "start_date": "2026-11-02",
+    "expires": "2026-11-02"
+  },
+  {
+    "id": "2026-11-03-sinclair-halfalive",
+    "match": {
+      "name_contains": "half\u2022alive",
+      "venue_contains": "Sinclair"
+    },
+    "badge": "\u26a1 Indie Pop Movement",
+    "note": "Kinetic choreography, soaring pop hooks, and theatrical energy from the California hitmakers.",
+    "start_date": "2026-11-03",
+    "expires": "2026-11-03"
+  },
+  {
+    "id": "2026-11-03-willi-carlisle",
+    "match": {
+      "name_contains": "Willi Carlisle",
+      "venue_contains": "Crystal Ballroom"
+    },
+    "badge": "\ud83e\ude95 Folk & Storytelling",
+    "note": "Brilliant folksinger, queer Ozark banjo maestro, and poet in Davis Square's grand ballroom.",
+    "start_date": "2026-11-03",
+    "expires": "2026-11-03"
+  },
+  {
+    "id": "2026-11-03-kate-nash",
+    "match": {
+      "name_contains": "Kate Nash",
+      "venue_contains": "Armory"
+    },
+    "badge": "\ud83c\udfb9 UK Indie Pop Legend",
+    "note": "'Foundations' icon Kate Nash brings witty songwriting, punk ethos, and piano pop to Somerville.",
+    "start_date": "2026-11-03",
+    "expires": "2026-11-03"
+  },
+  {
+    "id": "2026-11-03-eraserhead",
+    "match": {
+      "name_contains": "Eraserhead",
+      "venue_contains": "Somerville Theatre"
+    },
+    "badge": "\ud83c\udfac Lynchian Cult Night",
+    "note": "David Lynch's surreal industrial nightmare projected on genuine 35mm film.",
+    "start_date": "2026-11-03",
+    "expires": "2026-11-03"
+  },
+  {
+    "id": "2026-11-03-boston-open-screen",
+    "match": {
+      "name_contains": "Boston Open Screen",
+      "venue_contains": "Coolidge"
+    },
+    "badge": "\ud83c\udfa5 Micro-Cinema Showcase",
+    "note": "'Open mic for filmmakers': bring your own short film under 10 minutes on USB and see it on the big screen.",
+    "start_date": "2026-11-03",
+    "expires": "2026-11-03"
+  },
+  {
+    "id": "2026-11-03-jordan-earle",
+    "match": {
+      "name_contains": "Centennial Celebration",
+      "venue_contains": "Jordan Hall"
+    },
+    "badge": "\ud83c\udfbc Avant-Garde Soundscapes",
+    "note": "Groundbreaking experimental graphic scores by Earle Brown and Morton Feldman performed by Callithumpian Consort.",
+    "start_date": "2026-11-03",
+    "expires": "2026-11-03"
+  },
+  {
+    "id": "2026-11-03-sleeping-with-sirens",
+    "match": {
+      "name_contains": "Sleeping With Sirens",
+      "venue_contains": "House of Blues"
+    },
+    "badge": "\u26a1 Post-Hardcore Anthem",
+    "note": "High-octane screams and soaring melodic hooks next to Fenway Park.",
+    "start_date": "2026-11-03",
+    "expires": "2026-11-03"
+  },
+  {
+    "id": "2026-11-03-danis-bingo",
+    "match": {
+      "name_contains": "Drag Bingo",
+      "venue_contains": "Dani's"
+    },
+    "badge": "\ud83d\udc51 Tuesday Drag & Games",
+    "note": "No-cover Tuesday drag bingo, prizes, cocktails, and hilarious hosting in Back Bay.",
+    "start_date": "2026-11-03",
+    "expires": "2026-11-03"
+  },
+  {
+    "id": "2026-11-03-aeronaut-trivia",
+    "match": {
+      "name_contains": "INDIE TRIVIA",
+      "venue_contains": "Aeronaut"
+    },
+    "badge": "\ud83e\udde0 Craft Beer Trivia",
+    "note": "Somerville's premiere hyper-competitive neighborhood trivia night with Ben R.",
+    "start_date": "2026-11-03",
+    "expires": "2026-11-03"
+  },
+  {
+    "id": "2026-11-03-cantab-harvest",
+    "match": {
+      "name_contains": "Harvest Fest",
+      "venue_contains": "Cantab"
+    },
+    "badge": "\ud83c\udfb7 Central Sq Jump",
+    "note": "Multi-band community harvest celebration with soulful sax, blues, and lively dance in Cambridge.",
+    "start_date": "2026-11-03",
+    "expires": "2026-11-03"
+  },
+  {
+    "id": "2026-11-04-sinclair-halfalive-2",
+    "match": {
+      "name_contains": "half\u2022alive",
+      "venue_contains": "Sinclair"
+    },
+    "badge": "\u26a1 Sold Out Encore",
+    "note": "Second night of infectious indie pop and kinetic stagecraft in Harvard Square.",
+    "start_date": "2026-11-04",
+    "expires": "2026-11-04"
+  },
+  {
+    "id": "2026-11-04-jordan-philharmonia",
+    "match": {
+      "name_contains": "David Loebel",
+      "venue_contains": "Jordan Hall"
+    },
+    "badge": "\ud83c\udfbb Free Master Orchestral",
+    "note": "NEC Philharmonia performs Smetana's glorious 'Moldau' and Bart\u00f3k's Concerto for Orchestra.",
+    "start_date": "2026-11-04",
+    "expires": "2026-11-04"
+  },
+  {
+    "id": "2026-11-04-duff-goldman",
+    "match": {
+      "name_contains": "Duff Goldman",
+      "venue_contains": "Crystal Ballroom"
+    },
+    "badge": "\ud83c\udf82 Live Culinary Storytelling",
+    "note": "Ace of Cakes star shares riotous culinary stories, punk rock roots, and pastry wizardry in Davis Sq.",
+    "start_date": "2026-11-04",
+    "expires": "2026-11-04"
+  },
+  {
+    "id": "2026-11-04-warren-miller",
+    "match": {
+      "name_contains": "Warren Miller",
+      "venue_contains": "Somerville Theatre"
+    },
+    "badge": "\u26f7\ufe0f Action Film Premiere",
+    "note": "Legendary big-mountain ski and snowboard cinematography on the grand Davis Square screen.",
+    "start_date": "2026-11-04",
+    "expires": "2026-11-04"
+  },
+  {
+    "id": "2026-11-04-pretty-sick",
+    "match": {
+      "name_contains": "Pretty Sick",
+      "venue_contains": "Brighton Music Hall"
+    },
+    "badge": "\ud83c\udfb8 90s Grunge Revival",
+    "note": "Grimy NYC grunge-pop trio channeling Hole and Smashing Pumpkins on Brighton Ave.",
+    "start_date": "2026-11-04",
+    "expires": "2026-11-04"
+  },
+  {
+    "id": "2026-11-04-armory-horror-karaoke",
+    "match": {
+      "name_contains": "Open Mic x Karaoke of Horror",
+      "venue_contains": "Armory"
+    },
+    "badge": "\ud83c\udfa4 Performance Art",
+    "note": "Quirky community open stage for spoken word, horrific comedy, and offbeat tunes.",
+    "start_date": "2026-11-04",
+    "expires": "2026-11-04"
+  },
+  {
+    "id": "2026-11-04-lilypad-variety",
+    "match": {
+      "name_contains": "Variety Show",
+      "venue_contains": "Lilypad"
+    },
+    "badge": "\ud83c\udfad Inman Underground",
+    "note": "Eclectic late-night mix of experimental puppetry, jazz, mime, and comedy in Cambridge.",
+    "start_date": "2026-11-04",
+    "expires": "2026-11-04"
+  },
+  {
+    "id": "2026-11-04-cantab-slam",
+    "match": {
+      "name_contains": "Boston Poetry Slam",
+      "venue_contains": "Cantab"
+    },
+    "badge": "\ud83c\udf99\ufe0f Spoken Word Championship",
+    "note": "Historic weekly poetry slam in Central Square's subterranean room (running since 1991).",
+    "start_date": "2026-11-04",
+    "expires": "2026-11-04"
+  },
+  {
+    "id": "2026-11-04-midway-vinyl",
+    "match": {
+      "name_contains": "Wax & Stacks",
+      "venue_contains": "Midway"
+    },
+    "badge": "\ud83d\udcbf Analog Vinyl Session",
+    "note": "Local crate-diggers, all-vinyl sets, and vintage subculture in Jamaica Plain.",
+    "start_date": "2026-11-04",
+    "expires": "2026-11-04"
+  },
+  {
+    "id": "2026-11-04-aeronaut-survivor",
+    "match": {
+      "name_contains": "Survivor",
+      "venue_contains": "Aeronaut"
+    },
+    "badge": "\ud83d\udcfa Cult Community Viewing",
+    "note": "Giant projector screening of Survivor with custom themed beers in Somerville.",
+    "start_date": "2026-11-04",
+    "expires": "2026-11-04"
+  }
+]

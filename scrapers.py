@@ -2337,12 +2337,13 @@ def scrape_boston_sports(_url, _ua):
 
 def scrape_city_winery(url, ua):
     """City Winery Boston — Vivenu-backed event API."""
-    r = _SESSION.get("https://awsapi.citywinery.com/events", params={"location": "Boston", "top": 200},
+    r = _SESSION.get("https://awsapi.citywinery.com/events", params={"location": "Boston", "top": 500},
                      timeout=20, headers={"User-Agent": ua, "Accept": "application/json"})
     r.raise_for_status()
     payload = (r.json() or {}).get("data", {})
     events = []
     now = datetime.now(timezone.utc)
+    cutoff = now - timedelta(hours=6)
     for ev in payload.get("event_data", []) or []:
         iso = ev.get("start")
         if not iso:
@@ -2351,7 +2352,7 @@ def scrape_city_winery(url, ua):
             when = datetime.fromisoformat(iso.replace("Z", "+00:00"))
         except ValueError:
             continue
-        if when < now:
+        if when < cutoff:
             continue
         slug = ev.get("url") or ev.get("_id")
         price = ev.get("startingPrice")
@@ -2362,6 +2363,7 @@ def scrape_city_winery(url, ua):
             "url": f"https://tickets.citywinery.com/events/{slug}" if slug else None,
             "venue": ev.get("locationName") or "City Winery Boston",
             "price": price_str,
+            "category": "music",
         })
     return events
 
@@ -3848,8 +3850,86 @@ def scrape_kendall_center(url, ua):
 
 
 def scrape_lizard_lounge(url, ua):
-    """Lizard Lounge in Cambridge (live music cellar, album releases, poetry)."""
-    return scrape_tribe_rest(url, ua, default_venue="Lizard Lounge", default_category="music")
+    """Lizard Lounge in Cambridge (live music cellar, album releases, poetry).
+
+    Parses the current month calendar HTML (with showtimes and ticket prices)
+    and combines with the iCal feed for subsequent months.
+    """
+    events = []
+    seen = set()
+    now = datetime.now(timezone.utc)
+    cutoff = now - timedelta(hours=6)
+
+    # 1. Scrape current month from calendar HTML
+    try:
+        r = _SESSION.get("https://lizardloungeclub.com/calendar/", headers={"User-Agent": ua}, timeout=15)
+        if r.status_code == 200:
+            soup = BeautifulSoup(r.text, "html.parser")
+            for art in soup.find_all("article"):
+                title_el = art.find(["h3", "h4", "h2", "a"])
+                if not title_el:
+                    continue
+                a = art.find("a", href=True)
+                link = a["href"] if a else "https://lizardloungeclub.com/calendar/"
+                name = a.get_text(" ", strip=True) if a else title_el.get_text(" ", strip=True)
+                if not name or "No Event Tonight" in name:
+                    continue
+
+                times = art.find_all("time")
+                date_str = None
+                time_str = "20:00"
+                for t in times:
+                    dt_val = t.get("datetime") or t.get_text(strip=True)
+                    if re.match(r"^\d{4}-\d{2}-\d{2}$", dt_val):
+                        date_str = dt_val
+                    elif re.match(r"^\d{1,2}:\d{2}$", dt_val) and time_str == "20:00":
+                        time_str = dt_val
+
+                if not date_str:
+                    continue
+
+                hour, minute = [int(x) for x in time_str.split(":")]
+                y, m, d = [int(x) for x in date_str.split("-")]
+                dt = datetime(y, m, d, hour, minute, tzinfo=EASTERN)
+                dt_utc = dt.astimezone(timezone.utc)
+                if dt_utc < cutoff:
+                    continue
+
+                pm = re.search(r"\$\d+(?:\.\d{2})?", art.get_text())
+                price = pm.group(0) if pm else None
+
+                key = (name.lower(), date_str)
+                if key not in seen:
+                    seen.add(key)
+                    events.append({
+                        "name": name,
+                        "date": dt_utc.isoformat(),
+                        "url": link,
+                        "venue": "Lizard Lounge",
+                        "price": price,
+                        "category": "music",
+                    })
+    except Exception:
+        pass
+
+    # 2. Scrape iCal feed for future months
+    try:
+        ical_events = scrape_ical("https://lizardloungeclub.com/?post_type=tribe_events&ical=1&eventDisplay=list", ua)
+        for ev in ical_events:
+            ev_name = ev.get("name") or ""
+            if not ev_name or "No Event Tonight" in ev_name:
+                continue
+            ev_date = (ev.get("date") or "")[:10]
+            key = (ev_name.lower(), ev_date)
+            if key not in seen:
+                seen.add(key)
+                ev["venue"] = "Lizard Lounge"
+                ev["category"] = "music"
+                events.append(ev)
+    except Exception:
+        pass
+
+    return events
 
 
 def scrape_the_fenway(url, ua):
@@ -5162,8 +5242,9 @@ def scrape_club_passim(url, ua):
     now = datetime.now(EASTERN)
     out = []
     seen = set()
+    consecutive_empty = 0
 
-    for offset in (0, 7, 14, 21, 28, 35):
+    for offset in range(-7, 126, 7):
         page_url = f"https://www.passim.org/live-music/?ped={offset}"
         try:
             resp = _SESSION.get(page_url, headers={"User-Agent": ua}, timeout=10)
@@ -5174,7 +5255,16 @@ def scrape_club_passim(url, ua):
             continue
 
         soup = BeautifulSoup(html_text, "html.parser")
-        for card in soup.find_all("div", class_="date_time_tickets"):
+        cards = soup.find_all("div", class_="date_time_tickets")
+        if not cards and offset > 0:
+            consecutive_empty += 1
+            if consecutive_empty >= 2:
+                break
+            continue
+        else:
+            consecutive_empty = 0
+
+        for card in cards:
             parent = card.find_parent("li")
             if not parent:
                 continue
@@ -5219,8 +5309,10 @@ def scrape_club_passim(url, ua):
             try:
                 dt_str = f"{month_abbr} {day_str} {now.year} {hour}:{minute:02d}"
                 dt = datetime.strptime(dt_str, "%b %d %Y %H:%M").replace(tzinfo=EASTERN)
-                if dt < now - timedelta(days=1):
+                if dt < now - timedelta(days=60):
                     dt = dt.replace(year=now.year + 1)
+                if dt < now - timedelta(hours=6):
+                    continue
             except Exception:
                 continue
 
@@ -6011,7 +6103,63 @@ def scrape_squarespace(url, ua):
     return events
 
 
+def scrape_improv_asylum(url, ua):
+    """Improv Asylum in North End — live comedy, mainstage revue & improv shows via Tixr / Schema.org."""
+    resp = _SESSION.get("https://calendar.improvasylum.com", headers={"User-Agent": ua}, timeout=15)
+    resp.raise_for_status()
+    soup = BeautifulSoup(resp.text, "html.parser")
+    events = []
+    seen = set()
+    now = datetime.now(timezone.utc)
+    cutoff = now - timedelta(hours=6)
+
+    for s in soup.find_all("script"):
+        if s.string and "schema.org" in s.string and '"Event"' in s.string:
+            try:
+                data = json.loads(s.string)
+            except Exception:
+                continue
+            graph = data.get("@graph", []) if isinstance(data, dict) else (data if isinstance(data, list) else [])
+            for item in graph:
+                if item.get("@type") != "Event":
+                    continue
+                name = item.get("name")
+                start_iso = item.get("startDate")
+                if not name or not start_iso:
+                    continue
+                try:
+                    dt = datetime.fromisoformat(start_iso.replace("Z", "+00:00"))
+                    if dt < cutoff:
+                        continue
+                except ValueError:
+                    continue
+
+                ev_url = item.get("url") or item.get("@id") or "https://calendar.improvasylum.com"
+                key = (name.lower(), dt.isoformat())
+                if key in seen:
+                    continue
+                seen.add(key)
+
+                offers = item.get("offers", {})
+                price = None
+                if isinstance(offers, dict):
+                    low = offers.get("lowPrice") or offers.get("price")
+                    if low:
+                        price = f"${low}"
+
+                events.append({
+                    "name": name,
+                    "date": dt.astimezone(timezone.utc).isoformat(),
+                    "url": ev_url,
+                    "venue": "Improv Asylum",
+                    "price": price,
+                    "category": "comedy",
+                })
+    return events
+
+
 _ALL_VENUES = [
+    {"name": "Improv Asylum", "url": "https://calendar.improvasylum.com", "ua": UA_CHROME, "scraper": scrape_improv_asylum, "default_category": "comedy"},
     {"name": "Paradise Rock Club", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZpZA11JtA&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
     {"name": "Brighton Music Hall", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZpapwne&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
     {"name": "MGM Music Hall at Fenway", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZ917AEJz&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
@@ -6164,7 +6312,6 @@ STATIC_LINKS = [
     ("theater", "American Repertory Theater", "https://americanrepertorytheater.org/shows-events/"),
     ("theater", "Huntington Theatre", "https://www.huntingtontheatre.org/season/"),
     ("art",     "Harvard Art Museums calendar", "https://harvardartmuseums.org/calendar"),
-    ("comedy",  "Improv Asylum (North End)", "https://calendar.improvasylum.com/"),
     ("theater", "SpeakEasy Stage Company", "https://www.speakeasystage.com/season"),
     ("theater", "Lyric Stage Company", "https://www.lyricstage.com/whats-on/"),
     ("theater", "Company One Theatre", "https://companyone.org/season/"),
@@ -6273,9 +6420,6 @@ MANUAL_RECURRING_EVENTS = [
     ]),
     ("Memorial Drive Sundays", "https://www.cambridgema.gov/recreation/memorialdrive", "outdoors", [
         ("Memorial Drive Car-Free Sundays", "https://www.cambridgema.gov/recreation/memorialdrive", 6, 11, 0),
-    ]),
-    ("Swing in the Square", "https://www.rosi-boston.org/swing-in-the-square", "dance", [
-        ("Swing in the Square — Free Outdoor Dancing", "https://www.rosi-boston.org/swing-in-the-square", 2, 18, 0),
     ]),
     ("Everybody Dance Now", "https://www.everybodydancenow.org", "dance", [
         ("Outdoor Drop-in Dance Classes @ The Grove", "https://www.everybodydancenow.org", 2, 18, 0),

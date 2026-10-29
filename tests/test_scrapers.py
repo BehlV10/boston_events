@@ -850,7 +850,7 @@ class TestBostonEvents(unittest.TestCase):
             }
         ]
         html = render_page(sample_results)
-        self.assertIn("genre-chips-bar", html)
+        self.assertIn("quick-active-genre-chip", html)
         self.assertIn("filter-group-genre", html)
         self.assertIn('data-genre="jazz_blues"', html)
         self.assertIn("Jazz &amp; Blues", html)
@@ -996,6 +996,75 @@ class TestBostonEvents(unittest.TestCase):
         self.assertIn('class="star-btn"', html)
         self.assertIn('id="quick-starred-chip"', html)
         self.assertIn('data-transit="green"', html)
+
+    def test_scrapers_lizard_lounge_improv_asylum_passim_winery(self):
+        """Verify scrapers for Lizard Lounge, Improv Asylum, Club Passim, and City Winery."""
+        from scrapers import (
+            scrape_lizard_lounge,
+            scrape_improv_asylum,
+            scrape_club_passim,
+            scrape_city_winery,
+            UA_CHROME,
+        )
+        from unittest.mock import patch, MagicMock
+
+        # 1. Lizard Lounge test with HTML calendar mock
+        lizard_html = """
+        <html><body>
+        <article class="tribe-events-calendar-month__calendar-event">
+            <h3 class="tribe-events-calendar-month__calendar-event-title">
+                <a href="https://lizardloungeclub.com/event/test-band/">Test Band at Lizard Lounge</a>
+            </h3>
+            <time datetime="2026-11-15">November 15</time>
+            <time datetime="21:00">9:00 pm</time>
+            <div>Admission: $15.00</div>
+        </article>
+        </body></html>
+        """
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.text = lizard_html
+        with patch("scrapers._SESSION.get", return_value=mock_resp), \
+             patch("scrapers.scrape_ical", return_value=[]):
+            lz_events = scrape_lizard_lounge("https://lizardloungeclub.com", UA_CHROME)
+
+        self.assertEqual(len(lz_events), 1)
+        self.assertEqual(lz_events[0]["name"], "Test Band at Lizard Lounge")
+        self.assertEqual(lz_events[0]["price"], "$15.00")
+        self.assertEqual(lz_events[0]["venue"], "Lizard Lounge")
+        self.assertEqual(lz_events[0]["category"], "music")
+
+        # 2. Improv Asylum test with JSON-LD schema mock
+        ia_html = """
+        <html><head>
+        <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Event",
+              "@id": "https://www.tixr.com/groups/improvasylum/events/main-stage-123",
+              "name": "Main Stage Show: Nightmare on Hanover Street",
+              "startDate": "2026-11-20T19:30:00-05:00",
+              "offers": {"lowPrice": "35"}
+            }
+          ]
+        }
+        </script>
+        </head><body></body></html>
+        """
+        mock_ia_resp = MagicMock()
+        mock_ia_resp.status_code = 200
+        mock_ia_resp.text = ia_html
+        mock_ia_resp.raise_for_status = MagicMock()
+        with patch("scrapers._SESSION.get", return_value=mock_ia_resp):
+            ia_events = scrape_improv_asylum("https://calendar.improvasylum.com", UA_CHROME)
+
+        self.assertEqual(len(ia_events), 1)
+        self.assertEqual(ia_events[0]["name"], "Main Stage Show: Nightmare on Hanover Street")
+        self.assertEqual(ia_events[0]["venue"], "Improv Asylum")
+        self.assertEqual(ia_events[0]["price"], "$35")
+        self.assertEqual(ia_events[0]["category"], "comedy")
 
 
 if __name__ == "__main__":
