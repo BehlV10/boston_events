@@ -6809,31 +6809,73 @@ def fetch_boston_weather():
     return out
 
 
+LUCKYSEAT_CACHE_FILE = os.path.join(CACHE_DIR, "luckyseat_shows.json")
+
+
 def fetch_luckyseat_boston():
-    """Fetch LuckySeat's show list and filter to Boston. Cached for 15 min."""
+    """Fetch LuckySeat's show list and filter to Greater Boston (Boston, Cambridge, Somerville).
+    Cached for 15 min with persistent disk backup so transient WAF blocks never wipe listings."""
     if _luckyseat_cache["data"] is not None and time.time() - _luckyseat_cache["ts"] < CACHE_SECONDS:
         return _luckyseat_cache["data"]
+
+    disk_data = None
+    if os.path.exists(LUCKYSEAT_CACHE_FILE):
+        try:
+            with open(LUCKYSEAT_CACHE_FILE, "r", encoding="utf-8") as f:
+                disk_data = json.load(f)
+        except Exception:
+            disk_data = None
+
     shows = []
     try:
+        headers = {
+            "User-Agent": UA_CHROME,
+            "Accept": "application/json, text/plain, */*",
+            "Referer": "https://www.luckyseat.com/",
+            "Origin": "https://www.luckyseat.com",
+            "Accept-Language": "en-US,en;q=0.9",
+        }
         resp = _SESSION.get(
             "https://www.luckyseat.com/api/showmanagement/getshowlist",
-            headers={"User-Agent": UA_SAFARI, "Accept": "application/json"},
+            headers=headers,
             timeout=10,
         )
         resp.raise_for_status()
-        for s in resp.json():
-            if (s.get("city") or "").lower() != "boston":
-                continue
-            if not s.get("isActive") or s.get("isTempClosed"):
-                continue
-            shows.append({
-                "name": s.get("showName"),
-                "venue": s.get("eventLocation"),
-                "price": s.get("priceAndFeesTotal"),
-                "url": f"https://www.luckyseat.com/shows/{s.get('showAlias')}" if s.get("showAlias") else "https://www.luckyseat.com/",
-            })
-    except Exception:
-        shows = []
+        raw_shows = resp.json()
+        if isinstance(raw_shows, list) and len(raw_shows) > 0:
+            for s in raw_shows:
+                city = (s.get("city") or "").strip().lower()
+                if city not in ("boston", "cambridge", "somerville"):
+                    continue
+                if not s.get("isActive") or s.get("isTempClosed"):
+                    continue
+                shows.append({
+                    "name": s.get("showName"),
+                    "venue": s.get("eventLocation"),
+                    "price": s.get("priceAndFeesTotal"),
+                    "url": f"https://www.luckyseat.com/shows/{s.get('showAlias')}" if s.get("showAlias") else "https://www.luckyseat.com/",
+                })
+            if shows:
+                try:
+                    with open(LUCKYSEAT_CACHE_FILE, "w", encoding="utf-8") as f:
+                        json.dump(shows, f)
+                except Exception:
+                    pass
+    except Exception as e:
+        if disk_data:
+            shows = disk_data
+        else:
+            try:
+                events_json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "events.json")
+                if os.path.exists(events_json_path):
+                    with open(events_json_path, "r", encoding="utf-8") as f:
+                        shows = json.load(f).get("luckyseat") or []
+            except Exception:
+                shows = []
+
+    if not shows and disk_data:
+        shows = disk_data
+
     _luckyseat_cache["data"] = shows
     _luckyseat_cache["ts"] = time.time()
     return shows

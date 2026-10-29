@@ -1070,7 +1070,7 @@ def group_by_date(results):
     return sorted(buckets.items()), tba, ongoing
 
 
-def render_page(results):
+def render_page(results, weather=None, luckyseat_shows=None):
     if not any(r.get("venue") == "Community Submissions" for r in results):
         comm = _load_community_events()
         if comm:
@@ -1086,7 +1086,8 @@ def render_page(results):
 
     upvotes_map = _load_upvotes_map()
 
-    weather = fetch_boston_weather()
+    if weather is None:
+        weather = fetch_boston_weather()
     weather_pill_html = ""
     if weather:
         w_label = weather.get("label", "")
@@ -1301,7 +1302,7 @@ def render_page(results):
     useful_sidebar = ""
     if STATIC_LINKS or DEAL_LINKS:
         deals_block = ""
-        lucky_shows = fetch_luckyseat_boston()
+        lucky_shows = luckyseat_shows if luckyseat_shows is not None else fetch_luckyseat_boston()
         if DEAL_LINKS or lucky_shows:
             lucky_html = ""
             if lucky_shows:

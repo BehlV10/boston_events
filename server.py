@@ -157,18 +157,25 @@ def export_json(path="events.json", force=False):
 def export_html(path="index.html", force=False, source_json="events.json"):
     """Render and write a static self-contained HTML page."""
     venues = None
+    weather = None
+    luckyseat = None
     if not force and os.path.exists(source_json):
         try:
             with open(source_json, "r", encoding="utf-8") as f:
                 payload = json.load(f)
-            venues = payload.get("venues") if isinstance(payload, dict) else payload
+            if isinstance(payload, dict):
+                venues = payload.get("venues")
+                weather = payload.get("weather")
+                luckyseat = payload.get("luckyseat")
+            else:
+                venues = payload
         except Exception:
             venues = None
 
     if not venues:
         venues = get_all_events(force=force)
 
-    html = render_page(venues)
+    html = render_page(venues, weather=weather, luckyseat_shows=luckyseat)
     with open(path, "w", encoding="utf-8") as f:
         f.write(html)
     print(f"wrote {path}: {len(html):,} bytes")
