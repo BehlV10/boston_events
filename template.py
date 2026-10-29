@@ -1513,6 +1513,24 @@ def render_page(results):
     --radius-md: 6px;
     --radius-sm: 4px;
   }}
+  [data-theme="anime"] {{
+    --bg: #0d0a1c;
+    --card: #17122e;
+    --card-hover: #211a42;
+    --fg: #f5f0ff;
+    --muted: #a49abf;
+    --accent: #ff4b93;
+    --accent-glow: rgba(255, 75, 147, 0.4);
+    --border: rgba(255, 107, 181, 0.22);
+    --border-hover: rgba(0, 240, 255, 0.45);
+    --green: #00f0ff;
+    --green-bg: rgba(0, 240, 255, 0.14);
+    --green-border: rgba(0, 240, 255, 0.38);
+    --warn: #ff758f;
+    --radius-lg: 18px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+  }}
   *, *::before, *::after {{ box-sizing: border-box; }}
   html, body {{
     margin: 0;
@@ -3380,6 +3398,11 @@ def render_page(results):
     background: var(--accent);
     color: #0c0e14;
   }}
+  [data-theme="anime"] .theme-pill-btn.active {{
+    background: linear-gradient(135deg, #ff4b93 0%, #a855f7 100%);
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(255, 75, 147, 0.5);
+  }}
 
   /* Indie Guide Aesthetic */
   [data-theme="indie"] .chip-icon,
@@ -3594,6 +3617,154 @@ def render_page(results):
     color: #fff;
     border-color: rgba(255, 255, 255, 0.3);
   }}
+
+  /* Anime / Neo-Tokyo Aesthetic */
+  [data-theme="anime"] .banner {{
+    background-color: #110d28;
+    background-image:
+      linear-gradient(180deg, rgba(30, 15, 60, 0.45) 0%, rgba(18, 12, 40, 0.78) 58%, rgba(13, 10, 28, 0.98) 100%),
+      url('banner.jpg');
+    border-bottom: 2px solid rgba(255, 75, 147, 0.3);
+    box-shadow: 0 4px 30px rgba(168, 85, 247, 0.18);
+  }}
+  [data-theme="anime"] .banner-top-tag {{
+    color: #00f0ff;
+    text-shadow: 0 0 12px rgba(0, 240, 255, 0.7);
+    letter-spacing: 0.18em;
+    font-weight: 700;
+  }}
+  [data-theme="anime"] .banner-title {{
+    background: linear-gradient(135deg, #ffffff 20%, #ff79c6 60%, #00f0ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 25px rgba(255, 75, 147, 0.35));
+    letter-spacing: -0.02em;
+  }}
+  [data-theme="anime"] .banner-meta-pill {{
+    background: rgba(28, 20, 56, 0.85);
+    border: 1px solid rgba(255, 107, 181, 0.35);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4), 0 0 18px rgba(255, 75, 147, 0.22);
+    border-radius: 999px;
+  }}
+  [data-theme="anime"] .pill-submit-btn {{
+    background: linear-gradient(135deg, #ff4b93 0%, #9333ea 100%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+    box-shadow: 0 0 12px rgba(255, 75, 147, 0.45);
+    font-weight: 700;
+    border-radius: 999px;
+  }}
+  [data-theme="anime"] .pill-submit-btn:hover {{
+    filter: brightness(1.2);
+    box-shadow: 0 0 20px rgba(255, 75, 147, 0.7);
+    transform: translateY(-1px) scale(1.02);
+  }}
+  [data-theme="anime"] .live-pulse {{
+    background: #00f0ff;
+    box-shadow: 0 0 10px #00f0ff, 0 0 20px #00f0ff;
+  }}
+  [data-theme="anime"] .chip,
+  [data-theme="anime"] .loc-chip,
+  [data-theme="anime"] .genre-chip,
+  [data-theme="anime"] .transit-chip,
+  [data-theme="anime"] .sub-chip {{
+    border-radius: 999px;
+    background: rgba(30, 22, 60, 0.65);
+    border: 1px solid rgba(255, 107, 181, 0.22);
+    color: #d1c7e8;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }}
+  [data-theme="anime"] .chip:hover,
+  [data-theme="anime"] .loc-chip:hover,
+  [data-theme="anime"] .genre-chip:hover,
+  [data-theme="anime"] .transit-chip:hover,
+  [data-theme="anime"] .sub-chip:hover {{
+    border-color: #00f0ff;
+    color: #fff;
+    box-shadow: 0 0 12px rgba(0, 240, 255, 0.4);
+    transform: translateY(-2px);
+  }}
+  [data-theme="anime"] .chip.active,
+  [data-theme="anime"] .loc-chip.active,
+  [data-theme="anime"] .genre-chip.active,
+  [data-theme="anime"] .sub-chip.active {{
+    background: linear-gradient(135deg, rgba(255, 75, 147, 0.3) 0%, rgba(168, 85, 247, 0.3) 100%);
+    border-color: #ff4b93;
+    color: #fff;
+    box-shadow: 0 0 14px rgba(255, 75, 147, 0.4);
+    font-weight: 700;
+  }}
+  [data-theme="anime"] .day {{
+    background: rgba(23, 18, 46, 0.7);
+    border: 1px solid rgba(255, 107, 181, 0.18);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+    border-radius: var(--radius-lg);
+  }}
+  [data-theme="anime"] .day h2 {{
+    color: #fce7f3;
+    border-bottom: 1px solid rgba(255, 107, 181, 0.18);
+  }}
+  [data-theme="anime"] .day h2 .count {{
+    background: rgba(255, 75, 147, 0.2);
+    border: 1px solid rgba(255, 75, 147, 0.45);
+    color: #ff85be;
+    border-radius: 999px;
+  }}
+  [data-theme="anime"] .event {{
+    background: rgba(30, 24, 62, 0.55);
+    border: 1px solid rgba(255, 107, 181, 0.15);
+    border-radius: var(--radius-md);
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }}
+  [data-theme="anime"] .event:hover {{
+    background: rgba(42, 34, 88, 0.85);
+    border-color: rgba(255, 75, 147, 0.5);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35), 0 0 14px rgba(255, 75, 147, 0.3);
+    transform: translateY(-2px);
+  }}
+  [data-theme="anime"] .event .what a {{
+    color: #f5f0ff;
+  }}
+  [data-theme="anime"] .event .what a:hover {{
+    color: #00f0ff;
+    text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
+  }}
+  [data-theme="anime"] .cat-pill {{
+    border-radius: 999px;
+    font-weight: 700;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+  }}
+  [data-theme="anime"] .star-btn:hover,
+  [data-theme="anime"] .star-btn.starred {{
+    color: #ff4b93;
+    text-shadow: 0 0 12px rgba(255, 75, 147, 0.8);
+  }}
+  [data-theme="anime"] .view-toggle {{
+    border-radius: 999px;
+    background: rgba(30, 22, 60, 0.65);
+    border: 1px solid rgba(255, 107, 181, 0.25);
+    padding: 3px;
+  }}
+  [data-theme="anime"] .view-btn {{
+    border-radius: 999px;
+  }}
+  [data-theme="anime"] .view-btn.active {{
+    background: linear-gradient(135deg, #ff4b93 0%, #9333ea 100%);
+    color: #fff;
+    box-shadow: 0 0 12px rgba(255, 75, 147, 0.45);
+  }}
+  [data-theme="anime"] .share-filter-btn {{
+    border-radius: 999px;
+    background: rgba(30, 22, 60, 0.65);
+    border: 1px solid rgba(255, 107, 181, 0.25);
+  }}
+  [data-theme="anime"] .share-filter-btn:hover {{
+    border-color: #00f0ff;
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+    color: #00f0ff;
+  }}
 </style>
 </head>
 <body>
@@ -3606,6 +3777,7 @@ def render_page(results):
           <div class="theme-toggle-pills" role="radiogroup" aria-label="Visual Theme">
             <button type="button" class="theme-pill-btn active" data-theme="indie" role="radio" aria-checked="true">Indie Guide</button>
             <button type="button" class="theme-pill-btn" data-theme="classic" role="radio" aria-checked="false">Classic Dark</button>
+            <button type="button" class="theme-pill-btn" data-theme="anime" role="radio" aria-checked="false">Anime 🌸</button>
           </div>
         </div>
       </div>
@@ -6234,7 +6406,8 @@ def render_page(results):
     // --- Theme Switcher ---
     const THEME_KEY = 'boston_events_theme';
     function setTheme(t, save) {{
-      const theme = (t === 'classic') ? 'classic' : 'indie';
+      const validThemes = ['indie', 'classic', 'anime'];
+      const theme = validThemes.includes(t) ? t : 'indie';
       document.documentElement.setAttribute('data-theme', theme);
       if (document.body) {{
         document.body.setAttribute('data-theme', theme);
