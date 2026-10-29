@@ -1092,7 +1092,7 @@ def render_page(results):
         w_label = weather.get("label", "")
         w_icon = weather.get("icon", "🌤️")
         w_temp = weather.get("temp", "--")
-        weather_pill_html = f'<span class="pill-weather" title="{w_label} in Boston">{w_icon} {w_temp}°F <span class="weather-label">{w_label}</span></span><span class="pill-dot">·</span>'
+        weather_pill_html = f'<span class="pill-weather" title="{w_label} in Boston"><span class="chip-icon">{w_icon} </span>{w_temp}°F <span class="weather-label">{w_label}</span></span><span class="pill-dot">·</span>'
         weather_html = f'{w_icon} {w_temp}°F {w_label} · '
     else:
         weather_html = ""
@@ -1135,10 +1135,10 @@ def render_page(results):
             gcolor = ginfo["color"]
             gicon = ginfo["icon"]
             glabel = ginfo["label"]
-            cat_tag = f'<span class="cat-pill genre-pill" data-genre="{escape(genre)}" title="Music Genre: {escape(glabel)}" style="--cat-c:{gcolor}; background:{gcolor}18; border-color:{gcolor}33; color:{gcolor}">{gicon} {escape(glabel)}</span>'
+            cat_tag = f'<span class="cat-pill genre-pill" data-genre="{escape(genre)}" title="Music Genre: {escape(glabel)}" style="--cat-c:{gcolor}; background:{gcolor}18; border-color:{gcolor}33; color:{gcolor}"><span class="chip-icon">{gicon} </span>{escape(glabel)}</span>'
         else:
             color, icon = CATEGORY_STYLES.get(cat, CATEGORY_STYLES["other"])
-            cat_tag = f'<span class="cat-pill" style="--cat-c:{color}; background:{color}18; border-color:{color}33; color:{color}">{icon} {escape(cat)}</span>'
+            cat_tag = f'<span class="cat-pill" style="--cat-c:{color}; background:{color}18; border-color:{color}33; color:{color}"><span class="chip-icon">{icon} </span>{escape(cat)}</span>'
         venue = e.get("venue") or ""
         source = e.get("_source_venue") or ""
         city = _event_city(venue, source, e)
@@ -1166,7 +1166,7 @@ def render_page(results):
         geo_btn = ""
         if geo:
             geo_attrs = f' data-lat="{geo["lat"]}" data-lng="{geo["lng"]}" data-venue-name="{escape(geo["venue"])}" data-neighborhood="{escape(geo["neighborhood"])}"'
-            geo_btn = ' <button type="button" class="venue-map-jump" title="View on Map">📍</button>'
+            geo_btn = ' <button type="button" class="venue-map-jump" title="View on Map"><span class="chip-icon">📍</span><span class="indie-jump-label">map</span></button>'
 
         sub_name, sub_slug = resolve_subarea(city, e, geo)
         sub_attrs = f' data-subarea="{escape(sub_slug)}"'
@@ -1190,7 +1190,7 @@ def render_page(results):
                 venue_link = f'<a class="venue-link" href="{escape(maps_url)}" target="_blank" rel="noopener">{escape(venue)}</a>'
 
             if e.get("_is_community"):
-                venue_html = f'{venue_link}{geo_btn} <span class="badge-community" title="Community submitted event">👤 Community</span>'
+                venue_html = f'{venue_link}{geo_btn} <span class="badge-community" title="Community submitted event"><span class="chip-icon">👤 </span>Community</span>'
             elif source and source.lower() != venue.lower() and not any(agg in source.lower() for agg in ["ticketmaster", "eventbrite", "do617", "boston calendar", "boston shows"]):
                 venue_html = f'{venue_link}{geo_btn} <span class="venue-via">(via {escape(source)})</span>'
             else:
@@ -1270,7 +1270,7 @@ def render_page(results):
         past_banner_html = '''
           <div class="past-events-banner" id="past-events-banner" style="display: none;">
             <div class="past-banner-info">
-              <span class="past-banner-badge" id="past-banner-badge">⏱️ Live Tonight</span>
+              <span class="past-banner-badge" id="past-banner-badge"><span class="chip-icon">⏱️ </span>Live Tonight</span>
               <span class="past-banner-text" id="past-banner-text"></span>
             </div>
             <div class="past-banner-actions">
@@ -1354,7 +1354,7 @@ def render_page(results):
                     for n, u in pairs
                 )
                 parts.append(
-                    f'<div class="useful-cat"><div class="useful-cat-head" style="color:{color}">{icon} {escape(cat)}</div><ul>{link_items}</ul></div>'
+                    f'<div class="useful-cat"><div class="useful-cat-head" style="color:{color}"><span class="chip-icon">{icon} </span>{escape(cat)}</div><ul>{link_items}</ul></div>'
                 )
             useful_block = f'''
         <div class="useful-inner">
@@ -1399,7 +1399,7 @@ def render_page(results):
     bucket_boxes = "\n".join(
         f'''<label class="chk">
             <input type="checkbox" class="cat-chk" value="{escape(b)}" checked>
-            <span>{_bucket_icon_row(b)} {escape(b)} <span class="count">{bucket_counts.get(b, 0)}</span></span>
+            <span><span class="chip-icon">{_bucket_icon_row(b)} </span>{escape(b)} <span class="count">{bucket_counts.get(b, 0)}</span></span>
           </label>'''
         for b in bucket_order
     )
@@ -1417,7 +1417,7 @@ def render_page(results):
     genre_boxes = "\n".join(
         f'''<label class="chk">
             <input type="checkbox" class="genre-chk" value="{escape(gid)}" checked>
-            <span><span class="genre-swatch" style="background:{ginfo['color']}"></span>{ginfo['icon']} {escape(ginfo['label'])} <span class="count">{genre_counts.get(gid, 0)}</span></span>
+            <span><span class="genre-swatch" style="background:{ginfo['color']}"></span><span class="chip-icon">{ginfo['icon']} </span>{escape(ginfo['label'])} <span class="count">{genre_counts.get(gid, 0)}</span></span>
           </label>'''
         for gid, ginfo in MUSIC_GENRES.items()
     )
@@ -1429,7 +1429,7 @@ def render_page(results):
         </label>
         <label class="chk">
           <input type="checkbox" class="recur-chk" value="weekly" checked>
-          <span>↻ Weekly recurring <span class="count">{recurring_count}</span></span>
+          <span><span class="chip-icon">↻ </span>Weekly recurring <span class="count">{recurring_count}</span></span>
         </label>'''
 
     venue_counts = {v: 0 for v in all_venue_names}
@@ -1469,9 +1469,15 @@ def render_page(results):
 <meta charset="utf-8">
 <title>Wicked Boston Events</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<script>
+  try {{
+    var t = localStorage.getItem('boston_events_theme') || 'indie';
+    document.documentElement.setAttribute('data-theme', t);
+  }} catch(e) {{}}
+</script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230c0e14'/%3E%3Crect x='3' y='3' width='58' height='58' rx='13' fill='none' stroke='%23ffd866' stroke-width='3'/%3E%3Ctext x='32' y='48' font-family='Impact, Arial Black, sans-serif' font-weight='900' font-size='44' fill='%235d9bff' text-anchor='middle'%3EB%3C/text%3E%3C/svg%3E">
 <style>
-  :root {{
+  :root, [data-theme="classic"] {{
     --bg: #0c0e14;
     --card: #151822;
     --card-hover: #1c202e;
@@ -1488,6 +1494,24 @@ def render_page(results):
     --radius-lg: 16px;
     --radius-md: 10px;
     --radius-sm: 6px;
+  }}
+  [data-theme="indie"] {{
+    --bg: #0e1014;
+    --card: #15181e;
+    --card-hover: #1c2028;
+    --fg: #f4f5f8;
+    --muted: #8c93a4;
+    --accent: #e2a85a;
+    --accent-glow: transparent;
+    --border: rgba(255, 255, 255, 0.08);
+    --border-hover: rgba(255, 255, 255, 0.16);
+    --green: #48bb78;
+    --green-bg: rgba(72, 187, 120, 0.12);
+    --green-border: rgba(72, 187, 120, 0.25);
+    --warn: #e07a5f;
+    --radius-lg: 10px;
+    --radius-md: 6px;
+    --radius-sm: 4px;
   }}
   *, *::before, *::after {{ box-sizing: border-box; }}
   html, body {{
@@ -3294,12 +3318,297 @@ def render_page(results):
     text-align: center;
     margin-top: 4px;
   }}
+  /* ========================================================
+     THEME SWITCHER & INDIE GUIDE THEME
+     ======================================================== */
+  .banner-top-row {{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    gap: 12px;
+    flex-wrap: wrap;
+  }}
+  .theme-toggle-wrap {{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(15, 18, 25, 0.75);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 999px;
+    padding: 3px 4px 3px 10px;
+    margin-left: auto;
+  }}
+  .theme-toggle-label {{
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }}
+  .theme-toggle-pills {{
+    display: inline-flex;
+    gap: 2px;
+    background: rgba(0, 0, 0, 0.35);
+    border-radius: 999px;
+    padding: 2px;
+  }}
+  .theme-pill-btn {{
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    font-family: inherit;
+  }}
+  .theme-pill-btn:hover {{
+    color: #fff;
+  }}
+  .theme-pill-btn.active {{
+    background: #f4f5f8;
+    color: #0c0e14;
+    font-weight: 700;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  }}
+  [data-theme="classic"] .theme-pill-btn.active {{
+    background: var(--accent);
+    color: #0c0e14;
+  }}
+
+  /* Indie Guide Aesthetic */
+  [data-theme="indie"] .chip-icon,
+  [data-theme="indie"] .live-pulse {{
+    display: none !important;
+  }}
+  [data-theme="indie"] .banner {{
+    background-color: #0b0d11;
+    background-image:
+      linear-gradient(180deg, rgba(11, 13, 17, 0.35) 0%, rgba(11, 13, 17, 0.82) 60%, rgba(11, 13, 17, 0.98) 100%),
+      url('banner.jpg');
+    min-height: 250px;
+    padding: 34px 24px 26px;
+  }}
+  [data-theme="indie"] .banner-top-tag {{
+    color: #cbd5e1;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    font-weight: 650;
+    text-shadow: none;
+  }}
+  [data-theme="indie"] .banner-title {{
+    font-size: 42px;
+    letter-spacing: -0.04em;
+    font-weight: 850;
+  }}
+  [data-theme="indie"] .banner-meta-pill {{
+    background: rgba(18, 21, 28, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 6px 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.4);
+  }}
+  [data-theme="indie"] .pill-submit-btn {{
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #f4f5f8;
+    box-shadow: none;
+    border-radius: 6px;
+    font-weight: 600;
+    padding: 4px 11px;
+  }}
+  [data-theme="indie"] .pill-submit-btn:hover {{
+    background: rgba(255, 255, 255, 0.16);
+    border-color: rgba(255, 255, 255, 0.35);
+    transform: none;
+    filter: none;
+    box-shadow: none;
+  }}
+  [data-theme="indie"] .chip,
+  [data-theme="indie"] .loc-chip,
+  [data-theme="indie"] .genre-chip,
+  [data-theme="indie"] .transit-chip,
+  [data-theme="indie"] .sub-chip {{
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 6px 13px;
+  }}
+  [data-theme="indie"] .chip.active,
+  [data-theme="indie"] .loc-chip.active,
+  [data-theme="indie"] .genre-chip.active,
+  [data-theme="indie"] .sub-chip.active {{
+    background: rgba(226, 168, 90, 0.14);
+    border-color: #e2a85a;
+    color: #f6c888;
+    font-weight: 600;
+  }}
+  [data-theme="indie"] .chip:hover,
+  [data-theme="indie"] .loc-chip:hover,
+  [data-theme="indie"] .genre-chip:hover,
+  [data-theme="indie"] .transit-chip:hover,
+  [data-theme="indie"] .sub-chip:hover {{
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.18);
+    color: #fff;
+  }}
+  [data-theme="indie"] .day {{
+    border-radius: 8px;
+    padding: 16px 18px 14px;
+    background: var(--card);
+  }}
+  [data-theme="indie"] .day h2 {{
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+  }}
+  [data-theme="indie"] .event {{
+    padding: 9px 12px;
+    border-radius: 4px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    margin-bottom: 2px;
+  }}
+  [data-theme="indie"] .event:hover {{
+    background: rgba(255, 255, 255, 0.035);
+    border-color: rgba(255, 255, 255, 0.08);
+    transform: none;
+    box-shadow: none;
+  }}
+  [data-theme="indie"] .event .when {{
+    font-variant-numeric: tabular-nums;
+    font-size: 12px;
+    color: #9aa1b2;
+    font-weight: 500;
+  }}
+  [data-theme="indie"] .event .what a {{
+    color: #f4f5f8;
+    font-weight: 600;
+  }}
+  [data-theme="indie"] .event .what a:hover {{
+    color: #e2a85a;
+    text-decoration: underline;
+  }}
+  [data-theme="indie"] .cat-pill {{
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-radius: 3px;
+    padding: 2px 6px;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    color: #b5bcc9 !important;
+  }}
+  [data-theme="indie"] .cal-btn {{
+    border-radius: 4px;
+    font-size: 11px;
+    padding: 1px 7px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: transparent;
+    color: var(--muted);
+  }}
+  [data-theme="indie"] .cal-btn:hover {{
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.25);
+  }}
+  [data-theme="indie"] .view-toggle {{
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    padding: 2px;
+  }}
+  [data-theme="indie"] .view-btn {{
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 5px 12px;
+  }}
+  [data-theme="indie"] .view-btn.active {{
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    box-shadow: none;
+  }}
+  [data-theme="indie"] .share-filter-btn {{
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 12px;
+  }}
+  [data-theme="indie"] .past-events-banner {{
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    box-shadow: none;
+    color: var(--muted);
+  }}
+  [data-theme="indie"] .past-banner-badge {{
+    background: rgba(255, 255, 255, 0.08);
+    color: #e2a85a;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    border-radius: 3px;
+    padding: 2px 7px;
+  }}
+  [data-theme="indie"] .past-banner-btn {{
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+    color: #eef1f8;
+    font-weight: 500;
+  }}
+  [data-theme="indie"] .past-banner-btn:hover {{
+    background: rgba(255, 255, 255, 0.12);
+  }}
+  .indie-jump-label {{
+    display: none;
+  }}
+  [data-theme="indie"] .indie-jump-label {{
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 3px;
+    padding: 1px 5px;
+    line-height: 1.2;
+    vertical-align: middle;
+  }}
+  [data-theme="indie"] .venue-map-jump:hover .indie-jump-label {{
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.3);
+  }}
 </style>
 </head>
 <body>
   <div class="banner">
     <div class="banner-inner">
-      <div class="banner-top-tag"><span class="live-pulse"></span> GREATER BOSTON LIVE EVENTS</div>
+      <div class="banner-top-row">
+        <div class="banner-top-tag"><span class="live-pulse"></span> GREATER BOSTON LIVE EVENTS</div>
+        <div class="theme-toggle-wrap">
+          <span class="theme-toggle-label">Theme:</span>
+          <div class="theme-toggle-pills" role="radiogroup" aria-label="Visual Theme">
+            <button type="button" class="theme-pill-btn active" data-theme="indie" role="radio" aria-checked="true">Indie Guide</button>
+            <button type="button" class="theme-pill-btn" data-theme="classic" role="radio" aria-checked="false">Classic Dark</button>
+          </div>
+        </div>
+      </div>
       <div class="banner-title-row">
         <h1 class="banner-title">Wicked Boston Events</h1>
       </div>
@@ -3318,7 +3627,7 @@ def render_page(results):
   <div class="layout">
     <div class="mobile-filter-bar">
       <button type="button" id="mobile-filter-toggle" class="mobile-filter-btn">
-        <span>⚙️ Filter</span>
+        <span><span class="chip-icon">⚙️ </span>Filter</span>
         <span id="mobile-filter-badge" class="count">All</span>
       </button>
     </div>
@@ -3341,7 +3650,7 @@ def render_page(results):
       <div class="filter-group">
         <label class="free-toggle" for="free-only-chk">
           <input type="checkbox" id="free-only-chk">
-          <span>✨ Free events only</span>
+          <span><span class="chip-icon">✨ </span>Free events only</span>
         </label>
       </div>
       <div class="filter-group">
@@ -3369,15 +3678,15 @@ def render_page(results):
       <div class="view-switch-bar">
         <div class="view-toggle" role="group" aria-label="View mode">
           <button type="button" class="view-btn active" id="btn-view-list" data-view="list">
-            <span>📋</span> List View
+            <span><span class="chip-icon">📋 </span>List View</span>
           </button>
           <button type="button" class="view-btn" id="btn-view-map" data-view="map">
-            <span>🗺️</span> Map View
+            <span><span class="chip-icon">🗺️ </span>Map View</span>
           </button>
         </div>
         <div class="view-switch-right">
           <button type="button" id="btn-share-filter" class="share-filter-btn" title="Copy shareable link with current filters">
-            <span>🔗</span> <span id="share-btn-text">Share View</span>
+            <span class="chip-icon">🔗 </span><span id="share-btn-text">Share View</span>
           </button>
           <span id="map-venue-stat" class="map-venue-stat" style="display: none;">
             <strong id="map-venue-count">0</strong> venues on map
@@ -3385,7 +3694,7 @@ def render_page(results):
         </div>
       </div>
       <div class="location-chips-bar" id="location-chips">
-        <button type="button" class="loc-chip active" data-city="all">📍 All Areas</button>
+        <button type="button" class="loc-chip active" data-city="all"><span class="chip-icon">📍 </span>All Areas</button>
         <button type="button" class="loc-chip" data-city="boston"><span class="city-dot" style="background:#5d9bff"></span>Boston</button>
         <button type="button" class="loc-chip" data-city="cambridge"><span class="city-dot" style="background:#e05a6b"></span>Cambridge</button>
         <button type="button" class="loc-chip" data-city="somerville"><span class="city-dot" style="background:#f29e4c"></span>Somerville</button>
@@ -3398,27 +3707,27 @@ def render_page(results):
       </div>
       <div class="subarea-chips-bar" id="subarea-chips-bar" style="display: none;"></div>
       <div class="genre-chips-bar" id="genre-chips-bar">
-        <button type="button" class="genre-chip active" data-genre="all">♪ All Music</button>
-        <button type="button" class="genre-chip" data-genre="rock_indie">🎸 Rock &amp; Indie</button>
-        <button type="button" class="genre-chip" data-genre="jazz_blues">🎷 Jazz &amp; Blues</button>
-        <button type="button" class="genre-chip" data-genre="folk_trad">🪕 Folk &amp; Trad</button>
-        <button type="button" class="genre-chip" data-genre="electronic">🎛 Electronic</button>
-        <button type="button" class="genre-chip" data-genre="classical">🎻 Classical</button>
-        <button type="button" class="genre-chip" data-genre="hiphop_rnb">🎤 Hip-Hop &amp; R&B</button>
-        <button type="button" class="genre-chip" data-genre="latin_global">🪇 Latin &amp; Global</button>
-        <button type="button" class="genre-chip" data-genre="pop">✨ Pop</button>
+        <button type="button" class="genre-chip active" data-genre="all"><span class="chip-icon">♪ </span>All Music</button>
+        <button type="button" class="genre-chip" data-genre="rock_indie"><span class="chip-icon">🎸 </span>Rock &amp; Indie</button>
+        <button type="button" class="genre-chip" data-genre="jazz_blues"><span class="chip-icon">🎷 </span>Jazz &amp; Blues</button>
+        <button type="button" class="genre-chip" data-genre="folk_trad"><span class="chip-icon">🪕 </span>Folk &amp; Trad</button>
+        <button type="button" class="genre-chip" data-genre="electronic"><span class="chip-icon">🎛 </span>Electronic</button>
+        <button type="button" class="genre-chip" data-genre="classical"><span class="chip-icon">🎻 </span>Classical</button>
+        <button type="button" class="genre-chip" data-genre="hiphop_rnb"><span class="chip-icon">🎤 </span>Hip-Hop &amp; R&B</button>
+        <button type="button" class="genre-chip" data-genre="latin_global"><span class="chip-icon">🪇 </span>Latin &amp; Global</button>
+        <button type="button" class="genre-chip" data-genre="pop"><span class="chip-icon">✨ </span>Pop</button>
       </div>
       <div class="quick-chips-bar" id="quick-chips">
-        <button type="button" class="chip active" data-time="today">⚡ Today</button>
+        <button type="button" class="chip active" data-time="today"><span class="chip-icon">⚡ </span>Today</button>
         <button type="button" class="chip" data-time="tomorrow">Tomorrow</button>
-        <button type="button" class="chip" data-time="weekend">🎉 This Weekend</button>
-        <button type="button" class="chip" data-time="week">📅 Next 7 Days</button>
+        <button type="button" class="chip" data-time="weekend"><span class="chip-icon">🎉 </span>This Weekend</button>
+        <button type="button" class="chip" data-time="week"><span class="chip-icon">📅 </span>Next 7 Days</button>
         <button type="button" class="chip" data-time="all">All Upcoming</button>
-        <button type="button" class="chip chip-tod" data-tod="day" title="Daytime events before 5:00 PM">☀️ Daytime</button>
-        <button type="button" class="chip chip-tod" data-tod="night" title="Evening &amp; nightlife events 5:00 PM+">🌙 Evening</button>
-        <button type="button" class="chip chip-free" id="quick-free-chip">✨ Free Only</button>
-        <button type="button" class="chip chip-starred" id="quick-starred-chip" title="Filter to your saved events">⭐ Saved <span id="starred-count" style="display:none;">(0)</span></button>
-        <button type="button" class="chip chip-copy-plan" id="btn-copy-plan" style="display:none;" title="Copy your saved events as a shareable text itinerary">📋 Copy Plan</button>
+        <button type="button" class="chip chip-tod" data-tod="day" title="Daytime events before 5:00 PM"><span class="chip-icon">☀️ </span>Daytime</button>
+        <button type="button" class="chip chip-tod" data-tod="night" title="Evening &amp; nightlife events 5:00 PM+"><span class="chip-icon">🌙 </span>Evening</button>
+        <button type="button" class="chip chip-free" id="quick-free-chip"><span class="chip-icon">✨ </span>Free Only</button>
+        <button type="button" class="chip chip-starred" id="quick-starred-chip" title="Filter to your saved events"><span class="chip-icon">⭐ </span>Saved <span id="starred-count" style="display:none;">(0)</span></button>
+        <button type="button" class="chip chip-copy-plan" id="btn-copy-plan" style="display:none;" title="Copy your saved events as a shareable text itinerary"><span class="chip-icon">📋 </span>Copy Plan</button>
       </div>
       <div class="week-nav" id="week-nav">
         <button type="button" id="week-prev" aria-label="Previous">← prev</button>
@@ -3426,7 +3735,7 @@ def render_page(results):
         <button type="button" id="week-next" aria-label="Next">next →</button>
         <button type="button" id="week-today">today</button>
         <button type="button" id="week-all" data-mode="week">show all</button>
-        <button type="button" id="cal-toggle" aria-expanded="false">📅 pick date</button>
+        <button type="button" id="cal-toggle" aria-expanded="false"><span class="chip-icon">📅 </span>pick date</button>
       </div>
       <div class="mini-cal" id="mini-cal" hidden>
         <div class="mini-cal-head">
@@ -3444,8 +3753,8 @@ def render_page(results):
             <span class="map-hint">· OpenStreetMap · Pins update with your date &amp; filters</span>
           </div>
           <div class="map-header-actions">
-            <button type="button" id="map-label-toggle-btn" class="map-tool-btn" title="Toggle between venue names and numbers only">🏷️ Names: On</button>
-            <button type="button" id="map-recenter-btn" class="map-tool-btn" title="Center map on Boston">🎯 Center Boston</button>
+            <button type="button" id="map-label-toggle-btn" class="map-tool-btn" title="Toggle between venue names and numbers only"><span class="chip-icon">🏷️ </span>Names: On</button>
+            <button type="button" id="map-recenter-btn" class="map-tool-btn" title="Center map on Boston"><span class="chip-icon">🎯 </span>Center Boston</button>
           </div>
         </div>
         <div id="leaflet-map" class="leaflet-map"></div>
@@ -3463,9 +3772,9 @@ def render_page(results):
       <div id="no-events-msg" class="no-events-msg" style="display: none;">
         <p>No events found for this selection.</p>
         <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap;">
-          <button type="button" class="chip" id="no-events-week-btn">📅 View Next 7 Days</button>
+          <button type="button" class="chip" id="no-events-week-btn"><span class="chip-icon">📅 </span>View Next 7 Days</button>
           <button type="button" class="chip" id="no-events-all-btn">All Upcoming</button>
-          <button type="button" class="chip" id="no-events-reset-btn" style="display: none;">↺ Reset All Filters</button>
+          <button type="button" class="chip" id="no-events-reset-btn" style="display: none;"><span class="chip-icon">↺ </span>Reset All Filters</button>
         </div>
       </div>
       {"".join(initial_sections)}
@@ -4233,13 +4542,13 @@ def render_page(results):
       renderedSubareaCity = city;
       const subs = SUBAREAS_DATA[city] || [];
       const cityLabel = (CITY_LABELS_MAP && CITY_LABELS_MAP[city]) || city;
-      let html = `<button type="button" class="sub-chip ${{activeSubarea === 'all' ? 'active' : ''}}" data-subarea="all">📍 All ${{cityLabel}}</button>`;
+      let html = `<button type="button" class="sub-chip ${{activeSubarea === 'all' ? 'active' : ''}}" data-subarea="all"><span class="chip-icon">📍 </span>All ${{cityLabel}}</button>`;
       subs.forEach(s => {{
         const slug = s[0];
         const name = s[1];
         const icon = s[2] || '📍';
         const isAct = (activeSubarea === slug);
-        html += `<button type="button" class="sub-chip ${{isAct ? 'active' : ''}}" data-subarea="${{slug}}">${{icon}} ${{name}}</button>`;
+        html += `<button type="button" class="sub-chip ${{isAct ? 'active' : ''}}" data-subarea="${{slug}}"><span class="chip-icon">${{icon}} </span>${{name}}</button>`;
       }});
       subareaBar.innerHTML = html;
       subareaBar.style.display = 'flex';
@@ -5920,6 +6229,32 @@ def render_page(results):
           }}
         }}, 1600);
       }});
+    }}
+
+    // --- Theme Switcher ---
+    const THEME_KEY = 'boston_events_theme';
+    function setTheme(t, save) {{
+      const theme = (t === 'classic') ? 'classic' : 'indie';
+      document.documentElement.setAttribute('data-theme', theme);
+      if (document.body) {{
+        document.body.setAttribute('data-theme', theme);
+      }}
+      document.querySelectorAll('.theme-pill-btn').forEach(b => {{
+        const isActive = (b.dataset.theme === theme);
+        b.classList.toggle('active', isActive);
+        b.setAttribute('aria-checked', isActive ? 'true' : 'false');
+      }});
+      if (save !== false) {{
+        try {{ localStorage.setItem(THEME_KEY, theme); }} catch (_) {{}}
+      }}
+    }}
+    document.querySelectorAll('.theme-pill-btn').forEach(btn => {{
+      btn.addEventListener('click', () => setTheme(btn.dataset.theme, true));
+    }});
+    try {{
+      setTheme(localStorage.getItem(THEME_KEY) || 'indie', false);
+    }} catch (_) {{
+      setTheme('indie', false);
     }}
 
     loadUpvoteState();
