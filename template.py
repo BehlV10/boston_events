@@ -1316,7 +1316,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
             bucket_events = by_bucket.get(bname) or []
             if not bucket_events:
                 continue
-            bucket_events.sort(key=lambda ev: (0 if _get_event_highlight(ev, highlights) else 1, ev.get("_time") or datetime.max.replace(tzinfo=EASTERN)))
+            bucket_events.sort(key=lambda ev: ev.get("_time") or datetime.max.replace(tzinfo=EASTERN))
             cats = dict(CATEGORY_BUCKETS).get(bname, [])
             accent = CATEGORY_STYLES.get(cats[0], CATEGORY_STYLES["other"])[0] if cats else CATEGORY_STYLES["other"][0]
             items = "\n".join(render_event(e) for e in bucket_events)
@@ -3998,11 +3998,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
         <button type="button" class="loc-chip" data-city="cambridge"><span class="city-dot" style="background:#e05a6b"></span>Cambridge</button>
         <button type="button" class="loc-chip" data-city="somerville"><span class="city-dot" style="background:#f29e4c"></span>Somerville</button>
         <button type="button" class="loc-chip" data-city="other"><span class="city-dot" style="background:#9aa3b2"></span>Greater Boston</button>
-        <span class="transit-sep" aria-hidden="true"></span>
-        <button type="button" class="transit-chip" data-transit="red" title="MBTA Red Line (Harvard, Central, Kendall, Porter, Davis, Downtown, Dorchester)"><span class="t-dot" style="background:#da291c"></span>Red Line</button>
-        <button type="button" class="transit-chip" data-transit="green" title="MBTA Green Line (Back Bay, Fenway, Allston, Brookline, Union Sq, Inman, Medford)"><span class="t-dot" style="background:#00843d"></span>Green Line</button>
-        <button type="button" class="transit-chip" data-transit="orange" title="MBTA Orange Line (South End, Back Bay, Jamaica Plain, Roxbury, Assembly, Charlestown)"><span class="t-dot" style="background:#ed8b00"></span>Orange Line</button>
-        <button type="button" class="transit-chip" data-transit="blue" title="MBTA Blue Line (East Boston, Waterfront, Aquarium)"><span class="t-dot" style="background:#003da5"></span>Blue Line</button>
       </div>
       <div class="subarea-chips-bar" id="subarea-chips-bar" style="display: none;"></div>
       <div class="quick-chips-bar" id="quick-chips">
@@ -4013,7 +4008,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
         <button type="button" class="chip" data-time="all">All Upcoming</button>
         <button type="button" class="chip chip-tod" id="quick-day-chip" data-tod="day" title="Filter to daytime events (before 5 PM)"><span class="chip-icon">☀️ </span>Daytime</button>
         <button type="button" class="chip chip-tod" id="quick-night-chip" data-tod="night" title="Filter to evening events (5 PM and later)"><span class="chip-icon">🌙 </span>Evening</button>
-        <button type="button" class="chip chip-featured" id="quick-featured-chip" title="Filter to Editor's Picks"><span class="chip-icon">✨ </span>Picks <span id="featured-count" style="display:none;">(0)</span></button>
         <button type="button" class="chip chip-active-genre" id="quick-active-genre-chip" style="display:none;" title="Click to clear genre filter"><span id="active-genre-label"></span> <span class="chip-icon" style="margin-left:4px;">✕</span></button>
         <button type="button" class="chip chip-starred" id="quick-starred-chip" title="Filter to your saved events"><span class="chip-icon">⭐ </span>Saved <span id="starred-count" style="display:none;">(0)</span></button>
         <button type="button" class="chip chip-copy-plan" id="btn-copy-plan" style="display:none;" title="Copy your saved events as a shareable text itinerary"><span class="chip-icon">📋 </span>Copy Plan</button>
