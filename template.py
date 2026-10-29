@@ -1290,9 +1290,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
         hl_class = " highlighted" if hl else ""
         hl_attr = ' data-highlight="true"' if hl else ""
         b_text = (hl.get("badge") or "Editor's Pick") if hl else ""
-        hl_badge = f' <span class="badge-highlight" title="Curated recommendation"><span class="chip-icon">✨ </span>{escape(b_text)}</span>' if hl else ""
         note = hl.get("note") if hl else None
-        note_html = f'<div class="curator-note"><span class="note-label">Why we recommend:</span> {escape(note)}</div>' if note else ""
+        tooltip = f"{b_text} — {note}" if (note and b_text) else (note or b_text or "Curated recommendation")
+        hl_badge = f' <span class="badge-highlight" title="{escape(tooltip)}"><span class="chip-icon">✨ </span>{escape(b_text)}</span>' if hl else ""
 
         return (
             f'<li class="event{hl_class}" data-id="{ev_id}" data-cat="{escape(cat)}" data-bucket="{escape(bucket)}"{genre_attr} '
@@ -1301,7 +1301,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
             f'<div class="when">{escape(format_when(e))}</div>'
             f'<div class="what">{star_btn}{link}{price_tag}{recur_badge}{hl_badge}'
             f'<div class="venue-tag">{cat_tag}{v_prefix}{sub_tag}{extra_html}{cal_html}</div>'
-            f'{desc_html}{note_html}</div></li>'
+            f'{desc_html}</div></li>'
         )
 
     bucket_name_order = [b for b, _ in CATEGORY_BUCKETS]
@@ -3130,64 +3130,25 @@ def render_page(results, weather=None, luckyseat_shows=None):
   }}
 
   /* Curated Highlights / Editor's Picks */
-  .event.highlighted {{
-    background: linear-gradient(90deg, rgba(255, 184, 0, 0.14) 0%, rgba(255, 120, 0, 0.05) 50%, var(--card) 100%);
-    border: 1.5px solid rgba(255, 184, 0, 0.65);
-    box-shadow: 0 4px 20px rgba(255, 184, 0, 0.16), 0 0 1px rgba(255, 184, 0, 0.4);
-    position: relative;
-  }}
-  .event.highlighted:hover {{
-    background: linear-gradient(90deg, rgba(255, 184, 0, 0.2) 0%, rgba(255, 120, 0, 0.08) 50%, var(--card) 100%);
-    border-color: rgba(255, 184, 0, 0.95);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 26px rgba(255, 184, 0, 0.28);
-  }}
-  .event.highlighted::before {{
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 4px;
-    background: linear-gradient(180deg, #ffe066 0%, #ff8a00 100%);
-    border-radius: 4px 0 0 4px;
-    box-shadow: 0 0 8px rgba(255, 184, 0, 0.7);
-  }}
   .badge-highlight {{
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    padding: 3px 10px;
+    gap: 4px;
+    padding: 2px 8px;
     border-radius: 999px;
     font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.03em;
-    background: linear-gradient(135deg, rgba(255, 184, 0, 0.32) 0%, rgba(255, 120, 0, 0.24) 100%);
-    border: 1px solid rgba(255, 184, 0, 0.8);
-    color: #ffe885;
-    text-shadow: 0 0 8px rgba(255, 184, 0, 0.5);
-    box-shadow: 0 0 12px rgba(255, 184, 0, 0.35);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    background: rgba(255, 184, 0, 0.16);
+    border: 1px solid rgba(255, 184, 0, 0.45);
+    color: #ffd866;
     vertical-align: middle;
     margin-left: 6px;
-    animation: badge-pulse-glow 3s infinite ease-in-out;
+    transition: background 0.15s ease, border-color 0.15s ease;
   }}
-  .curator-note {{
-    font-size: 12.5px;
-    color: #ffebb8;
-    background: rgba(255, 184, 0, 0.09);
-    border: 1px solid rgba(255, 184, 0, 0.28);
-    border-left: 3px solid #ffb800;
-    padding: 6px 10px;
-    border-radius: 4px;
-    margin-top: 8px;
-    font-style: italic;
-    line-height: 1.45;
-  }}
-  .curator-note .note-label {{
-    font-weight: 700;
-    font-style: normal;
-    color: #ffca47;
-    margin-right: 5px;
+  .badge-highlight:hover {{
+    background: rgba(255, 184, 0, 0.28);
+    border-color: rgba(255, 184, 0, 0.7);
   }}
   .chip-featured.active {{
     background: linear-gradient(135deg, rgba(255, 184, 0, 0.35), rgba(255, 138, 0, 0.28)) !important;
