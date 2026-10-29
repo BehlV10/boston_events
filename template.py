@@ -1917,13 +1917,23 @@ def render_page(results, weather=None, luckyseat_shows=None):
     display: flex;
     align-items: center;
     gap: 8px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     padding: 8px 12px;
+    max-width: 100%;
+  }}
+  .quick-chips-bar::-webkit-scrollbar {{
+    display: none;
   }}
   .chip {{
+    flex-shrink: 0;
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid var(--border);
     color: var(--fg);
@@ -3827,6 +3837,23 @@ def render_page(results, weather=None, luckyseat_shows=None):
         </label>
       </div>
       <div class="filter-group">
+        <h3>Time of Day</h3>
+        <div class="chk-grid">
+          <label class="chk">
+            <input type="radio" name="tod-filter" class="tod-radio" value="all" checked>
+            <span>All times</span>
+          </label>
+          <label class="chk">
+            <input type="radio" name="tod-filter" class="tod-radio" value="day">
+            <span>Daytime (&lt; 5 PM)</span>
+          </label>
+          <label class="chk">
+            <input type="radio" name="tod-filter" class="tod-radio" value="night">
+            <span>Evening (5 PM+)</span>
+          </label>
+        </div>
+      </div>
+      <div class="filter-group">
         <h3>Category <span class="spacer"></span> <button type="button" id="cat-all">all</button> <button type="button" id="cat-none">none</button></h3>
         <div class="chk-grid">{bucket_boxes}</div>
       </div>
@@ -3896,9 +3923,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
         <button type="button" class="chip" data-time="weekend"><span class="chip-icon">🎉 </span>This Weekend</button>
         <button type="button" class="chip" data-time="week"><span class="chip-icon">📅 </span>Next 7 Days</button>
         <button type="button" class="chip" data-time="all">All Upcoming</button>
-        <button type="button" class="chip chip-tod" data-tod="day" title="Daytime events before 5:00 PM"><span class="chip-icon">☀️ </span>Daytime</button>
-        <button type="button" class="chip chip-tod" data-tod="night" title="Evening &amp; nightlife events 5:00 PM+"><span class="chip-icon">🌙 </span>Evening</button>
-        <button type="button" class="chip chip-free" id="quick-free-chip"><span class="chip-icon">✨ </span>Free Only</button>
         <button type="button" class="chip chip-starred" id="quick-starred-chip" title="Filter to your saved events"><span class="chip-icon">⭐ </span>Saved <span id="starred-count" style="display:none;">(0)</span></button>
         <button type="button" class="chip chip-copy-plan" id="btn-copy-plan" style="display:none;" title="Copy your saved events as a shareable text itinerary"><span class="chip-icon">📋 </span>Copy Plan</button>
       </div>
@@ -4212,8 +4236,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
     let activeSubarea = 'all';
     let renderedSubareaCity = null;
     const quickChips = document.querySelectorAll('#quick-chips .chip[data-time]');
-    const todChips = document.querySelectorAll('#quick-chips .chip-tod');
-    const quickFreeChip = document.getElementById('quick-free-chip');
+    const todRadios = document.querySelectorAll('.tod-radio');
     const quickPopularChip = document.getElementById('quick-popular-chip');
     const quickStarredChip = document.getElementById('quick-starred-chip');
     const starredCountEl = document.getElementById('starred-count');
@@ -4673,12 +4696,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
       quickChips.forEach(chip => {{
         chip.classList.toggle('active', chip.dataset.time === timeFilter);
       }});
-      todChips.forEach(chip => {{
-        chip.classList.toggle('active', chip.dataset.tod === activeTod);
+      todRadios.forEach(radio => {{
+        radio.checked = (radio.value === activeTod);
       }});
-      if (quickFreeChip) {{
-        quickFreeChip.classList.toggle('active', freeOnlyChk ? freeOnlyChk.checked : false);
-      }}
       if (quickPopularChip) {{
         quickPopularChip.classList.toggle('active', popularOnly);
       }}
@@ -4923,6 +4943,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
         }} else {{
           activeTod = 'all';
         }}
+        todRadios.forEach(r => {{ r.checked = (r.value === activeTod); }});
 
         if (params.has('recur')) {{
           const vals = new Set(params.get('recur').split(','));
@@ -5483,6 +5504,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
       activeSubarea = 'all';
       activeTransit = 'all';
       activeTod = 'all';
+      todRadios.forEach(r => {{ r.checked = (r.value === 'all'); }});
       activeGenre = 'all';
       genreChips.forEach(c => c.classList.toggle('active', c.dataset.genre === 'all'));
       genreBoxes.forEach(b => b.checked = true);
@@ -5552,11 +5574,12 @@ def render_page(results, weather=None, luckyseat_shows=None):
       }});
     }});
 
-    todChips.forEach(chip => {{
-      chip.addEventListener('click', () => {{
-        const tod = chip.dataset.tod;
-        activeTod = (activeTod === tod) ? 'all' : tod;
-        apply();
+    todRadios.forEach(radio => {{
+      radio.addEventListener('change', () => {{
+        if (radio.checked) {{
+          activeTod = radio.value;
+          apply();
+        }}
       }});
     }});
 
