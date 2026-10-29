@@ -1293,6 +1293,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
         note = hl.get("note") if hl else None
         tooltip = f"{b_text} — {note}" if (note and b_text) else (note or b_text or "Curated recommendation")
         hl_badge = f' <span class="badge-highlight" title="{escape(tooltip)}"><span class="chip-icon">✨ </span>{escape(b_text)}</span>' if hl else ""
+        note_html = f'<div class="curator-note"><span class="note-label">Why we recommend:</span> {escape(note)}</div>' if note else ""
 
         return (
             f'<li class="event{hl_class}" data-id="{ev_id}" data-cat="{escape(cat)}" data-bucket="{escape(bucket)}"{genre_attr} '
@@ -1301,7 +1302,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
             f'<div class="when">{escape(format_when(e))}</div>'
             f'<div class="what">{star_btn}{link}{price_tag}{recur_badge}{hl_badge}'
             f'<div class="venue-tag">{cat_tag}{v_prefix}{sub_tag}{extra_html}{cal_html}</div>'
-            f'{desc_html}</div></li>'
+            f'{desc_html}{note_html}</div></li>'
         )
 
     bucket_name_order = [b for b, _ in CATEGORY_BUCKETS]
@@ -3149,6 +3150,24 @@ def render_page(results, weather=None, luckyseat_shows=None):
   .badge-highlight:hover {{
     background: rgba(255, 184, 0, 0.28);
     border-color: rgba(255, 184, 0, 0.7);
+  }}
+  .curator-note {{
+    font-size: 12.5px;
+    color: #ffebb8;
+    background: rgba(255, 184, 0, 0.08);
+    border: 1px solid rgba(255, 184, 0, 0.22);
+    border-left: 3px solid #ffb800;
+    padding: 6px 10px;
+    border-radius: 4px;
+    margin-top: 8px;
+    font-style: italic;
+    line-height: 1.45;
+  }}
+  .curator-note .note-label {{
+    font-weight: 700;
+    font-style: normal;
+    color: #ffca47;
+    margin-right: 5px;
   }}
   .chip-featured.active {{
     background: linear-gradient(135deg, rgba(255, 184, 0, 0.35), rgba(255, 138, 0, 0.28)) !important;
