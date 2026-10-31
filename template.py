@@ -4901,7 +4901,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
       }}
     }}
 
-    function setTimeRange(fromVal, toVal) {{
+    function setTimeRange(fromVal, toVal, skipApply = false) {{
       timeFrom = parseTimeToMinutes(fromVal);
       timeTo = parseTimeToMinutes(toVal);
       if (timeFrom !== null && timeTo !== null && timeTo <= timeFrom) {{
@@ -4911,8 +4911,10 @@ def render_page(results, weather=None, luckyseat_shows=None):
         showPastToday = true;
       }}
       updateTimeUI();
-      apply();
-      stateToHash();
+      if (!skipApply) {{
+        apply();
+        stateToHash();
+      }}
     }}
 
     let starredOnly = false;
@@ -5709,9 +5711,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
         if (hasParam('from') || hasParam('tfrom') || hasParam('to') || hasParam('tto')) {{
           const f = getParam('from') || getParam('tfrom');
           const t = getParam('to') || getParam('tto');
-          setTimeRange(f, t);
+          setTimeRange(f, t, true);
         }} else {{
-          setTimeRange(null, null);
+          setTimeRange(null, null, true);
         }}
 
         if (hasParam('recur')) {{
@@ -5786,17 +5788,12 @@ def render_page(results, weather=None, luckyseat_shows=None):
       let needsHydration = (
         timeFilter === 'all' ||
         showAll ||
-        starredOnly ||
-        popularOnly ||
-        featuredOnly ||
-        activeTransit !== 'all' ||
-        activeGenre !== 'all' ||
-        timeFrom !== null ||
-        timeTo !== null ||
         searchText.length > 0
       );
       if (!needsHydration) {{
-        if (timeFilter === 'day') {{
+        if (starredOnly) {{
+          needsHydration = Array.from(starredEvents).some(id => !document.querySelector(`.event[data-id="${{id}}"]`));
+        }} else if (timeFilter === 'day') {{
           needsHydration = !daySections.some(d => d.dataset.date === anchorISO);
         }} else if (timeFilter === 'week') {{
           for (const wDate of week) {{
