@@ -2391,6 +2391,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
   .city-swatch {{ display: inline-block; width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }}
   .free-toggle {{ display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; cursor: pointer; color: var(--green); user-select: none; }}
   .free-toggle input {{ accent-color: var(--green); width: 14px; height: 14px; cursor: pointer; margin: 0; }}
+  .timeframe-toggle {{ display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; cursor: pointer; color: var(--accent); user-select: none; }}
+  .timeframe-toggle input {{ accent-color: var(--accent); width: 14px; height: 14px; cursor: pointer; margin: 0; }}
 
   /* Timeframe & Custom Range Controls */
   .custom-time-range {{
@@ -4269,57 +4271,21 @@ def render_page(results, weather=None, luckyseat_shows=None):
           <input type="checkbox" id="free-only-chk">
           <span><span class="chip-icon">✨ </span>Free events only</span>
         </label>
-      </div>
-      <div class="filter-group time-filter-group" id="filter-group-time">
-        <h3>Time of Day <span class="spacer"></span> <button type="button" id="tod-reset">all</button></h3>
-        <div class="chk-grid time-preset-grid">
-          <label class="chk">
-            <input type="radio" name="tod-filter" class="tod-radio" value="all" checked>
-            <span>All times</span>
-          </label>
-          <label class="chk">
-            <input type="radio" name="tod-filter" class="tod-radio" value="day">
-            <span><span class="chip-icon">☀️ </span>Daytime (&lt; 5 PM)</span>
-          </label>
-          <label class="chk">
-            <input type="radio" name="tod-filter" class="tod-radio" value="night">
-            <span><span class="chip-icon">🌙 </span>Evening (5 PM+)</span>
-          </label>
-        </div>
-
-        <div class="timeframe-toggle-wrap" style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--border);">
-          <label class="chk" for="timeframe-enable-chk" style="font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+        <div class="timeframe-toggle-wrap" style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border);">
+          <label class="timeframe-toggle" for="timeframe-enable-chk">
             <input type="checkbox" id="timeframe-enable-chk">
             <span><span class="chip-icon">⏱️ </span>Set timeframe window</span>
           </label>
-
           <div class="custom-time-range" id="custom-time-range" style="display: none; margin-top: 10px;">
             <div class="time-select-row">
               <div class="time-input-wrap">
                 <label for="time-from-select">From</label>
-                <select id="time-from-select" class="time-dropdown">
-                  <option value="20:00" selected>8:00 PM</option>
-                  <option value="17:00">5:00 PM</option>
-                  <option value="18:00">6:00 PM</option>
-                  <option value="19:00">7:00 PM</option>
-                  <option value="21:00">9:00 PM</option>
-                  <option value="22:00">10:00 PM</option>
-                  <option value="12:00">12:00 PM</option>
-                  <option value="09:00">9:00 AM</option>
-                </select>
+                <select id="time-from-select" class="time-dropdown"></select>
               </div>
               <div class="time-range-arrow">→</div>
               <div class="time-input-wrap">
                 <label for="time-to-select">To</label>
-                <select id="time-to-select" class="time-dropdown">
-                  <option value="24:00" selected>12:00 AM (Midnight)</option>
-                  <option value="26:00">2:00 AM (Late Night)</option>
-                  <option value="23:00">11:00 PM</option>
-                  <option value="22:00">10:00 PM</option>
-                  <option value="21:00">9:00 PM</option>
-                  <option value="20:00">8:00 PM</option>
-                  <option value="17:00">5:00 PM</option>
-                </select>
+                <select id="time-to-select" class="time-dropdown"></select>
               </div>
             </div>
             <div class="time-range-active-indicator" id="time-range-active-indicator" style="display:none;"></div>
@@ -4690,7 +4656,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
     const GENRES_DATA = {json.dumps(genres_map)};
     let activeGenre = 'all';
     let activeTransit = 'all';
-    let activeTod = 'all';
     let timeFrom = null;
     let timeTo = null;
     const timeFromSelect = document.getElementById('time-from-select');
@@ -4701,11 +4666,77 @@ def render_page(results, weather=None, luckyseat_shows=None):
     const quickCustomTimeChip = document.getElementById('quick-custom-time-chip');
     const activeTimeframeLabel = document.getElementById('active-timeframe-label');
 
-    const TOD_PRESETS = {{
-      'all': {{ from: null, to: null, label: 'All times' }},
-      'day': {{ from: 360, to: 1020, label: 'Daytime (< 5 PM)' }},
-      'night': {{ from: 1020, to: null, label: 'Evening (5 PM+)' }}
-    }};
+    const HOURLY_TIMES = [
+      {{ val: '00:00', mins: 0, label: '12:00 AM (Midnight)' }},
+      {{ val: '01:00', mins: 60, label: '1:00 AM' }},
+      {{ val: '02:00', mins: 120, label: '2:00 AM' }},
+      {{ val: '03:00', mins: 180, label: '3:00 AM' }},
+      {{ val: '04:00', mins: 240, label: '4:00 AM' }},
+      {{ val: '05:00', mins: 300, label: '5:00 AM' }},
+      {{ val: '06:00', mins: 360, label: '6:00 AM' }},
+      {{ val: '07:00', mins: 420, label: '7:00 AM' }},
+      {{ val: '08:00', mins: 480, label: '8:00 AM' }},
+      {{ val: '09:00', mins: 540, label: '9:00 AM' }},
+      {{ val: '10:00', mins: 600, label: '10:00 AM' }},
+      {{ val: '11:00', mins: 660, label: '11:00 AM' }},
+      {{ val: '12:00', mins: 720, label: '12:00 PM (Noon)' }},
+      {{ val: '13:00', mins: 780, label: '1:00 PM' }},
+      {{ val: '14:00', mins: 840, label: '2:00 PM' }},
+      {{ val: '15:00', mins: 900, label: '3:00 PM' }},
+      {{ val: '16:00', mins: 960, label: '4:00 PM' }},
+      {{ val: '17:00', mins: 1020, label: '5:00 PM' }},
+      {{ val: '18:00', mins: 1080, label: '6:00 PM' }},
+      {{ val: '19:00', mins: 1140, label: '7:00 PM' }},
+      {{ val: '20:00', mins: 1200, label: '8:00 PM' }},
+      {{ val: '21:00', mins: 1260, label: '9:00 PM' }},
+      {{ val: '22:00', mins: 1320, label: '10:00 PM' }},
+      {{ val: '23:00', mins: 1380, label: '11:00 PM' }},
+      {{ val: '24:00', mins: 1440, label: '12:00 AM (Next Midnight)' }},
+      {{ val: '26:00', mins: 1560, label: '2:00 AM (Late Night)' }}
+    ];
+
+    function initTimeDropdowns() {{
+      if (!timeFromSelect) return;
+      timeFromSelect.innerHTML = '';
+      HOURLY_TIMES.slice(0, 24).forEach(item => {{
+        const opt = document.createElement('option');
+        opt.value = item.val;
+        opt.textContent = item.label;
+        if (item.val === '20:00') opt.selected = true;
+        timeFromSelect.appendChild(opt);
+      }});
+      syncToOptions(timeFromSelect.value, '24:00');
+    }}
+
+    function syncToOptions(fromVal, preferredToVal) {{
+      if (!timeToSelect) return;
+      const fromMins = parseTimeToMinutes(fromVal) ?? 1200;
+      const targetToMins = parseTimeToMinutes(preferredToVal);
+
+      let validOptions = HOURLY_TIMES.filter(item => item.mins > fromMins);
+      if (validOptions.length === 0) {{
+        validOptions = HOURLY_TIMES.slice(24);
+      }}
+
+      timeToSelect.innerHTML = '';
+      validOptions.forEach(item => {{
+        const opt = document.createElement('option');
+        opt.value = item.val;
+        opt.textContent = item.label;
+        timeToSelect.appendChild(opt);
+      }});
+
+      if (targetToMins && targetToMins > fromMins && validOptions.some(o => o.mins === targetToMins)) {{
+        timeToSelect.value = formatMinutesToHHMM(targetToMins);
+      }} else {{
+        const midnight = validOptions.find(o => o.mins === 1440);
+        if (fromMins < 1440 && midnight) {{
+          timeToSelect.value = '24:00';
+        }} else {{
+          timeToSelect.value = validOptions[validOptions.length - 1].val;
+        }}
+      }}
+    }}
 
     function parseTimeToMinutes(str) {{
       if (!str) return null;
@@ -4763,10 +4794,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
     }}
 
     function updateTimeUI() {{
-      todRadios.forEach(r => {{
-        r.checked = (r.value === activeTod);
-      }});
-
       const isCustomActive = (timeFrom !== null || timeTo !== null);
       if (timeframeEnableChk) {{
         timeframeEnableChk.checked = isCustomActive;
@@ -4778,6 +4805,10 @@ def render_page(results, weather=None, luckyseat_shows=None):
       if (timeFromSelect && timeFrom !== null) {{
         timeFromSelect.value = formatMinutesToHHMM(timeFrom);
       }}
+      const curFrom = (timeFromSelect && timeFromSelect.value) ? timeFromSelect.value : (timeFrom !== null ? formatMinutesToHHMM(timeFrom) : '20:00');
+      const curTo = (timeTo !== null) ? formatMinutesToHHMM(timeTo) : (timeToSelect ? timeToSelect.value : '24:00');
+      syncToOptions(curFrom, curTo);
+
       if (timeToSelect && timeTo !== null) {{
         timeToSelect.value = formatMinutesToHHMM(timeTo);
       }}
@@ -4817,22 +4848,13 @@ def render_page(results, weather=None, luckyseat_shows=None):
       }}
     }}
 
-    function setTimeRange(fromVal, toVal, presetKey) {{
-      if (presetKey && TOD_PRESETS[presetKey]) {{
-        activeTod = presetKey;
-        const p = TOD_PRESETS[presetKey];
-        timeFrom = p.from;
-        timeTo = p.to;
-      }} else {{
-        timeFrom = parseTimeToMinutes(fromVal);
-        timeTo = parseTimeToMinutes(toVal);
-        if (timeFrom !== null || timeTo !== null) {{
-          activeTod = 'custom';
-        }} else {{
-          activeTod = 'all';
-        }}
+    function setTimeRange(fromVal, toVal) {{
+      timeFrom = parseTimeToMinutes(fromVal);
+      timeTo = parseTimeToMinutes(toVal);
+      if (timeFrom !== null && timeTo !== null && timeTo <= timeFrom) {{
+        timeTo = (timeFrom < 1440) ? 1440 : timeFrom + 60;
       }}
-      if ((activeTod === 'day') && timeFilter === 'today') {{
+      if (timeFrom !== null && timeFrom < 720 && timeFilter === 'today') {{
         showPastToday = true;
       }}
       updateTimeUI();
@@ -4847,9 +4869,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
     let activeSubarea = 'all';
     let renderedSubareaCity = null;
     const quickChips = document.querySelectorAll('#quick-chips .chip[data-time]');
-    const todRadios = document.querySelectorAll('.tod-radio');
-    const quickDayChip = document.getElementById('quick-day-chip');
-    const quickNightChip = document.getElementById('quick-night-chip');
     const quickPopularChip = document.getElementById('quick-popular-chip');
     const quickFeaturedChip = document.getElementById('quick-featured-chip');
     const quickActiveGenreChip = document.getElementById('quick-active-genre-chip');
@@ -5369,15 +5388,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
       quickChips.forEach(chip => {{
         chip.classList.toggle('active', chip.dataset.time === timeFilter);
       }});
-      if (quickDayChip) {{
-        quickDayChip.classList.toggle('active', activeTod === 'day');
-      }}
-      if (quickNightChip) {{
-        quickNightChip.classList.toggle('active', activeTod === 'night');
-      }}
-      todRadios.forEach(radio => {{
-        radio.checked = (radio.value === activeTod);
-      }});
       if (quickPopularChip) {{
         quickPopularChip.classList.toggle('active', popularOnly);
       }}
@@ -5506,7 +5516,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
       const allRecurs = recurBoxes.length;
       const chkRecurs = Array.from(recurBoxes).filter(b => b.checked).length;
       const isFree = freeOnlyChk && freeOnlyChk.checked;
-      const isTimeFiltered = (timeFrom !== null || timeTo !== null || (activeTod !== 'all'));
+      const isTimeFiltered = (timeFrom !== null || timeTo !== null);
       const isFiltered = (chkCats < allCats) || (chkGenres < allGenres) || (activeGenre !== 'all') || (chkVenues < allVenues) || (chkCities < allCities) || (chkRecurs < allRecurs) || isFree || popularOnly || starredOnly || (activeTransit !== 'all') || isTimeFiltered || (activeSubarea !== 'all') || (searchInput && !!searchInput.value.trim());
 
       if (mobileBadge) {{
@@ -5560,11 +5570,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
       if (timeFrom !== null || timeTo !== null) {{
         if (timeFrom !== null) params.set('from', formatMinutesToHHMM(timeFrom));
         if (timeTo !== null) params.set('to', formatMinutesToHHMM(timeTo));
-        if (activeTod && activeTod !== 'custom' && activeTod !== 'all') {{
-          params.set('tod', activeTod);
-        }}
-      }} else if (activeTod && activeTod !== 'all') {{
-        params.set('tod', activeTod);
       }}
 
       const allRecurs = Array.from(recurBoxes).map(b => b.value);
@@ -5651,13 +5656,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
         if (hasParam('from') || hasParam('tfrom') || hasParam('to') || hasParam('tto')) {{
           const f = getParam('from') || getParam('tfrom');
           const t = getParam('to') || getParam('tto');
-          const pKey = getParam('tod');
-          setTimeRange(f, t, pKey);
-        }} else if (hasParam('tod')) {{
-          const todVal = getParam('tod');
-          setTimeRange(null, null, todVal);
+          setTimeRange(f, t);
         }} else {{
-          setTimeRange(null, null, 'all');
+          setTimeRange(null, null);
         }}
 
         if (hasParam('recur')) {{
@@ -5737,7 +5738,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
         featuredOnly ||
         activeTransit !== 'all' ||
         activeGenre !== 'all' ||
-        activeTod !== 'all' ||
         timeFrom !== null ||
         timeTo !== null ||
         searchText.length > 0
@@ -5827,10 +5827,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
             }} else {{
               todOk = false;
             }}
-          }} else if (activeTod === 'day') {{
-            todOk = (li.dataset.tod === 'day');
-          }} else if (activeTod === 'night') {{
-            todOk = (li.dataset.tod === 'night');
           }}
           const freeOk = !freeOnly || li.dataset.free === 'true';
           const popularOk = !popularOnly || parseInt(li.dataset.votes || '0', 10) >= 3;
@@ -5858,7 +5854,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
 
           let timePastOk = true;
           if (isPast) {{
-            if (!showPastToday && activeTod !== 'day' && activeTod !== 'morning') {{
+            if (!showPastToday) {{
               timePastOk = false;
               hiddenPastCount++;
             }}
@@ -6344,7 +6340,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
       activeTransit = 'all';
       timeFrom = null;
       timeTo = null;
-      activeTod = 'all';
+      if (timeframeEnableChk) timeframeEnableChk.checked = false;
+      if (customTimeRangeDiv) customTimeRangeDiv.style.display = 'none';
       updateTimeUI();
       activeGenre = 'all';
       genreBoxes.forEach(b => b.checked = true);
@@ -6420,19 +6417,11 @@ def render_page(results, weather=None, luckyseat_shows=None):
       }});
     }});
 
-    function setTod(tod) {{
-      if (activeTod === tod) {{
-        setTimeRange(null, null, 'all');
-      }} else {{
-        setTimeRange(null, null, tod);
-      }}
-    }}
-
     if (quickCustomTimeChip) {{
       quickCustomTimeChip.addEventListener('click', () => {{
         if (timeframeEnableChk) timeframeEnableChk.checked = false;
         if (customTimeRangeDiv) customTimeRangeDiv.style.display = 'none';
-        setTimeRange(null, null, 'all');
+        setTimeRange(null, null);
       }});
     }}
 
@@ -6442,55 +6431,32 @@ def render_page(results, weather=None, luckyseat_shows=None):
           if (customTimeRangeDiv) customTimeRangeDiv.style.display = 'block';
           const f = (timeFromSelect && timeFromSelect.value) ? timeFromSelect.value : '20:00';
           const t = (timeToSelect && timeToSelect.value) ? timeToSelect.value : '24:00';
-          if (timeFromSelect) timeFromSelect.value = f;
-          if (timeToSelect) timeToSelect.value = t;
           setTimeRange(f, t);
         }} else {{
           if (customTimeRangeDiv) customTimeRangeDiv.style.display = 'none';
-          setTimeRange(null, null, 'all');
+          setTimeRange(null, null);
         }}
       }});
     }}
 
-    todRadios.forEach(radio => {{
-      radio.addEventListener('click', (e) => {{
-        if (activeTod === radio.value && radio.value !== 'all') {{
-          e.preventDefault();
-          setTod('all');
-        }}
-      }});
-      radio.addEventListener('change', () => {{
-        if (radio.checked) {{
-          if (timeframeEnableChk) timeframeEnableChk.checked = false;
-          if (customTimeRangeDiv) customTimeRangeDiv.style.display = 'none';
-          setTod(radio.value);
-        }}
-      }});
-    }});
-
     if (timeFromSelect) {{
       timeFromSelect.addEventListener('change', () => {{
         const f = timeFromSelect.value;
-        const t = timeToSelect ? timeToSelect.value : '';
+        const currentTo = timeToSelect ? timeToSelect.value : '24:00';
+        syncToOptions(f, currentTo);
+        const t = timeToSelect ? timeToSelect.value : '24:00';
         if (timeframeEnableChk) timeframeEnableChk.checked = true;
         setTimeRange(f, t);
       }});
     }}
     if (timeToSelect) {{
       timeToSelect.addEventListener('change', () => {{
-        const f = timeFromSelect ? timeFromSelect.value : '';
+        const f = timeFromSelect ? timeFromSelect.value : '20:00';
         const t = timeToSelect.value;
         if (timeframeEnableChk) timeframeEnableChk.checked = true;
         setTimeRange(f, t);
       }});
     }}
-
-    const todResetBtn = document.getElementById('tod-reset');
-    if (todResetBtn) todResetBtn.addEventListener('click', () => {{
-      if (timeframeEnableChk) timeframeEnableChk.checked = false;
-      if (customTimeRangeDiv) customTimeRangeDiv.style.display = 'none';
-      setTimeRange(null, null, 'all');
-    }});
 
     if (quickFeaturedChip) {{
       quickFeaturedChip.addEventListener('click', () => {{
@@ -7402,7 +7368,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
     syncInitialUpvotes();
     fetchLiveUpvotes();
     loadStarredState();
-
+    initTimeDropdowns();
     hashToState();
     apply();
   </script>

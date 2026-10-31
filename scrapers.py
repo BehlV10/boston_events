@@ -756,10 +756,11 @@ def scrape_tunehatch(url, ua):
 
         v_name = s.get("venueName") or ("Cantab Underground" if slug == "cantab_underground" else "The Cantab Lounge")
 
+        show_url = s.get("externalTicketURL") or (f"https://tunehatch.com/shows/{slug_s}" if slug_s else "https://thecantablounge.com/")
         events.append({
             "name": name,
             "date": when.astimezone(timezone.utc).isoformat(),
-            "url": f"https://tunehatch.com/e/shows/{slug_s}" if slug_s else None,
+            "url": show_url,
             "venue": v_name,
             "price": None,
             "description": desc or None,
