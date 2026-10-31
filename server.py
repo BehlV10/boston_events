@@ -142,11 +142,21 @@ def export_json(path="events.json", force=False):
         except Exception:
             pass
 
+    luckyseat_shows = fetch_luckyseat_boston()
+    if not luckyseat_shows and os.path.exists(path):
+        try:
+            with open(path, "r", encoding="utf-8") as existing_file:
+                prev_ls = json.load(existing_file).get("luckyseat")
+                if isinstance(prev_ls, list) and len(prev_ls) > 0:
+                    luckyseat_shows = prev_ls
+        except Exception:
+            pass
+
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "venues": venues,
         "weather": fetch_boston_weather(),
-        "luckyseat": fetch_luckyseat_boston(),
+        "luckyseat": luckyseat_shows or [],
         "upvotes": _read_upvotes(),
     }
     with open(path, "w", encoding="utf-8") as f:
@@ -174,6 +184,9 @@ def export_html(path="index.html", force=False, source_json="events.json"):
 
     if not venues:
         venues = get_all_events(force=force)
+
+    if not luckyseat:
+        luckyseat = fetch_luckyseat_boston()
 
     html = render_page(venues, weather=weather, luckyseat_shows=luckyseat)
     with open(path, "w", encoding="utf-8") as f:

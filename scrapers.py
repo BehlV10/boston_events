@@ -7273,22 +7273,60 @@ def fetch_boston_weather():
     return out
 
 
+LUCKYSEAT_FALLBACK_SHOWS = [
+    {
+        "name": "Hadestown",
+        "venue": "Emerson Colonial Theatre",
+        "price": 45.0,
+        "url": "https://www.luckyseat.com/shows/hadestown-boston-2026Oct",
+    },
+    {
+        "name": "Late Nite Catechism: Til Death Do Us Part",
+        "venue": "Charles Playhouse",
+        "price": 35.0,
+        "url": "https://www.luckyseat.com/shows/latenitecatechism-boston-2026Oct",
+    },
+    {
+        "name": "Rocky™ in Concert",
+        "venue": "Emerson Colonial Theatre",
+        "price": 30.0,
+        "url": "https://www.luckyseat.com/shows/rockyinconcert-boston-2026Oct",
+    },
+    {
+        "name": "Wicked",
+        "venue": "Citizens Opera House",
+        "price": 40.0,
+        "url": "https://www.luckyseat.com/shows/wicked-boston-2026Sep",
+    },
+    {
+        "name": "The Getaway Driver",
+        "venue": "Central Square Theater",
+        "price": 49.0,
+        "url": "https://www.luckyseat.com/shows/thegetawaydriver-cambridge-2026Sep",
+    },
+]
+
 LUCKYSEAT_CACHE_FILE = os.path.join(CACHE_DIR, "luckyseat_shows.json")
+LUCKYSEAT_COMMITTED_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "luckyseat_shows.json")
 
 
 def fetch_luckyseat_boston():
     """Fetch LuckySeat's show list and filter to Greater Boston (Boston, Cambridge, Somerville).
-    Cached for 15 min with persistent disk backup so transient WAF blocks never wipe listings."""
+    Cached for 15 min with multi-tier disk and hardcoded fallbacks so Cloudflare blocks never wipe listings."""
     if _luckyseat_cache["data"] is not None and time.time() - _luckyseat_cache["ts"] < CACHE_SECONDS:
         return _luckyseat_cache["data"]
 
     disk_data = None
-    if os.path.exists(LUCKYSEAT_CACHE_FILE):
-        try:
-            with open(LUCKYSEAT_CACHE_FILE, "r", encoding="utf-8") as f:
-                disk_data = json.load(f)
-        except Exception:
-            disk_data = None
+    for candidate_path in (LUCKYSEAT_CACHE_FILE, LUCKYSEAT_COMMITTED_FILE):
+        if os.path.exists(candidate_path):
+            try:
+                with open(candidate_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    if isinstance(data, list) and len(data) > 0:
+                        disk_data = data
+                        break
+            except Exception:
+                pass
 
     shows = []
     try:
@@ -7331,25 +7369,32 @@ def fetch_luckyseat_boston():
                     "url": f"https://www.luckyseat.com/shows/{s.get('showAlias')}" if s.get("showAlias") else "https://www.luckyseat.com/",
                 })
             if shows:
-                try:
-                    with open(LUCKYSEAT_CACHE_FILE, "w", encoding="utf-8") as f:
-                        json.dump(shows, f)
-                except Exception:
-                    pass
-    except Exception as e:
-        if disk_data:
-            shows = disk_data
-        else:
-            try:
-                events_json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "events.json")
-                if os.path.exists(events_json_path):
-                    with open(events_json_path, "r", encoding="utf-8") as f:
-                        shows = json.load(f).get("luckyseat") or []
-            except Exception:
-                shows = []
+                for save_path in (LUCKYSEAT_CACHE_FILE, LUCKYSEAT_COMMITTED_FILE):
+                    try:
+                        os.makedirs(os.path.dirname(save_path), exist_ok=True)
+                        with open(save_path, "w", encoding="utf-8") as f:
+                            json.dump(shows, f, indent=2)
+                    except Exception:
+                        pass
+    except Exception:
+        pass
 
     if not shows and disk_data:
         shows = disk_data
+
+    if not shows:
+        try:
+            events_json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "events.json")
+            if os.path.exists(events_json_path):
+                with open(events_json_path, "r", encoding="utf-8") as f:
+                    candidate = json.load(f).get("luckyseat")
+                    if isinstance(candidate, list) and len(candidate) > 0:
+                        shows = candidate
+        except Exception:
+            pass
+
+    if not shows:
+        shows = list(LUCKYSEAT_FALLBACK_SHOWS)
 
     _luckyseat_cache["data"] = shows
     _luckyseat_cache["ts"] = time.time()

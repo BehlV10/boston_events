@@ -1,0 +1,32 @@
+[
+  {
+    "name": "Hadestown",
+    "venue": "Emerson Colonial Theatre",
+    "price": 45.0,
+    "url": "https://www.luckyseat.com/shows/hadestown-boston-2026Oct"
+  },
+  {
+    "name": "Late Nite Catechism: Til Death Do Us Part",
+    "venue": "Charles Playhouse",
+    "price": 35.0,
+    "url": "https://www.luckyseat.com/shows/latenitecatechism-boston-2026Oct"
+  },
+  {
+    "name": "Rocky\u2122 in Concert",
+    "venue": "Emerson Colonial Theatre",
+    "price": 30.0,
+    "url": "https://www.luckyseat.com/shows/rockyinconcert-boston-2026Oct"
+  },
+  {
+    "name": "Wicked",
+    "venue": "Citizens Opera House",
+    "price": 40.0,
+    "url": "https://www.luckyseat.com/shows/wicked-boston-2026Sep"
+  },
+  {
+    "name": "The Getaway Driver",
+    "venue": "Central Square Theater",
+    "price": 49.0,
+    "url": "https://www.luckyseat.com/shows/thegetawaydriver-cambridge-2026Sep"
+  }
+]

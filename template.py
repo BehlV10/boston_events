@@ -1391,7 +1391,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
     useful_sidebar = ""
     if STATIC_LINKS or DEAL_LINKS:
         deals_block = ""
-        lucky_shows = luckyseat_shows if luckyseat_shows is not None else fetch_luckyseat_boston()
+        lucky_shows = luckyseat_shows if (luckyseat_shows and len(luckyseat_shows) > 0) else fetch_luckyseat_boston()
         if DEAL_LINKS or lucky_shows:
             lucky_html = ""
             if lucky_shows:
