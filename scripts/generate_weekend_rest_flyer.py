@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """
-Generate a 16-event Weekend Rest Instagram flyer (Tonight Sat Oct 31 & Tomorrow Sun Nov 1, 2026)
-for @wickedbostonevents.
+Generate a packed 28-event Weekend Rest Instagram flyer (Tonight Sat Oct 31 & Tomorrow Sun Nov 1, 2026)
+for @wickedbostonevents with zero wasted whitespace and high-density, easily readable event cards.
 
 Features:
 - Balanced 2-column layout:
-  - Left Column: TONIGHT · SAT OCT 31 (8 Halloween Night picks)
-  - Right Column: TOMORROW · SUN NOV 01 (8 Día de los Muertos & Sunday picks)
+  - Left Column: 🎃 TONIGHT · SAT OCT 31 (14 Halloween Night picks)
+  - Right Column: 🌼 TOMORROW · SUN NOV 01 (14 Día de los Muertos & Sunday picks)
 - High contrast typography, 1080x1350 resolution for Instagram (4:5).
+- Tight, balanced spacing with NO giant gaps of whitespace.
 - Start Time, Price / FREE badge, Venue & Neighborhood on top row.
 - Bold punchy event title on bottom row.
 - Direct caption generation with links and Instagram tags.
@@ -49,6 +50,42 @@ def get_art_base64():
 
 SAT_NIGHT_EVENTS = [
     {
+        "time": "5:00 PM",
+        "price": "FREE",
+        "title": "Bluegrass Session & Jam",
+        "venue": "The Burren Front Room",
+        "hood": "Davis Sq",
+        "accent": "#00d2d3",
+        "url": "https://www.burren.com/",
+    },
+    {
+        "time": "5:00 PM",
+        "price": "$20",
+        "title": "Night of Living Dead w/ Live Score",
+        "venue": "The Underground",
+        "hood": "Downtown",
+        "accent": "#ff7675",
+        "url": "https://wickedbostonevents.com",
+    },
+    {
+        "time": "6:00 PM",
+        "price": "FREE",
+        "title": "The Blair Project Halloween Bash",
+        "venue": "City Hall Plaza",
+        "hood": "Downtown",
+        "accent": "#ffd866",
+        "url": "https://www.boston.gov/",
+    },
+    {
+        "time": "6:00 PM",
+        "price": "FREE",
+        "title": "Halloween @ Harpoon x Natalija",
+        "venue": "Harpoon Beer Hall",
+        "hood": "Seaport",
+        "accent": "#ff9f43",
+        "url": "https://www.harpoonbrewery.com/",
+    },
+    {
         "time": "7:00 PM",
         "price": "FREE",
         "title": "Sam Adams Halloween Bash",
@@ -83,6 +120,24 @@ SAT_NIGHT_EVENTS = [
         "hood": "South End",
         "accent": "#ff5252",
         "url": "https://www.clubcafe.com/",
+    },
+    {
+        "time": "7:00 PM",
+        "price": "$65+",
+        "title": "Blade Runner Live in Concert",
+        "venue": "Emerson Colonial Theatre",
+        "hood": "Downtown",
+        "accent": "#54a0ff",
+        "url": "https://www.emersoncolonialtheatre.com/",
+    },
+    {
+        "time": "7:00 PM",
+        "price": "$15",
+        "title": "Motörhead / Cure / Velvet Underground",
+        "venue": "O'Brien's Pub",
+        "hood": "Allston",
+        "accent": "#ff9f43",
+        "url": "https://obrienspubboston.com/",
     },
     {
         "time": "7:30 PM",
@@ -124,6 +179,15 @@ SAT_NIGHT_EVENTS = [
 
 SUN_EVENTS = [
     {
+        "time": "7:00 AM",
+        "price": "FREE",
+        "title": "Cambridge Half Marathon",
+        "venue": "Cambridgeside",
+        "hood": "Cambridge",
+        "accent": "#00d2d3",
+        "url": "https://cambridgehalf.com/",
+    },
+    {
         "time": "10:00 AM",
         "price": "FREE",
         "title": "Día de Muertos: Ofrendas Altar",
@@ -134,7 +198,7 @@ SUN_EVENTS = [
     },
     {
         "time": "10:00 AM",
-        "price": "FREE",
+        "price": "FREE*",
         "title": "MFA Boston: Diwali Festival",
         "venue": "Museum of Fine Arts",
         "hood": "Fenway",
@@ -144,11 +208,20 @@ SUN_EVENTS = [
     {
         "time": "10:00 AM",
         "price": "FREE",
-        "title": "Raúl The Third: Book Signing",
+        "title": "Raúl The Third: Book Signing & Art",
         "venue": "Painted Burro",
-        "hood": "Somerville",
+        "hood": "Davis Sq",
         "accent": "#ff9f43",
         "url": "https://thepaintedburro.com/",
+    },
+    {
+        "time": "10:00 AM",
+        "price": "FREE",
+        "title": "Seaport Smalls Fall Market",
+        "venue": "The Rocks at Harbor Way",
+        "hood": "Seaport",
+        "accent": "#54a0ff",
+        "url": "https://bostonseaport.xyz/",
     },
     {
         "time": "12:00 PM",
@@ -178,9 +251,27 @@ SUN_EVENTS = [
         "url": "https://thedruid.co/",
     },
     {
+        "time": "12:00 PM",
+        "price": "FREE",
+        "title": "Scottish Session Brunch",
+        "venue": "McCarthy's Toad",
+        "hood": "Porter Sq",
+        "accent": "#f39c12",
+        "url": "https://mccarthystoad.com/",
+    },
+    {
+        "time": "1:00 PM",
+        "price": "FREE",
+        "title": "Chelsea Day of Dead Festival",
+        "venue": "Chelsea Square Park",
+        "hood": "Chelsea",
+        "accent": "#ff793f",
+        "url": "https://chelseama.gov/",
+    },
+    {
         "time": "1:00 PM",
         "price": "$45+",
-        "title": "Wicked (Broadway Tour)",
+        "title": "Wicked (Broadway National Tour)",
         "venue": "Citizens Opera House",
         "hood": "Downtown",
         "accent": "#2ed573",
@@ -195,15 +286,33 @@ SUN_EVENTS = [
         "accent": "#e056fd",
         "url": "https://www.gardnermuseum.org/",
     },
+    {
+        "time": "2:00 PM",
+        "price": "$25+",
+        "title": "To Kill a Mockingbird",
+        "venue": "Huntington Theatre",
+        "hood": "Back Bay",
+        "accent": "#a29bfe",
+        "url": "https://www.huntingtontheatre.org/",
+    },
+    {
+        "time": "7:00 PM",
+        "price": "$15",
+        "title": "The Commute: Live Theatre",
+        "venue": "The Rockwell",
+        "hood": "Davis Sq",
+        "accent": "#ff7675",
+        "url": "https://therockwell.org/",
+    },
 ]
 
 
 def render_card(ev):
-    is_free = ev["price"].upper() == "FREE"
+    is_free = "FREE" in ev["price"].upper()
     price_cls = "price-free" if is_free else "price-paid"
     
     return f"""
-    <div class="event-card" style="border-left: 5px solid {ev['accent']};">
+    <div class="event-card" style="border-left: 4.5px solid {ev['accent']};">
       <div class="card-top-row">
         <div class="badge-group">
           <span class="event-time">{ev['time']}</span>
@@ -230,7 +339,7 @@ def generate_flyer_html():
 <title>Halloweekend: Tonight & Sunday Events Flyer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=JetBrains+Mono:wght@700;800&family=Bungee&family=Creepster&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=JetBrains+Mono:wght@700;800&display=swap" rel="stylesheet">
 <style>
   * {{
     box-sizing: border-box;
@@ -241,12 +350,12 @@ def generate_flyer_html():
   body {{
     width: 1080px;
     height: 1350px;
-    background: #0f081d;
+    background: #0d061a;
     font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
     color: #ffffff;
     display: flex;
     flex-direction: column;
-    padding: 24px 28px 20px 28px;
+    padding: 20px 24px 18px 24px;
     position: relative;
     overflow: hidden;
   }}
@@ -259,7 +368,7 @@ def generate_flyer_html():
     left: 20%;
     width: 600px;
     height: 350px;
-    background: radial-gradient(ellipse at center, rgba(255, 121, 63, 0.22) 0%, rgba(15, 8, 29, 0) 70%);
+    background: radial-gradient(ellipse at center, rgba(255, 121, 63, 0.22) 0%, rgba(13, 6, 26, 0) 70%);
     pointer-events: none;
     z-index: 0;
   }}
@@ -271,32 +380,33 @@ def generate_flyer_html():
     right: 10%;
     width: 650px;
     height: 400px;
-    background: radial-gradient(ellipse at center, rgba(162, 155, 254, 0.16) 0%, rgba(15, 8, 29, 0) 70%);
+    background: radial-gradient(ellipse at center, rgba(162, 155, 254, 0.16) 0%, rgba(13, 6, 26, 0) 70%);
     pointer-events: none;
     z-index: 0;
   }}
 
   .header-card {{
-    background: #180e2a;
-    border-radius: 14px;
+    background: #170d28;
+    border-radius: 12px;
     border: 1.5px solid rgba(255, 121, 63, 0.4);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 25px rgba(255, 121, 63, 0.15);
-    padding: 12px 20px 12px 16px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5), 0 0 25px rgba(255, 121, 63, 0.15);
+    padding: 10px 18px 10px 14px;
     display: flex;
     align-items: center;
-    gap: 16px;
-    margin-bottom: 12px;
+    gap: 14px;
+    margin-bottom: 10px;
     position: relative;
     z-index: 1;
+    flex-shrink: 0;
   }}
 
   .header-art {{
-    width: 82px;
-    height: 82px;
-    border-radius: 12px;
+    width: 74px;
+    height: 74px;
+    border-radius: 10px;
     object-fit: cover;
     border: 2px solid #ff793f;
-    box-shadow: 0 0 14px rgba(255, 121, 63, 0.5);
+    box-shadow: 0 0 12px rgba(255, 121, 63, 0.5);
     flex-shrink: 0;
   }}
 
@@ -312,7 +422,7 @@ def generate_flyer_html():
   }}
 
   .brand-tag {{
-    font-size: 11.5px;
+    font-size: 11px;
     font-weight: 800;
     letter-spacing: 1.8px;
     text-transform: uppercase;
@@ -324,24 +434,24 @@ def generate_flyer_html():
 
   .handle-tag {{
     font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
+    font-size: 11.5px;
     font-weight: 700;
     color: #ffeaa7;
     background: rgba(255, 121, 63, 0.2);
     border: 1px solid rgba(255, 121, 63, 0.45);
-    padding: 2.5px 8px;
-    border-radius: 6px;
+    padding: 2px 7.5px;
+    border-radius: 5px;
   }}
 
   .main-title {{
-    font-size: 31px;
+    font-size: 29px;
     font-weight: 900;
-    letter-spacing: -0.6px;
+    letter-spacing: -0.5px;
     color: #ffffff;
     line-height: 1.1;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
   }}
 
   .main-title span.glow {{
@@ -350,47 +460,50 @@ def generate_flyer_html():
   }}
 
   .sub-tagline {{
-    font-size: 13px;
+    font-size: 12.5px;
     color: #d1c4e9;
     font-weight: 600;
-    margin-top: 3px;
+    margin-top: 2px;
   }}
 
   /* 2-Column Content Layout */
   .columns-grid {{
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 14px;
+    gap: 12px;
     flex: 1;
     position: relative;
     z-index: 1;
+    min-height: 0;
   }}
 
   .day-col {{
     display: flex;
     flex-direction: column;
     height: 100%;
+    min-height: 0;
   }}
 
   .col-header {{
-    background: #23143c;
-    border-radius: 9px;
-    padding: 7px 14px;
+    background: #201237;
+    border-radius: 8px;
+    padding: 6px 12px;
     margin-bottom: 7px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     border: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
   }}
 
   .col-title {{
-    font-size: 13.5px;
+    font-size: 13px;
     font-weight: 900;
-    letter-spacing: 1.2px;
+    letter-spacing: 1.1px;
     text-transform: uppercase;
     display: flex;
     align-items: center;
-    gap: 7px;
+    gap: 6px;
   }}
 
   .col-header.sat {{
@@ -408,7 +521,7 @@ def generate_flyer_html():
   }}
 
   .col-subtext {{
-    font-size: 11px;
+    font-size: 10.5px;
     font-weight: 700;
     color: #a29bfe;
     letter-spacing: 0.5px;
@@ -417,23 +530,22 @@ def generate_flyer_html():
   .cards-list {{
     display: flex;
     flex-direction: column;
-    gap: 5.5px;
+    gap: 6px;
     flex: 1;
-    justify-content: space-between;
   }}
 
-  /* Event Card */
+  /* Event Card: Compact, high density, rich dark purple */
   .event-card {{
-    background: #1c1032;
-    border-radius: 8px;
-    padding: 8px 12px 8px 12px;
-    border: 1px solid rgba(255, 121, 63, 0.25);
-    border-right: 1px solid rgba(255, 121, 63, 0.15);
-    border-bottom: 2.5px solid rgba(255, 121, 63, 0.4);
+    background: #190e2d;
+    border-radius: 7px;
+    padding: 6.5px 11px 6.5px 11px;
+    border: 1px solid rgba(255, 121, 63, 0.22);
+    border-right: 1px solid rgba(255, 121, 63, 0.14);
+    border-bottom: 2px solid rgba(255, 121, 63, 0.38);
     display: flex;
     flex-direction: column;
-    gap: 3.5px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    gap: 3px;
+    box-shadow: 0 1.5px 6px rgba(0, 0, 0, 0.25);
   }}
 
   .card-top-row {{
@@ -445,34 +557,34 @@ def generate_flyer_html():
   .badge-group {{
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
   }}
 
   .event-time {{
     font-family: 'JetBrains Mono', monospace;
-    font-size: 13.5px;
+    font-size: 12px;
     font-weight: 800;
     color: #ffeaa7;
-    background: #311850;
+    background: #2d1549;
     border: 1px solid rgba(255, 121, 63, 0.35);
-    padding: 2px 7px;
+    padding: 1.5px 6px;
     border-radius: 4px;
     letter-spacing: 0.2px;
   }}
 
   .event-price {{
     font-family: 'JetBrains Mono', monospace;
-    font-size: 12.5px;
+    font-size: 11.5px;
     font-weight: 800;
-    padding: 2px 7px;
+    padding: 1.5px 6px;
     border-radius: 4px;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.2px;
   }}
 
   .price-free {{
     background: #00b894;
     color: #ffffff;
-    box-shadow: 0 1px 5px rgba(0, 184, 148, 0.3);
+    box-shadow: 0 1px 4px rgba(0, 184, 148, 0.3);
   }}
 
   .price-paid {{
@@ -482,7 +594,7 @@ def generate_flyer_html():
   }}
 
   .event-location {{
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
     color: #c9bbde;
     white-space: nowrap;
@@ -498,7 +610,7 @@ def generate_flyer_html():
   }}
 
   .event-title {{
-    font-size: 19px;
+    font-size: 16.5px;
     font-weight: 900;
     color: #ffffff;
     line-height: 1.15;
@@ -510,37 +622,38 @@ def generate_flyer_html():
 
   /* Footer Card */
   .footer-card {{
-    background: #180e2a;
-    border-radius: 12px;
+    background: #170d28;
+    border-radius: 10px;
     border: 1px solid rgba(255, 121, 63, 0.3);
-    margin-top: 10px;
-    padding: 8px 20px;
+    margin-top: 9px;
+    padding: 7px 18px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     position: relative;
     z-index: 1;
+    flex-shrink: 0;
   }}
 
   .footer-left {{
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 12.5px;
+    font-size: 12px;
     font-weight: 700;
     color: #ffd866;
   }}
 
   .footer-right {{
     font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 800;
     color: #ffffff;
     background: linear-gradient(135deg, #ff4757 0%, #ff793f 60%, #f39c12 100%);
-    padding: 4px 12px;
+    padding: 3.5px 11px;
     border-radius: 6px;
     letter-spacing: 0.3px;
-    box-shadow: 0 2px 10px rgba(255, 121, 63, 0.4);
+    box-shadow: 0 2px 8px rgba(255, 121, 63, 0.4);
   }}
 </style>
 </head>
@@ -558,7 +671,7 @@ def generate_flyer_html():
         <span>HALLOWEEKEND:</span> <span class="glow">TONIGHT & SUNDAY</span>
       </div>
       <div class="sub-tagline">
-        Top Curated Halloween Parties, Live Shows & Día de los Muertos in Boston, Cambridge & Somerville
+        28 Top Curated Halloween Parties, Live Shows & Día de los Muertos in Boston, Cambridge & Somerville
       </div>
     </div>
   </div>
@@ -569,7 +682,7 @@ def generate_flyer_html():
     <div class="day-col">
       <div class="col-header sat">
         <span class="col-title">🎃 TONIGHT · SAT OCT 31</span>
-        <span class="col-subtext">HALLOWEEN NIGHT</span>
+        <span class="col-subtext">HALLOWEEN NIGHT (14 PICKS)</span>
       </div>
       <div class="cards-list">
         {sat_cards}
@@ -580,7 +693,7 @@ def generate_flyer_html():
     <div class="day-col">
       <div class="col-header sun">
         <span class="col-title">🌼 TOMORROW · SUN NOV 01</span>
-        <span class="col-subtext">DÍA DE MUERTOS & MORE</span>
+        <span class="col-subtext">DÍA DE MUERTOS & MORE (14 PICKS)</span>
       </div>
       <div class="cards-list">
         {sun_cards}
@@ -607,7 +720,7 @@ def generate_caption():
     lines = [
         "🎃 HALLOWEEKEND GUIDE: TONIGHT & SUNDAY (OCT 31 – NOV 1) 🌼",
         "",
-        "The weekend isn't over yet! Whether you're heading out for Halloween tonight or exploring Día de los Muertos & Diwali festivals on Sunday, here are 16 top handpicked events across Boston, Cambridge & Somerville:",
+        "The weekend isn't over yet! Whether you're heading out for Halloween tonight or exploring Día de los Muertos & Diwali festivals on Sunday, here are 28 top handpicked events across Boston, Cambridge & Somerville:",
         "",
         "🎃 TONIGHT · SATURDAY OCT 31 (Halloween Night):",
     ]
@@ -638,7 +751,7 @@ def generate_caption():
 
 
 def main():
-    print("Generating Weekend Rest Flyer...")
+    print("Generating 28-Event Weekend Rest Flyer...")
     html = generate_flyer_html()
     with open(FLYER_HTML, "w", encoding="utf-8") as f:
         f.write(html)
