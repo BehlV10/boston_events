@@ -1122,6 +1122,79 @@
     border-color: #238636;
     color: #3fb950;
   }
+  .dist-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: rgba(46, 160, 67, 0.15);
+    color: #3fb950;
+    border: 1px solid rgba(46, 160, 67, 0.35);
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  [data-theme="indie"] .dist-badge {
+    background: rgba(56, 189, 248, 0.12);
+    color: #38bdf8;
+    border-color: rgba(56, 189, 248, 0.3);
+  }
+  [data-theme="anime"] .dist-badge {
+    background: rgba(255, 75, 147, 0.15);
+    color: #ff79c6;
+    border-color: rgba(255, 75, 147, 0.35);
+  }
+  [data-theme="halloween"] .dist-badge {
+    background: rgba(255, 121, 63, 0.18);
+    color: #ff9f43;
+    border-color: rgba(255, 121, 63, 0.4);
+    box-shadow: 0 0 8px rgba(255, 121, 63, 0.2);
+  }
+  .near-stream-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    margin-bottom: 12px;
+    font-size: 13px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .near-stream-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--fg);
+  }
+  .near-stream-clear-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border);
+    color: var(--fg);
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .near-stream-clear-btn:hover {
+    background: var(--accent);
+    color: #0c0e14;
+  }
+  .near-events-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
   .map-venue-stat {
     font-size: 12px;
     color: var(--muted);
@@ -3496,6 +3569,9 @@
           <button type="button" class="view-btn" id="btn-view-map" data-view="map">
             <span><span class="chip-icon">🗺️ </span>Map View</span>
           </button>
+          <button type="button" class="view-btn" id="btn-near-me" data-view="near" title="Sort events on visible day by distance to your current location">
+            <span><span class="chip-icon">📍 </span><span id="near-me-btn-label">Near Me</span></span>
+          </button>
         </div>
         <div class="view-switch-right">
           <button type="button" id="btn-share-filter" class="share-filter-btn" title="Copy shareable link with current filters">
@@ -3590,6 +3666,7 @@
               <button type="button" class="past-banner-btn btn-tomorrow" id="btn-banner-tomorrow" style="display: none;">See Tomorrow →</button>
             </div>
           </div>
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">63</span></h3>
@@ -4183,6 +4260,7 @@
         <section class="day out-of-week" data-date="2026-11-01">
           <h2>Tomorrow · Nov 1<span class="count">243</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">64</span></h3>
@@ -4615,6 +4693,7 @@
         <section class="day out-of-week" data-date="2026-11-02">
           <h2>Monday · Nov 2<span class="count">155</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">51</span></h3>
@@ -4953,6 +5032,7 @@
         <section class="day out-of-week" data-date="2026-11-03">
           <h2>Tuesday · Nov 3<span class="count">169</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">57</span></h3>
@@ -5293,6 +5373,7 @@
         <section class="day out-of-week" data-date="2026-11-04">
           <h2>Wednesday · Nov 4<span class="count">196</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">69</span></h3>
@@ -5672,6 +5753,7 @@
         <section class="day out-of-week" data-date="2026-11-05">
           <h2>Thursday · Nov 5<span class="count">222</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">66</span></h3>
@@ -6071,6 +6153,7 @@
         <section class="day out-of-week" data-date="2026-11-06">
           <h2>Friday · Nov 6<span class="count">198</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">54</span></h3>
@@ -6442,6 +6525,7 @@
         <section class="day out-of-week" data-date="2026-11-07">
           <h2>Saturday · Nov 7<span class="count">250</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">57</span></h3>
@@ -6863,6 +6947,7 @@
         <section class="day out-of-week" data-date="2026-11-08">
           <h2>Sunday · Nov 8<span class="count">202</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">48</span></h3>
@@ -7242,6 +7327,7 @@
         <section class="day out-of-week" data-date="2026-11-09">
           <h2>Monday · Nov 9<span class="count">125</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">49</span></h3>
@@ -7544,6 +7630,7 @@
         <section class="day out-of-week" data-date="2026-11-10">
           <h2>Tuesday · Nov 10<span class="count">154</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">59</span></h3>
@@ -7869,6 +7956,7 @@
         <section class="day out-of-week" data-date="2026-11-11">
           <h2>Wednesday · Nov 11<span class="count">66</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">22</span></h3>
@@ -8070,6 +8158,7 @@
         <section class="day out-of-week" data-date="2026-11-12">
           <h2>Thursday · Nov 12<span class="count">108</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">54</span></h3>
@@ -8319,6 +8408,7 @@
         <section class="day out-of-week" data-date="2026-11-13">
           <h2>Friday · Nov 13<span class="count">105</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">36</span></h3>
@@ -8541,6 +8631,7 @@
         <section class="day out-of-week" data-date="2026-11-14">
           <h2>Saturday · Nov 14<span class="count">110</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">35</span></h3>
@@ -8792,6 +8883,7 @@
         <section class="day out-of-week" data-date="2026-11-15">
           <h2>Sunday · Nov 15<span class="count">94</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">27</span></h3>
@@ -9021,6 +9113,7 @@
         <section class="day out-of-week" data-date="2026-11-16">
           <h2>Monday · Nov 16<span class="count">62</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">30</span></h3>
@@ -9214,6 +9307,7 @@
         <section class="day out-of-week" data-date="2026-11-17">
           <h2>Tuesday · Nov 17<span class="count">57</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">16</span></h3>
@@ -9400,6 +9494,7 @@
         <section class="day out-of-week" data-date="2026-11-18">
           <h2>Wednesday · Nov 18<span class="count">56</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">18</span></h3>
@@ -9567,6 +9662,7 @@
         <section class="day out-of-week" data-date="2026-11-19">
           <h2>Thursday · Nov 19<span class="count">81</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">22</span></h3>
@@ -9783,6 +9879,7 @@
         <section class="day out-of-week" data-date="2026-11-20">
           <h2>Friday · Nov 20<span class="count">78</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">18</span></h3>
@@ -9984,6 +10081,7 @@
         <section class="day out-of-week" data-date="2026-11-21">
           <h2>Saturday · Nov 21<span class="count">92</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">26</span></h3>
@@ -10205,6 +10303,7 @@
         <section class="day out-of-week" data-date="2026-11-22">
           <h2>Sunday · Nov 22<span class="count">82</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">25</span></h3>
@@ -10434,6 +10533,7 @@
         <section class="day out-of-week" data-date="2026-11-23">
           <h2>Monday · Nov 23<span class="count">38</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">16</span></h3>
@@ -10585,6 +10685,7 @@
         <section class="day out-of-week" data-date="2026-11-24">
           <h2>Tuesday · Nov 24<span class="count">34</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">11</span></h3>
@@ -10708,6 +10809,7 @@
         <section class="day out-of-week" data-date="2026-11-25">
           <h2>Wednesday · Nov 25<span class="count">43</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">11</span></h3>
@@ -10862,6 +10964,7 @@
         <section class="day out-of-week" data-date="2026-11-26">
           <h2>Thursday · Nov 26<span class="count">19</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">3</span></h3>
@@ -10946,6 +11049,7 @@
         <section class="day out-of-week" data-date="2026-11-27">
           <h2>Friday · Nov 27<span class="count">47</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">11</span></h3>
@@ -11098,6 +11202,7 @@
         <section class="day out-of-week" data-date="2026-11-28">
           <h2>Saturday · Nov 28<span class="count">57</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">14</span></h3>
@@ -11266,6 +11371,7 @@
         <section class="day out-of-week" data-date="2026-11-29">
           <h2>Sunday · Nov 29<span class="count">49</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">11</span></h3>
@@ -11420,6 +11526,7 @@
         <section class="day out-of-week" data-date="2026-11-30">
           <h2>Monday · Nov 30<span class="count">34</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">12</span></h3>
@@ -11567,6 +11674,7 @@
         <section class="day out-of-week" data-date="2026-12-01">
           <h2>Tuesday · Dec 1<span class="count">39</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">10</span></h3>
@@ -11723,6 +11831,7 @@
         <section class="day out-of-week" data-date="2026-12-02">
           <h2>Wednesday · Dec 2<span class="count">43</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">10</span></h3>
@@ -11871,6 +11980,7 @@
         <section class="day out-of-week" data-date="2026-12-03">
           <h2>Thursday · Dec 3<span class="count">46</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">13</span></h3>
@@ -12040,6 +12150,7 @@
         <section class="day out-of-week" data-date="2026-12-04">
           <h2>Friday · Dec 4<span class="count">46</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">7</span></h3>
@@ -12197,6 +12308,7 @@
         <section class="day out-of-week" data-date="2026-12-05">
           <h2>Saturday · Dec 5<span class="count">66</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">10</span></h3>
@@ -12370,6 +12482,7 @@
         <section class="day out-of-week" data-date="2026-12-06">
           <h2>Sunday · Dec 6<span class="count">55</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">12</span></h3>
@@ -12536,6 +12649,7 @@
         <section class="day out-of-week" data-date="2026-12-07">
           <h2>Monday · Dec 7<span class="count">32</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">11</span></h3>
@@ -12675,6 +12789,7 @@
         <section class="day out-of-week" data-date="2026-12-08">
           <h2>Tuesday · Dec 8<span class="count">27</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">5</span></h3>
@@ -12789,6 +12904,7 @@
         <section class="day out-of-week" data-date="2026-12-09">
           <h2>Wednesday · Dec 9<span class="count">32</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">11</span></h3>
@@ -12904,6 +13020,7 @@
         <section class="day out-of-week" data-date="2026-12-10">
           <h2>Thursday · Dec 10<span class="count">37</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">8</span></h3>
@@ -13030,6 +13147,7 @@
         <section class="day out-of-week" data-date="2026-12-11">
           <h2>Friday · Dec 11<span class="count">40</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">6</span></h3>
@@ -13175,6 +13293,7 @@
         <section class="day out-of-week" data-date="2026-12-12">
           <h2>Saturday · Dec 12<span class="count">67</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">12</span></h3>
@@ -13353,6 +13472,7 @@
         <section class="day out-of-week" data-date="2026-12-13">
           <h2>Sunday · Dec 13<span class="count">63</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">13</span></h3>
@@ -13521,6 +13641,7 @@
         <section class="day out-of-week" data-date="2026-12-14">
           <h2>Monday · Dec 14<span class="count">26</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">8</span></h3>
@@ -13636,6 +13757,7 @@
         <section class="day out-of-week" data-date="2026-12-15">
           <h2>Tuesday · Dec 15<span class="count">28</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">6</span></h3>
@@ -13747,6 +13869,7 @@
         <section class="day out-of-week" data-date="2026-12-16">
           <h2>Wednesday · Dec 16<span class="count">31</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">7</span></h3>
@@ -13879,6 +14002,7 @@
         <section class="day out-of-week" data-date="2026-12-17">
           <h2>Thursday · Dec 17<span class="count">44</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">9</span></h3>
@@ -14030,6 +14154,7 @@
         <section class="day out-of-week" data-date="2026-12-18">
           <h2>Friday · Dec 18<span class="count">36</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">8</span></h3>
@@ -14161,6 +14286,7 @@
         <section class="day out-of-week" data-date="2026-12-19">
           <h2>Saturday · Dec 19<span class="count">64</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">12</span></h3>
@@ -14336,6 +14462,7 @@
         <section class="day out-of-week" data-date="2026-12-20">
           <h2>Sunday · Dec 20<span class="count">44</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">7</span></h3>
@@ -14469,6 +14596,7 @@
         <section class="day out-of-week" data-date="2026-12-21">
           <h2>Monday · Dec 21<span class="count">25</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">8</span></h3>
@@ -14595,6 +14723,7 @@
         <section class="day out-of-week" data-date="2026-12-22">
           <h2>Tuesday · Dec 22<span class="count">21</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">4</span></h3>
@@ -14699,6 +14828,7 @@
         <section class="day out-of-week" data-date="2026-12-23">
           <h2>Wednesday · Dec 23<span class="count">24</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">7</span></h3>
@@ -14800,6 +14930,7 @@
         <section class="day out-of-week" data-date="2026-12-24">
           <h2>Thursday · Dec 24<span class="count">6</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">1</span></h3>
@@ -14847,6 +14978,7 @@
         <section class="day out-of-week" data-date="2026-12-25">
           <h2>Friday · Dec 25<span class="count">2</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="boston">
             <h3 class="city-head"><span>Boston</span><span class="count">2</span></h3>
@@ -14864,6 +14996,7 @@
         <section class="day out-of-week" data-date="2026-12-26">
           <h2>Saturday · Dec 26<span class="count">16</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">1</span></h3>
@@ -14939,6 +15072,7 @@
         <section class="day out-of-week" data-date="2026-12-27">
           <h2>Sunday · Dec 27<span class="count">16</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">5</span></h3>
@@ -15008,6 +15142,7 @@
         <section class="day out-of-week" data-date="2026-12-28">
           <h2>Monday · Dec 28<span class="count">8</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="somerville">
             <h3 class="city-head"><span>Somerville</span><span class="count">1</span></h3>
@@ -15059,6 +15194,7 @@
         <section class="day out-of-week" data-date="2026-12-29">
           <h2>Tuesday · Dec 29<span class="count">4</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="somerville">
             <h3 class="city-head"><span>Somerville</span><span class="count">2</span></h3>
@@ -15100,6 +15236,7 @@
         <section class="day out-of-week" data-date="2026-12-30">
           <h2>Wednesday · Dec 30<span class="count">9</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">1</span></h3>
@@ -15172,6 +15309,7 @@
         <section class="day out-of-week" data-date="2026-12-31">
           <h2>Thursday · Dec 31<span class="count">11</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">1</span></h3>
@@ -15236,6 +15374,7 @@
         <section class="day out-of-week" data-date="2027-01-01">
           <h2>Friday · Jan 1<span class="count">4</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="somerville">
             <h3 class="city-head"><span>Somerville</span><span class="count">1</span></h3>
@@ -15271,6 +15410,7 @@
         <section class="day out-of-week" data-date="2027-01-02">
           <h2>Saturday · Jan 2<span class="count">5</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="somerville">
             <h3 class="city-head"><span>Somerville</span><span class="count">4</span></h3>
@@ -15313,6 +15453,7 @@
         <section class="day out-of-week" data-date="2027-01-03">
           <h2>Sunday · Jan 3<span class="count">4</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="somerville">
             <h3 class="city-head"><span>Somerville</span><span class="count">2</span></h3>
@@ -15354,6 +15495,7 @@
         <section class="day out-of-week" data-date="2027-01-04">
           <h2>Monday · Jan 4<span class="count">1</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="boston">
             <h3 class="city-head"><span>Boston</span><span class="count">1</span></h3>
@@ -15370,6 +15512,7 @@
         <section class="day out-of-week" data-date="2027-01-05">
           <h2>Tuesday · Jan 5<span class="count">2</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="somerville">
             <h3 class="city-head"><span>Somerville</span><span class="count">2</span></h3>
@@ -15393,6 +15536,7 @@
         <section class="day out-of-week" data-date="2027-01-06">
           <h2>Wednesday · Jan 6<span class="count">1</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="somerville">
             <h3 class="city-head"><span>Somerville</span><span class="count">1</span></h3>
@@ -15409,6 +15553,7 @@
         <section class="day out-of-week" data-date="2027-01-07">
           <h2>Thursday · Jan 7<span class="count">6</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="somerville">
             <h3 class="city-head"><span>Somerville</span><span class="count">1</span></h3>
@@ -15458,6 +15603,7 @@
         <section class="day out-of-week" data-date="2027-01-08">
           <h2>Friday · Jan 8<span class="count">6</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">1</span></h3>
@@ -15495,6 +15641,7 @@
         <section class="day out-of-week" data-date="2027-01-09">
           <h2>Saturday · Jan 9<span class="count">5</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">2</span></h3>
@@ -15535,6 +15682,7 @@
         <section class="day out-of-week" data-date="2027-01-10">
           <h2>Sunday · Jan 10<span class="count">4</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="boston">
             <h3 class="city-head"><span>Boston</span><span class="count">4</span></h3>
@@ -15566,6 +15714,7 @@
         <section class="day out-of-week" data-date="2027-01-12">
           <h2>Tuesday · Jan 12<span class="count">3</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="somerville">
             <h3 class="city-head"><span>Somerville</span><span class="count">1</span></h3>
@@ -15594,6 +15743,7 @@
         <section class="day out-of-week" data-date="2027-01-13">
           <h2>Wednesday · Jan 13<span class="count">3</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="somerville">
             <h3 class="city-head"><span>Somerville</span><span class="count">1</span></h3>
@@ -15622,6 +15772,7 @@
         <section class="day out-of-week" data-date="2027-01-14">
           <h2>Thursday · Jan 14<span class="count">8</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">1</span></h3>
@@ -15683,6 +15834,7 @@
         <section class="day out-of-week" data-date="2027-01-15">
           <h2>Friday · Jan 15<span class="count">4</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">1</span></h3>
@@ -15718,6 +15870,7 @@
         <section class="day out-of-week" data-date="2027-01-16">
           <h2>Saturday · Jan 16<span class="count">8</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">2</span></h3>
@@ -15779,6 +15932,7 @@
         <section class="day out-of-week" data-date="2027-01-17">
           <h2>Sunday · Jan 17<span class="count">10</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="somerville">
             <h3 class="city-head"><span>Somerville</span><span class="count">2</span></h3>
@@ -15820,6 +15974,7 @@
         <section class="day out-of-week" data-date="2027-01-18">
           <h2>Monday · Jan 18<span class="count">1</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="boston">
             <h3 class="city-head"><span>Boston</span><span class="count">1</span></h3>
@@ -15836,6 +15991,7 @@
         <section class="day out-of-week" data-date="2027-01-19">
           <h2>Tuesday · Jan 19<span class="count">4</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">1</span></h3>
@@ -15875,6 +16031,7 @@
         <section class="day out-of-week" data-date="2027-01-20">
           <h2>Wednesday · Jan 20<span class="count">3</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="somerville">
             <h3 class="city-head"><span>Somerville</span><span class="count">2</span></h3>
@@ -15909,6 +16066,7 @@
         <section class="day out-of-week" data-date="2027-01-21">
           <h2>Thursday · Jan 21<span class="count">10</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">1</span></h3>
@@ -15966,6 +16124,7 @@
         <section class="day out-of-week" data-date="2027-01-22">
           <h2>Friday · Jan 22<span class="count">12</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">1</span></h3>
@@ -16015,6 +16174,7 @@
         <section class="day out-of-week" data-date="2027-01-23">
           <h2>Saturday · Jan 23<span class="count">11</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="somerville">
             <h3 class="city-head"><span>Somerville</span><span class="count">1</span></h3>
@@ -16073,6 +16233,7 @@
         <section class="day out-of-week" data-date="2027-01-24">
           <h2>Sunday · Jan 24<span class="count">9</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">1</span></h3>
@@ -16107,6 +16268,7 @@
         <section class="day out-of-week" data-date="2027-01-25">
           <h2>Monday · Jan 25<span class="count">2</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="somerville">
             <h3 class="city-head"><span>Somerville</span><span class="count">1</span></h3>
@@ -16134,6 +16296,7 @@
         <section class="day out-of-week" data-date="2027-01-26">
           <h2>Tuesday · Jan 26<span class="count">6</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">1</span></h3>
@@ -16181,6 +16344,7 @@
         <section class="day out-of-week" data-date="2027-01-27">
           <h2>Wednesday · Jan 27<span class="count">5</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="somerville">
             <h3 class="city-head"><span>Somerville</span><span class="count">2</span></h3>
@@ -16217,6 +16381,7 @@
         <section class="day out-of-week" data-date="2027-01-28">
           <h2>Thursday · Jan 28<span class="count">6</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="somerville">
             <h3 class="city-head"><span>Somerville</span><span class="count">1</span></h3>
@@ -16254,6 +16419,7 @@
         <section class="day out-of-week" data-date="2027-01-29">
           <h2>Friday · Jan 29<span class="count">6</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">1</span></h3>
@@ -16301,6 +16467,7 @@
         <section class="day out-of-week" data-date="2027-01-30">
           <h2>Saturday · Jan 30<span class="count">8</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">1</span></h3>
@@ -16366,6 +16533,7 @@
         <section class="day out-of-week" data-date="2027-01-31">
           <h2>Sunday · Jan 31<span class="count">6</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">1</span></h3>
@@ -16413,6 +16581,7 @@
         <section class="day out-of-week" data-date="2027-02-02">
           <h2>Tuesday · Feb 2<span class="count">5</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="somerville">
             <h3 class="city-head"><span>Somerville</span><span class="count">1</span></h3>
@@ -16443,6 +16612,7 @@
         <section class="day out-of-week" data-date="2027-02-03">
           <h2>Wednesday · Feb 3<span class="count">2</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="somerville">
             <h3 class="city-head"><span>Somerville</span><span class="count">1</span></h3>
@@ -16470,6 +16640,7 @@
         <section class="day out-of-week" data-date="2027-02-04">
           <h2>Thursday · Feb 4<span class="count">9</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">1</span></h3>
@@ -16520,6 +16691,7 @@
         <section class="day out-of-week" data-date="2027-02-05">
           <h2>Friday · Feb 5<span class="count">5</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="somerville">
             <h3 class="city-head"><span>Somerville</span><span class="count">1</span></h3>
@@ -16550,6 +16722,7 @@
         <section class="day out-of-week" data-date="2027-02-06">
           <h2>Saturday · Feb 6<span class="count">11</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">1</span></h3>
@@ -16612,6 +16785,7 @@
         <section class="day out-of-week" data-date="2027-02-07">
           <h2>Sunday · Feb 7<span class="count">8</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="somerville">
             <h3 class="city-head"><span>Somerville</span><span class="count">1</span></h3>
@@ -16657,6 +16831,7 @@
         <section class="day out-of-week" data-date="2027-02-08">
           <h2>Monday · Feb 8<span class="count">2</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="somerville">
             <h3 class="city-head"><span>Somerville</span><span class="count">1</span></h3>
@@ -16684,6 +16859,7 @@
         <section class="day out-of-week" data-date="2027-02-09">
           <h2>Tuesday · Feb 9<span class="count">7</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">1</span></h3>
@@ -16732,6 +16908,7 @@
         <section class="day out-of-week" data-date="2027-02-10">
           <h2>Wednesday · Feb 10<span class="count">8</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="somerville">
             <h3 class="city-head"><span>Somerville</span><span class="count">2</span></h3>
@@ -16771,6 +16948,7 @@
         <section class="day out-of-week" data-date="2027-02-11">
           <h2>Thursday · Feb 11<span class="count">8</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="somerville">
             <h3 class="city-head"><span>Somerville</span><span class="count">1</span></h3>
@@ -16816,6 +16994,7 @@
         <section class="day out-of-week" data-date="2027-02-12">
           <h2>Friday · Feb 12<span class="count">7</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">1</span></h3>
@@ -16848,6 +17027,7 @@
         <section class="day out-of-week" data-date="2027-02-13">
           <h2>Saturday · Feb 13<span class="count">9</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">1</span></h3>
@@ -16888,6 +17068,7 @@
         <section class="day out-of-week" data-date="2027-02-14">
           <h2>Sunday · Feb 14<span class="count">4</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="boston">
             <h3 class="city-head"><span>Boston</span><span class="count">4</span></h3>
@@ -16907,6 +17088,7 @@
         <section class="day out-of-week" data-date="2027-02-15">
           <h2>Monday · Feb 15<span class="count">2</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="boston">
             <h3 class="city-head"><span>Boston</span><span class="count">2</span></h3>
@@ -16924,6 +17106,7 @@
         <section class="day out-of-week" data-date="2027-02-16">
           <h2>Tuesday · Feb 16<span class="count">2</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="somerville">
             <h3 class="city-head"><span>Somerville</span><span class="count">1</span></h3>
@@ -16951,6 +17134,7 @@
         <section class="day out-of-week" data-date="2027-02-17">
           <h2>Wednesday · Feb 17<span class="count">4</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">1</span></h3>
@@ -16996,6 +17180,7 @@
         <section class="day out-of-week" data-date="2027-02-18">
           <h2>Thursday · Feb 18<span class="count">7</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="somerville">
             <h3 class="city-head"><span>Somerville</span><span class="count">2</span></h3>
@@ -17046,6 +17231,7 @@
         <section class="day out-of-week" data-date="2027-02-19">
           <h2>Friday · Feb 19<span class="count">5</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="somerville">
             <h3 class="city-head"><span>Somerville</span><span class="count">1</span></h3>
@@ -17076,6 +17262,7 @@
         <section class="day out-of-week" data-date="2027-02-20">
           <h2>Saturday · Feb 20<span class="count">5</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="somerville">
             <h3 class="city-head"><span>Somerville</span><span class="count">1</span></h3>
@@ -17106,6 +17293,7 @@
         <section class="day out-of-week" data-date="2027-02-21">
           <h2>Sunday · Feb 21<span class="count">5</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">1</span></h3>
@@ -17146,6 +17334,7 @@
         <section class="day out-of-week" data-date="2027-02-22">
           <h2>Monday · Feb 22<span class="count">2</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="somerville">
             <h3 class="city-head"><span>Somerville</span><span class="count">1</span></h3>
@@ -17173,6 +17362,7 @@
         <section class="day out-of-week" data-date="2027-02-23">
           <h2>Tuesday · Feb 23<span class="count">6</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">2</span></h3>
@@ -17220,6 +17410,7 @@
         <section class="day out-of-week" data-date="2027-02-24">
           <h2>Wednesday · Feb 24<span class="count">4</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">1</span></h3>
@@ -17259,6 +17450,7 @@
         <section class="day out-of-week" data-date="2027-02-25">
           <h2>Thursday · Feb 25<span class="count">8</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">1</span></h3>
@@ -17308,6 +17500,7 @@
         <section class="day out-of-week" data-date="2027-02-26">
           <h2>Friday · Feb 26<span class="count">5</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">1</span></h3>
@@ -17344,6 +17537,7 @@
         <section class="day out-of-week" data-date="2027-02-27">
           <h2>Saturday · Feb 27<span class="count">10</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">1</span></h3>
@@ -17385,6 +17579,7 @@
         <section class="day out-of-week" data-date="2027-02-28">
           <h2>Sunday · Feb 28<span class="count">6</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">1</span></h3>
@@ -17426,6 +17621,7 @@
         <section class="day out-of-week" data-date="tba">
           <h2>Date TBA<span class="count">617</span></h2>
           
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">
           <div class="city-section" data-city="cambridge">
             <h3 class="city-head"><span>Cambridge</span><span class="count">60</span></h3>
@@ -19224,7 +19420,7 @@
           
           <div class="deals-sub">
             <div class="deals-sub-head"><a href="https://www.luckyseat.com/" target="_blank" rel="noopener">LuckySeat — Boston</a></div>
-            <ul class="deals-list"><li><a href="https://www.luckyseat.com/shows/aneveningwithaarontveit-boston-2026Oct" target="_blank" rel="noopener"><span class="deal-name">An Evening with Aaron Tveit</span><span class="deal-meta">Emerson Colonial Theatre · $30 all-in</span></a></li><li><a href="https://www.luckyseat.com/shows/bladerunnerlive-boston-2026Oct" target="_blank" rel="noopener"><span class="deal-name">Blade Runner Live</span><span class="deal-meta">Emerson Colonial Theatre · $30 all-in</span></a></li><li><a href="https://www.luckyseat.com/shows/lachanze-boston-2026Oct" target="_blank" rel="noopener"><span class="deal-name">LaChanze</span><span class="deal-meta">Berklee Performance Center · $35 all-in</span></a></li><li><a href="https://www.luckyseat.com/shows/latenitecatechism-boston-2026Oct" target="_blank" rel="noopener"><span class="deal-name">Late Nite Catechism: Til Death Do Us Part</span><span class="deal-meta">Charles Playhouse · $35 all-in</span></a></li><li><a href="https://www.luckyseat.com/shows/rockyinconcert-boston-2026Oct" target="_blank" rel="noopener"><span class="deal-name">Rocky™ in Concert</span><span class="deal-meta">Emerson Colonial Theatre · $30 all-in</span></a></li><li><a href="https://www.luckyseat.com/shows/wicked-boston-2026Sep" target="_blank" rel="noopener"><span class="deal-name">Wicked</span><span class="deal-meta">Citizens Opera House · $40 all-in</span></a></li><li><a href="https://www.luckyseat.com/shows/thegetawaydriver-cambridge-2026Sep" target="_blank" rel="noopener"><span class="deal-name">The Getaway Driver</span><span class="deal-meta">Central Square Theater · $49 all-in</span></a></li></ul>
+            <ul class="deals-list"><li><a href="https://www.luckyseat.com/shows/hadestown-boston-2026Oct" target="_blank" rel="noopener"><span class="deal-name">Hadestown</span><span class="deal-meta">Emerson Colonial Theatre · $45 all-in</span></a></li><li><a href="https://www.luckyseat.com/shows/latenitecatechism-boston-2026Oct" target="_blank" rel="noopener"><span class="deal-name">Late Nite Catechism: Til Death Do Us Part</span><span class="deal-meta">Charles Playhouse · $35 all-in</span></a></li><li><a href="https://www.luckyseat.com/shows/rockyinconcert-boston-2026Oct" target="_blank" rel="noopener"><span class="deal-name">Rocky™ in Concert</span><span class="deal-meta">Emerson Colonial Theatre · $30 all-in</span></a></li><li><a href="https://www.luckyseat.com/shows/wicked-boston-2026Sep" target="_blank" rel="noopener"><span class="deal-name">Wicked</span><span class="deal-meta">Citizens Opera House · $40 all-in</span></a></li><li><a href="https://www.luckyseat.com/shows/thegetawaydriver-cambridge-2026Sep" target="_blank" rel="noopener"><span class="deal-name">The Getaway Driver</span><span class="deal-meta">Central Square Theater · $49 all-in</span></a></li></ul>
           </div>
           <ul class="deals-list"><li><a href="https://bostix.org/categories/bostix-deals/" target="_blank" rel="noopener">BosTix — same-day half-price (ArtsBoston)</a></li><li><a href="https://www.todaytix.com/boston" target="_blank" rel="noopener">TodayTix Boston (lotteries + discounts)</a></li><li><a href="https://www.goldstar.com/cities/boston-ma" target="_blank" rel="noopener">Goldstar Boston discounts</a></li></ul>
         </div>
@@ -19666,6 +19862,23 @@
     let leafletMap = null;
     let markersLayer = null;
     let mapLoading = false;
+    let nearMeActive = false;
+    let userCoords = null;
+    try {
+      const savedCoords = sessionStorage.getItem('boston_user_coords');
+      if (savedCoords) userCoords = JSON.parse(savedCoords);
+    } catch (_) {}
+
+    function haversineMiles(lat1, lon1, lat2, lon2) {
+      const R = 3958.8;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    }
 
     const mobileToggle = document.getElementById('mobile-filter-toggle');
     const mobileClose = document.getElementById('mobile-filter-close');
@@ -19955,7 +20168,52 @@
           }
         });
       }
+      if (mode === 'list' && nearMeActive) {
+        setNearMe(false);
+      }
       stateToHash();
+    }
+
+    function toggleNearMe() {
+      if (nearMeActive) {
+        setNearMe(false);
+        return;
+      }
+      if (userCoords && userCoords.lat && userCoords.lng) {
+        setNearMe(true);
+        return;
+      }
+      const label = document.getElementById('near-me-btn-label');
+      if (label) label.textContent = 'Locating...';
+      if (!navigator.geolocation) {
+        alert('Geolocation is not supported by your browser.');
+        if (label) label.textContent = 'Near Me';
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          userCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          try {
+            sessionStorage.setItem('boston_user_coords', JSON.stringify(userCoords));
+          } catch (_) {}
+          if (label) label.textContent = 'Near Me';
+          setNearMe(true);
+        },
+        (err) => {
+          if (label) label.textContent = 'Near Me';
+          alert('Could not determine your location (' + (err.message || 'permission denied') + '). Please ensure location permissions are allowed in your browser.');
+        },
+        { timeout: 10000, enableHighAccuracy: false, maximumAge: 300000 }
+      );
+    }
+
+    function setNearMe(active) {
+      nearMeActive = !!active;
+      const nearBtn = document.getElementById('btn-near-me');
+      const listBtn = document.getElementById('btn-view-list');
+      if (nearBtn) nearBtn.classList.toggle('active', nearMeActive);
+      if (listBtn) listBtn.classList.toggle('active', !nearMeActive && currentView === 'list');
+      apply();
     }
 
     function shortenVenueName(name) {
@@ -20634,6 +20892,117 @@
         day.classList.toggle('empty', visible === 0);
         const headingCount = day.querySelector('h2 .count');
         if (headingCount) headingCount.textContent = visible;
+
+        // Proximity calculation & Near Me sorting
+        const nearStream = day.querySelector('.near-me-stream');
+        const citiesDiv = day.querySelector('.cities');
+        if (userCoords && userCoords.lat && userCoords.lng) {
+          day.querySelectorAll('.event').forEach(li => {
+            const lat = parseFloat(li.dataset.lat);
+            const lng = parseFloat(li.dataset.lng);
+            if (!isNaN(lat) && !isNaN(lng)) {
+              const d = haversineMiles(userCoords.lat, userCoords.lng, lat, lng);
+              li.dataset.distance = d.toFixed(2);
+              let badge = li.querySelector('.dist-badge');
+              if (!badge) {
+                badge = document.createElement('span');
+                badge.className = 'dist-badge';
+                const vTag = li.querySelector('.venue-tag');
+                if (vTag) vTag.appendChild(badge);
+              }
+              badge.title = `${d.toFixed(1)} miles away`;
+              badge.innerHTML = `<span class="chip-icon">📍 </span>${d < 0.1 ? '< 0.1' : d.toFixed(1)} mi`;
+            } else {
+              li.dataset.distance = '99999';
+              const badge = li.querySelector('.dist-badge');
+              if (badge) badge.remove();
+            }
+          });
+        }
+
+        if (nearStream && citiesDiv) {
+          if (nearMeActive && userCoords && userCoords.lat && userCoords.lng) {
+            citiesDiv.style.display = 'none';
+            nearStream.style.display = 'block';
+
+            const visibleEvents = Array.from(citiesDiv.querySelectorAll('.event:not(.hidden)'));
+            visibleEvents.sort((a, b) => {
+              const distA = parseFloat(a.dataset.distance || '99999');
+              const distB = parseFloat(b.dataset.distance || '99999');
+              if (distA !== distB) return distA - distB;
+              const timeA = parseInt(a.dataset.timeMins || '9999', 10);
+              const timeB = parseInt(b.dataset.timeMins || '9999', 10);
+              return timeA - timeB;
+            });
+
+            const locatedCount = visibleEvents.filter(e => parseFloat(e.dataset.distance || '99999') < 9999).length;
+
+            let banner = nearStream.querySelector('.near-stream-banner');
+            if (!banner) {
+              banner = document.createElement('div');
+              banner.className = 'near-stream-banner';
+              nearStream.appendChild(banner);
+            }
+            banner.innerHTML = `
+              <div class="near-stream-info">
+                <span class="chip-icon">📍 </span>
+                <span><strong>Sorted by distance from you</strong> (${locatedCount} events with venue locations)</span>
+              </div>
+              <button type="button" class="near-stream-clear-btn" id="btn-reset-near">Reset to Category View</button>
+            `;
+
+            let list = nearStream.querySelector('.near-events-list');
+            if (!list) {
+              list = document.createElement('ul');
+              list.className = 'near-events-list';
+              nearStream.appendChild(list);
+            }
+            list.innerHTML = '';
+            visibleEvents.forEach(ev => {
+              list.appendChild(ev);
+            });
+          } else {
+            nearStream.style.display = 'none';
+            citiesDiv.style.display = 'block';
+            const strayEvents = nearStream.querySelectorAll('.event');
+            if (strayEvents.length > 0) {
+              strayEvents.forEach(ev => {
+                const bucketName = ev.dataset.bucket;
+                const cityName = ev.dataset.city || 'other';
+                const targetBucket = citiesDiv.querySelector(`.city-section[data-city="${cityName}"] .bucket[data-bucket="${bucketName}"] ul`);
+                if (targetBucket) targetBucket.appendChild(ev);
+              });
+              citiesDiv.querySelectorAll('.bucket ul').forEach(ul => {
+                const items = Array.from(ul.children);
+                items.sort((a, b) => (parseInt(a.dataset.epoch || '0', 10) - parseInt(b.dataset.epoch || '0', 10)));
+                items.forEach(it => ul.appendChild(it));
+              });
+            }
+          }
+        }
+      });
+
+      daySections.filter(d => !activeDays.includes(d)).forEach(day => {
+        const nearStream = day.querySelector('.near-me-stream');
+        const citiesDiv = day.querySelector('.cities');
+        if (nearStream && citiesDiv) {
+          nearStream.style.display = 'none';
+          citiesDiv.style.display = 'block';
+          const strayEvents = nearStream.querySelectorAll('.event');
+          if (strayEvents.length > 0) {
+            strayEvents.forEach(ev => {
+              const bucketName = ev.dataset.bucket;
+              const cityName = ev.dataset.city || 'other';
+              const targetBucket = citiesDiv.querySelector(`.city-section[data-city="${cityName}"] .bucket[data-bucket="${bucketName}"] ul`);
+              if (targetBucket) targetBucket.appendChild(ev);
+            });
+            citiesDiv.querySelectorAll('.bucket ul').forEach(ul => {
+              const items = Array.from(ul.children);
+              items.sort((a, b) => (parseInt(a.dataset.epoch || '0', 10) - parseInt(b.dataset.epoch || '0', 10)));
+              items.forEach(it => ul.appendChild(it));
+            });
+          }
+        }
       });
 
       // Update past events notice banner
@@ -21315,6 +21684,15 @@
 
     const btnViewMap = document.getElementById('btn-view-map');
     if (btnViewMap) btnViewMap.addEventListener('click', () => switchView('map'));
+
+    const btnNearMe = document.getElementById('btn-near-me');
+    if (btnNearMe) btnNearMe.addEventListener('click', () => toggleNearMe());
+
+    document.addEventListener('click', (e) => {
+      if (e.target && e.target.id === 'btn-reset-near') {
+        setNearMe(false);
+      }
+    });
 
     const mapRecenterBtn = document.getElementById('map-recenter-btn');
     if (mapRecenterBtn) {

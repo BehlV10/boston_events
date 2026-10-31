@@ -1371,6 +1371,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
         <section class="{day_class}" data-date="{date_attr}">
           <h2>{heading_html}<span class="count">{len(events)}</span></h2>
           {past_banner_html}
+          <div class="near-me-stream" style="display: none;"></div>
           <div class="cities">{"".join(city_blocks)}</div>
         </section>'''
 
@@ -2680,6 +2681,79 @@ def render_page(results, weather=None, luckyseat_shows=None):
     background: rgba(35, 134, 54, 0.2);
     border-color: #238636;
     color: #3fb950;
+  }}
+  .dist-badge {{
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 999px;
+    background: rgba(46, 160, 67, 0.15);
+    color: #3fb950;
+    border: 1px solid rgba(46, 160, 67, 0.35);
+    margin-left: 6px;
+    vertical-align: middle;
+  }}
+  [data-theme="indie"] .dist-badge {{
+    background: rgba(56, 189, 248, 0.12);
+    color: #38bdf8;
+    border-color: rgba(56, 189, 248, 0.3);
+  }}
+  [data-theme="anime"] .dist-badge {{
+    background: rgba(255, 75, 147, 0.15);
+    color: #ff79c6;
+    border-color: rgba(255, 75, 147, 0.35);
+  }}
+  [data-theme="halloween"] .dist-badge {{
+    background: rgba(255, 121, 63, 0.18);
+    color: #ff9f43;
+    border-color: rgba(255, 121, 63, 0.4);
+    box-shadow: 0 0 8px rgba(255, 121, 63, 0.2);
+  }}
+  .near-stream-banner {{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    margin-bottom: 12px;
+    font-size: 13px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }}
+  .near-stream-info {{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--fg);
+  }}
+  .near-stream-clear-btn {{
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border);
+    color: var(--fg);
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }}
+  .near-stream-clear-btn:hover {{
+    background: var(--accent);
+    color: #0c0e14;
+  }}
+  .near-events-list {{
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }}
   .map-venue-stat {{
     font-size: 12px;
@@ -4315,6 +4389,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
           <button type="button" class="view-btn" id="btn-view-map" data-view="map">
             <span><span class="chip-icon">🗺️ </span>Map View</span>
           </button>
+          <button type="button" class="view-btn" id="btn-near-me" data-view="near" title="Sort events on visible day by distance to your current location">
+            <span><span class="chip-icon">📍 </span><span id="near-me-btn-label">Near Me</span></span>
+          </button>
         </div>
         <div class="view-switch-right">
           <button type="button" id="btn-share-filter" class="share-filter-btn" title="Copy shareable link with current filters">
@@ -4839,6 +4916,23 @@ def render_page(results, weather=None, luckyseat_shows=None):
     let leafletMap = null;
     let markersLayer = null;
     let mapLoading = false;
+    let nearMeActive = false;
+    let userCoords = null;
+    try {{
+      const savedCoords = sessionStorage.getItem('boston_user_coords');
+      if (savedCoords) userCoords = JSON.parse(savedCoords);
+    }} catch (_) {{}}
+
+    function haversineMiles(lat1, lon1, lat2, lon2) {{
+      const R = 3958.8;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    }}
 
     const mobileToggle = document.getElementById('mobile-filter-toggle');
     const mobileClose = document.getElementById('mobile-filter-close');
@@ -5128,7 +5222,52 @@ def render_page(results, weather=None, luckyseat_shows=None):
           }}
         }});
       }}
+      if (mode === 'list' && nearMeActive) {{
+        setNearMe(false);
+      }}
       stateToHash();
+    }}
+
+    function toggleNearMe() {{
+      if (nearMeActive) {{
+        setNearMe(false);
+        return;
+      }}
+      if (userCoords && userCoords.lat && userCoords.lng) {{
+        setNearMe(true);
+        return;
+      }}
+      const label = document.getElementById('near-me-btn-label');
+      if (label) label.textContent = 'Locating...';
+      if (!navigator.geolocation) {{
+        alert('Geolocation is not supported by your browser.');
+        if (label) label.textContent = 'Near Me';
+        return;
+      }}
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {{
+          userCoords = {{ lat: pos.coords.latitude, lng: pos.coords.longitude }};
+          try {{
+            sessionStorage.setItem('boston_user_coords', JSON.stringify(userCoords));
+          }} catch (_) {{}}
+          if (label) label.textContent = 'Near Me';
+          setNearMe(true);
+        }},
+        (err) => {{
+          if (label) label.textContent = 'Near Me';
+          alert('Could not determine your location (' + (err.message || 'permission denied') + '). Please ensure location permissions are allowed in your browser.');
+        }},
+        {{ timeout: 10000, enableHighAccuracy: false, maximumAge: 300000 }}
+      );
+    }}
+
+    function setNearMe(active) {{
+      nearMeActive = !!active;
+      const nearBtn = document.getElementById('btn-near-me');
+      const listBtn = document.getElementById('btn-view-list');
+      if (nearBtn) nearBtn.classList.toggle('active', nearMeActive);
+      if (listBtn) listBtn.classList.toggle('active', !nearMeActive && currentView === 'list');
+      apply();
     }}
 
     function shortenVenueName(name) {{
@@ -5807,6 +5946,117 @@ def render_page(results, weather=None, luckyseat_shows=None):
         day.classList.toggle('empty', visible === 0);
         const headingCount = day.querySelector('h2 .count');
         if (headingCount) headingCount.textContent = visible;
+
+        // Proximity calculation & Near Me sorting
+        const nearStream = day.querySelector('.near-me-stream');
+        const citiesDiv = day.querySelector('.cities');
+        if (userCoords && userCoords.lat && userCoords.lng) {{
+          day.querySelectorAll('.event').forEach(li => {{
+            const lat = parseFloat(li.dataset.lat);
+            const lng = parseFloat(li.dataset.lng);
+            if (!isNaN(lat) && !isNaN(lng)) {{
+              const d = haversineMiles(userCoords.lat, userCoords.lng, lat, lng);
+              li.dataset.distance = d.toFixed(2);
+              let badge = li.querySelector('.dist-badge');
+              if (!badge) {{
+                badge = document.createElement('span');
+                badge.className = 'dist-badge';
+                const vTag = li.querySelector('.venue-tag');
+                if (vTag) vTag.appendChild(badge);
+              }}
+              badge.title = `${{d.toFixed(1)}} miles away`;
+              badge.innerHTML = `<span class="chip-icon">📍 </span>${{d < 0.1 ? '< 0.1' : d.toFixed(1)}} mi`;
+            }} else {{
+              li.dataset.distance = '99999';
+              const badge = li.querySelector('.dist-badge');
+              if (badge) badge.remove();
+            }}
+          }});
+        }}
+
+        if (nearStream && citiesDiv) {{
+          if (nearMeActive && userCoords && userCoords.lat && userCoords.lng) {{
+            citiesDiv.style.display = 'none';
+            nearStream.style.display = 'block';
+
+            const visibleEvents = Array.from(citiesDiv.querySelectorAll('.event:not(.hidden)'));
+            visibleEvents.sort((a, b) => {{
+              const distA = parseFloat(a.dataset.distance || '99999');
+              const distB = parseFloat(b.dataset.distance || '99999');
+              if (distA !== distB) return distA - distB;
+              const timeA = parseInt(a.dataset.timeMins || '9999', 10);
+              const timeB = parseInt(b.dataset.timeMins || '9999', 10);
+              return timeA - timeB;
+            }});
+
+            const locatedCount = visibleEvents.filter(e => parseFloat(e.dataset.distance || '99999') < 9999).length;
+
+            let banner = nearStream.querySelector('.near-stream-banner');
+            if (!banner) {{
+              banner = document.createElement('div');
+              banner.className = 'near-stream-banner';
+              nearStream.appendChild(banner);
+            }}
+            banner.innerHTML = `
+              <div class="near-stream-info">
+                <span class="chip-icon">📍 </span>
+                <span><strong>Sorted by distance from you</strong> (${{locatedCount}} events with venue locations)</span>
+              </div>
+              <button type="button" class="near-stream-clear-btn" id="btn-reset-near">Reset to Category View</button>
+            `;
+
+            let list = nearStream.querySelector('.near-events-list');
+            if (!list) {{
+              list = document.createElement('ul');
+              list.className = 'near-events-list';
+              nearStream.appendChild(list);
+            }}
+            list.innerHTML = '';
+            visibleEvents.forEach(ev => {{
+              list.appendChild(ev);
+            }});
+          }} else {{
+            nearStream.style.display = 'none';
+            citiesDiv.style.display = 'block';
+            const strayEvents = nearStream.querySelectorAll('.event');
+            if (strayEvents.length > 0) {{
+              strayEvents.forEach(ev => {{
+                const bucketName = ev.dataset.bucket;
+                const cityName = ev.dataset.city || 'other';
+                const targetBucket = citiesDiv.querySelector(`.city-section[data-city="${{cityName}}"] .bucket[data-bucket="${{bucketName}}"] ul`);
+                if (targetBucket) targetBucket.appendChild(ev);
+              }});
+              citiesDiv.querySelectorAll('.bucket ul').forEach(ul => {{
+                const items = Array.from(ul.children);
+                items.sort((a, b) => (parseInt(a.dataset.epoch || '0', 10) - parseInt(b.dataset.epoch || '0', 10)));
+                items.forEach(it => ul.appendChild(it));
+              }});
+            }}
+          }}
+        }}
+      }});
+
+      daySections.filter(d => !activeDays.includes(d)).forEach(day => {{
+        const nearStream = day.querySelector('.near-me-stream');
+        const citiesDiv = day.querySelector('.cities');
+        if (nearStream && citiesDiv) {{
+          nearStream.style.display = 'none';
+          citiesDiv.style.display = 'block';
+          const strayEvents = nearStream.querySelectorAll('.event');
+          if (strayEvents.length > 0) {{
+            strayEvents.forEach(ev => {{
+              const bucketName = ev.dataset.bucket;
+              const cityName = ev.dataset.city || 'other';
+              const targetBucket = citiesDiv.querySelector(`.city-section[data-city="${{cityName}}"] .bucket[data-bucket="${{bucketName}}"] ul`);
+              if (targetBucket) targetBucket.appendChild(ev);
+            }});
+            citiesDiv.querySelectorAll('.bucket ul').forEach(ul => {{
+              const items = Array.from(ul.children);
+              items.sort((a, b) => (parseInt(a.dataset.epoch || '0', 10) - parseInt(b.dataset.epoch || '0', 10)));
+              items.forEach(it => ul.appendChild(it));
+            }});
+          }}
+        }}
       }});
 
       // Update past events notice banner
@@ -6488,6 +6738,15 @@ def render_page(results, weather=None, luckyseat_shows=None):
 
     const btnViewMap = document.getElementById('btn-view-map');
     if (btnViewMap) btnViewMap.addEventListener('click', () => switchView('map'));
+
+    const btnNearMe = document.getElementById('btn-near-me');
+    if (btnNearMe) btnNearMe.addEventListener('click', () => toggleNearMe());
+
+    document.addEventListener('click', (e) => {{
+      if (e.target && e.target.id === 'btn-reset-near') {{
+        setNearMe(false);
+      }}
+    }});
 
     const mapRecenterBtn = document.getElementById('map-recenter-btn');
     if (mapRecenterBtn) {{

@@ -7295,17 +7295,28 @@ def fetch_luckyseat_boston():
         headers = {
             "User-Agent": UA_CHROME,
             "Accept": "application/json, text/plain, */*",
-            "Referer": "https://www.luckyseat.com/",
-            "Origin": "https://www.luckyseat.com",
             "Accept-Language": "en-US,en;q=0.9",
         }
-        resp = _SESSION.get(
-            "https://www.luckyseat.com/api/showmanagement/getshowlist",
-            headers=headers,
-            timeout=10,
-        )
-        resp.raise_for_status()
-        raw_shows = resp.json()
+        raw_shows = None
+        try:
+            resp = requests.get(
+                "https://www.luckyseat.com/api/showmanagement/getshowlist",
+                headers=headers,
+                timeout=10,
+            )
+            if resp.status_code == 200:
+                raw_shows = resp.json()
+        except Exception:
+            raw_shows = None
+
+        if not raw_shows or not isinstance(raw_shows, list):
+            try:
+                cmd = ["curl", "-sL", "-A", UA_CHROME, "https://www.luckyseat.com/api/showmanagement/getshowlist"]
+                c_out = subprocess.check_output(cmd, timeout=12)
+                raw_shows = json.loads(c_out)
+            except Exception:
+                raw_shows = None
+
         if isinstance(raw_shows, list) and len(raw_shows) > 0:
             for s in raw_shows:
                 city = (s.get("city") or "").strip().lower()
