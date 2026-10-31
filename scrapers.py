@@ -399,7 +399,7 @@ def scrape_eventbrite_search(url, ua):
                 continue
             iso = ev.get("startDate")
             if iso and "T" not in iso:
-                iso = f"{iso}T19:00:00-04:00"
+                iso = f"{iso}T00:00:00-04:00"
             try:
                 iso = datetime.fromisoformat(iso).astimezone(timezone.utc).isoformat() if iso else None
             except ValueError:

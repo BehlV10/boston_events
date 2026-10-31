@@ -946,7 +946,9 @@ def _merge_duplicates(events):
         # 0. Canonical specific URL match check
         if curl and curl in seen_url:
             for cand in seen_url[curl]:
-                if not _is_different_show(e, cand):
+                s_cand = (cand.get("_source_venue") or cand.get("source") or "").lower()
+                s_cur = (e.get("_source_venue") or e.get("source") or "").lower()
+                if s_cand != s_cur or not _is_different_show(e, cand):
                     match = cand
                     break
 
@@ -999,6 +1001,15 @@ def _merge_duplicates(events):
                 if e.get("_time") and (e["_time"].hour != 0 or e["_time"].minute != 0):
                     match["_time"] = e["_time"]
 
+            # If match has 19:00:00 (Eventbrite discovery fallback) while e has a real/earlier time, prefer e
+            m_time = match.get("_time")
+            e_time = e.get("_time")
+            m_src = (match.get("_source_venue") or match.get("venue") or "").lower()
+            if "eventbrite" in m_src and m_time and m_time.hour == 19 and m_time.minute == 0 and e_time and not (e_time.hour == 19 and e_time.minute == 0):
+                match["_time"] = e_time
+                if e.get("date"):
+                    match["date"] = e["date"]
+
             if not match.get("price") and e.get("price"):
                 match["price"] = e["price"]
 
@@ -1014,6 +1025,10 @@ def _merge_duplicates(events):
 
             if not match.get("description") and e.get("description"):
                 match["description"] = e["description"]
+
+            if (not match.get("lat") or not match.get("lng")) and e.get("lat") and e.get("lng"):
+                match["lat"] = e.get("lat")
+                match["lng"] = e.get("lng")
         else:
             if curl:
                 seen_url.setdefault(curl, []).append(e)
@@ -1489,7 +1504,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
     bucket_boxes = "\n".join(
         f'''<label class="chk">
             <input type="checkbox" class="cat-chk" value="{escape(b)}" checked>
-            <span><span class="chip-icon">{_bucket_icon_row(b)} </span>{escape(b)} <span class="count">{bucket_counts.get(b, 0)}</span></span>
+            <span>{escape(b)} <span class="count">{bucket_counts.get(b, 0)}</span></span>
           </label>'''
         for b in bucket_order
     )
@@ -1751,6 +1766,40 @@ def render_page(results, weather=None, luckyseat_shows=None):
   }}
   .pill-submit-btn:active {{
     transform: translateY(1px);
+  }}
+  .pill-social-link {{
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 11.5px;
+    font-weight: 550;
+    transition: color 0.15s ease, opacity 0.15s ease;
+    opacity: 0.85;
+  }}
+  .pill-social-link:hover {{
+    color: var(--fg);
+    opacity: 1;
+    text-decoration: underline;
+  }}
+  .footer-social-link {{
+    color: inherit;
+    text-decoration: underline;
+    opacity: 0.9;
+  }}
+  .footer-social-link:hover {{
+    opacity: 1;
+  }}
+
+  /* Classic Dark: remove distracting emojis from category badges and category filters */
+  :root .cat-pill .chip-icon,
+  [data-theme="classic"] .cat-pill .chip-icon,
+  :root .cat-pill.genre-pill .chip-icon,
+  [data-theme="classic"] .cat-pill.genre-pill .chip-icon,
+  :root .chk-grid .cat-chk ~ span .chip-icon,
+  [data-theme="classic"] .chk-grid .cat-chk ~ span .chip-icon {{
+    display: none !important;
   }}
 
   /* Layout */
@@ -4235,6 +4284,10 @@ def render_page(results, weather=None, luckyseat_shows=None):
         {weather_pill_html}
         <span class="pill-stat"><strong>{total:,}</strong> events · <strong>{len(results)}</strong> venues</span>
         <span class="pill-dot">·</span>
+        <a href="https://www.instagram.com/wickedbostonevents/" target="_blank" rel="noopener" class="pill-social-link" title="Follow @wickedbostonevents on Instagram">
+          <span>📸 @wickedbostonevents</span>
+        </a>
+        <span class="pill-dot">·</span>
         <button type="button" class="pill-submit-btn" id="btn-open-submit-modal" aria-haspopup="dialog" aria-expanded="false">
           <span>＋ Add Event</span>
         </button>
@@ -4417,7 +4470,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
   </div>
   <footer>
     <p>Boston Events · Live local music, comedy, arts, outdoors &amp; community events across Greater Boston.</p>
-    <p style="margin-top:6px; font-size:11px; opacity:0.85;">Data compiled directly from venue calendars and official local community feeds. Not affiliated with any commercial ticketing broker.</p>
+    <p style="margin-top:6px; font-size:11px; opacity:0.85;">Data compiled directly from venue calendars and official local community feeds. Not affiliated with any commercial ticketing broker. · <a href="https://www.instagram.com/wickedbostonevents/" target="_blank" rel="noopener" class="footer-social-link">Instagram: @wickedbostonevents</a></p>
   </footer>
   <!-- Community Event Submission Modal -->
   <div id="submit-event-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-submit-title" style="display:none;">
