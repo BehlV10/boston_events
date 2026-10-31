@@ -4918,10 +4918,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
     let mapLoading = false;
     let nearMeActive = false;
     let userCoords = null;
-    try {{
-      const savedCoords = sessionStorage.getItem('boston_user_coords');
-      if (savedCoords) userCoords = JSON.parse(savedCoords);
-    }} catch (_) {{}}
 
     function haversineMiles(lat1, lon1, lat2, lon2) {{
       const R = 3958.8;
@@ -5247,9 +5243,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
       navigator.geolocation.getCurrentPosition(
         (pos) => {{
           userCoords = {{ lat: pos.coords.latitude, lng: pos.coords.longitude }};
-          try {{
-            sessionStorage.setItem('boston_user_coords', JSON.stringify(userCoords));
-          }} catch (_) {{}}
           if (label) label.textContent = 'Near Me';
           setNearMe(true);
         }},
@@ -5257,7 +5250,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
           if (label) label.textContent = 'Near Me';
           alert('Could not determine your location (' + (err.message || 'permission denied') + '). Please ensure location permissions are allowed in your browser.');
         }},
-        {{ timeout: 10000, enableHighAccuracy: false, maximumAge: 300000 }}
+        {{ timeout: 10000, enableHighAccuracy: false, maximumAge: 60000 }}
       );
     }}
 
@@ -5947,49 +5940,36 @@ def render_page(results, weather=None, luckyseat_shows=None):
         const headingCount = day.querySelector('h2 .count');
         if (headingCount) headingCount.textContent = visible;
 
-        // Proximity calculation & Near Me sorting
+        // Proximity calculation & Near Me sorting (only when Near Me button was clicked)
         const nearStream = day.querySelector('.near-me-stream');
         const citiesDiv = day.querySelector('.cities');
-        if (userCoords && userCoords.lat && userCoords.lng) {{
-          day.querySelectorAll('.event').forEach(li => {{
-            const lat = parseFloat(li.dataset.lat);
-            const lng = parseFloat(li.dataset.lng);
-            if (!isNaN(lat) && !isNaN(lng)) {{
-              const d = haversineMiles(userCoords.lat, userCoords.lng, lat, lng);
-              li.dataset.distance = d.toFixed(2);
-              let badge = li.querySelector('.dist-badge');
-              if (!badge) {{
-                badge = document.createElement('span');
-                badge.className = 'dist-badge';
-                const vTag = li.querySelector('.venue-tag');
-                if (vTag) vTag.appendChild(badge);
-              }}
-              badge.title = `${{d.toFixed(1)}} miles away`;
-              badge.innerHTML = `<span class="chip-icon">📍 </span>${{d < 0.1 ? '< 0.1' : d.toFixed(1)}} mi`;
-            }} else {{
-              li.dataset.distance = '99999';
-              const badge = li.querySelector('.dist-badge');
-              if (badge) badge.remove();
-            }}
-          }});
-        }}
 
         if (nearStream && citiesDiv) {{
           if (nearMeActive && userCoords && userCoords.lat && userCoords.lng) {{
             citiesDiv.style.display = 'none';
             nearStream.style.display = 'block';
 
+            // Always query the master list of visible events in citiesDiv
             const visibleEvents = Array.from(citiesDiv.querySelectorAll('.event:not(.hidden)'));
-            visibleEvents.sort((a, b) => {{
-              const distA = parseFloat(a.dataset.distance || '99999');
-              const distB = parseFloat(b.dataset.distance || '99999');
-              if (distA !== distB) return distA - distB;
-              const timeA = parseInt(a.dataset.timeMins || '9999', 10);
-              const timeB = parseInt(b.dataset.timeMins || '9999', 10);
-              return timeA - timeB;
+
+            const eventDistances = [];
+            visibleEvents.forEach(ev => {{
+              const lat = parseFloat(ev.dataset.lat);
+              const lng = parseFloat(ev.dataset.lng);
+              let dist = 99999;
+              if (!isNaN(lat) && !isNaN(lng)) {{
+                dist = haversineMiles(userCoords.lat, userCoords.lng, lat, lng);
+              }}
+              const timeMins = parseInt(ev.dataset.timeMins || '9999', 10);
+              eventDistances.push({{ ev: ev, dist: dist, timeMins: timeMins }});
             }});
 
-            const locatedCount = visibleEvents.filter(e => parseFloat(e.dataset.distance || '99999') < 9999).length;
+            eventDistances.sort((a, b) => {{
+              if (a.dist !== b.dist) return a.dist - b.dist;
+              return a.timeMins - b.timeMins;
+            }});
+
+            const locatedCount = eventDistances.filter(item => item.dist < 9999).length;
 
             let banner = nearStream.querySelector('.near-stream-banner');
             if (!banner) {{
@@ -6000,7 +5980,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
             banner.innerHTML = `
               <div class="near-stream-info">
                 <span class="chip-icon">📍 </span>
-                <span><strong>Sorted by distance from you</strong> (${{locatedCount}} events with venue locations)</span>
+                <span><strong>Sorted by distance from your location</strong> (${{locatedCount}} events nearby)</span>
               </div>
               <button type="button" class="near-stream-clear-btn" id="btn-reset-near">Reset to Category View</button>
             `;
@@ -6012,26 +5992,31 @@ def render_page(results, weather=None, luckyseat_shows=None):
               nearStream.appendChild(list);
             }}
             list.innerHTML = '';
-            visibleEvents.forEach(ev => {{
-              list.appendChild(ev);
+
+            eventDistances.forEach(item => {{
+              // Clone the element so the master list in citiesDiv remains 100% intact
+              const clone = item.ev.cloneNode(true);
+              clone.classList.remove('hidden');
+
+              if (item.dist < 9999) {{
+                const dStr = item.dist < 0.1 ? '< 0.1 mi away' : `${{item.dist.toFixed(1)}} mi away`;
+                let badge = clone.querySelector('.dist-badge');
+                if (!badge) {{
+                  badge = document.createElement('span');
+                  badge.className = 'dist-badge';
+                  const vTag = clone.querySelector('.venue-tag');
+                  if (vTag) vTag.appendChild(badge);
+                }}
+                badge.title = `${{item.dist.toFixed(2)}} miles away`;
+                badge.innerHTML = `<span class="chip-icon">📍 </span>${{dStr}}`;
+              }}
+
+              list.appendChild(clone);
             }});
           }} else {{
             nearStream.style.display = 'none';
+            nearStream.innerHTML = '';
             citiesDiv.style.display = 'block';
-            const strayEvents = nearStream.querySelectorAll('.event');
-            if (strayEvents.length > 0) {{
-              strayEvents.forEach(ev => {{
-                const bucketName = ev.dataset.bucket;
-                const cityName = ev.dataset.city || 'other';
-                const targetBucket = citiesDiv.querySelector(`.city-section[data-city="${{cityName}}"] .bucket[data-bucket="${{bucketName}}"] ul`);
-                if (targetBucket) targetBucket.appendChild(ev);
-              }});
-              citiesDiv.querySelectorAll('.bucket ul').forEach(ul => {{
-                const items = Array.from(ul.children);
-                items.sort((a, b) => (parseInt(a.dataset.epoch || '0', 10) - parseInt(b.dataset.epoch || '0', 10)));
-                items.forEach(it => ul.appendChild(it));
-              }});
-            }}
           }}
         }}
       }});
@@ -6041,21 +6026,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
         const citiesDiv = day.querySelector('.cities');
         if (nearStream && citiesDiv) {{
           nearStream.style.display = 'none';
+          nearStream.innerHTML = '';
           citiesDiv.style.display = 'block';
-          const strayEvents = nearStream.querySelectorAll('.event');
-          if (strayEvents.length > 0) {{
-            strayEvents.forEach(ev => {{
-              const bucketName = ev.dataset.bucket;
-              const cityName = ev.dataset.city || 'other';
-              const targetBucket = citiesDiv.querySelector(`.city-section[data-city="${{cityName}}"] .bucket[data-bucket="${{bucketName}}"] ul`);
-              if (targetBucket) targetBucket.appendChild(ev);
-            }});
-            citiesDiv.querySelectorAll('.bucket ul').forEach(ul => {{
-              const items = Array.from(ul.children);
-              items.sort((a, b) => (parseInt(a.dataset.epoch || '0', 10) - parseInt(b.dataset.epoch || '0', 10)));
-              items.forEach(it => ul.appendChild(it));
-            }});
-          }}
         }}
       }});
 
