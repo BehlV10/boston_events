@@ -4271,92 +4271,59 @@ def render_page(results, weather=None, luckyseat_shows=None):
         </label>
       </div>
       <div class="filter-group time-filter-group" id="filter-group-time">
-        <h3>Time &amp; Timeframe <span class="spacer"></span> <button type="button" id="tod-reset">all</button></h3>
+        <h3>Time of Day <span class="spacer"></span> <button type="button" id="tod-reset">all</button></h3>
         <div class="chk-grid time-preset-grid">
           <label class="chk">
             <input type="radio" name="tod-filter" class="tod-radio" value="all" checked>
             <span>All times</span>
           </label>
           <label class="chk">
-            <input type="radio" name="tod-filter" class="tod-radio" value="late">
-            <span><span class="chip-icon">🍸 </span>After Dinner (8 PM – Midnight)</span>
+            <input type="radio" name="tod-filter" class="tod-radio" value="day">
+            <span><span class="chip-icon">☀️ </span>Daytime (&lt; 5 PM)</span>
           </label>
           <label class="chk">
             <input type="radio" name="tod-filter" class="tod-radio" value="night">
             <span><span class="chip-icon">🌙 </span>Evening (5 PM+)</span>
           </label>
-          <label class="chk">
-            <input type="radio" name="tod-filter" class="tod-radio" value="prime">
-            <span><span class="chip-icon">🌆 </span>Prime Evening (5 – 8 PM)</span>
-          </label>
-          <label class="chk">
-            <input type="radio" name="tod-filter" class="tod-radio" value="night_owl">
-            <span><span class="chip-icon">🦉 </span>Late Night (10 PM+)</span>
-          </label>
-          <label class="chk">
-            <input type="radio" name="tod-filter" class="tod-radio" value="day">
-            <span><span class="chip-icon">☀️ </span>Daytime (&lt; 5 PM)</span>
-          </label>
-          <label class="chk">
-            <input type="radio" name="tod-filter" class="tod-radio" value="afternoon">
-            <span><span class="chip-icon">🌤️ </span>Afternoon (12 – 5 PM)</span>
-          </label>
-          <label class="chk">
-            <input type="radio" name="tod-filter" class="tod-radio" value="morning">
-            <span><span class="chip-icon">☕ </span>Morning (&lt; 12 PM)</span>
-          </label>
         </div>
 
-        <div class="custom-time-range" id="custom-time-range">
-          <div class="custom-time-heading">
-            <span><span class="chip-icon">⏱️ </span>Custom Time Window</span>
-            <button type="button" class="btn-clear-time-range" id="btn-clear-time-range" style="display:none;">clear</button>
-          </div>
-          <div class="time-select-row">
-            <div class="time-input-wrap">
-              <label for="time-from-select">From</label>
-              <select id="time-from-select" class="time-dropdown">
-                <option value="">Any start</option>
-                <option value="06:00">6:00 AM</option>
-                <option value="07:00">7:00 AM</option>
-                <option value="08:00">8:00 AM</option>
-                <option value="09:00">9:00 AM</option>
-                <option value="10:00">10:00 AM</option>
-                <option value="11:00">11:00 AM</option>
-                <option value="12:00">12:00 PM (Noon)</option>
-                <option value="13:00">1:00 PM</option>
-                <option value="14:00">2:00 PM</option>
-                <option value="15:00">3:00 PM</option>
-                <option value="16:00">4:00 PM</option>
-                <option value="17:00">5:00 PM</option>
-                <option value="18:00">6:00 PM</option>
-                <option value="19:00">7:00 PM</option>
-                <option value="20:00">8:00 PM</option>
-                <option value="21:00">9:00 PM</option>
-                <option value="22:00">10:00 PM</option>
-                <option value="23:00">11:00 PM</option>
-              </select>
+        <div class="timeframe-toggle-wrap" style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--border);">
+          <label class="chk" for="timeframe-enable-chk" style="font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+            <input type="checkbox" id="timeframe-enable-chk">
+            <span><span class="chip-icon">⏱️ </span>Set timeframe window</span>
+          </label>
+
+          <div class="custom-time-range" id="custom-time-range" style="display: none; margin-top: 10px;">
+            <div class="time-select-row">
+              <div class="time-input-wrap">
+                <label for="time-from-select">From</label>
+                <select id="time-from-select" class="time-dropdown">
+                  <option value="20:00" selected>8:00 PM</option>
+                  <option value="17:00">5:00 PM</option>
+                  <option value="18:00">6:00 PM</option>
+                  <option value="19:00">7:00 PM</option>
+                  <option value="21:00">9:00 PM</option>
+                  <option value="22:00">10:00 PM</option>
+                  <option value="12:00">12:00 PM</option>
+                  <option value="09:00">9:00 AM</option>
+                </select>
+              </div>
+              <div class="time-range-arrow">→</div>
+              <div class="time-input-wrap">
+                <label for="time-to-select">To</label>
+                <select id="time-to-select" class="time-dropdown">
+                  <option value="24:00" selected>12:00 AM (Midnight)</option>
+                  <option value="26:00">2:00 AM (Late Night)</option>
+                  <option value="23:00">11:00 PM</option>
+                  <option value="22:00">10:00 PM</option>
+                  <option value="21:00">9:00 PM</option>
+                  <option value="20:00">8:00 PM</option>
+                  <option value="17:00">5:00 PM</option>
+                </select>
+              </div>
             </div>
-            <div class="time-range-arrow">→</div>
-            <div class="time-input-wrap">
-              <label for="time-to-select">To</label>
-              <select id="time-to-select" class="time-dropdown">
-                <option value="">Any end</option>
-                <option value="12:00">12:00 PM (Noon)</option>
-                <option value="14:00">2:00 PM</option>
-                <option value="17:00">5:00 PM</option>
-                <option value="18:00">6:00 PM</option>
-                <option value="19:00">7:00 PM</option>
-                <option value="20:00">8:00 PM</option>
-                <option value="21:00">9:00 PM</option>
-                <option value="22:00">10:00 PM</option>
-                <option value="23:00">11:00 PM</option>
-                <option value="24:00">12:00 AM (Midnight)</option>
-                <option value="26:00">2:00 AM (Late Night)</option>
-              </select>
-            </div>
+            <div class="time-range-active-indicator" id="time-range-active-indicator" style="display:none;"></div>
           </div>
-          <div class="time-range-active-indicator" id="time-range-active-indicator" style="display:none;"></div>
         </div>
       </div>
       <div class="filter-group">
@@ -4416,9 +4383,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
         <button type="button" class="chip" data-time="weekend"><span class="chip-icon">🎉 </span>This Weekend</button>
         <button type="button" class="chip" data-time="week"><span class="chip-icon">📅 </span>Next 7 Days</button>
         <button type="button" class="chip" data-time="all">All Upcoming</button>
-        <button type="button" class="chip chip-tod" id="quick-day-chip" data-tod="day" title="Filter to daytime events (before 5 PM)"><span class="chip-icon">☀️ </span>Daytime</button>
-        <button type="button" class="chip chip-tod" id="quick-night-chip" data-tod="night" title="Filter to evening events (5 PM and later)"><span class="chip-icon">🌙 </span>Evening</button>
-        <button type="button" class="chip chip-tod" id="quick-late-chip" data-tod="late" title="Filter to events after dinner (8 PM to Midnight)"><span class="chip-icon">🍸 </span>8 PM – Midnight</button>
         <button type="button" class="chip chip-time-custom" id="quick-custom-time-chip" style="display:none;" title="Click to clear timeframe filter"><span id="active-timeframe-label"></span> <span class="chip-icon" style="margin-left:4px;">✕</span></button>
         <button type="button" class="chip chip-active-genre" id="quick-active-genre-chip" style="display:none;" title="Click to clear genre filter"><span id="active-genre-label"></span> <span class="chip-icon" style="margin-left:4px;">✕</span></button>
         <button type="button" class="chip chip-starred" id="quick-starred-chip" title="Filter to your saved events"><span class="chip-icon">⭐ </span>Saved <span id="starred-count" style="display:none;">(0)</span></button>
@@ -4731,22 +4695,16 @@ def render_page(results, weather=None, luckyseat_shows=None):
     let timeTo = null;
     const timeFromSelect = document.getElementById('time-from-select');
     const timeToSelect = document.getElementById('time-to-select');
-    const btnClearTimeRange = document.getElementById('btn-clear-time-range');
+    const timeframeEnableChk = document.getElementById('timeframe-enable-chk');
+    const customTimeRangeDiv = document.getElementById('custom-time-range');
     const timeRangeIndicator = document.getElementById('time-range-active-indicator');
-    const quickLateChip = document.getElementById('quick-late-chip');
     const quickCustomTimeChip = document.getElementById('quick-custom-time-chip');
     const activeTimeframeLabel = document.getElementById('active-timeframe-label');
 
     const TOD_PRESETS = {{
       'all': {{ from: null, to: null, label: 'All times' }},
-      'late': {{ from: 1200, to: 1440, label: '8 PM – Midnight' }},
-      'after_dinner': {{ from: 1200, to: 1440, label: '8 PM – Midnight' }},
-      'night': {{ from: 1020, to: null, label: 'Evening (5 PM+)' }},
-      'prime': {{ from: 1020, to: 1200, label: 'Prime (5 – 8 PM)' }},
-      'night_owl': {{ from: 1320, to: null, label: 'Late Night (10 PM+)' }},
       'day': {{ from: 360, to: 1020, label: 'Daytime (< 5 PM)' }},
-      'morning': {{ from: 360, to: 720, label: 'Morning (< 12 PM)' }},
-      'afternoon': {{ from: 720, to: 1020, label: 'Afternoon (12 – 5 PM)' }}
+      'night': {{ from: 1020, to: null, label: 'Evening (5 PM+)' }}
     }};
 
     function parseTimeToMinutes(str) {{
@@ -4809,24 +4767,23 @@ def render_page(results, weather=None, luckyseat_shows=None):
         r.checked = (r.value === activeTod);
       }});
 
-      if (timeFromSelect) {{
-        timeFromSelect.value = timeFrom !== null ? formatMinutesToHHMM(timeFrom) : '';
+      const isCustomActive = (timeFrom !== null || timeTo !== null);
+      if (timeframeEnableChk) {{
+        timeframeEnableChk.checked = isCustomActive;
       }}
-      if (timeToSelect) {{
-        timeToSelect.value = timeTo !== null ? formatMinutesToHHMM(timeTo) : '';
+      if (customTimeRangeDiv) {{
+        customTimeRangeDiv.style.display = isCustomActive ? 'block' : 'none';
       }}
 
-      if (quickDayChip) quickDayChip.classList.toggle('active', activeTod === 'day');
-      if (quickNightChip) quickNightChip.classList.toggle('active', activeTod === 'night');
-      if (quickLateChip) quickLateChip.classList.toggle('active', activeTod === 'late' || (timeFrom === 1200 && timeTo === 1440));
-
-      const hasCustomTime = (timeFrom !== null || timeTo !== null) && activeTod !== 'all';
-      if (btnClearTimeRange) {{
-        btnClearTimeRange.style.display = hasCustomTime ? 'inline-block' : 'none';
+      if (timeFromSelect && timeFrom !== null) {{
+        timeFromSelect.value = formatMinutesToHHMM(timeFrom);
+      }}
+      if (timeToSelect && timeTo !== null) {{
+        timeToSelect.value = formatMinutesToHHMM(timeTo);
       }}
 
       if (timeRangeIndicator) {{
-        if (hasCustomTime) {{
+        if (isCustomActive) {{
           let desc = '';
           if (timeFrom !== null && timeTo !== null) {{
             desc = `Active: ${{formatMinutesToLabel(timeFrom)}} – ${{formatMinutesToLabel(timeTo)}}`;
@@ -4843,7 +4800,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
       }}
 
       if (quickCustomTimeChip && activeTimeframeLabel) {{
-        if (hasCustomTime && activeTod !== 'day' && activeTod !== 'night' && activeTod !== 'late') {{
+        if (isCustomActive) {{
           let label = '';
           if (timeFrom !== null && timeTo !== null) {{
             label = `${{formatMinutesToLabel(timeFrom)}} – ${{formatMinutesToLabel(timeTo)}}`;
@@ -4869,18 +4826,13 @@ def render_page(results, weather=None, luckyseat_shows=None):
       }} else {{
         timeFrom = parseTimeToMinutes(fromVal);
         timeTo = parseTimeToMinutes(toVal);
-        activeTod = 'custom';
-        for (const [k, p] of Object.entries(TOD_PRESETS)) {{
-          if (p.from === timeFrom && p.to === timeTo) {{
-            activeTod = k;
-            break;
-          }}
-        }}
-        if (timeFrom === null && timeTo === null) {{
+        if (timeFrom !== null || timeTo !== null) {{
+          activeTod = 'custom';
+        }} else {{
           activeTod = 'all';
         }}
       }}
-      if ((activeTod === 'day' || activeTod === 'morning') && timeFilter === 'today') {{
+      if ((activeTod === 'day') && timeFilter === 'today') {{
         showPastToday = true;
       }}
       updateTimeUI();
@@ -6476,17 +6428,28 @@ def render_page(results, weather=None, luckyseat_shows=None):
       }}
     }}
 
-    if (quickDayChip) {{
-      quickDayChip.addEventListener('click', () => setTod('day'));
-    }}
-    if (quickNightChip) {{
-      quickNightChip.addEventListener('click', () => setTod('night'));
-    }}
-    if (quickLateChip) {{
-      quickLateChip.addEventListener('click', () => setTod('late'));
-    }}
     if (quickCustomTimeChip) {{
-      quickCustomTimeChip.addEventListener('click', () => setTimeRange(null, null, 'all'));
+      quickCustomTimeChip.addEventListener('click', () => {{
+        if (timeframeEnableChk) timeframeEnableChk.checked = false;
+        if (customTimeRangeDiv) customTimeRangeDiv.style.display = 'none';
+        setTimeRange(null, null, 'all');
+      }});
+    }}
+
+    if (timeframeEnableChk) {{
+      timeframeEnableChk.addEventListener('change', () => {{
+        if (timeframeEnableChk.checked) {{
+          if (customTimeRangeDiv) customTimeRangeDiv.style.display = 'block';
+          const f = (timeFromSelect && timeFromSelect.value) ? timeFromSelect.value : '20:00';
+          const t = (timeToSelect && timeToSelect.value) ? timeToSelect.value : '24:00';
+          if (timeFromSelect) timeFromSelect.value = f;
+          if (timeToSelect) timeToSelect.value = t;
+          setTimeRange(f, t);
+        }} else {{
+          if (customTimeRangeDiv) customTimeRangeDiv.style.display = 'none';
+          setTimeRange(null, null, 'all');
+        }}
+      }});
     }}
 
     todRadios.forEach(radio => {{
@@ -6498,6 +6461,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
       }});
       radio.addEventListener('change', () => {{
         if (radio.checked) {{
+          if (timeframeEnableChk) timeframeEnableChk.checked = false;
+          if (customTimeRangeDiv) customTimeRangeDiv.style.display = 'none';
           setTod(radio.value);
         }}
       }});
@@ -6507,6 +6472,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
       timeFromSelect.addEventListener('change', () => {{
         const f = timeFromSelect.value;
         const t = timeToSelect ? timeToSelect.value : '';
+        if (timeframeEnableChk) timeframeEnableChk.checked = true;
         setTimeRange(f, t);
       }});
     }}
@@ -6514,17 +6480,17 @@ def render_page(results, weather=None, luckyseat_shows=None):
       timeToSelect.addEventListener('change', () => {{
         const f = timeFromSelect ? timeFromSelect.value : '';
         const t = timeToSelect.value;
+        if (timeframeEnableChk) timeframeEnableChk.checked = true;
         setTimeRange(f, t);
-      }});
-    }}
-    if (btnClearTimeRange) {{
-      btnClearTimeRange.addEventListener('click', () => {{
-        setTimeRange(null, null, 'all');
       }});
     }}
 
     const todResetBtn = document.getElementById('tod-reset');
-    if (todResetBtn) todResetBtn.addEventListener('click', () => setTimeRange(null, null, 'all'));
+    if (todResetBtn) todResetBtn.addEventListener('click', () => {{
+      if (timeframeEnableChk) timeframeEnableChk.checked = false;
+      if (customTimeRangeDiv) customTimeRangeDiv.style.display = 'none';
+      setTimeRange(null, null, 'all');
+    }});
 
     if (quickFeaturedChip) {{
       quickFeaturedChip.addEventListener('click', () => {{
@@ -7439,12 +7405,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
 
     hashToState();
     apply();
-
-    if ('requestIdleCallback' in window) {{
-      requestIdleCallback(() => {{ ensureDeferredDaysHydrated(); }}, {{ timeout: 2500 }});
-    }} else {{
-      setTimeout(() => {{ ensureDeferredDaysHydrated(); }}, 2500);
-    }}
   </script>
 </body>
 </html>"""
