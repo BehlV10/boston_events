@@ -219,116 +219,6 @@
     "expires": "2026-10-30"
   },
   {
-    "id": "2026-10-31-coolidge",
-    "match": {
-      "name_contains": "Halloween Horror Marathon",
-      "venue_contains": "Coolidge"
-    },
-    "badge": "\ud83c\udfac Legendary",
-    "note": "The 25th annual dusk-to-dawn 12-hour 35mm cult horror marathon. A Boston cinema rite of passage.",
-    "start_date": "2026-10-31",
-    "expires": "2026-10-31"
-  },
-  {
-    "id": "2026-10-31-punkoween",
-    "match": {
-      "name_contains": "Punkoween",
-      "venue_contains": "Middle East"
-    },
-    "badge": "\ud83c\udfb8 Underground Pick",
-    "note": "Local punk heroes cover Bad Brains, Dead Kennedys, Black Flag, and Slapshot in Central Square.",
-    "start_date": "2026-10-31",
-    "expires": "2026-10-31"
-  },
-  {
-    "id": "2026-10-31-scaryoke",
-    "match": {
-      "name_contains": "SCARY-OKE",
-      "venue_contains": "Lilypad"
-    },
-    "badge": "\ud83c\udfa4 Quirky Gem",
-    "note": "Inman Square's intimate micro-venue hosts eccentric psychedelic karaoke with live synthesizer backup.",
-    "start_date": "2026-10-31",
-    "expires": "2026-10-31"
-  },
-  {
-    "id": "2026-10-31-coco",
-    "match": {
-      "name_contains": "Coco in Concert",
-      "venue_contains": "Symphony Hall"
-    },
-    "badge": "\ud83c\udfbb Film & Symphony",
-    "note": "Pixar's vibrant Day of the Dead classic with Michael Giacchino's score performed live by a 50-piece orchestra.",
-    "start_date": "2026-10-31",
-    "expires": "2026-10-31"
-  },
-  {
-    "id": "2026-10-31-rockwell-fright",
-    "match": {
-      "name_contains": "Fright Night",
-      "venue_contains": "Rockwell"
-    },
-    "badge": "\ud83c\udf83 Davis Sq Horror Show",
-    "note": "Special Halloween night horror comedy showcase in Davis Square\u2019s underground stage.",
-    "start_date": "2026-10-31",
-    "expires": "2026-10-31"
-  },
-  {
-    "id": "2026-10-31-sueco",
-    "match": {
-      "name_contains": "Sueco",
-      "venue_contains": "Paradise Rock"
-    },
-    "badge": "\u26a1 Alt-Rock Energy",
-    "note": "Screaming alt-pop/punk powerhouse bringing raw electricity to Commonwealth Ave.",
-    "start_date": "2026-10-31",
-    "expires": "2026-10-31"
-  },
-  {
-    "id": "2026-10-31-bennygreen",
-    "match": {
-      "name_contains": "BENNY GREEN",
-      "venue_contains": "Scullers"
-    },
-    "badge": "\ud83c\udfb9 Jazz Royalty",
-    "note": "Hard-bop piano master and former Jazz Messenger delivering world-class swing overlooking Boston.",
-    "start_date": "2026-10-31",
-    "expires": "2026-10-31"
-  },
-  {
-    "id": "2026-10-31-danis",
-    "match": {
-      "name_contains": "Drag Brunch",
-      "venue_contains": "Dani's"
-    },
-    "badge": "\ud83c\udf83 Spooky Drag",
-    "note": "Back Bay's bustling queer bar Halloween costume party and high-energy drag extravaganza.",
-    "start_date": "2026-10-31",
-    "expires": "2026-10-31"
-  },
-  {
-    "id": "2026-10-31-broadwayrave",
-    "match": {
-      "name_contains": "Broadway Rave",
-      "venue_contains": "Brighton Music Hall"
-    },
-    "badge": "\ud83c\udfad Theatrical Dance",
-    "note": "Costumed musical theater blowout where everyone belts Wicked, Hamilton, and Rent hits all night.",
-    "start_date": "2026-10-31",
-    "expires": "2026-10-31"
-  },
-  {
-    "id": "2026-10-31-divaland",
-    "match": {
-      "name_contains": "DIVALAND",
-      "venue_contains": "Sinclair"
-    },
-    "badge": "\ud83d\udc83 Halloween Dance",
-    "note": "Pop diva dance blowout and costumed dance floor in Harvard Square.",
-    "start_date": "2026-10-31",
-    "expires": "2026-10-31"
-  },
-  {
     "id": "2026-11-01-sinclair",
     "match": {
       "name_contains": "The Gringos",
@@ -766,5 +656,280 @@
     "note": "Giant projector screening of Survivor with custom themed beers in Somerville.",
     "start_date": "2026-11-04",
     "expires": "2026-11-04"
+  },
+  {
+    "id": "2026-10-31-vrocc-muertos",
+    "match": {
+      "name_contains": "VROCC D\u00eda de Muertos",
+      "venue_contains": ""
+    },
+    "badge": "\ud83c\udf3a D\u00eda de Muertos",
+    "note": "East Boston community ofrendas, traditional folk art, authentic food, and live mariachi.",
+    "start_date": "2026-10-31",
+    "expires": "2026-10-31"
+  },
+  {
+    "id": "2026-10-31-ica-watershed",
+    "match": {
+      "name_contains": "Watershed Community Event: Veronica",
+      "venue_contains": "ICA"
+    },
+    "badge": "\ud83c\udfba Waterfront Mariachi",
+    "note": "Free family cultural celebration with Veronica Robles Cultural Center and all-female mariachi on Boston Harbor.",
+    "start_date": "2026-10-31",
+    "expires": "2026-10-31"
+  },
+  {
+    "id": "2026-10-31-sam-adams",
+    "match": {
+      "name_contains": "Halloween Party",
+      "venue_contains": "Sam Adams"
+    },
+    "badge": "\ud83c\udf7b Brewery Costume Bash",
+    "note": "Festive autumn craft brews, costume contests, and live DJs right in Downtown Boston.",
+    "start_date": "2026-10-31",
+    "expires": "2026-10-31"
+  },
+  {
+    "id": "2026-10-31-death-becomes-her",
+    "match": {
+      "name_contains": "Death Becomes She/Her",
+      "venue_contains": "Club Caf\u00e9"
+    },
+    "badge": "\ud83d\udc51 Cult Drag Musical",
+    "note": "South End\u2019s outrageous live singing drag parody and costume extravaganza.",
+    "start_date": "2026-10-31",
+    "expires": "2026-10-31"
+  },
+  {
+    "id": "2026-10-31-coco-symphony",
+    "match": {
+      "name_contains": "Coco in Concert",
+      "venue_contains": "Symphony"
+    },
+    "badge": "\ud83c\udfbb Film & Symphony",
+    "note": "Disney & Pixar\u2019s D\u00eda de los Muertos masterpiece projected in HD with live symphonic orchestra at Symphony Hall.",
+    "start_date": "2026-10-31",
+    "expires": "2026-10-31"
+  },
+  {
+    "id": "2026-10-31-nightmare-hanover",
+    "match": {
+      "name_contains": "Nightmare on Hanover",
+      "venue_contains": "Improv Asylum"
+    },
+    "badge": "\ud83c\udfad Halloween Comedy",
+    "note": "Improv Asylum\u2019s flagship North End Halloween sketch revue and high-octane improv.",
+    "start_date": "2026-10-31",
+    "expires": "2026-10-31"
+  },
+  {
+    "id": "2026-10-31-ica-magic",
+    "match": {
+      "name_contains": "ICA Halloween",
+      "venue_contains": "ICA"
+    },
+    "badge": "\u2728 Waterfront Art Party",
+    "note": "Boston Harbor museum transformed into an enchanted Halloween dance party with DJs and art installations.",
+    "start_date": "2026-10-31",
+    "expires": "2026-10-31"
+  },
+  {
+    "id": "2026-10-31-entre-mundos",
+    "match": {
+      "name_contains": "Entre Mundos",
+      "venue_contains": ""
+    },
+    "badge": "\ud83d\udc80 D\u00eda de los Muertos Gala",
+    "note": "Sensational Latin rhythms, traditional altar dedications, sugar skull face painting, and dancing.",
+    "start_date": "2026-10-31",
+    "expires": "2026-10-31"
+  },
+  {
+    "id": "2026-10-31-trixie-royale",
+    "match": {
+      "name_contains": "Trixie",
+      "venue_contains": "Royale"
+    },
+    "badge": "\ud83d\udc83 Halloween Dance Party",
+    "note": "Massive drag dance party at Theatre District\u2019s grand historic ballroom.",
+    "start_date": "2026-10-31",
+    "expires": "2026-10-31"
+  },
+  {
+    "id": "2026-10-31-collective-64",
+    "match": {
+      "name_contains": "Collective 64",
+      "venue_contains": ""
+    },
+    "badge": "\ud83c\udf83 Underground Party",
+    "note": "Partiful community Halloween creative warehouse party with underground electronic sets.",
+    "start_date": "2026-10-31",
+    "expires": "2026-10-31"
+  },
+  {
+    "id": "2026-10-31-tarot-brunch",
+    "match": {
+      "name_contains": "TAROT DJ BRUNCH",
+      "venue_contains": "Lou"
+    },
+    "badge": "\ud83d\udd2e Spooky Tarot Brunch",
+    "note": "Tarot card readings, DJ Rattbott spinning vinyl, and hearty autumn brunch in Harvard Square.",
+    "start_date": "2026-10-31",
+    "expires": "2026-10-31"
+  },
+  {
+    "id": "2026-10-31-punkoween",
+    "match": {
+      "name_contains": "Punkoween",
+      "venue_contains": "Middle East"
+    },
+    "badge": "\ud83c\udfb8 Hardcore Legend",
+    "note": "Annual Central Square punk and hardcore blowout featuring explosive tribute sets.",
+    "start_date": "2026-10-31",
+    "expires": "2026-10-31"
+  },
+  {
+    "id": "2026-10-31-benny-green",
+    "match": {
+      "name_contains": "BENNY GREEN",
+      "venue_contains": "Scullers"
+    },
+    "badge": "\ud83c\udfb9 Jazz Royalty",
+    "note": "Virtuoso hard-bop pianist Benny Green performing intimate classic jazz sets overlooking the Charles.",
+    "start_date": "2026-10-31",
+    "expires": "2026-10-31"
+  },
+  {
+    "id": "2026-10-31-dub-apocalypse",
+    "match": {
+      "name_contains": "Dub Apocalypse",
+      "venue_contains": "Lizard Lounge"
+    },
+    "badge": "\u26a1 Cellar Dub Groove",
+    "note": "Legendary subterranean dub-reggae-jazz masquerade party in Cambridge\u2019s favorite cellar.",
+    "start_date": "2026-10-31",
+    "expires": "2026-10-31"
+  },
+  {
+    "id": "2026-10-31-divaland",
+    "match": {
+      "name_contains": "DIVALAND",
+      "venue_contains": "Sinclair"
+    },
+    "badge": "\ud83d\udc80 Divaland of the Dead",
+    "note": "Harvard Square dance blowout honoring the greatest pop divas of all time in full costume.",
+    "start_date": "2026-10-31",
+    "expires": "2026-10-31"
+  },
+  {
+    "id": "2026-10-31-bulb-blitz",
+    "match": {
+      "name_contains": "Bulb Blitz",
+      "venue_contains": "Somerville"
+    },
+    "badge": "\ud83c\udf31 Community Harvest",
+    "note": "Planting spring bulbs, kids costume parade, fresh cider, and autumn community celebration.",
+    "start_date": "2026-10-31",
+    "expires": "2026-10-31"
+  },
+  {
+    "id": "2026-10-31-aeronaut-bonanza",
+    "match": {
+      "name_contains": "Halloween Bonanza",
+      "venue_contains": "AERONAUT"
+    },
+    "badge": "\ud83c\udf7b Brewery Bonanza",
+    "note": "Annual Aeronaut taproom costume extravaganza with scavenger hunt, brass band, and prizes.",
+    "start_date": "2026-10-31",
+    "expires": "2026-10-31"
+  },
+  {
+    "id": "2026-10-31-fright-night-rockwell",
+    "match": {
+      "name_contains": "Fright Night",
+      "venue_contains": "Rockwell"
+    },
+    "badge": "\ud83c\udfad Davis Sq Horror Cabaret",
+    "note": "Immersive spooky theatrical comedy, variety acts, and live cabaret in Davis Square.",
+    "start_date": "2026-10-31",
+    "expires": "2026-10-31"
+  },
+  {
+    "id": "2026-10-31-rocky-horror",
+    "match": {
+      "name_contains": "The Rocky Horror Picture Show",
+      "venue_contains": "Somerville"
+    },
+    "badge": "\ud83c\udfac 35mm Cult Classic",
+    "note": "Davis Square\u2019s legendary 35mm film screening with live shadowcast performers and interactive prop bags.",
+    "start_date": "2026-10-31",
+    "expires": "2026-10-31"
+  },
+  {
+    "id": "2026-10-31-cirque-of-dead",
+    "match": {
+      "name_contains": "Cirque of",
+      "venue_contains": "Armory"
+    },
+    "badge": "\ud83c\udfaa Macabre Circus",
+    "note": "Boston Circus Guild\u2019s dark carnival of aerial acrobatics, fire performance, and chilling burlesque.",
+    "start_date": "2026-10-31",
+    "expires": "2026-10-31"
+  },
+  {
+    "id": "2026-10-31-city-hall-blair",
+    "match": {
+      "name_contains": "BLAIR",
+      "venue_contains": "City Hall"
+    },
+    "badge": "\ud83c\udf83 City Hall Mega Bash",
+    "note": "Massive free outdoor Halloween dance party, live DJs, food trucks, and thousands in costume at Boston City Hall Plaza.",
+    "start_date": "2026-10-31",
+    "expires": "2026-11-01"
+  },
+  {
+    "id": "2026-10-31-w-hotel-ball",
+    "match": {
+      "name_contains": "Haunted Hotel",
+      "venue_contains": "W"
+    },
+    "badge": "\ud83c\udf78 Luxury Halloween Ball",
+    "note": "Grand multi-room costume gala with top DJs and immersive theatrical decor in Theatre District.",
+    "start_date": "2026-10-31",
+    "expires": "2026-11-01"
+  },
+  {
+    "id": "2026-10-31-greatest-mansion",
+    "match": {
+      "name_contains": "Greatest Haunted",
+      "venue_contains": "Greatest Bar"
+    },
+    "badge": "\ud83d\udc7b 4-Floor Mega Party",
+    "note": "Four levels of high-energy club entertainment and massive costume contest by TD Garden.",
+    "start_date": "2026-10-31",
+    "expires": "2026-11-01"
+  },
+  {
+    "id": "2026-10-31-bow-costume",
+    "match": {
+      "name_contains": "Costume Contest at Bow",
+      "venue_contains": "Bow"
+    },
+    "badge": "\ud83c\udfc6 Union Sq Costume Bash",
+    "note": "Open-air courtyard costume showdown with local food vendors, craft brews, and prizes in Union Square.",
+    "start_date": "2026-10-31",
+    "expires": "2026-11-01"
+  },
+  {
+    "id": "2026-10-31-block-party-pet",
+    "match": {
+      "name_contains": "Block Party and Pet",
+      "venue_contains": ""
+    },
+    "badge": "\ud83d\udc36 Community Block Party",
+    "note": "Beloved Somerville neighborhood block party with dog costume parade, autumn treats, and games.",
+    "start_date": "2026-10-31",
+    "expires": "2026-11-01"
   }
 ]

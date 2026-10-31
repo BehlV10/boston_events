@@ -1248,8 +1248,11 @@ def render_page(results, weather=None, luckyseat_shows=None):
                 tod_val = "night"
             else:
                 tod_val = "night" if ("00:00" in raw_date or "12:00" in raw_date) else "all"
+            time_mins = t_obj.hour * 60 + t_obj.minute
+            time_attr = f' data-time-mins="{time_mins}" data-time-str="{t_obj.strftime("%H:%M")}"'
         else:
             tod_val = "all"
+            time_attr = ' data-time-mins="-1"'
         tod_attr = f' data-tod="{tod_val}"'
 
         if venue:
@@ -1302,7 +1305,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
 
         return (
             f'<li class="event{hl_class}" data-id="{ev_id}" data-cat="{escape(cat)}" data-bucket="{escape(bucket)}"{genre_attr} '
-            f'data-venue="{escape(source)}" data-city="{escape(city)}"{sub_attrs}{transit_attr}{tod_attr} '
+            f'data-venue="{escape(source)}" data-city="{escape(city)}"{sub_attrs}{transit_attr}{tod_attr}{time_attr} '
             f'data-recur="{recur_flag}" data-free="{free_flag}"{epoch_attr}{geo_attrs}{hl_attr}>'
             f'<div class="when">{escape(format_when(e))}</div>'
             f'<div class="what">{star_btn}{link}{price_tag}{recur_badge}{hl_badge}'
@@ -1550,15 +1553,29 @@ def render_page(results, weather=None, luckyseat_shows=None):
     other_note = ""
     genres_map = {gid: {"label": ginfo["label"], "icon": ginfo["icon"], "color": ginfo["color"]} for gid, ginfo in MUSIC_GENRES.items()}
 
+    now_eastern = datetime.now(EASTERN)
+    is_halloween_weekend = (now_eastern.month == 10 and now_eastern.day >= 29) or (now_eastern.month == 11 and now_eastern.day <= 2)
+    default_theme = "halloween" if is_halloween_weekend else "indie"
+
     return f"""<!doctype html>
-<html lang="en">
+<html lang="en" data-theme="{default_theme}">
 <head>
 <meta charset="utf-8">
 <title>Wicked Boston Events</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
 <script>
   try {{
-    var t = localStorage.getItem('boston_events_theme') || 'indie';
+    var manualTheme = localStorage.getItem('boston_events_theme_manual');
+    var t = localStorage.getItem('boston_events_theme');
+    var now = new Date();
+    var m = now.getMonth() + 1;
+    var d = now.getDate();
+    var isHalloween = (m === 10 && d >= 29) || (m === 11 && d <= 2);
+    if (!manualTheme && isHalloween) {{
+      t = 'halloween';
+    }} else if (!t) {{
+      t = isHalloween ? 'halloween' : 'indie';
+    }}
     document.documentElement.setAttribute('data-theme', t);
   }} catch(e) {{}}
 </script>
@@ -2373,6 +2390,91 @@ def render_page(results, weather=None, luckyseat_shows=None):
   .city-swatch {{ display: inline-block; width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }}
   .free-toggle {{ display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; cursor: pointer; color: var(--green); user-select: none; }}
   .free-toggle input {{ accent-color: var(--green); width: 14px; height: 14px; cursor: pointer; margin: 0; }}
+
+  /* Timeframe & Custom Range Controls */
+  .custom-time-range {{
+    margin-top: 9px;
+    padding-top: 9px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }}
+  .custom-time-heading {{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }}
+  .btn-clear-time-range {{
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 10px;
+    padding: 1px 7px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: inherit;
+  }}
+  .btn-clear-time-range:hover {{
+    color: var(--accent);
+    border-color: var(--accent);
+  }}
+  .time-select-row {{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }}
+  .time-input-wrap {{
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }}
+  .time-input-wrap label {{
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+  }}
+  .time-dropdown {{
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--fg);
+    padding: 5px 6px;
+    border-radius: var(--radius-sm);
+    font-size: 11.5px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+  }}
+  .time-dropdown:focus {{
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-glow);
+  }}
+  .time-range-arrow {{
+    color: var(--muted);
+    font-size: 13px;
+    padding-top: 14px;
+    user-select: none;
+  }}
+  .time-range-active-indicator {{
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--accent);
+    font-weight: 600;
+    line-height: 1.3;
+  }}
+  .chip-time-custom {{
+    background: rgba(255, 121, 63, 0.15) !important;
+    border-color: #ff793f !important;
+    color: #ff9f43 !important;
+  }}
 
   /* Search Box */
   .search-input-wrap {{ position: relative; display: flex; align-items: center; }}
@@ -3498,6 +3600,11 @@ def render_page(results, weather=None, luckyseat_shows=None):
     color: #ffffff;
     box-shadow: 0 0 10px rgba(255, 75, 147, 0.5);
   }}
+  [data-theme="halloween"] .theme-pill-btn.active {{
+    background: linear-gradient(135deg, #ff793f 0%, #ff4757 100%);
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(255, 121, 63, 0.5);
+  }}
 
   /* Indie Guide Aesthetic */
   [data-theme="indie"] .chip-icon,
@@ -3855,10 +3962,178 @@ def render_page(results, weather=None, luckyseat_shows=None):
     background: rgba(30, 22, 60, 0.65);
     border: 1px solid rgba(255, 107, 181, 0.25);
   }}
-  [data-theme="anime"] .share-filter-btn:hover {{
-    border-color: #00f0ff;
-    box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
-    color: #00f0ff;
+  /* =========================================================================
+     HALLOWEEN & DÍA DE LOS MUERTOS THEME (Nocturnal Twilight, Orange & Black)
+     ========================================================================= */
+  [data-theme="halloween"] {{
+    --bg: #09050e;
+    --card: #130a1c;
+    --card-hover: #1c1028;
+    --fg: #fffcf6;
+    --muted: #a395b5;
+    --accent: #ff793f;
+    --accent-glow: rgba(255, 121, 63, 0.35);
+    --border: rgba(255, 121, 63, 0.22);
+    --border-hover: rgba(255, 121, 63, 0.45);
+    --green: #00d2d3;
+    --green-bg: rgba(0, 210, 211, 0.14);
+    --green-border: rgba(0, 210, 211, 0.35);
+    --warn: #ff9f43;
+    --radius-lg: 16px;
+    --radius-md: 10px;
+    --radius-sm: 6px;
+  }}
+
+  [data-theme="halloween"] body {{
+    background-color: var(--bg);
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255, 121, 63, 0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 40% at 90% 40%, rgba(142, 68, 173, 0.06) 0%, transparent 60%);
+    background-attachment: fixed;
+    color: var(--fg);
+  }}
+
+  [data-theme="halloween"] .banner {{
+    background-color: #0d0617;
+    background-image:
+      linear-gradient(180deg, rgba(13, 6, 23, 0.45) 0%, rgba(20, 9, 34, 0.75) 55%, rgba(9, 5, 14, 0.98) 100%),
+      url('banner_halloween.jpg');
+    background-position: center 85%;
+    background-size: cover;
+    border-bottom: 2px solid rgba(255, 121, 63, 0.45);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 121, 63, 0.15);
+  }}
+
+  [data-theme="halloween"] .banner-top-tag {{
+    color: #ff9f43;
+    text-shadow: 0 0 14px rgba(255, 159, 67, 0.7);
+    letter-spacing: 0.18em;
+    font-weight: 800;
+  }}
+
+  [data-theme="halloween"] .live-pulse {{
+    background: #ff793f;
+    box-shadow: 0 0 10px #ff793f, 0 0 20px #ff793f;
+  }}
+
+  [data-theme="halloween"] .banner-title {{
+    background: linear-gradient(135deg, #ffffff 15%, #ff9f43 55%, #ff5252 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 25px rgba(255, 121, 63, 0.4));
+    letter-spacing: -0.02em;
+  }}
+
+  [data-theme="halloween"] .banner-meta-pill {{
+    background: rgba(22, 11, 36, 0.88);
+    border: 1px solid rgba(255, 121, 63, 0.4);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 16px rgba(255, 121, 63, 0.18);
+    border-radius: 999px;
+    backdrop-filter: blur(10px);
+  }}
+
+  [data-theme="halloween"] .pill-submit-btn {{
+    background: linear-gradient(135deg, #ff4757 0%, #ff793f 60%, #f39c12 100%);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    color: #fff;
+    box-shadow: 0 0 14px rgba(255, 121, 63, 0.5);
+    font-weight: 800;
+    border-radius: 999px;
+  }}
+
+  [data-theme="halloween"] .pill-submit-btn:hover {{
+    filter: brightness(1.15);
+    box-shadow: 0 0 22px rgba(255, 121, 63, 0.75);
+    transform: translateY(-1px) scale(1.02);
+  }}
+
+  [data-theme="halloween"] .chip,
+  [data-theme="halloween"] .loc-chip,
+  [data-theme="halloween"] .genre-chip,
+  [data-theme="halloween"] .transit-chip,
+  [data-theme="halloween"] .sub-chip {{
+    border-radius: 999px;
+    background: rgba(26, 14, 42, 0.7);
+    border: 1px solid rgba(255, 121, 63, 0.25);
+    color: #d8cde8;
+    backdrop-filter: blur(8px);
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }}
+
+  [data-theme="halloween"] .chip:hover,
+  [data-theme="halloween"] .loc-chip:hover,
+  [data-theme="halloween"] .genre-chip:hover,
+  [data-theme="halloween"] .transit-chip:hover,
+  [data-theme="halloween"] .sub-chip:hover {{
+    border-color: #ff9f43;
+    color: #ffffff;
+    box-shadow: 0 0 14px rgba(255, 159, 67, 0.4);
+    transform: translateY(-2px);
+  }}
+
+  [data-theme="halloween"] .chip.active,
+  [data-theme="halloween"] .loc-chip.active,
+  [data-theme="halloween"] .genre-chip.active,
+  [data-theme="halloween"] .sub-chip.active {{
+    background: linear-gradient(135deg, rgba(255, 121, 63, 0.4) 0%, rgba(224, 86, 253, 0.28) 100%);
+    border-color: #ff793f;
+    color: #ffeaa7;
+    box-shadow: 0 0 14px rgba(255, 121, 63, 0.4);
+    font-weight: 700;
+  }}
+
+  [data-theme="halloween"] .day {{
+    background: rgba(19, 10, 31, 0.75);
+    border: 1px solid rgba(255, 121, 63, 0.22);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+    border-radius: var(--radius-lg);
+  }}
+
+  [data-theme="halloween"] .day h2 {{
+    color: #fff2df;
+    border-bottom: 1px solid rgba(255, 121, 63, 0.22);
+  }}
+
+  [data-theme="halloween"] .day h2 .count {{
+    background: rgba(255, 121, 63, 0.2);
+    border: 1px solid rgba(255, 121, 63, 0.5);
+    color: #ff9f43;
+    border-radius: 999px;
+  }}
+
+  [data-theme="halloween"] .event {{
+    background: rgba(26, 14, 42, 0.6);
+    border: 1px solid rgba(255, 121, 63, 0.18);
+    border-radius: var(--radius-md);
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }}
+
+  [data-theme="halloween"] .event:hover {{
+    background: rgba(36, 20, 58, 0.9);
+    border-color: rgba(255, 121, 63, 0.6);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 16px rgba(255, 121, 63, 0.3);
+    transform: translateY(-2px);
+  }}
+
+  [data-theme="halloween"] .event .what a {{
+    color: #ffffff;
+  }}
+
+  [data-theme="halloween"] .event .what a:hover {{
+    color: #ff9f43;
+    text-shadow: 0 0 10px rgba(255, 159, 67, 0.6);
+  }}
+
+  [data-theme="halloween"] .filter-group {{
+    background: rgba(19, 10, 31, 0.85);
+    border: 1px solid rgba(255, 121, 63, 0.25);
+  }}
+
+  [data-theme="halloween"] .badge-highlight {{
+    background: linear-gradient(135deg, rgba(255, 121, 63, 0.25) 0%, rgba(243, 156, 18, 0.35) 100%);
+    border: 1px solid #ff793f;
+    color: #ffeaa7;
+    box-shadow: 0 0 10px rgba(255, 121, 63, 0.25);
   }}
 </style>
 </head>
@@ -3870,7 +4145,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
         <div class="theme-toggle-wrap">
           <span class="theme-toggle-label">Theme:</span>
           <div class="theme-toggle-pills" role="radiogroup" aria-label="Visual Theme">
-            <button type="button" class="theme-pill-btn active" data-theme="indie" role="radio" aria-checked="true">Indie Guide</button>
+            <button type="button" class="theme-pill-btn{' active' if default_theme == 'halloween' else ''}" data-theme="halloween" role="radio" aria-checked="{'true' if default_theme == 'halloween' else 'false'}">🎃 Halloween</button>
+            <button type="button" class="theme-pill-btn{' active' if default_theme == 'indie' else ''}" data-theme="indie" role="radio" aria-checked="{'true' if default_theme == 'indie' else 'false'}">Indie Guide</button>
             <button type="button" class="theme-pill-btn" data-theme="classic" role="radio" aria-checked="false">Classic Dark</button>
             <button type="button" class="theme-pill-btn" data-theme="anime" role="radio" aria-checked="false">Anime 🌸</button>
           </div>
@@ -3920,21 +4196,93 @@ def render_page(results, weather=None, luckyseat_shows=None):
           <span><span class="chip-icon">✨ </span>Free events only</span>
         </label>
       </div>
-      <div class="filter-group">
-        <h3>Time of Day <span class="spacer"></span> <button type="button" id="tod-reset">all</button></h3>
-        <div class="chk-grid">
+      <div class="filter-group time-filter-group" id="filter-group-time">
+        <h3>Time &amp; Timeframe <span class="spacer"></span> <button type="button" id="tod-reset">all</button></h3>
+        <div class="chk-grid time-preset-grid">
           <label class="chk">
             <input type="radio" name="tod-filter" class="tod-radio" value="all" checked>
             <span>All times</span>
+          </label>
+          <label class="chk">
+            <input type="radio" name="tod-filter" class="tod-radio" value="late">
+            <span><span class="chip-icon">🍸 </span>After Dinner (8 PM – Midnight)</span>
+          </label>
+          <label class="chk">
+            <input type="radio" name="tod-filter" class="tod-radio" value="night">
+            <span><span class="chip-icon">🌙 </span>Evening (5 PM+)</span>
+          </label>
+          <label class="chk">
+            <input type="radio" name="tod-filter" class="tod-radio" value="prime">
+            <span><span class="chip-icon">🌆 </span>Prime Evening (5 – 8 PM)</span>
+          </label>
+          <label class="chk">
+            <input type="radio" name="tod-filter" class="tod-radio" value="night_owl">
+            <span><span class="chip-icon">🦉 </span>Late Night (10 PM+)</span>
           </label>
           <label class="chk">
             <input type="radio" name="tod-filter" class="tod-radio" value="day">
             <span><span class="chip-icon">☀️ </span>Daytime (&lt; 5 PM)</span>
           </label>
           <label class="chk">
-            <input type="radio" name="tod-filter" class="tod-radio" value="night">
-            <span><span class="chip-icon">🌙 </span>Evening (5 PM+)</span>
+            <input type="radio" name="tod-filter" class="tod-radio" value="afternoon">
+            <span><span class="chip-icon">🌤️ </span>Afternoon (12 – 5 PM)</span>
           </label>
+          <label class="chk">
+            <input type="radio" name="tod-filter" class="tod-radio" value="morning">
+            <span><span class="chip-icon">☕ </span>Morning (&lt; 12 PM)</span>
+          </label>
+        </div>
+
+        <div class="custom-time-range" id="custom-time-range">
+          <div class="custom-time-heading">
+            <span><span class="chip-icon">⏱️ </span>Custom Time Window</span>
+            <button type="button" class="btn-clear-time-range" id="btn-clear-time-range" style="display:none;">clear</button>
+          </div>
+          <div class="time-select-row">
+            <div class="time-input-wrap">
+              <label for="time-from-select">From</label>
+              <select id="time-from-select" class="time-dropdown">
+                <option value="">Any start</option>
+                <option value="06:00">6:00 AM</option>
+                <option value="07:00">7:00 AM</option>
+                <option value="08:00">8:00 AM</option>
+                <option value="09:00">9:00 AM</option>
+                <option value="10:00">10:00 AM</option>
+                <option value="11:00">11:00 AM</option>
+                <option value="12:00">12:00 PM (Noon)</option>
+                <option value="13:00">1:00 PM</option>
+                <option value="14:00">2:00 PM</option>
+                <option value="15:00">3:00 PM</option>
+                <option value="16:00">4:00 PM</option>
+                <option value="17:00">5:00 PM</option>
+                <option value="18:00">6:00 PM</option>
+                <option value="19:00">7:00 PM</option>
+                <option value="20:00">8:00 PM</option>
+                <option value="21:00">9:00 PM</option>
+                <option value="22:00">10:00 PM</option>
+                <option value="23:00">11:00 PM</option>
+              </select>
+            </div>
+            <div class="time-range-arrow">→</div>
+            <div class="time-input-wrap">
+              <label for="time-to-select">To</label>
+              <select id="time-to-select" class="time-dropdown">
+                <option value="">Any end</option>
+                <option value="12:00">12:00 PM (Noon)</option>
+                <option value="14:00">2:00 PM</option>
+                <option value="17:00">5:00 PM</option>
+                <option value="18:00">6:00 PM</option>
+                <option value="19:00">7:00 PM</option>
+                <option value="20:00">8:00 PM</option>
+                <option value="21:00">9:00 PM</option>
+                <option value="22:00">10:00 PM</option>
+                <option value="23:00">11:00 PM</option>
+                <option value="24:00">12:00 AM (Midnight)</option>
+                <option value="26:00">2:00 AM (Late Night)</option>
+              </select>
+            </div>
+          </div>
+          <div class="time-range-active-indicator" id="time-range-active-indicator" style="display:none;"></div>
         </div>
       </div>
       <div class="filter-group">
@@ -3993,6 +4341,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
         <button type="button" class="chip" data-time="all">All Upcoming</button>
         <button type="button" class="chip chip-tod" id="quick-day-chip" data-tod="day" title="Filter to daytime events (before 5 PM)"><span class="chip-icon">☀️ </span>Daytime</button>
         <button type="button" class="chip chip-tod" id="quick-night-chip" data-tod="night" title="Filter to evening events (5 PM and later)"><span class="chip-icon">🌙 </span>Evening</button>
+        <button type="button" class="chip chip-tod" id="quick-late-chip" data-tod="late" title="Filter to events after dinner (8 PM to Midnight)"><span class="chip-icon">🍸 </span>8 PM – Midnight</button>
+        <button type="button" class="chip chip-time-custom" id="quick-custom-time-chip" style="display:none;" title="Click to clear timeframe filter"><span id="active-timeframe-label"></span> <span class="chip-icon" style="margin-left:4px;">✕</span></button>
         <button type="button" class="chip chip-active-genre" id="quick-active-genre-chip" style="display:none;" title="Click to clear genre filter"><span id="active-genre-label"></span> <span class="chip-icon" style="margin-left:4px;">✕</span></button>
         <button type="button" class="chip chip-starred" id="quick-starred-chip" title="Filter to your saved events"><span class="chip-icon">⭐ </span>Saved <span id="starred-count" style="display:none;">(0)</span></button>
         <button type="button" class="chip chip-copy-plan" id="btn-copy-plan" style="display:none;" title="Copy your saved events as a shareable text itinerary"><span class="chip-icon">📋 </span>Copy Plan</button>
@@ -4300,6 +4650,167 @@ def render_page(results, weather=None, luckyseat_shows=None):
     let activeGenre = 'all';
     let activeTransit = 'all';
     let activeTod = 'all';
+    let timeFrom = null;
+    let timeTo = null;
+    const timeFromSelect = document.getElementById('time-from-select');
+    const timeToSelect = document.getElementById('time-to-select');
+    const btnClearTimeRange = document.getElementById('btn-clear-time-range');
+    const timeRangeIndicator = document.getElementById('time-range-active-indicator');
+    const quickLateChip = document.getElementById('quick-late-chip');
+    const quickCustomTimeChip = document.getElementById('quick-custom-time-chip');
+    const activeTimeframeLabel = document.getElementById('active-timeframe-label');
+
+    const TOD_PRESETS = {{
+      'all': {{ from: null, to: null, label: 'All times' }},
+      'late': {{ from: 1200, to: 1440, label: '8 PM – Midnight' }},
+      'after_dinner': {{ from: 1200, to: 1440, label: '8 PM – Midnight' }},
+      'night': {{ from: 1020, to: null, label: 'Evening (5 PM+)' }},
+      'prime': {{ from: 1020, to: 1200, label: 'Prime (5 – 8 PM)' }},
+      'night_owl': {{ from: 1320, to: null, label: 'Late Night (10 PM+)' }},
+      'day': {{ from: 360, to: 1020, label: 'Daytime (< 5 PM)' }},
+      'morning': {{ from: 360, to: 720, label: 'Morning (< 12 PM)' }},
+      'afternoon': {{ from: 720, to: 1020, label: 'Afternoon (12 – 5 PM)' }}
+    }};
+
+    function parseTimeToMinutes(str) {{
+      if (!str) return null;
+      str = String(str).trim().toLowerCase();
+      if (str === 'midnight' || str === '12am' || str === '12:00am' || str === '24:00' || str === '24') return 1440;
+      if (str === 'noon' || str === '12pm' || str === '12:00pm') return 720;
+      if (str === '2am' || str === '2:00am' || str === '26:00' || str === '26') return 1560;
+
+      const ampmMatch = str.match(/^(\d{{1,2}})(?::(\d{{2}}))?\s*(am|pm)$/);
+      if (ampmMatch) {{
+        let h = parseInt(ampmMatch[1], 10);
+        const m = ampmMatch[2] ? parseInt(ampmMatch[2], 10) : 0;
+        const ampm = ampmMatch[3];
+        if (ampm === 'pm' && h < 12) h += 12;
+        if (ampm === 'am' && h === 12) h = 0;
+        return h * 60 + m;
+      }}
+
+      const colonMatch = str.match(/^(\d{{1,2}}):(\d{{2}})$/);
+      if (colonMatch) {{
+        const h = parseInt(colonMatch[1], 10);
+        const m = parseInt(colonMatch[2], 10);
+        return h * 60 + m;
+      }}
+
+      const numMatch = str.match(/^(\d{{1,2}})$/);
+      if (numMatch) {{
+        const n = parseInt(numMatch[1], 10);
+        return n * 60;
+      }}
+
+      return null;
+    }}
+
+    function formatMinutesToHHMM(mins) {{
+      if (mins === null || mins === undefined) return '';
+      if (mins === 1440) return '24:00';
+      if (mins === 1560) return '26:00';
+      const h = Math.floor(mins / 60);
+      const m = mins % 60;
+      return `${{String(h).padStart(2, '0')}}:${{String(m).padStart(2, '0')}}`;
+    }}
+
+    function formatMinutesToLabel(mins) {{
+      if (mins === null || mins === undefined) return '';
+      if (mins === 1440) return 'Midnight';
+      if (mins === 1560) return '2:00 AM';
+      if (mins === 720) return '12:00 PM';
+      const h24 = Math.floor(mins / 60) % 24;
+      const m = mins % 60;
+      const ampm = (Math.floor(mins / 60) >= 12 && Math.floor(mins / 60) < 24) ? 'PM' : 'AM';
+      let h12 = h24 % 12;
+      if (h12 === 0) h12 = 12;
+      return m > 0 ? `${{h12}}:${{String(m).padStart(2, '0')}} ${{ampm}}` : `${{h12}} ${{ampm}}`;
+    }}
+
+    function updateTimeUI() {{
+      todRadios.forEach(r => {{
+        r.checked = (r.value === activeTod);
+      }});
+
+      if (timeFromSelect) {{
+        timeFromSelect.value = timeFrom !== null ? formatMinutesToHHMM(timeFrom) : '';
+      }}
+      if (timeToSelect) {{
+        timeToSelect.value = timeTo !== null ? formatMinutesToHHMM(timeTo) : '';
+      }}
+
+      if (quickDayChip) quickDayChip.classList.toggle('active', activeTod === 'day');
+      if (quickNightChip) quickNightChip.classList.toggle('active', activeTod === 'night');
+      if (quickLateChip) quickLateChip.classList.toggle('active', activeTod === 'late' || (timeFrom === 1200 && timeTo === 1440));
+
+      const hasCustomTime = (timeFrom !== null || timeTo !== null) && activeTod !== 'all';
+      if (btnClearTimeRange) {{
+        btnClearTimeRange.style.display = hasCustomTime ? 'inline-block' : 'none';
+      }}
+
+      if (timeRangeIndicator) {{
+        if (hasCustomTime) {{
+          let desc = '';
+          if (timeFrom !== null && timeTo !== null) {{
+            desc = `Active: ${{formatMinutesToLabel(timeFrom)}} – ${{formatMinutesToLabel(timeTo)}}`;
+          }} else if (timeFrom !== null) {{
+            desc = `Active: From ${{formatMinutesToLabel(timeFrom)}} onwards`;
+          }} else if (timeTo !== null) {{
+            desc = `Active: Until ${{formatMinutesToLabel(timeTo)}}`;
+          }}
+          timeRangeIndicator.textContent = desc;
+          timeRangeIndicator.style.display = 'block';
+        }} else {{
+          timeRangeIndicator.style.display = 'none';
+        }}
+      }}
+
+      if (quickCustomTimeChip && activeTimeframeLabel) {{
+        if (hasCustomTime && activeTod !== 'day' && activeTod !== 'night' && activeTod !== 'late') {{
+          let label = '';
+          if (timeFrom !== null && timeTo !== null) {{
+            label = `${{formatMinutesToLabel(timeFrom)}} – ${{formatMinutesToLabel(timeTo)}}`;
+          }} else if (timeFrom !== null) {{
+            label = `From ${{formatMinutesToLabel(timeFrom)}}`;
+          }} else if (timeTo !== null) {{
+            label = `Until ${{formatMinutesToLabel(timeTo)}}`;
+          }}
+          activeTimeframeLabel.textContent = `⏱️ ${{label}}`;
+          quickCustomTimeChip.style.display = 'inline-flex';
+        }} else {{
+          quickCustomTimeChip.style.display = 'none';
+        }}
+      }}
+    }}
+
+    function setTimeRange(fromVal, toVal, presetKey) {{
+      if (presetKey && TOD_PRESETS[presetKey]) {{
+        activeTod = presetKey;
+        const p = TOD_PRESETS[presetKey];
+        timeFrom = p.from;
+        timeTo = p.to;
+      }} else {{
+        timeFrom = parseTimeToMinutes(fromVal);
+        timeTo = parseTimeToMinutes(toVal);
+        activeTod = 'custom';
+        for (const [k, p] of Object.entries(TOD_PRESETS)) {{
+          if (p.from === timeFrom && p.to === timeTo) {{
+            activeTod = k;
+            break;
+          }}
+        }}
+        if (timeFrom === null && timeTo === null) {{
+          activeTod = 'all';
+        }}
+      }}
+      if ((activeTod === 'day' || activeTod === 'morning') && timeFilter === 'today') {{
+        showPastToday = true;
+      }}
+      updateTimeUI();
+      apply();
+      stateToHash();
+    }}
+
     let starredOnly = false;
     let starredEvents = new Set();
     const SUBAREAS_DATA = {json.dumps(SUBAREAS_BY_CITY)};
@@ -4911,7 +5422,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
       const allRecurs = recurBoxes.length;
       const chkRecurs = Array.from(recurBoxes).filter(b => b.checked).length;
       const isFree = freeOnlyChk && freeOnlyChk.checked;
-      const isFiltered = (chkCats < allCats) || (chkGenres < allGenres) || (activeGenre !== 'all') || (chkVenues < allVenues) || (chkCities < allCities) || (chkRecurs < allRecurs) || isFree || popularOnly || starredOnly || (activeTransit !== 'all') || (activeTod !== 'all') || (activeSubarea !== 'all') || (searchInput && !!searchInput.value.trim());
+      const isTimeFiltered = (timeFrom !== null || timeTo !== null || (activeTod !== 'all'));
+      const isFiltered = (chkCats < allCats) || (chkGenres < allGenres) || (activeGenre !== 'all') || (chkVenues < allVenues) || (chkCities < allCities) || (chkRecurs < allRecurs) || isFree || popularOnly || starredOnly || (activeTransit !== 'all') || isTimeFiltered || (activeSubarea !== 'all') || (searchInput && !!searchInput.value.trim());
 
       if (mobileBadge) {{
         mobileBadge.textContent = isFiltered ? 'Active' : 'All';
@@ -4960,7 +5472,16 @@ def render_page(results, weather=None, luckyseat_shows=None):
       if (checkedCities.length > 0 && checkedCities.length < allCities.length) params.set('city', checkedCities.join(','));
       if (activeSubarea && activeSubarea !== 'all') params.set('sub', activeSubarea);
       if (activeTransit && activeTransit !== 'all') params.set('line', activeTransit);
-      if (activeTod && activeTod !== 'all') params.set('tod', activeTod);
+
+      if (timeFrom !== null || timeTo !== null) {{
+        if (timeFrom !== null) params.set('from', formatMinutesToHHMM(timeFrom));
+        if (timeTo !== null) params.set('to', formatMinutesToHHMM(timeTo));
+        if (activeTod && activeTod !== 'custom' && activeTod !== 'all') {{
+          params.set('tod', activeTod);
+        }}
+      }} else if (activeTod && activeTod !== 'all') {{
+        params.set('tod', activeTod);
+      }}
 
       const allRecurs = Array.from(recurBoxes).map(b => b.value);
       const checkedRecurs = Array.from(recurBoxes).filter(b => b.checked).map(b => b.value);
@@ -4987,32 +5508,37 @@ def render_page(results, weather=None, luckyseat_shows=None):
     }}
 
     function hashToState() {{
-      const hash = location.hash.slice(1);
-      const params = hash ? new URLSearchParams(hash) : null;
+      const searchStr = location.search ? location.search.slice(1) : '';
+      const hashStr = location.hash ? location.hash.slice(1) : '';
+      const sParams = searchStr ? new URLSearchParams(searchStr) : null;
+      const hParams = hashStr ? new URLSearchParams(hashStr) : null;
 
-      if (params) {{
-        if (params.has('q')) searchInput.value = params.get('q');
-        if (params.get('free') === '1' && freeOnlyChk) freeOnlyChk.checked = true;
-        if (params.get('pop') === '1') popularOnly = true;
-        if (params.get('picks') === '1') featuredOnly = true;
-        if (params.get('saved') === '1') starredOnly = true;
-        if (params.get('past') === '1') showPastToday = true;
-        if (params.get('v') === 'map') {{
+      const getParam = (k) => (hParams && hParams.get(k)) || (sParams && sParams.get(k));
+      const hasParam = (k) => (hParams && hParams.has(k)) || (sParams && sParams.has(k));
+
+      if (hParams || sParams) {{
+        if (hasParam('q')) searchInput.value = getParam('q');
+        if (getParam('free') === '1' && freeOnlyChk) freeOnlyChk.checked = true;
+        if (getParam('pop') === '1') popularOnly = true;
+        if (getParam('picks') === '1') featuredOnly = true;
+        if (getParam('saved') === '1') starredOnly = true;
+        if (getParam('past') === '1') showPastToday = true;
+        if (getParam('v') === 'map') {{
           switchView('map');
         }}
 
-        if (params.has('t')) {{
-          timeFilter = params.get('t');
+        if (hasParam('t')) {{
+          timeFilter = getParam('t');
           showAll = (timeFilter === 'all');
         }}
 
-        if (params.has('cat')) {{
-          const vals = new Set(params.get('cat').split(','));
+        if (hasParam('cat')) {{
+          const vals = new Set(getParam('cat').split(','));
           catBoxes.forEach(b => {{ b.checked = vals.has(b.value); }});
         }}
 
-        if (params.has('genre')) {{
-          const gVal = params.get('genre');
+        if (hasParam('genre')) {{
+          const gVal = getParam('genre');
           if (gVal.includes(',')) {{
             const vals = new Set(gVal.split(','));
             genreBoxes.forEach(b => {{ b.checked = vals.has(b.value); }});
@@ -5021,39 +5547,42 @@ def render_page(results, weather=None, luckyseat_shows=None):
           }}
         }}
 
-        if (params.has('city')) {{
-          const vals = new Set(params.get('city').split(','));
+        if (hasParam('city')) {{
+          const vals = new Set(getParam('city').split(','));
           cityBoxes.forEach(b => {{ b.checked = vals.has(b.value); }});
         }}
 
-        if (params.has('sub')) {{
-          activeSubarea = params.get('sub');
+        if (hasParam('sub')) {{
+          activeSubarea = getParam('sub');
         }} else {{
           activeSubarea = 'all';
         }}
 
-        if (params.has('line')) {{
-          activeTransit = params.get('line');
+        if (hasParam('line')) {{
+          activeTransit = getParam('line');
         }} else {{
           activeTransit = 'all';
         }}
 
-        if (params.has('tod')) {{
-          activeTod = params.get('tod');
+        if (hasParam('from') || hasParam('tfrom') || hasParam('to') || hasParam('tto')) {{
+          const f = getParam('from') || getParam('tfrom');
+          const t = getParam('to') || getParam('tto');
+          const pKey = getParam('tod');
+          setTimeRange(f, t, pKey);
+        }} else if (hasParam('tod')) {{
+          const todVal = getParam('tod');
+          setTimeRange(null, null, todVal);
         }} else {{
-          activeTod = 'all';
+          setTimeRange(null, null, 'all');
         }}
-        todRadios.forEach(r => {{ r.checked = (r.value === activeTod); }});
-        if (quickDayChip) quickDayChip.classList.toggle('active', activeTod === 'day');
-        if (quickNightChip) quickNightChip.classList.toggle('active', activeTod === 'night');
 
-        if (params.has('recur')) {{
-          const vals = new Set(params.get('recur').split(','));
+        if (hasParam('recur')) {{
+          const vals = new Set(getParam('recur').split(','));
           recurBoxes.forEach(b => {{ b.checked = vals.has(b.value); }});
         }}
 
-        if (params.has('venues')) {{
-          const rawVenues = params.get('venues').split(';').map(s => s.trim()).filter(Boolean);
+        if (hasParam('venues')) {{
+          const rawVenues = getParam('venues').split(';').map(s => s.trim()).filter(Boolean);
           const vals = new Set(rawVenues);
           venueBoxes.forEach(b => {{ b.checked = vals.has(b.value); }});
           try {{
@@ -5061,15 +5590,15 @@ def render_page(results, weather=None, luckyseat_shows=None):
           }} catch (_) {{}}
         }}
 
-        if (params.has('d')) {{
-          const d = params.get('d');
+        if (hasParam('d')) {{
+          const d = getParam('d');
           if (d === 'all') {{
             showAll = true;
             timeFilter = 'all';
           }} else {{
             anchor = parseISO(d);
             calMonth = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
-            if (!params.has('t')) {{
+            if (!hasParam('t')) {{
               if (d === todayISO) {{
                 timeFilter = 'today';
                 showAll = false;
@@ -5085,7 +5614,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
         }}
       }}
 
-      if (!params || !params.has('venues')) {{
+      if ((!hParams && !sParams) || (!hasParam('venues'))) {{
         try {{
           const saved = JSON.parse(localStorage.getItem('boston_saved_venues') || 'null');
           if (Array.isArray(saved) && saved.length > 0 && saved.length < venueBoxes.length) {{
@@ -5125,6 +5654,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
         activeTransit !== 'all' ||
         activeGenre !== 'all' ||
         activeTod !== 'all' ||
+        timeFrom !== null ||
+        timeTo !== null ||
         searchText.length > 0
       );
       if (!needsHydration) {{
@@ -5193,7 +5724,26 @@ def render_page(results, weather=None, luckyseat_shows=None):
           const subareaOk = (activeSubarea === 'all') || (li.dataset.subarea === activeSubarea);
           const transitOk = (activeTransit === 'all') || ((li.dataset.transit || '').split(',').includes(activeTransit));
           let todOk = true;
-          if (activeTod === 'day') {{
+          if (timeFrom !== null || timeTo !== null) {{
+            const evMins = li.dataset.timeMins ? parseInt(li.dataset.timeMins, 10) : -1;
+            if (evMins >= 0) {{
+              if (timeFrom !== null && timeTo !== null) {{
+                if (timeTo > 1440) {{
+                  todOk = (evMins >= timeFrom && evMins <= 1440) || (evMins >= 0 && evMins <= (timeTo - 1440));
+                }} else if (timeFrom > timeTo) {{
+                  todOk = (evMins >= timeFrom) || (evMins <= timeTo);
+                }} else {{
+                  todOk = (evMins >= timeFrom && evMins <= timeTo);
+                }}
+              }} else if (timeFrom !== null) {{
+                todOk = (evMins >= timeFrom);
+              }} else if (timeTo !== null) {{
+                todOk = (evMins <= timeTo);
+              }}
+            }} else {{
+              todOk = false;
+            }}
+          }} else if (activeTod === 'day') {{
             todOk = (li.dataset.tod === 'day');
           }} else if (activeTod === 'night') {{
             todOk = (li.dataset.tod === 'night');
@@ -5224,7 +5774,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
 
           let timePastOk = true;
           if (isPast) {{
-            if (!showPastToday && activeTod !== 'day') {{
+            if (!showPastToday && activeTod !== 'day' && activeTod !== 'morning') {{
               timePastOk = false;
               hiddenPastCount++;
             }}
@@ -5618,10 +6168,10 @@ def render_page(results, weather=None, luckyseat_shows=None):
       starredOnly = false;
       activeSubarea = 'all';
       activeTransit = 'all';
+      timeFrom = null;
+      timeTo = null;
       activeTod = 'all';
-      todRadios.forEach(r => {{ r.checked = (r.value === 'all'); }});
-      if (quickDayChip) quickDayChip.classList.remove('active');
-      if (quickNightChip) quickNightChip.classList.remove('active');
+      updateTimeUI();
       activeGenre = 'all';
       genreBoxes.forEach(b => b.checked = true);
       catBoxes.forEach(b => b.checked = true);
@@ -5698,15 +6248,10 @@ def render_page(results, weather=None, luckyseat_shows=None):
 
     function setTod(tod) {{
       if (activeTod === tod) {{
-        activeTod = 'all';
+        setTimeRange(null, null, 'all');
       }} else {{
-        activeTod = tod;
+        setTimeRange(null, null, tod);
       }}
-      if (activeTod === 'day' && timeFilter === 'today') {{
-        showPastToday = true;
-      }}
-      apply();
-      stateToHash();
     }}
 
     if (quickDayChip) {{
@@ -5714,6 +6259,12 @@ def render_page(results, weather=None, luckyseat_shows=None):
     }}
     if (quickNightChip) {{
       quickNightChip.addEventListener('click', () => setTod('night'));
+    }}
+    if (quickLateChip) {{
+      quickLateChip.addEventListener('click', () => setTod('late'));
+    }}
+    if (quickCustomTimeChip) {{
+      quickCustomTimeChip.addEventListener('click', () => setTimeRange(null, null, 'all'));
     }}
 
     todRadios.forEach(radio => {{
@@ -5730,8 +6281,28 @@ def render_page(results, weather=None, luckyseat_shows=None):
       }});
     }});
 
+    if (timeFromSelect) {{
+      timeFromSelect.addEventListener('change', () => {{
+        const f = timeFromSelect.value;
+        const t = timeToSelect ? timeToSelect.value : '';
+        setTimeRange(f, t);
+      }});
+    }}
+    if (timeToSelect) {{
+      timeToSelect.addEventListener('change', () => {{
+        const f = timeFromSelect ? timeFromSelect.value : '';
+        const t = timeToSelect.value;
+        setTimeRange(f, t);
+      }});
+    }}
+    if (btnClearTimeRange) {{
+      btnClearTimeRange.addEventListener('click', () => {{
+        setTimeRange(null, null, 'all');
+      }});
+    }}
+
     const todResetBtn = document.getElementById('tod-reset');
-    if (todResetBtn) todResetBtn.addEventListener('click', () => setTod('all'));
+    if (todResetBtn) todResetBtn.addEventListener('click', () => setTimeRange(null, null, 'all'));
 
     if (quickFeaturedChip) {{
       quickFeaturedChip.addEventListener('click', () => {{
@@ -6590,8 +7161,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
 
     // --- Theme Switcher ---
     const THEME_KEY = 'boston_events_theme';
+    const THEME_MANUAL_KEY = 'boston_events_theme_manual';
     function setTheme(t, save) {{
-      const validThemes = ['indie', 'classic', 'anime'];
+      const validThemes = ['halloween', 'indie', 'classic', 'anime'];
       const theme = validThemes.includes(t) ? t : 'indie';
       document.documentElement.setAttribute('data-theme', theme);
       if (document.body) {{
@@ -6603,16 +7175,29 @@ def render_page(results, weather=None, luckyseat_shows=None):
         b.setAttribute('aria-checked', isActive ? 'true' : 'false');
       }});
       if (save !== false) {{
-        try {{ localStorage.setItem(THEME_KEY, theme); }} catch (_) {{}}
+        try {{
+          localStorage.setItem(THEME_KEY, theme);
+          localStorage.setItem(THEME_MANUAL_KEY, 'true');
+        }} catch (_) {{}}
       }}
     }}
     document.querySelectorAll('.theme-pill-btn').forEach(btn => {{
       btn.addEventListener('click', () => setTheme(btn.dataset.theme, true));
     }});
     try {{
-      setTheme(localStorage.getItem(THEME_KEY) || 'indie', false);
+      const manual = localStorage.getItem(THEME_MANUAL_KEY);
+      const stored = localStorage.getItem(THEME_KEY);
+      const now = new Date();
+      const m = now.getMonth() + 1;
+      const d = now.getDate();
+      const isHalloween = (m === 10 && d >= 29) || (m === 11 && d <= 2);
+      if (!manual && isHalloween) {{
+        setTheme('halloween', false);
+      }} else {{
+        setTheme(stored || (isHalloween ? 'halloween' : 'indie'), false);
+      }}
     }} catch (_) {{
-      setTheme('indie', false);
+      setTheme('{default_theme}', false);
     }}
 
     loadUpvoteState();

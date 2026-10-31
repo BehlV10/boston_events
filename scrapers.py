@@ -1351,35 +1351,69 @@ def scrape_brattle(url, ua):
 
 
 def scrape_ica(url, ua):
+    """Scrape events from ICA Boston (including ICA Free Thursday Night, First Fridays, Tours, and Talks)."""
     soup = fetch_soup(url, ua)
     events = []
     seen = set()
-    for art in soup.select("article"):
-        a = art.select_one("a[href*='/events/']")
+    now = datetime.now(EASTERN)
+
+    for node in soup.select(".node-event"):
+        a = node.select_one("h3 a") or node.select_one("a[href*='/events/']")
         if not a:
             continue
-        href = a.get("href", "")
-        if href in seen or not href.rstrip("/").endswith(tuple(href.rstrip("/").split("/")[-1:])):
-            pass
-        img = a.select_one("img")
-        name = None
-        if a.get_text(strip=True):
-            name = a.get_text(strip=True)
-        elif img and img.get("alt"):
-            name = img.get("alt")
-        else:
-            slug = href.rstrip("/").split("/")[-1]
-            name = slug.replace("-", " ").title()
-        if not name or href in seen:
+        title = a.get_text(" ", strip=True)
+        if not title:
             continue
-        seen.add(href)
-        events.append({
-            "name": name[:160],
-            "date": None,
-            "url": urljoin(url, href),
-            "venue": "ICA Boston",
-            "price": None,
-        })
+        href = a.get("href", "")
+        ev_url = urljoin(url, href)
+
+        text = node.get_text(separator=" | ", strip=True)
+        is_free = "Free" in text
+
+        # Find dates like 'Thu, Oct 29, 5–9 PM' or 'Sat, Oct 31, 11 AM–3 PM' or 'Sun, Nov 1, 10 AM'
+        date_matches = re.findall(
+            r'(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s+([A-Za-z]+)\s+(\d{1,2})(?:,\s+(\d{4}))?(?:,\s+(\d{1,2}(?::\d{2})?\s*(?:AM|PM|am|pm)?(?:[–-]\d{1,2}(?::\d{2})?\s*(?:AM|PM|am|pm))?))?',
+            text
+        )
+
+        for m in date_matches:
+            month_s, day_s, year_s, time_s = m
+            yr = int(year_s) if year_s else now.year
+            start_t = "12:00 PM"
+            if time_s:
+                ampm_m = re.search(r'(AM|PM|am|pm)', time_s, re.IGNORECASE)
+                default_ampm = ampm_m.group(1).upper() if ampm_m else "PM"
+                parts = re.split(r'[–-]', time_s)
+                start_raw = parts[0].strip()
+                if not re.search(r'[a-zA-Z]', start_raw):
+                    start_raw = f"{start_raw} {default_ampm}"
+                start_t = start_raw
+
+            dt = None
+            for fmt in ("%b %d %Y %I %p", "%b %d %Y %I:%M %p", "%B %d %Y %I %p", "%B %d %Y %I:%M %p"):
+                try:
+                    dt = datetime.strptime(f"{month_s} {day_s} {yr} {start_t}", fmt).replace(tzinfo=EASTERN)
+                    break
+                except Exception:
+                    pass
+
+            if not dt:
+                continue
+
+            iso_date = dt.astimezone(timezone.utc).isoformat()
+            key = (title.lower(), iso_date[:10])
+            if key in seen:
+                continue
+            seen.add(key)
+
+            events.append({
+                "name": html.unescape(title).strip()[:160],
+                "date": iso_date,
+                "url": ev_url,
+                "venue": "ICA Boston",
+                "price": "Free" if is_free else None,
+            })
+
     return events
 
 
@@ -3880,7 +3914,12 @@ def scrape_lizard_lounge(url, ua):
 
     # 1. Scrape current month from calendar HTML
     try:
-        r = _SESSION.get("https://lizardloungeclub.com/calendar/", headers={"User-Agent": ua}, timeout=15)
+        headers = {
+            "User-Agent": ua or UA_CHROME,
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+        }
+        r = _SESSION.get("https://lizardloungeclub.com/calendar/", headers=headers, timeout=15)
         if r.status_code == 200:
             soup = BeautifulSoup(r.text, "html.parser")
             for art in soup.find_all("article"):
@@ -6176,7 +6215,270 @@ def scrape_improv_asylum(url, ua):
     return events
 
 
+def scrape_squarespace_calendar_block(url, ua):
+    """Scrape events from Squarespace pages using calendar blocks (e.g. Cisco Brewers Fenway, Castle Island Brewing)."""
+    soup = fetch_soup(url, ua)
+    cal_block = soup.select_one(".sqs-block-calendar[data-block-json]")
+    if not cal_block:
+        return []
+    try:
+        b_json = json.loads(cal_block["data-block-json"])
+        collection_id = b_json.get("collectionId")
+    except Exception:
+        return []
+    if not collection_id:
+        return []
+
+    now = datetime.now(EASTERN)
+    months = [now.strftime("%m-%Y"), (now.replace(day=28) + timedelta(days=5)).strftime("%m-%Y")]
+
+    events = []
+    seen = set()
+    base_url = f"{urlparse(url).scheme}://{urlparse(url).netloc}"
+
+    for m in months:
+        api_url = f"{base_url}/api/open/GetItemsByMonth?collectionId={collection_id}&month={m}"
+        try:
+            r = _SESSION.get(api_url, headers={"User-Agent": ua or UA_CHROME}, timeout=10)
+            if r.status_code != 200:
+                continue
+            items = r.json()
+        except Exception:
+            continue
+
+        for it in items:
+            title = it.get("title")
+            if not title or is_placeholder_or_closed_event(title):
+                continue
+            sc = it.get("structuredContent") or {}
+            start_ts = sc.get("startDate")
+            iso_date = None
+            if start_ts:
+                dt = datetime.fromtimestamp(start_ts / 1000, tz=timezone.utc).astimezone(EASTERN)
+                iso_date = dt.isoformat()
+
+            full_url = it.get("fullUrl")
+            ev_url = urljoin(base_url, full_url) if full_url else url
+            key = (title.lower(), iso_date[:10] if iso_date else None)
+            if key in seen:
+                continue
+            seen.add(key)
+
+            events.append({
+                "name": html.unescape(title).strip()[:160],
+                "date": iso_date,
+                "url": ev_url,
+                "price": None,
+            })
+    return events
+
+
+def scrape_somerville_city(url, ua):
+    """Scrape municipal community events from City of Somerville calendar (Truck O' Treat, etc.)."""
+    soup = fetch_soup(url, ua)
+    events = []
+    seen = set()
+
+    for row in soup.select(".views-row"):
+        a = row.select_one("a")
+        if not a:
+            continue
+        title = a.get_text(" ", strip=True)
+        if not title or is_placeholder_or_closed_event(title):
+            continue
+        href = a.get("href", "")
+        ev_url = urljoin(url, href)
+        text = row.get_text(separator=" | ", strip=True)
+
+        m = re.search(
+            r'(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s+([A-Za-z]+)\s+(\d{1,2}),\s+(\d{4})(?:\s*-\s*(\d{1,2}:\d{2}\s*(?:am|pm)))?',
+            text,
+            re.IGNORECASE,
+        )
+        iso_date = None
+        if m:
+            month_s, day_s, year_s, time_s = m.groups()
+            time_part = time_s.strip() if time_s else "12:00pm"
+            try:
+                dt = datetime.strptime(f"{month_s} {day_s} {year_s} {time_part}", "%B %d %Y %I:%M%p").replace(tzinfo=EASTERN)
+                iso_date = dt.astimezone(timezone.utc).isoformat()
+            except Exception:
+                try:
+                    dt = datetime.strptime(f"{month_s} {day_s} {year_s}", "%B %d %Y").replace(tzinfo=EASTERN)
+                    iso_date = dt.astimezone(timezone.utc).isoformat()
+                except Exception:
+                    pass
+
+        if not iso_date:
+            continue
+
+        key = (title.lower(), iso_date[:10])
+        if key in seen:
+            continue
+        seen.add(key)
+
+        events.append({
+            "name": html.unescape(title).strip()[:160],
+            "date": iso_date,
+            "url": ev_url,
+            "venue": "Somerville City Hall",
+            "price": "Free",
+        })
+    return events
+
+
+def scrape_northeastern(url, ua):
+    """Scrape campus lectures and public performances from Northeastern University Localist API."""
+    try:
+        r = _SESSION.get(url, headers={"User-Agent": ua or UA_CHROME}, timeout=10)
+        r.raise_for_status()
+        data = r.json()
+    except Exception:
+        return []
+
+    events = []
+    seen = set()
+    for it in data.get("events", []):
+        ev = it.get("event", {})
+        title = ev.get("title")
+        if not title or is_placeholder_or_closed_event(title):
+            continue
+        instances = ev.get("event_instances", [])
+        if not instances:
+            continue
+        inst = instances[0].get("event_instance", {})
+        start_str = inst.get("start")
+        if not start_str:
+            continue
+
+        try:
+            dt = datetime.fromisoformat(start_str).astimezone(timezone.utc)
+            iso_date = dt.isoformat()
+        except Exception:
+            continue
+
+        loc = ev.get("location_name") or "Northeastern University"
+        ev_url = ev.get("localist_url") or url
+        key = (title.lower(), iso_date[:10])
+        if key in seen:
+            continue
+        seen.add(key)
+
+        events.append({
+            "name": html.unescape(title).strip()[:160],
+            "date": iso_date,
+            "url": ev_url,
+            "venue": loc[:80],
+            "price": "Free" if ev.get("free") else None,
+        })
+    return events
+
+
+def scrape_partiful(url, ua):
+    """Scrape community events and parties from Partiful Boston explore directory or individual event links."""
+    headers = {
+        "User-Agent": ua or UA_CHROME,
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    }
+    try:
+        r = _SESSION.get(url, headers=headers, timeout=12)
+        r.raise_for_status()
+        soup = BeautifulSoup(r.text, "html.parser")
+    except Exception:
+        return []
+
+    events = []
+    seen = set()
+
+    # 1. Parse __NEXT_DATA__
+    next_data_el = soup.select_one("script#__NEXT_DATA__")
+    if next_data_el:
+        try:
+            nd = json.loads(next_data_el.string)
+            props = nd.get("props", {}).get("pageProps", {})
+
+            # Case A: Explore directory (props['items'])
+            items = props.get("items", [])
+            for it in items:
+                ev = it.get("item", {}).get("event", {})
+                title = ev.get("title")
+                start_iso = ev.get("startDate")
+                if not title or not start_iso or is_placeholder_or_closed_event(title):
+                    continue
+                loc = ev.get("locationInfo", {})
+                vname = loc.get("displayName") or loc.get("mapsInfo", {}).get("name") or loc.get("approximateLocation") or "Boston"
+                ev_url = f"https://partiful.com/e/{ev.get('id')}"
+                key = (title.lower(), start_iso[:10])
+                if key in seen:
+                    continue
+                seen.add(key)
+                events.append({
+                    "name": html.unescape(title).strip()[:160],
+                    "date": start_iso,
+                    "url": ev_url,
+                    "venue": vname,
+                    "price": "Free" if ev.get("isPublic") else None,
+                    "category": "community",
+                })
+
+            # Case B: Single event page (props['event'])
+            ev = props.get("event", {})
+            if ev and ev.get("title") and ev.get("startDate"):
+                title = ev.get("title")
+                start_iso = ev.get("startDate")
+                if not is_placeholder_or_closed_event(title):
+                    loc = ev.get("locationInfo", {})
+                    vname = loc.get("displayName") or loc.get("mapsInfo", {}).get("name") or loc.get("approximateLocation") or "Boston"
+                    key = (title.lower(), start_iso[:10])
+                    if key not in seen:
+                        seen.add(key)
+                        events.append({
+                            "name": html.unescape(title).strip()[:160],
+                            "date": start_iso,
+                            "url": url,
+                            "venue": vname,
+                            "price": "Free",
+                            "category": "community",
+                        })
+        except Exception:
+            pass
+
+    # 2. Fallback to schema.org Event LD+JSON if needed
+    if not events:
+        for s in soup.select('script[type="application/ld+json"]'):
+            try:
+                data = json.loads(s.string)
+                if isinstance(data, dict) and data.get("@type") == "Event":
+                    title = data.get("name")
+                    start_iso = data.get("startDate")
+                    if not title or not start_iso or is_placeholder_or_closed_event(title):
+                        continue
+                    loc = data.get("location", {})
+                    vname = loc.get("name") if isinstance(loc, dict) else "Boston"
+                    key = (title.lower(), start_iso[:10])
+                    if key in seen:
+                        seen.add(key)
+                        events.append({
+                            "name": html.unescape(title).strip()[:160],
+                            "date": start_iso,
+                            "url": url,
+                            "venue": vname,
+                            "price": "Free" if data.get("offers", {}).get("price") == 0 else None,
+                            "category": "community",
+                        })
+            except Exception:
+                pass
+
+    return events
+
+
 _ALL_VENUES = [
+    {"name": "Partiful Boston", "url": "https://partiful.com/explore/l/bos/events", "ua": UA_CHROME, "scraper": scrape_partiful, "default_category": "community"},
+    {"name": "ICA Boston", "url": "https://www.icaboston.org/events/", "ua": UA_CHROME, "scraper": scrape_ica, "default_category": "art"},
+    {"name": "Cisco Brewers Fenway", "url": "https://ciscobrewersfenway.com/eventschedule", "ua": UA_CHROME, "scraper": scrape_squarespace_calendar_block, "default_category": "music"},
+    {"name": "Castle Island Brewing", "url": "https://castleislandbeer.com/public-events", "ua": UA_CHROME, "scraper": scrape_squarespace_calendar_block, "default_category": "food"},
+    {"name": "City of Somerville", "url": "https://www.somervillema.gov/events", "ua": UA_CHROME, "scraper": scrape_somerville_city, "default_category": "community"},
+    {"name": "Northeastern University", "url": "https://calendar.northeastern.edu/api/2/events?days=45", "ua": UA_CHROME, "scraper": scrape_northeastern, "default_category": "community"},
     {"name": "Improv Asylum", "url": "https://calendar.improvasylum.com", "ua": UA_CHROME, "scraper": scrape_improv_asylum, "default_category": "comedy"},
     {"name": "Paradise Rock Club", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZpZA11JtA&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
     {"name": "Brighton Music Hall", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZpapwne&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
