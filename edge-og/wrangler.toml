@@ -1,0 +1,6 @@
+name = "wicked-boston-events-og"
+main = "worker.js"
+compatibility_date = "2024-11-01"
+
+[observability]
+enabled = true

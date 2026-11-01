@@ -602,6 +602,7 @@ def build_json_ld(events, site_url=None):
             if m_price:
                 offers_obj["price"] = m_price.group(1)
 
+        ev_img = e.get("img") or e.get("image") or f"{site_url}/og-image.jpg"
         ev_schema = {
             "@type": "Event",
             "name": title,
@@ -609,9 +610,14 @@ def build_json_ld(events, site_url=None):
             "eventStatus": "https://schema.org/EventScheduled",
             "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
             "location": location_obj,
+            "image": [ev_img],
             "description": e.get("description") or f"{title} live at {venue_name} in {city_label}, MA",
             "url": url,
             "offers": offers_obj,
+            "performer": {
+                "@type": "PerformingGroup",
+                "name": title
+            },
             "organizer": {
                 "@type": "Organization",
                 "name": e.get("_source_venue") or venue_name,
@@ -728,6 +734,14 @@ def build_seo_directory_html(all_events_flat, all_venue_names):
           <li><a href="#cat=Music+%26+nightlife&amp;genre=folk">Folk &amp; Americana</a></li>
           <li><a href="#cat=Music+%26+nightlife&amp;genre=classical">Classical &amp; Symphony</a></li>
         </ul>
+
+        <h3 style="margin-top:18px;">🔥 Programmatic Event Guides</h3>
+        <ul>
+          <li><a href="free-events-boston-this-weekend/">Free Events This Weekend</a></li>
+          <li><a href="cambridge-events-tonight/">Cambridge Events Tonight</a></li>
+          <li><a href="live-music-somerville/">Somerville Live Music</a></li>
+          <li><a href="board-game-nights-boston/">Board Game Nights &amp; Trivia</a></li>
+        </ul>
       </div>
 
       <!-- Venues A-Z -->
@@ -760,53 +774,258 @@ def build_seo_directory_html(all_events_flat, all_venue_names):
 </section>"""
 
 
+def _parse_event_eastern_date(e):
+    raw = e.get("date")
+    if not raw or raw == "tba":
+        return None
+    try:
+        dt = datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=EASTERN)
+        else:
+            dt = dt.astimezone(EASTERN)
+        return dt.date()
+    except Exception:
+        if len(str(raw)) >= 10 and str(raw)[:10].count("-") == 2:
+            try:
+                return datetime.strptime(str(raw)[:10], "%Y-%m-%d").date()
+            except Exception:
+                pass
+    return None
+
+
+def _event_date_matches_time_filter(e, time_filter):
+    if not time_filter:
+        return True
+    ed = _parse_event_eastern_date(e)
+    if not ed:
+        return False
+    today = datetime.now(EASTERN).date()
+    if time_filter in ("tonight", "today"):
+        return ed == today
+    if time_filter == "weekend":
+        cur_weekday = today.weekday()
+        if cur_weekday == 5:
+            weekend_dates = {today + timedelta(days=-1), today, today + timedelta(days=1)}
+        elif cur_weekday == 6:
+            weekend_dates = {today + timedelta(days=-2), today + timedelta(days=-1), today}
+        elif cur_weekday == 4:
+            weekend_dates = {today, today + timedelta(days=1), today + timedelta(days=2)}
+        else:
+            days_to_fri = 4 - cur_weekday
+            weekend_dates = {today + timedelta(days=days_to_fri + i) for i in (0, 1, 2)}
+        return ed in weekend_dates
+    return True
+
+
+def _event_matches_keywords(e, keywords):
+    if not keywords:
+        return True
+    text = f"{e.get('title', '')} {e.get('name', '')} {e.get('description', '')} {e.get('category', '')} {e.get('genre', '')}".lower()
+    return any(k.lower() in text for k in keywords)
+
+
+def filter_events_for_hub(hub, events):
+    city_filter = hub.get("city_filter")
+    cat_filter = hub.get("cat_filter")
+    free_only = hub.get("free_only", False)
+    time_filter = hub.get("time_filter")
+    keyword_filter = hub.get("keyword_filter")
+
+    filtered = []
+    for e in events:
+        if city_filter and _event_city(e.get("venue"), e.get("_source_venue"), e) != city_filter:
+            continue
+        if cat_filter and category_bucket(e.get("category")) != cat_filter:
+            continue
+        if free_only and not _is_event_free(e):
+            continue
+        if time_filter and not _event_date_matches_time_filter(e, time_filter):
+            continue
+        if keyword_filter and not _event_matches_keywords(e, keyword_filter):
+            continue
+        filtered.append(e)
+
+    # Fallback if tonight has fewer than 5 events: expand up to 3 days out
+    if time_filter in ("tonight", "today") and len(filtered) < 5:
+        today = datetime.now(EASTERN).date()
+        horizon = today + timedelta(days=3)
+        for e in events:
+            if e in filtered:
+                continue
+            if city_filter and _event_city(e.get("venue"), e.get("_source_venue"), e) != city_filter:
+                continue
+            if cat_filter and category_bucket(e.get("category")) != cat_filter:
+                continue
+            if free_only and not _is_event_free(e):
+                continue
+            ed = _parse_event_eastern_date(e)
+            if ed and today <= ed <= horizon:
+                filtered.append(e)
+                if len(filtered) >= 25:
+                    break
+
+    return filtered
+
+
 HUBS = {
-    "boston": {
-        "title": "Live Boston Events & Concerts",
+    # 1. High-Volume Programmatic Intent Pages
+    "free-events-boston-this-weekend": {
+        "title": "Free Events in Boston This Weekend",
+        "h1": "Free Events in Boston This Weekend",
+        "city_filter": None,
+        "cat_filter": None,
+        "free_only": True,
+        "time_filter": "weekend",
+        "keyword_filter": None,
+        "subtitle": "Curated list of completely free concerts, community markets, gallery openings, and comedy across Boston, Cambridge, and Somerville this weekend.",
+        "og_badge": "FREE THIS WEEKEND",
+        "og_image": "og-free-weekend.jpg",
+        "query": "#free=1"
+    },
+    "cambridge-events-tonight": {
+        "title": "Tonight in Cambridge: Live Music, Comedy & Shows",
+        "h1": "Cambridge Events Tonight",
+        "city_filter": "cambridge",
+        "cat_filter": None,
+        "free_only": False,
+        "time_filter": "tonight",
+        "keyword_filter": None,
+        "subtitle": "What's happening tonight in Cambridge: live gigs, DJ sets, comedy, and theater across Harvard Square, Central Square, and Kendall.",
+        "og_badge": "CAMBRIDGE TONIGHT",
+        "og_image": "og-cambridge-tonight.jpg",
+        "query": "#city=cambridge"
+    },
+    "live-music-somerville": {
+        "title": "Live Music & Concerts in Somerville",
+        "h1": "Somerville Live Music",
+        "city_filter": "somerville",
+        "cat_filter": "Music & nightlife",
+        "free_only": False,
+        "time_filter": None,
+        "keyword_filter": None,
+        "subtitle": "Upcoming live concerts, indie rock gigs, jazz, and acoustic sessions across Somerville venues (The Rockwell, Burren, Crystal Ballroom, Armory).",
+        "og_badge": "SOMERVILLE MUSIC",
+        "og_image": "og-somerville-music.jpg",
+        "query": "#city=somerville&cat=Music+%26+nightlife"
+    },
+    "board-game-nights-boston": {
+        "title": "Board Game Nights & Trivia in Boston & Cambridge",
+        "h1": "Boston Board Game Nights & Trivia",
+        "city_filter": None,
+        "cat_filter": None,
+        "free_only": False,
+        "time_filter": None,
+        "keyword_filter": ["board game", "boardgame", "trivia", "game night", "tabletop", "chess", "arcade", "d&d", "dungeons"],
+        "subtitle": "Weekly board game meetups, pub trivia, tabletop gaming, arcade tournaments, and social game nights across Greater Boston.",
+        "og_badge": "BOARD GAMES & TRIVIA",
+        "og_image": "og-board-games.jpg",
+        "query": "#q=trivia"
+    },
+    "boston-events-today": {
+        "title": "Boston Events Today & Tonight",
+        "h1": "Boston Events Today",
         "city_filter": "boston",
         "cat_filter": None,
         "free_only": False,
+        "time_filter": "today",
+        "keyword_filter": None,
+        "subtitle": "What's happening today in Boston: live music, theater, comedy clubs, and nightlife across Back Bay, Allston, Fenway, and Downtown.",
+        "og_badge": "BOSTON TODAY",
+        "og_image": "og-boston-today.jpg",
+        "query": "#city=boston"
+    },
+    "boston-events-this-weekend": {
+        "title": "Things to Do in Boston This Weekend",
+        "h1": "Boston This Weekend",
+        "city_filter": "boston",
+        "cat_filter": None,
+        "free_only": False,
+        "time_filter": "weekend",
+        "keyword_filter": None,
+        "subtitle": "Weekend guide to concerts, comedy, nightlife, pop-up markets, and cultural exhibits across Boston.",
+        "og_badge": "BOSTON WEEKEND",
+        "og_image": "og-boston-weekend.jpg",
+        "query": "#city=boston"
+    },
+
+    # 2. Neighborhood & Category Directories
+    "boston": {
+        "title": "Live Boston Events & Concerts",
+        "h1": "Boston Events Directory",
+        "city_filter": "boston",
+        "cat_filter": None,
+        "free_only": False,
+        "time_filter": None,
+        "keyword_filter": None,
         "subtitle": "Curated live calendar for concerts, comedy, nightlife, and arts across Boston (Back Bay, Allston, Brighton, Fenway, Seaport, Downtown, South End).",
+        "og_badge": "BOSTON DIRECTORY",
+        "og_image": "og-boston.jpg",
         "query": "#city=boston"
     },
     "cambridge": {
         "title": "Cambridge Live Music & Events",
+        "h1": "Cambridge Events Directory",
         "city_filter": "cambridge",
         "cat_filter": None,
         "free_only": False,
+        "time_filter": None,
+        "keyword_filter": None,
         "subtitle": "Upcoming live shows, concerts, and cultural events across Harvard Square, Central Square, Kendall, and Inman Square.",
+        "og_badge": "CAMBRIDGE DIRECTORY",
+        "og_image": "og-cambridge.jpg",
         "query": "#city=cambridge"
     },
     "somerville": {
         "title": "Somerville Shows & Live Events",
+        "h1": "Somerville Events Directory",
         "city_filter": "somerville",
         "cat_filter": None,
         "free_only": False,
+        "time_filter": None,
+        "keyword_filter": None,
         "subtitle": "Independent concerts, comedy, craft markets, and cinema across Davis Square, Union Square, and Assembly Row.",
+        "og_badge": "SOMERVILLE DIRECTORY",
+        "og_image": "og-somerville.jpg",
         "query": "#city=somerville"
     },
     "music": {
         "title": "Boston & Cambridge Live Music Calendar",
+        "h1": "Boston Live Music Guide",
         "city_filter": None,
         "cat_filter": "Music & nightlife",
         "free_only": False,
+        "time_filter": None,
+        "keyword_filter": None,
         "subtitle": "Daily live music directory covering indie rock, jazz, punk, electronic, and folk across 40+ local Boston & Cambridge stages.",
+        "og_badge": "LIVE MUSIC GUIDE",
+        "og_image": "og-music.jpg",
         "query": "#cat=Music+%26+nightlife"
     },
     "comedy": {
         "title": "Boston Stand-Up Comedy & Shows",
+        "h1": "Boston Comedy Guide",
         "city_filter": None,
         "cat_filter": "Comedy",
         "free_only": False,
+        "time_filter": None,
+        "keyword_filter": None,
         "subtitle": "Live stand-up comedy shows, improv, and open mics across The Comedy Studio, The 88 Club, The Rockwell, and Wilbur.",
+        "og_badge": "COMEDY & IMPROV",
+        "og_image": "og-comedy.jpg",
         "query": "#cat=Comedy"
     },
     "free": {
         "title": "Free Events in Boston & Cambridge",
+        "h1": "Free Things to Do in Boston",
         "city_filter": None,
         "cat_filter": None,
         "free_only": True,
+        "time_filter": None,
+        "keyword_filter": None,
         "subtitle": "Curated list of free museum days, open mics, community workshops, library events, and outdoor gatherings.",
+        "og_badge": "FREE EVENTS",
+        "og_image": "og-free.jpg",
         "query": "#free=1"
     }
 }
@@ -819,26 +1038,16 @@ def render_hub_page(hub_slug, events, site_url=None):
     if not hub:
         return ""
 
-    city_filter = hub["city_filter"]
-    cat_filter = hub["cat_filter"]
-    free_only = hub["free_only"]
-
-    filtered = []
-    for e in events:
-        if city_filter and _event_city(e.get("venue"), e.get("_source_venue"), e) != city_filter:
-            continue
-        if cat_filter and category_bucket(e.get("category")) != cat_filter:
-            continue
-        if free_only and not _is_event_free(e):
-            continue
-        filtered.append(e)
+    filtered = filter_events_for_hub(hub, events)
 
     hub_canonical = f"{site_url}/{hub_slug}/"
+    og_img_name = hub.get("og_image") or f"og-{hub_slug}.jpg"
     meta_tags = build_seo_meta_tags(
         site_url=site_url,
         title=f"{hub['title']} · Wicked Boston Events",
         description=hub["subtitle"],
-        path=f"{hub_slug}/"
+        path=f"{hub_slug}/",
+        image_url=f"{site_url}/{og_img_name}"
     )
 
     hub_event_items = []
@@ -849,24 +1058,78 @@ def render_hub_page(hub_slug, events, site_url=None):
         title = e.get("title") or e.get("name")
         venue_name = e.get("venue") or e.get("_source_venue") or "Boston Area Venue"
         city = _event_city(venue_name, e.get("_source_venue"), e)
+        city_label = CITY_LABELS.get(city, "Boston")
         url = e.get("url") or e.get("link") or hub_canonical
+        geo = resolve_event_geo(e)
+
+        loc_obj = {
+            "@type": "Place",
+            "name": venue_name,
+            "address": {
+                "@type": "PostalAddress",
+                "addressLocality": city_label,
+                "addressRegion": "MA",
+                "addressCountry": "US"
+            }
+        }
+        if geo:
+            if geo.get("address"):
+                loc_obj["address"]["streetAddress"] = geo["address"]
+            loc_obj["geo"] = {
+                "@type": "GeoCoordinates",
+                "latitude": geo["lat"],
+                "longitude": geo["lng"]
+            }
+
+        ev_img = e.get("img") or e.get("image") or f"{site_url}/og-image.jpg"
+        price_val = e.get("price")
+        offers_obj = {
+            "@type": "Offer",
+            "url": url,
+            "availability": "https://schema.org/InStock",
+            "priceCurrency": "USD"
+        }
+        if _is_event_free(e):
+            offers_obj["price"] = "0"
+        elif price_val:
+            m_price = re.search(r"\$?(\d+(\.\d{2})?)", str(price_val))
+            if m_price:
+                offers_obj["price"] = m_price.group(1)
+
+        t_obj = e.get("_time")
+        t_str = e.get("time") or ""
+        start_date = d_str
+        if t_obj:
+            start_date = f"{d_str}T{t_obj.strftime('%H:%M:%S')}-05:00"
+        elif ":" in t_str and ("am" in t_str.lower() or "pm" in t_str.lower()):
+            try:
+                dt_tmp = datetime.strptime(t_str.strip().upper(), "%I:%M %p")
+                start_date = f"{d_str}T{dt_tmp.strftime('%H:%M:%S')}-05:00"
+            except Exception:
+                pass
+
         hub_event_items.append({
             "@type": "ListItem",
             "position": idx + 1,
             "item": {
                 "@type": "Event",
                 "name": title,
-                "startDate": d_str,
+                "startDate": start_date,
+                "eventStatus": "https://schema.org/EventScheduled",
+                "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+                "location": loc_obj,
+                "image": [ev_img],
+                "description": e.get("description") or f"{title} live at {venue_name} in {city_label}, MA",
                 "url": url,
-                "location": {
-                    "@type": "Place",
-                    "name": venue_name,
-                    "address": {
-                        "@type": "PostalAddress",
-                        "addressLocality": CITY_LABELS.get(city, "Boston"),
-                        "addressRegion": "MA",
-                        "addressCountry": "US"
-                    }
+                "offers": offers_obj,
+                "performer": {
+                    "@type": "PerformingGroup",
+                    "name": title
+                },
+                "organizer": {
+                    "@type": "Organization",
+                    "name": e.get("_source_venue") or venue_name,
+                    "url": url
                 }
             }
         })
@@ -915,6 +1178,10 @@ def render_hub_page(hub_slug, events, site_url=None):
     active_m = 'active' if hub_slug == 'music' else ''
     active_co = 'active' if hub_slug == 'comedy' else ''
     active_f = 'active' if hub_slug == 'free' else ''
+    active_fw = 'active' if hub_slug == 'free-events-boston-this-weekend' else ''
+    active_ct = 'active' if hub_slug == 'cambridge-events-tonight' else ''
+    active_sm = 'active' if hub_slug == 'live-music-somerville' else ''
+    active_bg = 'active' if hub_slug == 'board-game-nights-boston' else ''
 
     return f"""<!doctype html>
 <html lang="en">
@@ -1096,6 +1363,10 @@ def render_hub_page(hub_slug, events, site_url=None):
   <a href="../" class="logo"><span>Wicked</span> Boston Events</a>
   <nav class="hub-nav">
     <a href="../">All Events</a>
+    <a href="../free-events-boston-this-weekend/" class="{active_fw}">Free Weekend</a>
+    <a href="../cambridge-events-tonight/" class="{active_ct}">Cambridge Tonight</a>
+    <a href="../live-music-somerville/" class="{active_sm}">Somerville Music</a>
+    <a href="../board-game-nights-boston/" class="{active_bg}">Board Games</a>
     <a href="../boston/" class="{active_b}">Boston</a>
     <a href="../cambridge/" class="{active_c}">Cambridge</a>
     <a href="../somerville/" class="{active_s}">Somerville</a>

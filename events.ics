@@ -1,0 +1,1009 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Wicked Boston Events//NONSGML Live Calendar//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:Boston Live Events & Shows
+X-WR-TIMEZONE:America/New_York
+X-WR-CALDESC:Curated live shows, concerts, and comedy across Boston, Cambridge, and Somerville.
+BEGIN:VEVENT
+UID:20261102_1245812707@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261102
+SUMMARY:Art Opening: Harvard Square Gift Shop + The Littlest Sister Performance @ Harvard Square Subway Kiosk
+LOCATION:Harvard Square Subway Kiosk, Boston MA
+DESCRIPTION:Art Opening: Harvard Square Gift Shop + The Littlest Sister Performance live at Harvard Square Subway Kiosk. Zero ticket broker fees. Details: https://partiful.com/e/34k9aCWo4tEI76pTNiQP
+URL:https://partiful.com/e/34k9aCWo4tEI76pTNiQP
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261107_2285928470@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261107
+SUMMARY:BUNGALOW DYSTOPIAN DANCE @ Jacque's Cabaret
+LOCATION:Jacque's Cabaret, Boston MA
+DESCRIPTION:BUNGALOW DYSTOPIAN DANCE live at Jacque's Cabaret. Zero ticket broker fees. Details: https://partiful.com/e/JZ0VqzinebdqOcoxwPlH
+URL:https://partiful.com/e/JZ0VqzinebdqOcoxwPlH
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261107_4697296572@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261107
+SUMMARY:Somerville Winter Farmers Market @ Boston
+LOCATION:Boston, Boston MA
+DESCRIPTION:Somerville Winter Farmers Market live at Boston. Zero ticket broker fees. Details: https://partiful.com/e/ODNZeSSBA000tIaAexuP
+URL:https://partiful.com/e/ODNZeSSBA000tIaAexuP
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261108_4309293165@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261108
+SUMMARY:1 year of 🔗 hyperlinked: a girl edm + hyperpop party @ Boston
+LOCATION:Boston, Boston MA
+DESCRIPTION:1 year of 🔗 hyperlinked: a girl edm + hyperpop party live at Boston. Zero ticket broker fees. Details: https://partiful.com/e/xXASMGPMZQAl3dLOm1zI
+URL:https://partiful.com/e/xXASMGPMZQAl3dLOm1zI
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261108_1278265644@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261108
+SUMMARY:Paper Playdate @ Tatte Bakery & Cafe
+LOCATION:Tatte Bakery & Cafe, Boston MA
+DESCRIPTION:Paper Playdate live at Tatte Bakery & Cafe. Zero ticket broker fees. Details: https://partiful.com/e/gXoV7lSwwH4RKDKtr0VY
+URL:https://partiful.com/e/gXoV7lSwwH4RKDKtr0VY
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261108_7123405723@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261108
+SUMMARY:Fall Bake Exchange-  Cafecito & Chisme x Dar Cafe @ The Foundry
+LOCATION:The Foundry, Boston MA
+DESCRIPTION:Fall Bake Exchange-  Cafecito & Chisme x Dar Cafe live at The Foundry. Zero ticket broker fees. Details: https://partiful.com/e/9MyfE0c5rozU8gOKx0FJ
+URL:https://partiful.com/e/9MyfE0c5rozU8gOKx0FJ
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261110_6082334386@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261110
+SUMMARY:Fenway Free Market @ Fenway Community Center
+LOCATION:Fenway Community Center, Boston MA
+DESCRIPTION:Fenway Free Market live at Fenway Community Center. Zero ticket broker fees. Details: https://partiful.com/e/11FX60ikL9VhCTpCna8o
+URL:https://partiful.com/e/11FX60ikL9VhCTpCna8o
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261112_4544496929@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261112
+SUMMARY:LUNCH BREAK DANCE PARTY: Guest List @ The Foundry
+LOCATION:The Foundry, Boston MA
+DESCRIPTION:LUNCH BREAK DANCE PARTY: Guest List live at The Foundry. Zero ticket broker fees. Details: https://partiful.com/e/4ESAifPSYcVIKI4lHzzy
+URL:https://partiful.com/e/4ESAifPSYcVIKI4lHzzy
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261114_7586171391@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261114
+SUMMARY:my spelling bee 🐝 @ Panethnic Pourovers
+LOCATION:Panethnic Pourovers, Boston MA
+DESCRIPTION:my spelling bee 🐝 live at Panethnic Pourovers. Zero ticket broker fees. Details: https://partiful.com/e/lw9lJutGDOgZitJePHD3
+URL:https://partiful.com/e/lw9lJutGDOgZitJePHD3
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261114_6684059848@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261114
+SUMMARY:Coffee & Collectives @ Phinista Café
+LOCATION:Phinista Café, Boston MA
+DESCRIPTION:Coffee & Collectives live at Phinista Café. Zero ticket broker fees. Details: https://partiful.com/e/dKLUV3nxZJmLB0KAsG0N
+URL:https://partiful.com/e/dKLUV3nxZJmLB0KAsG0N
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261115_1375649740@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261115
+SUMMARY:fruitstand’s 3rd birthday: fruit 🍑 @ 52 Church
+LOCATION:52 Church, Boston MA
+DESCRIPTION:fruitstand’s 3rd birthday: fruit 🍑 live at 52 Church. Zero ticket broker fees. Details: https://partiful.com/e/sb67WN7JRX3uyAE5LFAh
+URL:https://partiful.com/e/sb67WN7JRX3uyAE5LFAh
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261115_6411843683@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261115
+SUMMARY:duck duck duck duck duck duck GOOSE! @ Make Way For Ducklings Statue\, Boston Public Garden
+LOCATION:Make Way For Ducklings Statue\, Boston Public Garden, Boston MA
+DESCRIPTION:duck duck duck duck duck duck GOOSE! live at Make Way For Ducklings Statue\, Boston Public Garden. Zero ticket broker fees. Details: https://partiful.com/e/nMhM5jZffB2zl2NMgQtO
+URL:https://partiful.com/e/nMhM5jZffB2zl2NMgQtO
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261115_5136523127@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261115
+SUMMARY:Boston Sapphic Craft Meetup @ Boston Public Market
+LOCATION:Boston Public Market, Boston MA
+DESCRIPTION:Boston Sapphic Craft Meetup live at Boston Public Market. Zero ticket broker fees. Details: https://partiful.com/e/HqAsJblFKe6gKT7z9b5a
+URL:https://partiful.com/e/HqAsJblFKe6gKT7z9b5a
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261121_5229859815@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261121
+SUMMARY:MEGA Journal and Chat @ The Foundry
+LOCATION:The Foundry, Boston MA
+DESCRIPTION:MEGA Journal and Chat live at The Foundry. Zero ticket broker fees. Details: https://partiful.com/e/g2fAsQbcfx5SOPIOEddI
+URL:https://partiful.com/e/g2fAsQbcfx5SOPIOEddI
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261121_5086925109@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261121
+SUMMARY:ART @ NIGHT @ First Street Market
+LOCATION:First Street Market, Boston MA
+DESCRIPTION:ART @ NIGHT live at First Street Market. Zero ticket broker fees. Details: https://partiful.com/e/2Al5mSQ8gkWmY5WC6dHJ
+URL:https://partiful.com/e/2Al5mSQ8gkWmY5WC6dHJ
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261203_7137763035@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261203
+SUMMARY:Let’s Feast Cookbook Club (Dec) @ Molly's Bookstore
+LOCATION:Molly's Bookstore, Boston MA
+DESCRIPTION:Let’s Feast Cookbook Club (Dec) live at Molly's Bookstore. Zero ticket broker fees. Details: https://partiful.com/e/v4O8TBGBC7LlDQnN2UHg
+URL:https://partiful.com/e/v4O8TBGBC7LlDQnN2UHg
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261102_1233829796@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261102
+SUMMARY:Southie Taproom Closing early at 7PM @ Castle Island Brewing
+LOCATION:Castle Island Brewing, Boston MA
+DESCRIPTION:Southie Taproom Closing early at 7PM live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/southie-taproom-closing-early-at-7pm
+URL:https://castleislandbeer.com/calendar/southie-taproom-closing-early-at-7pm
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261103_2499773114@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261103
+SUMMARY:Musical Bingo @ Castle Island Brewing
+LOCATION:Castle Island Brewing, Boston MA
+DESCRIPTION:Musical Bingo live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/musical-bingo-4-d2mnz-lweyh
+URL:https://castleislandbeer.com/calendar/musical-bingo-4-d2mnz-lweyh
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261103_4772735456@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261103
+SUMMARY:Southie Trivia @ Castle Island Brewing
+LOCATION:Castle Island Brewing, Boston MA
+DESCRIPTION:Southie Trivia live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/y0jk7jbh7uzy6rv32szl1qpdry78c0-2tthe-h2ba5-8l7ne-lj829
+URL:https://castleislandbeer.com/calendar/y0jk7jbh7uzy6rv32szl1qpdry78c0-2tthe-h2ba5-8l7ne-lj829
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261105_1795997020@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261105
+SUMMARY:Trivia With TIm @ Castle Island Brewing
+LOCATION:Castle Island Brewing, Boston MA
+DESCRIPTION:Trivia With TIm live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/trivia-with-tim-shh72-js58b-gener-wnldt-gxt79-m2afy-ayl6z-344w9-hx9gz-dt8k3-yc5ss-rhh7f-dhd5g-hfa69-5g8ch-d5y99-d5zma-gs5k5-fg7el-4spja
+URL:https://castleislandbeer.com/calendar/trivia-with-tim-shh72-js58b-gener-wnldt-gxt79-m2afy-ayl6z-344w9-hx9gz-dt8k3-yc5ss-rhh7f-dhd5g-hfa69-5g8ch-d5y99-d5zma-gs5k5-fg7el-4spja
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261107_4019878087@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261107
+SUMMARY:Steal My Style Thrift Market @ Castle Island Brewing
+LOCATION:Castle Island Brewing, Boston MA
+DESCRIPTION:Steal My Style Thrift Market live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/steal-my-style-thrift-market
+URL:https://castleislandbeer.com/calendar/steal-my-style-thrift-market
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261109_6119931880@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261109
+SUMMARY:Brews & Laughs @ Castle Island Brewing
+LOCATION:Castle Island Brewing, Boston MA
+DESCRIPTION:Brews & Laughs live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/brews-laughs-1-rk8b7-xtnwd
+URL:https://castleislandbeer.com/calendar/brews-laughs-1-rk8b7-xtnwd
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261110_2200558756@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261110
+SUMMARY:Bonsai Bar @ Castle Island Brewing
+LOCATION:Castle Island Brewing, Boston MA
+DESCRIPTION:Bonsai Bar live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/bonsai-bar-2-j82f2-8xdf7
+URL:https://castleislandbeer.com/calendar/bonsai-bar-2-j82f2-8xdf7
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261110_2499773114@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261110
+SUMMARY:Musical Bingo @ Castle Island Brewing
+LOCATION:Castle Island Brewing, Boston MA
+DESCRIPTION:Musical Bingo live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/musical-bingo-4-d2mnz-5785z
+URL:https://castleislandbeer.com/calendar/musical-bingo-4-d2mnz-5785z
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261110_4772735456@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261110
+SUMMARY:Southie Trivia @ Castle Island Brewing
+LOCATION:Castle Island Brewing, Boston MA
+DESCRIPTION:Southie Trivia live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/y0jk7jbh7uzy6rv32szl1qpdry78c0-2tthe-h2ba5-8l7ne-lj829-zeswg
+URL:https://castleislandbeer.com/calendar/y0jk7jbh7uzy6rv32szl1qpdry78c0-2tthe-h2ba5-8l7ne-lj829-zeswg
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261111_6627374643@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261111
+SUMMARY:Skip the small talk @ Castle Island Brewing
+LOCATION:Castle Island Brewing, Boston MA
+DESCRIPTION:Skip the small talk live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/skip-the-small-talk
+URL:https://castleislandbeer.com/calendar/skip-the-small-talk
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261112_1795997020@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261112
+SUMMARY:Trivia With TIm @ Castle Island Brewing
+LOCATION:Castle Island Brewing, Boston MA
+DESCRIPTION:Trivia With TIm live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/trivia-with-tim-shh72-js58b-gener-wnldt-gxt79-m2afy-ayl6z-344w9-hx9gz-dt8k3-yc5ss-rhh7f-dhd5g-hfa69-5g8ch-d5y99-d5zma-gs5k5-fg7el-4spja-nfgnw
+URL:https://castleislandbeer.com/calendar/trivia-with-tim-shh72-js58b-gener-wnldt-gxt79-m2afy-ayl6z-344w9-hx9gz-dt8k3-yc5ss-rhh7f-dhd5g-hfa69-5g8ch-d5y99-d5zma-gs5k5-fg7el-4spja-nfgnw
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261114_4645531983@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261114
+SUMMARY:National Pickle Day Party @ Castle Island Brewing
+LOCATION:Castle Island Brewing, Boston MA
+DESCRIPTION:National Pickle Day Party live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/national-pickle-day-party
+URL:https://castleislandbeer.com/calendar/national-pickle-day-party
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261117_2499773114@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261117
+SUMMARY:Musical Bingo @ Castle Island Brewing
+LOCATION:Castle Island Brewing, Boston MA
+DESCRIPTION:Musical Bingo live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/musical-bingo-4-d2mnz-5785z-ypd9r
+URL:https://castleislandbeer.com/calendar/musical-bingo-4-d2mnz-5785z-ypd9r
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261117_4772735456@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261117
+SUMMARY:Southie Trivia @ Castle Island Brewing
+LOCATION:Castle Island Brewing, Boston MA
+DESCRIPTION:Southie Trivia live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/y0jk7jbh7uzy6rv32szl1qpdry78c0-2tthe-h2ba5-8l7ne-lj829-zeswg-2xtmp
+URL:https://castleislandbeer.com/calendar/y0jk7jbh7uzy6rv32szl1qpdry78c0-2tthe-h2ba5-8l7ne-lj829-zeswg-2xtmp
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261119_8862840723@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261119
+SUMMARY:Don't F**k It Up @ Castle Island Brewing
+LOCATION:Castle Island Brewing, Boston MA
+DESCRIPTION:Don't F**k It Up live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/dont-fk-it-up
+URL:https://castleislandbeer.com/calendar/dont-fk-it-up
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261119_1795997020@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261119
+SUMMARY:Trivia With TIm @ Castle Island Brewing
+LOCATION:Castle Island Brewing, Boston MA
+DESCRIPTION:Trivia With TIm live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/trivia-with-tim-shh72-js58b-gener-wnldt-gxt79-m2afy-ayl6z-344w9-hx9gz-dt8k3-yc5ss-rhh7f-dhd5g-hfa69-5g8ch-d5y99-d5zma-gs5k5-fg7el-4spja-52akb
+URL:https://castleislandbeer.com/calendar/trivia-with-tim-shh72-js58b-gener-wnldt-gxt79-m2afy-ayl6z-344w9-hx9gz-dt8k3-yc5ss-rhh7f-dhd5g-hfa69-5g8ch-d5y99-d5zma-gs5k5-fg7el-4spja-52akb
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261120_2734751855@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261120
+SUMMARY:Don’t Drown Comedy Show @ Castle Island Brewing
+LOCATION:Castle Island Brewing, Boston MA
+DESCRIPTION:Don’t Drown Comedy Show live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/6vxqyvd1tstzh2ljivi6enc0nztn5e-kfzys
+URL:https://castleislandbeer.com/calendar/6vxqyvd1tstzh2ljivi6enc0nztn5e-kfzys
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261121_2016553855@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261121
+SUMMARY:Brews and Botanicals Exotic Plant Show @ Castle Island Brewing
+LOCATION:Castle Island Brewing, Boston MA
+DESCRIPTION:Brews and Botanicals Exotic Plant Show live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/brews-and-botanicals-exotic-plant-show
+URL:https://castleislandbeer.com/calendar/brews-and-botanicals-exotic-plant-show
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261122_5669415229@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261122
+SUMMARY:Friendsgiving @ Castle Island Brewing
+LOCATION:Castle Island Brewing, Boston MA
+DESCRIPTION:Friendsgiving live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/friendsgiving
+URL:https://castleislandbeer.com/calendar/friendsgiving
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261123_6119931880@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261123
+SUMMARY:Brews & Laughs @ Castle Island Brewing
+LOCATION:Castle Island Brewing, Boston MA
+DESCRIPTION:Brews & Laughs live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/brews-laughs-1-rk8b7-xtnwd-8f5f5
+URL:https://castleislandbeer.com/calendar/brews-laughs-1-rk8b7-xtnwd-8f5f5
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261124_2499773114@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261124
+SUMMARY:Musical Bingo @ Castle Island Brewing
+LOCATION:Castle Island Brewing, Boston MA
+DESCRIPTION:Musical Bingo live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/musical-bingo-4-d2mnz-5785z-ypd9r-r5wpf
+URL:https://castleislandbeer.com/calendar/musical-bingo-4-d2mnz-5785z-ypd9r-r5wpf
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261124_4772735456@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261124
+SUMMARY:Southie Trivia @ Castle Island Brewing
+LOCATION:Castle Island Brewing, Boston MA
+DESCRIPTION:Southie Trivia live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/y0jk7jbh7uzy6rv32szl1qpdry78c0-2tthe-h2ba5-8l7ne-lj829-zeswg-2xtmp-hpkl9
+URL:https://castleislandbeer.com/calendar/y0jk7jbh7uzy6rv32szl1qpdry78c0-2tthe-h2ba5-8l7ne-lj829-zeswg-2xtmp-hpkl9
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261126_1795997020@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261126
+SUMMARY:Trivia With TIm @ Castle Island Brewing
+LOCATION:Castle Island Brewing, Boston MA
+DESCRIPTION:Trivia With TIm live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/trivia-with-tim-shh72-js58b-gener-wnldt-gxt79-m2afy-ayl6z-344w9-hx9gz-dt8k3-yc5ss-rhh7f-dhd5g-hfa69-5g8ch-d5y99-d5zma-gs5k5-fg7el-4spja-y97al
+URL:https://castleislandbeer.com/calendar/trivia-with-tim-shh72-js58b-gener-wnldt-gxt79-m2afy-ayl6z-344w9-hx9gz-dt8k3-yc5ss-rhh7f-dhd5g-hfa69-5g8ch-d5y99-d5zma-gs5k5-fg7el-4spja-y97al
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261201_2499773114@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261201
+SUMMARY:Musical Bingo @ Castle Island Brewing
+LOCATION:Castle Island Brewing, Boston MA
+DESCRIPTION:Musical Bingo live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/musical-bingo-4-d2mnz-5785z-ypd9r-r5wpf-bb43e
+URL:https://castleislandbeer.com/calendar/musical-bingo-4-d2mnz-5785z-ypd9r-r5wpf-bb43e
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261201_4772735456@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261201
+SUMMARY:Southie Trivia @ Castle Island Brewing
+LOCATION:Castle Island Brewing, Boston MA
+DESCRIPTION:Southie Trivia live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/y0jk7jbh7uzy6rv32szl1qpdry78c0-2tthe-h2ba5-8l7ne-lj829-zeswg-2xtmp-hpkl9-ar9be
+URL:https://castleislandbeer.com/calendar/y0jk7jbh7uzy6rv32szl1qpdry78c0-2tthe-h2ba5-8l7ne-lj829-zeswg-2xtmp-hpkl9-ar9be
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261101_3960246746@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261101
+SUMMARY:The Commute (Performance) @ Somerville City Hall
+LOCATION:Somerville City Hall, Boston MA
+DESCRIPTION:The Commute (Performance) live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/01/commute-performance
+URL:https://www.somervillema.gov/events/2026/11/01/commute-performance
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261102_3363672554@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261102
+SUMMARY:General Exercise - Holland Street (Council on Aging) @ Somerville City Hall
+LOCATION:Somerville City Hall, Boston MA
+DESCRIPTION:General Exercise - Holland Street (Council on Aging) live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/02/general-exercise-holland-street-council-aging
+URL:https://www.somervillema.gov/events/2026/11/02/general-exercise-holland-street-council-aging
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261102_8431429184@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261102
+SUMMARY:Coffee & Conversation Ralph & Jenny Center (Council on Aging) @ Somerville City Hall
+LOCATION:Somerville City Hall, Boston MA
+DESCRIPTION:Coffee & Conversation Ralph & Jenny Center (Council on Aging) live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/02/coffee-conversation-ralph-jenny-center-council-aging
+URL:https://www.somervillema.gov/events/2026/11/02/coffee-conversation-ralph-jenny-center-council-aging
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261102_6280285806@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261102
+SUMMARY:Virtual Nutrition Class (Council on Aging) @ Somerville City Hall
+LOCATION:Somerville City Hall, Boston MA
+DESCRIPTION:Virtual Nutrition Class (Council on Aging) live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/02/virtual-nutrition-class-council-aging
+URL:https://www.somervillema.gov/events/2026/11/02/virtual-nutrition-class-council-aging
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261102_8713804910@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261102
+SUMMARY:Nutrition at Ralph & Jenny (Council on Aging) @ Somerville City Hall
+LOCATION:Somerville City Hall, Boston MA
+DESCRIPTION:Nutrition at Ralph & Jenny (Council on Aging) live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/02/nutrition-ralph-jenny-council-aging
+URL:https://www.somervillema.gov/events/2026/11/02/nutrition-ralph-jenny-council-aging
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261102_2688037433@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261102
+SUMMARY:Virtual General Exercise (Council on Aging) @ Somerville City Hall
+LOCATION:Somerville City Hall, Boston MA
+DESCRIPTION:Virtual General Exercise (Council on Aging) live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/02/virtual-general-exercise-council-aging
+URL:https://www.somervillema.gov/events/2026/11/02/virtual-general-exercise-council-aging
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261102_3591214792@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261102
+SUMMARY:General Exercise - Ralph & Jenny Center (Council on Aging) @ Somerville City Hall
+LOCATION:Somerville City Hall, Boston MA
+DESCRIPTION:General Exercise - Ralph & Jenny Center (Council on Aging) live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/02/general-exercise-ralph-jenny-center-council-aging
+URL:https://www.somervillema.gov/events/2026/11/02/general-exercise-ralph-jenny-center-council-aging
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261102_4926758435@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261102
+SUMMARY:School Building Committee Meeting (Virtual) @ Somerville City Hall
+LOCATION:Somerville City Hall, Boston MA
+DESCRIPTION:School Building Committee Meeting (Virtual) live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/02/school-building-committee-meeting-virtual
+URL:https://www.somervillema.gov/events/2026/11/02/school-building-committee-meeting-virtual
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261103_7994383708@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261103
+SUMMARY:School Committee Regular Meeting @ Somerville City Hall
+LOCATION:Somerville City Hall, Boston MA
+DESCRIPTION:School Committee Regular Meeting live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/02/school-committee-regular-meeting
+URL:https://www.somervillema.gov/events/2026/11/02/school-committee-regular-meeting
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261103_5597872792@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261103
+SUMMARY:Josie Edwards at Warehouse XI @ Somerville City Hall
+LOCATION:Somerville City Hall, Boston MA
+DESCRIPTION:Josie Edwards at Warehouse XI live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/02/josie-edwards-warehouse-xi
+URL:https://www.somervillema.gov/events/2026/11/02/josie-edwards-warehouse-xi
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261103_8438591254@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261103
+SUMMARY:Virtual Nutrition Make-up & Q&A (Council on Aging) @ Somerville City Hall
+LOCATION:Somerville City Hall, Boston MA
+DESCRIPTION:Virtual Nutrition Make-up & Q&A (Council on Aging) live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/02/virtual-nutrition-make-qa-council-aging
+URL:https://www.somervillema.gov/events/2026/11/02/virtual-nutrition-make-qa-council-aging
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261103_3933054717@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261103
+SUMMARY:State Election @ Somerville City Hall
+LOCATION:Somerville City Hall, Boston MA
+DESCRIPTION:State Election live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/03/state-election
+URL:https://www.somervillema.gov/events/2026/11/03/state-election
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261103_4550839406@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261103
+SUMMARY:Bingo at Ralph & Jenny (Council on Aging) @ Somerville City Hall
+LOCATION:Somerville City Hall, Boston MA
+DESCRIPTION:Bingo at Ralph & Jenny (Council on Aging) live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/03/bingo-ralph-jenny-council-aging
+URL:https://www.somervillema.gov/events/2026/11/03/bingo-ralph-jenny-council-aging
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261103_3190692030@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261103
+SUMMARY:November Asian Tea Party - How Are Parks and Open Spaces Planned? @ Somerville City Hall
+LOCATION:Somerville City Hall, Boston MA
+DESCRIPTION:November Asian Tea Party - How Are Parks and Open Spaces Planned? live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/03/november-asian-tea-party-how-are-parks-and-open-spaces-planned
+URL:https://www.somervillema.gov/events/2026/11/03/november-asian-tea-party-how-are-parks-and-open-spaces-planned
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261103_7608098569@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261103
+SUMMARY:Healthy Steps (Council on Aging) @ Somerville City Hall
+LOCATION:Somerville City Hall, Boston MA
+DESCRIPTION:Healthy Steps (Council on Aging) live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/03/healthy-steps-council-aging
+URL:https://www.somervillema.gov/events/2026/11/03/healthy-steps-council-aging
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261103_5661918150@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261103
+SUMMARY:Virtual Overdose Prevention and Response Trainings @ Somerville City Hall
+LOCATION:Somerville City Hall, Boston MA
+DESCRIPTION:Virtual Overdose Prevention and Response Trainings live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/03/virtual-overdose-prevention-and-response-trainings
+URL:https://www.somervillema.gov/events/2026/11/03/virtual-overdose-prevention-and-response-trainings
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261103_5884635840@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261103
+SUMMARY:Human Rights Commission Rights Violations Subcommittee Meeting @ Somerville City Hall
+LOCATION:Somerville City Hall, Boston MA
+DESCRIPTION:Human Rights Commission Rights Violations Subcommittee Meeting live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/03/human-rights-commission-rights-violations-subcommittee-meeting
+URL:https://www.somervillema.gov/events/2026/11/03/human-rights-commission-rights-violations-subcommittee-meeting
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261103_6047305295@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261103
+SUMMARY:Traffic Commission Meeting @ Somerville City Hall
+LOCATION:Somerville City Hall, Boston MA
+DESCRIPTION:Traffic Commission Meeting live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/03/traffic-commission-meeting
+URL:https://www.somervillema.gov/events/2026/11/03/traffic-commission-meeting
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261104_3363672554@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261104
+SUMMARY:General Exercise - Holland Street (Council on Aging) @ Somerville City Hall
+LOCATION:Somerville City Hall, Boston MA
+DESCRIPTION:General Exercise - Holland Street (Council on Aging) live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/04/general-exercise-holland-street-council-aging
+URL:https://www.somervillema.gov/events/2026/11/04/general-exercise-holland-street-council-aging
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261101_3176166981@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261101
+SUMMARY:Boston Graduate Fair - Fall 2026 @ Northeastern University Alumni Center
+LOCATION:Northeastern University Alumni Center, Boston MA
+DESCRIPTION:Boston Graduate Fair - Fall 2026 live at Northeastern University Alumni Center. Zero ticket broker fees. Details: https://calendar.northeastern.edu/event/boston-graduate-fair-fall-2026
+URL:https://calendar.northeastern.edu/event/boston-graduate-fair-fall-2026
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261101_3508247143@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261101
+SUMMARY:Women's Soccer vs. Monmouth @ Parsons Field
+LOCATION:Parsons Field, Boston MA
+DESCRIPTION:Women's Soccer vs. Monmouth live at Parsons Field. Zero ticket broker fees. Details: https://calendar.northeastern.edu/event/womens-soccer-vs-monmouth-2147
+URL:https://calendar.northeastern.edu/event/womens-soccer-vs-monmouth-2147
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261102_3176166981@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261102
+SUMMARY:Boston Graduate Fair - Fall 2026 @ Northeastern University Alumni Center
+LOCATION:Northeastern University Alumni Center, Boston MA
+DESCRIPTION:Boston Graduate Fair - Fall 2026 live at Northeastern University Alumni Center. Zero ticket broker fees. Details: https://calendar.northeastern.edu/event/boston-graduate-fair-fall-2026
+URL:https://calendar.northeastern.edu/event/boston-graduate-fair-fall-2026
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261102_5257170937@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261102
+SUMMARY:Daily Guided Meditation @ Center for Spirituality\, Dialogue\, and Service
+LOCATION:Center for Spirituality\, Dialogue\, and Service, Boston MA
+DESCRIPTION:Daily Guided Meditation live at Center for Spirituality\, Dialogue\, and Service . Zero ticket broker fees. Details: https://calendar.northeastern.edu/event/daily-guided-meditation
+URL:https://calendar.northeastern.edu/event/daily-guided-meditation
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261102_4812378182@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261102
+SUMMARY:Daily Yoga @ Center for Spirituality\, Dialogue\, and Service
+LOCATION:Center for Spirituality\, Dialogue\, and Service, Boston MA
+DESCRIPTION:Daily Yoga live at Center for Spirituality\, Dialogue\, and Service . Zero ticket broker fees. Details: https://calendar.northeastern.edu/event/daily-yoga-1496
+URL:https://calendar.northeastern.edu/event/daily-yoga-1496
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261102_3348048502@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261102
+SUMMARY:Global Topics for Global Learners @ Northeastern University
+LOCATION:Northeastern University, Boston MA
+DESCRIPTION:Global Topics for Global Learners live at Northeastern University. Zero ticket broker fees. Details: https://calendar.northeastern.edu/event/global-topics-for-global-learners-1329
+URL:https://calendar.northeastern.edu/event/global-topics-for-global-learners-1329
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261103_4670601000@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261103
+SUMMARY:Women's Basketball vs. Albany @ Solomon Court
+LOCATION:Solomon Court, Boston MA
+DESCRIPTION:Women's Basketball vs. Albany live at Solomon Court. Zero ticket broker fees. Details: https://calendar.northeastern.edu/event/womens-basketball-vs-albany
+URL:https://calendar.northeastern.edu/event/womens-basketball-vs-albany
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261103_3176166981@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261103
+SUMMARY:Boston Graduate Fair - Fall 2026 @ Northeastern University Alumni Center
+LOCATION:Northeastern University Alumni Center, Boston MA
+DESCRIPTION:Boston Graduate Fair - Fall 2026 live at Northeastern University Alumni Center. Zero ticket broker fees. Details: https://calendar.northeastern.edu/event/boston-graduate-fair-fall-2026
+URL:https://calendar.northeastern.edu/event/boston-graduate-fair-fall-2026
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261103_5948871308@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261103
+SUMMARY:Crafting Data Visuals to Tell a Scientific Story: CommLab Drop-In Hours @ Northeastern University
+LOCATION:Northeastern University, Boston MA
+DESCRIPTION:Crafting Data Visuals to Tell a Scientific Story: CommLab Drop-In Hours live at Northeastern University. Zero ticket broker fees. Details: https://calendar.northeastern.edu/event/crafting-data-visuals-to-tell-a-scientific-story-commlab-drop-in-hours-9262
+URL:https://calendar.northeastern.edu/event/crafting-data-visuals-to-tell-a-scientific-story-commlab-drop-in-hours-9262
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261103_5257170937@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261103
+SUMMARY:Daily Guided Meditation @ Center for Spirituality\, Dialogue\, and Service
+LOCATION:Center for Spirituality\, Dialogue\, and Service, Boston MA
+DESCRIPTION:Daily Guided Meditation live at Center for Spirituality\, Dialogue\, and Service . Zero ticket broker fees. Details: https://calendar.northeastern.edu/event/daily-guided-meditation
+URL:https://calendar.northeastern.edu/event/daily-guided-meditation
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261102_5741080938@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261102
+SUMMARY:Training Center Grad Show: Keepin' it Reel @ Improv Asylum
+LOCATION:Improv Asylum, Boston MA
+DESCRIPTION:Training Center Grad Show: Keepin' it Reel live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/training-center-grad-show-keepin-it-reel-209561
+URL:https://www.tixr.com/groups/improvasylum/events/training-center-grad-show-keepin-it-reel-209561
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261104_3212230821@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261104
+SUMMARY:HOUSE TEAMS @ Improv Asylum
+LOCATION:Improv Asylum, Boston MA
+DESCRIPTION:HOUSE TEAMS live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/house-teams-210231
+URL:https://www.tixr.com/groups/improvasylum/events/house-teams-210231
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261106_5124232241@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261106
+SUMMARY:Improv Asylum's Main Stage Show @ Improv Asylum
+LOCATION:Improv Asylum, Boston MA
+DESCRIPTION:Improv Asylum's Main Stage Show live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-199179
+URL:https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-199179
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261107_5124232241@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261107
+SUMMARY:Improv Asylum's Main Stage Show @ Improv Asylum
+LOCATION:Improv Asylum, Boston MA
+DESCRIPTION:Improv Asylum's Main Stage Show live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-199178
+URL:https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-199178
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261108_5124232241@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261108
+SUMMARY:Improv Asylum's Main Stage Show @ Improv Asylum
+LOCATION:Improv Asylum, Boston MA
+DESCRIPTION:Improv Asylum's Main Stage Show live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-199159
+URL:https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-199159
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261108_7726664538@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261108
+SUMMARY:Raunch @ Improv Asylum
+LOCATION:Improv Asylum, Boston MA
+DESCRIPTION:Raunch live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/raunch-201882
+URL:https://www.tixr.com/groups/improvasylum/events/raunch-201882
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261111_3212230821@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261111
+SUMMARY:HOUSE TEAMS @ Improv Asylum
+LOCATION:Improv Asylum, Boston MA
+DESCRIPTION:HOUSE TEAMS live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/house-teams-210232
+URL:https://www.tixr.com/groups/improvasylum/events/house-teams-210232
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261112_3629692666@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261112
+SUMMARY:The Main Stage Show @ Improv Asylum
+LOCATION:Improv Asylum, Boston MA
+DESCRIPTION:The Main Stage Show live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/the-main-stage-show-200943
+URL:https://www.tixr.com/groups/improvasylum/events/the-main-stage-show-200943
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261113_5124232241@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261113
+SUMMARY:Improv Asylum's Main Stage Show @ Improv Asylum
+LOCATION:Improv Asylum, Boston MA
+DESCRIPTION:Improv Asylum's Main Stage Show live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-210967
+URL:https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-210967
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261114_5124232241@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261114
+SUMMARY:Improv Asylum's Main Stage Show @ Improv Asylum
+LOCATION:Improv Asylum, Boston MA
+DESCRIPTION:Improv Asylum's Main Stage Show live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-199169
+URL:https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-199169
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261115_5124232241@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261115
+SUMMARY:Improv Asylum's Main Stage Show @ Improv Asylum
+LOCATION:Improv Asylum, Boston MA
+DESCRIPTION:Improv Asylum's Main Stage Show live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-199161
+URL:https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-199161
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261115_7726664538@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261115
+SUMMARY:Raunch @ Improv Asylum
+LOCATION:Improv Asylum, Boston MA
+DESCRIPTION:Raunch live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/raunch-202961
+URL:https://www.tixr.com/groups/improvasylum/events/raunch-202961
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261116_3656697028@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261116
+SUMMARY:The Kiki Moonlight Cabaret @ Improv Asylum
+LOCATION:Improv Asylum, Boston MA
+DESCRIPTION:The Kiki Moonlight Cabaret live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/the-kiki-moonlight-cabaret-207197
+URL:https://www.tixr.com/groups/improvasylum/events/the-kiki-moonlight-cabaret-207197
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261118_3212230821@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261118
+SUMMARY:HOUSE TEAMS @ Improv Asylum
+LOCATION:Improv Asylum, Boston MA
+DESCRIPTION:HOUSE TEAMS live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/house-teams-212000
+URL:https://www.tixr.com/groups/improvasylum/events/house-teams-212000
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261119_3629692666@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261119
+SUMMARY:The Main Stage Show @ Improv Asylum
+LOCATION:Improv Asylum, Boston MA
+DESCRIPTION:The Main Stage Show live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/the-main-stage-show-200944
+URL:https://www.tixr.com/groups/improvasylum/events/the-main-stage-show-200944
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261120_5124232241@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261120
+SUMMARY:Improv Asylum's Main Stage Show @ Improv Asylum
+LOCATION:Improv Asylum, Boston MA
+DESCRIPTION:Improv Asylum's Main Stage Show live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-199180
+URL:https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-199180
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261120_3455732475@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261120
+SUMMARY:Hen House @ Improv Asylum
+LOCATION:Improv Asylum, Boston MA
+DESCRIPTION:Hen House live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/hen-house-207098
+URL:https://www.tixr.com/groups/improvasylum/events/hen-house-207098
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261121_5124232241@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261121
+SUMMARY:Improv Asylum's Main Stage Show @ Improv Asylum
+LOCATION:Improv Asylum, Boston MA
+DESCRIPTION:Improv Asylum's Main Stage Show live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-199171
+URL:https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-199171
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261122_5124232241@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261122
+SUMMARY:Improv Asylum's Main Stage Show @ Improv Asylum
+LOCATION:Improv Asylum, Boston MA
+DESCRIPTION:Improv Asylum's Main Stage Show live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-199162
+URL:https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-199162
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261122_7726664538@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261122
+SUMMARY:Raunch @ Improv Asylum
+LOCATION:Improv Asylum, Boston MA
+DESCRIPTION:Raunch live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/raunch-202968
+URL:https://www.tixr.com/groups/improvasylum/events/raunch-202968
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261125_3212230821@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261125
+SUMMARY:HOUSE TEAMS @ Improv Asylum
+LOCATION:Improv Asylum, Boston MA
+DESCRIPTION:HOUSE TEAMS live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/house-teams-212005
+URL:https://www.tixr.com/groups/improvasylum/events/house-teams-212005
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261126_3629692666@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261126
+SUMMARY:The Main Stage Show @ Improv Asylum
+LOCATION:Improv Asylum, Boston MA
+DESCRIPTION:The Main Stage Show live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/the-main-stage-show-212001
+URL:https://www.tixr.com/groups/improvasylum/events/the-main-stage-show-212001
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261128_2531850512@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261128
+SUMMARY:Main Stage Show: Sleigh It Again! @ Improv Asylum
+LOCATION:Improv Asylum, Boston MA
+DESCRIPTION:Main Stage Show: Sleigh It Again! live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/main-stage-show-sleigh-it-again--200506
+URL:https://www.tixr.com/groups/improvasylum/events/main-stage-show-sleigh-it-again--200506
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261128_4831266029@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261128
+SUMMARY:'Twas @ Improv Asylum
+LOCATION:Improv Asylum, Boston MA
+DESCRIPTION:'Twas live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/-twas-211790
+URL:https://www.tixr.com/groups/improvasylum/events/-twas-211790
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261129_2531850512@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261129
+SUMMARY:Main Stage Show: Sleigh It Again! @ Improv Asylum
+LOCATION:Improv Asylum, Boston MA
+DESCRIPTION:Main Stage Show: Sleigh It Again! live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/main-stage-show-sleigh-it-again--199163
+URL:https://www.tixr.com/groups/improvasylum/events/main-stage-show-sleigh-it-again--199163
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261129_7726664538@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261129
+SUMMARY:Raunch @ Improv Asylum
+LOCATION:Improv Asylum, Boston MA
+DESCRIPTION:Raunch live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/raunch-202971
+URL:https://www.tixr.com/groups/improvasylum/events/raunch-202971
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261202_3212230821@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261202
+SUMMARY:HOUSE TEAMS @ Improv Asylum
+LOCATION:Improv Asylum, Boston MA
+DESCRIPTION:HOUSE TEAMS live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/house-teams-212007
+URL:https://www.tixr.com/groups/improvasylum/events/house-teams-212007
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261203_2531850512@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261203
+SUMMARY:Main Stage Show: Sleigh It Again! @ Improv Asylum
+LOCATION:Improv Asylum, Boston MA
+DESCRIPTION:Main Stage Show: Sleigh It Again! live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/main-stage-show-sleigh-it-again--200945
+URL:https://www.tixr.com/groups/improvasylum/events/main-stage-show-sleigh-it-again--200945
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261204_2531850512@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261204
+SUMMARY:Main Stage Show: Sleigh It Again! @ Improv Asylum
+LOCATION:Improv Asylum, Boston MA
+DESCRIPTION:Main Stage Show: Sleigh It Again! live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/main-stage-show-sleigh-it-again--200786
+URL:https://www.tixr.com/groups/improvasylum/events/main-stage-show-sleigh-it-again--200786
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261205_2531850512@wickedbostonevents.com
+DTSTAMP:20261101T220712Z
+DTSTART;VALUE=DATE:20261205
+SUMMARY:Main Stage Show: Sleigh It Again! @ Improv Asylum
+LOCATION:Improv Asylum, Boston MA
+DESCRIPTION:Main Stage Show: Sleigh It Again! live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/main-stage-show-sleigh-it-again--200745
+URL:https://www.tixr.com/groups/improvasylum/events/main-stage-show-sleigh-it-again--200745
+STATUS:CONFIRMED
+END:VEVENT
+END:VCALENDAR

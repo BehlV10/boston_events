@@ -35,6 +35,7 @@ from scrapers import (  # noqa: E402
     fetch_luckyseat_boston,
 )
 from template import render_page, render_hub_page, HUBS, get_site_url  # noqa: E402
+from export_og import generate_all_og_cards  # noqa: E402
 import threading
 import time
 
@@ -231,6 +232,17 @@ def export_html(path="index.html", force=False, source_json="events.json"):
             with open(hub_path, "w", encoding="utf-8") as f:
                 f.write(hub_html)
             print(f"wrote directory hub {hub_path}: {len(hub_html):,} bytes")
+
+        # Generate dynamic OpenGraph cards for programmatic landing pages
+        generate_all_og_cards(base_dir, flat_events, HUBS)
+
+        # Export RSS 2.0 and iCalendar feeds for automated syndication
+        try:
+            from export_feeds import export_rss_feed, export_ics_calendar
+            export_rss_feed(flat_events, os.path.join(base_dir, "feed.xml"), site_url=site_url)
+            export_ics_calendar(flat_events, os.path.join(base_dir, "events.ics"), site_url=site_url)
+        except Exception as e:
+            print(f"Warning: failed to export RSS / ICS feeds: {e}")
     except Exception as e:
         print(f"Warning: failed to export directory hubs: {e}")
 
