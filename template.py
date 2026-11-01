@@ -4515,7 +4515,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
         <span id="week-label">Today, {today.strftime("%b %d")}</span>
         <button type="button" id="week-next" aria-label="Next">next →</button>
         <button type="button" id="week-today">today</button>
-        <button type="button" id="week-all" data-mode="week">show all</button>
         <button type="button" id="cal-toggle" aria-expanded="false"><span class="chip-icon">📅 </span>pick date</button>
         <button type="button" class="chip chip-time-custom" id="quick-custom-time-chip" style="display:none;" title="Click to clear timeframe filter"><span id="active-timeframe-label"></span> <span class="chip-icon" style="margin-left:4px;">✕</span></button>
         <button type="button" class="chip chip-active-genre" id="quick-active-genre-chip" style="display:none;" title="Click to clear genre filter"><span id="active-genre-label"></span> <span class="chip-icon" style="margin-left:4px;">✕</span></button>
@@ -6492,22 +6491,25 @@ def render_page(results, weather=None, luckyseat_shows=None):
       calMonth = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
       apply();
     }});
-    document.getElementById('week-all').addEventListener('click', () => {{
-      if (showAll || timeFilter === 'all') {{
-        showAll = false;
-        timeFilter = 'today';
-        rangeStart = null;
-        rangeEnd = null;
-        anchor = parseISO(todayISO);
-      }} else {{
-        showAll = true;
-        timeFilter = 'all';
-        rangeStart = null;
-        rangeEnd = null;
-      }}
-      calMonth = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
-      apply();
-    }});
+    const weekAllBtn = document.getElementById('week-all');
+    if (weekAllBtn) {{
+      weekAllBtn.addEventListener('click', () => {{
+        if (showAll || timeFilter === 'all') {{
+          showAll = false;
+          timeFilter = 'today';
+          rangeStart = null;
+          rangeEnd = null;
+          anchor = parseISO(todayISO);
+        }} else {{
+          showAll = true;
+          timeFilter = 'all';
+          rangeStart = null;
+          rangeEnd = null;
+        }}
+        calMonth = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
+        apply();
+      }});
+    }}
 
     const noEventsWeek = document.getElementById('no-events-week-btn');
     if (noEventsWeek) {{
