@@ -1965,15 +1965,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
     padding: 8px 12px;
-    overflow-x: auto;
-    white-space: nowrap;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    overflow-x: hidden;
     max-width: 100%;
-  }}
-  .location-chips-bar::-webkit-scrollbar {{
-    display: none;
   }}
   .loc-chip {{
     background: rgba(255, 255, 255, 0.04);
@@ -2645,7 +2638,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
   .week-nav button.chip-copy-plan:hover {{ background: rgba(52, 211, 153, 0.22); border-color: #34d399; color: #6ee7b7; }}
   #week-label, #week-label-b {{ font-size: 13px; font-weight: 600; color: var(--fg); flex: 1; text-align: center; min-width: 160px; }}
   .week-nav.bottom #week-label-b {{ flex: 0; padding: 0 12px; }}
-  .mini-cal {{ background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 10px 12px; }}
+  .mini-cal {{ background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 10px 12px; contain: content; }}
   .mini-cal-head {{ display:flex; align-items:center; gap:8px; margin-bottom: 6px; }}
   .mini-cal-head button {{ background: transparent; color: var(--fg); border: 1px solid var(--border); border-radius: 6px; padding: 2px 10px; font-size: 14px; cursor: pointer; font-family: inherit; line-height: 1; }}
   .mini-cal-head button:hover {{ border-color: var(--accent); color: var(--accent); }}
@@ -3322,12 +3315,21 @@ def render_page(results, weather=None, luckyseat_shows=None):
       margin-bottom: 12px;
     }}
     .location-chips-bar {{
-      padding: 6px 10px;
+      padding: 6px 8px;
       gap: 6px;
+      overflow-x: hidden;
+      justify-content: space-between;
     }}
     .loc-chip {{
-      padding: 5px 12px;
+      padding: 5px 6px;
       font-size: 12px;
+      flex: 1 1 0;
+      min-width: 0;
+      justify-content: center;
+      text-align: center;
+    }}
+    .loc-chip .chip-icon, .loc-chip .city-dot {{
+      margin-right: 2px;
     }}
     .subarea-chips-bar {{
       padding: 5px 8px;
@@ -4507,7 +4509,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
         <button type="button" class="loc-chip" data-city="boston"><span class="city-dot" style="background:#5d9bff"></span>Boston</button>
         <button type="button" class="loc-chip" data-city="cambridge"><span class="city-dot" style="background:#e05a6b"></span>Cambridge</button>
         <button type="button" class="loc-chip" data-city="somerville"><span class="city-dot" style="background:#f29e4c"></span>Somerville</button>
-        <button type="button" class="loc-chip" data-city="other"><span class="city-dot" style="background:#9aa3b2"></span>Greater Boston</button>
       </div>
       <div class="subarea-chips-bar" id="subarea-chips-bar" style="display: none;"></div>
       <div class="week-nav" id="week-nav">
@@ -5087,8 +5088,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
       tmpl.remove();
       daySections = Array.from(document.querySelectorAll('.day[data-date]'));
       updateDayHeadings();
-      syncInitialUpvotes();
-      loadStarredState();
+      if (starredEvents && starredEvents.size > 0) {{
+        loadStarredState();
+      }}
     }}
     function parseISO(s) {{ const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); }}
     function fmtISO(d) {{
@@ -6024,8 +6026,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
         const isPastDay = dayDate && dayDate !== 'tba' && dayDate < todayISO;
         let dayVisible = 0;
 
-        day.querySelectorAll('.city-section').forEach(sec => {{
-          const cCity = sec.dataset.city;
+        const citySections = day._citySections || (day._citySections = Array.from(day.querySelectorAll('.city-section')));
+        citySections.forEach(sec => {{
+          const cCity = sec.getAttribute('data-city') || '';
           if (!cities.has(cCity)) {{
             sec.classList.add('empty');
             const cCount = sec.querySelector('.city-head .count');
@@ -6034,8 +6037,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
           }}
 
           let cityVisible = 0;
-          sec.querySelectorAll('.bucket').forEach(b => {{
-            const bCat = b.dataset.bucket;
+          const buckets = sec._buckets || (sec._buckets = Array.from(sec.querySelectorAll('.bucket')));
+          buckets.forEach(b => {{
+            const bCat = b.getAttribute('data-bucket') || '';
             if (!cats.has(bCat)) {{
               b.classList.add('empty');
               const bCount = b.querySelector('.bucket-head .count');
@@ -6044,22 +6048,26 @@ def render_page(results, weather=None, luckyseat_shows=None):
             }}
 
             let bucketVisible = 0;
-            b.querySelectorAll('.event').forEach(li => {{
+            const events = b._events || (b._events = Array.from(b.querySelectorAll('.event')));
+            events.forEach(li => {{
               let m = li._meta;
               if (!m) {{
+                const tm = li.getAttribute('data-time-mins');
+                const ep = li.getAttribute('data-epoch');
+                const vt = li.getAttribute('data-votes');
                 m = {{
-                  venue: li.dataset.venue || '',
-                  recur: li.dataset.recur || '',
-                  subarea: li.dataset.subarea || 'all',
-                  transit: li.dataset.transit ? li.dataset.transit.split(',') : [],
-                  timeMins: li.dataset.timeMins ? parseInt(li.dataset.timeMins, 10) : -1,
-                  free: li.dataset.free === 'true',
-                  votes: parseInt(li.dataset.votes || '0', 10),
-                  id: li.dataset.id || li.dataset.eventId || '',
-                  genre: li.dataset.genre || '',
-                  epoch: li.dataset.epoch ? parseInt(li.dataset.epoch, 10) : 0,
+                  venue: li.getAttribute('data-venue') || '',
+                  recur: li.getAttribute('data-recur') || '',
+                  subarea: li.getAttribute('data-subarea') || 'all',
+                  transit: li.getAttribute('data-transit') || '',
+                  timeMins: tm ? parseInt(tm, 10) : -1,
+                  free: li.getAttribute('data-free') === 'true',
+                  votes: vt ? parseInt(vt, 10) : 0,
+                  id: li.getAttribute('data-id') || li.getAttribute('data-event-id') || '',
+                  genre: li.getAttribute('data-genre') || '',
+                  epoch: ep ? parseInt(ep, 10) : 0,
                   featured: li.classList.contains('highlighted'),
-                  text: li.textContent.toLowerCase(),
+                  text: null,
                   hidden: false,
                 }};
                 li._meta = m;
@@ -6068,7 +6076,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
               const venueOk = venues.has(m.venue);
               const recurOk = recurs.has(m.recur);
               const subareaOk = (activeSubarea === 'all') || (m.subarea === activeSubarea);
-              const transitOk = (activeTransit === 'all') || (m.transit.includes(activeTransit));
+              const transitOk = (activeTransit === 'all') || (m.transit.indexOf(activeTransit) !== -1);
               let todOk = true;
               if (timeFrom !== null || timeTo !== null) {{
                 if (m.timeMins >= 0) {{
@@ -6092,7 +6100,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
               const freeOk = !freeOnly || m.free;
               const popularOk = !popularOnly || m.votes >= 3;
               const starredOk = !starredOnly || starredEvents.has(m.id);
-              const searchOk = !searchText || m.text.includes(searchText);
+              const searchOk = !searchText || (m.text || (m.text = li.textContent.toLowerCase())).includes(searchText);
 
               const isMusicEv = bCat === 'Music & nightlife' || !!m.genre;
               let genreOk = true;
@@ -6286,18 +6294,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
       updateQuickChipsUI();
       updateLocChipsUI();
       updateSearchUI();
-      const allVenues = venueBoxes.length;
-      const checkedVenuesList = Array.from(venueBoxes).filter(b => b.checked).map(b => b.value);
-      if (checkedVenuesList.length > 0 && checkedVenuesList.length < allVenues) {{
-        try {{
-          localStorage.setItem('boston_saved_venues', JSON.stringify(checkedVenuesList));
-        }} catch (_) {{}}
-      }} else if (checkedVenuesList.length === allVenues) {{
-        try {{
-          localStorage.removeItem('boston_saved_venues');
-        }} catch (_) {{}}
-      }}
-
       updateMobileBadge();
       if (currentView === 'map') {{
         updateMapMarkers();
@@ -6604,7 +6600,23 @@ def render_page(results, weather=None, luckyseat_shows=None):
       apply();
       stateToHash();
     }}));
-    venueBoxes.forEach(b => b.addEventListener('change', apply));
+    function saveVenuesState() {{
+      const allVenues = venueBoxes.length;
+      const checkedVenuesList = Array.from(venueBoxes).filter(b => b.checked).map(b => b.value);
+      if (checkedVenuesList.length > 0 && checkedVenuesList.length < allVenues) {{
+        try {{
+          localStorage.setItem('boston_saved_venues', JSON.stringify(checkedVenuesList));
+        }} catch (_) {{}}
+      }} else if (checkedVenuesList.length === allVenues) {{
+        try {{
+          localStorage.removeItem('boston_saved_venues');
+        }} catch (_) {{}}
+      }}
+    }}
+    venueBoxes.forEach(b => b.addEventListener('change', () => {{
+      saveVenuesState();
+      apply();
+    }}));
     recurBoxes.forEach(b => b.addEventListener('change', apply));
     cityBoxes.forEach(b => b.addEventListener('change', apply));
     searchInput.addEventListener('input', apply);
@@ -6646,7 +6658,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
       try {{ localStorage.removeItem('boston_saved_venues'); }} catch (_) {{}}
       apply();
     }});
-    document.getElementById('venue-none').addEventListener('click', () => {{ venueBoxes.forEach(b => b.checked = false); apply(); }});
+    document.getElementById('venue-none').addEventListener('click', () => {{ venueBoxes.forEach(b => b.checked = false); saveVenuesState(); apply(); }});
     document.getElementById('city-all').addEventListener('click', () => {{ activeSubarea = 'all'; activeTransit = 'all'; cityBoxes.forEach(b => b.checked = true); apply(); }});
     document.getElementById('city-none').addEventListener('click', () => {{ activeSubarea = 'all'; activeTransit = 'all'; cityBoxes.forEach(b => b.checked = false); apply(); }});
 
@@ -6863,6 +6875,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
         const raw = JSON.parse(localStorage.getItem('boston_starred_events') || '[]');
         if (Array.isArray(raw)) starredEvents = new Set(raw);
       }} catch (_) {{}}
+      if (!starredEvents || starredEvents.size === 0) return;
       document.querySelectorAll('.event[data-id]').forEach(li => {{
         const isStar = starredEvents.has(li.dataset.id);
         const btn = li.querySelector('.star-btn');
