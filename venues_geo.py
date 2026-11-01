@@ -205,6 +205,12 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
     # Downtown, Theater District & Chinatown
     "royale": (42.3508, -71.0654, "Theater District", "279 Tremont St, Boston", "Royale"),
     "the wilbur": (42.3516, -71.0648, "Theater District", "246 Tremont St, Boston", "The Wilbur"),
+    "wilbur theatre": (42.3516, -71.0648, "Theater District", "246 Tremont St, Boston", "The Wilbur"),
+    "wilbur theater": (42.3516, -71.0648, "Theater District", "246 Tremont St, Boston", "The Wilbur"),
+    "the huntington theatre": (42.3421, -71.0858, "Back Bay", "264 Huntington Ave, Boston", "The Huntington Theatre"),
+    "dorchester brewing company": (42.3245, -71.0587, "Dorchester", "1250 Massachusetts Ave, Boston", "Dorchester Brewing Company"),
+    "dorchester brewing": (42.3245, -71.0587, "Dorchester", "1250 Massachusetts Ave, Boston", "Dorchester Brewing Company"),
+    "cambridge center for adult education": (42.3744, -71.1219, "Harvard Square", "42 Brattle St, Cambridge", "CCAE (Cambridge Center for Adult Education)"),
     "boch center wang theatre": (42.3509, -71.0651, "Theater District", "270 Tremont St, Boston", "Boch Center Wang Theatre"),
     "boch center shubert theatre": (42.3513, -71.0651, "Theater District", "265 Tremont St, Boston", "Boch Center Shubert Theatre"),
     "emerson colonial theatre": (42.3524, -71.0658, "Theater District", "106 Boylston St, Boston", "Emerson Colonial Theatre"),

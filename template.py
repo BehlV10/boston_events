@@ -2541,9 +2541,12 @@ def render_page(results, weather=None, luckyseat_shows=None):
   /* Week navigation */
   .week-nav {{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 8px 12px; }}
   .week-nav.bottom {{ justify-content: center; }}
-  .week-nav button {{ background: transparent; color: var(--fg); border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px; font-size: 12px; cursor: pointer; font-family: inherit; }}
+  .week-nav button {{ background: transparent; color: var(--fg); border: 1px solid var(--border); border-radius: 999px; padding: 4px 12px; font-size: 12px; cursor: pointer; font-family: inherit; transition: all 0.15s ease; }}
   .week-nav button:hover {{ border-color: var(--accent); color: var(--accent); }}
   .week-nav button[aria-pressed="true"], .week-nav button.active {{ background: var(--accent); color: #0c0e14; border-color: var(--accent); font-weight: 600; }}
+  .week-nav button.chip-starred.active {{ background: #f59e0b; color: #0c0e14; border-color: #f59e0b; font-weight: 600; }}
+  .week-nav button.chip-copy-plan {{ background: rgba(52, 211, 153, 0.12); border-color: rgba(52, 211, 153, 0.35); color: #34d399; font-weight: 500; }}
+  .week-nav button.chip-copy-plan:hover {{ background: rgba(52, 211, 153, 0.22); border-color: #34d399; color: #6ee7b7; }}
   #week-label, #week-label-b {{ font-size: 13px; font-weight: 600; color: var(--fg); flex: 1; text-align: center; min-width: 160px; }}
   .week-nav.bottom #week-label-b {{ flex: 0; padding: 0 12px; }}
   .mini-cal {{ background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 10px 12px; }}
@@ -2553,15 +2556,22 @@ def render_page(results, weather=None, luckyseat_shows=None):
   #cal-month-label {{ flex: 1; text-align: center; font-size: 13px; font-weight: 600; }}
   .mini-cal-grid {{ display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; font-size: 11px; }}
   .mini-cal-grid .dow {{ text-align: center; color: var(--muted); font-size: 10px; padding: 2px 0; letter-spacing: 0.04em; }}
-  .mini-cal-grid .d {{ text-align: center; padding: 5px 0; border-radius: 6px; cursor: pointer; color: var(--muted); background: transparent; border: 1px solid transparent; position: relative; }}
+  .mini-cal-grid .d {{ text-align: center; padding: 6px 0; border-radius: 6px; cursor: pointer; color: var(--muted); background: transparent; border: 1px solid transparent; position: relative; user-select: none; transition: background 0.12s ease; }}
   .mini-cal-grid .d.has-events {{ color: var(--fg); }}
   .mini-cal-grid .d.has-events::after {{ content:''; position:absolute; bottom: 2px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }}
   .mini-cal-grid .d.today {{ border-color: var(--border); }}
   .mini-cal-grid .d.in-week {{ background: rgba(93,155,255,0.12); color: var(--fg); }}
   .mini-cal-grid .d.anchor {{ background: var(--accent); color: #0c0e14; font-weight: 700; }}
   .mini-cal-grid .d.anchor::after {{ background: #0c0e14; }}
+  .mini-cal-grid .d.range-start {{ background: var(--accent); color: #0c0e14; font-weight: 700; border-radius: 6px 0 0 6px; }}
+  .mini-cal-grid .d.range-start::after {{ background: #0c0e14; }}
+  .mini-cal-grid .d.range-end {{ background: var(--accent); color: #0c0e14; font-weight: 700; border-radius: 0 6px 6px 0; }}
+  .mini-cal-grid .d.range-end::after {{ background: #0c0e14; }}
+  .mini-cal-grid .d.range-start.range-end {{ border-radius: 6px; }}
+  .mini-cal-grid .d.in-range {{ background: rgba(93,155,255,0.22); color: var(--fg); border-radius: 0; }}
   .mini-cal-grid .d.blank {{ cursor: default; }}
   .mini-cal-grid .d:not(.blank):hover {{ border-color: var(--accent); }}
+  .mini-cal-hint {{ font-size: 11px; color: var(--muted); text-align: center; margin-top: 8px; padding-top: 6px; border-top: 1px solid var(--border); }}
   .event.hidden {{ display: none; }}
   .day.empty, .day.out-of-week {{ display: none; }}
   .no-events-msg {{
@@ -4396,17 +4406,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
         <button type="button" class="loc-chip" data-city="other"><span class="city-dot" style="background:#9aa3b2"></span>Greater Boston</button>
       </div>
       <div class="subarea-chips-bar" id="subarea-chips-bar" style="display: none;"></div>
-      <div class="quick-chips-bar" id="quick-chips">
-        <button type="button" class="chip active" data-time="today"><span class="chip-icon">⚡ </span>Today</button>
-        <button type="button" class="chip" data-time="tomorrow">Tomorrow</button>
-        <button type="button" class="chip" data-time="weekend"><span class="chip-icon">🎉 </span>This Weekend</button>
-        <button type="button" class="chip" data-time="week"><span class="chip-icon">📅 </span>Next 7 Days</button>
-        <button type="button" class="chip" data-time="all">All Upcoming</button>
-        <button type="button" class="chip chip-time-custom" id="quick-custom-time-chip" style="display:none;" title="Click to clear timeframe filter"><span id="active-timeframe-label"></span> <span class="chip-icon" style="margin-left:4px;">✕</span></button>
-        <button type="button" class="chip chip-active-genre" id="quick-active-genre-chip" style="display:none;" title="Click to clear genre filter"><span id="active-genre-label"></span> <span class="chip-icon" style="margin-left:4px;">✕</span></button>
-        <button type="button" class="chip chip-starred" id="quick-starred-chip" title="Filter to your saved events"><span class="chip-icon">⭐ </span>Saved <span id="starred-count" style="display:none;">(0)</span></button>
-        <button type="button" class="chip chip-copy-plan" id="btn-copy-plan" style="display:none;" title="Copy your saved events as a shareable text itinerary"><span class="chip-icon">📋 </span>Copy Plan</button>
-      </div>
       <div class="week-nav" id="week-nav">
         <button type="button" id="week-prev" aria-label="Previous">← prev</button>
         <span id="week-label">Today, {today.strftime("%b %d")}</span>
@@ -4414,6 +4413,10 @@ def render_page(results, weather=None, luckyseat_shows=None):
         <button type="button" id="week-today">today</button>
         <button type="button" id="week-all" data-mode="week">show all</button>
         <button type="button" id="cal-toggle" aria-expanded="false"><span class="chip-icon">📅 </span>pick date</button>
+        <button type="button" class="week-nav-chip chip-starred" id="quick-starred-chip" title="Filter to your saved events"><span class="chip-icon">⭐ </span>Saved <span id="starred-count" style="display:none;">(0)</span></button>
+        <button type="button" class="week-nav-chip chip-copy-plan" id="btn-copy-plan" style="display:none;" title="Copy your saved events as a shareable text itinerary"><span class="chip-icon">📋 </span>Copy Plan</button>
+        <button type="button" class="chip chip-time-custom" id="quick-custom-time-chip" style="display:none;" title="Click to clear timeframe filter"><span id="active-timeframe-label"></span> <span class="chip-icon" style="margin-left:4px;">✕</span></button>
+        <button type="button" class="chip chip-active-genre" id="quick-active-genre-chip" style="display:none;" title="Click to clear genre filter"><span id="active-genre-label"></span> <span class="chip-icon" style="margin-left:4px;">✕</span></button>
       </div>
       <div class="mini-cal" id="mini-cal" hidden>
         <div class="mini-cal-head">
@@ -4422,6 +4425,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
           <button type="button" id="cal-next-month" aria-label="Next month">›</button>
         </div>
         <div class="mini-cal-grid" id="mini-cal-grid"></div>
+        <div class="mini-cal-hint" id="cal-hint">Select a date, or click a 2nd date to pick a range</div>
       </div>
       <div id="map-view-wrapper" class="map-view-wrapper" style="display: none;">
         <div class="map-header">
@@ -4937,6 +4941,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
     let userUpvotes = new Set();
     let cachedVotes = {{}};
     let timeFilter = 'today';
+    let rangeStart = null;
+    let rangeEnd = null;
     let currentView = 'list';
     let showPastToday = false;
     let leafletMap = null;
@@ -5130,6 +5136,10 @@ def render_page(results, weather=None, luckyseat_shows=None):
         const sat = addDays(todayDate, daysToSat);
         const sun = addDays(sat, 1);
         label = `Weekend: ${{fmtShort(sat)}} – ${{fmtShort(sun)}}`;
+      }} else if (timeFilter === 'range' && rangeStart && rangeEnd) {{
+        const s = parseISO(rangeStart);
+        const e = parseISO(rangeEnd);
+        label = `${{fmtShort(s)}} – ${{fmtShort(e)}}, ${{e.getFullYear()}}`;
       }} else if (timeFilter === 'day') {{
         label = `${{DAYS_FULL[anchor.getDay()]}}, ${{fmtShort(anchor)}}, ${{anchor.getFullYear()}}`;
       }} else {{
@@ -5142,6 +5152,25 @@ def render_page(results, weather=None, luckyseat_shows=None):
       if (btn) {{
         btn.textContent = (timeFilter === 'all' || showAll) ? 'today view' : 'show all';
         btn.setAttribute('aria-pressed', (timeFilter === 'all' || showAll) ? 'true' : 'false');
+      }}
+      const todayBtn = document.getElementById('week-today');
+      if (todayBtn) {{
+        todayBtn.classList.toggle('active', !showAll && timeFilter === 'today');
+      }}
+      const calToggle = document.getElementById('cal-toggle');
+      if (calToggle) {{
+        if (timeFilter === 'range' && rangeStart && rangeEnd) {{
+          const s = parseISO(rangeStart);
+          const e = parseISO(rangeEnd);
+          calToggle.innerHTML = `<span class="chip-icon">📅 </span>${{fmtShort(s)}} – ${{fmtShort(e)}}`;
+          calToggle.classList.add('active');
+        }} else if (timeFilter === 'day' && fmtISO(anchor) !== todayISO) {{
+          calToggle.innerHTML = `<span class="chip-icon">📅 </span>${{fmtShort(anchor)}}`;
+          calToggle.classList.add('active');
+        }} else {{
+          calToggle.innerHTML = '<span class="chip-icon">📅 </span>pick date';
+          calToggle.classList.remove('active');
+        }}
       }}
     }}
 
@@ -5641,7 +5670,10 @@ def render_page(results, weather=None, luckyseat_shows=None):
       if (starredOnly) params.set('saved', '1');
 
       if (timeFilter !== 'today') params.set('t', timeFilter);
-      if ((timeFilter === 'day' || timeFilter === 'week') && fmtISO(anchor) !== todayISO) {{
+      if (timeFilter === 'range' && rangeStart && rangeEnd) {{
+        params.set('d', rangeStart);
+        params.set('d_end', rangeEnd);
+      }} else if ((timeFilter === 'day' || timeFilter === 'week') && fmtISO(anchor) !== todayISO) {{
         params.set('d', fmtISO(anchor));
       }}
       if (currentView !== 'list') params.set('v', currentView);
@@ -5735,6 +5767,13 @@ def render_page(results, weather=None, luckyseat_shows=None):
           if (d === 'all') {{
             showAll = true;
             timeFilter = 'all';
+          }} else if (hasParam('d_end')) {{
+            rangeStart = d;
+            rangeEnd = getParam('d_end');
+            timeFilter = 'range';
+            showAll = false;
+            anchor = parseISO(rangeStart);
+            calMonth = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
           }} else {{
             anchor = parseISO(d);
             calMonth = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
@@ -5793,6 +5832,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
       if (!needsHydration) {{
         if (starredOnly) {{
           needsHydration = Array.from(starredEvents).some(id => !document.querySelector(`.event[data-id="${{id}}"]`));
+        }} else if (timeFilter === 'range' && rangeStart && rangeEnd) {{
+          needsHydration = true;
         }} else if (timeFilter === 'day') {{
           needsHydration = !daySections.some(d => d.dataset.date === anchorISO);
         }} else if (timeFilter === 'week') {{
@@ -5831,6 +5872,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
           inTime = (date === tomorrowISO);
         }} else if (timeFilter === 'weekend') {{
           inTime = (date === satISO || date === sunISO);
+        }} else if (timeFilter === 'range' && rangeStart && rangeEnd) {{
+          inTime = (date >= rangeStart && date <= rangeEnd);
         }} else if (timeFilter === 'day') {{
           inTime = (date === anchorISO);
         }} else if (timeFilter === 'week') {{
@@ -6117,19 +6160,50 @@ def render_page(results, weather=None, luckyseat_shows=None):
         const classes = ['d'];
         if (eventDates.has(iso)) classes.push('has-events');
         if (iso === todayISO) classes.push('today');
-        if (!showAll && timeFilter === 'week' && week.has(iso)) classes.push('in-week');
-        if (iso === fmtISO(anchor)) classes.push('anchor');
+
+        if (timeFilter === 'range' && rangeStart && rangeEnd) {{
+          if (iso === rangeStart) classes.push('range-start', 'anchor');
+          else if (iso === rangeEnd) classes.push('range-end', 'anchor');
+          else if (iso > rangeStart && iso < rangeEnd) classes.push('in-range');
+        }} else if (rangeStart && !rangeEnd) {{
+          if (iso === rangeStart) classes.push('range-start', 'anchor');
+        }} else {{
+          if (!showAll && timeFilter === 'week' && week.has(iso)) classes.push('in-week');
+          if (iso === fmtISO(anchor)) classes.push('anchor');
+        }}
         html += `<div class="${{classes.join(' ')}}" data-date="${{iso}}">${{d}}</div>`;
       }}
       grid.innerHTML = html;
+
+      const hintEl = document.getElementById('cal-hint');
+      if (hintEl) {{
+        if (timeFilter === 'range' && rangeStart && rangeEnd) {{
+          const s = parseISO(rangeStart), e = parseISO(rangeEnd);
+          hintEl.textContent = `Range: ${{fmtShort(s)}} – ${{fmtShort(e)}} (click any date to start new range)`;
+        }} else if (rangeStart && !rangeEnd) {{
+          const s = parseISO(rangeStart);
+          hintEl.textContent = `Selected ${{fmtShort(s)}} — click a 2nd date to set range`;
+        }} else {{
+          hintEl.textContent = 'Select a date, or click a 2nd date to pick a range';
+        }}
+      }}
     }}
 
     function shiftNav(delta) {{
-      if (timeFilter === 'week') {{
+      if (timeFilter === 'range' && rangeStart && rangeEnd) {{
+        const s = parseISO(rangeStart);
+        const e = parseISO(rangeEnd);
+        const diffDays = Math.max(1, Math.round((e - s) / 86400000) + 1);
+        rangeStart = fmtISO(addDays(s, delta * diffDays));
+        rangeEnd = fmtISO(addDays(e, delta * diffDays));
+        anchor = parseISO(rangeStart);
+      }} else if (timeFilter === 'week') {{
+        rangeStart = null; rangeEnd = null;
         anchor = addDays(anchor, delta * 7);
       }} else if (timeFilter === 'today' || timeFilter === 'tomorrow' || timeFilter === 'day') {{
         anchor = addDays(anchor, delta);
         const iso = fmtISO(anchor);
+        rangeStart = iso; rangeEnd = null;
         if (iso === todayISO) {{
           timeFilter = 'today';
         }} else if (iso === fmtISO(addDays(parseISO(todayISO), 1))) {{
@@ -6138,11 +6212,13 @@ def render_page(results, weather=None, luckyseat_shows=None):
           timeFilter = 'day';
         }}
       }} else if (timeFilter === 'weekend') {{
+        rangeStart = null; rangeEnd = null;
         anchor = addDays(anchor, delta * 7);
       }} else {{
         // 'all'
         anchor = addDays(parseISO(todayISO), delta > 0 ? 1 : 0);
         const iso = fmtISO(anchor);
+        rangeStart = iso; rangeEnd = null;
         timeFilter = (iso === todayISO) ? 'today' : (iso === fmtISO(addDays(parseISO(todayISO), 1)) ? 'tomorrow' : 'day');
       }}
       showAll = false;
@@ -6151,6 +6227,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
     }}
 
     function setAnchor(iso) {{
+      rangeStart = iso;
+      rangeEnd = null;
       if (iso === todayISO) {{
         timeFilter = 'today';
       }} else if (iso === fmtISO(addDays(parseISO(todayISO), 1))) {{
@@ -6245,6 +6323,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
     if (nextB) nextB.addEventListener('click', () => shiftNav(1));
     document.getElementById('week-today').addEventListener('click', () => {{
       timeFilter = 'today';
+      rangeStart = null;
+      rangeEnd = null;
       showAll = false;
       anchor = parseISO(todayISO);
       calMonth = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
@@ -6254,10 +6334,14 @@ def render_page(results, weather=None, luckyseat_shows=None):
       if (showAll || timeFilter === 'all') {{
         showAll = false;
         timeFilter = 'today';
+        rangeStart = null;
+        rangeEnd = null;
         anchor = parseISO(todayISO);
       }} else {{
         showAll = true;
         timeFilter = 'all';
+        rangeStart = null;
+        rangeEnd = null;
       }}
       calMonth = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
       apply();
@@ -6267,6 +6351,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
     if (noEventsWeek) {{
       noEventsWeek.addEventListener('click', () => {{
         timeFilter = 'week';
+        rangeStart = null;
+        rangeEnd = null;
         showAll = false;
         anchor = parseISO(todayISO);
         calMonth = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
@@ -6277,6 +6363,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
     if (noEventsAll) {{
       noEventsAll.addEventListener('click', () => {{
         timeFilter = 'all';
+        rangeStart = null;
+        rangeEnd = null;
         showAll = true;
         calMonth = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
         apply();
@@ -6299,7 +6387,29 @@ def render_page(results, weather=None, luckyseat_shows=None):
     document.getElementById('mini-cal-grid').addEventListener('click', (e) => {{
       const cell = e.target.closest('.d:not(.blank)');
       if (!cell || !cell.dataset.date) return;
-      setAnchor(cell.dataset.date);
+      const clicked = cell.dataset.date;
+      if (!rangeStart || (rangeStart && rangeEnd)) {{
+        rangeStart = clicked;
+        rangeEnd = null;
+        setAnchor(rangeStart);
+      }} else if (rangeStart && !rangeEnd) {{
+        if (clicked === rangeStart) {{
+          rangeEnd = null;
+          timeFilter = (rangeStart === todayISO) ? 'today' : (rangeStart === fmtISO(addDays(parseISO(todayISO), 1)) ? 'tomorrow' : 'day');
+          apply();
+        }} else {{
+          if (clicked < rangeStart) {{
+            rangeEnd = rangeStart;
+            rangeStart = clicked;
+          }} else {{
+            rangeEnd = clicked;
+          }}
+          timeFilter = 'range';
+          showAll = false;
+          anchor = parseISO(rangeStart);
+          apply();
+        }}
+      }}
     }});
 
     if (freeOnlyChk) freeOnlyChk.addEventListener('change', apply);
@@ -6775,10 +6885,13 @@ def render_page(results, weather=None, luckyseat_shows=None):
         showPastToday = !showPastToday;
         apply();
       }} else if (e.target && e.target.id === 'btn-banner-tomorrow') {{
-        const tomorrowChip = document.querySelector('#quick-chips .chip[data-time="tomorrow"]');
-        if (tomorrowChip) {{
-          tomorrowChip.click();
-        }}
+        rangeStart = null;
+        rangeEnd = null;
+        timeFilter = 'tomorrow';
+        showAll = false;
+        anchor = addDays(parseISO(todayISO), 1);
+        calMonth = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
+        apply();
       }}
     }});
 

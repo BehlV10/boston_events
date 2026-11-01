@@ -161,9 +161,13 @@ class TestBostonEvents(unittest.TestCase):
         self.assertIn("The Sinclair", html)
         self.assertIn("Indie Rock Night", html)
         self.assertIn("modal-view-venue", html)  # Suggest a venue form present
-        self.assertIn("Suggest a Venue", html)
         self.assertIn('data-subarea="harvard_sq"', html)
         self.assertIn('id="subarea-chips-bar"', html)
+        self.assertNotIn('class="quick-chips-bar"', html)
+        self.assertIn('id="quick-starred-chip"', html)
+        self.assertIn('id="btn-copy-plan"', html)
+        self.assertIn('id="cal-hint"', html)
+        self.assertIn('.range-start', html)
 
         # Verify inline <script> has valid JavaScript syntax
         import re, shutil, subprocess, tempfile
@@ -1167,6 +1171,74 @@ class TestBostonEvents(unittest.TestCase):
         self.assertIsNone(res["error"])
         self.assertTrue(res["fallback"])
         self.assertTrue(res["cached"])
+
+    def test_scrape_dorchester_brewing(self):
+        """Verify Dorchester Brewing Company parser extracts events, dates, and categories."""
+        from scrapers import scrape_dorchester_brewing
+        from unittest.mock import patch, MagicMock
+
+        mock_html = """
+        <div class="tribe-events-pro-photo__event">
+            <article>
+                <h3><a href="https://www.dorchesterbrewing.com/events/event/trivia-night/">General Trivia Night</a></h3>
+                <div class="tribe-event-time">November 10, 2026 7:00 pm - 9:00 pm</div>
+            </article>
+        </div>
+        """
+        mock_resp = MagicMock()
+        mock_resp.text = mock_html
+        with patch("scrapers._SESSION.get", return_value=mock_resp):
+            events = scrape_dorchester_brewing("https://www.dorchesterbrewing.com/events/", "test_ua")
+        self.assertEqual(len(events), 1)
+        self.assertEqual(events[0]["name"], "General Trivia Night")
+        self.assertEqual(events[0]["category"], "trivia")
+        self.assertEqual(events[0]["price"], "Free")
+        self.assertEqual(events[0]["venue"], "Dorchester Brewing Company")
+        self.assertIn("2026-11-1", events[0]["date"])
+
+    def test_scrape_huntington_theatre(self):
+        """Verify Huntington Theatre scraper parses season productions and run dates."""
+        from scrapers import scrape_huntington_theatre
+        from unittest.mock import patch, MagicMock
+
+        mock_html = """
+        <div class="c-event-card">
+            <h3>The Lehman Trilogy</h3>
+            <div class="dates">Nov 15 – Dec 20, 2026</div>
+            <a href="/season/the-lehman-trilogy">Buy Tickets</a>
+        </div>
+        """
+        mock_resp = MagicMock()
+        mock_resp.text = mock_html
+        with patch("scrapers._SESSION.get", return_value=mock_resp):
+            events = scrape_huntington_theatre("https://www.huntingtontheatre.org/season/", "test_ua")
+        self.assertEqual(len(events), 1)
+        self.assertEqual(events[0]["name"], "The Lehman Trilogy")
+        self.assertEqual(events[0]["category"], "theater")
+        self.assertEqual(events[0]["venue"], "The Huntington Theatre")
+        self.assertEqual(events[0]["url"], "https://www.huntingtontheatre.org/season/the-lehman-trilogy")
+        self.assertIn("2026-12-2", events[0]["date"])
+
+    def test_scrape_ccae(self):
+        """Verify CCAE scraper extracts community workshops and classes."""
+        from scrapers import scrape_ccae
+        from unittest.mock import patch, MagicMock
+
+        mock_html = """
+        <a class="card-image" href="https://ccae.org/happenings/events/watercolor-workshop">
+            <h3>Intro to Watercolor Painting</h3>
+            <div class="date-time">Nov 12 | 6:00 pm</div>
+        </a>
+        """
+        mock_resp = MagicMock()
+        mock_resp.text = mock_html
+        with patch("scrapers._SESSION.get", return_value=mock_resp):
+            events = scrape_ccae("https://ccae.org/events", "test_ua")
+        self.assertEqual(len(events), 1)
+        self.assertEqual(events[0]["name"], "CCAE: Intro to Watercolor Painting")
+        self.assertEqual(events[0]["category"], "art")
+        self.assertEqual(events[0]["venue"], "Cambridge Center for Adult Education (CCAE)")
+        self.assertIn("2026-11-12", events[0]["date"])
 
 
 if __name__ == "__main__":

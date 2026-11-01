@@ -2658,6 +2658,159 @@ def scrape_second_sun_rising(url, ua):
     return events[:2]
 
 
+def scrape_dorchester_brewing(url, ua):
+    """Dorchester Brewing Company — live music, trivia, and community events."""
+    resp = _SESSION.get(url, headers={"User-Agent": ua or UA_CHROME}, timeout=15)
+    soup = BeautifulSoup(resp.text, "html.parser")
+    events = []
+    seen = set()
+    now = datetime.now(timezone.utc)
+
+    for a in soup.find_all("a", href=lambda h: h and "/events/event/" in h):
+        href = a["href"]
+        parent = a.find_parent("article") or a.find_parent("div", class_=lambda c: c and ("tribe" in " ".join(c) or "event" in " ".join(c)))
+        if not parent:
+            continue
+
+        title_el = parent.find(["h2", "h3", "h4"])
+        title = title_el.get_text(strip=True) if title_el else ""
+        if not title:
+            t = a.get_text(strip=True)
+            if t and "view event" not in t.lower() and not re.search(r"\d{1,2}:\d{2}", t):
+                title = t
+        if not title or title.lower() in ("view event",):
+            continue
+
+        full_text = parent.get_text(" ", strip=True)
+        m_dt = re.search(r"([A-Za-z]+ \d{1,2}, \d{4})\s+(\d{1,2}:\d{2}\s*(?:am|pm))", full_text, re.I)
+        iso = None
+        if m_dt:
+            d_str = f"{m_dt.group(1)} {m_dt.group(2)}"
+            try:
+                dt = datetime.strptime(d_str, "%B %d, %Y %I:%M %p").replace(tzinfo=EASTERN)
+                if dt < now:
+                    continue
+                iso = dt.astimezone(timezone.utc).isoformat()
+            except Exception:
+                pass
+
+        key = (title.lower(), href)
+        if key in seen:
+            continue
+        seen.add(key)
+
+        is_trivia = "trivia" in title.lower()
+        events.append({
+            "name": title,
+            "date": iso,
+            "url": href,
+            "venue": "Dorchester Brewing Company",
+            "category": "trivia" if is_trivia else ("music" if any(k in title.lower() for k in ["dance", "music", "songwriting"]) else "food"),
+            "price": "Free" if is_trivia else None,
+        })
+    return events
+
+
+def scrape_huntington_theatre(url, ua):
+    """The Huntington Theatre — Tony Award-winning regional theatre productions on Huntington Ave."""
+    resp = _SESSION.get(url, headers={"User-Agent": ua or UA_CHROME}, timeout=15)
+    soup = BeautifulSoup(resp.text, "html.parser")
+    events = []
+    seen = set()
+    now = datetime.now(EASTERN)
+
+    for card in soup.find_all(class_=lambda c: c and "c-event-card" in c):
+        title_el = card.find("h3") or card.find("h2")
+        title = title_el.get_text(strip=True) if title_el else ""
+        if not title:
+            continue
+
+        a = card.find("a", href=True)
+        link = a["href"] if a else url
+        if not link.startswith("http"):
+            link = f"https://www.huntingtontheatre.org{link}"
+
+        key = title.lower()
+        if key in seen:
+            continue
+        seen.add(key)
+
+        full_text = card.get_text(" ", strip=True)
+        m_dates = re.search(r"([A-Za-z]+ \d{1,2})\s*[-–—]\s*([A-Za-z]+ \d{1,2}),?\s*(\d{4})", full_text)
+        if m_dates:
+            end_m_d = m_dates.group(2)
+            year = m_dates.group(3)
+            end_dt = None
+            for fmt in ("%B %d %Y", "%b %d %Y"):
+                try:
+                    end_dt = datetime.strptime(f"{end_m_d} {year}", fmt).replace(hour=20, tzinfo=EASTERN)
+                    break
+                except ValueError:
+                    continue
+            if not end_dt or end_dt < now:
+                continue
+            events.append({
+                "name": title,
+                "date": end_dt.astimezone(timezone.utc).isoformat(),
+                "url": link,
+                "venue": "The Huntington Theatre",
+                "category": "theater",
+                "price": "$25+",
+                "description": f"Playing through {end_m_d}, {year} at The Huntington Theatre",
+            })
+    return events
+
+
+def scrape_ccae(url, ua):
+    """Cambridge Center for Adult Education (CCAE) — community talks, workshops, and arts series in Harvard Sq."""
+    resp = _SESSION.get(url, headers={"User-Agent": ua or UA_CHROME}, timeout=15)
+    soup = BeautifulSoup(resp.text, "html.parser")
+    events = []
+    seen = set()
+    now = datetime.now(EASTERN)
+
+    for a in soup.find_all("a", class_=lambda c: c and "card-image" in c):
+        href = a.get("href", "")
+        if "/happenings/events/" not in href:
+            continue
+        h3 = a.find("h3")
+        title = h3.get_text(strip=True) if h3 else ""
+        if not title:
+            continue
+
+        full_text = a.get_text(" ", strip=True)
+        m_dt = re.search(r"([A-Za-z]+ \d{1,2})\s*\|\s*(\d{1,2}:\d{2}\s*(?:am|pm))", full_text, re.I)
+        iso = None
+        if m_dt:
+            m_d_str = m_dt.group(1)
+            time_str = m_dt.group(2).replace(" ", "")
+            year = now.year
+            for fmt in ("%B %d %Y %I:%M%p", "%b %d %Y %I:%M%p"):
+                try:
+                    dt = datetime.strptime(f"{m_d_str} {year} {time_str}", fmt).replace(tzinfo=EASTERN)
+                    if dt >= now:
+                        iso = dt.astimezone(timezone.utc).isoformat()
+                    break
+                except ValueError:
+                    continue
+
+        key = (title.lower(), href)
+        if key in seen:
+            continue
+        seen.add(key)
+
+        is_art = any(k in title.lower() for k in ["drawing", "craft", "art", "paint", "watercolor", "ceramic", "photo"])
+        events.append({
+            "name": f"CCAE: {title}",
+            "date": iso,
+            "url": href,
+            "venue": "Cambridge Center for Adult Education (CCAE)",
+            "category": "art" if is_art else "community",
+            "price": None,
+        })
+    return events
+
+
 def scrape_meetup_group(url, ua):
     """Meetup group page — events live in Next.js __NEXT_DATA__ Apollo state.
     Caps to events within the next 6 weeks to avoid weekly recurrences flooding."""
@@ -6631,7 +6784,11 @@ _ALL_VENUES = [
     {"name": "Lamplighter Brewing (via Eventbrite)", "url": "https://www.eventbrite.com/o/lamplighter-brewing-co-12408758507", "ua": UA_CHROME, "scraper": scrape_eventbrite_org, "default_category": "food"},
     {"name": "Do617", "url": "https://do617.com/events", "ua": UA_CHROME, "scraper": scrape_do617, "default_category": None},
     {"name": "Middle East Cambridge", "url": "https://mideastoffers.com", "ua": UA_CHROME, "scraper": scrape_middle_east, "default_category": "music"},
-    {"name": "Wilbur Theatre", "url": "https://thewilbur.com/", "ua": UA_CHROME, "scraper": scrape_wilbur, "default_category": "comedy"},
+    {"name": "The Wilbur", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZpZAEAIvA&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "comedy"},
+    {"name": "The Dance Complex", "url": "https://www.dancecomplex.org/events/?ical=1", "ua": UA_CHROME, "scraper": scrape_ical, "default_category": "dance"},
+    {"name": "Dorchester Brewing Company", "url": "https://www.dorchesterbrewing.com/events/", "ua": UA_CHROME, "scraper": scrape_dorchester_brewing, "default_category": "food"},
+    {"name": "The Huntington Theatre", "url": "https://www.huntingtontheatre.org/season/", "ua": UA_CHROME, "scraper": scrape_huntington_theatre, "default_category": "theater"},
+    {"name": "CCAE (Cambridge Center for Adult Education)", "url": "https://ccae.org/events", "ua": UA_CHROME, "scraper": scrape_ccae, "default_category": "community"},
     {"name": "Brookline Booksmith", "url": "https://www.brooklinebooksmith.com/events", "ua": UA_CURL, "scraper": scrape_event_list, "default_category": "books"},
     {"name": "Gardner Museum", "url": "https://www.gardnermuseum.org/calendar", "ua": UA_CHROME, "scraper": scrape_gardner, "default_category": "community"},
     {"name": "ICA Boston", "url": "https://www.icaboston.org/events", "ua": UA_CHROME, "scraper": scrape_ica, "default_category": "community"},
