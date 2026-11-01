@@ -72,6 +72,7 @@ CITY_RULES = [
         "cambridge art association",
     )),
     ("boston", (
+        "the 88 club", "88 club",
         "bsmnt", "kings seaport", "kings - seaport", "kings dining",
         "midway cafe", "o'brien's pub", "obriens pub", "o'brien's", "obriens",
         "jordan hall", "new england conservatory", "nec (", "nec:", "nec ", "nec hall",
@@ -259,7 +260,7 @@ def resolve_subarea(city, event, geo=None):
             return ("Downtown & Theater Dist.", "theater_downtown")
         if any(k in blob for k in ["south end", "beehive", "wally", "club cafe", "club café", "sowa", "reunion bbq", "calderwood"]):
             return ("South End", "south_end")
-        if any(k in blob for k in ["back bay", "copley", "boston public library", "bpl", "trident", "newbury", "prudential", "dani", "danis"]):
+        if any(k in blob for k in ["back bay", "copley", "boston public library", "bpl", "trident", "newbury", "prudential", "dani", "danis", "88 club"]):
             return ("Back Bay & Copley", "back_bay")
         if any(k in blob for k in ["seaport", "leader bank", "ica boston", "kings seaport", "kings dining", "greenway", "harbor", "scorpion", "laugh boston"]):
             return ("Seaport & Waterfront", "seaport_waterfront")
@@ -1216,6 +1217,14 @@ def render_page(results, weather=None, luckyseat_shows=None):
             cat_tag = f'<span class="cat-pill" style="--cat-c:{color}; background:{color}18; border-color:{color}33; color:{color}"><span class="chip-icon">{icon} </span>{escape(cat)}</span>'
         venue = e.get("venue") or ""
         source = e.get("_source_venue") or ""
+        if "88 club" in raw_title.lower() and (not venue or venue.startswith("@") or venue.lower() in ("boston", "massachusetts", "other")):
+            venue = "The 88 Club"
+            e = dict(e)
+            e["venue"] = venue
+        if source == "Deep Cuts Medford" and "do617.com" in (e.get("url") or "") and venue.lower() != "deep cuts":
+            source = "Do617"
+            e = dict(e)
+            e["_source_venue"] = source
         city = _event_city(venue, source, e)
         recurring = is_recurring(e)
         recur_flag = "weekly" if recurring else "once"

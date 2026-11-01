@@ -325,6 +325,8 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
     "time out market boston": (42.3429, -71.1003, "Fenway", "401 Park Dr, Boston", "Time Out Market Boston"),
     "401 park": (42.3429, -71.1003, "Fenway", "401 Park Dr, Boston", "401 Park"),
     "the fenway": (42.3429, -71.1003, "Fenway", "401 Park Dr, Boston", "The Fenway"),
+    "the 88 club": (42.3468, -71.0845, "Back Bay", "50 Dalton St, Boston", "The 88 Club"),
+    "88 club": (42.3468, -71.0845, "Back Bay", "50 Dalton St, Boston", "The 88 Club"),
 
     # Allston & Brighton
     "o'brien's pub": (42.3533, -71.1305, "Allston", "3 Harvard Ave, Allston", "O'Brien's Pub"),
@@ -449,6 +451,8 @@ VENUE_RULES = [
     ("club cafe", (42.3486, -71.0718, "South End", "209 Columbus Ave, Boston", "Club Café")),
     ("dani's", (42.3485, -71.0843, "Back Bay", "909 Boylston St, Boston", "Dani's Queer Bar")),
     ("danis", (42.3485, -71.0843, "Back Bay", "909 Boylston St, Boston", "Dani's Queer Bar")),
+    ("the 88 club", (42.3468, -71.0845, "Back Bay", "50 Dalton St, Boston", "The 88 Club")),
+    ("88 club", (42.3468, -71.0845, "Back Bay", "50 Dalton St, Boston", "The 88 Club")),
     ("legacy", (42.3512, -71.0660, "Theater District", "79 Warrenton St, Boston", "Legacy Boston")),
     ("the alley bar", (42.3582, -71.0592, "Downtown", "14 Pi Alley, Boston", "The Alley Bar")),
     ("sunset cantina", (42.3503, -71.1187, "Allston / BU", "916 Commonwealth Ave, Boston", "Sunset Cantina")),
@@ -688,10 +692,11 @@ def resolve_event_geo(event: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     """
     venue_raw = (event.get("venue") or "").strip()
     source_raw = (event.get("_source_venue") or "").strip()
+    title_raw = (event.get("name") or event.get("title") or "").strip()
 
     # Discard non-physical venues
     v_lower = venue_raw.lower()
-    if not v_lower or v_lower in ("zoom", "online", "virtual", "online event", "tba", "various") or "(virtual)" in v_lower or "online event" in v_lower:
+    if v_lower in ("zoom", "online", "virtual", "online event", "tba", "various") or "(virtual)" in v_lower or "online event" in v_lower:
         return None
 
     # 1. Check if event has native coordinates
@@ -713,15 +718,15 @@ def resolve_event_geo(event: Dict[str, Any]) -> Optional[Dict[str, Any]]:
 
     # 2. Check exact curated match
     norm_v = re.sub(r"[^\w\s]", "", v_lower).strip()
-    if v_lower in VENUE_COORDINATES:
+    if v_lower and v_lower in VENUE_COORDINATES:
         lat, lng, neigh, addr, cname = VENUE_COORDINATES[v_lower]
         return {"lat": lat, "lng": lng, "venue": cname, "neighborhood": neigh, "address": addr}
-    if norm_v in VENUE_COORDINATES:
+    if norm_v and norm_v in VENUE_COORDINATES:
         lat, lng, neigh, addr, cname = VENUE_COORDINATES[norm_v]
         return {"lat": lat, "lng": lng, "venue": cname, "neighborhood": neigh, "address": addr}
 
     # 3. Check needle rules
-    target = f"{v_lower} {source_raw.lower()}"
+    target = f"{v_lower} {source_raw.lower()} {title_raw.lower()}"
     for needle, (lat, lng, neigh, addr, cname) in VENUE_RULES:
         if needle in target:
             return {"lat": lat, "lng": lng, "venue": cname, "neighborhood": neigh, "address": addr}

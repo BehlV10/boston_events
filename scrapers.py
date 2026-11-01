@@ -1746,6 +1746,57 @@ def scrape_do617(url, ua):
     seen = set()
     start_date = datetime.now(EASTERN).date()
 
+    # 0. Single venue page support (e.g. /venues/deep-cuts)
+    if "/venues/" in (url or ""):
+        try:
+            resp = _SESSION.get(url, headers={"User-Agent": ua or UA_CHROME}, timeout=10)
+            if resp.status_code == 200:
+                soup = BeautifulSoup(resp.text, "html.parser")
+                cards = soup.find_all("div", attrs={"data-card-kind": "event"})
+                for card in cards:
+                    a_link = card.find("a", href=True)
+                    if not a_link:
+                        continue
+                    rel_href = a_link.get("href", "")
+                    full_url = urljoin("https://do617.com", rel_href.lstrip("./"))
+                    h3 = card.find("h3")
+                    name = h3.get_text(strip=True) if h3 else ""
+                    if not name:
+                        continue
+                    m_date = re.search(r"/events/(\d{4})/(\d{1,2})/(\d{1,2})/", rel_href)
+                    if not m_date:
+                        continue
+                    y, m_val, day_val = m_date.groups()
+                    date_part = f"{int(y):04d}-{int(m_val):02d}-{int(day_val):02d}"
+                    date_el = card.find(class_=lambda c: c and "date" in c)
+                    raw_date_text = date_el.get_text(" ", strip=True) if date_el else ""
+                    time_str = "20:00:00"
+                    m_time = re.search(r"(\d{1,2})(?::(\d{2}))?\s*(am|pm)", raw_date_text, re.I)
+                    if m_time:
+                        hr = int(m_time.group(1))
+                        mn = int(m_time.group(2) or 0)
+                        merid = m_time.group(3).lower()
+                        if merid == "pm" and hr < 12:
+                            hr += 12
+                        elif merid == "am" and hr == 12:
+                            hr = 0
+                        time_str = f"{hr:02d}:{mn:02d}:00"
+                    try:
+                        iso_str = f"{date_part}T{time_str}-04:00"
+                        iso = datetime.fromisoformat(iso_str).astimezone(timezone.utc).isoformat()
+                    except Exception:
+                        iso = None
+                    events.append({
+                        "name": name,
+                        "date": iso,
+                        "url": full_url,
+                        "venue": "Deep Cuts",
+                        "price": None,
+                    })
+        except Exception:
+            pass
+        return events
+
     # 1. Scrape today + next 4 days from Do617 date feeds
     for i in range(5):
         d = start_date + timedelta(days=i)
@@ -1802,6 +1853,12 @@ def scrape_do617(url, ua):
                     if "enrichment" not in (p.get("class") or []) and "date" not in (p.get("class") or [])
                 ]
                 venue_name = p_tags[0] if p_tags else None
+                if "88 club" in name.lower():
+                    venue_name = "The 88 Club"
+                elif venue_name and venue_name.startswith("@"):
+                    m_at = re.search(r"\bat\s+(?:the\s+)?([A-Za-z0-9\s'&]+?)(?:\s*-\s*Boston|\s*,\s*MA|\s*$)", name, re.I)
+                    if m_at:
+                        venue_name = m_at.group(1).strip()
 
                 key = (name.lower(), date_part)
                 if key in seen:

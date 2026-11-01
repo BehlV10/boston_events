@@ -1241,6 +1241,29 @@ class TestBostonEvents(unittest.TestCase):
         self.assertIn("2026-11-12", events[0]["date"])
 
 
+    def test_88_club_resolution_and_geocoding(self):
+        """Verify The 88 Club maps to Boston, Back Bay, and resolves correct coordinates."""
+        from template import _event_city, resolve_subarea
+        from venues_geo import resolve_event_geo
+
+        ev1 = {"name": "Comedy at The 88 Club (Free!)", "venue": "The 88 Club", "_source_venue": "The Boston Calendar"}
+        geo1 = resolve_event_geo(ev1)
+        self.assertIsNotNone(geo1)
+        self.assertEqual(geo1["venue"], "The 88 Club")
+        self.assertEqual(geo1["neighborhood"], "Back Bay")
+        city1 = _event_city("The 88 Club", "The Boston Calendar", ev1)
+        self.assertEqual(city1, "boston")
+        sub_name1, sub_slug1 = resolve_subarea(city1, ev1, geo1)
+        self.assertEqual(sub_slug1, "back_bay")
+        self.assertEqual(sub_name1, "Back Bay & Copley")
+
+        ev2 = {"name": "Free Comedy Show at The 88 Club - Boston, MA", "venue": "@BOSCOMEDYSHOWS", "_source_venue": "Do617"}
+        geo2 = resolve_event_geo(ev2)
+        self.assertIsNotNone(geo2)
+        self.assertEqual(geo2["venue"], "The 88 Club")
+        self.assertEqual(geo2["neighborhood"], "Back Bay")
+
+
 if __name__ == "__main__":
     unittest.main()
 
