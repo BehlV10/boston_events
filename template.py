@@ -256,8 +256,8 @@ def resolve_subarea(city, event, geo=None):
     elif city == "boston":
         if any(k in blob for k in ["fenway", "symphony", "house of blues", "mgm music", "mfa", "museum of fine arts", "jordan hall", "nec ", "nec:", "nec (", "new england conservatory", "berklee", "cafe 939", "time out", "401 park", "bill's bar", "bills bar", "loretta"]):
             return ("Fenway & Kenmore", "fenway_kenmore")
-        if any(k in blob for k in ["theater district", "theatre district", "boch", "wang", "shubert", "paramount", "colonial", "royale", "charles playhouse", "downtown", "common", "orpheum", "bsmnt", "city winery", "big night live", "td garden", "wilbur", "sports museum", "versus", "west end", "legacy", "feral"]):
-            return ("Downtown & Theater Dist.", "theater_downtown")
+        if any(k in blob for k in ["theater district", "theatre district", "boch", "wang", "shubert", "paramount", "colonial", "royale", "charles playhouse", "downtown", "common", "public garden", "duckling", "orpheum", "bsmnt", "city winery", "big night live", "td garden", "wilbur", "sports museum", "versus", "west end", "legacy", "feral"]):
+            return ("Downtown & Boston Common", "theater_downtown")
         if any(k in blob for k in ["south end", "beehive", "wally", "club cafe", "club café", "sowa", "reunion bbq", "calderwood"]):
             return ("South End", "south_end")
         if any(k in blob for k in ["back bay", "copley", "boston public library", "bpl", "trident", "newbury", "prudential", "dani", "danis", "88 club"]):

@@ -6699,6 +6699,7 @@ def _get_partiful_targets(primary_url):
         "https://partiful.com/explore/l/bos/events",
         "https://partiful.com/u/qu6OZYvBzHdRAzlwQBXK",  # Touch Grass + Meet irl organizer
         "https://partiful.com/e/oKWiAZcxbw1kWLgb5CRR",  # Cuffing Season Finale
+        "https://partiful.com/e/nMhM5jZffB2zl2NMgQtO",  # Duck Duck Goose in Boston Public Garden
     ):
         if default_u not in targets:
             targets.append(default_u)
