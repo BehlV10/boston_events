@@ -30,7 +30,7 @@ CITY_RULES = [
     ("somerville", (
         "somerville", "aeronaut", "crystal ballroom", "somerville theatre", "somerville theater",
         "somerville, ma", "(somerville)", ", somerville",
-        "davis square", "assembly row", "union square",
+        "davis square", "davis sq", "seven hills park", "assembly row", "union square", "union sq",
         "the burren", "burren", "mccarthy's toad", "mccarthys toad", "remnant somerville",
         "comedy studio", "bow market", "upstairs at bow",
         "armory", "arts at the armory", "somerville arts council",

@@ -6677,77 +6677,135 @@ def scrape_northeastern(url, ua):
     return events
 
 
+PARTIFUL_SOURCES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "partiful_sources.json")
+
+
+def _get_partiful_targets(primary_url):
+    targets = []
+    if primary_url:
+        targets.append(primary_url)
+    if os.path.exists(PARTIFUL_SOURCES_FILE):
+        try:
+            with open(PARTIFUL_SOURCES_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, list):
+                    for u in data:
+                        if isinstance(u, str) and u.startswith("http") and u not in targets:
+                            targets.append(u)
+        except Exception:
+            pass
+    # Guaranteed defaults for community favorites
+    for default_u in (
+        "https://partiful.com/explore/l/bos/events",
+        "https://partiful.com/u/qu6OZYvBzHdRAzlwQBXK",  # Touch Grass + Meet irl organizer
+        "https://partiful.com/e/oKWiAZcxbw1kWLgb5CRR",  # Cuffing Season Finale
+    ):
+        if default_u not in targets:
+            targets.append(default_u)
+    return targets
+
+
 def scrape_partiful(url, ua):
-    """Scrape community events and parties from Partiful Boston explore directory or individual event links."""
+    """Scrape community events, parties, and Touch Grass mixers from Partiful Boston."""
     headers = {
         "User-Agent": ua or UA_CHROME,
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
     }
-    try:
-        r = _SESSION.get(url, headers=headers, timeout=12)
-        r.raise_for_status()
-        soup = BeautifulSoup(r.text, "html.parser")
-    except Exception:
-        return []
-
+    targets = _get_partiful_targets(url)
     events = []
     seen = set()
 
-    # 1. Parse __NEXT_DATA__
-    next_data_el = soup.select_one("script#__NEXT_DATA__")
-    if next_data_el:
+    for target_url in targets:
         try:
-            nd = json.loads(next_data_el.string)
-            props = nd.get("props", {}).get("pageProps", {})
-
-            # Case A: Explore directory (props['items'])
-            items = props.get("items", [])
-            for it in items:
-                ev = it.get("item", {}).get("event", {})
-                title = ev.get("title")
-                start_iso = ev.get("startDate")
-                if not title or not start_iso or is_placeholder_or_closed_event(title):
-                    continue
-                loc = ev.get("locationInfo", {})
-                vname = loc.get("displayName") or loc.get("mapsInfo", {}).get("name") or loc.get("approximateLocation") or "Boston"
-                ev_url = f"https://partiful.com/e/{ev.get('id')}"
-                key = (title.lower(), start_iso[:10])
-                if key in seen:
-                    continue
-                seen.add(key)
-                events.append({
-                    "name": html.unescape(title).strip()[:160],
-                    "date": start_iso,
-                    "url": ev_url,
-                    "venue": vname,
-                    "price": "Free" if ev.get("isPublic") else None,
-                    "category": "community",
-                })
-
-            # Case B: Single event page (props['event'])
-            ev = props.get("event", {})
-            if ev and ev.get("title") and ev.get("startDate"):
-                title = ev.get("title")
-                start_iso = ev.get("startDate")
-                if not is_placeholder_or_closed_event(title):
-                    loc = ev.get("locationInfo", {})
-                    vname = loc.get("displayName") or loc.get("mapsInfo", {}).get("name") or loc.get("approximateLocation") or "Boston"
-                    key = (title.lower(), start_iso[:10])
-                    if key not in seen:
-                        seen.add(key)
-                        events.append({
-                            "name": html.unescape(title).strip()[:160],
-                            "date": start_iso,
-                            "url": url,
-                            "venue": vname,
-                            "price": "Free",
-                            "category": "community",
-                        })
+            r = _SESSION.get(target_url, headers=headers, timeout=12)
+            if r.status_code != 200:
+                continue
+            soup = BeautifulSoup(r.text, "html.parser")
         except Exception:
-            pass
+            continue
 
-    # 2. Fallback to schema.org Event LD+JSON if needed
-    if not events:
+        next_data_el = soup.select_one("script#__NEXT_DATA__")
+        if next_data_el:
+            try:
+                nd = json.loads(next_data_el.string)
+                props = nd.get("props", {}).get("pageProps", {})
+
+                # Case A: Explore directory (props['items'])
+                items = props.get("items", [])
+                for it in items:
+                    ev = it.get("item", {}).get("event", {})
+                    title = ev.get("title")
+                    start_iso = ev.get("startDate")
+                    if not title or not start_iso or is_placeholder_or_closed_event(title):
+                        continue
+                    loc = ev.get("locationInfo", {}) or {}
+                    vname = loc.get("displayName") or loc.get("mapsInfo", {}).get("name") or loc.get("approximateLocation") or "Boston"
+                    ev_url = f"https://partiful.com/e/{ev.get('id')}"
+                    key = (title.lower().strip(), start_iso[:10])
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    events.append({
+                        "name": html.unescape(title).strip()[:160],
+                        "date": start_iso,
+                        "url": ev_url,
+                        "venue": vname,
+                        "price": "Free" if ev.get("isPublic") else None,
+                        "category": "community",
+                    })
+
+                # Case B: Single event page (props['event'])
+                ev = props.get("event", {})
+                if ev and ev.get("title") and ev.get("startDate"):
+                    title = ev.get("title")
+                    start_iso = ev.get("startDate")
+                    if not is_placeholder_or_closed_event(title):
+                        loc = ev.get("locationInfo", {}) or {}
+                        vname = loc.get("displayName") or loc.get("mapsInfo", {}).get("name") or ev.get("location") or loc.get("approximateLocation") or "Boston"
+                        key = (title.lower().strip(), start_iso[:10])
+                        if key in seen:
+                            if vname and vname.lower() != "boston":
+                                for ex in events:
+                                    if (ex["name"].lower().strip(), ex["date"][:10]) == key:
+                                        if ex["venue"].lower() == "boston":
+                                            ex["venue"] = vname
+                                        break
+                        else:
+                            seen.add(key)
+                            events.append({
+                                "name": html.unescape(title).strip()[:160],
+                                "date": start_iso,
+                                "url": target_url,
+                                "venue": vname,
+                                "price": "Free" if ev.get("isPublic") else None,
+                                "category": "community",
+                            })
+
+                # Case C: Organizer profile page (props['initialPublishedEvents'], e.g. Touch Grass)
+                for ev in props.get("initialPublishedEvents", []):
+                    title = ev.get("title")
+                    start_iso = ev.get("startDate")
+                    if not title or not start_iso or is_placeholder_or_closed_event(title):
+                        continue
+                    loc = ev.get("locationInfo", {}) or {}
+                    vname = loc.get("displayName") or loc.get("mapsInfo", {}).get("name") or loc.get("approximateLocation") or "Boston"
+                    ev_url = f"https://partiful.com/e/{ev.get('id')}" if ev.get("id") else target_url
+                    key = (title.lower().strip(), start_iso[:10])
+                    if key in seen:
+                        continue
+                    seen.add(key)
+                    events.append({
+                        "name": html.unescape(title).strip()[:160],
+                        "date": start_iso,
+                        "url": ev_url,
+                        "venue": vname,
+                        "price": "Free" if ev.get("isPublic") else None,
+                        "category": "community",
+                    })
+            except Exception:
+                pass
+
+        # Case D: Fallback schema.org Event LD+JSON
         for s in soup.select('script[type="application/ld+json"]'):
             try:
                 data = json.loads(s.string)
@@ -6758,17 +6816,18 @@ def scrape_partiful(url, ua):
                         continue
                     loc = data.get("location", {})
                     vname = loc.get("name") if isinstance(loc, dict) else "Boston"
-                    key = (title.lower(), start_iso[:10])
+                    key = (title.lower().strip(), start_iso[:10])
                     if key in seen:
-                        seen.add(key)
-                        events.append({
-                            "name": html.unescape(title).strip()[:160],
-                            "date": start_iso,
-                            "url": url,
-                            "venue": vname,
-                            "price": "Free" if data.get("offers", {}).get("price") == 0 else None,
-                            "category": "community",
-                        })
+                        continue
+                    seen.add(key)
+                    events.append({
+                        "name": html.unescape(title).strip()[:160],
+                        "date": start_iso,
+                        "url": target_url,
+                        "venue": vname,
+                        "price": "Free" if data.get("offers", {}).get("price") == 0 else None,
+                        "category": "community",
+                    })
             except Exception:
                 pass
 
@@ -6777,6 +6836,7 @@ def scrape_partiful(url, ua):
 
 _ALL_VENUES = [
     {"name": "Partiful Boston", "url": "https://partiful.com/explore/l/bos/events", "ua": UA_CHROME, "scraper": scrape_partiful, "default_category": "community"},
+    {"name": "Luma Boston", "url": "https://lu.ma/boston", "ua": UA_CHROME, "scraper": scrape_luma, "default_category": "community"},
     {"name": "ICA Boston", "url": "https://www.icaboston.org/events/", "ua": UA_CHROME, "scraper": scrape_ica, "default_category": "art"},
     {"name": "Cisco Brewers Fenway", "url": "https://ciscobrewersfenway.com/eventschedule", "ua": UA_CHROME, "scraper": scrape_squarespace_calendar_block, "default_category": "music"},
     {"name": "Castle Island Brewing", "url": "https://castleislandbeer.com/public-events", "ua": UA_CHROME, "scraper": scrape_squarespace_calendar_block, "default_category": "food"},
