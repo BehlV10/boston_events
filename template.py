@@ -425,6 +425,703 @@ def _is_event_free(e):
     return False
 
 
+def get_site_url():
+    cname_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "CNAME")
+    if os.path.exists(cname_path):
+        try:
+            with open(cname_path, "r", encoding="utf-8") as f:
+                domain = f.read().strip()
+                if domain:
+                    return f"https://{domain}"
+        except Exception:
+            pass
+    return os.environ.get("SITE_URL", "https://behlv10.github.io/boston_events").rstrip("/")
+
+
+def build_seo_meta_tags(site_url=None, title=None, description=None, path="", image_url=None):
+    if not site_url:
+        site_url = get_site_url()
+
+    clean_path = path.lstrip("/")
+    canonical_url = f"{site_url}/{clean_path}" if clean_path else f"{site_url}/"
+    default_title = "Wicked Boston Events · Live Music, Comedy, Nightlife & Things to Do in Boston, Cambridge & Somerville"
+    default_desc = "Discover upcoming live music, comedy, nightlife, arts, and community events across Greater Boston. Updated every 30 minutes directly from 40+ local independent venues."
+
+    t = title or default_title
+    d = description or default_desc
+    img = image_url or f"{site_url}/og-image.jpg"
+
+    return f"""<!-- SEO & AEO Meta Tags -->
+<title>{escape(t)}</title>
+<meta name="description" content="{escape(d)}">
+<meta name="keywords" content="Boston events, Boston live music, things to do in Boston, Cambridge concerts, Somerville comedy, Boston nightlife, free events Boston, Boston theater, live music Boston tonight, things to do this weekend Boston">
+<meta name="author" content="Wicked Boston Events">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+<link rel="canonical" href="{escape(canonical_url)}">
+
+<!-- OpenGraph / Social Previews -->
+<meta property="og:locale" content="en_US">
+<meta property="og:type" content="website">
+<meta property="og:title" content="{escape(t)}">
+<meta property="og:description" content="{escape(d)}">
+<meta property="og:url" content="{escape(canonical_url)}">
+<meta property="og:site_name" content="Wicked Boston Events">
+<meta property="og:image" content="{escape(img)}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Wicked Boston Events Guide">
+
+<!-- Twitter Cards -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{escape(t)}">
+<meta name="twitter:description" content="{escape(d)}">
+<meta name="twitter:image" content="{escape(img)}">
+<meta name="twitter:site" content="@wickedbostonevents">"""
+
+
+def build_json_ld(events, site_url=None):
+    if not site_url:
+        site_url = get_site_url()
+
+    website_schema = {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Wicked Boston Events",
+        "url": f"{site_url}/",
+        "description": "Comprehensive independent live calendar for music, comedy, nightlife, theater, and arts across Greater Boston.",
+        "inLanguage": "en-US",
+        "potentialAction": {
+            "@type": "SearchAction",
+            "target": f"{site_url}/#q={{search_term_string}}",
+            "query-input": "required name=search_term_string"
+        }
+    }
+
+    faq_schema = {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What are the best live music venues in Boston and Cambridge?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Top live music stages in Greater Boston include The Sinclair, Middle East (Upstairs & Downstairs), Cantab Lounge, Paradise Rock Club, Midway Cafe, Club Passim, The Rockwell, O'Brien's Pub, Lilypad, Symphony Hall, Berklee Performance Center, and Warehouse XI."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Where can I find free events and comedy in Boston tonight?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Wicked Boston Events tracks dozens of free and low-cost community events, open mics, and live performances across Boston, Cambridge, and Somerville. Use the 'Free' filter to browse free museum days, brewery trivia, live jazz, and stand-up shows."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What neighborhoods in Greater Boston does this event guide cover?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "The calendar covers Boston (Back Bay, Allston, Brighton, Fenway, Seaport, Downtown, South End, Dorchester), Cambridge (Harvard Square, Central Square, Kendall Square, Inman Square, Porter Square), and Somerville (Davis Square, Union Square, Assembly Row, Spring Hill)."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How often is the Boston Events calendar updated?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "The calendar is automatically scraped and synchronized every 30 minutes directly from official venue box offices, artist calendars, and verified community sources."
+                }
+            }
+        ]
+    }
+
+    event_items = []
+    seen = set()
+    for e in events:
+        d_str = e.get("date")
+        if not d_str or d_str == "tba":
+            continue
+        title = e.get("title") or e.get("name")
+        venue_name = e.get("venue") or e.get("_source_venue") or "Boston Area Venue"
+        if not title:
+            continue
+        k = f"{d_str}_{venue_name}_{title[:30]}".lower()
+        if k in seen:
+            continue
+        seen.add(k)
+
+        t_obj = e.get("_time")
+        t_str = e.get("time") or ""
+        start_date = d_str
+        if t_obj:
+            start_date = f"{d_str}T{t_obj.strftime('%H:%M:%S')}-05:00"
+        elif ":" in t_str and ("am" in t_str.lower() or "pm" in t_str.lower()):
+            try:
+                dt_tmp = datetime.strptime(t_str.strip().upper(), "%I:%M %p")
+                start_date = f"{d_str}T{dt_tmp.strftime('%H:%M:%S')}-05:00"
+            except Exception:
+                pass
+
+        geo = resolve_event_geo(e)
+        city = _event_city(venue_name, e.get("_source_venue"), e)
+        city_label = CITY_LABELS.get(city, "Boston")
+
+        location_obj = {
+            "@type": "Place",
+            "name": venue_name,
+            "address": {
+                "@type": "PostalAddress",
+                "addressLocality": city_label,
+                "addressRegion": "MA",
+                "addressCountry": "US"
+            }
+        }
+        if geo:
+            if geo.get("address"):
+                location_obj["address"]["streetAddress"] = geo["address"]
+            location_obj["geo"] = {
+                "@type": "GeoCoordinates",
+                "latitude": geo["lat"],
+                "longitude": geo["lng"]
+            }
+
+        url = e.get("url") or e.get("link") or f"{site_url}/"
+        price = e.get("price")
+        is_free_val = _is_event_free(e)
+        offers_obj = {
+            "@type": "Offer",
+            "url": url,
+            "availability": "https://schema.org/InStock",
+            "priceCurrency": "USD"
+        }
+        if is_free_val:
+            offers_obj["price"] = "0"
+        elif price:
+            m_price = re.search(r"\$?(\d+(\.\d{2})?)", str(price))
+            if m_price:
+                offers_obj["price"] = m_price.group(1)
+
+        ev_schema = {
+            "@type": "Event",
+            "name": title,
+            "startDate": start_date,
+            "eventStatus": "https://schema.org/EventScheduled",
+            "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
+            "location": location_obj,
+            "description": e.get("description") or f"{title} live at {venue_name} in {city_label}, MA",
+            "url": url,
+            "offers": offers_obj,
+            "organizer": {
+                "@type": "Organization",
+                "name": e.get("_source_venue") or venue_name,
+                "url": url
+            }
+        }
+        event_items.append(ev_schema)
+        if len(event_items) >= 75:
+            break
+
+    itemlist_schema = {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": "Upcoming Greater Boston Events",
+        "description": "Curated upcoming live events across Boston, Cambridge, and Somerville.",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": idx + 1,
+                "item": ev
+            }
+            for idx, ev in enumerate(event_items)
+        ]
+    }
+
+    scripts = [
+        f'<script type="application/ld+json">\n{json.dumps(website_schema, ensure_ascii=False, indent=2)}\n</script>',
+        f'<script type="application/ld+json">\n{json.dumps(faq_schema, ensure_ascii=False, indent=2)}\n</script>',
+        f'<script type="application/ld+json">\n{json.dumps(itemlist_schema, ensure_ascii=False, indent=2)}\n</script>'
+    ]
+    return "\n".join(scripts)
+
+
+def build_seo_directory_html(all_events_flat, all_venue_names):
+    venue_counts = defaultdict(int)
+    for e in all_events_flat:
+        v = e.get("venue") or e.get("_source_venue")
+        if v:
+            venue_counts[v] += 1
+
+    sorted_venues = sorted(all_venue_names)
+    venue_lis = []
+    for v in sorted_venues[:48]:
+        cnt = venue_counts.get(v, 0)
+        cnt_str = f" <span class=\"dir-cnt\">({cnt})</span>" if cnt > 0 else ""
+        venue_lis.append(f'<li><a href="#venues={quote(v)}">{escape(v)}</a>{cnt_str}</li>')
+    venues_html = "\n".join(venue_lis)
+
+    return f"""<section class="seo-directory" id="boston-directory" aria-label="Greater Boston Events Directory">
+  <div class="directory-container">
+    <div class="directory-header">
+      <h2>Greater Boston Events Directory &amp; Neighborhood Guide</h2>
+      <p class="directory-sub">Live independent directory for concerts, stand-up comedy, nightlife, stage theater, and arts across Boston, Cambridge, and Somerville. Data synchronized directly from 40+ official venue box offices.</p>
+    </div>
+
+    <div class="directory-grid">
+      <!-- Locations & Neighborhoods -->
+      <div class="directory-col">
+        <h3>📍 Browse by Neighborhood</h3>
+        <div class="directory-group">
+          <strong class="directory-group-title"><a href="boston/">Boston</a></strong>
+          <ul>
+            <li><a href="#city=boston&amp;sub=back_bay_copley">Back Bay &amp; Copley</a></li>
+            <li><a href="#city=boston&amp;sub=allston_brighton">Allston &amp; Brighton</a></li>
+            <li><a href="#city=boston&amp;sub=fenway_kenmore">Fenway &amp; Kenmore</a></li>
+            <li><a href="#city=boston&amp;sub=downtown_common">Downtown &amp; Boston Common</a></li>
+            <li><a href="#city=boston&amp;sub=seaport_waterfront">Seaport &amp; Waterfront</a></li>
+            <li><a href="#city=boston&amp;sub=south_end">South End</a></li>
+            <li><a href="#city=boston&amp;sub=brookline">Brookline &amp; Coolidge Corner</a></li>
+            <li><a href="#city=boston&amp;sub=dorchester_roxbury">Dorchester &amp; Roxbury</a></li>
+          </ul>
+        </div>
+        <div class="directory-group">
+          <strong class="directory-group-title"><a href="cambridge/">Cambridge</a></strong>
+          <ul>
+            <li><a href="#city=cambridge&amp;sub=harvard_sq">Harvard Square</a></li>
+            <li><a href="#city=cambridge&amp;sub=central_sq">Central Square</a></li>
+            <li><a href="#city=cambridge&amp;sub=kendall_east">Kendall &amp; East Cambridge</a></li>
+            <li><a href="#city=cambridge&amp;sub=inman_porter">Inman &amp; Porter Square</a></li>
+          </ul>
+        </div>
+        <div class="directory-group">
+          <strong class="directory-group-title"><a href="somerville/">Somerville</a></strong>
+          <ul>
+            <li><a href="#city=somerville&amp;sub=davis_sq">Davis Square</a></li>
+            <li><a href="#city=somerville&amp;sub=union_sq">Union Square</a></li>
+            <li><a href="#city=somerville&amp;sub=assembly_row">Assembly Row</a></li>
+            <li><a href="#city=somerville&amp;sub=spring_hill_gilman">Spring Hill &amp; Gilman</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Categories & Vibes -->
+      <div class="directory-col">
+        <h3>🎭 Browse by Category</h3>
+        <ul>
+          <li><a href="music/">Live Music &amp; Concerts</a></li>
+          <li><a href="comedy/">Stand-Up Comedy &amp; Improv</a></li>
+          <li><a href="#cat=Stage+%26+theater">Stage, Theater &amp; Musicals</a></li>
+          <li><a href="#cat=Nightlife+%26+parties">Nightlife &amp; Queer Parties</a></li>
+          <li><a href="#cat=Arts+%26+culture">Arts, Galleries &amp; Museum Nights</a></li>
+          <li><a href="#cat=Community">Community, Markets &amp; Gatherings</a></li>
+          <li><a href="#cat=Film">Cinema &amp; Indie Film Screenings</a></li>
+          <li><a href="free/">Free Events in Boston</a></li>
+          <li><a href="#picks=1">Curator's Highlights &amp; Picks</a></li>
+        </ul>
+
+        <h3 style="margin-top:18px;">🎵 Music Subgenres</h3>
+        <ul class="genre-tag-list">
+          <li><a href="#cat=Music+%26+nightlife&amp;genre=indie_rock">Indie &amp; Rock</a></li>
+          <li><a href="#cat=Music+%26+nightlife&amp;genre=punk">Punk &amp; Hardcore</a></li>
+          <li><a href="#cat=Music+%26+nightlife&amp;genre=jazz">Jazz, Soul &amp; Blues</a></li>
+          <li><a href="#cat=Music+%26+nightlife&amp;genre=electronic">Electronic &amp; Techno</a></li>
+          <li><a href="#cat=Music+%26+nightlife&amp;genre=folk">Folk &amp; Americana</a></li>
+          <li><a href="#cat=Music+%26+nightlife&amp;genre=classical">Classical &amp; Symphony</a></li>
+        </ul>
+      </div>
+
+      <!-- Venues A-Z -->
+      <div class="directory-col">
+        <h3>🏛️ Tracked Venues A–Z</h3>
+        <p class="hint">Official box office feeds tracked and refreshed every 30 mins.</p>
+        <ul class="venue-directory-list">
+          {venues_html}
+        </ul>
+      </div>
+    </div>
+
+    <!-- Verified Entity Q&A for AEO (Perplexity, ChatGPT, Gemini, Copilot) -->
+    <div class="aeo-faq-block">
+      <h3>Frequently Asked Questions about Greater Boston Events</h3>
+      <div class="faq-item">
+        <h4>Where can I find live music in Boston and Cambridge tonight?</h4>
+        <p>Wicked Boston Events tracks over 40 local stages every 30 minutes, including The Sinclair, Middle East, Cantab Lounge, Paradise Rock Club, Midway Cafe, Club Passim, O'Brien's Pub, and Symphony Hall.</p>
+      </div>
+      <div class="faq-item">
+        <h4>Are there free events and comedy shows in Boston this week?</h4>
+        <p>Yes. You can toggle the <a href="free/">'Free' filter</a> to see free museum days, open mics, library talks, trivia nights, outdoor markets, and community gatherings across Boston, Cambridge, and Somerville.</p>
+      </div>
+      <div class="faq-item">
+        <h4>How does Boston Events differ from commercial ticketing sites?</h4>
+        <p>Wicked Boston Events is an independent community project. It does not sell tickets, charge fees, or take broker markups. Every listing links directly to the venue's own official box office or community organizer.</p>
+      </div>
+    </div>
+  </div>
+</section>"""
+
+
+HUBS = {
+    "boston": {
+        "title": "Live Boston Events & Concerts",
+        "city_filter": "boston",
+        "cat_filter": None,
+        "free_only": False,
+        "subtitle": "Curated live calendar for concerts, comedy, nightlife, and arts across Boston (Back Bay, Allston, Brighton, Fenway, Seaport, Downtown, South End).",
+        "query": "#city=boston"
+    },
+    "cambridge": {
+        "title": "Cambridge Live Music & Events",
+        "city_filter": "cambridge",
+        "cat_filter": None,
+        "free_only": False,
+        "subtitle": "Upcoming live shows, concerts, and cultural events across Harvard Square, Central Square, Kendall, and Inman Square.",
+        "query": "#city=cambridge"
+    },
+    "somerville": {
+        "title": "Somerville Shows & Live Events",
+        "city_filter": "somerville",
+        "cat_filter": None,
+        "free_only": False,
+        "subtitle": "Independent concerts, comedy, craft markets, and cinema across Davis Square, Union Square, and Assembly Row.",
+        "query": "#city=somerville"
+    },
+    "music": {
+        "title": "Boston & Cambridge Live Music Calendar",
+        "city_filter": None,
+        "cat_filter": "Music & nightlife",
+        "free_only": False,
+        "subtitle": "Daily live music directory covering indie rock, jazz, punk, electronic, and folk across 40+ local Boston & Cambridge stages.",
+        "query": "#cat=Music+%26+nightlife"
+    },
+    "comedy": {
+        "title": "Boston Stand-Up Comedy & Shows",
+        "city_filter": None,
+        "cat_filter": "Comedy",
+        "free_only": False,
+        "subtitle": "Live stand-up comedy shows, improv, and open mics across The Comedy Studio, The 88 Club, The Rockwell, and Wilbur.",
+        "query": "#cat=Comedy"
+    },
+    "free": {
+        "title": "Free Events in Boston & Cambridge",
+        "city_filter": None,
+        "cat_filter": None,
+        "free_only": True,
+        "subtitle": "Curated list of free museum days, open mics, community workshops, library events, and outdoor gatherings.",
+        "query": "#free=1"
+    }
+}
+
+
+def render_hub_page(hub_slug, events, site_url=None):
+    if not site_url:
+        site_url = get_site_url()
+    hub = HUBS.get(hub_slug)
+    if not hub:
+        return ""
+
+    city_filter = hub["city_filter"]
+    cat_filter = hub["cat_filter"]
+    free_only = hub["free_only"]
+
+    filtered = []
+    for e in events:
+        if city_filter and _event_city(e.get("venue"), e.get("_source_venue"), e) != city_filter:
+            continue
+        if cat_filter and category_bucket(e.get("category")) != cat_filter:
+            continue
+        if free_only and not _is_event_free(e):
+            continue
+        filtered.append(e)
+
+    hub_canonical = f"{site_url}/{hub_slug}/"
+    meta_tags = build_seo_meta_tags(
+        site_url=site_url,
+        title=f"{hub['title']} · Wicked Boston Events",
+        description=hub["subtitle"],
+        path=f"{hub_slug}/"
+    )
+
+    hub_event_items = []
+    for idx, e in enumerate(filtered[:50]):
+        d_str = e.get("date")
+        if not d_str or d_str == "tba":
+            continue
+        title = e.get("title") or e.get("name")
+        venue_name = e.get("venue") or e.get("_source_venue") or "Boston Area Venue"
+        city = _event_city(venue_name, e.get("_source_venue"), e)
+        url = e.get("url") or e.get("link") or hub_canonical
+        hub_event_items.append({
+            "@type": "ListItem",
+            "position": idx + 1,
+            "item": {
+                "@type": "Event",
+                "name": title,
+                "startDate": d_str,
+                "url": url,
+                "location": {
+                    "@type": "Place",
+                    "name": venue_name,
+                    "address": {
+                        "@type": "PostalAddress",
+                        "addressLocality": CITY_LABELS.get(city, "Boston"),
+                        "addressRegion": "MA",
+                        "addressCountry": "US"
+                    }
+                }
+            }
+        })
+
+    hub_ld = {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        "name": hub["title"],
+        "description": hub["subtitle"],
+        "url": hub_canonical,
+        "itemListElement": hub_event_items
+    }
+    json_ld_str = f'<script type="application/ld+json">\n{json.dumps(hub_ld, ensure_ascii=False, indent=2)}\n</script>'
+
+    cards_html = []
+    for e in filtered[:60]:
+        title = escape(e.get("title") or e.get("name") or "Event")
+        venue = escape(e.get("venue") or e.get("_source_venue") or "Venue")
+        url = escape(e.get("url") or e.get("link") or "#")
+        d_str = escape(e.get("date") or "")
+        t_str = escape(e.get("time") or "")
+        price_val = e.get("price")
+        price_badge = f'<span class="badge badge-price">${escape(str(price_val))}</span>' if price_val else ""
+        if _is_event_free(e):
+            price_badge = '<span class="badge badge-free">Free</span>'
+        city = _event_city(e.get("venue"), e.get("_source_venue"), e)
+        city_name = escape(CITY_LABELS.get(city, "Boston"))
+
+        cards_html.append(f"""<article class="hub-card">
+  <div class="hub-card-head">
+    <time class="hub-date">{d_str}{(' · ' + t_str) if t_str else ''}</time>
+    <div class="hub-badges">{price_badge}</div>
+  </div>
+  <h3 class="hub-title"><a href="{url}" target="_blank" rel="noopener">{title}</a></h3>
+  <div class="hub-meta">
+    <span class="hub-venue">📍 {venue}</span>
+    <span class="hub-city">({city_name})</span>
+  </div>
+</article>""")
+
+    cards_joined = "\n".join(cards_html) if cards_html else "<p class='no-hub-events'>No scheduled events matching this directory right now. Check the interactive calendar for all upcoming dates.</p>"
+
+    active_b = 'active' if hub_slug == 'boston' else ''
+    active_c = 'active' if hub_slug == 'cambridge' else ''
+    active_s = 'active' if hub_slug == 'somerville' else ''
+    active_m = 'active' if hub_slug == 'music' else ''
+    active_co = 'active' if hub_slug == 'comedy' else ''
+    active_f = 'active' if hub_slug == 'free' else ''
+
+    return f"""<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+{meta_tags}
+{json_ld_str}
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230c0e14'/%3E%3Crect x='3' y='3' width='58' height='58' rx='13' fill='none' stroke='%23ffd866' stroke-width='3'/%3E%3Ctext x='32' y='48' font-family='Impact, Arial Black, sans-serif' font-weight='900' font-size='44' fill='%235d9bff' text-anchor='middle'%3EB%3C/text%3E%3C/svg%3E">
+<style>
+  :root {{
+    --bg: #0c0e14;
+    --card: #151822;
+    --card-hover: #1c202e;
+    --fg: #eef1f8;
+    --muted: #8e96a8;
+    --accent: #5d9bff;
+    --border: rgba(255, 255, 255, 0.08);
+    --green: #4ade80;
+  }}
+  body {{
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+  }}
+  header {{
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }}
+  .logo {{
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--fg);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }}
+  .logo span {{ color: var(--accent); }}
+  .hub-nav {{
+    display: flex;
+    gap: 12px;
+    font-size: 13px;
+    flex-wrap: wrap;
+  }}
+  .hub-nav a {{
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }}
+  .hub-nav a:hover, .hub-nav a.active {{
+    color: var(--accent);
+    font-weight: 600;
+  }}
+  main {{
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 18px 60px;
+  }}
+  .hero {{
+    text-align: center;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }}
+  .hero h1 {{
+    font-size: 32px;
+    font-weight: 800;
+    margin: 0 0 10px;
+    color: var(--fg);
+  }}
+  .hero p {{
+    font-size: 15px;
+    color: var(--muted);
+    max-width: 650px;
+    margin: 0 auto 20px;
+  }}
+  .cta-btn {{
+    display: inline-block;
+    background: var(--accent);
+    color: #0c0e14;
+    padding: 10px 22px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 14px;
+    text-decoration: none;
+    box-shadow: 0 2px 12px rgba(93, 155, 255, 0.35);
+    transition: transform 0.15s ease, filter 0.15s ease;
+  }}
+  .cta-btn:hover {{
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+  }}
+  .hub-grid {{
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }}
+  @media (min-width: 640px) {{
+    .hub-grid {{
+      grid-template-columns: repeat(2, 1fr);
+    }}
+  }}
+  .hub-card {{
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: background 0.15s ease, border-color 0.15s ease;
+  }}
+  .hub-card:hover {{
+    background: var(--card-hover);
+    border-color: rgba(93, 155, 255, 0.4);
+  }}
+  .hub-card-head {{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }}
+  .hub-date {{
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }}
+  .badge {{
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-weight: 600;
+  }}
+  .badge-price {{ background: rgba(255, 255, 255, 0.08); color: var(--fg); }}
+  .badge-free {{ background: rgba(74, 222, 128, 0.16); color: var(--green); }}
+  .hub-title {{
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0 0 8px;
+    line-height: 1.35;
+  }}
+  .hub-title a {{
+    color: var(--fg);
+    text-decoration: none;
+  }}
+  .hub-title a:hover {{
+    color: var(--accent);
+    text-decoration: underline;
+  }}
+  .hub-meta {{
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }}
+  footer {{
+    border-top: 1px solid var(--border);
+    padding: 24px 20px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+  }}
+  footer a {{ color: var(--accent); text-decoration: none; }}
+</style>
+</head>
+<body>
+<header>
+  <a href="../" class="logo"><span>Wicked</span> Boston Events</a>
+  <nav class="hub-nav">
+    <a href="../">All Events</a>
+    <a href="../boston/" class="{active_b}">Boston</a>
+    <a href="../cambridge/" class="{active_c}">Cambridge</a>
+    <a href="../somerville/" class="{active_s}">Somerville</a>
+    <a href="../music/" class="{active_m}">Live Music</a>
+    <a href="../comedy/" class="{active_co}">Comedy</a>
+    <a href="../free/" class="{active_f}">Free</a>
+  </nav>
+</header>
+<main>
+  <div class="hero">
+    <h1>{hub['title']}</h1>
+    <p>{hub['subtitle']}</p>
+    <a href="../{hub['query']}" class="cta-btn">Open Full Interactive Calendar &amp; Filters →</a>
+  </div>
+  <div class="hub-grid">
+    {cards_joined}
+  </div>
+</main>
+<footer>
+  <p><a href="../">Wicked Boston Events</a> · Independent Greater Boston Events Calendar · <a href="https://www.instagram.com/wickedbostonevents/" target="_blank" rel="noopener">Instagram: @wickedbostonevents</a></p>
+</footer>
+</body>
+</html>"""
+
+
+
 def _event_stable_id(e):
     title = (e.get("name") or "").strip().lower()
     venue = (e.get("venue") or e.get("_source_venue") or "").strip().lower()
@@ -1596,12 +2293,18 @@ def render_page(results, weather=None, luckyseat_shows=None):
     is_halloween_weekend = (now_eastern.month == 10 and now_eastern.day >= 29) or (now_eastern.month == 11 and now_eastern.day <= 2)
     default_theme = "halloween" if is_halloween_weekend else "indie"
 
+    site_url = get_site_url()
+    seo_meta_tags = build_seo_meta_tags(site_url)
+    json_ld_scripts = build_json_ld(all_events_flat, site_url)
+    seo_directory_html = build_seo_directory_html(all_events_flat, all_venue_names)
+
     return f"""<!doctype html>
 <html lang="en" data-theme="{default_theme}">
 <head>
 <meta charset="utf-8">
-<title>Wicked Boston Events</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+{seo_meta_tags}
+{json_ld_scripts}
 <script>
   try {{
     var manualTheme = localStorage.getItem('boston_events_theme_manual');
@@ -2762,6 +3465,133 @@ def render_page(results, weather=None, luckyseat_shows=None):
     font-size: 10px;
     opacity: 0.7;
     font-weight: 400;
+  }}
+
+  /* Greater Boston SEO & AEO Directory Section */
+  .seo-directory {{
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px 22px;
+    margin-top: 14px;
+    margin-bottom: 20px;
+  }}
+  .directory-header {{
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 14px;
+  }}
+  .directory-header h2 {{
+    font-size: 18px;
+    font-weight: 800;
+    margin: 0 0 6px;
+    color: var(--fg);
+  }}
+  .directory-sub {{
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+    margin: 0;
+  }}
+  .directory-grid {{
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+  }}
+  @media (max-width: 860px) {{
+    .directory-grid {{
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }}
+  }}
+  .directory-col h3 {{
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+    margin: 0 0 10px;
+  }}
+  .directory-col ul {{
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }}
+  .directory-col li {{
+    font-size: 12px;
+    color: var(--muted);
+    padding: 2px 0;
+  }}
+  .directory-col a {{
+    color: var(--fg);
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }}
+  .directory-col a:hover {{
+    color: var(--accent);
+    text-decoration: underline;
+  }}
+  .directory-group {{
+    margin-bottom: 12px;
+  }}
+  .directory-group-title {{
+    display: block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--fg);
+    margin-bottom: 4px;
+  }}
+  .directory-group-title a {{
+    color: var(--accent);
+  }}
+  .genre-tag-list {{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }}
+  .genre-tag-list li a {{
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+    font-size: 11px;
+  }}
+  .venue-directory-list {{
+    max-height: 320px;
+    overflow-y: auto;
+    padding-right: 6px;
+  }}
+  .dir-cnt {{
+    font-size: 10px;
+    opacity: 0.7;
+  }}
+  .aeo-faq-block {{
+    margin-top: 24px;
+    padding-top: 18px;
+    border-top: 1px dashed var(--border);
+  }}
+  .aeo-faq-block h3 {{
+    font-size: 14px;
+    color: var(--fg);
+    margin: 0 0 12px;
+  }}
+  .faq-item {{
+    margin-bottom: 12px;
+  }}
+  .faq-item h4 {{
+    font-size: 13px;
+    color: var(--accent);
+    margin: 0 0 4px;
+  }}
+  .faq-item p {{
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+    margin: 0;
+  }}
+  .faq-item a {{
+    color: var(--accent);
+    text-decoration: none;
   }}
 
   /* View Switcher */
@@ -4571,6 +5401,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
         <button type="button" id="week-next-b" aria-label="Next week">next →</button>
       </div>
       {ongoing_section}
+      {seo_directory_html}
     </main>
     {useful_sidebar}
   </div>

@@ -34,7 +34,7 @@ from scrapers import (  # noqa: E402
     fetch_boston_weather,
     fetch_luckyseat_boston,
 )
-from template import render_page  # noqa: E402
+from template import render_page, render_hub_page, HUBS, get_site_url  # noqa: E402
 import threading
 import time
 
@@ -82,6 +82,31 @@ def add_cors_headers(response):
 @app.get("/static/banner.jpg")
 def banner_img():
     return send_from_directory(os.path.dirname(os.path.abspath(__file__)), "banner.jpg")
+
+
+@app.get("/og-image.jpg")
+def og_image():
+    return send_from_directory(os.path.dirname(os.path.abspath(__file__)), "og-image.jpg")
+
+
+@app.get("/robots.txt")
+def robots_txt():
+    return send_from_directory(os.path.dirname(os.path.abspath(__file__)), "robots.txt")
+
+
+@app.get("/sitemap.xml")
+def sitemap_xml():
+    return send_from_directory(os.path.dirname(os.path.abspath(__file__)), "sitemap.xml")
+
+
+@app.get("/<hub_slug>")
+@app.get("/<hub_slug>/")
+def hub_page(hub_slug):
+    if hub_slug in HUBS:
+        venues = get_all_events(force="refresh" in request.args)
+        flat_events = [e for v in venues for e in v.get("events", [])]
+        return render_hub_page(hub_slug, flat_events, site_url=get_site_url())
+    return "Not Found", 404
 
 
 @app.get("/")
@@ -192,6 +217,22 @@ def export_html(path="index.html", force=False, source_json="events.json"):
     with open(path, "w", encoding="utf-8") as f:
         f.write(html)
     print(f"wrote {path}: {len(html):,} bytes")
+
+    # Generate static directory hub pages (boston/, cambridge/, somerville/, music/, comedy/, free/)
+    try:
+        site_url = get_site_url()
+        base_dir = os.path.dirname(os.path.abspath(path)) or "."
+        flat_events = [e for v in (venues or []) for e in v.get("events", [])]
+        for hub_slug in HUBS:
+            hub_dir = os.path.join(base_dir, hub_slug)
+            os.makedirs(hub_dir, exist_ok=True)
+            hub_html = render_hub_page(hub_slug, flat_events, site_url=site_url)
+            hub_path = os.path.join(hub_dir, "index.html")
+            with open(hub_path, "w", encoding="utf-8") as f:
+                f.write(hub_html)
+            print(f"wrote directory hub {hub_path}: {len(hub_html):,} bytes")
+    except Exception as e:
+        print(f"Warning: failed to export directory hubs: {e}")
 
 
 def run_diagnostics(filter_name=None):
