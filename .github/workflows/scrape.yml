@@ -45,6 +45,11 @@ jobs:
 
       - name: Commit data and static site if changed
         run: |
+          # Guard against corrupted or zero-byte data files
+          if [ ! -s events.json ] || [ $(wc -l < events.json) -lt 10000 ]; then
+            echo "ERROR: Corrupt or zero-byte events.json detected ($(wc -l < events.json 2>/dev/null || echo 0) lines). Aborting commit to prevent data loss."
+            exit 1
+          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add events.json index.html events.html community_events.json highlights.json luckyseat_shows.json
@@ -56,7 +61,8 @@ jobs:
               git push && break
               echo "git push attempt $i failed; waiting before retry..."
               sleep $((i * 5))
-              git pull --rebase -X ours origin main || true
+              git fetch origin main
+              git merge origin/main -X ours --no-edit || true
             done
           fi
 

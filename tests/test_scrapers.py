@@ -655,7 +655,7 @@ class TestBostonEvents(unittest.TestCase):
             "items": [
                 {
                     "title": "Gypsy Jazz Brunch",
-                    "startDate": 1793462400000,
+                    "startDate": int((datetime.now(timezone.utc) + timedelta(days=2)).timestamp() * 1000),
                     "fullUrl": "/new-events/gypsy-jazz-brunch",
                     "excerpt": "Live acoustic gypsy jazz every Sunday.",
                 }
@@ -768,7 +768,7 @@ class TestBostonEvents(unittest.TestCase):
             "upcoming": [
                 {
                     "title": "Jazz Jam Session at Satellite",
-                    "startDate": 1793462400000,
+                    "startDate": int((datetime.now(timezone.utc) + timedelta(days=2)).timestamp() * 1000),
                     "fullUrl": "/live/jazz-jam-session",
                 }
             ]
@@ -1065,6 +1065,108 @@ class TestBostonEvents(unittest.TestCase):
         self.assertEqual(ia_events[0]["venue"], "Improv Asylum")
         self.assertEqual(ia_events[0]["price"], "$35")
         self.assertEqual(ia_events[0]["category"], "comedy")
+
+
+    def test_do617_modern_markup(self):
+        """Verify scrape_do617 accurately parses modern Svelte card markup."""
+        from scrapers import scrape_do617, UA_CHROME
+        from unittest.mock import patch, MagicMock
+
+        sample_html = """
+        <html><body>
+        <div class="standard-card svelte-xyz compact" data-card-kind="event">
+          <a class="card-link" href="./events/2026/11/15/indie-rock-night">
+            <div class="details">
+              <h3>Indie Rock Night at Brighton Music Hall</h3>
+              <p class="date">Tomorrow | 8 pm</p>
+              <p>Brighton Music Hall</p>
+              <p class="enrichment">Music • Allston / Brighton</p>
+            </div>
+          </a>
+        </div>
+        </body></html>
+        """
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.text = sample_html
+
+        with patch("scrapers._SESSION.get", return_value=mock_resp):
+            events = scrape_do617("https://do617.com/events", UA_CHROME)
+
+        self.assertGreaterEqual(len(events), 1)
+        self.assertEqual(events[0]["name"], "Indie Rock Night at Brighton Music Hall")
+        self.assertEqual(events[0]["venue"], "Brighton Music Hall")
+        self.assertIn("https://do617.com/events/2026/11/15/indie-rock-night", events[0]["url"])
+
+    def test_second_sun_rising_abbreviated_date(self):
+        """Verify scrape_second_sun_rising accurately parses abbreviated prose dates."""
+        from scrapers import scrape_second_sun_rising, UA_CHROME
+        from bs4 import BeautifulSoup
+        from unittest.mock import patch
+
+        prose_html = """
+        <html><body>
+        <article>
+          <h2>When? Where? How much?</h2>
+          <p>Four nights of dancing! Sunday Nov 8th we’ll be at Cambridge Masonic Hall at 1950 Mass Ave.</p>
+          <p>Admission is pay-what-you-can.</p>
+        </article>
+        </body></html>
+        """
+        with patch("scrapers.fetch_soup", return_value=BeautifulSoup(prose_html, "html.parser")):
+            events = scrape_second_sun_rising("https://secondsunrising.com/", UA_CHROME)
+
+        self.assertEqual(len(events), 1)
+        self.assertEqual(events[0]["name"], "Second Sun Rising — Fusion Dance")
+        self.assertEqual(events[0]["venue"], "Cambridge Masonic Hall (Cambridge)")
+        from scrapers import EASTERN
+        local_dt = datetime.fromisoformat(events[0]["date"]).astimezone(EASTERN)
+        self.assertEqual(local_dt.month, 11)
+        self.assertEqual(local_dt.day, 8)
+
+    def test_venue_ttl_tiers(self):
+        """Verify fast, slow, and default cache TTL tiers based on venue characteristics."""
+        from scrapers import _get_venue_ttl, FAST_VENUE_TTL, SLOW_VENUE_TTL, DEFAULT_VENUE_TTL
+
+        self.assertEqual(_get_venue_ttl("Eventbrite Boston"), FAST_VENUE_TTL)
+        self.assertEqual(_get_venue_ttl("The Boston Calendar"), FAST_VENUE_TTL)
+        self.assertEqual(_get_venue_ttl("Do617"), FAST_VENUE_TTL)
+        self.assertEqual(_get_venue_ttl("Luma Boston"), FAST_VENUE_TTL)
+
+        self.assertEqual(_get_venue_ttl("Boston Public Library"), SLOW_VENUE_TTL)
+        self.assertEqual(_get_venue_ttl("Harvard Art Museums"), SLOW_VENUE_TTL)
+        self.assertEqual(_get_venue_ttl("Growing Center"), SLOW_VENUE_TTL)
+
+        self.assertEqual(_get_venue_ttl("The Sinclair"), DEFAULT_VENUE_TTL)
+        self.assertEqual(_get_venue_ttl("The Burren"), DEFAULT_VENUE_TTL)
+
+    def test_scrape_one_resilient_fallback(self):
+        """When live scraping raises an exception, _scrape_one should safely return fallback events with error=None."""
+        from scrapers import _scrape_one, _last_known_good
+        from unittest.mock import patch
+
+        v_config = {
+            "name": "Test Resilient Venue",
+            "url": "https://testresilient.com/events",
+            "scraper": lambda u, ua: (_ for _ in ()).throw(ConnectionError("Simulated network drop")),
+            "ua": "TestUA",
+        }
+        _last_known_good["Test Resilient Venue"] = [
+            {
+                "name": "Cached Showcase",
+                "date": "2026-11-20T20:00:00Z",
+                "url": "https://testresilient.com/event/1",
+                "venue": "Test Resilient Venue",
+            }
+        ]
+
+        res = _scrape_one(v_config, force=True)
+        self.assertEqual(res["venue"], "Test Resilient Venue")
+        self.assertEqual(len(res["events"]), 1)
+        self.assertEqual(res["events"][0]["name"], "Cached Showcase")
+        self.assertIsNone(res["error"])
+        self.assertTrue(res["fallback"])
+        self.assertTrue(res["cached"])
 
 
 if __name__ == "__main__":

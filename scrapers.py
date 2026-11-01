@@ -1740,43 +1740,123 @@ def scrape_manray(url, ua):
 
 
 def scrape_do617(url, ua):
-    """Do617 — Schema.org microdata embedded in server-rendered HTML."""
-    soup = fetch_soup(url, ua)
+    """Do617 — Scrapes upcoming Boston events via modern Svelte event cards or legacy Schema.org microdata."""
     events = []
     now = datetime.now(timezone.utc)
     seen = set()
-    for card in soup.select('[itemprop="event"]'):
-        name_el = card.find(itemprop="name")
-        date_el = card.find(itemprop="startDate")
-        loc_el = card.find(itemprop="location")
-        if not name_el or not date_el:
-            continue
-        name = name_el.get_text(strip=True)
-        iso = date_el.get("content", "")
-        iso = re.sub(r"([+-]\d{2})(\d{2})$", r"\1:\2", iso)
+    start_date = datetime.now(EASTERN).date()
+
+    # 1. Scrape today + next 4 days from Do617 date feeds
+    for i in range(5):
+        d = start_date + timedelta(days=i)
+        day_url = f"https://do617.com/events/{d.year}/{d.month:02d}/{d.day:02d}"
         try:
-            dt = datetime.fromisoformat(iso).astimezone(timezone.utc)
-        except (ValueError, AttributeError):
+            resp = _SESSION.get(day_url, headers={"User-Agent": ua or UA_CHROME}, timeout=10)
+            if resp.status_code != 200:
+                continue
+            soup = BeautifulSoup(resp.text, "html.parser")
+            cards = soup.find_all("div", attrs={"data-card-kind": "event"})
+            for card in cards:
+                a_link = card.find("a", href=True)
+                if not a_link:
+                    continue
+                rel_href = a_link.get("href", "")
+                full_url = urljoin("https://do617.com", rel_href.lstrip("./"))
+
+                h3 = card.find("h3")
+                name = h3.get_text(strip=True) if h3 else ""
+                if not name:
+                    continue
+
+                m_date = re.search(r"/events/(\d{4})/(\d{2})/(\d{2})/", rel_href)
+                date_part = f"{d.year:04d}-{d.month:02d}-{d.day:02d}"
+                if m_date:
+                    y, m_val, day_val = m_date.groups()
+                    date_part = f"{y}-{m_val}-{day_val}"
+
+                date_el = card.find(class_=lambda c: c and "date" in c)
+                raw_date_text = date_el.get_text(" ", strip=True) if date_el else ""
+
+                time_str = "20:00:00"
+                m_time = re.search(r"(\d{1,2})(?::(\d{2}))?\s*(am|pm)", raw_date_text, re.I)
+                if m_time:
+                    hr = int(m_time.group(1))
+                    mn = int(m_time.group(2) or 0)
+                    merid = m_time.group(3).lower()
+                    if merid == "pm" and hr < 12:
+                        hr += 12
+                    elif merid == "am" and hr == 12:
+                        hr = 0
+                    time_str = f"{hr:02d}:{mn:02d}:00"
+
+                iso = None
+                try:
+                    iso_str = f"{date_part}T{time_str}-04:00"
+                    iso = datetime.fromisoformat(iso_str).astimezone(timezone.utc).isoformat()
+                except Exception:
+                    iso = None
+
+                p_tags = [
+                    p.get_text(strip=True)
+                    for p in card.find_all("p")
+                    if "enrichment" not in (p.get("class") or []) and "date" not in (p.get("class") or [])
+                ]
+                venue_name = p_tags[0] if p_tags else None
+
+                key = (name.lower(), date_part)
+                if key in seen:
+                    continue
+                seen.add(key)
+
+                events.append({
+                    "name": name,
+                    "date": iso,
+                    "url": full_url,
+                    "venue": venue_name,
+                    "price": None,
+                })
+        except Exception:
             continue
-        if dt < now:
-            continue
-        venue_name = None
-        if loc_el:
-            vn = loc_el.find(itemprop="name")
-            venue_name = vn.get_text(strip=True) if vn else None
-        permalink = card.get("data-permalink", "")
-        event_url = f"https://do617.com{permalink}" if permalink else url
-        key = (name.lower(), dt.date().isoformat())
-        if key in seen:
-            continue
-        seen.add(key)
-        events.append({
-            "name": name,
-            "date": dt.isoformat(),
-            "url": event_url,
-            "venue": venue_name,
-            "price": None,
-        })
+
+    # 2. Fallback to legacy Schema.org microdata if modern feed returned nothing
+    if not events:
+        try:
+            soup = fetch_soup(url, ua)
+            for card in soup.select('[itemprop="event"]'):
+                name_el = card.find(itemprop="name")
+                date_el = card.find(itemprop="startDate")
+                loc_el = card.find(itemprop="location")
+                if not name_el or not date_el:
+                    continue
+                name = name_el.get_text(strip=True)
+                iso = date_el.get("content", "")
+                iso = re.sub(r"([+-]\d{2})(\d{2})$", r"\1:\2", iso)
+                try:
+                    dt = datetime.fromisoformat(iso).astimezone(timezone.utc)
+                except (ValueError, AttributeError):
+                    continue
+                if dt < now:
+                    continue
+                venue_name = None
+                if loc_el:
+                    vn = loc_el.find(itemprop="name")
+                    venue_name = vn.get_text(strip=True) if vn else None
+                permalink = card.get("data-permalink", "")
+                event_url = f"https://do617.com{permalink}" if permalink else url
+                key = (name.lower(), dt.date().isoformat())
+                if key in seen:
+                    continue
+                seen.add(key)
+                events.append({
+                    "name": name,
+                    "date": dt.isoformat(),
+                    "url": event_url,
+                    "venue": venue_name,
+                    "price": None,
+                })
+        except Exception:
+            pass
+
     return events
 
 
@@ -2531,39 +2611,51 @@ def scrape_bida(url, ua):
     return events
 
 
+_SSR_MONTHS = {
+    "jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6,
+    "jul": 7, "aug": 8, "sep": 9, "oct": 10, "nov": 11, "dec": 12,
+}
+
 _SSR_DATE_RE = re.compile(
-    r'(Sunday|Saturday|Friday|Monday|Tuesday|Wednesday|Thursday),\s+'
-    r'(January|February|March|April|May|June|July|August|September|October|November|December)\s+'
+    r'(?:(Sunday|Saturday|Friday|Monday|Tuesday|Wednesday|Thursday)[,\s]+)?'
+    r'(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:t(?:ember)?)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+'
     r'(\d{1,2})(?:st|nd|rd|th)?',
     re.I,
 )
 
 
 def scrape_second_sun_rising(url, ua):
-    """Second Sun Rising — monthly Sunday fusion dance at Cambridge Masonic Hall.
-    Page describes one upcoming dance in prose; parse the date out."""
+    """Second Sun Rising — monthly fusion dance at Cambridge Masonic Hall.
+    Parses upcoming dates from prose on this month's dance page."""
     soup = fetch_soup(url + "index.php/this-months-dance/", ua)
     text = soup.get_text(" ", strip=True)
-    m = _SSR_DATE_RE.search(text)
-    if not m:
+    matches = _SSR_DATE_RE.findall(text)
+    if not matches:
         return []
-    month_name, day = m.group(2), int(m.group(3))
+
     now = datetime.now(EASTERN)
-    try:
-        dt = datetime.strptime(f"{month_name} {day} {now.year}", "%B %d %Y").replace(
-            hour=19, tzinfo=EASTERN,
-        )
-    except ValueError:
-        return []
-    if dt < now - timedelta(hours=4):
-        return []
-    return [{
-        "name": "Second Sun Rising — Fusion Dance",
-        "date": dt.astimezone(timezone.utc).isoformat(),
-        "url": url,
-        "venue": "Cambridge Masonic Hall (Cambridge)",
-        "price": "pay-what-you-can $10–$30",
-    }]
+    events = []
+    for dow, month_str, day_str in matches:
+        m_num = _SSR_MONTHS.get(month_str[:3].lower())
+        if not m_num:
+            continue
+        day = int(day_str)
+        year = now.year + (1 if m_num < now.month - 1 else 0)
+        try:
+            dt = datetime(year, m_num, day, 19, 0, tzinfo=EASTERN)
+            if dt >= now - timedelta(hours=4):
+                events.append({
+                    "name": "Second Sun Rising — Fusion Dance",
+                    "date": dt.astimezone(timezone.utc).isoformat(),
+                    "url": url,
+                    "venue": "Cambridge Masonic Hall (Cambridge)",
+                    "price": "pay-what-you-can $10–$30",
+                })
+        except Exception:
+            continue
+
+    events.sort(key=lambda e: e["date"])
+    return events[:2]
 
 
 def scrape_meetup_group(url, ua):
@@ -7614,7 +7706,7 @@ def _scrape_one(v, force=False):
             "venue": name,
             "url": v["url"],
             "events": prev,
-            "error": str(e),
+            "error": str(e) if not prev else None,
             "fallback": bool(prev),
             "duration": round(time.time() - t0, 2),
             "cached": bool(prev),
