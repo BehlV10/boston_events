@@ -1412,7 +1412,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
             if lucky_shows:
                 def _lucky_li(s):
                     price = s.get("price")
-                    price_str = f" · ${price:.0f} all-in" if isinstance(price, (int, float)) else ""
+                    price_str = f" · ${price:.0f}" if isinstance(price, (int, float)) else ""
                     return (
                         f'<li><a href="{escape(s["url"])}" target="_blank" rel="noopener">'
                         f'<span class="deal-name">{escape(s["name"] or "Show")}</span>'
