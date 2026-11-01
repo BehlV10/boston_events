@@ -5419,6 +5419,17 @@ def render_page(results, weather=None, luckyseat_shows=None):
       const listBtn = document.getElementById('btn-view-list');
       if (nearBtn) nearBtn.classList.toggle('active', nearMeActive);
       if (listBtn) listBtn.classList.toggle('active', !nearMeActive && currentView === 'list');
+      if (!nearMeActive) {{
+        daySections.forEach(day => {{
+          const nearStream = day.querySelector('.near-me-stream');
+          const citiesDiv = day.querySelector('.cities');
+          if (nearStream && citiesDiv) {{
+            nearStream.style.display = 'none';
+            nearStream.innerHTML = '';
+            citiesDiv.style.display = 'block';
+          }}
+        }});
+      }}
       apply();
     }}
 
@@ -5794,6 +5805,12 @@ def render_page(results, weather=None, luckyseat_shows=None):
       history.replaceState(null, '', hash ? '#' + hash : location.pathname + location.search);
     }}
 
+    let hashTimer = null;
+    function scheduleStateToHash() {{
+      if (hashTimer) clearTimeout(hashTimer);
+      hashTimer = setTimeout(stateToHash, 150);
+    }}
+
     function hashToState() {{
       const searchStr = location.search ? location.search.slice(1) : '';
       const hashStr = location.hash ? location.hash.slice(1) : '';
@@ -6007,113 +6024,148 @@ def render_page(results, weather=None, luckyseat_shows=None):
         const isToday = dayDate === todayISO;
         const isPastDay = dayDate && dayDate !== 'tba' && dayDate < todayISO;
         let dayVisible = 0;
-        const bucketCounts = new Map();
-        const cityCounts = new Map();
-
-        day.querySelectorAll('.event').forEach(li => {{
-          const catOk = cats.has(li.dataset.bucket);
-          const venueOk = venues.has(li.dataset.venue);
-          const recurOk = recurs.has(li.dataset.recur);
-          const cityOk = cities.has(li.dataset.city);
-          const subareaOk = (activeSubarea === 'all') || (li.dataset.subarea === activeSubarea);
-          const transitOk = (activeTransit === 'all') || ((li.dataset.transit || '').split(',').includes(activeTransit));
-          let todOk = true;
-          if (timeFrom !== null || timeTo !== null) {{
-            const evMins = li.dataset.timeMins ? parseInt(li.dataset.timeMins, 10) : -1;
-            if (evMins >= 0) {{
-              if (timeFrom !== null && timeTo !== null) {{
-                if (timeTo > 1440) {{
-                  todOk = (evMins >= timeFrom && evMins <= 1440) || (evMins >= 0 && evMins <= (timeTo - 1440));
-                }} else if (timeFrom > timeTo) {{
-                  todOk = (evMins >= timeFrom) || (evMins <= timeTo);
-                }} else {{
-                  todOk = (evMins >= timeFrom && evMins <= timeTo);
-                }}
-              }} else if (timeFrom !== null) {{
-                todOk = (evMins >= timeFrom);
-              }} else if (timeTo !== null) {{
-                todOk = (evMins <= timeTo);
-              }}
-            }} else {{
-              todOk = false;
-            }}
-          }}
-          const freeOk = !freeOnly || li.dataset.free === 'true';
-          const popularOk = !popularOnly || parseInt(li.dataset.votes || '0', 10) >= 3;
-          const starredOk = !starredOnly || starredEvents.has(li.dataset.id || li.dataset.eventId || '');
-          const searchOk = !searchText || li.textContent.toLowerCase().includes(searchText);
-
-          const evGenre = li.dataset.genre;
-          const isMusicEv = li.dataset.bucket === 'Music & nightlife' || !!evGenre;
-          let genreOk = true;
-          if (activeGenre !== 'all') {{
-            genreOk = (evGenre === activeGenre);
-          }} else if (isMusicEv && evGenre) {{
-            genreOk = checkedGenres.has(evGenre);
-          }}
-
-          const epoch = li.dataset.epoch ? parseInt(li.dataset.epoch, 10) : 0;
-          const isPastTime = isToday && epoch > 0 && epoch < twoHoursAgoEpoch;
-          const isPast = isPastDay || isPastTime;
-
-          if (isToday && epoch > 0) {{
-            totalTodayEventsCount++;
-          }}
-
-          li.classList.toggle('past-time', isPast);
-
-          let timePastOk = true;
-          if (isPast) {{
-            if (!showPastToday) {{
-              timePastOk = false;
-              hiddenPastCount++;
-            }}
-          }}
-
-          const featuredOk = !featuredOnly || li.classList.contains('highlighted');
-          const isVisible = catOk && genreOk && venueOk && recurOk && cityOk && subareaOk && transitOk && todOk && searchOk && freeOk && timePastOk && popularOk && starredOk && featuredOk;
-          li.classList.toggle('hidden', !isVisible);
-
-          if (isVisible) {{
-            dayVisible++;
-            const b = li.closest('.bucket');
-            if (b) bucketCounts.set(b, (bucketCounts.get(b) || 0) + 1);
-            const c = li.closest('.city-section');
-            if (c) cityCounts.set(c, (cityCounts.get(c) || 0) + 1);
-            if (isToday && !isPast) visibleTonightCount++;
-          }}
-        }});
-
-        day.querySelectorAll('.bucket').forEach(b => {{
-          const visible = bucketCounts.get(b) || 0;
-          b.classList.toggle('empty', visible === 0);
-          const countSpan = b.querySelector('.bucket-head .count');
-          if (countSpan) countSpan.textContent = visible;
-        }});
 
         day.querySelectorAll('.city-section').forEach(sec => {{
-          const visible = cityCounts.get(sec) || 0;
-          sec.classList.toggle('empty', visible === 0);
-          const countSpan = sec.querySelector('.city-head .count');
-          if (countSpan) countSpan.textContent = visible;
+          const cCity = sec.dataset.city;
+          if (!cities.has(cCity)) {{
+            sec.classList.add('empty');
+            const cCount = sec.querySelector('.city-head .count');
+            if (cCount && cCount._val !== 0) {{ cCount._val = 0; cCount.textContent = '0'; }}
+            return;
+          }}
+
+          let cityVisible = 0;
+          sec.querySelectorAll('.bucket').forEach(b => {{
+            const bCat = b.dataset.bucket;
+            if (!cats.has(bCat)) {{
+              b.classList.add('empty');
+              const bCount = b.querySelector('.bucket-head .count');
+              if (bCount && bCount._val !== 0) {{ bCount._val = 0; bCount.textContent = '0'; }}
+              return;
+            }}
+
+            let bucketVisible = 0;
+            b.querySelectorAll('.event').forEach(li => {{
+              let m = li._meta;
+              if (!m) {{
+                m = {{
+                  venue: li.dataset.venue || '',
+                  recur: li.dataset.recur || '',
+                  subarea: li.dataset.subarea || 'all',
+                  transit: li.dataset.transit ? li.dataset.transit.split(',') : [],
+                  timeMins: li.dataset.timeMins ? parseInt(li.dataset.timeMins, 10) : -1,
+                  free: li.dataset.free === 'true',
+                  votes: parseInt(li.dataset.votes || '0', 10),
+                  id: li.dataset.id || li.dataset.eventId || '',
+                  genre: li.dataset.genre || '',
+                  epoch: li.dataset.epoch ? parseInt(li.dataset.epoch, 10) : 0,
+                  featured: li.classList.contains('highlighted'),
+                  text: li.textContent.toLowerCase(),
+                  hidden: false,
+                }};
+                li._meta = m;
+              }}
+
+              const venueOk = venues.has(m.venue);
+              const recurOk = recurs.has(m.recur);
+              const subareaOk = (activeSubarea === 'all') || (m.subarea === activeSubarea);
+              const transitOk = (activeTransit === 'all') || (m.transit.includes(activeTransit));
+              let todOk = true;
+              if (timeFrom !== null || timeTo !== null) {{
+                if (m.timeMins >= 0) {{
+                  if (timeFrom !== null && timeTo !== null) {{
+                    if (timeTo > 1440) {{
+                      todOk = (m.timeMins >= timeFrom && m.timeMins <= 1440) || (m.timeMins >= 0 && m.timeMins <= (timeTo - 1440));
+                    }} else if (timeFrom > timeTo) {{
+                      todOk = (m.timeMins >= timeFrom) || (m.timeMins <= timeTo);
+                    }} else {{
+                      todOk = (m.timeMins >= timeFrom && m.timeMins <= timeTo);
+                    }}
+                  }} else if (timeFrom !== null) {{
+                    todOk = (m.timeMins >= timeFrom);
+                  }} else if (timeTo !== null) {{
+                    todOk = (m.timeMins <= timeTo);
+                  }}
+                }} else {{
+                  todOk = false;
+                }}
+              }}
+              const freeOk = !freeOnly || m.free;
+              const popularOk = !popularOnly || m.votes >= 3;
+              const starredOk = !starredOnly || starredEvents.has(m.id);
+              const searchOk = !searchText || m.text.includes(searchText);
+
+              const isMusicEv = bCat === 'Music & nightlife' || !!m.genre;
+              let genreOk = true;
+              if (activeGenre !== 'all') {{
+                genreOk = (m.genre === activeGenre);
+              }} else if (isMusicEv && m.genre) {{
+                genreOk = checkedGenres.has(m.genre);
+              }}
+
+              const isPastTime = isToday && m.epoch > 0 && m.epoch < twoHoursAgoEpoch;
+              const isPast = isPastDay || isPastTime;
+
+              if (isToday && m.epoch > 0) {{
+                totalTodayEventsCount++;
+              }}
+
+              let timePastOk = true;
+              if (isPast) {{
+                if (!showPastToday) {{
+                  timePastOk = false;
+                  hiddenPastCount++;
+                }}
+              }}
+
+              const featuredOk = !featuredOnly || m.featured;
+              const isVisible = genreOk && venueOk && recurOk && subareaOk && transitOk && todOk && searchOk && freeOk && timePastOk && popularOk && starredOk && featuredOk;
+
+              const isHidden = !isVisible;
+              if (m.hidden !== isHidden) {{
+                m.hidden = isHidden;
+                li.classList.toggle('hidden', isHidden);
+              }}
+
+              if (isVisible) {{
+                bucketVisible++;
+                if (isToday && !isPast) visibleTonightCount++;
+              }}
+            }});
+
+            b.classList.toggle('empty', bucketVisible === 0);
+            const bCount = b.querySelector('.bucket-head .count');
+            if (bCount && bCount._val !== bucketVisible) {{
+              bCount._val = bucketVisible;
+              bCount.textContent = bucketVisible;
+            }}
+            cityVisible += bucketVisible;
+          }});
+
+          sec.classList.toggle('empty', cityVisible === 0);
+          const cCount = sec.querySelector('.city-head .count');
+          if (cCount && cCount._val !== cityVisible) {{
+            cCount._val = cityVisible;
+            cCount.textContent = cityVisible;
+          }}
+          dayVisible += cityVisible;
         }});
 
         day.classList.toggle('empty', dayVisible === 0);
         const headingCount = day.querySelector('h2 .count');
-        if (headingCount) headingCount.textContent = dayVisible;
+        if (headingCount && headingCount._val !== dayVisible) {{
+          headingCount._val = dayVisible;
+          headingCount.textContent = dayVisible;
+        }}
 
-        // Proximity calculation & Near Me sorting (only when Near Me button was clicked)
-        const nearStream = day.querySelector('.near-me-stream');
-        const citiesDiv = day.querySelector('.cities');
-
-        if (nearStream && citiesDiv) {{
-          if (nearMeActive && userCoords && userCoords.lat && userCoords.lng) {{
+        if (nearMeActive && userCoords && userCoords.lat && userCoords.lng) {{
+          const nearStream = day.querySelector('.near-me-stream');
+          const citiesDiv = day.querySelector('.cities');
+          if (nearStream && citiesDiv) {{
             citiesDiv.style.display = 'none';
             nearStream.style.display = 'block';
 
-            // Always query the master list of visible events in citiesDiv
             const visibleEvents = Array.from(citiesDiv.querySelectorAll('.event:not(.hidden)'));
-
             const eventDistances = [];
             visibleEvents.forEach(ev => {{
               const lat = parseFloat(ev.dataset.lat);
@@ -6132,7 +6184,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
             }});
 
             const locatedCount = eventDistances.filter(item => item.dist < 9999).length;
-
             let banner = nearStream.querySelector('.near-stream-banner');
             if (!banner) {{
               banner = document.createElement('div');
@@ -6156,10 +6207,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
             list.innerHTML = '';
 
             eventDistances.forEach(item => {{
-              // Clone the element so the master list in citiesDiv remains 100% intact
               const clone = item.ev.cloneNode(true);
               clone.classList.remove('hidden');
-
               if (item.dist < 9999) {{
                 const dStr = item.dist < 0.1 ? '< 0.1 mi away' : `${{item.dist.toFixed(1)}} mi away`;
                 let badge = clone.querySelector('.dist-badge');
@@ -6172,24 +6221,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
                 badge.title = `${{item.dist.toFixed(2)}} miles away`;
                 badge.innerHTML = `<span class="chip-icon">📍 </span>${{dStr}}`;
               }}
-
               list.appendChild(clone);
             }});
-          }} else {{
-            nearStream.style.display = 'none';
-            nearStream.innerHTML = '';
-            citiesDiv.style.display = 'block';
           }}
-        }}
-      }});
-
-      daySections.filter(d => !activeDays.includes(d)).forEach(day => {{
-        const nearStream = day.querySelector('.near-me-stream');
-        const citiesDiv = day.querySelector('.cities');
-        if (nearStream && citiesDiv) {{
-          nearStream.style.display = 'none';
-          nearStream.innerHTML = '';
-          citiesDiv.style.display = 'block';
         }}
       }});
 
@@ -6269,7 +6303,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
       if (currentView === 'map') {{
         updateMapMarkers();
       }}
-      stateToHash();
+      scheduleStateToHash();
     }}
 
     function renderCal() {{
