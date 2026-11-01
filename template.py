@@ -1209,9 +1209,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
         if genre and genre in MUSIC_GENRES:
             ginfo = MUSIC_GENRES[genre]
             gcolor = ginfo["color"]
-            gicon = ginfo["icon"]
             glabel = ginfo["label"]
-            cat_tag = f'<span class="cat-pill genre-pill" data-genre="{escape(genre)}" title="Music Genre: {escape(glabel)}" style="--cat-c:{gcolor}; background:{gcolor}18; border-color:{gcolor}33; color:{gcolor}"><span class="chip-icon">{gicon} </span>{escape(glabel)}</span>'
+            cat_tag = f'<span class="cat-pill genre-pill" data-genre="{escape(genre)}" title="Music Genre: {escape(glabel)}" style="--cat-c:{gcolor}; background:{gcolor}18; border-color:{gcolor}33; color:{gcolor}">{escape(glabel)}</span>'
         else:
             color, icon = CATEGORY_STYLES.get(cat, CATEGORY_STYLES["other"])
             cat_tag = f'<span class="cat-pill" style="--cat-c:{color}; background:{color}18; border-color:{color}33; color:{color}"><span class="chip-icon">{icon} </span>{escape(cat)}</span>'
@@ -1501,14 +1500,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
         cats = dict(CATEGORY_BUCKETS).get(bucket_name, [])
         return " ".join(CATEGORY_STYLES.get(c, CATEGORY_STYLES["other"])[1] for c in cats)
 
-    bucket_boxes = "\n".join(
-        f'''<label class="chk">
-            <input type="checkbox" class="cat-chk" value="{escape(b)}" checked>
-            <span>{escape(b)} <span class="count">{bucket_counts.get(b, 0)}</span></span>
-          </label>'''
-        for b in bucket_order
-    )
-
     genre_order = list(MUSIC_GENRES.keys())
     genre_counts = {g: 0 for g in genre_order}
     for e in all_events_flat:
@@ -1520,12 +1511,35 @@ def render_page(results, weather=None, luckyseat_shows=None):
             genre_counts[g] += 1
 
     genre_boxes = "\n".join(
-        f'''<label class="chk">
+        f'''<label class="chk chk-subgenre">
             <input type="checkbox" class="genre-chk" value="{escape(gid)}" checked>
-            <span><span class="genre-swatch" style="background:{ginfo['color']}"></span><span class="chip-icon">{ginfo['icon']} </span>{escape(ginfo['label'])} <span class="count">{genre_counts.get(gid, 0)}</span></span>
+            <span><span class="genre-swatch" style="background:{ginfo['color']}"></span>{escape(ginfo['label'])} <span class="count">{genre_counts.get(gid, 0)}</span></span>
           </label>'''
         for gid, ginfo in MUSIC_GENRES.items()
     )
+
+    cat_items = []
+    for b in bucket_order:
+        item_html = f'''<label class="chk">
+            <input type="checkbox" class="cat-chk" value="{escape(b)}" checked>
+            <span>{escape(b)} <span class="count">{bucket_counts.get(b, 0)}</span></span>
+          </label>'''
+        if b == "Music & nightlife":
+            subgenres_html = f'''<div class="subgenre-container filter-group-genre" id="subgenre-container">
+            <div class="subgenre-header">
+              <span class="subgenre-title">Subgenres</span>
+              <span class="spacer"></span>
+              <button type="button" id="genre-all" class="subgenre-btn" title="Select all subgenres">all</button>
+              <button type="button" id="genre-none" class="subgenre-btn" title="Deselect all subgenres">none</button>
+            </div>
+            <div class="subgenre-grid">
+              {genre_boxes}
+            </div>
+          </div>'''
+            cat_items.append(item_html + "\n" + subgenres_html)
+        else:
+            cat_items.append(item_html)
+    bucket_boxes = "\n".join(cat_items)
 
     recur_boxes = f'''
         <label class="chk">
@@ -1725,18 +1739,26 @@ def render_page(results, weather=None, luckyseat_shows=None):
   .banner-meta-pill {{
     display: inline-flex;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
+    flex-wrap: nowrap;
+    gap: 8px;
     align-self: flex-start;
     background: rgba(18, 21, 31, 0.72);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     border: 1px solid rgba(255, 255, 255, 0.14);
     border-radius: 999px;
-    padding: 6px 16px;
-    font-size: 13px;
+    padding: 5px 14px;
+    font-size: 12.5px;
     color: var(--fg);
     box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+    max-width: 100%;
+  }}
+  .banner-top-actions {{
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    margin-left: auto;
   }}
   .pill-weather {{ display: inline-flex; align-items: center; gap: 4px; font-weight: 600; color: #fff; }}
   .weather-label {{ font-weight: 400; color: var(--muted); }}
@@ -1757,8 +1779,54 @@ def render_page(results, weather=None, luckyseat_shows=None):
     box-shadow: 0 2px 8px rgba(255, 216, 102, 0.3);
     transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
     line-height: 1.3;
-    vertical-align: middle;
-    margin-left: auto;
+    white-space: nowrap;
+  }}
+  .subgenre-container {{
+    margin: 3px 0 6px 14px;
+    padding: 6px 8px 6px 10px;
+    background: rgba(255, 255, 255, 0.02);
+    border-left: 2px solid rgba(255, 255, 255, 0.12);
+    border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    transition: opacity 0.2s ease;
+  }}
+  .subgenre-container.disabled {{
+    opacity: 0.4;
+    pointer-events: none;
+  }}
+  .subgenre-header {{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--muted);
+    margin-bottom: 5px;
+  }}
+  .subgenre-btn {{
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0 4px;
+    border-radius: 3px;
+    font-family: inherit;
+  }}
+  .subgenre-btn:hover {{
+    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+  }}
+  .subgenre-grid {{
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }}
+  .chk-subgenre {{
+    font-size: 11.5px;
+    opacity: 0.9;
   }}
   .chk-saved span {{ font-weight: 600; color: #f59e0b; }}
   .btn-copy-plan-sidebar {{
@@ -2147,6 +2215,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
     color: #fff;
   }}
   .star-btn {{
+    display: none !important;
     background: none;
     border: none;
     color: var(--muted);
@@ -3182,13 +3251,15 @@ def render_page(results, weather=None, luckyseat_shows=None):
     .banner {{ min-height: 190px; padding: 24px 16px 16px; width: 100%; max-width: 100vw; }}
     .banner-meta-pill {{
       border-radius: var(--radius-md);
-      font-size: 12px;
-      padding: 6px 12px;
-      gap: 6px 10px;
+      font-size: 11.5px;
+      padding: 5px 10px;
+      gap: 6px 8px;
       max-width: 100%;
-      width: 100%;
-      box-sizing: border-box;
-      display: flex;
+      width: auto;
+      white-space: nowrap;
+      overflow-x: auto;
+      display: inline-flex;
+      flex-wrap: nowrap;
     }}
     .layout {{
       grid-template-columns: minmax(0, 1fr);
@@ -4294,13 +4365,18 @@ def render_page(results, weather=None, luckyseat_shows=None):
     <div class="banner-inner">
       <div class="banner-top-row">
         <div class="banner-top-tag"><span class="live-pulse"></span> GREATER BOSTON LIVE EVENTS</div>
-        <div class="theme-toggle-wrap">
-          <div class="theme-toggle-pills" role="radiogroup" aria-label="Visual Theme">
-            <button type="button" class="theme-pill-btn{' active' if default_theme == 'halloween' else ''}" data-theme="halloween" role="radio" aria-checked="{'true' if default_theme == 'halloween' else 'false'}" title="Halloween Theme">🎃</button>
-            <button type="button" class="theme-pill-btn{' active' if default_theme == 'indie' else ''}" data-theme="indie" role="radio" aria-checked="{'true' if default_theme == 'indie' else 'false'}" title="Indie Guide Theme">Indie</button>
-            <button type="button" class="theme-pill-btn" data-theme="classic" role="radio" aria-checked="false" title="Classic Dark Theme">Dark</button>
-            <button type="button" class="theme-pill-btn" data-theme="anime" role="radio" aria-checked="false" title="Anime Theme">🌸</button>
+        <div class="banner-top-actions">
+          <div class="theme-toggle-wrap">
+            <div class="theme-toggle-pills" role="radiogroup" aria-label="Visual Theme">
+              <button type="button" class="theme-pill-btn{' active' if default_theme == 'halloween' else ''}" data-theme="halloween" role="radio" aria-checked="{'true' if default_theme == 'halloween' else 'false'}" title="Halloween Theme">🎃</button>
+              <button type="button" class="theme-pill-btn{' active' if default_theme == 'indie' else ''}" data-theme="indie" role="radio" aria-checked="{'true' if default_theme == 'indie' else 'false'}" title="Indie Guide Theme">📰</button>
+              <button type="button" class="theme-pill-btn" data-theme="classic" role="radio" aria-checked="false" title="Classic Dark Theme">🌙</button>
+              <button type="button" class="theme-pill-btn" data-theme="anime" role="radio" aria-checked="false" title="Anime Theme">🌸</button>
+            </div>
           </div>
+          <button type="button" class="pill-submit-btn" id="btn-open-submit-modal" aria-haspopup="dialog" aria-expanded="false">
+            <span>＋ Add Event</span>
+          </button>
         </div>
       </div>
       <div class="banner-title-row">
@@ -4313,9 +4389,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
         <a href="https://www.instagram.com/wickedbostonevents/" target="_blank" rel="noopener" class="pill-social-link" title="Follow @wickedbostonevents on Instagram" aria-label="Follow @wickedbostonevents on Instagram">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle;"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
         </a>
-        <button type="button" class="pill-submit-btn" id="btn-open-submit-modal" aria-haspopup="dialog" aria-expanded="false">
-          <span>＋ Add Event</span>
-        </button>
       </div>
     </div>
   </div>
@@ -4372,18 +4445,16 @@ def render_page(results, weather=None, luckyseat_shows=None):
       </div>
       <div class="filter-group">
         <h3>Category <span class="spacer"></span> <button type="button" id="cat-all">all</button> <button type="button" id="cat-none">none</button></h3>
-        <div class="chk-grid">
+        <div style="display:none;">
           <label class="chk chk-saved" id="chk-saved-label">
             <input type="checkbox" id="saved-only-chk">
             <span><span class="chip-icon">⭐ </span>Saved <span class="count" id="saved-count" style="display:none;">(0)</span></span>
           </label>
           <button type="button" class="btn-copy-plan-sidebar" id="btn-copy-plan" style="display:none;" title="Copy your saved events as a shareable text itinerary"><span class="chip-icon">📋 </span>Copy Plan</button>
+        </div>
+        <div class="chk-grid">
           {bucket_boxes}
         </div>
-      </div>
-      <div class="filter-group" id="filter-group-genre">
-        <h3>Music Genre <span class="spacer"></span> <button type="button" id="genre-all">all</button> <button type="button" id="genre-none">none</button></h3>
-        <div class="chk-grid">{genre_boxes}</div>
       </div>
       <div class="filter-group">
         <h3>City <span class="spacer"></span> <button type="button" id="city-all">all</button> <button type="button" id="city-none">none</button></h3>
@@ -5526,7 +5597,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
       if (quickActiveGenreChip && activeGenreLabel) {{
         if (activeGenre !== 'all' && GENRES_DATA && GENRES_DATA[activeGenre]) {{
           const gi = GENRES_DATA[activeGenre];
-          activeGenreLabel.innerHTML = `<span class="chip-icon">${{gi.icon}} </span>${{gi.label}}`;
+          activeGenreLabel.textContent = gi.label;
           quickActiveGenreChip.style.display = 'inline-flex';
         }} else {{
           quickActiveGenreChip.style.display = 'none';
@@ -6445,9 +6516,25 @@ def render_page(results, weather=None, luckyseat_shows=None):
     }});
 
     if (freeOnlyChk) freeOnlyChk.addEventListener('change', apply);
-    catBoxes.forEach(b => b.addEventListener('change', apply));
+    catBoxes.forEach(b => b.addEventListener('change', () => {{
+      if (b.value === 'Music & nightlife') {{
+        const musicChecked = b.checked;
+        genreBoxes.forEach(gb => {{ gb.checked = musicChecked; }});
+        const subContainer = document.getElementById('subgenre-container');
+        if (subContainer) subContainer.classList.toggle('disabled', !musicChecked);
+      }}
+      apply();
+    }}));
     genreBoxes.forEach(b => b.addEventListener('change', () => {{
       activeGenre = 'all';
+      const anyChecked = Array.from(genreBoxes).some(gb => gb.checked);
+      if (anyChecked) {{
+        catBoxes.forEach(cb => {{
+          if (cb.value === 'Music & nightlife') cb.checked = true;
+        }});
+        const subContainer = document.getElementById('subgenre-container');
+        if (subContainer) subContainer.classList.remove('disabled');
+      }}
       apply();
       stateToHash();
     }}));
@@ -6455,12 +6542,29 @@ def render_page(results, weather=None, luckyseat_shows=None):
     recurBoxes.forEach(b => b.addEventListener('change', apply));
     cityBoxes.forEach(b => b.addEventListener('change', apply));
     searchInput.addEventListener('input', apply);
-    document.getElementById('cat-all').addEventListener('click', () => {{ catBoxes.forEach(b => b.checked = true); apply(); }});
-    document.getElementById('cat-none').addEventListener('click', () => {{ catBoxes.forEach(b => b.checked = false); apply(); }});
+    document.getElementById('cat-all').addEventListener('click', () => {{
+      catBoxes.forEach(b => b.checked = true);
+      genreBoxes.forEach(b => b.checked = true);
+      const subContainer = document.getElementById('subgenre-container');
+      if (subContainer) subContainer.classList.remove('disabled');
+      apply();
+    }});
+    document.getElementById('cat-none').addEventListener('click', () => {{
+      catBoxes.forEach(b => b.checked = false);
+      genreBoxes.forEach(b => b.checked = false);
+      const subContainer = document.getElementById('subgenre-container');
+      if (subContainer) subContainer.classList.add('disabled');
+      apply();
+    }});
     const genreAllBtn = document.getElementById('genre-all');
     if (genreAllBtn) genreAllBtn.addEventListener('click', () => {{
+      catBoxes.forEach(cb => {{
+        if (cb.value === 'Music & nightlife') cb.checked = true;
+      }});
       genreBoxes.forEach(b => b.checked = true);
       activeGenre = 'all';
+      const subContainer = document.getElementById('subgenre-container');
+      if (subContainer) subContainer.classList.remove('disabled');
       apply();
       stateToHash();
     }});
@@ -6492,6 +6596,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
         catBoxes.forEach(cb => {{
           if (cb.value === 'Music & nightlife') cb.checked = true;
         }});
+        const subContainer = document.getElementById('subgenre-container');
+        if (subContainer) subContainer.classList.remove('disabled');
         genreBoxes.forEach(b => {{ b.checked = (b.value === activeGenre); }});
       }}
       apply();
@@ -6539,6 +6645,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
       activeGenre = 'all';
       genreBoxes.forEach(b => b.checked = true);
       catBoxes.forEach(b => b.checked = true);
+      const subContainer = document.getElementById('subgenre-container');
+      if (subContainer) subContainer.classList.remove('disabled');
       cityBoxes.forEach(b => b.checked = true);
       recurBoxes.forEach(b => b.checked = true);
       venueBoxes.forEach(b => b.checked = true);
