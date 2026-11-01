@@ -1393,7 +1393,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
     deferred_sections = []
     for idx, (date_obj, events) in enumerate(dated):
         sec_html = _render_day_section(escape(format_date_heading(date_obj)), events, date_obj.isoformat())
-        if idx < 7:
+        if idx < 3:
             initial_sections.append(sec_html)
         else:
             deferred_sections.append(sec_html)
@@ -3296,6 +3296,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
       padding: 20px;
       max-height: 100vh;
       overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
     }}
     .mobile-filter-close {{
       display: block;
@@ -5995,6 +5997,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
         const dayDate = day.dataset.date || '';
         const isToday = dayDate === todayISO;
         const isPastDay = dayDate && dayDate !== 'tba' && dayDate < todayISO;
+        let dayVisible = 0;
+        const bucketCounts = new Map();
+        const cityCounts = new Map();
 
         day.querySelectorAll('.event').forEach(li => {{
           const catOk = cats.has(li.dataset.bucket);
@@ -6060,29 +6065,33 @@ def render_page(results, weather=None, luckyseat_shows=None):
           const isVisible = catOk && genreOk && venueOk && recurOk && cityOk && subareaOk && transitOk && todOk && searchOk && freeOk && timePastOk && popularOk && starredOk && featuredOk;
           li.classList.toggle('hidden', !isVisible);
 
-          if (isToday && isVisible && !isPast) {{
-            visibleTonightCount++;
+          if (isVisible) {{
+            dayVisible++;
+            const b = li.closest('.bucket');
+            if (b) bucketCounts.set(b, (bucketCounts.get(b) || 0) + 1);
+            const c = li.closest('.city-section');
+            if (c) cityCounts.set(c, (cityCounts.get(c) || 0) + 1);
+            if (isToday && !isPast) visibleTonightCount++;
           }}
         }});
 
         day.querySelectorAll('.bucket').forEach(b => {{
-          const visible = b.querySelectorAll('.event:not(.hidden)').length;
+          const visible = bucketCounts.get(b) || 0;
           b.classList.toggle('empty', visible === 0);
           const countSpan = b.querySelector('.bucket-head .count');
           if (countSpan) countSpan.textContent = visible;
         }});
 
         day.querySelectorAll('.city-section').forEach(sec => {{
-          const visible = sec.querySelectorAll('.event:not(.hidden)').length;
+          const visible = cityCounts.get(sec) || 0;
           sec.classList.toggle('empty', visible === 0);
           const countSpan = sec.querySelector('.city-head .count');
           if (countSpan) countSpan.textContent = visible;
         }});
 
-        const visible = day.querySelectorAll('.event:not(.hidden)').length;
-        day.classList.toggle('empty', visible === 0);
+        day.classList.toggle('empty', dayVisible === 0);
         const headingCount = day.querySelector('h2 .count');
-        if (headingCount) headingCount.textContent = visible;
+        if (headingCount) headingCount.textContent = dayVisible;
 
         // Proximity calculation & Near Me sorting (only when Near Me button was clicked)
         const nearStream = day.querySelector('.near-me-stream');
@@ -6222,9 +6231,16 @@ def render_page(results, weather=None, luckyseat_shows=None):
 
       renderCal();
       updateWeekLabel();
-      document.querySelectorAll('.genre-pill').forEach(p => {{
-        p.classList.toggle('genre-pill-active', activeGenre !== 'all' && p.dataset.genre === activeGenre);
-      }});
+      if (activeGenre !== 'all') {{
+        activeDays.forEach(day => {{
+          day.querySelectorAll('.genre-pill').forEach(p => {{
+            p.classList.toggle('genre-pill-active', p.dataset.genre === activeGenre);
+          }});
+        }});
+      }} else {{
+        const activePills = document.querySelectorAll('.genre-pill-active');
+        if (activePills.length > 0) activePills.forEach(p => p.classList.remove('genre-pill-active'));
+      }}
       updateQuickChipsUI();
       updateLocChipsUI();
       updateSearchUI();
@@ -6248,6 +6264,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
     }}
 
     function renderCal() {{
+      const cal = document.getElementById('mini-cal');
+      if (cal && cal.hasAttribute('hidden')) return;
       const grid = document.getElementById('mini-cal-grid');
       if (!grid) return;
       const year = calMonth.getFullYear(), month = calMonth.getMonth();
@@ -6408,13 +6426,11 @@ def render_page(results, weather=None, luckyseat_shows=None):
     if (mobileToggle && sidebarFilters) {{
       mobileToggle.addEventListener('click', () => {{
         sidebarFilters.classList.add('mobile-open');
-        document.body.style.overflow = 'hidden';
       }});
     }}
     if (mobileClose && sidebarFilters) {{
       mobileClose.addEventListener('click', () => {{
         sidebarFilters.classList.remove('mobile-open');
-        document.body.style.overflow = '';
       }});
     }}
 
@@ -6476,7 +6492,12 @@ def render_page(results, weather=None, luckyseat_shows=None):
     document.getElementById('cal-toggle').addEventListener('click', (e) => {{
       const cal = document.getElementById('mini-cal');
       const open = cal.hasAttribute('hidden');
-      if (open) cal.removeAttribute('hidden'); else cal.setAttribute('hidden', '');
+      if (open) {{
+        cal.removeAttribute('hidden');
+        renderCal();
+      }} else {{
+        cal.setAttribute('hidden', '');
+      }}
       e.currentTarget.setAttribute('aria-expanded', open ? 'true' : 'false');
     }});
     document.getElementById('cal-prev-month').addEventListener('click', () => {{
@@ -7645,9 +7666,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
       const validThemes = ['halloween', 'indie', 'classic', 'anime'];
       const theme = validThemes.includes(t) ? t : 'indie';
       document.documentElement.setAttribute('data-theme', theme);
-      if (document.body) {{
-        document.body.setAttribute('data-theme', theme);
-      }}
       document.querySelectorAll('.theme-pill-btn').forEach(b => {{
         const isActive = (b.dataset.theme === theme);
         b.classList.toggle('active', isActive);
