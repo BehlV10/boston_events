@@ -164,7 +164,7 @@ class TestBostonEvents(unittest.TestCase):
         self.assertIn('data-subarea="harvard_sq"', html)
         self.assertIn('id="subarea-chips-bar"', html)
         self.assertNotIn('class="quick-chips-bar"', html)
-        self.assertIn('id="quick-starred-chip"', html)
+        self.assertIn('id="saved-only-chk"', html)
         self.assertIn('id="btn-copy-plan"', html)
         self.assertIn('id="cal-hint"', html)
         self.assertIn('.range-start', html)
@@ -998,7 +998,7 @@ class TestBostonEvents(unittest.TestCase):
         self.assertIn('data-transit="red"', html)
         self.assertIn('data-tod="night"', html)
         self.assertIn('class="star-btn"', html)
-        self.assertIn('id="quick-starred-chip"', html)
+        self.assertIn('id="saved-only-chk"', html)
         self.assertIn('data-transit="green"', html)
 
     def test_scrapers_lizard_lounge_improv_asylum_passim_winery(self):

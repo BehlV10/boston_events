@@ -1758,6 +1758,31 @@ def render_page(results, weather=None, luckyseat_shows=None):
     transition: transform 0.15s ease, box-shadow 0.15s ease, filter 0.15s ease;
     line-height: 1.3;
     vertical-align: middle;
+    margin-left: auto;
+  }}
+  .chk-saved span {{ font-weight: 600; color: #f59e0b; }}
+  .btn-copy-plan-sidebar {{
+    grid-column: 1 / -1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: rgba(52, 211, 153, 0.12);
+    border: 1px solid rgba(52, 211, 153, 0.35);
+    color: #34d399;
+    border-radius: var(--radius-sm);
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s ease;
+    margin: 2px 0 4px;
+  }}
+  .btn-copy-plan-sidebar:hover {{
+    background: rgba(52, 211, 153, 0.22);
+    border-color: #34d399;
+    color: #6ee7b7;
   }}
   .pill-submit-btn:hover {{
     transform: translateY(-1px) scale(1.02);
@@ -1770,18 +1795,20 @@ def render_page(results, weather=None, luckyseat_shows=None):
   .pill-social-link {{
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    justify-content: center;
     color: var(--muted);
     text-decoration: none;
     font-size: 11.5px;
     font-weight: 550;
-    transition: color 0.15s ease, opacity 0.15s ease;
+    transition: color 0.15s ease, opacity 0.15s ease, transform 0.15s ease;
     opacity: 0.85;
+    padding: 2px 4px;
+    border-radius: 4px;
   }}
   .pill-social-link:hover {{
-    color: var(--fg);
+    color: #e1306c;
     opacity: 1;
-    text-decoration: underline;
+    transform: scale(1.1);
   }}
   .footer-social-link {{
     color: inherit;
@@ -1813,26 +1840,17 @@ def render_page(results, weather=None, luckyseat_shows=None):
     align-items: start;
   }}
   aside.filters {{
-    position: sticky;
-    top: 12px;
-    max-height: calc(100vh - 24px);
-    overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 12px;
-    padding-right: 4px;
   }}
-  aside.filters::-webkit-scrollbar, aside.useful::-webkit-scrollbar {{ width: 6px; }}
-  aside.filters::-webkit-scrollbar-thumb, aside.useful::-webkit-scrollbar-thumb {{ background: var(--border); border-radius: 3px; }}
   aside.useful {{
-    position: sticky;
-    top: 12px;
-    max-height: calc(100vh - 24px);
-    overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 12px;
   }}
+  .filter-group.venues .chk-grid::-webkit-scrollbar {{ width: 6px; }}
+  .filter-group.venues .chk-grid::-webkit-scrollbar-thumb {{ background: var(--border); border-radius: 3px; }}
   aside.useful .useful-inner {{
     background: var(--card);
     border: 1px solid var(--border);
@@ -3168,6 +3186,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
       padding: 6px 12px;
       gap: 6px 10px;
       max-width: 100%;
+      width: 100%;
+      box-sizing: border-box;
+      display: flex;
     }}
     .layout {{
       grid-template-columns: minmax(0, 1fr);
@@ -3682,28 +3703,23 @@ def render_page(results, weather=None, luckyseat_shows=None):
   .theme-toggle-wrap {{
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    background: rgba(15, 18, 25, 0.75);
+    background: rgba(15, 18, 25, 0.7);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 999px;
-    padding: 3px 4px 3px 10px;
+    padding: 2px;
     margin-left: auto;
   }}
   .theme-toggle-label {{
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
+    display: none;
   }}
   .theme-toggle-pills {{
     display: inline-flex;
-    gap: 2px;
-    background: rgba(0, 0, 0, 0.35);
+    gap: 1px;
+    background: transparent;
     border-radius: 999px;
-    padding: 2px;
+    padding: 0;
   }}
   .theme-pill-btn {{
     border: none;
@@ -3711,11 +3727,12 @@ def render_page(results, weather=None, luckyseat_shows=None):
     color: var(--muted);
     font-size: 11px;
     font-weight: 600;
-    padding: 3px 10px;
+    padding: 2px 7px;
     border-radius: 999px;
     cursor: pointer;
     transition: all 0.15s ease;
     font-family: inherit;
+    line-height: 1.35;
   }}
   .theme-pill-btn:hover {{
     color: #fff;
@@ -4278,12 +4295,11 @@ def render_page(results, weather=None, luckyseat_shows=None):
       <div class="banner-top-row">
         <div class="banner-top-tag"><span class="live-pulse"></span> GREATER BOSTON LIVE EVENTS</div>
         <div class="theme-toggle-wrap">
-          <span class="theme-toggle-label">Theme:</span>
           <div class="theme-toggle-pills" role="radiogroup" aria-label="Visual Theme">
-            <button type="button" class="theme-pill-btn{' active' if default_theme == 'halloween' else ''}" data-theme="halloween" role="radio" aria-checked="{'true' if default_theme == 'halloween' else 'false'}">🎃 Halloween</button>
-            <button type="button" class="theme-pill-btn{' active' if default_theme == 'indie' else ''}" data-theme="indie" role="radio" aria-checked="{'true' if default_theme == 'indie' else 'false'}">Indie Guide</button>
-            <button type="button" class="theme-pill-btn" data-theme="classic" role="radio" aria-checked="false">Classic Dark</button>
-            <button type="button" class="theme-pill-btn" data-theme="anime" role="radio" aria-checked="false">Anime 🌸</button>
+            <button type="button" class="theme-pill-btn{' active' if default_theme == 'halloween' else ''}" data-theme="halloween" role="radio" aria-checked="{'true' if default_theme == 'halloween' else 'false'}" title="Halloween Theme">🎃</button>
+            <button type="button" class="theme-pill-btn{' active' if default_theme == 'indie' else ''}" data-theme="indie" role="radio" aria-checked="{'true' if default_theme == 'indie' else 'false'}" title="Indie Guide Theme">Indie</button>
+            <button type="button" class="theme-pill-btn" data-theme="classic" role="radio" aria-checked="false" title="Classic Dark Theme">Dark</button>
+            <button type="button" class="theme-pill-btn" data-theme="anime" role="radio" aria-checked="false" title="Anime Theme">🌸</button>
           </div>
         </div>
       </div>
@@ -4294,10 +4310,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
         {weather_pill_html}
         <span class="pill-stat"><strong>{total:,}</strong> events · <strong>{len(results)}</strong> venues</span>
         <span class="pill-dot">·</span>
-        <a href="https://www.instagram.com/wickedbostonevents/" target="_blank" rel="noopener" class="pill-social-link" title="Follow @wickedbostonevents on Instagram">
-          <span>📸 @wickedbostonevents</span>
+        <a href="https://www.instagram.com/wickedbostonevents/" target="_blank" rel="noopener" class="pill-social-link" title="Follow @wickedbostonevents on Instagram" aria-label="Follow @wickedbostonevents on Instagram">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle;"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
         </a>
-        <span class="pill-dot">·</span>
         <button type="button" class="pill-submit-btn" id="btn-open-submit-modal" aria-haspopup="dialog" aria-expanded="false">
           <span>＋ Add Event</span>
         </button>
@@ -4357,7 +4372,14 @@ def render_page(results, weather=None, luckyseat_shows=None):
       </div>
       <div class="filter-group">
         <h3>Category <span class="spacer"></span> <button type="button" id="cat-all">all</button> <button type="button" id="cat-none">none</button></h3>
-        <div class="chk-grid">{bucket_boxes}</div>
+        <div class="chk-grid">
+          <label class="chk chk-saved" id="chk-saved-label">
+            <input type="checkbox" id="saved-only-chk">
+            <span><span class="chip-icon">⭐ </span>Saved <span class="count" id="saved-count" style="display:none;">(0)</span></span>
+          </label>
+          <button type="button" class="btn-copy-plan-sidebar" id="btn-copy-plan" style="display:none;" title="Copy your saved events as a shareable text itinerary"><span class="chip-icon">📋 </span>Copy Plan</button>
+          {bucket_boxes}
+        </div>
       </div>
       <div class="filter-group" id="filter-group-genre">
         <h3>Music Genre <span class="spacer"></span> <button type="button" id="genre-all">all</button> <button type="button" id="genre-none">none</button></h3>
@@ -4413,8 +4435,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
         <button type="button" id="week-today">today</button>
         <button type="button" id="week-all" data-mode="week">show all</button>
         <button type="button" id="cal-toggle" aria-expanded="false"><span class="chip-icon">📅 </span>pick date</button>
-        <button type="button" class="week-nav-chip chip-starred" id="quick-starred-chip" title="Filter to your saved events"><span class="chip-icon">⭐ </span>Saved <span id="starred-count" style="display:none;">(0)</span></button>
-        <button type="button" class="week-nav-chip chip-copy-plan" id="btn-copy-plan" style="display:none;" title="Copy your saved events as a shareable text itinerary"><span class="chip-icon">📋 </span>Copy Plan</button>
         <button type="button" class="chip chip-time-custom" id="quick-custom-time-chip" style="display:none;" title="Click to clear timeframe filter"><span id="active-timeframe-label"></span> <span class="chip-icon" style="margin-left:4px;">✕</span></button>
         <button type="button" class="chip chip-active-genre" id="quick-active-genre-chip" style="display:none;" title="Click to clear genre filter"><span id="active-genre-label"></span> <span class="chip-icon" style="margin-left:4px;">✕</span></button>
       </div>
@@ -4935,6 +4955,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
     const featuredCountEl = document.getElementById('featured-count');
     const quickStarredChip = document.getElementById('quick-starred-chip');
     const starredCountEl = document.getElementById('starred-count');
+    const savedOnlyChk = document.getElementById('saved-only-chk');
+    const savedCountEl = document.getElementById('saved-count');
     const btnCopyPlan = document.getElementById('btn-copy-plan');
     let popularOnly = false;
     let featuredOnly = false;
@@ -5486,13 +5508,20 @@ def render_page(results, weather=None, luckyseat_shows=None):
       if (quickStarredChip) {{
         quickStarredChip.classList.toggle('active', starredOnly);
       }}
+      if (savedOnlyChk) {{
+        savedOnlyChk.checked = starredOnly;
+      }}
+      const n = starredEvents.size;
       if (starredCountEl) {{
-        const n = starredEvents.size;
         starredCountEl.textContent = `(${{n}})`;
         starredCountEl.style.display = n > 0 ? 'inline' : 'none';
       }}
+      if (savedCountEl) {{
+        savedCountEl.textContent = `(${{n}})`;
+        savedCountEl.style.display = n > 0 ? 'inline' : 'none';
+      }}
       if (btnCopyPlan) {{
-        btnCopyPlan.style.display = starredEvents.size > 0 ? 'inline-flex' : 'none';
+        btnCopyPlan.style.display = n > 0 ? 'inline-flex' : 'none';
       }}
       if (quickActiveGenreChip && activeGenreLabel) {{
         if (activeGenre !== 'all' && GENRES_DATA && GENRES_DATA[activeGenre]) {{
@@ -5697,7 +5726,10 @@ def render_page(results, weather=None, luckyseat_shows=None):
         if (getParam('free') === '1' && freeOnlyChk) freeOnlyChk.checked = true;
         if (getParam('pop') === '1') popularOnly = true;
         if (getParam('picks') === '1') featuredOnly = true;
-        if (getParam('saved') === '1') starredOnly = true;
+        if (getParam('saved') === '1') {{
+          starredOnly = true;
+          if (savedOnlyChk) savedOnlyChk.checked = true;
+        }}
         if (getParam('past') === '1') showPastToday = true;
         if (getParam('v') === 'map') {{
           switchView('map');
@@ -6496,6 +6528,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
       popularOnly = false;
       featuredOnly = false;
       starredOnly = false;
+      if (savedOnlyChk) savedOnlyChk.checked = false;
       activeSubarea = 'all';
       activeTransit = 'all';
       timeFrom = null;
@@ -6629,6 +6662,17 @@ def render_page(results, weather=None, luckyseat_shows=None):
       }});
     }}
 
+    if (savedOnlyChk) {{
+      savedOnlyChk.addEventListener('change', () => {{
+        starredOnly = savedOnlyChk.checked;
+        if (starredOnly && timeFilter === 'today') {{
+          timeFilter = 'all';
+          showAll = true;
+        }}
+        apply();
+      }});
+    }}
+
     if (quickStarredChip) {{
       quickStarredChip.addEventListener('click', () => {{
         starredOnly = !starredOnly;
@@ -6678,6 +6722,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
       }});
       if (starredOnly && starredEvents.size === 0) {{
         starredOnly = false;
+        if (savedOnlyChk) savedOnlyChk.checked = false;
       }}
       updateQuickChipsUI();
       if (starredOnly) apply();
