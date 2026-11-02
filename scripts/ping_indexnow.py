@@ -6,23 +6,23 @@ import sys
 import requests
 
 INDEXNOW_KEY = "e14a72d9b4c0423188d3e915fa276e01"
-HOST = "behlv10.github.io"
-KEY_LOCATION = f"https://{HOST}/boston_events/{INDEXNOW_KEY}.txt"
+HOST = "www.wickedbostonevents.com"
+KEY_LOCATION = f"https://{HOST}/{INDEXNOW_KEY}.txt"
 
 URLS = [
-    f"https://{HOST}/boston_events/",
-    f"https://{HOST}/boston_events/free-events-boston-this-weekend/",
-    f"https://{HOST}/boston_events/cambridge-events-tonight/",
-    f"https://{HOST}/boston_events/live-music-somerville/",
-    f"https://{HOST}/boston_events/board-game-nights-boston/",
-    f"https://{HOST}/boston_events/boston-events-today/",
-    f"https://{HOST}/boston_events/boston-events-this-weekend/",
-    f"https://{HOST}/boston_events/boston/",
-    f"https://{HOST}/boston_events/cambridge/",
-    f"https://{HOST}/boston_events/somerville/",
-    f"https://{HOST}/boston_events/music/",
-    f"https://{HOST}/boston_events/comedy/",
-    f"https://{HOST}/boston_events/free/",
+    f"https://{HOST}/",
+    f"https://{HOST}/free-events-boston-this-weekend/",
+    f"https://{HOST}/cambridge-events-tonight/",
+    f"https://{HOST}/live-music-somerville/",
+    f"https://{HOST}/board-game-nights-boston/",
+    f"https://{HOST}/boston-events-today/",
+    f"https://{HOST}/boston-events-this-weekend/",
+    f"https://{HOST}/boston/",
+    f"https://{HOST}/cambridge/",
+    f"https://{HOST}/somerville/",
+    f"https://{HOST}/music/",
+    f"https://{HOST}/comedy/",
+    f"https://{HOST}/free/",
 ]
 
 
