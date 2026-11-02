@@ -3923,13 +3923,13 @@ def render_page(results, weather=None, luckyseat_shows=None):
     display: inline-flex;
     align-items: center;
   }}
-  .near-me-btn {{
+  .map-toggle-btn {{
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--border);
     color: var(--muted);
-    font-size: 12px;
+    font-size: 12.5px;
     font-weight: 600;
-    padding: 5px 13px;
+    padding: 5px 14px;
     border-radius: 999px;
     cursor: pointer;
     font-family: inherit;
@@ -3938,11 +3938,11 @@ def render_page(results, weather=None, luckyseat_shows=None):
     justify-content: center;
     transition: all 0.15s ease;
   }}
-  .near-me-btn:hover {{
+  .map-toggle-btn:hover {{
     color: var(--fg);
     border-color: var(--accent);
   }}
-  .near-me-btn.active {{
+  .map-toggle-btn.active {{
     background: rgba(93, 155, 255, 0.18);
     border-color: var(--accent);
     color: var(--accent);
@@ -4431,10 +4431,10 @@ def render_page(results, weather=None, luckyseat_shows=None):
       text-align: center;
     }}
     .view-actions {{
-      flex: 1;
+      flex: 0.8;
       display: flex;
     }}
-    .near-me-btn {{
+    .map-toggle-btn {{
       width: 100%;
       justify-content: center;
       padding: 7px 4px;
@@ -5652,17 +5652,17 @@ def render_page(results, weather=None, luckyseat_shows=None):
     </aside>
     <main>
       <div class="view-switch-bar">
-        <div class="view-toggle" role="group" aria-label="View mode">
-          <button type="button" class="view-btn active" id="btn-view-list" data-view="list" title="View chronological event list">
+        <div class="view-toggle" role="group" aria-label="Feed presentation">
+          <button type="button" class="view-btn active" id="btn-view-list" data-view="list" title="View events chronologically by neighborhood">
             <span>List</span>
           </button>
-          <button type="button" class="view-btn" id="btn-view-map" data-view="map" title="Toggle interactive venue map">
-            <span>Map</span>
+          <button type="button" class="view-btn" id="btn-near-me" data-view="near" title="Sort events by distance to your current location">
+            <span id="near-me-btn-label">Near Me</span>
           </button>
         </div>
         <div class="view-actions">
-          <button type="button" class="near-me-btn" id="btn-near-me" title="Sort events by distance to your current location">
-            <span id="near-me-btn-label">Near Me</span>
+          <button type="button" class="map-toggle-btn" id="btn-view-map" title="Toggle interactive venue map">
+            <span id="map-btn-label">Map</span>
           </button>
         </div>
       </div>
@@ -6211,6 +6211,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
     let rangeStart = null;
     let rangeEnd = null;
     let currentView = 'list';
+    let mapOpen = false;
     let showPastToday = false;
     let leafletMap = null;
     let markersLayer = null;
@@ -6520,20 +6521,20 @@ def render_page(results, weather=None, luckyseat_shows=None):
       updateMapMarkers();
     }}
 
-    function switchView(mode) {{
-      if (mode === 'map' && currentView === 'map') {{
-        mode = 'list';
+    function toggleMap(forcedState) {{
+      if (typeof forcedState === 'boolean') {{
+        mapOpen = forcedState;
+      }} else {{
+        mapOpen = !mapOpen;
       }}
-      currentView = mode;
-      const listBtn = document.getElementById('btn-view-list');
+      currentView = mapOpen ? 'map' : 'list';
       const mapBtn = document.getElementById('btn-view-map');
       const mapWrapper = document.getElementById('map-view-wrapper');
 
-      if (listBtn) listBtn.classList.toggle('active', mode === 'list');
-      if (mapBtn) mapBtn.classList.toggle('active', mode === 'map');
-      if (mapWrapper) mapWrapper.style.display = (mode === 'map') ? 'flex' : 'none';
+      if (mapBtn) mapBtn.classList.toggle('active', mapOpen);
+      if (mapWrapper) mapWrapper.style.display = mapOpen ? 'flex' : 'none';
 
-      if (mode === 'map') {{
+      if (mapOpen) {{
         loadLeaflet(() => {{
           initMap();
           if (leafletMap) {{
@@ -6543,6 +6544,14 @@ def render_page(results, weather=None, luckyseat_shows=None):
         }});
       }}
       stateToHash();
+    }}
+
+    function switchView(mode) {{
+      if (mode === 'map') {{
+        toggleMap(true);
+      }} else {{
+        toggleMap(false);
+      }}
     }}
 
     function toggleNearMe() {{
@@ -6577,7 +6586,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
 
     function setNearMe(active) {{
       nearMeActive = !!active;
+      const listBtn = document.getElementById('btn-view-list');
       const nearBtn = document.getElementById('btn-near-me');
+      if (listBtn) listBtn.classList.toggle('active', !nearMeActive);
       if (nearBtn) nearBtn.classList.toggle('active', nearMeActive);
       if (!nearMeActive) {{
         daySections.forEach(day => {{
@@ -6591,6 +6602,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
         }});
       }}
       apply();
+      stateToHash();
     }}
 
     function shortenVenueName(name) {{
@@ -6958,7 +6970,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
       }} else if ((timeFilter === 'day' || timeFilter === 'week') && fmtISO(anchor) !== todayISO) {{
         params.set('d', fmtISO(anchor));
       }}
-      if (currentView !== 'list') params.set('v', currentView);
+      if (mapOpen) params.set('map', '1');
+      if (nearMeActive) params.set('near', '1');
       if (showPastToday) params.set('past', '1');
 
       const hash = params.toString();
@@ -6990,8 +7003,11 @@ def render_page(results, weather=None, luckyseat_shows=None):
           if (savedOnlyChk) savedOnlyChk.checked = true;
         }}
         if (getParam('past') === '1') showPastToday = true;
-        if (getParam('v') === 'map') {{
-          switchView('map');
+        if (getParam('v') === 'map' || getParam('map') === '1') {{
+          toggleMap(true);
+        }}
+        if (getParam('near') === '1') {{
+          toggleNearMe();
         }}
 
         if (hasParam('t')) {{
@@ -7454,7 +7470,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
       updateLocChipsUI();
       updateSearchUI();
       updateMobileBadge();
-      if (currentView === 'map') {{
+      if (mapOpen || currentView === 'map') {{
         updateMapMarkers();
       }}
       scheduleStateToHash();
@@ -8189,13 +8205,23 @@ def render_page(results, weather=None, luckyseat_shows=None):
     }});
 
     const btnViewList = document.getElementById('btn-view-list');
-    if (btnViewList) btnViewList.addEventListener('click', () => switchView('list'));
-
-    const btnViewMap = document.getElementById('btn-view-map');
-    if (btnViewMap) btnViewMap.addEventListener('click', () => switchView('map'));
+    if (btnViewList) {{
+      btnViewList.addEventListener('click', () => {{
+        if (nearMeActive) setNearMe(false);
+      }});
+    }}
 
     const btnNearMe = document.getElementById('btn-near-me');
-    if (btnNearMe) btnNearMe.addEventListener('click', () => toggleNearMe());
+    if (btnNearMe) {{
+      btnNearMe.addEventListener('click', () => {{
+        if (!nearMeActive) toggleNearMe();
+      }});
+    }}
+
+    const btnViewMap = document.getElementById('btn-view-map');
+    if (btnViewMap) {{
+      btnViewMap.addEventListener('click', () => toggleMap());
+    }}
 
     document.addEventListener('click', (e) => {{
       if (e.target && e.target.id === 'btn-reset-near') {{
@@ -8259,7 +8285,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
         const lat = parseFloat(jumpBtn.dataset.lat || (li && li.dataset.lat));
         const lng = parseFloat(jumpBtn.dataset.lng || (li && li.dataset.lng));
         if (isNaN(lat) || isNaN(lng)) return;
-        switchView('map');
+        toggleMap(true);
         loadLeaflet(() => {{
           initMap();
           if (leafletMap) {{
