@@ -3919,6 +3919,36 @@ def render_page(results, weather=None, luckyseat_shows=None):
     font-weight: 700;
     box-shadow: 0 2px 8px var(--accent-glow);
   }}
+  .view-actions {{
+    display: inline-flex;
+    align-items: center;
+  }}
+  .near-me-btn {{
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 13px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: inherit;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+  }}
+  .near-me-btn:hover {{
+    color: var(--fg);
+    border-color: var(--accent);
+  }}
+  .near-me-btn.active {{
+    background: rgba(93, 155, 255, 0.18);
+    border-color: var(--accent);
+    color: var(--accent);
+    font-weight: 700;
+    box-shadow: 0 0 10px rgba(93, 155, 255, 0.25);
+  }}
   .share-filter-btn {{
     background: transparent;
     border: 1px solid var(--border);
@@ -4386,11 +4416,11 @@ def render_page(results, weather=None, luckyseat_shows=None):
     .mobile-filter-bar {{ display: block; margin-bottom: 8px; }}
     .view-switch-bar {{
       padding: 4px 6px;
-      gap: 6px;
+      gap: 8px;
       overflow-x: hidden;
     }}
     .view-toggle {{
-      width: 100%;
+      flex: 1.4;
       display: flex;
     }}
     .view-btn {{
@@ -4398,6 +4428,17 @@ def render_page(results, weather=None, luckyseat_shows=None):
       justify-content: center;
       padding: 7px 4px;
       font-size: 12.5px;
+      text-align: center;
+    }}
+    .view-actions {{
+      flex: 1;
+      display: flex;
+    }}
+    .near-me-btn {{
+      width: 100%;
+      justify-content: center;
+      padding: 7px 4px;
+      font-size: 12px;
       text-align: center;
     }}
     .mobile-filter-btn {{
@@ -5612,13 +5653,15 @@ def render_page(results, weather=None, luckyseat_shows=None):
     <main>
       <div class="view-switch-bar">
         <div class="view-toggle" role="group" aria-label="View mode">
-          <button type="button" class="view-btn active" id="btn-view-list" data-view="list">
+          <button type="button" class="view-btn active" id="btn-view-list" data-view="list" title="View chronological event list">
             <span>List</span>
           </button>
-          <button type="button" class="view-btn" id="btn-view-map" data-view="map">
+          <button type="button" class="view-btn" id="btn-view-map" data-view="map" title="Toggle interactive venue map">
             <span>Map</span>
           </button>
-          <button type="button" class="view-btn" id="btn-near-me" data-view="near" title="Sort events on visible day by distance to your current location">
+        </div>
+        <div class="view-actions">
+          <button type="button" class="near-me-btn" id="btn-near-me" title="Sort events by distance to your current location">
             <span id="near-me-btn-label">Near Me</span>
           </button>
         </div>
@@ -6478,6 +6521,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
     }}
 
     function switchView(mode) {{
+      if (mode === 'map' && currentView === 'map') {{
+        mode = 'list';
+      }}
       currentView = mode;
       const listBtn = document.getElementById('btn-view-list');
       const mapBtn = document.getElementById('btn-view-map');
@@ -6495,9 +6541,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
             updateMapMarkers();
           }}
         }});
-      }}
-      if (mode === 'list' && nearMeActive) {{
-        setNearMe(false);
       }}
       stateToHash();
     }}
@@ -6535,9 +6578,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
     function setNearMe(active) {{
       nearMeActive = !!active;
       const nearBtn = document.getElementById('btn-near-me');
-      const listBtn = document.getElementById('btn-view-list');
       if (nearBtn) nearBtn.classList.toggle('active', nearMeActive);
-      if (listBtn) listBtn.classList.toggle('active', !nearMeActive && currentView === 'list');
       if (!nearMeActive) {{
         daySections.forEach(day => {{
           const nearStream = day.querySelector('.near-me-stream');
