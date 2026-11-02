@@ -449,7 +449,7 @@ def build_seo_meta_tags(site_url=None, title=None, description=None, path="", im
 
     t = title or default_title
     d = description or default_desc
-    img = image_url or f"{site_url}/og-image.jpg"
+    img = image_url or f"{site_url}/og-image.jpg?v=2"
 
     return f"""<!-- SEO & AEO Meta Tags -->
 <title>{escape(t)}</title>
