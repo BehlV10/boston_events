@@ -7,8 +7,8 @@ X-WR-CALNAME:Boston Live Events & Shows
 X-WR-TIMEZONE:America/New_York
 X-WR-CALDESC:Curated live shows, concerts, and comedy across Boston, Cambridge, and Somerville.
 BEGIN:VEVENT
-UID:20261102_5004031429@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261102_3172555537@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261102
 SUMMARY:Art Opening: Harvard Square Gift Shop + The Littlest Sister Performance @ Harvard Square Subway Kiosk
 LOCATION:Harvard Square Subway Kiosk, Boston MA
@@ -17,8 +17,8 @@ URL:https://partiful.com/e/34k9aCWo4tEI76pTNiQP
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261102_1372280305@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261102_7779758284@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261102
 SUMMARY:november book club @ 1 Devonshire Place
 LOCATION:1 Devonshire Place, Boston MA
@@ -27,8 +27,8 @@ URL:https://partiful.com/e/kSjQVCf2mNAROmiTy76Y
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261105_8447247696@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261105_3263315507@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261105
 SUMMARY:Café+Nature Walk: North Brighton [11/5] @ Sofra
 LOCATION:Sofra, Boston MA
@@ -37,8 +37,8 @@ URL:https://partiful.com/e/6chJaCpBhweftqHrSixt
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261106_8471846349@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261106_3669930332@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261106
 SUMMARY:Holiday Market at Snowport @ Boston
 LOCATION:Boston, Boston MA
@@ -47,8 +47,8 @@ URL:https://partiful.com/e/XHMins0YnKGzGoky4y4v
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261107_2770380820@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261107_9066927909@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261107
 SUMMARY:BUNGALOW DYSTOPIAN DANCE @ Jacque's Cabaret
 LOCATION:Jacque's Cabaret, Boston MA
@@ -57,8 +57,8 @@ URL:https://partiful.com/e/JZ0VqzinebdqOcoxwPlH
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261107_2206118608@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261107_2004746958@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261107
 SUMMARY:Somerville Winter Farmers Market @ Boston
 LOCATION:Boston, Boston MA
@@ -67,8 +67,8 @@ URL:https://partiful.com/e/ODNZeSSBA000tIaAexuP
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261107_8764462802@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261107_8354433801@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261107
 SUMMARY:Cuffing Season Finale 💚🍂 @ Seven Hills Park (behind the Davis Sq Red Line + Life Alive)
 LOCATION:Seven Hills Park (behind the Davis Sq Red Line + Life Alive), Boston MA
@@ -77,8 +77,8 @@ URL:https://partiful.com/e/oKWiAZcxbw1kWLgb5CRR
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261108_8969652427@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261108_1043418828@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261108
 SUMMARY:1 year of 🔗 hyperlinked: a girl edm + hyperpop party @ Boston
 LOCATION:Boston, Boston MA
@@ -87,8 +87,8 @@ URL:https://partiful.com/e/xXASMGPMZQAl3dLOm1zI
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261110_3777861692@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261110_4947797361@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261110
 SUMMARY:Fenway Free Market @ Fenway Community Center
 LOCATION:Fenway Community Center, Boston MA
@@ -97,8 +97,8 @@ URL:https://partiful.com/e/11FX60ikL9VhCTpCna8o
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261114_3970670184@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261114_8238402216@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261114
 SUMMARY:Coffee & Collectives @ Phinista Café
 LOCATION:Phinista Café, Boston MA
@@ -107,8 +107,8 @@ URL:https://partiful.com/e/dKLUV3nxZJmLB0KAsG0N
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261115_8623196285@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261115_5256897712@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261115
 SUMMARY:fruitstand’s 3rd birthday: fruit 🍑 @ 52 Church
 LOCATION:52 Church, Boston MA
@@ -117,8 +117,8 @@ URL:https://partiful.com/e/sb67WN7JRX3uyAE5LFAh
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261115_2542811234@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261115_6931159765@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261115
 SUMMARY:the art of storytelling @ shop 6\, the foundry
 LOCATION:shop 6\, the foundry, Boston MA
@@ -127,8 +127,8 @@ URL:https://partiful.com/e/ivCADCWSxLcU7jew03md
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261115_6266594499@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261115_6348373825@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261115
 SUMMARY:duck duck duck duck duck duck GOOSE! @ Make Way For Ducklings Statue\, Boston Public Garden
 LOCATION:Make Way For Ducklings Statue\, Boston Public Garden, Boston MA
@@ -137,8 +137,8 @@ URL:https://partiful.com/e/nMhM5jZffB2zl2NMgQtO
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261115_1616021567@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261115_8713774808@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261115
 SUMMARY:Boston Sapphic Craft Meetup @ Boston Public Market
 LOCATION:Boston Public Market, Boston MA
@@ -147,8 +147,8 @@ URL:https://partiful.com/e/HqAsJblFKe6gKT7z9b5a
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261121_8956127380@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261121_2636622234@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261121
 SUMMARY:MEGA Journal and Chat @ The Foundry
 LOCATION:The Foundry, Boston MA
@@ -157,8 +157,8 @@ URL:https://partiful.com/e/g2fAsQbcfx5SOPIOEddI
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261121_6659736536@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261121_9165801381@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261121
 SUMMARY:ART @ NIGHT @ First Street Market
 LOCATION:First Street Market, Boston MA
@@ -167,8 +167,8 @@ URL:https://partiful.com/e/2Al5mSQ8gkWmY5WC6dHJ
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261203_5794221038@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261203_1997838922@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261203
 SUMMARY:Let’s Feast Cookbook Club (Dec) @ Molly's Bookstore
 LOCATION:Molly's Bookstore, Boston MA
@@ -177,8 +177,8 @@ URL:https://partiful.com/e/v4O8TBGBC7LlDQnN2UHg
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261102_3502660249@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261102_2047236892@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261102
 SUMMARY:Southie Taproom Closing early at 7PM @ Castle Island Brewing
 LOCATION:Castle Island Brewing, Boston MA
@@ -187,8 +187,8 @@ URL:https://castleislandbeer.com/calendar/southie-taproom-closing-early-at-7pm
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261103_5520278194@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261103_7823145744@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261103
 SUMMARY:Musical Bingo @ Castle Island Brewing
 LOCATION:Castle Island Brewing, Boston MA
@@ -197,8 +197,8 @@ URL:https://castleislandbeer.com/calendar/musical-bingo-4-d2mnz-lweyh
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261103_8968047515@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261103_8366305914@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261103
 SUMMARY:Southie Trivia @ Castle Island Brewing
 LOCATION:Castle Island Brewing, Boston MA
@@ -207,8 +207,8 @@ URL:https://castleislandbeer.com/calendar/y0jk7jbh7uzy6rv32szl1qpdry78c0-2tthe-h
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261105_2051126076@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261105_3299641901@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261105
 SUMMARY:Trivia With TIm @ Castle Island Brewing
 LOCATION:Castle Island Brewing, Boston MA
@@ -217,8 +217,8 @@ URL:https://castleislandbeer.com/calendar/trivia-with-tim-shh72-js58b-gener-wnld
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261107_6988619080@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261107_4475686997@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261107
 SUMMARY:Steal My Style Thrift Market @ Castle Island Brewing
 LOCATION:Castle Island Brewing, Boston MA
@@ -227,8 +227,8 @@ URL:https://castleislandbeer.com/calendar/steal-my-style-thrift-market
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261109_8397230429@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261109_2762982433@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261109
 SUMMARY:Brews & Laughs @ Castle Island Brewing
 LOCATION:Castle Island Brewing, Boston MA
@@ -237,8 +237,8 @@ URL:https://castleislandbeer.com/calendar/brews-laughs-1-rk8b7-xtnwd
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261110_4218126970@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261110_6026565705@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261110
 SUMMARY:Bonsai Bar @ Castle Island Brewing
 LOCATION:Castle Island Brewing, Boston MA
@@ -247,8 +247,8 @@ URL:https://castleislandbeer.com/calendar/bonsai-bar-2-j82f2-8xdf7
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261110_5520278194@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261110_7823145744@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261110
 SUMMARY:Musical Bingo @ Castle Island Brewing
 LOCATION:Castle Island Brewing, Boston MA
@@ -257,8 +257,8 @@ URL:https://castleislandbeer.com/calendar/musical-bingo-4-d2mnz-5785z
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261110_8968047515@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261110_8366305914@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261110
 SUMMARY:Southie Trivia @ Castle Island Brewing
 LOCATION:Castle Island Brewing, Boston MA
@@ -267,8 +267,8 @@ URL:https://castleislandbeer.com/calendar/y0jk7jbh7uzy6rv32szl1qpdry78c0-2tthe-h
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261111_1979625868@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261111_3670539147@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261111
 SUMMARY:Skip the small talk @ Castle Island Brewing
 LOCATION:Castle Island Brewing, Boston MA
@@ -277,8 +277,8 @@ URL:https://castleislandbeer.com/calendar/skip-the-small-talk
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261112_2051126076@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261112_3299641901@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261112
 SUMMARY:Trivia With TIm @ Castle Island Brewing
 LOCATION:Castle Island Brewing, Boston MA
@@ -287,8 +287,8 @@ URL:https://castleislandbeer.com/calendar/trivia-with-tim-shh72-js58b-gener-wnld
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261114_7216066280@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261114_2176433816@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261114
 SUMMARY:National Pickle Day Party @ Castle Island Brewing
 LOCATION:Castle Island Brewing, Boston MA
@@ -297,8 +297,8 @@ URL:https://castleislandbeer.com/calendar/national-pickle-day-party
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261117_5520278194@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261117_7823145744@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261117
 SUMMARY:Musical Bingo @ Castle Island Brewing
 LOCATION:Castle Island Brewing, Boston MA
@@ -307,8 +307,8 @@ URL:https://castleislandbeer.com/calendar/musical-bingo-4-d2mnz-5785z-ypd9r
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261117_8968047515@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261117_8366305914@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261117
 SUMMARY:Southie Trivia @ Castle Island Brewing
 LOCATION:Castle Island Brewing, Boston MA
@@ -317,8 +317,8 @@ URL:https://castleislandbeer.com/calendar/y0jk7jbh7uzy6rv32szl1qpdry78c0-2tthe-h
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261119_3813311538@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261119_1982682816@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261119
 SUMMARY:Don't F**k It Up @ Castle Island Brewing
 LOCATION:Castle Island Brewing, Boston MA
@@ -327,8 +327,8 @@ URL:https://castleislandbeer.com/calendar/dont-fk-it-up
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261119_2051126076@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261119_3299641901@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261119
 SUMMARY:Trivia With TIm @ Castle Island Brewing
 LOCATION:Castle Island Brewing, Boston MA
@@ -337,8 +337,8 @@ URL:https://castleislandbeer.com/calendar/trivia-with-tim-shh72-js58b-gener-wnld
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261120_7308554529@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261120_5539636825@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261120
 SUMMARY:Don’t Drown Comedy Show @ Castle Island Brewing
 LOCATION:Castle Island Brewing, Boston MA
@@ -347,8 +347,8 @@ URL:https://castleislandbeer.com/calendar/6vxqyvd1tstzh2ljivi6enc0nztn5e-kfzys
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261121_4343494234@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261121_2846598150@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261121
 SUMMARY:Brews and Botanicals Exotic Plant Show @ Castle Island Brewing
 LOCATION:Castle Island Brewing, Boston MA
@@ -357,8 +357,8 @@ URL:https://castleislandbeer.com/calendar/brews-and-botanicals-exotic-plant-show
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261122_1257018067@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261122_1967349376@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261122
 SUMMARY:Friendsgiving @ Castle Island Brewing
 LOCATION:Castle Island Brewing, Boston MA
@@ -367,8 +367,8 @@ URL:https://castleislandbeer.com/calendar/friendsgiving
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261123_8397230429@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261123_2762982433@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261123
 SUMMARY:Brews & Laughs @ Castle Island Brewing
 LOCATION:Castle Island Brewing, Boston MA
@@ -377,8 +377,8 @@ URL:https://castleislandbeer.com/calendar/brews-laughs-1-rk8b7-xtnwd-8f5f5
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261124_5520278194@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261124_7823145744@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261124
 SUMMARY:Musical Bingo @ Castle Island Brewing
 LOCATION:Castle Island Brewing, Boston MA
@@ -387,8 +387,8 @@ URL:https://castleislandbeer.com/calendar/musical-bingo-4-d2mnz-5785z-ypd9r-r5wp
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261124_8968047515@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261124_8366305914@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261124
 SUMMARY:Southie Trivia @ Castle Island Brewing
 LOCATION:Castle Island Brewing, Boston MA
@@ -397,8 +397,8 @@ URL:https://castleislandbeer.com/calendar/y0jk7jbh7uzy6rv32szl1qpdry78c0-2tthe-h
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261126_2051126076@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261126_3299641901@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261126
 SUMMARY:Trivia With TIm @ Castle Island Brewing
 LOCATION:Castle Island Brewing, Boston MA
@@ -407,8 +407,8 @@ URL:https://castleislandbeer.com/calendar/trivia-with-tim-shh72-js58b-gener-wnld
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261201_5520278194@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261201_7823145744@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261201
 SUMMARY:Musical Bingo @ Castle Island Brewing
 LOCATION:Castle Island Brewing, Boston MA
@@ -417,8 +417,8 @@ URL:https://castleislandbeer.com/calendar/musical-bingo-4-d2mnz-5785z-ypd9r-r5wp
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261201_8968047515@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261201_8366305914@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261201
 SUMMARY:Southie Trivia @ Castle Island Brewing
 LOCATION:Castle Island Brewing, Boston MA
@@ -427,8 +427,8 @@ URL:https://castleislandbeer.com/calendar/y0jk7jbh7uzy6rv32szl1qpdry78c0-2tthe-h
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261102_3734937279@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261102_3213215067@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261102
 SUMMARY:General Exercise - Holland Street (Council on Aging) @ Somerville City Hall
 LOCATION:Somerville City Hall, Boston MA
@@ -437,8 +437,8 @@ URL:https://www.somervillema.gov/events/2026/11/02/general-exercise-holland-stre
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261102_6998395155@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261102_7240275269@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261102
 SUMMARY:Coffee & Conversation Ralph & Jenny Center (Council on Aging) @ Somerville City Hall
 LOCATION:Somerville City Hall, Boston MA
@@ -447,8 +447,8 @@ URL:https://www.somervillema.gov/events/2026/11/02/coffee-conversation-ralph-jen
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261102_4836323120@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261102_2358013617@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261102
 SUMMARY:Virtual Nutrition Class (Council on Aging) @ Somerville City Hall
 LOCATION:Somerville City Hall, Boston MA
@@ -457,8 +457,8 @@ URL:https://www.somervillema.gov/events/2026/11/02/virtual-nutrition-class-counc
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261102_5545684435@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261102_7268623842@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261102
 SUMMARY:Nutrition at Ralph & Jenny (Council on Aging) @ Somerville City Hall
 LOCATION:Somerville City Hall, Boston MA
@@ -467,8 +467,8 @@ URL:https://www.somervillema.gov/events/2026/11/02/nutrition-ralph-jenny-council
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261102_9165420883@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261102_4130986894@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261102
 SUMMARY:Virtual General Exercise (Council on Aging) @ Somerville City Hall
 LOCATION:Somerville City Hall, Boston MA
@@ -477,8 +477,8 @@ URL:https://www.somervillema.gov/events/2026/11/02/virtual-general-exercise-coun
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261102_5794986517@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261102_1323931580@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261102
 SUMMARY:General Exercise - Ralph & Jenny Center (Council on Aging) @ Somerville City Hall
 LOCATION:Somerville City Hall, Boston MA
@@ -487,8 +487,8 @@ URL:https://www.somervillema.gov/events/2026/11/02/general-exercise-ralph-jenny-
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261102_2797731727@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261102_3474961798@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261102
 SUMMARY:School Building Committee Meeting (Virtual) @ Somerville City Hall
 LOCATION:Somerville City Hall, Boston MA
@@ -497,8 +497,8 @@ URL:https://www.somervillema.gov/events/2026/11/02/school-building-committee-mee
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261102_9629649792@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261102_6276158052@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261102
 SUMMARY:How to Be a Good Neighbor: Getting Comfortable Engaging with Homeless* Community Members @ Somerville City Hall
 LOCATION:Somerville City Hall, Boston MA
@@ -507,8 +507,8 @@ URL:https://www.somervillema.gov/events/2026/11/02/how-be-good-neighbor-getting-
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261103_6993356710@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261103_4506667517@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261103
 SUMMARY:School Committee Regular Meeting @ Somerville City Hall
 LOCATION:Somerville City Hall, Boston MA
@@ -517,8 +517,8 @@ URL:https://www.somervillema.gov/events/2026/11/02/school-committee-regular-meet
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261103_7772251145@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261103_5232463602@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261103
 SUMMARY:Josie Edwards at Warehouse XI @ Somerville City Hall
 LOCATION:Somerville City Hall, Boston MA
@@ -527,8 +527,8 @@ URL:https://www.somervillema.gov/events/2026/11/02/josie-edwards-warehouse-xi
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261103_7776775626@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261103_5025227728@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261103
 SUMMARY:Virtual Nutrition Make-up & Q&A (Council on Aging) @ Somerville City Hall
 LOCATION:Somerville City Hall, Boston MA
@@ -537,8 +537,8 @@ URL:https://www.somervillema.gov/events/2026/11/02/virtual-nutrition-make-qa-cou
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261103_3141869592@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261103_1901154474@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261103
 SUMMARY:Knitting With Natasha (Council on Aging) @ Somerville City Hall
 LOCATION:Somerville City Hall, Boston MA
@@ -547,8 +547,8 @@ URL:https://www.somervillema.gov/events/2026/11/03/knitting-natasha-council-agin
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261103_1514504374@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261103_2799935253@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261103
 SUMMARY:State Election @ Somerville City Hall
 LOCATION:Somerville City Hall, Boston MA
@@ -557,8 +557,8 @@ URL:https://www.somervillema.gov/events/2026/11/03/state-election
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261103_5215974579@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261103_8981593929@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261103
 SUMMARY:Bingo at Ralph & Jenny (Council on Aging) @ Somerville City Hall
 LOCATION:Somerville City Hall, Boston MA
@@ -567,8 +567,8 @@ URL:https://www.somervillema.gov/events/2026/11/03/bingo-ralph-jenny-council-agi
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261103_7743100073@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261103_1769949555@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261103
 SUMMARY:November Asian Tea Party - How Are Parks and Open Spaces Planned? @ Somerville City Hall
 LOCATION:Somerville City Hall, Boston MA
@@ -577,8 +577,8 @@ URL:https://www.somervillema.gov/events/2026/11/03/november-asian-tea-party-how-
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261103_4962520467@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261103_8048317156@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261103
 SUMMARY:Healthy Steps (Council on Aging) @ Somerville City Hall
 LOCATION:Somerville City Hall, Boston MA
@@ -587,8 +587,8 @@ URL:https://www.somervillema.gov/events/2026/11/03/healthy-steps-council-aging
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261103_8886161617@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261103_8809528694@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261103
 SUMMARY:Virtual Overdose Prevention and Response Trainings @ Somerville City Hall
 LOCATION:Somerville City Hall, Boston MA
@@ -597,8 +597,8 @@ URL:https://www.somervillema.gov/events/2026/11/03/virtual-overdose-prevention-a
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261103_5908645641@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261103_3684006263@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261103
 SUMMARY:Human Rights Commission Rights Violations Subcommittee Meeting @ Somerville City Hall
 LOCATION:Somerville City Hall, Boston MA
@@ -607,8 +607,8 @@ URL:https://www.somervillema.gov/events/2026/11/03/human-rights-commission-right
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261103_7166021711@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261103_4073767883@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261103
 SUMMARY:Traffic Commission Meeting @ Somerville City Hall
 LOCATION:Somerville City Hall, Boston MA
@@ -617,8 +617,8 @@ URL:https://www.somervillema.gov/events/2026/11/03/traffic-commission-meeting
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261102_5420033710@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261102_1637530517@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261102
 SUMMARY:Boston Graduate Fair - Fall 2026 @ Northeastern University Alumni Center
 LOCATION:Northeastern University Alumni Center, Boston MA
@@ -627,8 +627,8 @@ URL:https://calendar.northeastern.edu/event/boston-graduate-fair-fall-2026
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261102_5300687310@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261102_2163030563@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261102
 SUMMARY:Daily Guided Meditation @ Center for Spirituality\, Dialogue\, and Service
 LOCATION:Center for Spirituality\, Dialogue\, and Service, Boston MA
@@ -637,8 +637,8 @@ URL:https://calendar.northeastern.edu/event/daily-guided-meditation
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261102_2209269167@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261102_6828138885@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261102
 SUMMARY:Daily Yoga @ Center for Spirituality\, Dialogue\, and Service
 LOCATION:Center for Spirituality\, Dialogue\, and Service, Boston MA
@@ -647,8 +647,8 @@ URL:https://calendar.northeastern.edu/event/daily-yoga-1496
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261102_8881110801@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261102_8226679455@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261102
 SUMMARY:Global Topics for Global Learners @ Northeastern University
 LOCATION:Northeastern University, Boston MA
@@ -657,8 +657,8 @@ URL:https://calendar.northeastern.edu/event/global-topics-for-global-learners-13
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261103_3556099451@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261103_1271566879@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261103
 SUMMARY:Women's Basketball vs. Albany @ Solomon Court
 LOCATION:Solomon Court, Boston MA
@@ -667,8 +667,8 @@ URL:https://calendar.northeastern.edu/event/womens-basketball-vs-albany
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261103_5420033710@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261103_1637530517@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261103
 SUMMARY:Boston Graduate Fair - Fall 2026 @ Northeastern University Alumni Center
 LOCATION:Northeastern University Alumni Center, Boston MA
@@ -677,8 +677,8 @@ URL:https://calendar.northeastern.edu/event/boston-graduate-fair-fall-2026
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261103_4998228210@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261103_2512019103@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261103
 SUMMARY:Crafting Data Visuals to Tell a Scientific Story: CommLab Drop-In Hours @ Northeastern University
 LOCATION:Northeastern University, Boston MA
@@ -687,8 +687,8 @@ URL:https://calendar.northeastern.edu/event/crafting-data-visuals-to-tell-a-scie
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261103_5300687310@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261103_2163030563@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261103
 SUMMARY:Daily Guided Meditation @ Center for Spirituality\, Dialogue\, and Service
 LOCATION:Center for Spirituality\, Dialogue\, and Service, Boston MA
@@ -697,8 +697,8 @@ URL:https://calendar.northeastern.edu/event/daily-guided-meditation
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261103_3322300595@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261103_4355876559@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261103
 SUMMARY:First-Gen Week: Own Your Story—From Co-op to Career @ Curry Student Center
 LOCATION:Curry Student Center, Boston MA
@@ -707,8 +707,8 @@ URL:https://calendar.northeastern.edu/event/first-gen-week-own-your-storyfrom-co
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261103_7476778476@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261103_3797680335@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261103
 SUMMARY:Galante Engineering Business Certificate | Info Session @ Northeastern University
 LOCATION:Northeastern University, Boston MA
@@ -717,8 +717,8 @@ URL:https://calendar.northeastern.edu/event/galante-engineering-business-certifi
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261104_4175201869@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261104_7992963447@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261104
 SUMMARY:HOUSE TEAMS @ Improv Asylum
 LOCATION:Improv Asylum, Boston MA
@@ -727,8 +727,8 @@ URL:https://www.tixr.com/groups/improvasylum/events/house-teams-210231
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261106_7363890839@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261106_5159473033@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261106
 SUMMARY:Improv Asylum's Main Stage Show @ Improv Asylum
 LOCATION:Improv Asylum, Boston MA
@@ -737,8 +737,8 @@ URL:https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-s
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261107_7363890839@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261107_5159473033@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261107
 SUMMARY:Improv Asylum's Main Stage Show @ Improv Asylum
 LOCATION:Improv Asylum, Boston MA
@@ -747,8 +747,8 @@ URL:https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-s
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261108_7363890839@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261108_5159473033@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261108
 SUMMARY:Improv Asylum's Main Stage Show @ Improv Asylum
 LOCATION:Improv Asylum, Boston MA
@@ -757,8 +757,8 @@ URL:https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-s
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261108_7982365209@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261108_3429218951@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261108
 SUMMARY:Raunch @ Improv Asylum
 LOCATION:Improv Asylum, Boston MA
@@ -767,8 +767,8 @@ URL:https://www.tixr.com/groups/improvasylum/events/raunch-201882
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261111_4175201869@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261111_7992963447@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261111
 SUMMARY:HOUSE TEAMS @ Improv Asylum
 LOCATION:Improv Asylum, Boston MA
@@ -777,8 +777,8 @@ URL:https://www.tixr.com/groups/improvasylum/events/house-teams-210232
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261112_5579121116@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261112_5099835114@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261112
 SUMMARY:The Main Stage Show @ Improv Asylum
 LOCATION:Improv Asylum, Boston MA
@@ -787,8 +787,8 @@ URL:https://www.tixr.com/groups/improvasylum/events/the-main-stage-show-200943
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261113_7363890839@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261113_5159473033@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261113
 SUMMARY:Improv Asylum's Main Stage Show @ Improv Asylum
 LOCATION:Improv Asylum, Boston MA
@@ -797,8 +797,8 @@ URL:https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-s
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261114_7363890839@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261114_5159473033@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261114
 SUMMARY:Improv Asylum's Main Stage Show @ Improv Asylum
 LOCATION:Improv Asylum, Boston MA
@@ -807,8 +807,8 @@ URL:https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-s
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261115_7363890839@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261115_5159473033@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261115
 SUMMARY:Improv Asylum's Main Stage Show @ Improv Asylum
 LOCATION:Improv Asylum, Boston MA
@@ -817,8 +817,8 @@ URL:https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-s
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261115_7982365209@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261115_3429218951@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261115
 SUMMARY:Raunch @ Improv Asylum
 LOCATION:Improv Asylum, Boston MA
@@ -827,8 +827,8 @@ URL:https://www.tixr.com/groups/improvasylum/events/raunch-202961
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261116_2995051360@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261116_2134323381@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261116
 SUMMARY:The Kiki Moonlight Cabaret @ Improv Asylum
 LOCATION:Improv Asylum, Boston MA
@@ -837,8 +837,8 @@ URL:https://www.tixr.com/groups/improvasylum/events/the-kiki-moonlight-cabaret-2
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261118_4175201869@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261118_7992963447@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261118
 SUMMARY:HOUSE TEAMS @ Improv Asylum
 LOCATION:Improv Asylum, Boston MA
@@ -847,8 +847,8 @@ URL:https://www.tixr.com/groups/improvasylum/events/house-teams-212000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261119_5579121116@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261119_5099835114@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261119
 SUMMARY:The Main Stage Show @ Improv Asylum
 LOCATION:Improv Asylum, Boston MA
@@ -857,8 +857,8 @@ URL:https://www.tixr.com/groups/improvasylum/events/the-main-stage-show-200944
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261120_7363890839@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261120_5159473033@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261120
 SUMMARY:Improv Asylum's Main Stage Show @ Improv Asylum
 LOCATION:Improv Asylum, Boston MA
@@ -867,8 +867,8 @@ URL:https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-s
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261120_4932731566@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261120_2417032422@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261120
 SUMMARY:Hen House @ Improv Asylum
 LOCATION:Improv Asylum, Boston MA
@@ -877,8 +877,8 @@ URL:https://www.tixr.com/groups/improvasylum/events/hen-house-207098
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261121_7363890839@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261121_5159473033@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261121
 SUMMARY:Improv Asylum's Main Stage Show @ Improv Asylum
 LOCATION:Improv Asylum, Boston MA
@@ -887,8 +887,8 @@ URL:https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-s
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261122_7363890839@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261122_5159473033@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261122
 SUMMARY:Improv Asylum's Main Stage Show @ Improv Asylum
 LOCATION:Improv Asylum, Boston MA
@@ -897,8 +897,8 @@ URL:https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-s
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261122_7982365209@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261122_3429218951@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261122
 SUMMARY:Raunch @ Improv Asylum
 LOCATION:Improv Asylum, Boston MA
@@ -907,8 +907,8 @@ URL:https://www.tixr.com/groups/improvasylum/events/raunch-202968
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261125_4175201869@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261125_7992963447@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261125
 SUMMARY:HOUSE TEAMS @ Improv Asylum
 LOCATION:Improv Asylum, Boston MA
@@ -917,8 +917,8 @@ URL:https://www.tixr.com/groups/improvasylum/events/house-teams-212005
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261126_5579121116@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261126_5099835114@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261126
 SUMMARY:The Main Stage Show @ Improv Asylum
 LOCATION:Improv Asylum, Boston MA
@@ -927,8 +927,8 @@ URL:https://www.tixr.com/groups/improvasylum/events/the-main-stage-show-212001
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261128_8637615173@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261128_4604078849@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261128
 SUMMARY:Main Stage Show: Sleigh It Again! @ Improv Asylum
 LOCATION:Improv Asylum, Boston MA
@@ -937,8 +937,8 @@ URL:https://www.tixr.com/groups/improvasylum/events/main-stage-show-sleigh-it-ag
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261128_3618928848@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261128_1813466274@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261128
 SUMMARY:'Twas @ Improv Asylum
 LOCATION:Improv Asylum, Boston MA
@@ -947,8 +947,8 @@ URL:https://www.tixr.com/groups/improvasylum/events/-twas-211790
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261129_8637615173@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261129_4604078849@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261129
 SUMMARY:Main Stage Show: Sleigh It Again! @ Improv Asylum
 LOCATION:Improv Asylum, Boston MA
@@ -957,8 +957,8 @@ URL:https://www.tixr.com/groups/improvasylum/events/main-stage-show-sleigh-it-ag
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261129_7982365209@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261129_3429218951@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261129
 SUMMARY:Raunch @ Improv Asylum
 LOCATION:Improv Asylum, Boston MA
@@ -967,8 +967,8 @@ URL:https://www.tixr.com/groups/improvasylum/events/raunch-202971
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261202_4175201869@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261202_7992963447@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261202
 SUMMARY:HOUSE TEAMS @ Improv Asylum
 LOCATION:Improv Asylum, Boston MA
@@ -977,8 +977,8 @@ URL:https://www.tixr.com/groups/improvasylum/events/house-teams-212007
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261203_8637615173@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261203_4604078849@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261203
 SUMMARY:Main Stage Show: Sleigh It Again! @ Improv Asylum
 LOCATION:Improv Asylum, Boston MA
@@ -987,8 +987,8 @@ URL:https://www.tixr.com/groups/improvasylum/events/main-stage-show-sleigh-it-ag
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261204_8637615173@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261204_4604078849@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261204
 SUMMARY:Main Stage Show: Sleigh It Again! @ Improv Asylum
 LOCATION:Improv Asylum, Boston MA
@@ -997,8 +997,8 @@ URL:https://www.tixr.com/groups/improvasylum/events/main-stage-show-sleigh-it-ag
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261205_8637615173@wickedbostonevents.com
-DTSTAMP:20261102T234527Z
+UID:20261205_4604078849@wickedbostonevents.com
+DTSTAMP:20261102T234733Z
 DTSTART;VALUE=DATE:20261205
 SUMMARY:Main Stage Show: Sleigh It Again! @ Improv Asylum
 LOCATION:Improv Asylum, Boston MA
