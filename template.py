@@ -2124,6 +2124,50 @@ def _get_event_highlight(e, highlights):
     return None
 
 
+def get_seasonal_theme(dt: datetime):
+    """
+    Returns (theme_key, emoji_icon, display_label) if dt falls on an active seasonal event,
+    or (None, None, None) to default to 'classic' (Classic Dark Blue).
+    """
+    y, m, d = dt.year, dt.month, dt.day
+
+    # Halloween (Oct 29 - Nov 1)
+    if (m == 10 and d >= 29) or (m == 11 and d <= 1):
+        return ("halloween", "🎃", "Halloween")
+
+    if m == 11:
+        # Election Day: Tuesday after the first Monday in November (Nov 2-8 where weekday is Tuesday (1))
+        first_mon = 1
+        while datetime(y, 11, first_mon).weekday() != 0:
+            first_mon += 1
+        election_day = first_mon + 1
+        if d == election_day:
+            return ("election", "🗳️", "Election Day Edition")
+
+        # Veterans Day / Bunker Hill: Nov 11
+        if d == 11:
+            return ("veterans", "🎖️", "Bunker Hill & Veterans Day")
+
+        # Thanksgiving: 4th Thursday in November
+        first_thu = 1
+        while datetime(y, 11, first_thu).weekday() != 3:
+            first_thu += 1
+        thanksgiving_day = first_thu + 21
+        # Thanksgiving Eve & Thanksgiving Day
+        if d in (thanksgiving_day - 1, thanksgiving_day):
+            return ("thanksgiving", "🦃", "Thanksgiving Harvest")
+
+        # Black Friday: Friday & Saturday of Thanksgiving weekend
+        if d in (thanksgiving_day + 1, thanksgiving_day + 2):
+            return ("blackfriday", "🏷️", "Black Friday Deals")
+
+        # Cyber Monday: Monday following Thanksgiving
+        if d == thanksgiving_day + 4:
+            return ("cybermonday", "⚡", "Cyber Monday Tech")
+
+    return (None, None, None)
+
+
 def render_page(results, weather=None, luckyseat_shows=None):
     highlights = _load_highlights()
     if not any(r.get("venue") == "Community Submissions" for r in results):
@@ -2580,8 +2624,16 @@ def render_page(results, weather=None, luckyseat_shows=None):
     genres_map = {gid: {"label": ginfo["label"], "icon": ginfo["icon"], "color": ginfo["color"]} for gid, ginfo in MUSIC_GENRES.items()}
 
     now_eastern = datetime.now(EASTERN)
-    is_halloween_weekend = (now_eastern.month == 10 and now_eastern.day >= 29) or (now_eastern.month == 11 and now_eastern.day <= 2)
-    default_theme = "halloween" if is_halloween_weekend else "indie"
+    seasonal_key, seasonal_icon, seasonal_label = get_seasonal_theme(now_eastern)
+    default_theme = seasonal_key if seasonal_key else "classic"
+    seasonal_btn_html = ""
+    if seasonal_key:
+        active_cls = " active" if default_theme == seasonal_key else ""
+        aria_chk = "true" if default_theme == seasonal_key else "false"
+        seasonal_btn_html = (
+            f'<button type="button" class="theme-pill-btn{active_cls}" data-theme="{seasonal_key}" '
+            f'role="radio" aria-checked="{aria_chk}" title="{seasonal_label} Theme">{seasonal_icon}</button>'
+        )
 
     site_url = get_site_url()
     seo_meta_tags = build_seo_meta_tags(site_url)
@@ -2596,17 +2648,34 @@ def render_page(results, weather=None, luckyseat_shows=None):
 {seo_meta_tags}
 {json_ld_scripts}
 <script>
+  function getClientSeasonalTheme(dt) {{
+    var y = dt.getFullYear();
+    var m = dt.getMonth() + 1;
+    var d = dt.getDate();
+    if ((m === 10 && d >= 29) || (m === 11 && d <= 1)) return 'halloween';
+    if (m === 11) {{
+      var firstMon = 1;
+      while (new Date(y, 10, firstMon).getDay() !== 1) firstMon++;
+      var electionDay = firstMon + 1;
+      if (d === electionDay) return 'election';
+      if (d === 11) return 'veterans';
+      var firstThu = 1;
+      while (new Date(y, 10, firstThu).getDay() !== 4) firstThu++;
+      var tDay = firstThu + 21;
+      if (d === tDay - 1 || d === tDay) return 'thanksgiving';
+      if (d === tDay + 1 || d === tDay + 2) return 'blackfriday';
+      if (d === tDay + 4) return 'cybermonday';
+    }}
+    return null;
+  }}
   try {{
     var manualTheme = localStorage.getItem('boston_events_theme_manual');
     var t = localStorage.getItem('boston_events_theme');
-    var now = new Date();
-    var m = now.getMonth() + 1;
-    var d = now.getDate();
-    var isHalloween = (m === 10 && d >= 29) || (m === 11 && d <= 2);
-    if (!manualTheme && isHalloween) {{
-      t = 'halloween';
+    var seasonal = getClientSeasonalTheme(new Date());
+    if (!manualTheme && seasonal) {{
+      t = seasonal;
     }} else if (!t) {{
-      t = isHalloween ? 'halloween' : 'indie';
+      t = seasonal || 'classic';
     }}
     document.documentElement.setAttribute('data-theme', t);
   }} catch(e) {{}}
@@ -5026,6 +5095,31 @@ def render_page(results, weather=None, luckyseat_shows=None):
     color: #ffffff;
     box-shadow: 0 0 10px rgba(255, 121, 63, 0.5);
   }}
+  [data-theme="election"] .theme-pill-btn.active {{
+    background: linear-gradient(135deg, #2563eb 0%, #dc2626 100%);
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(37, 99, 235, 0.5);
+  }}
+  [data-theme="veterans"] .theme-pill-btn.active {{
+    background: linear-gradient(135deg, #d4af37 0%, #1e3a8a 100%);
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.5);
+  }}
+  [data-theme="thanksgiving"] .theme-pill-btn.active {{
+    background: linear-gradient(135deg, #ea580c 0%, #be123c 100%);
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(234, 88, 12, 0.5);
+  }}
+  [data-theme="blackfriday"] .theme-pill-btn.active {{
+    background: linear-gradient(135deg, #facc15 0%, #eab308 100%);
+    color: #000000;
+    box-shadow: 0 0 10px rgba(250, 204, 21, 0.5);
+  }}
+  [data-theme="cybermonday"] .theme-pill-btn.active {{
+    background: linear-gradient(135deg, #06b6d4 0%, #9333ea 100%);
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(6, 182, 212, 0.5);
+  }}
 
   /* Indie Guide Aesthetic */
   [data-theme="indie"] .chip-icon,
@@ -5556,6 +5650,322 @@ def render_page(results, weather=None, luckyseat_shows=None):
     color: #ffeaa7;
     box-shadow: 0 0 10px rgba(255, 121, 63, 0.25);
   }}
+
+  /* =========================================================================
+     ELECTION DAY / CIVIC BOSTON THEME (Patriotic Royal Blue & Cardinal Red)
+     ========================================================================= */
+  [data-theme="election"] {{
+    --bg: #090d16;
+    --card: #121826;
+    --card-hover: #1b2438;
+    --fg: #f1f5f9;
+    --muted: #94a3b8;
+    --accent: #3b82f6;
+    --accent-glow: rgba(59, 130, 246, 0.35);
+    --border: rgba(59, 130, 246, 0.22);
+    --border-hover: rgba(59, 130, 246, 0.45);
+    --green: #22c55e;
+    --green-bg: rgba(34, 197, 94, 0.14);
+    --green-border: rgba(34, 197, 94, 0.35);
+    --warn: #ef4444;
+    --radius-lg: 14px;
+    --radius-md: 8px;
+    --radius-sm: 5px;
+  }}
+  [data-theme="election"] body {{
+    background-color: var(--bg);
+    background-image:
+      radial-gradient(ellipse 80% 50% at 20% -10%, rgba(59, 130, 246, 0.10) 0%, transparent 65%),
+      radial-gradient(ellipse 70% 40% at 85% 20%, rgba(239, 68, 68, 0.08) 0%, transparent 60%);
+    background-attachment: fixed;
+  }}
+  [data-theme="election"] .banner {{
+    background-color: #0c1220;
+    border-bottom: 2px solid rgba(59, 130, 246, 0.45);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(59, 130, 246, 0.15);
+  }}
+  [data-theme="election"] .banner-top-tag {{
+    color: #60a5fa;
+    text-shadow: 0 0 12px rgba(96, 165, 250, 0.6);
+  }}
+  [data-theme="election"] .live-pulse {{
+    background: #3b82f6;
+    box-shadow: 0 0 10px #3b82f6, 0 0 20px #3b82f6;
+  }}
+  [data-theme="election"] .banner-title {{
+    background: linear-gradient(135deg, #ffffff 15%, #93c5fd 60%, #fca5a5 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.35));
+  }}
+  [data-theme="election"] .pill-submit-btn {{
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 50%, #dc2626 100%);
+    color: #fff;
+    box-shadow: 0 0 14px rgba(37, 99, 235, 0.45);
+    border-radius: 999px;
+  }}
+  [data-theme="election"] .chip.active,
+  [data-theme="election"] .loc-chip.active,
+  [data-theme="election"] .genre-chip.active,
+  [data-theme="election"] .sub-chip.active {{
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.35) 0%, rgba(220, 38, 38, 0.25) 100%);
+    border-color: #3b82f6;
+    color: #ffffff;
+    box-shadow: 0 0 12px rgba(59, 130, 246, 0.35);
+  }}
+
+  /* =========================================================================
+     VETERANS DAY / BUNKER HILL THEME (Naval Blue, Gold Brass & Valor Crimson)
+     ========================================================================= */
+  [data-theme="veterans"] {{
+    --bg: #090d18;
+    --card: #111a2e;
+    --card-hover: #182542;
+    --fg: #f8fafc;
+    --muted: #94a3b8;
+    --accent: #d4af37;
+    --accent-glow: rgba(212, 175, 55, 0.35);
+    --border: rgba(212, 175, 55, 0.25);
+    --border-hover: rgba(212, 175, 55, 0.50);
+    --green: #38bdf8;
+    --green-bg: rgba(56, 189, 248, 0.14);
+    --green-border: rgba(56, 189, 248, 0.35);
+    --warn: #f59e0b;
+    --radius-lg: 14px;
+    --radius-md: 8px;
+    --radius-sm: 5px;
+  }}
+  [data-theme="veterans"] body {{
+    background-color: var(--bg);
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(212, 175, 55, 0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 40% at 90% 40%, rgba(30, 58, 138, 0.16) 0%, transparent 60%);
+    background-attachment: fixed;
+  }}
+  [data-theme="veterans"] .banner {{
+    background-color: #0c1322;
+    border-bottom: 2px solid rgba(212, 175, 55, 0.45);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(212, 175, 55, 0.15);
+  }}
+  [data-theme="veterans"] .banner-top-tag {{
+    color: #fbbf24;
+    text-shadow: 0 0 12px rgba(251, 191, 36, 0.6);
+  }}
+  [data-theme="veterans"] .live-pulse {{
+    background: #d4af37;
+    box-shadow: 0 0 10px #d4af37, 0 0 20px #d4af37;
+  }}
+  [data-theme="veterans"] .banner-title {{
+    background: linear-gradient(135deg, #ffffff 20%, #fde047 65%, #60a5fa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.35));
+  }}
+  [data-theme="veterans"] .pill-submit-btn {{
+    background: linear-gradient(135deg, #b45309 0%, #d97706 50%, #1e3a8a 100%);
+    color: #fff;
+    box-shadow: 0 0 14px rgba(212, 175, 55, 0.45);
+    border-radius: 999px;
+  }}
+  [data-theme="veterans"] .chip.active,
+  [data-theme="veterans"] .loc-chip.active,
+  [data-theme="veterans"] .genre-chip.active,
+  [data-theme="veterans"] .sub-chip.active {{
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.35) 0%, rgba(30, 58, 138, 0.35) 100%);
+    border-color: #d4af37;
+    color: #fef08a;
+    box-shadow: 0 0 12px rgba(212, 175, 55, 0.35);
+  }}
+
+  /* =========================================================================
+     THANKSGIVING / NEW ENGLAND HARVEST THEME (Harvest Amber & Cranberry)
+     ========================================================================= */
+  [data-theme="thanksgiving"] {{
+    --bg: #100b08;
+    --card: #1a120c;
+    --card-hover: #261b12;
+    --fg: #fef7ed;
+    --muted: #bfa094;
+    --accent: #ea580c;
+    --accent-glow: rgba(234, 88, 12, 0.35);
+    --border: rgba(234, 88, 12, 0.22);
+    --border-hover: rgba(234, 88, 12, 0.45);
+    --green: #84cc16;
+    --green-bg: rgba(132, 204, 22, 0.14);
+    --green-border: rgba(132, 204, 22, 0.35);
+    --warn: #f59e0b;
+    --radius-lg: 16px;
+    --radius-md: 10px;
+    --radius-sm: 6px;
+  }}
+  [data-theme="thanksgiving"] body {{
+    background-color: var(--bg);
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(234, 88, 12, 0.09) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 40% at 85% 35%, rgba(190, 18, 60, 0.07) 0%, transparent 60%);
+    background-attachment: fixed;
+  }}
+  [data-theme="thanksgiving"] .banner {{
+    background-color: #170f0a;
+    border-bottom: 2px solid rgba(234, 88, 12, 0.45);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(234, 88, 12, 0.15);
+  }}
+  [data-theme="thanksgiving"] .banner-top-tag {{
+    color: #fb923c;
+    text-shadow: 0 0 12px rgba(251, 146, 60, 0.6);
+  }}
+  [data-theme="thanksgiving"] .live-pulse {{
+    background: #ea580c;
+    box-shadow: 0 0 10px #ea580c, 0 0 20px #ea580c;
+  }}
+  [data-theme="thanksgiving"] .banner-title {{
+    background: linear-gradient(135deg, #fffbeb 20%, #fb923c 60%, #e11d48 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 20px rgba(234, 88, 12, 0.35));
+  }}
+  [data-theme="thanksgiving"] .pill-submit-btn {{
+    background: linear-gradient(135deg, #c2410c 0%, #ea580c 50%, #be123c 100%);
+    color: #fff;
+    box-shadow: 0 0 14px rgba(234, 88, 12, 0.5);
+    border-radius: 999px;
+  }}
+  [data-theme="thanksgiving"] .chip.active,
+  [data-theme="thanksgiving"] .loc-chip.active,
+  [data-theme="thanksgiving"] .genre-chip.active,
+  [data-theme="thanksgiving"] .sub-chip.active {{
+    background: linear-gradient(135deg, rgba(234, 88, 12, 0.4) 0%, rgba(190, 18, 60, 0.3) 100%);
+    border-color: #ea580c;
+    color: #ffedd5;
+    box-shadow: 0 0 12px rgba(234, 88, 12, 0.4);
+  }}
+
+  /* =========================================================================
+     BLACK FRIDAY THEME (Midnight Stealth Black & High-Voltage Electric Gold)
+     ========================================================================= */
+  [data-theme="blackfriday"] {{
+    --bg: #050608;
+    --card: #0f1116;
+    --card-hover: #181c24;
+    --fg: #fafafa;
+    --muted: #a1a1aa;
+    --accent: #facc15;
+    --accent-glow: rgba(250, 204, 21, 0.35);
+    --border: rgba(250, 204, 21, 0.22);
+    --border-hover: rgba(250, 204, 21, 0.45);
+    --green: #22c55e;
+    --green-bg: rgba(34, 197, 94, 0.14);
+    --green-border: rgba(34, 197, 94, 0.35);
+    --warn: #f97316;
+    --radius-lg: 12px;
+    --radius-md: 8px;
+    --radius-sm: 4px;
+  }}
+  [data-theme="blackfriday"] body {{
+    background-color: var(--bg);
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(250, 204, 21, 0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 40% at 10% 40%, rgba(239, 68, 68, 0.06) 0%, transparent 60%);
+    background-attachment: fixed;
+  }}
+  [data-theme="blackfriday"] .banner {{
+    background-color: #07090f;
+    border-bottom: 2px solid rgba(250, 204, 21, 0.5);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(250, 204, 21, 0.2);
+  }}
+  [data-theme="blackfriday"] .banner-top-tag {{
+    color: #facc15;
+    text-shadow: 0 0 14px rgba(250, 204, 21, 0.7);
+  }}
+  [data-theme="blackfriday"] .live-pulse {{
+    background: #facc15;
+    box-shadow: 0 0 10px #facc15, 0 0 20px #facc15;
+  }}
+  [data-theme="blackfriday"] .banner-title {{
+    background: linear-gradient(135deg, #ffffff 20%, #fde047 60%, #f97316 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 22px rgba(250, 204, 21, 0.4));
+  }}
+  [data-theme="blackfriday"] .pill-submit-btn {{
+    background: linear-gradient(135deg, #ca8a04 0%, #eab308 50%, #dc2626 100%);
+    color: #000;
+    font-weight: 800;
+    box-shadow: 0 0 16px rgba(250, 204, 21, 0.5);
+    border-radius: 999px;
+  }}
+  [data-theme="blackfriday"] .chip.active,
+  [data-theme="blackfriday"] .loc-chip.active,
+  [data-theme="blackfriday"] .genre-chip.active,
+  [data-theme="blackfriday"] .sub-chip.active {{
+    background: linear-gradient(135deg, rgba(250, 204, 21, 0.35) 0%, rgba(249, 115, 22, 0.25) 100%);
+    border-color: #facc15;
+    color: #fef08a;
+    box-shadow: 0 0 12px rgba(250, 204, 21, 0.35);
+  }}
+
+  /* =========================================================================
+     CYBER MONDAY / KENDALL TECH THEME (Cyberpunk Neon Cyan & Electric Violet)
+     ========================================================================= */
+  [data-theme="cybermonday"] {{
+    --bg: #050811;
+    --card: #0c1222;
+    --card-hover: #131c35;
+    --fg: #f0fdf4;
+    --muted: #7dd3fc;
+    --accent: #06b6d4;
+    --accent-glow: rgba(6, 182, 212, 0.45);
+    --border: rgba(6, 182, 212, 0.25);
+    --border-hover: rgba(6, 182, 212, 0.55);
+    --green: #10b981;
+    --green-bg: rgba(16, 185, 129, 0.14);
+    --green-border: rgba(16, 185, 129, 0.35);
+    --warn: #ec4899;
+    --radius-lg: 14px;
+    --radius-md: 8px;
+    --radius-sm: 5px;
+  }}
+  [data-theme="cybermonday"] body {{
+    background-color: var(--bg);
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% -10%, rgba(6, 182, 212, 0.12) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 40% at 85% 30%, rgba(168, 85, 247, 0.10) 0%, transparent 60%);
+    background-attachment: fixed;
+  }}
+  [data-theme="cybermonday"] .banner {{
+    background-color: #070e1c;
+    border-bottom: 2px solid rgba(6, 182, 212, 0.5);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(6, 182, 212, 0.2);
+  }}
+  [data-theme="cybermonday"] .banner-top-tag {{
+    color: #22d3ee;
+    text-shadow: 0 0 14px rgba(34, 211, 238, 0.7);
+  }}
+  [data-theme="cybermonday"] .live-pulse {{
+    background: #06b6d4;
+    box-shadow: 0 0 10px #06b6d4, 0 0 20px #06b6d4;
+  }}
+  [data-theme="cybermonday"] .banner-title {{
+    background: linear-gradient(135deg, #ffffff 20%, #22d3ee 60%, #c084fc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 20px rgba(6, 182, 212, 0.4));
+  }}
+  [data-theme="cybermonday"] .pill-submit-btn {{
+    background: linear-gradient(135deg, #0891b2 0%, #06b6d4 50%, #9333ea 100%);
+    color: #fff;
+    box-shadow: 0 0 16px rgba(6, 182, 212, 0.5);
+    border-radius: 999px;
+  }}
+  [data-theme="cybermonday"] .chip.active,
+  [data-theme="cybermonday"] .loc-chip.active,
+  [data-theme="cybermonday"] .genre-chip.active,
+  [data-theme="cybermonday"] .sub-chip.active {{
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.35) 0%, rgba(168, 85, 247, 0.25) 100%);
+    border-color: #06b6d4;
+    color: #cffafe;
+    box-shadow: 0 0 12px rgba(6, 182, 212, 0.4);
+  }}
 </style>
 </head>
 <body>
@@ -5566,10 +5976,10 @@ def render_page(results, weather=None, luckyseat_shows=None):
         <div class="banner-top-actions">
           <div class="theme-toggle-wrap">
             <div class="theme-toggle-pills" role="radiogroup" aria-label="Visual Theme">
-              <button type="button" class="theme-pill-btn{' active' if default_theme == 'halloween' else ''}" data-theme="halloween" role="radio" aria-checked="{'true' if default_theme == 'halloween' else 'false'}" title="Halloween Theme">🎃</button>
+              {seasonal_btn_html}
+              <button type="button" class="theme-pill-btn{' active' if default_theme == 'classic' else ''}" data-theme="classic" role="radio" aria-checked="{'true' if default_theme == 'classic' else 'false'}" title="Classic Dark Theme">🌙</button>
               <button type="button" class="theme-pill-btn{' active' if default_theme == 'indie' else ''}" data-theme="indie" role="radio" aria-checked="{'true' if default_theme == 'indie' else 'false'}" title="Indie Guide Theme">📰</button>
-              <button type="button" class="theme-pill-btn" data-theme="classic" role="radio" aria-checked="false" title="Classic Dark Theme">🌙</button>
-              <button type="button" class="theme-pill-btn" data-theme="anime" role="radio" aria-checked="false" title="Anime Theme">🌸</button>
+              <button type="button" class="theme-pill-btn{' active' if default_theme == 'anime' else ''}" data-theme="anime" role="radio" aria-checked="{'true' if default_theme == 'anime' else 'false'}" title="Anime Theme">🌸</button>
             </div>
           </div>
           <button type="button" class="pill-submit-btn" id="btn-open-submit-modal" aria-haspopup="dialog" aria-expanded="false">
@@ -8965,8 +9375,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
     const THEME_KEY = 'boston_events_theme';
     const THEME_MANUAL_KEY = 'boston_events_theme_manual';
     function setTheme(t, save) {{
-      const validThemes = ['halloween', 'indie', 'classic', 'anime'];
-      const theme = validThemes.includes(t) ? t : 'indie';
+      const validThemes = ['classic', 'indie', 'anime', 'halloween', 'election', 'veterans', 'thanksgiving', 'blackfriday', 'cybermonday'];
+      const theme = validThemes.includes(t) ? t : 'classic';
       document.documentElement.setAttribute('data-theme', theme);
       document.querySelectorAll('.theme-pill-btn').forEach(b => {{
         const isActive = (b.dataset.theme === theme);
@@ -8986,14 +9396,11 @@ def render_page(results, weather=None, luckyseat_shows=None):
     try {{
       const manual = localStorage.getItem(THEME_MANUAL_KEY);
       const stored = localStorage.getItem(THEME_KEY);
-      const now = new Date();
-      const m = now.getMonth() + 1;
-      const d = now.getDate();
-      const isHalloween = (m === 10 && d >= 29) || (m === 11 && d <= 2);
-      if (!manual && isHalloween) {{
-        setTheme('halloween', false);
+      const seasonal = (typeof getClientSeasonalTheme === 'function') ? getClientSeasonalTheme(new Date()) : null;
+      if (!manual && seasonal) {{
+        setTheme(seasonal, false);
       }} else {{
-        setTheme(stored || (isHalloween ? 'halloween' : 'indie'), false);
+        setTheme(stored || seasonal || 'classic', false);
       }}
     }} catch (_) {{
       setTheme('{default_theme}', false);
