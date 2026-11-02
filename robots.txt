@@ -32,4 +32,4 @@ Allow: /
 User-agent: meta-externalagent
 Allow: /
 
-Sitemap: https://behlv10.github.io/boston_events/sitemap.xml
+Sitemap: https://www.wickedbostonevents.com/sitemap.xml

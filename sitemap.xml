@@ -2,71 +2,71 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <!-- Core Main Site -->
   <url>
-    <loc>https://behlv10.github.io/boston_events/</loc>
+    <loc>https://www.wickedbostonevents.com/</loc>
     <changefreq>hourly</changefreq>
     <priority>1.0</priority>
   </url>
 
   <!-- High-Intent Programmatic Landing Pages -->
   <url>
-    <loc>https://behlv10.github.io/boston_events/free-events-boston-this-weekend/</loc>
+    <loc>https://www.wickedbostonevents.com/free-events-boston-this-weekend/</loc>
     <changefreq>hourly</changefreq>
     <priority>0.95</priority>
   </url>
   <url>
-    <loc>https://behlv10.github.io/boston_events/cambridge-events-tonight/</loc>
+    <loc>https://www.wickedbostonevents.com/cambridge-events-tonight/</loc>
     <changefreq>hourly</changefreq>
     <priority>0.95</priority>
   </url>
   <url>
-    <loc>https://behlv10.github.io/boston_events/live-music-somerville/</loc>
+    <loc>https://www.wickedbostonevents.com/live-music-somerville/</loc>
     <changefreq>hourly</changefreq>
     <priority>0.95</priority>
   </url>
   <url>
-    <loc>https://behlv10.github.io/boston_events/board-game-nights-boston/</loc>
+    <loc>https://www.wickedbostonevents.com/board-game-nights-boston/</loc>
     <changefreq>daily</changefreq>
     <priority>0.90</priority>
   </url>
   <url>
-    <loc>https://behlv10.github.io/boston_events/boston-events-today/</loc>
+    <loc>https://www.wickedbostonevents.com/boston-events-today/</loc>
     <changefreq>hourly</changefreq>
     <priority>0.95</priority>
   </url>
   <url>
-    <loc>https://behlv10.github.io/boston_events/boston-events-this-weekend/</loc>
+    <loc>https://www.wickedbostonevents.com/boston-events-this-weekend/</loc>
     <changefreq>hourly</changefreq>
     <priority>0.95</priority>
   </url>
 
   <!-- Location & Category Hub Directories -->
   <url>
-    <loc>https://behlv10.github.io/boston_events/boston/</loc>
+    <loc>https://www.wickedbostonevents.com/boston/</loc>
     <changefreq>hourly</changefreq>
     <priority>0.90</priority>
   </url>
   <url>
-    <loc>https://behlv10.github.io/boston_events/cambridge/</loc>
+    <loc>https://www.wickedbostonevents.com/cambridge/</loc>
     <changefreq>hourly</changefreq>
     <priority>0.90</priority>
   </url>
   <url>
-    <loc>https://behlv10.github.io/boston_events/somerville/</loc>
+    <loc>https://www.wickedbostonevents.com/somerville/</loc>
     <changefreq>hourly</changefreq>
     <priority>0.90</priority>
   </url>
   <url>
-    <loc>https://behlv10.github.io/boston_events/music/</loc>
+    <loc>https://www.wickedbostonevents.com/music/</loc>
     <changefreq>hourly</changefreq>
     <priority>0.90</priority>
   </url>
   <url>
-    <loc>https://behlv10.github.io/boston_events/comedy/</loc>
+    <loc>https://www.wickedbostonevents.com/comedy/</loc>
     <changefreq>hourly</changefreq>
     <priority>0.90</priority>
   </url>
   <url>
-    <loc>https://behlv10.github.io/boston_events/free/</loc>
+    <loc>https://www.wickedbostonevents.com/free/</loc>
     <changefreq>hourly</changefreq>
     <priority>0.90</priority>
   </url>

@@ -3,17 +3,17 @@
 > Real-time open-source aggregator of 8,000+ concerts, theater productions, comedy shows, indie dance, esports, and free community events across Boston, Cambridge, and Somerville.
 
 ## Key Feeds & Resources
-- [Main Events Calendar](https://behlv10.github.io/boston_events/): Full interactive multi-venue schedule filterable by neighborhood, price, and MBTA subway lines.
-- [JSON API Dataset](https://behlv10.github.io/boston_events/events.json): Machine-readable JSON export of all parsed events, venues, geolocations, and ticket links.
-- [RSS / Atom Feed](https://behlv10.github.io/boston_events/feed.xml): Hourly syndicated feed of newly scheduled events.
-- [iCalendar Feed](https://behlv10.github.io/boston_events/events.ics): 1-click subscription feed for Apple Calendar, Google Calendar, and Outlook.
+- [Main Events Calendar](https://www.wickedbostonevents.com/): Full interactive multi-venue schedule filterable by neighborhood, price, and MBTA subway lines.
+- [JSON API Dataset](https://www.wickedbostonevents.com/events.json): Machine-readable JSON export of all parsed events, venues, geolocations, and ticket links.
+- [RSS / Atom Feed](https://www.wickedbostonevents.com/feed.xml): Hourly syndicated feed of newly scheduled events.
+- [iCalendar Feed](https://www.wickedbostonevents.com/events.ics): 1-click subscription feed for Apple Calendar, Google Calendar, and Outlook.
 
 ## Curated Programmatic Hubs
-- [Free Events in Boston This Weekend](https://behlv10.github.io/boston_events/free-events-boston-this-weekend/)
-- [Cambridge Events Tonight](https://behlv10.github.io/boston_events/cambridge-events-tonight/)
-- [Live Music in Somerville](https://behlv10.github.io/boston_events/live-music-somerville/)
-- [Boston Comedy Shows](https://behlv10.github.io/boston_events/comedy/)
-- [Board Game Nights & Meetups](https://behlv10.github.io/boston_events/board-game-nights-boston/)
+- [Free Events in Boston This Weekend](https://www.wickedbostonevents.com/free-events-boston-this-weekend/)
+- [Cambridge Events Tonight](https://www.wickedbostonevents.com/cambridge-events-tonight/)
+- [Live Music in Somerville](https://www.wickedbostonevents.com/live-music-somerville/)
+- [Boston Comedy Shows](https://www.wickedbostonevents.com/comedy/)
+- [Board Game Nights & Meetups](https://www.wickedbostonevents.com/board-game-nights-boston/)
 
 ## Coverage Highlights
 Tracks over 175 venues, including Symphony Hall, The Huntington Theatre, Calderwood Pavilion (BCA), Central Square Theater, Laugh Boston, The Sinclair, The Middle East, Paradise Rock Club, Balance Patch (Esports & Smash), and Harvard/Central PoGO.
