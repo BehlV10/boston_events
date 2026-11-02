@@ -372,6 +372,87 @@ def scrape_eventbrite_org(url, ua):
     return events
 
 
+def _parse_eventbrite_server_data(html):
+    """Extract high-fidelity events with exact start_time, end_time, and venue from window.__SERVER_DATA__."""
+    m = re.search(r'window\.__SERVER_DATA__\s*=\s*(\{.*?\});\s*(?:window\.|</script>)', html, re.DOTALL)
+    if not m:
+        return []
+    try:
+        data = json.loads(m.group(1))
+    except Exception:
+        return []
+
+    def find_events(obj):
+        found = []
+        if isinstance(obj, dict):
+            if 'eventbrite_event_id' in obj or ('start_date' in obj and 'start_time' in obj):
+                found.append(obj)
+            for v in obj.values():
+                found.extend(find_events(v))
+        elif isinstance(obj, list):
+            for item in obj:
+                found.extend(find_events(item))
+        return found
+
+    raw_events = find_events(data)
+    events = []
+    seen = set()
+
+    for ev in raw_events:
+        name = ev.get("name")
+        u = ev.get("url")
+        start_date = ev.get("start_date")
+        start_time = ev.get("start_time") or "19:00"
+        tz_str = ev.get("timezone") or "America/New_York"
+
+        if not name or not u or not start_date:
+            continue
+        if u in seen:
+            continue
+        seen.add(u)
+
+        try:
+            dt = datetime.strptime(f"{start_date} {start_time}", "%Y-%m-%d %H:%M")
+            try:
+                dt = dt.replace(tzinfo=ZoneInfo(tz_str))
+            except Exception:
+                dt = dt.replace(tzinfo=EASTERN)
+            iso = dt.astimezone(timezone.utc).isoformat()
+        except Exception:
+            iso = None
+
+        pv = ev.get("primary_venue") or {}
+        venue_name = pv.get("name") if isinstance(pv, dict) else None
+        addr = pv.get("address") or {} if isinstance(pv, dict) else {}
+        lat = addr.get("latitude")
+        lng = addr.get("longitude")
+
+        price = None
+        if ev.get("is_free"):
+            price = "Free"
+        else:
+            ticket_avail = ev.get("ticket_availability") or {}
+            min_price = ticket_avail.get("minimum_ticket_price") or {}
+            if min_price.get("major_value"):
+                try:
+                    val = float(min_price["major_value"])
+                    price = "Free" if val == 0 else f"${val:g}"
+                except Exception:
+                    pass
+
+        events.append({
+            "name": name,
+            "date": iso,
+            "url": u,
+            "venue": venue_name,
+            "price": price,
+            "description": (ev.get("summary") or "")[:200],
+            "lat": lat,
+            "lng": lng,
+        })
+    return events
+
+
 def _parse_eventbrite_json_ld(soup):
     events = []
     for block in soup.find_all("script", type="application/ld+json"):
@@ -387,11 +468,18 @@ def _parse_eventbrite_json_ld(soup):
                 continue
             iso = ev.get("startDate")
             if iso and "T" not in iso:
-                iso = f"{iso}T00:00:00-04:00"
-            try:
-                iso = datetime.fromisoformat(iso).astimezone(timezone.utc).isoformat() if iso else None
-            except ValueError:
-                iso = None
+                # When date has no time, default to 19:00 (7 PM) Eastern rather than midnight,
+                # and use dynamic EASTERN timezone so it never shifts days between EST/EDT
+                try:
+                    dt_naive = datetime.strptime(iso, "%Y-%m-%d").replace(hour=19, minute=0, tzinfo=EASTERN)
+                    iso = dt_naive.astimezone(timezone.utc).isoformat()
+                except ValueError:
+                    iso = None
+            elif iso:
+                try:
+                    iso = datetime.fromisoformat(iso).astimezone(timezone.utc).isoformat()
+                except ValueError:
+                    iso = None
             loc = ev.get("location") or {}
             venue = loc.get("name") if isinstance(loc, dict) else None
             geo = loc.get("geo") or {} if isinstance(loc, dict) else {}
@@ -411,20 +499,24 @@ def _parse_eventbrite_json_ld(soup):
 
 
 def scrape_eventbrite_search(url, ua):
-    """Parse Eventbrite Boston discovery page via ItemList JSON-LD across multiple categories."""
+    """Parse Eventbrite discovery page via embedded __SERVER_DATA__ and ItemList JSON-LD."""
     import subprocess
 
-    def fetch_eb_soup(target_url):
+    def fetch_eb_html(target_url):
         try:
-            return fetch_soup(target_url, ua)
+            resp = _SESSION.get(target_url, headers={"User-Agent": ua or UA_CHROME}, timeout=15)
+            if resp.status_code == 200 and len(resp.text) > 10000:
+                return resp.text
         except Exception:
+            pass
+        try:
             res = subprocess.run(
                 ["curl", "-sL", "-A", ua or UA_CHROME, "--max-time", "12", target_url],
                 capture_output=True, text=True, check=False,
             )
-            if res.stdout and "application/ld+json" in res.stdout:
-                return BeautifulSoup(res.stdout, "html.parser")
-            return None
+            return res.stdout or ""
+        except Exception:
+            return ""
 
     urls_to_scrape = [url]
     if "ma--boston/events" in url:
@@ -447,10 +539,18 @@ def scrape_eventbrite_search(url, ua):
 
     for target in urls_to_scrape:
         try:
-            soup = fetch_eb_soup(target)
-            if not soup:
+            html = fetch_eb_html(target)
+            if not html:
                 continue
-            batch = _parse_eventbrite_json_ld(soup)
+
+            # 1. Prefer high-fidelity __SERVER_DATA__ with exact start_time & end_time
+            batch = _parse_eventbrite_server_data(html)
+
+            # 2. Fall back to ItemList JSON-LD if __SERVER_DATA__ wasn't found
+            if not batch:
+                soup = BeautifulSoup(html, "html.parser")
+                batch = _parse_eventbrite_json_ld(soup)
+
             for e in batch:
                 u = e.get("url")
                 if u and u not in seen_urls:
