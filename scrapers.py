@@ -7272,7 +7272,7 @@ STATIC_LINKS = [
     ("music",   "Berklee Performance Center", "https://www.berklee.edu/BPC"),
     ("clubbing","Middlesex Lounge (Cambridge)", "https://www.msexcambridge.com/calendar"),
     ("gaming",  "Balance Patch (Esports, Smash & FGC)", "https://www.balancepatch.com/events"),
-    ("gaming",  "Pokémon GO / Niantic Campfire Boston", "https://campfire.nianticlabs.com"),
+    ("gaming",  "Harvard/Central PoGO (Harvard Square Campfire Group)", "https://campfire.nianticlabs.com"),
     ("music",   "Regattabar (jazz)", "https://www.regattabarjazz.com/"),
     ("theater", "Jacques' Cabaret (historic drag & cabaret)", "http://jacquescabaret.com/v3/"),
     ("clubbing","Dani's Queer Bar (Theater District lesbian/queer bar)", "https://danisqueerbar.com/"),
@@ -7321,10 +7321,10 @@ MANUAL_RECURRING_EVENTS = [
         ("Fighting Game Community (FGC) Weekly: Street Fighter & Tekken", "https://www.balancepatch.com/events", 4, 19, 0),
         ("Balance Patch Weekend Community LAN & Casuals", "https://www.balancepatch.com/events", 5, 13, 0),
     ]),
-    ("Boston Common", "https://campfire.nianticlabs.com", "gaming", [
-        ("Pokémon GO Wednesday Raid Hour (Niantic Campfire Meetup)", "https://campfire.nianticlabs.com", 2, 18, 0),
-        ("Pokémon GO Tuesday Spotlight Hour Catch Train", "https://campfire.nianticlabs.com", 1, 18, 0),
-        ("Pokémon GO Weekend Raid & Battle Meetup", "https://campfire.nianticlabs.com", 5, 14, 0),
+    ("Harvard Square", "https://campfire.nianticlabs.com", "gaming", [
+        ("Pokémon GO Wednesday Raid Hour (Harvard/Central PoGO Campfire Meetup)", "https://campfire.nianticlabs.com", 2, 18, 0),
+        ("Pokémon GO Tuesday Spotlight Hour Catch Train (Harvard Square & Harvard Yard)", "https://campfire.nianticlabs.com", 1, 18, 0),
+        ("Pokémon GO Weekend Community Meetup & Raids (Harvard/Central PoGO)", "https://campfire.nianticlabs.com", 5, 14, 0),
     ]),
     ("Central Square Farmers Market", "https://www.cambridgefarmersmarkets.org/markets/central-square/", "food", [
         ("Central Square Farmers Market", "https://www.cambridgefarmersmarkets.org/markets/central-square/", 0, 12, 0),
