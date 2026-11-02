@@ -5622,11 +5622,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
             <span id="near-me-btn-label">Near Me</span>
           </button>
         </div>
-        <div class="view-switch-right">
-          <span id="map-venue-stat" class="map-venue-stat" style="display: none;">
-            <strong id="map-venue-count">0</strong> venues on map
-          </span>
-        </div>
       </div>
       <div class="location-chips-bar" id="location-chips">
         <button type="button" class="loc-chip active" data-city="all"><span class="chip-icon">📍 </span>All Areas</button>
@@ -5658,7 +5653,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
           <div class="map-header-title">
             <span class="live-pulse"></span>
             <strong>Greater Boston Live Map</strong>
-            <span class="map-hint">· OpenStreetMap · Pins update with your date &amp; filters</span>
+            <span class="map-hint">· <strong id="map-venue-count">0</strong> venues with events · OpenStreetMap</span>
           </div>
           <div class="map-header-actions">
             <button type="button" id="map-label-toggle-btn" class="map-tool-btn" title="Toggle between venue names and numbers only"><span class="chip-icon">🏷️ </span>Names: On</button>
@@ -6487,12 +6482,10 @@ def render_page(results, weather=None, luckyseat_shows=None):
       const listBtn = document.getElementById('btn-view-list');
       const mapBtn = document.getElementById('btn-view-map');
       const mapWrapper = document.getElementById('map-view-wrapper');
-      const mapStat = document.getElementById('map-venue-stat');
 
       if (listBtn) listBtn.classList.toggle('active', mode === 'list');
       if (mapBtn) mapBtn.classList.toggle('active', mode === 'map');
       if (mapWrapper) mapWrapper.style.display = (mode === 'map') ? 'flex' : 'none';
-      if (mapStat) mapStat.style.display = (mode === 'map') ? 'inline-block' : 'none';
 
       if (mode === 'map') {{
         loadLeaflet(() => {{
