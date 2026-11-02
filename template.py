@@ -658,10 +658,13 @@ def build_seo_directory_html(all_events_flat, all_venue_names):
         if v:
             venue_counts[v] += 1
 
-    sorted_venues = sorted(all_venue_names)
+    # Prioritize active venues with shows, then alphabetical
+    sorted_venues = sorted(all_venue_names, key=lambda v: (-venue_counts.get(v, 0), v.lower()))
     venue_lis = []
-    for v in sorted_venues[:48]:
+    for v in sorted_venues:
         cnt = venue_counts.get(v, 0)
+        if cnt == 0 and len(venue_lis) >= 80:
+            continue
         cnt_str = f" <span class=\"dir-cnt\">({cnt})</span>" if cnt > 0 else ""
         venue_lis.append(f'<li><a href="#venues={quote(v)}">{escape(v)}</a>{cnt_str}</li>')
     venues_html = "\n".join(venue_lis)
@@ -758,12 +761,12 @@ def build_seo_directory_html(all_events_flat, all_venue_names):
     <div class="aeo-faq-block">
       <h3>Frequently Asked Questions about Greater Boston Events</h3>
       <div class="faq-item">
-        <h4>Where can I find live music in Boston and Cambridge tonight?</h4>
-        <p>Wicked Boston Events tracks over 40 local stages every 30 minutes, including The Sinclair, Middle East, Cantab Lounge, Paradise Rock Club, Midway Cafe, Club Passim, O'Brien's Pub, and Symphony Hall.</p>
+        <h4>Where can I find live music and theater in Boston and Cambridge tonight?</h4>
+        <p>Wicked Boston Events tracks over 100+ local stages and theater spaces every 30 minutes, including Symphony Hall, The Sinclair, Middle East, Central Square Theater, Calderwood Pavilion (BCA), Cantab Lounge, Paradise Rock Club, Midway Cafe, Club Passim, and O'Brien's Pub.</p>
       </div>
       <div class="faq-item">
-        <h4>Are there free events and comedy shows in Boston this week?</h4>
-        <p>Yes. You can toggle the <a href="free/">'Free' filter</a> to see free museum days, open mics, library talks, trivia nights, outdoor markets, and community gatherings across Boston, Cambridge, and Somerville.</p>
+        <h4>Are there stand-up comedy shows, plays, and free events in Boston this week?</h4>
+        <p>Yes! Check our <a href="comedy/">Comedy Guide</a> for shows at Laugh Boston, The Comedy Studio, and Improv Asylum; browse <a href="#cat=Stage+%26+theater">Stage &amp; Theater</a> for Calderwood Pavilion, Central Square Theater, and Huntington Theatre productions; or explore our <a href="free/">Free Events Guide</a> for museum days, Eventbrite community gatherings, open mics, and markets.</p>
       </div>
       <div class="faq-item">
         <h4>How does Boston Events differ from commercial ticketing sites?</h4>
@@ -836,8 +839,11 @@ def filter_events_for_hub(hub, events):
     for e in events:
         if city_filter and _event_city(e.get("venue"), e.get("_source_venue"), e) != city_filter:
             continue
-        if cat_filter and category_bucket(e.get("category")) != cat_filter:
-            continue
+        if cat_filter:
+            bucket = category_bucket(e.get("category"))
+            direct_cat = (e.get("category") or "").lower()
+            if bucket != cat_filter and direct_cat != cat_filter.lower():
+                continue
         if free_only and not _is_event_free(e):
             continue
         if time_filter and not _event_date_matches_time_filter(e, time_filter):
@@ -855,8 +861,11 @@ def filter_events_for_hub(hub, events):
                 continue
             if city_filter and _event_city(e.get("venue"), e.get("_source_venue"), e) != city_filter:
                 continue
-            if cat_filter and category_bucket(e.get("category")) != cat_filter:
-                continue
+            if cat_filter:
+                bucket = category_bucket(e.get("category"))
+                direct_cat = (e.get("category") or "").lower()
+                if bucket != cat_filter and direct_cat != cat_filter.lower():
+                    continue
             if free_only and not _is_event_free(e):
                 continue
             ed = _parse_event_eastern_date(e)

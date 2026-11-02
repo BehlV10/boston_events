@@ -1263,9 +1263,32 @@ class TestBostonEvents(unittest.TestCase):
         self.assertEqual(geo2["venue"], "The 88 Club")
         self.assertEqual(geo2["neighborhood"], "Back Bay")
 
+    def test_calderwood_and_central_square_theater_geocoding(self):
+        """Verify Calderwood Pavilion and Central Square Theater resolve to correct neighborhoods and coordinates."""
+        from venues_geo import resolve_event_geo
+
+        ev_c = {"name": "The Wash", "venue": "Calderwood Pavilion"}
+        geo_c = resolve_event_geo(ev_c)
+        self.assertIsNotNone(geo_c)
+        self.assertEqual(geo_c["venue"], "Calderwood Pavilion")
+        self.assertEqual(geo_c["neighborhood"], "South End")
+
+        ev_t = {"name": "The Getaway Driver", "venue": "Central Square Theater"}
+        geo_t = resolve_event_geo(ev_t)
+        self.assertIsNotNone(geo_t)
+        self.assertEqual(geo_t["venue"], "Central Square Theater")
+        self.assertEqual(geo_t["neighborhood"], "Central Square")
+
+        ev_bso = {"name": "Haydn's The Creation", "venue": "Boston Symphony Orchestra"}
+        geo_bso = resolve_event_geo(ev_bso)
+        self.assertIsNotNone(geo_bso)
+        self.assertEqual(geo_bso["venue"], "Symphony Hall")
+        self.assertEqual(geo_bso["neighborhood"], "Fenway / Symphony")
+
 
 if __name__ == "__main__":
     unittest.main()
+
 
 
 
