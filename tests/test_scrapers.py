@@ -1285,6 +1285,34 @@ class TestBostonEvents(unittest.TestCase):
         self.assertEqual(geo_bso["venue"], "Symphony Hall")
         self.assertEqual(geo_bso["neighborhood"], "Fenway / Symphony")
 
+    def test_scrape_harvard_pogo_meetups(self):
+        """Verify Harvard PoGO scraper parses official Raid Days and Community Days."""
+        from scrapers import scrape_harvard_pogo_meetups
+        from unittest.mock import patch, MagicMock
+
+        mock_html = """
+        <a class="event-item-link" href="/events/chandelure-super-mega-raid-day-2026/">
+          <span class="event-tag-badge">Raid Day</span>
+          <h2>Chandelure Super Mega Raid Day</h2>
+          <div class="event-countdown" data-countdown="2026-10-31T17:00:00" data-countdown-to="end"></div>
+        </a>
+        <a class="event-item-link" href="/events/november-communityday2026/">
+          <span class="event-tag-badge">Community Day</span>
+          <h2>Pawniard Community Day</h2>
+          <div class="event-countdown" data-countdown="2026-11-21T14:00:00" data-countdown-to="start"></div>
+        </a>
+        """
+        mock_resp = MagicMock()
+        mock_resp.text = mock_html
+        with patch("scrapers._SESSION.get", return_value=mock_resp):
+            events = scrape_harvard_pogo_meetups("https://campfire.nianticlabs.com", "test_ua")
+        self.assertEqual(len(events), 2)
+        self.assertIn("Chandelure Super Mega Raid Day", events[0]["name"])
+        self.assertEqual(events[0]["venue"], "Harvard Square")
+        self.assertEqual(events[0]["category"], "gaming")
+        self.assertIn("Pawniard Community Day", events[1]["name"])
+        self.assertEqual(events[1]["venue"], "Harvard Square")
+
 
 if __name__ == "__main__":
     unittest.main()

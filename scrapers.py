@@ -3073,6 +3073,84 @@ def scrape_central_square_theater(url, ua):
     return events
 
 
+def scrape_harvard_pogo_meetups(url, ua):
+    """Parse real in-person Pokémon GO community meetups (Raid Days, Community Days, Global Wild Area)
+    held at Harvard Square & Harvard Yard by the Harvard/Central PoGO Campfire community."""
+    events = []
+    seen = set()
+    try:
+        resp = _SESSION.get("https://leekduck.com/events/", headers={"User-Agent": ua or UA_CHROME}, timeout=15)
+        soup = BeautifulSoup(resp.text, "html.parser")
+        events_map = {}
+
+        for a in soup.find_all("a", class_=lambda c: c and "event-item-link" in c):
+            h = a.find("h2") or a.find("h3")
+            title = h.get_text(strip=True) if h else ""
+            tag = a.find(class_="event-tag-badge")
+            tag_str = tag.get_text(strip=True) if tag else ""
+            cd = a.find(class_="event-countdown")
+            if not cd or not title:
+                continue
+            to_type = cd.get("data-countdown-to")
+            ts = cd.get("data-countdown")
+            link = "https://leekduck.com" + a.get("href", "")
+            if title not in events_map:
+                events_map[title] = {"tag": tag_str, "link": link}
+            events_map[title][to_type] = ts
+
+        MEETUP_TAGS = {"raid day", "community day", "wild area", "research day", "max battle"}
+
+        for title, d in events_map.items():
+            tag = d.get("tag", "").lower()
+            if "sendai" in title.lower() or "mexico" in title.lower():
+                continue
+            if not any(k in tag or k in title.lower() for k in MEETUP_TAGS):
+                continue
+
+            start_str = d.get("start")
+            end_str = d.get("end")
+            dt = None
+            if start_str:
+                try:
+                    dt = datetime.fromisoformat(start_str.replace("Z", "+00:00"))
+                    if dt.tzinfo is None:
+                        dt = dt.replace(tzinfo=EASTERN)
+                except Exception:
+                    dt = None
+            elif end_str:
+                try:
+                    end_dt = datetime.fromisoformat(end_str.replace("Z", "+00:00"))
+                    if end_dt.tzinfo is None:
+                        end_dt = end_dt.replace(tzinfo=EASTERN)
+                    dt = end_dt - timedelta(hours=3)
+                except Exception:
+                    dt = None
+
+            if not dt:
+                continue
+
+            iso = dt.astimezone(timezone.utc).isoformat()
+            key = (title.lower(), iso[:10])
+            if key in seen:
+                continue
+            seen.add(key)
+
+            clean_title = f"{title} (Harvard/Central PoGO Campfire Meetup)"
+            events.append({
+                "name": clean_title,
+                "date": iso,
+                "url": "https://campfire.nianticlabs.com",
+                "venue": "Harvard Square",
+                "category": "gaming",
+                "price": "Free",
+                "description": "In-person Pokémon GO meetup hosted by the Harvard/Central PoGO community at Harvard Square & Harvard Yard. Check in on the Niantic Campfire app for raid coordinates, flares, and lures.",
+            })
+    except Exception:
+        pass
+
+    return events
+
+
 def scrape_ccae(url, ua):
     """Cambridge Center for Adult Education (CCAE) — community talks, workshops, and arts series in Harvard Sq."""
     resp = _SESSION.get(url, headers={"User-Agent": ua or UA_CHROME}, timeout=15)
@@ -7140,6 +7218,7 @@ _ALL_VENUES = [
     {"name": "Eventbrite Boston", "url": "https://www.eventbrite.com/d/ma--boston/events/", "ua": UA_CHROME, "scraper": scrape_eventbrite_search, "default_category": None},
     {"name": "Aeronaut Brewing", "url": "https://d3izki9aezxlkr.cloudfront.net/public_events.json", "ua": UA_CHROME, "scraper": scrape_aeronaut, "default_category": "food"},
     {"name": "Versus Boston (via Eventbrite)", "url": "https://www.eventbrite.com/o/versus-105910382141", "ua": UA_CHROME, "scraper": scrape_eventbrite_org, "default_category": "gaming"},
+    {"name": "Harvard/Central PoGO", "url": "https://campfire.nianticlabs.com", "ua": UA_CHROME, "scraper": scrape_harvard_pogo_meetups, "default_category": "gaming"},
     {"name": "Make Friends After College (via Eventbrite)", "url": "https://www.eventbrite.com/o/make-friends-after-college-98390790901", "ua": UA_CHROME, "scraper": scrape_eventbrite_org, "default_category": "community"},
     {"name": "The Boston Calendar", "url": "https://www.thebostoncalendar.com/events", "ua": UA_CHROME, "scraper": scrape_boston_calendar, "default_category": None},
     {"name": "City Winery Boston", "url": "https://citywinery.com/pages/locations/boston", "ua": UA_CHROME, "scraper": scrape_city_winery, "default_category": "music"},
@@ -7320,11 +7399,6 @@ MANUAL_RECURRING_EVENTS = [
         ("Baystate Beatdown: Smash Ultimate Weekly", "https://smash.gg/baystate", 3, 18, 30),
         ("Fighting Game Community (FGC) Weekly: Street Fighter & Tekken", "https://www.balancepatch.com/events", 4, 19, 0),
         ("Balance Patch Weekend Community LAN & Casuals", "https://www.balancepatch.com/events", 5, 13, 0),
-    ]),
-    ("Harvard Square", "https://campfire.nianticlabs.com", "gaming", [
-        ("Pokémon GO Wednesday Raid Hour (Harvard/Central PoGO Campfire Meetup)", "https://campfire.nianticlabs.com", 2, 18, 0),
-        ("Pokémon GO Tuesday Spotlight Hour Catch Train (Harvard Square & Harvard Yard)", "https://campfire.nianticlabs.com", 1, 18, 0),
-        ("Pokémon GO Weekend Community Meetup & Raids (Harvard/Central PoGO)", "https://campfire.nianticlabs.com", 5, 14, 0),
     ]),
     ("Central Square Farmers Market", "https://www.cambridgefarmersmarkets.org/markets/central-square/", "food", [
         ("Central Square Farmers Market", "https://www.cambridgefarmersmarkets.org/markets/central-square/", 0, 12, 0),
