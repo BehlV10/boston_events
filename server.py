@@ -100,6 +100,11 @@ def sitemap_xml():
     return send_from_directory(os.path.dirname(os.path.abspath(__file__)), "sitemap.xml")
 
 
+@app.get("/deferred_days.html")
+def deferred_days_html():
+    return send_from_directory(os.path.dirname(os.path.abspath(__file__)), "deferred_days.html")
+
+
 @app.get("/<hub_slug>")
 @app.get("/<hub_slug>/")
 def hub_page(hub_slug):

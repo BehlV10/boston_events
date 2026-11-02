@@ -2388,6 +2388,14 @@ def render_page(results, weather=None, luckyseat_shows=None):
     if tba:
         deferred_sections.append(_render_day_section("Date TBA", tba, "tba"))
 
+    deferred_content = "".join(deferred_sections)
+    try:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        with open(os.path.join(base_dir, "deferred_days.html"), "w", encoding="utf-8") as f:
+            f.write(deferred_content)
+    except Exception:
+        pass
+
     all_event_dates = [d.isoformat() for d, _ in dated]
 
     useful_sidebar = ""
@@ -5733,9 +5741,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
         </div>
       </div>
       {"".join(initial_sections)}
-      <template id="deferred-days">
-      {"".join(deferred_sections)}
-      </template>
+      <template id="deferred-days"></template>
       <div class="week-nav bottom">
         <button type="button" id="week-prev-b" aria-label="Previous week">← prev</button>
         <span id="week-label-b"></span>
@@ -6249,21 +6255,65 @@ def render_page(results, weather=None, luckyseat_shows=None):
     const eventDates = new Set(ALL_EVENT_DATES);
 
     let deferredHydrated = false;
-    function ensureDeferredDaysHydrated() {{
-      if (deferredHydrated) return;
-      deferredHydrated = true;
+    let deferredHydrationPromise = null;
+    function ensureDeferredDaysHydrated(callback) {{
+      if (deferredHydrated) {{
+        if (callback) callback();
+        return;
+      }}
       const tmpl = document.getElementById('deferred-days');
-      if (!tmpl) return;
-      const bottomNav = document.querySelector('.week-nav.bottom');
-      if (bottomNav && bottomNav.parentNode) {{
-        bottomNav.parentNode.insertBefore(tmpl.content, bottomNav);
+      if (tmpl && tmpl.content && tmpl.content.childNodes.length > 0) {{
+        const bottomNav = document.querySelector('.week-nav.bottom');
+        if (bottomNav && bottomNav.parentNode) {{
+          bottomNav.parentNode.insertBefore(tmpl.content, bottomNav);
+        }}
+        tmpl.remove();
+        daySections = Array.from(document.querySelectorAll('.day[data-date]'));
+        updateDayHeadings();
+        if (starredEvents && starredEvents.size > 0) {{
+          loadStarredState();
+        }}
+        deferredHydrated = true;
+        if (callback) callback();
+        return;
       }}
-      tmpl.remove();
-      daySections = Array.from(document.querySelectorAll('.day[data-date]'));
-      updateDayHeadings();
-      if (starredEvents && starredEvents.size > 0) {{
-        loadStarredState();
+
+      if (!deferredHydrationPromise) {{
+        deferredHydrationPromise = fetch('deferred_days.html')
+          .then(r => r.ok ? r.text() : '')
+          .then(html => {{
+            if (html) {{
+              const div = document.createElement('div');
+              div.innerHTML = html;
+              const bottomNav = document.querySelector('.week-nav.bottom');
+              if (bottomNav && bottomNav.parentNode) {{
+                while (div.firstChild) {{
+                  bottomNav.parentNode.insertBefore(div.firstChild, bottomNav);
+                }}
+              }}
+              daySections = Array.from(document.querySelectorAll('.day[data-date]'));
+              updateDayHeadings();
+              if (starredEvents && starredEvents.size > 0) {{
+                loadStarredState();
+              }}
+            }}
+            deferredHydrated = true;
+            apply();
+            if (callback) callback();
+          }})
+          .catch(err => {{
+            deferredHydrated = true;
+            if (callback) callback();
+          }});
+      }} else {{
+        deferredHydrationPromise.then(() => {{ if (callback) callback(); }});
       }}
+    }}
+
+    if ('requestIdleCallback' in window) {{
+      requestIdleCallback(() => ensureDeferredDaysHydrated(), {{ timeout: 1500 }});
+    }} else {{
+      setTimeout(() => ensureDeferredDaysHydrated(), 800);
     }}
     function parseISO(s) {{ const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); }}
     function fmtISO(d) {{
