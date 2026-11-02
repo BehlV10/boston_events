@@ -1310,6 +1310,7 @@ class TestBostonEvents(unittest.TestCase):
         self.assertIn("Chandelure Super Mega Raid Day", events[0]["name"])
         self.assertEqual(events[0]["venue"], "Harvard Square")
         self.assertEqual(events[0]["category"], "gaming")
+        self.assertEqual(events[0]["url"], "https://apps.apple.com/us/app/niantic-campfire/id1608154490")
         self.assertIn("Pawniard Community Day", events[1]["name"])
         self.assertEqual(events[1]["venue"], "Harvard Square")
 
