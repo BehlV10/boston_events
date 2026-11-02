@@ -7827,14 +7827,17 @@ _WORD_BOUNDARY_PATTERNS = {
 }
 
 UTILITY_EVENT_RE = re.compile(
-    r'\b(esol|esl|ell class|ell conversation|citizenship class|citizenship preparation|'
-    r'homework help|drop-in tutoring|tech help|device clinic|computer basics|digital literacy|'
-    r'job seeker|resume help|career coaching|tax prep|library social work|social work: drop-in|'
+    r'\b(esol|esl|ell\b|ell class|ell conversation|english class|beginning english|language class|'
+    r'citizenship class|citizenship preparation|citizenship prep|'
+    r'homework help|drop-in tutoring|tutoring for teens|tutoring|'
+    r'tech help|device clinic|computer basics|digital literacy|meet your device|'
+    r'job seeker|job application|career exploration|career coaching|resume and job|resume help|'
+    r'linkedin profile\+|tax prep|library social work|social work|'
     r'city council meeting|school committee|school building committee|zoning board|'
     r'council on aging|virtual nutrition class|virtual general exercise|general exercise - holland|'
-    r'general exercise - ralph|meet your device)\b|'
-    r'english for speakers of other languages|english for u\.s\. citizenship|'
-    r'english conversation practice|english conversation group',
+    r'general exercise - ralph)\b|'
+    r'english for speakers of[\s\xa0]+other[\s\xa0]+languages|english for u\.s\. citizenship|'
+    r'english conversation|conversation practice|conversation group|conversational group|english grammar',
     re.IGNORECASE,
 )
 

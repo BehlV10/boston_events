@@ -1314,6 +1314,33 @@ class TestBostonEvents(unittest.TestCase):
         self.assertIn("Pawniard Community Day", events[1]["name"])
         self.assertEqual(events[1]["venue"], "Harvard Square")
 
+    def test_utility_event_categorization(self):
+        """ESOL, ELL, citizenship, and civic services must be categorized as 'services' and bucketed in 'Classes & Services'."""
+        from scrapers import infer_category, category_bucket, UTILITY_EVENT_RE
+
+        test_titles = [
+            "Beginner ESOL Class (Central Square)",
+            "High Beginner ESOL (Valente)",
+            "English Conversation Practice, Intermediate (O'Neill)",
+            "Beginning English Class (Valente)",
+            "Online Beginner ELL Class",
+            "Online Intermediate ELL Conversation Group",
+            "Intermediate English Grammar and Conversation Practice",
+            "Citizenship Preparation Classes (Central Square)",
+            "Fall 2026 English for U.S. Citizenship",
+            "Tech for All: Meet Your Device Workshop",
+            "Drop-in Tech Help at the Library (Central Square)",
+            "Library Social Work: Drop-in Hours at West",
+            "Free Drop-in Tutoring for Teens (Main)",
+            "General Exercise - Holland Street (Council on Aging)",
+        ]
+        for title in test_titles:
+            self.assertTrue(bool(UTILITY_EVENT_RE.search(title)), f"Failed regex match: {title}")
+            cat = infer_category(title, "Cambridge Public Library")
+            self.assertEqual(cat, "services", f"Failed category inference for: {title}")
+            bucket = category_bucket(cat)
+            self.assertEqual(bucket, "Classes & Services", f"Failed bucket lookup for: {title}")
+
 
 if __name__ == "__main__":
     unittest.main()

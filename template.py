@@ -22,6 +22,7 @@ from scrapers import (
     fetch_luckyseat_boston,
     _load_community_events,
     is_placeholder_or_closed_event,
+    UTILITY_EVENT_RE,
 )
 from venues_geo import resolve_event_geo
 
@@ -842,8 +843,9 @@ def filter_events_for_hub(hub, events):
         if city_filter and _event_city(e.get("venue"), e.get("_source_venue"), e) != city_filter:
             continue
         if cat_filter:
-            bucket = category_bucket(e.get("category"))
-            direct_cat = (e.get("category") or "").lower()
+            c = "services" if UTILITY_EVENT_RE.search(e.get("name") or "") else (e.get("category") or "other")
+            bucket = category_bucket(c)
+            direct_cat = c.lower()
             if bucket != cat_filter and direct_cat != cat_filter.lower():
                 continue
         if free_only and not _is_event_free(e):
@@ -864,8 +866,9 @@ def filter_events_for_hub(hub, events):
             if city_filter and _event_city(e.get("venue"), e.get("_source_venue"), e) != city_filter:
                 continue
             if cat_filter:
-                bucket = category_bucket(e.get("category"))
-                direct_cat = (e.get("category") or "").lower()
+                c = "services" if UTILITY_EVENT_RE.search(e.get("name") or "") else (e.get("category") or "other")
+                bucket = category_bucket(c)
+                direct_cat = c.lower()
                 if bucket != cat_filter and direct_cat != cat_filter.lower():
                     continue
             if free_only and not _is_event_free(e):
@@ -2039,6 +2042,8 @@ def group_by_date(results):
                 continue
             entry = {"venue_url": r["url"], **e, "_source_venue": r["venue"]}
             entry["venue"] = e.get("venue") or r["venue"]
+            if UTILITY_EVENT_RE.search(name):
+                entry["category"] = "services"
             raw = e.get("date")
             key = None
             if raw:
@@ -2231,7 +2236,10 @@ def render_page(results, weather=None, luckyseat_shows=None):
         else:
             price_tag = ""
 
-        cat = e.get("category") or "other"
+        if UTILITY_EVENT_RE.search(raw_title):
+            cat = "services"
+        else:
+            cat = e.get("category") or "other"
         genre = e.get("genre")
         if not genre and cat in ("music", "clubbing"):
             genre = infer_music_genre(e.get("name"), e.get("venue"), description=e.get("description"), category=cat)
@@ -2373,7 +2381,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
     def _render_buckets(events):
         by_bucket = {b: [] for b in bucket_name_order}
         for e in events:
-            by_bucket.setdefault(category_bucket(e.get("category")), []).append(e)
+            c = "services" if UTILITY_EVENT_RE.search(e.get("name") or "") else (e.get("category") or "other")
+            by_bucket.setdefault(category_bucket(c), []).append(e)
         bucket_blocks = []
         for bname in bucket_name_order:
             bucket_events = by_bucket.get(bname) or []
@@ -2536,8 +2545,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
     once_count = 0
     all_events_flat = [e for _, es in dated for e in es] + list(tba)
     for e in all_events_flat:
-        bucket_counts[category_bucket(e.get("category"))] = bucket_counts.get(category_bucket(e.get("category")), 0) + 1
-        if (e.get("category") or "other") == "other":
+        c = "services" if UTILITY_EVENT_RE.search(e.get("name") or "") else (e.get("category") or "other")
+        bucket_counts[category_bucket(c)] = bucket_counts.get(category_bucket(c), 0) + 1
+        if c == "other":
             other_count += 1
         if is_recurring(e):
             recurring_count += 1
