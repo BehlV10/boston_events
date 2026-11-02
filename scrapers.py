@@ -567,6 +567,28 @@ def _bc_extract_url_from_p(p):
     return None
 
 
+TBC_DETAILS_CACHE_PATH = os.path.join(CACHE_DIR, "tbc_details_cache.json")
+
+
+def _load_tbc_details_cache():
+    if not os.path.exists(TBC_DETAILS_CACHE_PATH):
+        return {}
+    try:
+        with open(TBC_DETAILS_CACHE_PATH, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            return data if isinstance(data, dict) else {}
+    except Exception:
+        return {}
+
+
+def _save_tbc_details_cache(cache_dict):
+    try:
+        with open(TBC_DETAILS_CACHE_PATH, "w", encoding="utf-8") as f:
+            json.dump(cache_dict, f)
+    except Exception:
+        pass
+
+
 def _bc_detail_info(bc_url, ua):
     """Fetch detail page for The Boston Calendar event and extract (external_url, admission_price)."""
     soup = None
@@ -583,6 +605,7 @@ def _bc_detail_info(bc_url, ua):
         return None, None
     ext_url = None
     price = None
+    where_url = None
     for p in soup.find_all("p"):
         b = p.find("b") or p.find("strong")
         if not b:
@@ -594,6 +617,13 @@ def _bc_detail_info(bc_url, ua):
                 ext_url = u
         elif "admission" in label or "price" in label:
             price = _parse_bc_admission(p.get_text(" ", strip=True))
+        elif "where" in label and not where_url:
+            u = _bc_extract_url_from_p(p)
+            if u and not any(m in u for m in ["google.com/maps", "maps.google.com", "openstreetmap"]):
+                where_url = u
+
+    if not ext_url and where_url:
+        ext_url = where_url
 
     if not ext_url:
         for a in soup.find_all("a", href=True):
@@ -603,7 +633,10 @@ def _bc_detail_info(bc_url, ua):
             if any(k in href for k in ["thebostoncalendar.com", "facebook.com/sharer", "twitter.com", "instagram.com"]):
                 continue
             text = a.get_text(" ", strip=True).lower()
-            if any(k in text for k in ["buy ticket", "get ticket", "ticket", "event website", "official website", "more info", "register"]):
+            if any(k in text for k in [
+                "buy ticket", "get ticket", "ticket", "event website", "official website",
+                "more info", "register", "sign up", "reserve", "details", "learn more", "enroll"
+            ]):
                 ext_url = href
                 break
 
@@ -713,21 +746,48 @@ def scrape_boston_calendar(url, ua):
                 entry["ends"] = f"{end_year:04d}-{end_month:02d}-{end_day:02d}"
             events.append(entry)
     if events:
-        # Prioritize upcoming events in the immediate future for detail fetching
-        # so users get direct primary source links for all near-term happenings
+        cache = _load_tbc_details_cache()
+
+        # 1. Apply existing cached details immediately
+        for e in events:
+            u = e.get("url")
+            if u and u in cache:
+                info = cache[u]
+                if info.get("url"):
+                    e["url"] = info["url"]
+                if info.get("price") and not e.get("price"):
+                    e["price"] = info["price"]
+
+        # 2. Identify uncached events still pointing to thebostoncalendar.com
         def _bc_sort_key(e):
             d = e.get("date")
-            return d if d else "9999"
+            v = (e.get("venue") or "").lower()
+            # Prioritize specific venues (like CCAE) and near-term dates
+            is_pri = 0 if any(k in v for k in ["ccae", "cambridge center", "museum", "theater", "theatre"]) else 1
+            return (is_pri, d if d else "9999")
 
-        sorted_events = sorted(events, key=_bc_sort_key)
-        top = sorted_events[:180]
-        with ThreadPoolExecutor(max_workers=20) as ex:
-            details = list(ex.map(lambda e: _bc_detail_info(e["url"], ua), top))
-        for e, (ext, p) in zip(top, details):
-            if ext:
-                e["url"] = ext
-            if p and not e.get("price"):
-                e["price"] = p
+        uncached = [e for e in events if "thebostoncalendar.com" in e.get("url", "") and e.get("url") not in cache]
+        sorted_uncached = sorted(uncached, key=_bc_sort_key)
+        batch = sorted_uncached[:400]
+
+        if batch:
+            with ThreadPoolExecutor(max_workers=25) as ex:
+                urls_to_fetch = [e["url"] for e in batch]
+                details = list(ex.map(lambda u: _bc_detail_info(u, ua), urls_to_fetch))
+
+            for e, (ext, p) in zip(batch, details):
+                orig = e["url"]
+                cache[orig] = {
+                    "url": ext,
+                    "price": p,
+                    "ts": time.time(),
+                }
+                if ext:
+                    e["url"] = ext
+                if p and not e.get("price"):
+                    e["price"] = p
+
+            _save_tbc_details_cache(cache)
     return events
 
 
