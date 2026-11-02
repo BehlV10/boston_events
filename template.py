@@ -2330,8 +2330,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
             accent = CATEGORY_STYLES.get(cats[0], CATEGORY_STYLES["other"])[0] if cats else CATEGORY_STYLES["other"][0]
             items = "\n".join(render_event(e) for e in bucket_events)
             bucket_blocks.append(f'''
-            <div class="bucket" data-bucket="{escape(bname)}">
-              <div class="bucket-head" style="--accent:{accent}">
+            <div class="bucket" data-bucket="{escape(bname)}" style="--accent:{accent};">
+              <div class="bucket-head">
                 <span class="bucket-name">{escape(bname)}</span>
                 <span class="count">{len(bucket_events)}</span>
               </div>
@@ -3281,7 +3281,14 @@ def render_page(results, weather=None, luckyseat_shows=None):
   .city-head {{ margin: 0 0 8px; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--city-color); display: flex; align-items: center; gap: 8px; }}
   .city-head .count {{ background: transparent; color: var(--muted); font-weight: 500; letter-spacing: 0; }}
   .buckets {{ display: flex; flex-direction: column; gap: 10px; }}
-  .bucket {{ border-left: 3px solid var(--accent, #444); padding: 2px 0 2px 12px; border-left-color: var(--accent); }}
+  .bucket {{ border-left: 3px solid var(--accent, #7aa2f7); padding: 2px 0 2px 12px; border-left-color: var(--accent); }}
+  .bucket[data-bucket="Music & nightlife"] {{ --accent: #7aa2f7; }}
+  .bucket[data-bucket="Dance"]             {{ --accent: #ff7ab2; }}
+  .bucket[data-bucket="Stage"]             {{ --accent: #f0a07a; }}
+  .bucket[data-bucket="Arts & culture"]    {{ --accent: #9ece6a; }}
+  .bucket[data-bucket="Play"]              {{ --accent: #bb9af7; }}
+  .bucket[data-bucket="Food & drink"]      {{ --accent: #c678dd; }}
+  .bucket[data-bucket="Community"]         {{ --accent: #8fa1b3; }}
   .bucket-head {{ display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); font-weight: 600; }}
   .bucket-head .count {{ background: transparent; color: var(--muted); }}
   .bucket ul {{ list-style: none; padding: 0; margin: 0; }}
