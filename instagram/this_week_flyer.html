@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800;900&family=JetBrains+Mono:wght@600;700;800&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 1080px;
+    height: 1350px;
+    background: #090c12;
+    color: #f1f5f9;
+    font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 28px 20px 28px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Background Glow Accents */
+  .glow-top-left {
+    position: absolute;
+    top: -120px;
+    left: -100px;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(93, 155, 255, 0.18) 0%, rgba(93, 155, 255, 0) 70%);
+    pointer-events: none;
+  }
+  .glow-bottom-right {
+    position: absolute;
+    bottom: -100px;
+    right: -100px;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(16, 185, 129, 0.14) 0%, rgba(16, 185, 129, 0) 70%);
+    pointer-events: none;
+  }
+
+  /* Top Header */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 14px;
+    border-bottom: 1.5px solid #1e293b;
+    margin-bottom: 14px;
+    flex-shrink: 0;
+  }
+  .brand-block {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .brand-logo {
+    font-size: 32px;
+    font-weight: 900;
+    letter-spacing: -0.8px;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .brand-logo span.accent {
+    color: #5d9bff;
+  }
+  .brand-sub {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #94a3b8;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+  }
+  .header-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+  }
+  .badge-dates {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 800;
+    color: #38bdf8;
+    background: rgba(56, 189, 248, 0.12);
+    border: 1.5px solid rgba(56, 189, 248, 0.35);
+    padding: 5px 14px;
+    border-radius: 999px;
+    letter-spacing: 0.5px;
+  }
+  .badge-stat {
+    font-size: 12px;
+    font-weight: 700;
+    color: #34d399;
+  }
+
+  /* Main Grid: 2 Columns */
+  .grid-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .column {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* Day Section Group */
+  .day-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .day-header {
+    font-size: 13.5px;
+    font-weight: 800;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: #60a5fa;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding-left: 2px;
+  }
+  .day-pin {
+    color: #f59e0b;
+    font-size: 12px;
+  }
+
+  .events-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  /* Event Card */
+  .event-card {
+    background: #0f1523;
+    border: 1px solid #1e293b;
+    border-left: 3.5px solid var(--accent, #5d9bff);
+    border-radius: 8px;
+    padding: 7px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  }
+
+  .card-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .card-time {
+    font-family: 'JetBrains Mono', monospace;
+    color: #94a3b8;
+  }
+  .card-price {
+    color: #cbd5e1;
+    background: #1e293b;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+  }
+  .card-price.free {
+    color: #34d399;
+    background: rgba(16, 185, 129, 0.16);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    font-weight: 800;
+  }
+  .card-cat {
+    margin-left: auto;
+    color: var(--accent, #94a3b8);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+  }
+
+  .card-title {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .card-venue {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #94a3b8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Footer */
+  .footer {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1.5px solid #1e293b;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .footer-url {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    font-weight: 800;
+    color: #5d9bff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .footer-sub {
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748b;
+    letter-spacing: 0.3px;
+  }
+</style>
+</head>
+<body>
+  <div class="glow-top-left"></div>
+  <div class="glow-bottom-right"></div>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="brand-block">
+      <div class="brand-logo">Wicked Boston <span class="accent">Events</span></div>
+      <div class="brand-sub">The Definitive Live Radar for Greater Boston</div>
+    </div>
+    <div class="header-badge">
+      <div class="badge-dates">WEEK OF NOV 2 – NOV 8</div>
+      <div class="badge-stat">● 8,200+ Live Shows Monitored</div>
+    </div>
+  </div>
+
+  <!-- 2-Column Grid -->
+  <div class="grid-container">
+    <div class="column">
+      <div class="day-group">
+  <div class="day-header"><span class="day-pin">✦</span> MON · NOV 2</div>
+  <div class="events-list">
+    <div class="event-card" style="--accent:#7aa2f7">
+      <div class="card-top">
+        <span class="card-time">7:30 PM</span>
+        <span class="card-price free">FREE</span>
+        <span class="card-cat">Classical</span>
+      </div>
+      <div class="card-title">First Monday at Jordan Hall</div>
+      <div class="card-venue">NEC Jordan Hall · Back Bay</div>
+    </div>
+    <div class="event-card" style="--accent:#e0af68">
+      <div class="card-top">
+        <span class="card-time">7:00 PM</span>
+        <span class="card-price ">$15</span>
+        <span class="card-cat">35mm Film</span>
+      </div>
+      <div class="card-title">Inglourious Basterds (35mm)</div>
+      <div class="card-venue">Somerville Theatre · Davis Sq</div>
+    </div>
+    <div class="event-card" style="--accent:#ff708d">
+      <div class="card-top">
+        <span class="card-time">7:00 PM</span>
+        <span class="card-price ">$22</span>
+        <span class="card-cat">Alt-Rock</span>
+      </div>
+      <div class="card-title">MICO: The Fantasy Tour</div>
+      <div class="card-venue">Paradise Rock Club · Comm Ave</div>
+    </div>
+  </div>
+</div>
+<div class="day-group">
+  <div class="day-header"><span class="day-pin">✦</span> TUE · NOV 3</div>
+  <div class="events-list">
+    <div class="event-card" style="--accent:#bb9af7">
+      <div class="card-top">
+        <span class="card-time">7:00 PM</span>
+        <span class="card-price ">$38</span>
+        <span class="card-cat">Indie Pop</span>
+      </div>
+      <div class="card-title">Kate Nash (Live Concert)</div>
+      <div class="card-venue">Arts at the Armory · Somerville</div>
+    </div>
+    <div class="event-card" style="--accent:#7aa2f7">
+      <div class="card-top">
+        <span class="card-time">7:00 PM</span>
+        <span class="card-price ">$32</span>
+        <span class="card-cat">Indie Pop</span>
+      </div>
+      <div class="card-title">half•alive (Night 1)</div>
+      <div class="card-venue">The Sinclair · Harvard Sq</div>
+    </div>
+    <div class="event-card" style="--accent:#9ece6a">
+      <div class="card-top">
+        <span class="card-time">8:00 PM</span>
+        <span class="card-price ">$20</span>
+        <span class="card-cat">Folk</span>
+      </div>
+      <div class="card-title">Willi Carlisle</div>
+      <div class="card-venue">Crystal Ballroom · Davis Sq</div>
+    </div>
+  </div>
+</div>
+<div class="day-group">
+  <div class="day-header"><span class="day-pin">✦</span> WED · NOV 4</div>
+  <div class="events-list">
+    <div class="event-card" style="--accent:#c678dd">
+      <div class="card-top">
+        <span class="card-time">7:30 PM</span>
+        <span class="card-price ">$35</span>
+        <span class="card-cat">Culinary</span>
+      </div>
+      <div class="card-title">Duff Goldman: Live Bakery Stories</div>
+      <div class="card-venue">Crystal Ballroom · Davis Sq</div>
+    </div>
+    <div class="event-card" style="--accent:#7aa2f7">
+      <div class="card-top">
+        <span class="card-time">7:30 PM</span>
+        <span class="card-price free">FREE</span>
+        <span class="card-cat">Orchestral</span>
+      </div>
+      <div class="card-title">David Loebel & NEC Symphony</div>
+      <div class="card-venue">Jordan Hall · Back Bay</div>
+    </div>
+    <div class="event-card" style="--accent:#ff708d">
+      <div class="card-top">
+        <span class="card-time">7:00 PM</span>
+        <span class="card-price ">$18</span>
+        <span class="card-cat">Grunge</span>
+      </div>
+      <div class="card-title">Pretty Sick: Tour 2026</div>
+      <div class="card-venue">Brighton Music Hall · Allston</div>
+    </div>
+  </div>
+</div>
+<div class="day-group">
+  <div class="day-header"><span class="day-pin">✦</span> THU · NOV 5</div>
+  <div class="events-list">
+    <div class="event-card" style="--accent:#ff708d">
+      <div class="card-top">
+        <span class="card-time">8:00 PM</span>
+        <span class="card-price ">$65+</span>
+        <span class="card-cat">Hip-Hop</span>
+      </div>
+      <div class="card-title">CHIEF KEEF (Live Tour)</div>
+      <div class="card-venue">MGM Music Hall · Fenway</div>
+    </div>
+    <div class="event-card" style="--accent:#7aa2f7">
+      <div class="card-top">
+        <span class="card-time">7:00 PM</span>
+        <span class="card-price ">$35</span>
+        <span class="card-cat">UK Alt-Rock</span>
+      </div>
+      <div class="card-title">Palace: USA & Canada Tour</div>
+      <div class="card-venue">House of Blues · Fenway</div>
+    </div>
+    <div class="event-card" style="--accent:#ffd866">
+      <div class="card-top">
+        <span class="card-time">7:30 PM</span>
+        <span class="card-price ">$49+</span>
+        <span class="card-cat">Classic Pop</span>
+      </div>
+      <div class="card-title">Air Supply: Matter of Time</div>
+      <div class="card-venue">Chevalier Theatre · Medford</div>
+    </div>
+  </div>
+</div>
+    </div>
+    <div class="column">
+      <div class="day-group">
+  <div class="day-header"><span class="day-pin">✦</span> FRI · NOV 6</div>
+  <div class="events-list">
+    <div class="event-card" style="--accent:#f0a07a">
+      <div class="card-top">
+        <span class="card-time">7:30 PM</span>
+        <span class="card-price ">$45+</span>
+        <span class="card-cat">Comedy</span>
+      </div>
+      <div class="card-title">Marc Maron: Yammering Tour</div>
+      <div class="card-venue">Chevalier Theatre · Medford</div>
+    </div>
+    <div class="event-card" style="--accent:#e06c75">
+      <div class="card-top">
+        <span class="card-time">9:30 PM</span>
+        <span class="card-price ">$40</span>
+        <span class="card-cat">Bass / EDM</span>
+      </div>
+      <div class="card-title">Svdden Death (18+ Bass)</div>
+      <div class="card-venue">Big Night Live · TD Garden</div>
+    </div>
+    <div class="event-card" style="--accent:#73daca">
+      <div class="card-top">
+        <span class="card-time">7:00 PM</span>
+        <span class="card-price ">$24</span>
+        <span class="card-cat">Indie Surf</span>
+      </div>
+      <div class="card-title">almost monday (Garage Pop)</div>
+      <div class="card-venue">Paradise Rock Club · Comm Ave</div>
+    </div>
+    <div class="event-card" style="--accent:#9ece6a">
+      <div class="card-top">
+        <span class="card-time">7:00 PM</span>
+        <span class="card-price ">$28</span>
+        <span class="card-cat">Irish Folk</span>
+      </div>
+      <div class="card-title">Amble: Headline Tour</div>
+      <div class="card-venue">House of Blues · Fenway</div>
+    </div>
+  </div>
+</div>
+<div class="day-group">
+  <div class="day-header"><span class="day-pin">✦</span> SAT · NOV 7</div>
+  <div class="events-list">
+    <div class="event-card" style="--accent:#ffb8d1">
+      <div class="card-top">
+        <span class="card-time">7:30 PM</span>
+        <span class="card-price ">$45</span>
+        <span class="card-cat">Funk / Soul</span>
+      </div>
+      <div class="card-title">Sammy Rae & The Friends</div>
+      <div class="card-venue">MGM Music Hall · Fenway</div>
+    </div>
+    <div class="event-card" style="--accent:#c678dd">
+      <div class="card-top">
+        <span class="card-time">12:00 PM</span>
+        <span class="card-price free">FREE</span>
+        <span class="card-cat">Market</span>
+      </div>
+      <div class="card-title">Steal My Style Thrift Market</div>
+      <div class="card-venue">Castle Island Brewing · Southie</div>
+    </div>
+    <div class="event-card" style="--accent:#ffd866">
+      <div class="card-top">
+        <span class="card-time">7:00 PM</span>
+        <span class="card-price ">$22</span>
+        <span class="card-cat">Indie Folk</span>
+      </div>
+      <div class="card-title">Porch Light: Hush Tour</div>
+      <div class="card-venue">Brighton Music Hall · Allston</div>
+    </div>
+    <div class="event-card" style="--accent:#4fbf8f">
+      <div class="card-top">
+        <span class="card-time">1:00 PM</span>
+        <span class="card-price free">FREE</span>
+        <span class="card-cat">Faire</span>
+      </div>
+      <div class="card-title">Bow Market Renaissance Faire</div>
+      <div class="card-venue">Remnant Brewing · Union Sq</div>
+    </div>
+  </div>
+</div>
+<div class="day-group">
+  <div class="day-header"><span class="day-pin">✦</span> SUN · NOV 8</div>
+  <div class="events-list">
+    <div class="event-card" style="--accent:#f0a07a">
+      <div class="card-top">
+        <span class="card-time">7:00 PM</span>
+        <span class="card-price ">$40+</span>
+        <span class="card-cat">Comedy</span>
+      </div>
+      <div class="card-title">Ben Schwartz & Friends (Improv)</div>
+      <div class="card-venue">Chevalier Theatre · Medford</div>
+    </div>
+    <div class="event-card" style="--accent:#ff708d">
+      <div class="card-top">
+        <span class="card-time">7:00 PM</span>
+        <span class="card-price ">$26</span>
+        <span class="card-cat">UK Rock</span>
+      </div>
+      <div class="card-title">Boston Manor (Headline)</div>
+      <div class="card-venue">The Sinclair · Harvard Sq</div>
+    </div>
+    <div class="event-card" style="--accent:#7aa2f7">
+      <div class="card-top">
+        <span class="card-time">3:00 PM</span>
+        <span class="card-price ">$45+</span>
+        <span class="card-cat">Piano Recital</span>
+      </div>
+      <div class="card-title">Igor Levit, Piano Master</div>
+      <div class="card-venue">Boston Symphony Hall · Back Bay</div>
+    </div>
+    <div class="event-card" style="--accent:#7aa2f7">
+      <div class="card-top">
+        <span class="card-time">3:00 PM</span>
+        <span class="card-price ">$25</span>
+        <span class="card-cat">Symphony</span>
+      </div>
+      <div class="card-title">Boston Civic Symphony Opener</div>
+      <div class="card-venue">NEC Jordan Hall · Back Bay</div>
+    </div>
+  </div>
+</div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-url">
+      <span>wickedbostonevents.com</span>
+      <span style="color:#475569">·</span>
+      <span style="color:#94a3b8; font-family:'Plus Jakarta Sans'">Free Event Radar</span>
+    </div>
+    <div class="footer-sub">Direct Official Ticket Links · Transit & MBTA Mapped · Updated Hourly</div>
+  </div>
+</body>
+</html>

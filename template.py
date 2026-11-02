@@ -2568,8 +2568,10 @@ def render_page(results, weather=None, luckyseat_shows=None):
 
     cat_items = []
     for b in bucket_order:
+        is_checked = (b != "Classes & Services")
+        chk_attr = " checked" if is_checked else ""
         item_html = f'''<label class="chk">
-            <input type="checkbox" class="cat-chk" value="{escape(b)}" checked>
+            <input type="checkbox" class="cat-chk" value="{escape(b)}"{chk_attr}>
             <span>{escape(b)} <span class="count">{bucket_counts.get(b, 0)}</span></span>
           </label>'''
         if b == "Music & nightlife":
@@ -3376,6 +3378,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
   .bucket[data-bucket="Play"]              {{ --accent: #bb9af7; }}
   .bucket[data-bucket="Food & drink"]      {{ --accent: #c678dd; }}
   .bucket[data-bucket="Community"]         {{ --accent: #8fa1b3; }}
+  .bucket[data-bucket="Classes & Services"] {{ --accent: #8fa1b3; }}
   .bucket-head {{ display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); font-weight: 600; }}
   .bucket-head .count {{ background: transparent; color: var(--muted); }}
   .bucket ul {{ list-style: none; padding: 0; margin: 0; }}
@@ -8374,7 +8377,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
       updateTimeUI();
       activeGenre = 'all';
       genreBoxes.forEach(b => b.checked = true);
-      catBoxes.forEach(b => b.checked = true);
+      catBoxes.forEach(b => b.checked = (b.value !== 'Classes & Services'));
       const subContainer = document.getElementById('subgenre-container');
       if (subContainer) subContainer.classList.remove('disabled');
       cityBoxes.forEach(b => b.checked = true);

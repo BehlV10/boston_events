@@ -7826,8 +7826,22 @@ _WORD_BOUNDARY_PATTERNS = {
     k: re.compile(rf"\b{re.escape(k)}\b", re.I) for k in _WORD_BOUNDARY_KEYWORDS
 }
 
+UTILITY_EVENT_RE = re.compile(
+    r'\b(esol|esl|ell class|ell conversation|citizenship class|citizenship preparation|'
+    r'homework help|drop-in tutoring|tech help|device clinic|computer basics|digital literacy|'
+    r'job seeker|resume help|career coaching|tax prep|library social work|social work: drop-in|'
+    r'city council meeting|school committee|school building committee|zoning board|'
+    r'council on aging|virtual nutrition class|virtual general exercise|general exercise - holland|'
+    r'general exercise - ralph|meet your device)\b|'
+    r'english for speakers of other languages|english for u\.s\. citizenship|'
+    r'english conversation practice|english conversation group',
+    re.IGNORECASE,
+)
+
 
 def infer_category(name, venue, default=None):
+    if UTILITY_EVENT_RE.search(name or ""):
+        return "services"
     text = f"{name or ''} {venue or ''}".lower()
     for cat, kws in CATEGORY_KEYWORDS:
         for k in kws:
@@ -7865,18 +7879,20 @@ CATEGORY_STYLES = {
     "art":       ("#ffd866", "✦"),
     "arts":      ("#ffd866", "✦"),
     "community": ("#8fa1b3", "◯"),
+    "services":  ("#8fa1b3", "🛠"),
     "other":     ("#6b7280", "·"),
 }
 
 
 CATEGORY_BUCKETS = [
-    ("Music & nightlife", ["music", "clubbing", "classical"]),
-    ("Dance",             ["dance"]),
-    ("Stage",             ["comedy", "theater", "stage"]),
-    ("Arts & culture",    ["books", "film", "art", "arts"]),
-    ("Play",              ["gaming", "sports", "fitness", "outdoors", "family"]),
-    ("Food & drink",      ["food"]),
-    ("Community",         ["community", "other"]),
+    ("Music & nightlife",  ["music", "clubbing", "classical"]),
+    ("Dance",              ["dance"]),
+    ("Stage",              ["comedy", "theater", "stage"]),
+    ("Arts & culture",     ["books", "film", "art", "arts"]),
+    ("Play",               ["gaming", "sports", "fitness", "outdoors", "family"]),
+    ("Food & drink",       ["food"]),
+    ("Community",          ["community", "other"]),
+    ("Classes & Services", ["services"]),
 ]
 _CAT_TO_BUCKET = {cat: name for name, cats in CATEGORY_BUCKETS for cat in cats}
 
