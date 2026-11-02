@@ -1913,6 +1913,8 @@ def scrape_manray(url, ua):
         if not name_el or not date_el:
             continue
         name = name_el.get_text(strip=True)
+        # Fix venue typo "Karakoe" -> "Karaoke"
+        name = re.sub(r"\bKarakoe\b", "Karaoke", name, flags=re.IGNORECASE)
         ts = date_el.get("data-event-start")
         try:
             dt = datetime.fromtimestamp(int(ts), tz=timezone.utc)
@@ -1927,10 +1929,11 @@ def scrape_manray(url, ua):
         desc = desc_el.get_text(" ", strip=True) if desc_el else ""
         cover_match = re.search(r"Cover\s*(\$[\d\.]+)", desc, re.IGNORECASE)
         price = cover_match.group(1) if cover_match else None
+        # Use official ManRay monthly calendar page rather than private/broken Google Calendar eid link
         events.append({
             "name": name,
             "date": dt.isoformat(),
-            "url": link_el["href"] if link_el else url,
+            "url": url,
             "venue": "ManRay",
             "price": price,
             "category": "clubbing",
@@ -7538,16 +7541,16 @@ DEAL_LINKS = [
 # structured calendar. Expanded into concrete dated entries at request time.
 # Tuple: (venue_name, venue_url, default_category, [(title, event_url, weekday 0=Mon..6=Sun, hour, minute), ...])
 MANUAL_RECURRING_EVENTS = [
-    ("The Beehive", "https://www.beehiveboston.com/calendar", "music", [
-        ("Live Jazz & Soul @ The Beehive", "https://www.beehiveboston.com/calendar", 0, 19, 30),
-        ("Live Jazz & Soul @ The Beehive", "https://www.beehiveboston.com/calendar", 1, 19, 30),
-        ("Live Jazz & Soul @ The Beehive", "https://www.beehiveboston.com/calendar", 2, 19, 30),
-        ("Live Music Night @ The Beehive", "https://www.beehiveboston.com/calendar", 3, 18, 30),
-        ("Live Music Night @ The Beehive", "https://www.beehiveboston.com/calendar", 4, 18, 30),
-        ("Live Music Night @ The Beehive", "https://www.beehiveboston.com/calendar", 5, 18, 30),
-        ("Live Music Weekend Brunch", "https://www.beehiveboston.com/calendar", 5, 10, 0),
-        ("Live Music Weekend Brunch", "https://www.beehiveboston.com/calendar", 6, 10, 0),
-        ("Blues on Sunday with Bruce Bears & Friends", "https://www.beehiveboston.com/calendar", 6, 19, 30),
+    ("The Beehive", "https://www.beehiveboston.com/musiccalendar", "music", [
+        ("Live Jazz & Soul @ The Beehive", "https://www.beehiveboston.com/musiccalendar", 0, 19, 30),
+        ("Live Jazz & Soul @ The Beehive", "https://www.beehiveboston.com/musiccalendar", 1, 19, 30),
+        ("Live Jazz & Soul @ The Beehive", "https://www.beehiveboston.com/musiccalendar", 2, 19, 30),
+        ("Live Music Night @ The Beehive", "https://www.beehiveboston.com/musiccalendar", 3, 18, 30),
+        ("Live Music Night @ The Beehive", "https://www.beehiveboston.com/musiccalendar", 4, 18, 30),
+        ("Live Music Night @ The Beehive", "https://www.beehiveboston.com/musiccalendar", 5, 18, 30),
+        ("Live Music Weekend Brunch", "https://www.beehiveboston.com/musiccalendar", 5, 10, 0),
+        ("Live Music Weekend Brunch", "https://www.beehiveboston.com/musiccalendar", 6, 10, 0),
+        ("Blues on Sunday with Bruce Bears & Friends", "https://www.beehiveboston.com/musiccalendar", 6, 19, 30),
     ]),
     ("Loretta's Last Call", "https://www.lorettaslastcall.com/events/", "dance", [
         ("Partner Swing Dancing", "https://www.lorettaslastcall.com/events/", 0, 20, 0),
@@ -7560,21 +7563,21 @@ MANUAL_RECURRING_EVENTS = [
         ("Fighting Game Community (FGC) Weekly: Street Fighter & Tekken", "https://www.balancepatch.com/events", 4, 19, 0),
         ("Balance Patch Weekend Community LAN & Casuals", "https://www.balancepatch.com/events", 5, 13, 0),
     ]),
-    ("Central Square Farmers Market", "https://www.cambridgefarmersmarkets.org/markets/central-square/", "food", [
-        ("Central Square Farmers Market", "https://www.cambridgefarmersmarkets.org/markets/central-square/", 0, 12, 0),
+    ("Central Square Farmers Market", "https://www.massfarmersmarkets.org/central", "food", [
+        ("Central Square Farmers Market", "https://www.massfarmersmarkets.org/central", 0, 12, 0),
     ]),
-    ("Copley Square Farmers Market", "https://www.bu.edu/treebos/copley-square-farmers-market/", "food", [
-        ("Copley Square Farmers Market", "https://www.bu.edu/treebos/copley-square-farmers-market/", 1, 11, 0),
-        ("Copley Square Farmers Market", "https://www.bu.edu/treebos/copley-square-farmers-market/", 4, 11, 0),
+    ("Copley Square Farmers Market", "https://www.massfarmersmarkets.org/copley", "food", [
+        ("Copley Square Farmers Market", "https://www.massfarmersmarkets.org/copley", 1, 11, 0),
+        ("Copley Square Farmers Market", "https://www.massfarmersmarkets.org/copley", 4, 11, 0),
     ]),
-    ("Davis Square Farmers Market", "https://www.cambridgefarmersmarkets.org/markets/davis-square/", "food", [
-        ("Davis Square Farmers Market", "https://www.cambridgefarmersmarkets.org/markets/davis-square/", 2, 12, 0),
+    ("Davis Square Farmers Market", "https://www.massfarmersmarkets.org/davis", "food", [
+        ("Davis Square Farmers Market", "https://www.massfarmersmarkets.org/davis", 2, 12, 0),
     ]),
-    ("Kendall Square Farmers Market", "https://www.cambridgefarmersmarkets.org/markets/kendall-square/", "food", [
-        ("Kendall Square Farmers Market", "https://www.cambridgefarmersmarkets.org/markets/kendall-square/", 3, 12, 0),
+    ("Kendall Square Farmers Market", "https://www.massfarmersmarkets.org/kendall", "food", [
+        ("Kendall Square Farmers Market", "https://www.massfarmersmarkets.org/kendall", 3, 12, 0),
     ]),
-    ("Union Square Farmers Market", "https://www.unionsquaremain.org/farmers-market", "food", [
-        ("Union Square Farmers Market", "https://www.unionsquaremain.org/farmers-market", 5, 9, 0),
+    ("Union Square Farmers Market", "https://www.unionsquaremain.org/union-square-farmers-market", "food", [
+        ("Union Square Farmers Market", "https://www.unionsquaremain.org/union-square-farmers-market", 5, 9, 0),
     ]),
     ("SoWa Open Market", "https://sowaboston.com/open-market/", "community", [
         ("SoWa Open Market", "https://sowaboston.com/open-market/", 6, 10, 0),
@@ -7611,11 +7614,11 @@ MANUAL_RECURRING_EVENTS = [
     ("Greenway Artisan Market", "https://www.rosekennedygreenway.org/events/", "art", [
         ("Greenway Artisan Market", "https://www.rosekennedygreenway.org/events/", 5, 11, 0),
     ]),
-    ("Memorial Drive Sundays", "https://www.cambridgema.gov/recreation/memorialdrive", "outdoors", [
-        ("Memorial Drive Car-Free Sundays", "https://www.cambridgema.gov/recreation/memorialdrive", 6, 11, 0),
+    ("Memorial Drive Sundays", "https://www.memorialdrivealliance.org", "outdoors", [
+        ("Memorial Drive Car-Free Sundays", "https://www.memorialdrivealliance.org", 6, 11, 0),
     ]),
-    ("Everybody Dance Now", "https://www.everybodydancenow.org", "dance", [
-        ("Outdoor Drop-in Dance Classes @ The Grove", "https://www.everybodydancenow.org", 2, 18, 0),
+    ("Everybody Dance Now", "https://www.instagram.com/everybodydancenowboston/", "dance", [
+        ("Outdoor Drop-in Dance Classes @ The Grove", "https://www.instagram.com/everybodydancenowboston/", 2, 18, 0),
     ]),
     ("Sabina Mezcalería", "https://sabinamezcaleria.com/", "dance", [
         ("Sunday Live Salsa & Social Dancing (3–6 PM)", "https://www.instagram.com/sabinamezcaleria/", 6, 15, 0, "Free admission"),
@@ -7655,11 +7658,11 @@ MANUAL_RECURRING_EVENTS = [
     ("Emmanuel Church", "https://www.emmanuelmusic.org/performance-info/2026-2027-cantata-schedule", "classical", [
         ("Emmanuel Music Weekly Bach Cantata Series", "https://www.emmanuelmusic.org/performance-info/2026-2027-cantata-schedule", 6, 11, 0, "Free"),
     ]),
-    ("Redbones", "https://redbones.com/events", "music", [
-        ("Phrenology Trivia Night @ Underbones", "https://redbones.com/events", 4, 20, 0, "Free"),
-        ("Live Music & Showcase @ Underbones", "https://redbones.com/events", 5, 21, 0, "Free"),
-        ("ONCE Upon A Time: Indie Music Series @ Underbones", "https://redbones.com/events", 6, 16, 0, "$15"),
-        ("Bluegrass & Roots Night @ Underbones", "https://redbones.com/events", 3, 20, 0, "Free"),
+    ("Redbones", "https://redbones.com/", "music", [
+        ("Phrenology Trivia Night @ Underbones", "https://redbones.com/", 4, 20, 0, "Free"),
+        ("Live Music & Showcase @ Underbones", "https://redbones.com/", 5, 21, 0, "Free"),
+        ("ONCE Upon A Time: Indie Music Series @ Underbones", "https://redbones.com/", 6, 16, 0, "$15"),
+        ("Bluegrass & Roots Night @ Underbones", "https://redbones.com/", 3, 20, 0, "Free"),
     ]),
 ]
 

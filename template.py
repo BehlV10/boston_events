@@ -2205,11 +2205,19 @@ def render_page(results, weather=None, luckyseat_shows=None):
 
     def render_event(e):
         raw_title = e.get("name") or "Untitled"
+        if "karakoe" in raw_title.lower():
+            raw_title = re.sub(r"\bKarakoe\b", "Karaoke", raw_title, flags=re.I)
         title = escape(raw_title)
         ev_id = _event_stable_id(e)
+        ev_url = e.get("url") or ""
+        if "google.com/calendar/event" in ev_url or "calendar.google.com" in ev_url:
+            if "manray" in (e.get("venue") or "").lower():
+                ev_url = "https://manrayclub.com/monthly-calendar/"
+            else:
+                ev_url = ""
         link = (
-            f'<a href="{escape(e["url"])}" target="_blank" rel="noopener">{title}</a>'
-            if e.get("url") else title
+            f'<a href="{escape(ev_url)}" target="_blank" rel="noopener">{title}</a>'
+            if ev_url else title
         )
         is_free = _is_event_free(e)
         price_raw = escape(e["price"]) if e.get("price") else ""
