@@ -4782,11 +4782,12 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
+    gap: 8px;
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    padding: 6px 12px;
+    padding: 6px 10px;
+    white-space: nowrap;
   }
   .view-toggle {
     display: inline-flex;
@@ -4809,7 +4810,7 @@
     font-family: inherit;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    justify-content: center;
     transition: all 0.15s ease;
   }
   .view-btn:hover {
@@ -5286,6 +5287,22 @@
       overflow-x: hidden;
     }
     .mobile-filter-bar { display: block; margin-bottom: 8px; }
+    .view-switch-bar {
+      padding: 4px 6px;
+      gap: 6px;
+      overflow-x: hidden;
+    }
+    .view-toggle {
+      width: 100%;
+      display: flex;
+    }
+    .view-btn {
+      flex: 1 1 0;
+      justify-content: center;
+      padding: 7px 4px;
+      font-size: 12.5px;
+      text-align: center;
+    }
     .mobile-filter-btn {
       width: 100%;
       background: var(--card);
@@ -7294,19 +7311,16 @@
       <div class="view-switch-bar">
         <div class="view-toggle" role="group" aria-label="View mode">
           <button type="button" class="view-btn active" id="btn-view-list" data-view="list">
-            <span><span class="chip-icon">📋 </span>List View</span>
+            <span>List</span>
           </button>
           <button type="button" class="view-btn" id="btn-view-map" data-view="map">
-            <span><span class="chip-icon">🗺️ </span>Map View</span>
+            <span>Map</span>
           </button>
           <button type="button" class="view-btn" id="btn-near-me" data-view="near" title="Sort events on visible day by distance to your current location">
-            <span><span class="chip-icon">📍 </span><span id="near-me-btn-label">Near Me</span></span>
+            <span id="near-me-btn-label">Near Me</span>
           </button>
         </div>
         <div class="view-switch-right">
-          <button type="button" id="btn-share-filter" class="share-filter-btn" title="Copy shareable link with current filters">
-            <span class="chip-icon">🔗 </span><span id="share-btn-text">Share View</span>
-          </button>
           <span id="map-venue-stat" class="map-venue-stat" style="display: none;">
             <strong id="map-venue-count">0</strong> venues on map
           </span>
