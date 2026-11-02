@@ -2628,6 +2628,24 @@ def render_page(results, weather=None, luckyseat_shows=None):
         for c in city_order
     )
 
+    transit_counts = {"red": 0, "green": 0, "orange": 0, "blue": 0}
+    for e in all_events_flat:
+        c = _event_city(e.get("venue"), e.get("_source_venue"), e)
+        geo = resolve_event_geo(e)
+        _, sub_slug = resolve_subarea(c, e, geo)
+        t_str = resolve_transit_lines(c, sub_slug, e, geo)
+        if t_str:
+            for t in t_str.split(","):
+                if t in transit_counts:
+                    transit_counts[t] += 1
+
+    transit_boxes = f'''<div class="transit-chips-grid">
+      <button type="button" class="transit-chip" data-transit="red" title="Filter by MBTA Red Line"><span class="t-dot" style="background:#da291c"></span>Red Line <span class="count">{transit_counts["red"]:,}</span></button>
+      <button type="button" class="transit-chip" data-transit="green" title="Filter by MBTA Green Line"><span class="t-dot" style="background:#00843d"></span>Green Line <span class="count">{transit_counts["green"]:,}</span></button>
+      <button type="button" class="transit-chip" data-transit="orange" title="Filter by MBTA Orange Line"><span class="t-dot" style="background:#ed8b00"></span>Orange Line <span class="count">{transit_counts["orange"]:,}</span></button>
+      <button type="button" class="transit-chip" data-transit="blue" title="Filter by MBTA Blue Line"><span class="t-dot" style="background:#003da5"></span>Blue Line <span class="count">{transit_counts["blue"]:,}</span></button>
+    </div>'''
+
     fail_banner = ""
     # In live mode, we keep fail_banner and internal notes silent for visitors
     other_note = ""
@@ -3346,6 +3364,24 @@ def render_page(results, weather=None, luckyseat_shows=None):
     width: 8px;
     height: 8px;
     border-radius: 50%;
+    flex-shrink: 0;
+  }}
+  .transit-chips-grid {{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-top: 4px;
+  }}
+  .transit-filter-group .transit-chip {{
+    width: 100%;
+    justify-content: flex-start;
+  }}
+  .transit-chip .count {{
+    margin-left: auto;
+    font-size: 10px;
+    opacity: 0.7;
+    font-weight: 500;
+    padding: 1px 5px;
   }}
 
   /* Day Section */
@@ -6079,6 +6115,10 @@ def render_page(results, weather=None, luckyseat_shows=None):
         <h3>City <span class="spacer"></span> <button type="button" id="city-all">all</button> <button type="button" id="city-none">none</button></h3>
         <div class="chk-grid">{city_boxes}</div>
       </div>
+      <div class="filter-group transit-filter-group">
+        <h3>MBTA Subway Line</h3>
+        {transit_boxes}
+      </div>
       <div class="filter-group">
         <h3>Recurrence</h3>
         <div class="chk-grid">{recur_boxes}</div>
@@ -6409,7 +6449,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
     const freeOnlyChk = document.getElementById('free-only-chk');
 
     const locChips = document.querySelectorAll('#location-chips .loc-chip');
-    const transitChips = document.querySelectorAll('#location-chips .transit-chip');
+    const transitChips = document.querySelectorAll('.transit-chip');
     const subareaBar = document.getElementById('subarea-chips-bar');
     const GENRES_DATA = {json.dumps(genres_map)};
     let activeGenre = 'all';

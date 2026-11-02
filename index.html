@@ -4282,6 +4282,24 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .transit-chips-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    margin-top: 4px;
+  }
+  .transit-filter-group .transit-chip {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .transit-chip .count {
+    margin-left: auto;
+    font-size: 10px;
+    opacity: 0.7;
+    font-weight: 500;
+    padding: 1px 5px;
   }
 
   /* Day Section */
@@ -7103,6 +7121,15 @@
             <span><span class="city-swatch" style="background:#9aa3b2"></span>Other <span class="count">964</span></span>
           </label></div>
       </div>
+      <div class="filter-group transit-filter-group">
+        <h3>MBTA Subway Line</h3>
+        <div class="transit-chips-grid">
+      <button type="button" class="transit-chip" data-transit="red" title="Filter by MBTA Red Line"><span class="t-dot" style="background:#da291c"></span>Red Line <span class="count">2,417</span></button>
+      <button type="button" class="transit-chip" data-transit="green" title="Filter by MBTA Green Line"><span class="t-dot" style="background:#00843d"></span>Green Line <span class="count">3,061</span></button>
+      <button type="button" class="transit-chip" data-transit="orange" title="Filter by MBTA Orange Line"><span class="t-dot" style="background:#ed8b00"></span>Orange Line <span class="count">1,677</span></button>
+      <button type="button" class="transit-chip" data-transit="blue" title="Filter by MBTA Blue Line"><span class="t-dot" style="background:#003da5"></span>Blue Line <span class="count">9</span></button>
+    </div>
+      </div>
       <div class="filter-group">
         <h3>Recurrence</h3>
         <div class="chk-grid">
@@ -9670,7 +9697,7 @@
     const freeOnlyChk = document.getElementById('free-only-chk');
 
     const locChips = document.querySelectorAll('#location-chips .loc-chip');
-    const transitChips = document.querySelectorAll('#location-chips .transit-chip');
+    const transitChips = document.querySelectorAll('.transit-chip');
     const subareaBar = document.getElementById('subarea-chips-bar');
     const GENRES_DATA = {"rock_indie": {"label": "Rock & Indie", "icon": "\ud83c\udfb8", "color": "#ff708d"}, "folk_trad": {"label": "Folk & Trad", "icon": "\ud83e\ude95", "color": "#9ece6a"}, "jazz_blues": {"label": "Jazz & Blues", "icon": "\ud83c\udfb7", "color": "#f29e4c"}, "electronic": {"label": "Electronic & Club", "icon": "\ud83c\udf9b", "color": "#bb9af7"}, "classical": {"label": "Classical", "icon": "\ud83c\udfbb", "color": "#7aa2f7"}, "hiphop_rnb": {"label": "Hip-Hop & R&B", "icon": "\ud83c\udfa4", "color": "#f0a07a"}, "latin_global": {"label": "Latin & Global", "icon": "\ud83e\ude87", "color": "#ffb8d1"}, "pop": {"label": "Pop", "icon": "\u2728", "color": "#ffd866"}};
     let activeGenre = 'all';
