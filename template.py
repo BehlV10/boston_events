@@ -467,6 +467,8 @@ def build_seo_meta_tags(site_url=None, title=None, description=None, path="", im
 <meta property="og:url" content="{escape(canonical_url)}">
 <meta property="og:site_name" content="Wicked Boston Events">
 <meta property="og:image" content="{escape(img)}">
+<meta property="og:image:secure_url" content="{escape(img)}">
+<meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Wicked Boston Events Guide">
