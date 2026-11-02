@@ -7,8 +7,778 @@ X-WR-CALNAME:Boston Live Events & Shows
 X-WR-TIMEZONE:America/New_York
 X-WR-CALDESC:Curated live shows, concerts, and comedy across Boston, Cambridge, and Somerville.
 BEGIN:VEVENT
-UID:20261102_3172555537@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
+UID:20261105_4968569044@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20261105
+SUMMARY:Compagnie Hervé Koubi @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Compagnie Hervé Koubi live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/compagnie-herve-koubi-fy27/
+URL:https://www.theplatformkendall.org/productions/compagnie-herve-koubi-fy27/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261106_4968569044@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20261106
+SUMMARY:Compagnie Hervé Koubi @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Compagnie Hervé Koubi live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/compagnie-herve-koubi-fy27/
+URL:https://www.theplatformkendall.org/productions/compagnie-herve-koubi-fy27/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261107_3366581226@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20261107
+SUMMARY:The Platform Opening Day @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:The Platform Opening Day live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/the-platform-opening-day/
+URL:https://www.theplatformkendall.org/the-platform-opening-day/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261107_4968569044@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20261107
+SUMMARY:Compagnie Hervé Koubi @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Compagnie Hervé Koubi live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/compagnie-herve-koubi-fy27/
+URL:https://www.theplatformkendall.org/productions/compagnie-herve-koubi-fy27/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261110_1600610388@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20261110
+SUMMARY:Peppino D'Agostino @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Peppino D'Agostino live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/peppino-dagostino/
+URL:https://www.theplatformkendall.org/productions/peppino-dagostino/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261111_2500213567@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20261111
+SUMMARY:Maryna Krut @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Maryna Krut live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/maryna-krut-fy27/
+URL:https://www.theplatformkendall.org/productions/maryna-krut-fy27/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261113_5528329542@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20261113
+SUMMARY:Strong Voice: The Tales of Roswitha @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Strong Voice: The Tales of Roswitha live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/strong-voice-the-tales-of-roswitha/
+URL:https://www.theplatformkendall.org/productions/strong-voice-the-tales-of-roswitha/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261113_5493718998@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20261113
+SUMMARY:Tamara Jokić @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Tamara Jokić live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/tamara-jokic/
+URL:https://www.theplatformkendall.org/productions/tamara-jokic/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261113_6898346330@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20261113
+SUMMARY:Jean Appolon Expressions Pouvwa @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Jean Appolon Expressions Pouvwa live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/jean-appolon-expressions-fy27/
+URL:https://www.theplatformkendall.org/productions/jean-appolon-expressions-fy27/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261114_6898346330@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20261114
+SUMMARY:Jean Appolon Expressions Pouvwa @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Jean Appolon Expressions Pouvwa live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/jean-appolon-expressions-fy27/
+URL:https://www.theplatformkendall.org/productions/jean-appolon-expressions-fy27/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261120_2404317727@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20261120
+SUMMARY:Nicolás Emden @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Nicolás Emden live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/nicolas-emden/
+URL:https://www.theplatformkendall.org/productions/nicolas-emden/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261120_8500640911@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20261120
+SUMMARY:Bria Skonberg @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Bria Skonberg live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/bria-skonberg-fy27/
+URL:https://www.theplatformkendall.org/productions/bria-skonberg-fy27/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261121_4198748952@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20261121
+SUMMARY:BalletX @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:BalletX live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/balletx-fy27/
+URL:https://www.theplatformkendall.org/productions/balletx-fy27/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261122_4198748952@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20261122
+SUMMARY:BalletX @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:BalletX live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/balletx-fy27/
+URL:https://www.theplatformkendall.org/productions/balletx-fy27/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261122_4334385659@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20261122
+SUMMARY:Pipo Romero @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Pipo Romero live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/pipo-romero/
+URL:https://www.theplatformkendall.org/productions/pipo-romero/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261203_6541045807@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20261203
+SUMMARY:Zohar & Adam @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Zohar & Adam live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/zohar-adam-fy27/
+URL:https://www.theplatformkendall.org/productions/zohar-adam-fy27/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261205_2416567744@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20261205
+SUMMARY:Laura Anglade @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Laura Anglade live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/laura-anglade/
+URL:https://www.theplatformkendall.org/productions/laura-anglade/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261205_4207933356@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20261205
+SUMMARY:Zoë Keating @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Zoë Keating live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/zoe-keating/
+URL:https://www.theplatformkendall.org/productions/zoe-keating/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261206_4107671972@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20261206
+SUMMARY:EZEKIEL'S WHEELS/RACHEL LINSKY @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:EZEKIEL'S WHEELS/RACHEL LINSKY live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/performance/ezekiels-wheels-rachel-linsky-2026-12-06-1930/
+URL:https://www.theplatformkendall.org/performance/ezekiels-wheels-rachel-linsky-2026-12-06-1930/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261206_6756247531@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20261206
+SUMMARY:Maria Mazzotta @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Maria Mazzotta live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/maria-mazzotta-fy27/
+URL:https://www.theplatformkendall.org/productions/maria-mazzotta-fy27/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261206_7149904706@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20261206
+SUMMARY:Ezekiel's Wheels & ZACHOR Dance Projects @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Ezekiel's Wheels & ZACHOR Dance Projects live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/ezekiels-wheels-linsky-fy27/
+URL:https://www.theplatformkendall.org/productions/ezekiels-wheels-linsky-fy27/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261209_7353820252@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20261209
+SUMMARY:MANAS @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:MANAS live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/manas/
+URL:https://www.theplatformkendall.org/productions/manas/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261210_8933176284@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20261210
+SUMMARY:Magic Tuber Stringband @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Magic Tuber Stringband live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/magic-tuber-stringband/
+URL:https://www.theplatformkendall.org/productions/magic-tuber-stringband/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261210_7556050160@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20261210
+SUMMARY:Monty Alexander "Jamaica to Jazz" @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Monty Alexander "Jamaica to Jazz" live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/monty-alexander-fy27/
+URL:https://www.theplatformkendall.org/productions/monty-alexander-fy27/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261211_2796412798@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20261211
+SUMMARY:PINE TREE FLYERS @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:PINE TREE FLYERS live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/pine-tree-flyers/
+URL:https://www.theplatformkendall.org/productions/pine-tree-flyers/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261211_7794972843@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20261211
+SUMMARY:Subject:Matter @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Subject:Matter live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/subjectmatter-fy27/
+URL:https://www.theplatformkendall.org/productions/subjectmatter-fy27/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261212_7794972843@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20261212
+SUMMARY:Subject:Matter @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Subject:Matter live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/subjectmatter-fy27/
+URL:https://www.theplatformkendall.org/productions/subjectmatter-fy27/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261213_1629611842@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20261213
+SUMMARY:Kandace Springs @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Kandace Springs live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/kandace-springs/
+URL:https://www.theplatformkendall.org/productions/kandace-springs/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270109_7561844798@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270109
+SUMMARY:Honeysuckle @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Honeysuckle live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/honeysuckle/
+URL:https://www.theplatformkendall.org/productions/honeysuckle/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270110_7239904556@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270110
+SUMMARY:BOWIE CELLO SYMPHONIC @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:BOWIE CELLO SYMPHONIC live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/bowie-cello-symphonic-aura-blackstar-visualized/
+URL:https://www.theplatformkendall.org/productions/bowie-cello-symphonic-aura-blackstar-visualized/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270114_8258943952@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270114
+SUMMARY:Gretchen Parlato @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Gretchen Parlato live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/gretchen-parlato/
+URL:https://www.theplatformkendall.org/productions/gretchen-parlato/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270115_7388079831@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270115
+SUMMARY:Balla Kouyaté & Matchume Zango BALA-BILA @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Balla Kouyaté & Matchume Zango BALA-BILA live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/balla-kouyate-and-matchume-zango-bala-bila/
+URL:https://www.theplatformkendall.org/productions/balla-kouyate-and-matchume-zango-bala-bila/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270115_5456339416@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270115
+SUMMARY:The Dirty Dozen Brass Band @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:The Dirty Dozen Brass Band live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/the-dirty-brass-dozen-band/
+URL:https://www.theplatformkendall.org/productions/the-dirty-brass-dozen-band/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270116_7518835480@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270116
+SUMMARY:Amythyst Kiah @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Amythyst Kiah live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/amythyst-kiah/
+URL:https://www.theplatformkendall.org/productions/amythyst-kiah/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270117_1384416013@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270117
+SUMMARY:Joshua Redman Quartet @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Joshua Redman Quartet live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/joshua-redman-quartet/
+URL:https://www.theplatformkendall.org/productions/joshua-redman-quartet/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270124_8765794012@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270124
+SUMMARY:Alash @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Alash live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/alash/
+URL:https://www.theplatformkendall.org/productions/alash/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270126_1381754114@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270126
+SUMMARY:Puuluup @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Puuluup live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/puuluup/
+URL:https://www.theplatformkendall.org/productions/puuluup/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270129_2394101097@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270129
+SUMMARY:Cirque Kalabanté Afrique en Cirque @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Cirque Kalabanté Afrique en Cirque live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/cirque-kabalante-afrique-en-cirque/
+URL:https://www.theplatformkendall.org/productions/cirque-kabalante-afrique-en-cirque/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270130_2394101097@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270130
+SUMMARY:Cirque Kalabanté Afrique en Cirque @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Cirque Kalabanté Afrique en Cirque live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/cirque-kabalante-afrique-en-cirque/
+URL:https://www.theplatformkendall.org/productions/cirque-kabalante-afrique-en-cirque/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270131_2394101097@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270131
+SUMMARY:Cirque Kalabanté Afrique en Cirque @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Cirque Kalabanté Afrique en Cirque live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/cirque-kabalante-afrique-en-cirque/
+URL:https://www.theplatformkendall.org/productions/cirque-kabalante-afrique-en-cirque/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270205_1585262024@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270205
+SUMMARY:Kurt Elling @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Kurt Elling live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/wildflowers-kurt-elling-with-fred-hersch/
+URL:https://www.theplatformkendall.org/productions/wildflowers-kurt-elling-with-fred-hersch/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270206_7346261547@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270206
+SUMMARY:The Hot Sardines @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:The Hot Sardines live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/the-hot-sardines/
+URL:https://www.theplatformkendall.org/productions/the-hot-sardines/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270207_7346261547@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270207
+SUMMARY:The Hot Sardines @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:The Hot Sardines live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/the-hot-sardines/
+URL:https://www.theplatformkendall.org/productions/the-hot-sardines/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270212_1549426638@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270212
+SUMMARY:Yamato @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Yamato live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/yamato/
+URL:https://www.theplatformkendall.org/productions/yamato/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270213_1549426638@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270213
+SUMMARY:Yamato @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Yamato live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/yamato/
+URL:https://www.theplatformkendall.org/productions/yamato/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270217_4494122700@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270217
+SUMMARY:CelloGayageum @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:CelloGayageum live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/cellogayageum/
+URL:https://www.theplatformkendall.org/productions/cellogayageum/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270220_4591777377@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270220
+SUMMARY:Juanito Pascual Trio Flamenco Celebration of Jimi Hendrix @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Juanito Pascual Trio Flamenco Celebration of Jimi Hendrix live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/juanito-pascual-trio-flamenco-celebration-of-jimi-hendrix/
+URL:https://www.theplatformkendall.org/productions/juanito-pascual-trio-flamenco-celebration-of-jimi-hendrix/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270227_4275461891@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270227
+SUMMARY:PHILADANCO! @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:PHILADANCO! live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/philadanco/
+URL:https://www.theplatformkendall.org/productions/philadanco/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270228_4275461891@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270228
+SUMMARY:PHILADANCO! @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:PHILADANCO! live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/philadanco/
+URL:https://www.theplatformkendall.org/productions/philadanco/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270302_6062156256@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270302
+SUMMARY:International Guitar Night @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:International Guitar Night live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/international-guitar-night/
+URL:https://www.theplatformkendall.org/productions/international-guitar-night/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270304_1788552060@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270304
+SUMMARY:Marquis Hill @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Marquis Hill live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/marquis-hill/
+URL:https://www.theplatformkendall.org/productions/marquis-hill/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270305_3681805985@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270305
+SUMMARY:ISAIAH COLLIER & THE DEFIANCE @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:ISAIAH COLLIER & THE DEFIANCE live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/performance/isaiah-collier-the-defiance-2027-03-05-2000-2/
+URL:https://www.theplatformkendall.org/performance/isaiah-collier-the-defiance-2027-03-05-2000-2/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270305_8563009532@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270305
+SUMMARY:Isaiah Collier: Joy @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Isaiah Collier: Joy live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/isaiah-collier-the-defiance/
+URL:https://www.theplatformkendall.org/productions/isaiah-collier-the-defiance/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270306_7018428711@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270306
+SUMMARY:Derek Gripper & Alam Khan @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Derek Gripper & Alam Khan live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/derek-gripper-alam-khan-fy27/
+URL:https://www.theplatformkendall.org/productions/derek-gripper-alam-khan-fy27/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270307_3560807045@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270307
+SUMMARY:Screendance Roadshow Playing Favorites @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Screendance Roadshow Playing Favorites live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/screendance-roadshow-playing-favorites/
+URL:https://www.theplatformkendall.org/productions/screendance-roadshow-playing-favorites/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270312_4076089200@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270312
+SUMMARY:Flamenkora @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Flamenkora live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/flamenkora/
+URL:https://www.theplatformkendall.org/productions/flamenkora/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270312_5536383622@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270312
+SUMMARY:RUBBERBAND @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:RUBBERBAND live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/rubberband-reckless-underdog/
+URL:https://www.theplatformkendall.org/productions/rubberband-reckless-underdog/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270313_5536383622@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270313
+SUMMARY:RUBBERBAND @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:RUBBERBAND live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/rubberband-reckless-underdog/
+URL:https://www.theplatformkendall.org/productions/rubberband-reckless-underdog/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270314_7718944105@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270314
+SUMMARY:Ladysmith Black Mambazo @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Ladysmith Black Mambazo live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/ladysmith-black-mambazo/
+URL:https://www.theplatformkendall.org/productions/ladysmith-black-mambazo/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270319_7570746112@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270319
+SUMMARY:Lucibela @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Lucibela live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/lucibela/
+URL:https://www.theplatformkendall.org/productions/lucibela/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270325_8660277689@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270325
+SUMMARY:Mayrig @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Mayrig live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/mayrig/
+URL:https://www.theplatformkendall.org/productions/mayrig/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270327_6738022896@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270327
+SUMMARY:Keyon Harrold @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Keyon Harrold live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/keyon-harrold-fy27/
+URL:https://www.theplatformkendall.org/productions/keyon-harrold-fy27/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270402_5700911064@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270402
+SUMMARY:Baklava Express @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Baklava Express live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/baklava-express/
+URL:https://www.theplatformkendall.org/productions/baklava-express/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270403_7962332857@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270403
+SUMMARY:Sole Defined @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Sole Defined live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/sole-defined-zaz/
+URL:https://www.theplatformkendall.org/productions/sole-defined-zaz/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270404_7962332857@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270404
+SUMMARY:Sole Defined @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Sole Defined live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/sole-defined-zaz/
+URL:https://www.theplatformkendall.org/productions/sole-defined-zaz/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270415_3499161415@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270415
+SUMMARY:Chris Potter Trio featuring Matt Brewer & Kendrick Scott @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Chris Potter Trio featuring Matt Brewer & Kendrick Scott live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/chris-potter-trio/
+URL:https://www.theplatformkendall.org/productions/chris-potter-trio/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270417_7894075519@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270417
+SUMMARY:Jack West Percussive Acoustic Guitar Duo featuring James Nash @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Jack West Percussive Acoustic Guitar Duo featuring James Nash live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/jack-west-james-nash-percussive-acoustic-guitar-duo/
+URL:https://www.theplatformkendall.org/productions/jack-west-james-nash-percussive-acoustic-guitar-duo/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270417_3725235424@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270417
+SUMMARY:Boston Dance Theater @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Boston Dance Theater live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/boston-dance-theater/
+URL:https://www.theplatformkendall.org/productions/boston-dance-theater/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270420_8358287892@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270420
+SUMMARY:NILADRI KUMAAR @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:NILADRI KUMAAR live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/performance/niladri-kumaar-2027-04-20-1930-2/
+URL:https://www.theplatformkendall.org/performance/niladri-kumaar-2027-04-20-1930-2/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270424_2722350311@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270424
+SUMMARY:Elida Almeida @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Elida Almeida live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/elida-almeida/
+URL:https://www.theplatformkendall.org/productions/elida-almeida/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270425_8786313314@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270425
+SUMMARY:Trio Mandili @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Trio Mandili live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/trio-mandili/
+URL:https://www.theplatformkendall.org/productions/trio-mandili/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270513_2958689144@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270513
+SUMMARY:Step Afrika! @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Step Afrika! live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/step-afrika-evolution/
+URL:https://www.theplatformkendall.org/productions/step-afrika-evolution/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270514_3276119596@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270514
+SUMMARY:Zafarán @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Zafarán live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/zafaran/
+URL:https://www.theplatformkendall.org/productions/zafaran/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270514_2958689144@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270514
+SUMMARY:Step Afrika! @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Step Afrika! live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/step-afrika-evolution/
+URL:https://www.theplatformkendall.org/productions/step-afrika-evolution/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270515_2958689144@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270515
+SUMMARY:Step Afrika! @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Step Afrika! live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/step-afrika-evolution/
+URL:https://www.theplatformkendall.org/productions/step-afrika-evolution/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270522_8760149577@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270522
+SUMMARY:Debashish Bhattacharya @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Debashish Bhattacharya live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/debashish-bhattacharya/
+URL:https://www.theplatformkendall.org/productions/debashish-bhattacharya/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20270624_2976981279@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20270624
+SUMMARY:Sullivan Fortner Trio @ The Platform Kendall
+LOCATION:The Platform Kendall, Boston MA
+DESCRIPTION:Sullivan Fortner Trio live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/sullivan-fortner-trio/
+URL:https://www.theplatformkendall.org/productions/sullivan-fortner-trio/
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261102_5922974322@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
 DTSTART;VALUE=DATE:20261102
 SUMMARY:Art Opening: Harvard Square Gift Shop + The Littlest Sister Performance @ Harvard Square Subway Kiosk
 LOCATION:Harvard Square Subway Kiosk, Boston MA
@@ -17,48 +787,8 @@ URL:https://partiful.com/e/34k9aCWo4tEI76pTNiQP
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261102_7779758284@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261102
-SUMMARY:november book club @ 1 Devonshire Place
-LOCATION:1 Devonshire Place, Boston MA
-DESCRIPTION:november book club live at 1 Devonshire Place. Zero ticket broker fees. Details: https://partiful.com/e/kSjQVCf2mNAROmiTy76Y
-URL:https://partiful.com/e/kSjQVCf2mNAROmiTy76Y
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261105_3263315507@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261105
-SUMMARY:Café+Nature Walk: North Brighton [11/5] @ Sofra
-LOCATION:Sofra, Boston MA
-DESCRIPTION:Café+Nature Walk: North Brighton [11/5] live at Sofra. Zero ticket broker fees. Details: https://partiful.com/e/6chJaCpBhweftqHrSixt
-URL:https://partiful.com/e/6chJaCpBhweftqHrSixt
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261106_3669930332@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261106
-SUMMARY:Holiday Market at Snowport @ Boston
-LOCATION:Boston, Boston MA
-DESCRIPTION:Holiday Market at Snowport live at Boston. Zero ticket broker fees. Details: https://partiful.com/e/XHMins0YnKGzGoky4y4v
-URL:https://partiful.com/e/XHMins0YnKGzGoky4y4v
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261107_9066927909@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261107
-SUMMARY:BUNGALOW DYSTOPIAN DANCE @ Jacque's Cabaret
-LOCATION:Jacque's Cabaret, Boston MA
-DESCRIPTION:BUNGALOW DYSTOPIAN DANCE live at Jacque's Cabaret. Zero ticket broker fees. Details: https://partiful.com/e/JZ0VqzinebdqOcoxwPlH
-URL:https://partiful.com/e/JZ0VqzinebdqOcoxwPlH
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261107_2004746958@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
+UID:20261107_3010442112@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
 DTSTART;VALUE=DATE:20261107
 SUMMARY:Somerville Winter Farmers Market @ Boston
 LOCATION:Boston, Boston MA
@@ -67,8 +797,8 @@ URL:https://partiful.com/e/ODNZeSSBA000tIaAexuP
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261107_8354433801@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
+UID:20261107_2082968073@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
 DTSTART;VALUE=DATE:20261107
 SUMMARY:Cuffing Season Finale 💚🍂 @ Seven Hills Park (behind the Davis Sq Red Line + Life Alive)
 LOCATION:Seven Hills Park (behind the Davis Sq Red Line + Life Alive), Boston MA
@@ -77,8 +807,8 @@ URL:https://partiful.com/e/oKWiAZcxbw1kWLgb5CRR
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261108_1043418828@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
+UID:20261108_6613458893@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
 DTSTART;VALUE=DATE:20261108
 SUMMARY:1 year of 🔗 hyperlinked: a girl edm + hyperpop party @ Boston
 LOCATION:Boston, Boston MA
@@ -87,8 +817,8 @@ URL:https://partiful.com/e/xXASMGPMZQAl3dLOm1zI
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261110_4947797361@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
+UID:20261110_7865210496@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
 DTSTART;VALUE=DATE:20261110
 SUMMARY:Fenway Free Market @ Fenway Community Center
 LOCATION:Fenway Community Center, Boston MA
@@ -97,8 +827,18 @@ URL:https://partiful.com/e/11FX60ikL9VhCTpCna8o
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261114_8238402216@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
+UID:20261113_7882264693@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20261113
+SUMMARY:Snowport Social - Let's Meet @ Snowport@ Seaport Blvd
+LOCATION:Snowport@ Seaport Blvd, Boston MA
+DESCRIPTION:Snowport Social - Let's Meet live at Snowport@ Seaport Blvd. Zero ticket broker fees. Details: https://partiful.com/e/6LeS60PI2qRWJWniQfx0
+URL:https://partiful.com/e/6LeS60PI2qRWJWniQfx0
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261114_2233858547@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
 DTSTART;VALUE=DATE:20261114
 SUMMARY:Coffee & Collectives @ Phinista Café
 LOCATION:Phinista Café, Boston MA
@@ -107,8 +847,18 @@ URL:https://partiful.com/e/dKLUV3nxZJmLB0KAsG0N
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261115_5256897712@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
+UID:20261114_7406763794@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20261114
+SUMMARY:GIRLSGIVING @ Boston
+LOCATION:Boston, Boston MA
+DESCRIPTION:GIRLSGIVING live at Boston. Zero ticket broker fees. Details: https://partiful.com/e/KPwyfJYxcryvOV5eRv3i
+URL:https://partiful.com/e/KPwyfJYxcryvOV5eRv3i
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261115_5899857784@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
 DTSTART;VALUE=DATE:20261115
 SUMMARY:fruitstand’s 3rd birthday: fruit 🍑 @ 52 Church
 LOCATION:52 Church, Boston MA
@@ -117,8 +867,8 @@ URL:https://partiful.com/e/sb67WN7JRX3uyAE5LFAh
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261115_6931159765@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
+UID:20261115_6154176956@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
 DTSTART;VALUE=DATE:20261115
 SUMMARY:the art of storytelling @ shop 6\, the foundry
 LOCATION:shop 6\, the foundry, Boston MA
@@ -127,8 +877,8 @@ URL:https://partiful.com/e/ivCADCWSxLcU7jew03md
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261115_6348373825@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
+UID:20261115_6519793445@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
 DTSTART;VALUE=DATE:20261115
 SUMMARY:duck duck duck duck duck duck GOOSE! @ Make Way For Ducklings Statue\, Boston Public Garden
 LOCATION:Make Way For Ducklings Statue\, Boston Public Garden, Boston MA
@@ -137,28 +887,28 @@ URL:https://partiful.com/e/nMhM5jZffB2zl2NMgQtO
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261115_8713774808@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261115
-SUMMARY:Boston Sapphic Craft Meetup @ Boston Public Market
-LOCATION:Boston Public Market, Boston MA
-DESCRIPTION:Boston Sapphic Craft Meetup live at Boston Public Market. Zero ticket broker fees. Details: https://partiful.com/e/HqAsJblFKe6gKT7z9b5a
-URL:https://partiful.com/e/HqAsJblFKe6gKT7z9b5a
+UID:20261117_5209315061@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20261117
+SUMMARY:Stationery Craftsgiving @ Dorchester Brewing Co.
+LOCATION:Dorchester Brewing Co., Boston MA
+DESCRIPTION:Stationery Craftsgiving live at Dorchester Brewing Co.. Zero ticket broker fees. Details: https://partiful.com/e/eVzMDTaIckS9pNInwsF0
+URL:https://partiful.com/e/eVzMDTaIckS9pNInwsF0
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261121_2636622234@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
+UID:20261121_6077762560@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
 DTSTART;VALUE=DATE:20261121
-SUMMARY:MEGA Journal and Chat @ The Foundry
-LOCATION:The Foundry, Boston MA
-DESCRIPTION:MEGA Journal and Chat live at The Foundry. Zero ticket broker fees. Details: https://partiful.com/e/g2fAsQbcfx5SOPIOEddI
-URL:https://partiful.com/e/g2fAsQbcfx5SOPIOEddI
+SUMMARY:CAFECITO & PLAY:  FRIENDSGIVING EDITION @ Boston
+LOCATION:Boston, Boston MA
+DESCRIPTION:CAFECITO & PLAY:  FRIENDSGIVING EDITION live at Boston. Zero ticket broker fees. Details: https://partiful.com/e/d3qs5lh70GzphvqESRB9
+URL:https://partiful.com/e/d3qs5lh70GzphvqESRB9
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261121_9165801381@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
+UID:20261121_8232644180@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
 DTSTART;VALUE=DATE:20261121
 SUMMARY:ART @ NIGHT @ First Street Market
 LOCATION:First Street Market, Boston MA
@@ -167,8 +917,28 @@ URL:https://partiful.com/e/2Al5mSQ8gkWmY5WC6dHJ
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261203_1997838922@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
+UID:20261122_7239805333@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20261122
+SUMMARY:Uplifting Tinashe ★ a tribute party @ Boston
+LOCATION:Boston, Boston MA
+DESCRIPTION:Uplifting Tinashe ★ a tribute party live at Boston. Zero ticket broker fees. Details: https://partiful.com/e/cyvBdHqEBWfqompCF2Bd
+URL:https://partiful.com/e/cyvBdHqEBWfqompCF2Bd
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261122_9609083297@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20261122
+SUMMARY:Dirty Water Stitch Club Holiday Market @ Time Out Market
+LOCATION:Time Out Market, Boston MA
+DESCRIPTION:Dirty Water Stitch Club Holiday Market live at Time Out Market. Zero ticket broker fees. Details: https://partiful.com/e/EnvbxdrE1eK2burB7fyW
+URL:https://partiful.com/e/EnvbxdrE1eK2burB7fyW
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261203_3780028208@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
 DTSTART;VALUE=DATE:20261203
 SUMMARY:Let’s Feast Cookbook Club (Dec) @ Molly's Bookstore
 LOCATION:Molly's Bookstore, Boston MA
@@ -177,833 +947,63 @@ URL:https://partiful.com/e/v4O8TBGBC7LlDQnN2UHg
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261102_2047236892@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261102
-SUMMARY:Southie Taproom Closing early at 7PM @ Castle Island Brewing
-LOCATION:Castle Island Brewing, Boston MA
-DESCRIPTION:Southie Taproom Closing early at 7PM live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/southie-taproom-closing-early-at-7pm
-URL:https://castleislandbeer.com/calendar/southie-taproom-closing-early-at-7pm
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261103_7823145744@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261103
-SUMMARY:Musical Bingo @ Castle Island Brewing
-LOCATION:Castle Island Brewing, Boston MA
-DESCRIPTION:Musical Bingo live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/musical-bingo-4-d2mnz-lweyh
-URL:https://castleislandbeer.com/calendar/musical-bingo-4-d2mnz-lweyh
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261103_8366305914@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261103
-SUMMARY:Southie Trivia @ Castle Island Brewing
-LOCATION:Castle Island Brewing, Boston MA
-DESCRIPTION:Southie Trivia live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/y0jk7jbh7uzy6rv32szl1qpdry78c0-2tthe-h2ba5-8l7ne-lj829
-URL:https://castleislandbeer.com/calendar/y0jk7jbh7uzy6rv32szl1qpdry78c0-2tthe-h2ba5-8l7ne-lj829
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261105_3299641901@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
+UID:20261105_1866728632@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
 DTSTART;VALUE=DATE:20261105
-SUMMARY:Trivia With TIm @ Castle Island Brewing
-LOCATION:Castle Island Brewing, Boston MA
-DESCRIPTION:Trivia With TIm live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/trivia-with-tim-shh72-js58b-gener-wnldt-gxt79-m2afy-ayl6z-344w9-hx9gz-dt8k3-yc5ss-rhh7f-dhd5g-hfa69-5g8ch-d5y99-d5zma-gs5k5-fg7el-4spja
-URL:https://castleislandbeer.com/calendar/trivia-with-tim-shh72-js58b-gener-wnldt-gxt79-m2afy-ayl6z-344w9-hx9gz-dt8k3-yc5ss-rhh7f-dhd5g-hfa69-5g8ch-d5y99-d5zma-gs5k5-fg7el-4spja
+SUMMARY:Live Music: Alec Mac @ Cisco Brewers Fenway
+LOCATION:Cisco Brewers Fenway, Boston MA
+DESCRIPTION:Live Music: Alec Mac live at Cisco Brewers Fenway. Zero ticket broker fees. Details: https://ciscobrewersfenway.com/calendar/live-music-alec-mac
+URL:https://ciscobrewersfenway.com/calendar/live-music-alec-mac
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261107_4475686997@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261107
-SUMMARY:Steal My Style Thrift Market @ Castle Island Brewing
-LOCATION:Castle Island Brewing, Boston MA
-DESCRIPTION:Steal My Style Thrift Market live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/steal-my-style-thrift-market
-URL:https://castleislandbeer.com/calendar/steal-my-style-thrift-market
+UID:20261105_7690858470@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
+DTSTART;VALUE=DATE:20261105
+SUMMARY:Trivia Night @ Cisco Brewers Fenway
+LOCATION:Cisco Brewers Fenway, Boston MA
+DESCRIPTION:Trivia Night live at Cisco Brewers Fenway. Zero ticket broker fees. Details: https://ciscobrewersfenway.com/calendar/trivia-night-2
+URL:https://ciscobrewersfenway.com/calendar/trivia-night-2
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261109_2762982433@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261109
-SUMMARY:Brews & Laughs @ Castle Island Brewing
-LOCATION:Castle Island Brewing, Boston MA
-DESCRIPTION:Brews & Laughs live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/brews-laughs-1-rk8b7-xtnwd
-URL:https://castleislandbeer.com/calendar/brews-laughs-1-rk8b7-xtnwd
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261110_6026565705@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261110
-SUMMARY:Bonsai Bar @ Castle Island Brewing
-LOCATION:Castle Island Brewing, Boston MA
-DESCRIPTION:Bonsai Bar live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/bonsai-bar-2-j82f2-8xdf7
-URL:https://castleislandbeer.com/calendar/bonsai-bar-2-j82f2-8xdf7
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261110_7823145744@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261110
-SUMMARY:Musical Bingo @ Castle Island Brewing
-LOCATION:Castle Island Brewing, Boston MA
-DESCRIPTION:Musical Bingo live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/musical-bingo-4-d2mnz-5785z
-URL:https://castleislandbeer.com/calendar/musical-bingo-4-d2mnz-5785z
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261110_8366305914@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261110
-SUMMARY:Southie Trivia @ Castle Island Brewing
-LOCATION:Castle Island Brewing, Boston MA
-DESCRIPTION:Southie Trivia live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/y0jk7jbh7uzy6rv32szl1qpdry78c0-2tthe-h2ba5-8l7ne-lj829-zeswg
-URL:https://castleislandbeer.com/calendar/y0jk7jbh7uzy6rv32szl1qpdry78c0-2tthe-h2ba5-8l7ne-lj829-zeswg
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261111_3670539147@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261111
-SUMMARY:Skip the small talk @ Castle Island Brewing
-LOCATION:Castle Island Brewing, Boston MA
-DESCRIPTION:Skip the small talk live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/skip-the-small-talk
-URL:https://castleislandbeer.com/calendar/skip-the-small-talk
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261112_3299641901@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261112
-SUMMARY:Trivia With TIm @ Castle Island Brewing
-LOCATION:Castle Island Brewing, Boston MA
-DESCRIPTION:Trivia With TIm live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/trivia-with-tim-shh72-js58b-gener-wnldt-gxt79-m2afy-ayl6z-344w9-hx9gz-dt8k3-yc5ss-rhh7f-dhd5g-hfa69-5g8ch-d5y99-d5zma-gs5k5-fg7el-4spja-nfgnw
-URL:https://castleislandbeer.com/calendar/trivia-with-tim-shh72-js58b-gener-wnldt-gxt79-m2afy-ayl6z-344w9-hx9gz-dt8k3-yc5ss-rhh7f-dhd5g-hfa69-5g8ch-d5y99-d5zma-gs5k5-fg7el-4spja-nfgnw
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261114_2176433816@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261114
-SUMMARY:National Pickle Day Party @ Castle Island Brewing
-LOCATION:Castle Island Brewing, Boston MA
-DESCRIPTION:National Pickle Day Party live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/national-pickle-day-party
-URL:https://castleislandbeer.com/calendar/national-pickle-day-party
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261117_7823145744@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261117
-SUMMARY:Musical Bingo @ Castle Island Brewing
-LOCATION:Castle Island Brewing, Boston MA
-DESCRIPTION:Musical Bingo live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/musical-bingo-4-d2mnz-5785z-ypd9r
-URL:https://castleislandbeer.com/calendar/musical-bingo-4-d2mnz-5785z-ypd9r
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261117_8366305914@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261117
-SUMMARY:Southie Trivia @ Castle Island Brewing
-LOCATION:Castle Island Brewing, Boston MA
-DESCRIPTION:Southie Trivia live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/y0jk7jbh7uzy6rv32szl1qpdry78c0-2tthe-h2ba5-8l7ne-lj829-zeswg-2xtmp
-URL:https://castleislandbeer.com/calendar/y0jk7jbh7uzy6rv32szl1qpdry78c0-2tthe-h2ba5-8l7ne-lj829-zeswg-2xtmp
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261119_1982682816@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261119
-SUMMARY:Don't F**k It Up @ Castle Island Brewing
-LOCATION:Castle Island Brewing, Boston MA
-DESCRIPTION:Don't F**k It Up live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/dont-fk-it-up
-URL:https://castleislandbeer.com/calendar/dont-fk-it-up
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261119_3299641901@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261119
-SUMMARY:Trivia With TIm @ Castle Island Brewing
-LOCATION:Castle Island Brewing, Boston MA
-DESCRIPTION:Trivia With TIm live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/trivia-with-tim-shh72-js58b-gener-wnldt-gxt79-m2afy-ayl6z-344w9-hx9gz-dt8k3-yc5ss-rhh7f-dhd5g-hfa69-5g8ch-d5y99-d5zma-gs5k5-fg7el-4spja-52akb
-URL:https://castleislandbeer.com/calendar/trivia-with-tim-shh72-js58b-gener-wnldt-gxt79-m2afy-ayl6z-344w9-hx9gz-dt8k3-yc5ss-rhh7f-dhd5g-hfa69-5g8ch-d5y99-d5zma-gs5k5-fg7el-4spja-52akb
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261120_5539636825@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261120
-SUMMARY:Don’t Drown Comedy Show @ Castle Island Brewing
-LOCATION:Castle Island Brewing, Boston MA
-DESCRIPTION:Don’t Drown Comedy Show live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/6vxqyvd1tstzh2ljivi6enc0nztn5e-kfzys
-URL:https://castleislandbeer.com/calendar/6vxqyvd1tstzh2ljivi6enc0nztn5e-kfzys
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261121_2846598150@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261121
-SUMMARY:Brews and Botanicals Exotic Plant Show @ Castle Island Brewing
-LOCATION:Castle Island Brewing, Boston MA
-DESCRIPTION:Brews and Botanicals Exotic Plant Show live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/brews-and-botanicals-exotic-plant-show
-URL:https://castleislandbeer.com/calendar/brews-and-botanicals-exotic-plant-show
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261122_1967349376@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261122
-SUMMARY:Friendsgiving @ Castle Island Brewing
-LOCATION:Castle Island Brewing, Boston MA
-DESCRIPTION:Friendsgiving live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/friendsgiving
-URL:https://castleislandbeer.com/calendar/friendsgiving
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261123_2762982433@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261123
-SUMMARY:Brews & Laughs @ Castle Island Brewing
-LOCATION:Castle Island Brewing, Boston MA
-DESCRIPTION:Brews & Laughs live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/brews-laughs-1-rk8b7-xtnwd-8f5f5
-URL:https://castleislandbeer.com/calendar/brews-laughs-1-rk8b7-xtnwd-8f5f5
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261124_7823145744@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261124
-SUMMARY:Musical Bingo @ Castle Island Brewing
-LOCATION:Castle Island Brewing, Boston MA
-DESCRIPTION:Musical Bingo live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/musical-bingo-4-d2mnz-5785z-ypd9r-r5wpf
-URL:https://castleislandbeer.com/calendar/musical-bingo-4-d2mnz-5785z-ypd9r-r5wpf
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261124_8366305914@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261124
-SUMMARY:Southie Trivia @ Castle Island Brewing
-LOCATION:Castle Island Brewing, Boston MA
-DESCRIPTION:Southie Trivia live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/y0jk7jbh7uzy6rv32szl1qpdry78c0-2tthe-h2ba5-8l7ne-lj829-zeswg-2xtmp-hpkl9
-URL:https://castleislandbeer.com/calendar/y0jk7jbh7uzy6rv32szl1qpdry78c0-2tthe-h2ba5-8l7ne-lj829-zeswg-2xtmp-hpkl9
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261126_3299641901@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261126
-SUMMARY:Trivia With TIm @ Castle Island Brewing
-LOCATION:Castle Island Brewing, Boston MA
-DESCRIPTION:Trivia With TIm live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/trivia-with-tim-shh72-js58b-gener-wnldt-gxt79-m2afy-ayl6z-344w9-hx9gz-dt8k3-yc5ss-rhh7f-dhd5g-hfa69-5g8ch-d5y99-d5zma-gs5k5-fg7el-4spja-y97al
-URL:https://castleislandbeer.com/calendar/trivia-with-tim-shh72-js58b-gener-wnldt-gxt79-m2afy-ayl6z-344w9-hx9gz-dt8k3-yc5ss-rhh7f-dhd5g-hfa69-5g8ch-d5y99-d5zma-gs5k5-fg7el-4spja-y97al
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261201_7823145744@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261201
-SUMMARY:Musical Bingo @ Castle Island Brewing
-LOCATION:Castle Island Brewing, Boston MA
-DESCRIPTION:Musical Bingo live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/musical-bingo-4-d2mnz-5785z-ypd9r-r5wpf-bb43e
-URL:https://castleislandbeer.com/calendar/musical-bingo-4-d2mnz-5785z-ypd9r-r5wpf-bb43e
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261201_8366305914@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261201
-SUMMARY:Southie Trivia @ Castle Island Brewing
-LOCATION:Castle Island Brewing, Boston MA
-DESCRIPTION:Southie Trivia live at Castle Island Brewing. Zero ticket broker fees. Details: https://castleislandbeer.com/calendar/y0jk7jbh7uzy6rv32szl1qpdry78c0-2tthe-h2ba5-8l7ne-lj829-zeswg-2xtmp-hpkl9-ar9be
-URL:https://castleislandbeer.com/calendar/y0jk7jbh7uzy6rv32szl1qpdry78c0-2tthe-h2ba5-8l7ne-lj829-zeswg-2xtmp-hpkl9-ar9be
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261102_3213215067@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261102
-SUMMARY:General Exercise - Holland Street (Council on Aging) @ Somerville City Hall
-LOCATION:Somerville City Hall, Boston MA
-DESCRIPTION:General Exercise - Holland Street (Council on Aging) live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/02/general-exercise-holland-street-council-aging
-URL:https://www.somervillema.gov/events/2026/11/02/general-exercise-holland-street-council-aging
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261102_7240275269@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261102
-SUMMARY:Coffee & Conversation Ralph & Jenny Center (Council on Aging) @ Somerville City Hall
-LOCATION:Somerville City Hall, Boston MA
-DESCRIPTION:Coffee & Conversation Ralph & Jenny Center (Council on Aging) live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/02/coffee-conversation-ralph-jenny-center-council-aging
-URL:https://www.somervillema.gov/events/2026/11/02/coffee-conversation-ralph-jenny-center-council-aging
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261102_2358013617@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261102
-SUMMARY:Virtual Nutrition Class (Council on Aging) @ Somerville City Hall
-LOCATION:Somerville City Hall, Boston MA
-DESCRIPTION:Virtual Nutrition Class (Council on Aging) live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/02/virtual-nutrition-class-council-aging
-URL:https://www.somervillema.gov/events/2026/11/02/virtual-nutrition-class-council-aging
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261102_7268623842@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261102
-SUMMARY:Nutrition at Ralph & Jenny (Council on Aging) @ Somerville City Hall
-LOCATION:Somerville City Hall, Boston MA
-DESCRIPTION:Nutrition at Ralph & Jenny (Council on Aging) live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/02/nutrition-ralph-jenny-council-aging
-URL:https://www.somervillema.gov/events/2026/11/02/nutrition-ralph-jenny-council-aging
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261102_4130986894@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261102
-SUMMARY:Virtual General Exercise (Council on Aging) @ Somerville City Hall
-LOCATION:Somerville City Hall, Boston MA
-DESCRIPTION:Virtual General Exercise (Council on Aging) live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/02/virtual-general-exercise-council-aging
-URL:https://www.somervillema.gov/events/2026/11/02/virtual-general-exercise-council-aging
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261102_1323931580@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261102
-SUMMARY:General Exercise - Ralph & Jenny Center (Council on Aging) @ Somerville City Hall
-LOCATION:Somerville City Hall, Boston MA
-DESCRIPTION:General Exercise - Ralph & Jenny Center (Council on Aging) live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/02/general-exercise-ralph-jenny-center-council-aging
-URL:https://www.somervillema.gov/events/2026/11/02/general-exercise-ralph-jenny-center-council-aging
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261102_3474961798@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261102
-SUMMARY:School Building Committee Meeting (Virtual) @ Somerville City Hall
-LOCATION:Somerville City Hall, Boston MA
-DESCRIPTION:School Building Committee Meeting (Virtual) live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/02/school-building-committee-meeting-virtual
-URL:https://www.somervillema.gov/events/2026/11/02/school-building-committee-meeting-virtual
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261102_6276158052@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261102
-SUMMARY:How to Be a Good Neighbor: Getting Comfortable Engaging with Homeless* Community Members @ Somerville City Hall
-LOCATION:Somerville City Hall, Boston MA
-DESCRIPTION:How to Be a Good Neighbor: Getting Comfortable Engaging with Homeless* Community Members live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/02/how-be-good-neighbor-getting-comfortable-engaging-homeless-community-members
-URL:https://www.somervillema.gov/events/2026/11/02/how-be-good-neighbor-getting-comfortable-engaging-homeless-community-members
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261103_4506667517@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261103
-SUMMARY:School Committee Regular Meeting @ Somerville City Hall
-LOCATION:Somerville City Hall, Boston MA
-DESCRIPTION:School Committee Regular Meeting live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/02/school-committee-regular-meeting
-URL:https://www.somervillema.gov/events/2026/11/02/school-committee-regular-meeting
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261103_5232463602@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261103
-SUMMARY:Josie Edwards at Warehouse XI @ Somerville City Hall
-LOCATION:Somerville City Hall, Boston MA
-DESCRIPTION:Josie Edwards at Warehouse XI live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/02/josie-edwards-warehouse-xi
-URL:https://www.somervillema.gov/events/2026/11/02/josie-edwards-warehouse-xi
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261103_5025227728@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261103
-SUMMARY:Virtual Nutrition Make-up & Q&A (Council on Aging) @ Somerville City Hall
-LOCATION:Somerville City Hall, Boston MA
-DESCRIPTION:Virtual Nutrition Make-up & Q&A (Council on Aging) live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/02/virtual-nutrition-make-qa-council-aging
-URL:https://www.somervillema.gov/events/2026/11/02/virtual-nutrition-make-qa-council-aging
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261103_1901154474@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261103
-SUMMARY:Knitting With Natasha (Council on Aging) @ Somerville City Hall
-LOCATION:Somerville City Hall, Boston MA
-DESCRIPTION:Knitting With Natasha (Council on Aging) live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/03/knitting-natasha-council-aging
-URL:https://www.somervillema.gov/events/2026/11/03/knitting-natasha-council-aging
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261103_2799935253@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261103
-SUMMARY:State Election @ Somerville City Hall
-LOCATION:Somerville City Hall, Boston MA
-DESCRIPTION:State Election live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/03/state-election
-URL:https://www.somervillema.gov/events/2026/11/03/state-election
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261103_8981593929@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261103
-SUMMARY:Bingo at Ralph & Jenny (Council on Aging) @ Somerville City Hall
-LOCATION:Somerville City Hall, Boston MA
-DESCRIPTION:Bingo at Ralph & Jenny (Council on Aging) live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/03/bingo-ralph-jenny-council-aging
-URL:https://www.somervillema.gov/events/2026/11/03/bingo-ralph-jenny-council-aging
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261103_1769949555@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261103
-SUMMARY:November Asian Tea Party - How Are Parks and Open Spaces Planned? @ Somerville City Hall
-LOCATION:Somerville City Hall, Boston MA
-DESCRIPTION:November Asian Tea Party - How Are Parks and Open Spaces Planned? live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/03/november-asian-tea-party-how-are-parks-and-open-spaces-planned
-URL:https://www.somervillema.gov/events/2026/11/03/november-asian-tea-party-how-are-parks-and-open-spaces-planned
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261103_8048317156@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261103
-SUMMARY:Healthy Steps (Council on Aging) @ Somerville City Hall
-LOCATION:Somerville City Hall, Boston MA
-DESCRIPTION:Healthy Steps (Council on Aging) live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/03/healthy-steps-council-aging
-URL:https://www.somervillema.gov/events/2026/11/03/healthy-steps-council-aging
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261103_8809528694@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261103
-SUMMARY:Virtual Overdose Prevention and Response Trainings @ Somerville City Hall
-LOCATION:Somerville City Hall, Boston MA
-DESCRIPTION:Virtual Overdose Prevention and Response Trainings live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/03/virtual-overdose-prevention-and-response-trainings
-URL:https://www.somervillema.gov/events/2026/11/03/virtual-overdose-prevention-and-response-trainings
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261103_3684006263@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261103
-SUMMARY:Human Rights Commission Rights Violations Subcommittee Meeting @ Somerville City Hall
-LOCATION:Somerville City Hall, Boston MA
-DESCRIPTION:Human Rights Commission Rights Violations Subcommittee Meeting live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/03/human-rights-commission-rights-violations-subcommittee-meeting
-URL:https://www.somervillema.gov/events/2026/11/03/human-rights-commission-rights-violations-subcommittee-meeting
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261103_4073767883@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261103
-SUMMARY:Traffic Commission Meeting @ Somerville City Hall
-LOCATION:Somerville City Hall, Boston MA
-DESCRIPTION:Traffic Commission Meeting live at Somerville City Hall. Zero ticket broker fees. Details: https://www.somervillema.gov/events/2026/11/03/traffic-commission-meeting
-URL:https://www.somervillema.gov/events/2026/11/03/traffic-commission-meeting
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261102_1637530517@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261102
-SUMMARY:Boston Graduate Fair - Fall 2026 @ Northeastern University Alumni Center
-LOCATION:Northeastern University Alumni Center, Boston MA
-DESCRIPTION:Boston Graduate Fair - Fall 2026 live at Northeastern University Alumni Center. Zero ticket broker fees. Details: https://calendar.northeastern.edu/event/boston-graduate-fair-fall-2026
-URL:https://calendar.northeastern.edu/event/boston-graduate-fair-fall-2026
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261102_2163030563@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261102
-SUMMARY:Daily Guided Meditation @ Center for Spirituality\, Dialogue\, and Service
-LOCATION:Center for Spirituality\, Dialogue\, and Service, Boston MA
-DESCRIPTION:Daily Guided Meditation live at Center for Spirituality\, Dialogue\, and Service . Zero ticket broker fees. Details: https://calendar.northeastern.edu/event/daily-guided-meditation
-URL:https://calendar.northeastern.edu/event/daily-guided-meditation
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261102_6828138885@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261102
-SUMMARY:Daily Yoga @ Center for Spirituality\, Dialogue\, and Service
-LOCATION:Center for Spirituality\, Dialogue\, and Service, Boston MA
-DESCRIPTION:Daily Yoga live at Center for Spirituality\, Dialogue\, and Service . Zero ticket broker fees. Details: https://calendar.northeastern.edu/event/daily-yoga-1496
-URL:https://calendar.northeastern.edu/event/daily-yoga-1496
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261102_8226679455@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261102
-SUMMARY:Global Topics for Global Learners @ Northeastern University
-LOCATION:Northeastern University, Boston MA
-DESCRIPTION:Global Topics for Global Learners live at Northeastern University. Zero ticket broker fees. Details: https://calendar.northeastern.edu/event/global-topics-for-global-learners-1329
-URL:https://calendar.northeastern.edu/event/global-topics-for-global-learners-1329
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261103_1271566879@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261103
-SUMMARY:Women's Basketball vs. Albany @ Solomon Court
-LOCATION:Solomon Court, Boston MA
-DESCRIPTION:Women's Basketball vs. Albany live at Solomon Court. Zero ticket broker fees. Details: https://calendar.northeastern.edu/event/womens-basketball-vs-albany
-URL:https://calendar.northeastern.edu/event/womens-basketball-vs-albany
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261103_1637530517@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261103
-SUMMARY:Boston Graduate Fair - Fall 2026 @ Northeastern University Alumni Center
-LOCATION:Northeastern University Alumni Center, Boston MA
-DESCRIPTION:Boston Graduate Fair - Fall 2026 live at Northeastern University Alumni Center. Zero ticket broker fees. Details: https://calendar.northeastern.edu/event/boston-graduate-fair-fall-2026
-URL:https://calendar.northeastern.edu/event/boston-graduate-fair-fall-2026
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261103_2512019103@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261103
-SUMMARY:Crafting Data Visuals to Tell a Scientific Story: CommLab Drop-In Hours @ Northeastern University
-LOCATION:Northeastern University, Boston MA
-DESCRIPTION:Crafting Data Visuals to Tell a Scientific Story: CommLab Drop-In Hours live at Northeastern University. Zero ticket broker fees. Details: https://calendar.northeastern.edu/event/crafting-data-visuals-to-tell-a-scientific-story-commlab-drop-in-hours-9262
-URL:https://calendar.northeastern.edu/event/crafting-data-visuals-to-tell-a-scientific-story-commlab-drop-in-hours-9262
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261103_2163030563@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261103
-SUMMARY:Daily Guided Meditation @ Center for Spirituality\, Dialogue\, and Service
-LOCATION:Center for Spirituality\, Dialogue\, and Service, Boston MA
-DESCRIPTION:Daily Guided Meditation live at Center for Spirituality\, Dialogue\, and Service . Zero ticket broker fees. Details: https://calendar.northeastern.edu/event/daily-guided-meditation
-URL:https://calendar.northeastern.edu/event/daily-guided-meditation
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261103_4355876559@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261103
-SUMMARY:First-Gen Week: Own Your Story—From Co-op to Career @ Curry Student Center
-LOCATION:Curry Student Center, Boston MA
-DESCRIPTION:First-Gen Week: Own Your Story—From Co-op to Career live at Curry Student Center. Zero ticket broker fees. Details: https://calendar.northeastern.edu/event/first-gen-week-own-your-storyfrom-co-op-to-career
-URL:https://calendar.northeastern.edu/event/first-gen-week-own-your-storyfrom-co-op-to-career
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261103_3797680335@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261103
-SUMMARY:Galante Engineering Business Certificate | Info Session @ Northeastern University
-LOCATION:Northeastern University, Boston MA
-DESCRIPTION:Galante Engineering Business Certificate | Info Session live at Northeastern University. Zero ticket broker fees. Details: https://calendar.northeastern.edu/event/galante-engineering-business-certificate-info-session-564
-URL:https://calendar.northeastern.edu/event/galante-engineering-business-certificate-info-session-564
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261104_7992963447@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261104
-SUMMARY:HOUSE TEAMS @ Improv Asylum
-LOCATION:Improv Asylum, Boston MA
-DESCRIPTION:HOUSE TEAMS live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/house-teams-210231
-URL:https://www.tixr.com/groups/improvasylum/events/house-teams-210231
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261106_5159473033@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
+UID:20261106_3783640215@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
 DTSTART;VALUE=DATE:20261106
-SUMMARY:Improv Asylum's Main Stage Show @ Improv Asylum
-LOCATION:Improv Asylum, Boston MA
-DESCRIPTION:Improv Asylum's Main Stage Show live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-199179
-URL:https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-199179
+SUMMARY:Live DJ: DJ Fuzzy Slippaz @ Cisco Brewers Fenway
+LOCATION:Cisco Brewers Fenway, Boston MA
+DESCRIPTION:Live DJ: DJ Fuzzy Slippaz live at Cisco Brewers Fenway. Zero ticket broker fees. Details: https://ciscobrewersfenway.com/calendar/live-music-alec-mac-fkkhe
+URL:https://ciscobrewersfenway.com/calendar/live-music-alec-mac-fkkhe
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261107_5159473033@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
+UID:20261107_3764257495@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
 DTSTART;VALUE=DATE:20261107
-SUMMARY:Improv Asylum's Main Stage Show @ Improv Asylum
-LOCATION:Improv Asylum, Boston MA
-DESCRIPTION:Improv Asylum's Main Stage Show live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-199178
-URL:https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-199178
+SUMMARY:Live Music: TimBear @ Cisco Brewers Fenway
+LOCATION:Cisco Brewers Fenway, Boston MA
+DESCRIPTION:Live Music: TimBear live at Cisco Brewers Fenway. Zero ticket broker fees. Details: https://ciscobrewersfenway.com/calendar/live-music-alec-mac-6kcxd
+URL:https://ciscobrewersfenway.com/calendar/live-music-alec-mac-6kcxd
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261108_5159473033@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
+UID:20261108_2067344813@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
 DTSTART;VALUE=DATE:20261108
-SUMMARY:Improv Asylum's Main Stage Show @ Improv Asylum
-LOCATION:Improv Asylum, Boston MA
-DESCRIPTION:Improv Asylum's Main Stage Show live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-199159
-URL:https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-199159
+SUMMARY:Patriots Watch PAWTY @ Cisco Brewers Fenway
+LOCATION:Cisco Brewers Fenway, Boston MA
+DESCRIPTION:Patriots Watch PAWTY live at Cisco Brewers Fenway. Zero ticket broker fees. Details: https://ciscobrewersfenway.com/calendar/patriots-watch-pawty
+URL:https://ciscobrewersfenway.com/calendar/patriots-watch-pawty
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261108_3429218951@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261108
-SUMMARY:Raunch @ Improv Asylum
-LOCATION:Improv Asylum, Boston MA
-DESCRIPTION:Raunch live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/raunch-201882
-URL:https://www.tixr.com/groups/improvasylum/events/raunch-201882
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261111_7992963447@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261111
-SUMMARY:HOUSE TEAMS @ Improv Asylum
-LOCATION:Improv Asylum, Boston MA
-DESCRIPTION:HOUSE TEAMS live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/house-teams-210232
-URL:https://www.tixr.com/groups/improvasylum/events/house-teams-210232
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261112_5099835114@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
+UID:20261112_1442024768@wickedbostonevents.com
+DTSTAMP:20261102T234816Z
 DTSTART;VALUE=DATE:20261112
-SUMMARY:The Main Stage Show @ Improv Asylum
-LOCATION:Improv Asylum, Boston MA
-DESCRIPTION:The Main Stage Show live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/the-main-stage-show-200943
-URL:https://www.tixr.com/groups/improvasylum/events/the-main-stage-show-200943
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261113_5159473033@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261113
-SUMMARY:Improv Asylum's Main Stage Show @ Improv Asylum
-LOCATION:Improv Asylum, Boston MA
-DESCRIPTION:Improv Asylum's Main Stage Show live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-210967
-URL:https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-210967
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261114_5159473033@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261114
-SUMMARY:Improv Asylum's Main Stage Show @ Improv Asylum
-LOCATION:Improv Asylum, Boston MA
-DESCRIPTION:Improv Asylum's Main Stage Show live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-199169
-URL:https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-199169
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261115_5159473033@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261115
-SUMMARY:Improv Asylum's Main Stage Show @ Improv Asylum
-LOCATION:Improv Asylum, Boston MA
-DESCRIPTION:Improv Asylum's Main Stage Show live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-199161
-URL:https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-199161
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261115_3429218951@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261115
-SUMMARY:Raunch @ Improv Asylum
-LOCATION:Improv Asylum, Boston MA
-DESCRIPTION:Raunch live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/raunch-202961
-URL:https://www.tixr.com/groups/improvasylum/events/raunch-202961
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261116_2134323381@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261116
-SUMMARY:The Kiki Moonlight Cabaret @ Improv Asylum
-LOCATION:Improv Asylum, Boston MA
-DESCRIPTION:The Kiki Moonlight Cabaret live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/the-kiki-moonlight-cabaret-207197
-URL:https://www.tixr.com/groups/improvasylum/events/the-kiki-moonlight-cabaret-207197
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261118_7992963447@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261118
-SUMMARY:HOUSE TEAMS @ Improv Asylum
-LOCATION:Improv Asylum, Boston MA
-DESCRIPTION:HOUSE TEAMS live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/house-teams-212000
-URL:https://www.tixr.com/groups/improvasylum/events/house-teams-212000
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261119_5099835114@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261119
-SUMMARY:The Main Stage Show @ Improv Asylum
-LOCATION:Improv Asylum, Boston MA
-DESCRIPTION:The Main Stage Show live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/the-main-stage-show-200944
-URL:https://www.tixr.com/groups/improvasylum/events/the-main-stage-show-200944
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261120_5159473033@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261120
-SUMMARY:Improv Asylum's Main Stage Show @ Improv Asylum
-LOCATION:Improv Asylum, Boston MA
-DESCRIPTION:Improv Asylum's Main Stage Show live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-199180
-URL:https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-199180
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261120_2417032422@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261120
-SUMMARY:Hen House @ Improv Asylum
-LOCATION:Improv Asylum, Boston MA
-DESCRIPTION:Hen House live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/hen-house-207098
-URL:https://www.tixr.com/groups/improvasylum/events/hen-house-207098
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261121_5159473033@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261121
-SUMMARY:Improv Asylum's Main Stage Show @ Improv Asylum
-LOCATION:Improv Asylum, Boston MA
-DESCRIPTION:Improv Asylum's Main Stage Show live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-199171
-URL:https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-199171
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261122_5159473033@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261122
-SUMMARY:Improv Asylum's Main Stage Show @ Improv Asylum
-LOCATION:Improv Asylum, Boston MA
-DESCRIPTION:Improv Asylum's Main Stage Show live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-199162
-URL:https://www.tixr.com/groups/improvasylum/events/improv-asylum-s-main-stage-show-199162
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261122_3429218951@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261122
-SUMMARY:Raunch @ Improv Asylum
-LOCATION:Improv Asylum, Boston MA
-DESCRIPTION:Raunch live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/raunch-202968
-URL:https://www.tixr.com/groups/improvasylum/events/raunch-202968
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261125_7992963447@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261125
-SUMMARY:HOUSE TEAMS @ Improv Asylum
-LOCATION:Improv Asylum, Boston MA
-DESCRIPTION:HOUSE TEAMS live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/house-teams-212005
-URL:https://www.tixr.com/groups/improvasylum/events/house-teams-212005
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261126_5099835114@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261126
-SUMMARY:The Main Stage Show @ Improv Asylum
-LOCATION:Improv Asylum, Boston MA
-DESCRIPTION:The Main Stage Show live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/the-main-stage-show-212001
-URL:https://www.tixr.com/groups/improvasylum/events/the-main-stage-show-212001
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261128_4604078849@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261128
-SUMMARY:Main Stage Show: Sleigh It Again! @ Improv Asylum
-LOCATION:Improv Asylum, Boston MA
-DESCRIPTION:Main Stage Show: Sleigh It Again! live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/main-stage-show-sleigh-it-again--200506
-URL:https://www.tixr.com/groups/improvasylum/events/main-stage-show-sleigh-it-again--200506
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261128_1813466274@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261128
-SUMMARY:'Twas @ Improv Asylum
-LOCATION:Improv Asylum, Boston MA
-DESCRIPTION:'Twas live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/-twas-211790
-URL:https://www.tixr.com/groups/improvasylum/events/-twas-211790
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261129_4604078849@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261129
-SUMMARY:Main Stage Show: Sleigh It Again! @ Improv Asylum
-LOCATION:Improv Asylum, Boston MA
-DESCRIPTION:Main Stage Show: Sleigh It Again! live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/main-stage-show-sleigh-it-again--199163
-URL:https://www.tixr.com/groups/improvasylum/events/main-stage-show-sleigh-it-again--199163
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261129_3429218951@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261129
-SUMMARY:Raunch @ Improv Asylum
-LOCATION:Improv Asylum, Boston MA
-DESCRIPTION:Raunch live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/raunch-202971
-URL:https://www.tixr.com/groups/improvasylum/events/raunch-202971
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261202_7992963447@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261202
-SUMMARY:HOUSE TEAMS @ Improv Asylum
-LOCATION:Improv Asylum, Boston MA
-DESCRIPTION:HOUSE TEAMS live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/house-teams-212007
-URL:https://www.tixr.com/groups/improvasylum/events/house-teams-212007
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261203_4604078849@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261203
-SUMMARY:Main Stage Show: Sleigh It Again! @ Improv Asylum
-LOCATION:Improv Asylum, Boston MA
-DESCRIPTION:Main Stage Show: Sleigh It Again! live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/main-stage-show-sleigh-it-again--200945
-URL:https://www.tixr.com/groups/improvasylum/events/main-stage-show-sleigh-it-again--200945
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261204_4604078849@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261204
-SUMMARY:Main Stage Show: Sleigh It Again! @ Improv Asylum
-LOCATION:Improv Asylum, Boston MA
-DESCRIPTION:Main Stage Show: Sleigh It Again! live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/main-stage-show-sleigh-it-again--200786
-URL:https://www.tixr.com/groups/improvasylum/events/main-stage-show-sleigh-it-again--200786
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261205_4604078849@wickedbostonevents.com
-DTSTAMP:20261102T234733Z
-DTSTART;VALUE=DATE:20261205
-SUMMARY:Main Stage Show: Sleigh It Again! @ Improv Asylum
-LOCATION:Improv Asylum, Boston MA
-DESCRIPTION:Main Stage Show: Sleigh It Again! live at Improv Asylum. Zero ticket broker fees. Details: https://www.tixr.com/groups/improvasylum/events/main-stage-show-sleigh-it-again--200745
-URL:https://www.tixr.com/groups/improvasylum/events/main-stage-show-sleigh-it-again--200745
+SUMMARY:Live Music: Maddi Ryan @ Cisco Brewers Fenway
+LOCATION:Cisco Brewers Fenway, Boston MA
+DESCRIPTION:Live Music: Maddi Ryan live at Cisco Brewers Fenway. Zero ticket broker fees. Details: https://ciscobrewersfenway.com/calendar/live-music-alec-mac-6kcxd-l3rll
+URL:https://ciscobrewersfenway.com/calendar/live-music-alec-mac-6kcxd-l3rll
 STATUS:CONFIRMED
 END:VEVENT
 END:VCALENDAR
