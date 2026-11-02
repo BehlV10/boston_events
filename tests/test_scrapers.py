@@ -1341,6 +1341,39 @@ class TestBostonEvents(unittest.TestCase):
             bucket = category_bucket(cat)
             self.assertEqual(bucket, "Classes & Services", f"Failed bucket lookup for: {title}")
 
+    def test_the_platform_kendall(self):
+        """The Platform Kendall venue, geo resolution, and Algolia scraper verification."""
+        from scrapers import _ALL_VENUES, scrape_the_platform_kendall
+        from venues_geo import resolve_event_geo
+        from template import _event_city, resolve_subarea, resolve_transit_lines
+
+        # Venue registered in _ALL_VENUES
+        matching = [v for v in _ALL_VENUES if v["name"] == "The Platform Kendall"]
+        self.assertEqual(len(matching), 1)
+        self.assertEqual(matching[0]["url"], "https://www.theplatformkendall.org/event-listing/")
+
+        # Geo & transit resolution
+        mock_ev = {
+            "name": "The Platform Opening Day",
+            "venue": "The Platform Kendall",
+            "_source_venue": "The Platform Kendall",
+        }
+        geo = resolve_event_geo(mock_ev)
+        self.assertIsNotNone(geo)
+        self.assertEqual(geo["venue"], "The Platform Kendall")
+        self.assertEqual(geo["neighborhood"], "Kendall Square")
+        self.assertAlmostEqual(geo["lat"], 42.3637, places=3)
+        self.assertAlmostEqual(geo["lng"], -71.0827, places=3)
+
+        city = _event_city(mock_ev["venue"], mock_ev["_source_venue"], mock_ev)
+        self.assertEqual(city, "cambridge")
+
+        sub_name, sub_slug = resolve_subarea(city, mock_ev, geo)
+        self.assertEqual(sub_slug, "kendall_mit")
+
+        transit = resolve_transit_lines(city, sub_slug, mock_ev, geo)
+        self.assertEqual(transit, "red")
+
 
 if __name__ == "__main__":
     unittest.main()

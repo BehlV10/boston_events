@@ -7,6 +7,7 @@ import re
 import ssl
 import threading
 import time
+import unicodedata
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timedelta, timezone
 from urllib.parse import quote, urljoin, urlparse
@@ -7331,7 +7332,183 @@ def scrape_partiful(url, ua):
     return events
 
 
+def scrape_the_platform_kendall(url=None, ua=None):
+    """Scrape upcoming performances and productions at The Platform Kendall from Algolia API."""
+    algolia_url = "https://Y1VSI41HOC-dsn.algolia.net/1/indexes/wp_platform_searchable_posts/query"
+    headers = {
+        "X-Algolia-Application-Id": "Y1VSI41HOC",
+        "X-Algolia-API-Key": "906fcb304f59c27fc5e38065cffa2da4",
+        "Content-Type": "application/json",
+        "User-Agent": ua or UA_CHROME,
+    }
+
+    prods = []
+    try:
+        p_body = json.dumps({"params": "hitsPerPage=1000&filters=post_type:production AND language:en"}).encode("utf-8")
+        resp = _SESSION.post(algolia_url, data=p_body, headers=headers, timeout=15)
+        if resp.status_code == 200:
+            prods = resp.json().get("hits", [])
+    except Exception as e:
+        log_warning(f"The Platform Kendall: productions query failed: {e}")
+
+    perfs = []
+    try:
+        f_body = json.dumps({"params": "hitsPerPage=1000&filters=post_type:performance"}).encode("utf-8")
+        resp = _SESSION.post(algolia_url, data=f_body, headers=headers, timeout=15)
+        if resp.status_code == 200:
+            perfs = resp.json().get("hits", [])
+    except Exception as e:
+        log_warning(f"The Platform Kendall: performances query failed: {e}")
+
+    def _norm(s):
+        s = unicodedata.normalize("NFKD", s or "").encode("ascii", "ignore").decode("utf-8")
+        return re.sub(r"[^a-z0-9]+", " ", s.lower()).strip()
+
+    prod_by_norm = {}
+    for p in prods:
+        t = p.get("production_title") or p.get("post_title") or ""
+        n = _norm(t)
+        if n:
+            prod_by_norm[n] = p
+
+    now = datetime.now(timezone.utc)
+    pattern = re.compile(r"^(.*?)\s*[-–—]\s*(\d{4}-\d{2}-\d{2})\s+(\d{1,2}:\d{2})$")
+
+    events = []
+    seen = set()
+
+    def find_prod(name_str):
+        n = _norm(name_str)
+        if n in prod_by_norm:
+            return prod_by_norm[n]
+        for pn, p in prod_by_norm.items():
+            if pn.startswith(n) or n.startswith(pn):
+                return p
+        return None
+
+    def decide_category(cname, genres):
+        g_str = " ".join(genres).lower()
+        if any(k in g_str for k in ["acrobatic", "circus", "theater", "theatre"]):
+            return "stage"
+        if any(k in g_str for k in ["dance", "ballet", "danza", "flamenco", "tap"]):
+            return "dance"
+        if any(k in g_str for k in ["jazz", "folk", "orchestra", "brass", "acoustic", "music", "classical", "soul", "blues", "hip hop", "rock"]):
+            return "music"
+        return infer_category(cname, "The Platform Kendall", default="stage")
+
+    for h in perfs:
+        link = h.get("permalink", "")
+        if "wpenginepowered" in link:
+            continue
+        title_raw = h.get("post_title", "").strip()
+        if not title_raw or ("scan" in title_raw.lower() and "test" in title_raw.lower()):
+            continue
+
+        perf_date = h.get("performance_date")
+        name = h.get("performance_title") or title_raw
+        dt = None
+        if perf_date:
+            try:
+                raw_iso = perf_date.replace("Z", "+00:00")
+                dt = datetime.fromisoformat(raw_iso)
+                if dt.tzinfo is None:
+                    dt = dt.replace(tzinfo=EASTERN)
+            except Exception:
+                pass
+        if not dt:
+            m = pattern.search(title_raw)
+            if m:
+                name = m.group(1).strip()
+                date_str = m.group(2)
+                time_str = m.group(3)
+                dt = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M").replace(tzinfo=EASTERN)
+
+        if not dt:
+            continue
+
+        dt_utc = dt.astimezone(timezone.utc)
+        if dt_utc < now:
+            continue
+
+        prod = find_prod(name)
+        clean_name = (prod.get("production_title") or prod.get("post_title")) if prod else name
+        if is_placeholder_or_closed_event(clean_name):
+            continue
+
+        event_url = (prod.get("permalink") if prod else None) or link
+        if "opening-day" in event_url or "opening day" in clean_name.lower():
+            event_url = "https://www.theplatformkendall.org/the-platform-opening-day/"
+
+        alert = (prod.get("alert_text") if prod else "") or ""
+        price = "Free" if "opening day" in clean_name.lower() or "free" in alert.lower() else None
+
+        prod_genres = (prod.get("genre") if prod else None) or []
+        cat = decide_category(clean_name, prod_genres)
+        genre = infer_music_genre(clean_name, "The Platform Kendall", description=" ".join(prod_genres), category=cat) if cat in ("music", "clubbing") else None
+
+        key = (_norm(clean_name), dt.isoformat()[:16])
+        if key in seen:
+            continue
+        seen.add(key)
+
+        events.append({
+            "name": clean_name,
+            "date": dt.isoformat(),
+            "url": event_url,
+            "venue": "The Platform Kendall",
+            "price": price or "Check link",
+            "category": cat,
+            "genre": genre,
+        })
+
+    for p in prods:
+        name = (p.get("production_title") or p.get("post_title") or "").strip()
+        fdate = p.get("first_performance_date")
+        if not fdate or is_placeholder_or_closed_event(name):
+            continue
+        try:
+            raw_iso = fdate.replace("Z", "+00:00")
+            dt = datetime.fromisoformat(raw_iso)
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=EASTERN)
+        except Exception:
+            continue
+
+        dt_utc = dt.astimezone(timezone.utc)
+        if dt_utc < now:
+            continue
+
+        key = (_norm(name), dt.isoformat()[:16])
+        if key in seen:
+            continue
+        seen.add(key)
+
+        event_url = p.get("permalink") or "https://www.theplatformkendall.org/event-listing/"
+        if "opening-day" in event_url or "opening day" in name.lower():
+            event_url = "https://www.theplatformkendall.org/the-platform-opening-day/"
+
+        alert = p.get("alert_text") or ""
+        price = "Free" if "opening day" in name.lower() or "free" in alert.lower() else None
+        prod_genres = p.get("genre") or []
+        cat = decide_category(name, prod_genres)
+        genre = infer_music_genre(name, "The Platform Kendall", description=" ".join(prod_genres), category=cat) if cat in ("music", "clubbing") else None
+
+        events.append({
+            "name": name,
+            "date": dt.isoformat(),
+            "url": event_url,
+            "venue": "The Platform Kendall",
+            "price": price or "Check link",
+            "category": cat,
+            "genre": genre,
+        })
+
+    events.sort(key=lambda x: x["date"])
+    return events
+
+
 _ALL_VENUES = [
+    {"name": "The Platform Kendall", "url": "https://www.theplatformkendall.org/event-listing/", "ua": UA_CHROME, "scraper": scrape_the_platform_kendall, "default_category": "stage"},
     {"name": "Partiful Boston", "url": "https://partiful.com/explore/l/bos/events", "ua": UA_CHROME, "scraper": scrape_partiful, "default_category": "community"},
     {"name": "Luma Boston", "url": "https://lu.ma/boston", "ua": UA_CHROME, "scraper": scrape_luma, "default_category": "community"},
     {"name": "ICA Boston", "url": "https://www.icaboston.org/events/", "ua": UA_CHROME, "scraper": scrape_ica, "default_category": "art"},

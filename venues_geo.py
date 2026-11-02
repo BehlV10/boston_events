@@ -131,6 +131,8 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
     "urban park roof garden": (42.3625, -71.0865, "Kendall Square", "90 Broadway, Cambridge", "Urban Park Roof Garden"),
     "cambridge crossing": (42.3712, -71.0768, "Cambridge Crossing", "222 Jacobs St, Cambridge", "Cambridge Crossing"),
     "batifol": (42.3639, -71.0829, "Kendall Square", "291 3rd St, Cambridge", "Batifol"),
+    "the platform": (42.3637, -71.0827, "Kendall Square", "315 Kendall St, Cambridge, MA 02142", "The Platform Kendall"),
+    "the platform kendall": (42.3637, -71.0827, "Kendall Square", "315 Kendall St, Cambridge, MA 02142", "The Platform Kendall"),
 
     # Cambridgeport & Central Square
     "the plough and stars": (42.3685, -71.1118, "Cambridgeport", "912 Massachusetts Ave, Cambridge", "The Plough and Stars"),
@@ -534,6 +536,7 @@ VENUE_RULES = [
     ("greenway", (42.3550, -71.0520, "Downtown / Waterfront", "Atlantic Ave, Boston", "Rose Kennedy Greenway")),
     ("kendall center", (42.3625, -71.0865, "Kendall Square", "90 Broadway, Cambridge", "Kendall Center")),
     ("urban park", (42.3625, -71.0865, "Kendall Square", "90 Broadway, Cambridge", "Urban Park Roof Garden")),
+    ("the platform", (42.3637, -71.0827, "Kendall Square", "315 Kendall St, Cambridge, MA 02142", "The Platform Kendall")),
     ("somerville arts council", (42.3875, -71.0995, "Somerville", "Somerville, MA", "Somerville Arts Council")),
     ("jacque", (42.3499, -71.0691, "Bay Village", "79 Broadway, Boston", "Jacques' Cabaret")),
     ("jungle", (42.3807, -71.0955, "Union Square", "6 Sanborn Ct, Somerville", "The Jungle Community Music Club")),

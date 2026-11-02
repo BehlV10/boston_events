@@ -58,6 +58,7 @@ CITY_RULES = [
         "havana club", "lou's", "wearelous", "lizard lounge",
         "lamplighter", "roxy's arcade", "roxys arcade",
         "venture café", "venture cafe", "cic cambridge",
+        "the platform", "the platform kendall", "platform kendall",
         "phoenix landing", "manray", "man ray", "prospect st",
         "lilypad", "inman square", "the druid", "druid",
         "plough and stars", "plough & stars", "gather here", "mit open space",
