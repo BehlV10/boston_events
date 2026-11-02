@@ -445,7 +445,7 @@ def build_seo_meta_tags(site_url=None, title=None, description=None, path="", im
     clean_path = path.lstrip("/")
     canonical_url = f"{site_url}/{clean_path}" if clean_path else f"{site_url}/"
     default_title = "Wicked Boston Events · Live Music, Comedy, Nightlife & Things to Do in Boston, Cambridge & Somerville"
-    default_desc = "Discover upcoming live music, comedy, nightlife, arts, and community events across Greater Boston. Updated every 30 minutes directly from 40+ local independent venues."
+    default_desc = "Find 8,000+ live music shows, comedy, theater, nightlife, and free events across Boston, Cambridge & Somerville. Filter by neighborhood and MBTA subway lines."
 
     t = title or default_title
     d = description or default_desc
@@ -488,7 +488,7 @@ def build_json_ld(events, site_url=None):
         "@type": "WebSite",
         "name": "Wicked Boston Events",
         "url": f"{site_url}/",
-        "description": "Comprehensive independent live calendar for music, comedy, nightlife, theater, and arts across Greater Boston.",
+        "description": "Find 8,000+ live music shows, comedy, theater, nightlife, and free events across Boston, Cambridge & Somerville. Filter by neighborhood and MBTA subway lines.",
         "inLanguage": "en-US",
         "potentialAction": {
             "@type": "SearchAction",
