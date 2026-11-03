@@ -1908,6 +1908,11 @@ def _merge_duplicates(events):
         # If either time is EDT midnight (00:00), it is likely an untimed/all-day placeholder
         if (t1.hour == 0 and t1.minute == 0) or (t2.hour == 0 and t2.minute == 0):
             return False
+        # If one time is noon (12:00) while the other is an evening/night show (>= 16:00),
+        # it is an untimed/placeholder broker listing (e.g. SeatGeek 12 PM default for evening concert)
+        if ((t1.hour == 12 and t1.minute == 0 and t2.hour >= 16) or
+            (t2.hour == 12 and t2.minute == 0 and t1.hour >= 16)):
+            return False
         diff_mins = abs((t1 - t2).total_seconds()) / 60.0
         s1 = (e1.get("_source_venue") or e1.get("source") or "").lower()
         s2 = (e2.get("_source_venue") or e2.get("source") or "").lower()
@@ -2006,26 +2011,39 @@ def _merge_duplicates(events):
                                 break
 
         if match:
+            # Upgrade placeholder time (00:00 midnight or 12:00 noon) when confirmed evening showtime arrives
+            m_time = match.get("_time")
+            e_time = e.get("_time")
+            m_is_placeholder = bool(m_time and (m_time.hour == 0 or (m_time.hour == 12 and m_time.minute == 0)))
+            e_is_evening = bool(e_time and e_time.hour >= 16)
+            if m_is_placeholder and e_is_evening:
+                match["_time"] = e_time
+                if e.get("date"):
+                    match["date"] = e["date"]
+
             match.setdefault("_alt_sources", [])
             src_url = e.get("url")
             src_name = e.get("_source_venue") or e.get("venue") or "source"
-            if src_url and not any(a.get("url") == src_url for a in match["_alt_sources"]) and src_url != match.get("url"):
-                match["_alt_sources"].append({"venue": src_name, "url": src_url, "price": e.get("price")})
+            is_placeholder_url = bool(src_url and ("-12-pm/" in src_url or "-12-am/" in src_url))
 
-            # If the newly arrived event has higher priority (e.g. direct venue vs aggregator), upgrade primary info
+            # If the newly arrived event has higher priority (e.g. direct venue vs aggregator)
+            # or if match currently has a placeholder time/URL, upgrade primary info
             cur_prio = _source_priority(match.get("_source_venue"))
             new_prio = _source_priority(e.get("_source_venue"))
-            if new_prio > cur_prio:
+            if (m_is_placeholder and e_is_evening) or (new_prio > cur_prio):
                 old_url = match.get("url")
                 old_src = match.get("_source_venue")
-                if old_url and not any(a.get("url") == old_url for a in match["_alt_sources"]):
+                old_is_placeholder = bool(old_url and ("-12-pm/" in old_url or "-12-am/" in old_url))
+                if old_url and not old_is_placeholder and not any(a.get("url") == old_url for a in match["_alt_sources"]):
                     match["_alt_sources"].append({"venue": old_src, "url": old_url, "price": match.get("price")})
                 match["url"] = e.get("url")
                 match["name"] = e.get("name")
                 match["venue"] = e.get("venue")
                 match["_source_venue"] = e.get("_source_venue")
-                if e.get("_time") and (e["_time"].hour != 0 or e["_time"].minute != 0):
-                    match["_time"] = e["_time"]
+                if e_time and (e_time.hour != 0 or e_time.minute != 0):
+                    match["_time"] = e_time
+            elif src_url and not is_placeholder_url and not any(a.get("url") == src_url for a in match["_alt_sources"]) and src_url != match.get("url"):
+                match["_alt_sources"].append({"venue": src_name, "url": src_url, "price": e.get("price")})
 
             # If match has 19:00:00 (Eventbrite discovery fallback) while e has a real/earlier time, prefer e
             m_time = match.get("_time")

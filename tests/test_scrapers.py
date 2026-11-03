@@ -1803,6 +1803,54 @@ class TestBostonEvents(unittest.TestCase):
         self.assertEqual(len(merged_kate), 1, "Kate Nash events across Arts at the Armory variants should merge into 1")
         self.assertGreaterEqual(len(merged_kate[0].get("_alt_sources", [])), 2)
 
+        # 3. Willi Carlisle (SeatGeek 12 PM placeholder should collapse into confirmed 8 PM Crystal Ballroom show)
+        willi_events = [
+            {
+                "name": "Willi Carlisle",
+                "date": "2026-11-03T17:00:00Z",  # 12:00 PM EST placeholder
+                "url": "https://seatgeek.com/willi-carlisle-tickets/somerville-massachusetts-crystal-ballroom-at-somerville-theatre-2026-11-03-12-pm/concert/18664484",
+                "venue": "Crystal Ballroom at Somerville Theatre",
+                "_source_venue": "SeatGeek",
+            },
+            {
+                "name": "Willi Carlisle - The Universal Bubba Tour",
+                "date": "2026-11-04T01:00:00Z",  # 8:00 PM EST confirmed
+                "url": "https://www.ticketmaster.com/willi-carlisle-the-universal-bubba-tour-somerville-massachusetts-11-03-2026/event/010064EA80986481",
+                "venue": "Crystal Ballroom at Somerville Theatre",
+                "_source_venue": "Ticketmaster",
+            },
+            {
+                "name": "Willi Carlisle",
+                "date": "2026-11-04T01:00:00Z",  # 8:00 PM EST confirmed
+                "url": "https://seatgeek.com/willi-carlisle-tickets/somerville-massachusetts-crystal-ballroom-at-somerville-theatre-2026-11-03-8-pm/concert/18376099",
+                "venue": "Crystal Ballroom at Somerville Theatre",
+                "_source_venue": "SeatGeek",
+            },
+            {
+                "name": "Willi Carlisle",
+                "date": "2026-11-04T01:00:00+00:00",  # 8:00 PM EST direct venue
+                "url": "https://www.crystalballroomboston.com/events/willi-carlisle/",
+                "venue": "Crystal Ballroom",
+                "_source_venue": "Crystal Ballroom",
+            },
+        ]
+        # In actual pipeline, events arrive sorted by _time so 12 PM is processed first
+        from datetime import datetime
+        import zoneinfo
+        _eastern = zoneinfo.ZoneInfo("America/New_York")
+        for e in willi_events:
+            e["_time"] = datetime.fromisoformat(e["date"].replace("Z", "+00:00")).astimezone(_eastern)
+        willi_events.sort(key=lambda e: e["_time"])
+
+        merged_willi = _merge_duplicates(willi_events)
+        self.assertEqual(len(merged_willi), 1, "Willi Carlisle 12 PM placeholder should merge with 8 PM show into 1 event")
+        self.assertEqual(merged_willi[0]["_source_venue"], "Crystal Ballroom")
+        self.assertEqual(merged_willi[0]["_time"].hour, 20, "Showtime should be 8:00 PM (hour 20), not 12:00 PM")
+        self.assertEqual(merged_willi[0]["url"], "https://www.crystalballroomboston.com/events/willi-carlisle/")
+        alt_urls = [a.get("url") for a in merged_willi[0].get("_alt_sources", [])]
+        self.assertIn("https://seatgeek.com/willi-carlisle-tickets/somerville-massachusetts-crystal-ballroom-at-somerville-theatre-2026-11-03-8-pm/concert/18376099", alt_urls)
+        self.assertNotIn("https://seatgeek.com/willi-carlisle-tickets/somerville-massachusetts-crystal-ballroom-at-somerville-theatre-2026-11-03-12-pm/concert/18664484", alt_urls)
+
     def test_naive_datetime_eastern_formatting(self):
         """Verify naive datetime strings are always treated as Eastern time, even in UTC environments."""
         from template import format_time, format_when
