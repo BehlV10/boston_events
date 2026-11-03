@@ -1730,6 +1730,20 @@ class TestBostonEvents(unittest.TestCase):
         self.assertEqual(len(merged_kate), 1, "Kate Nash events across Arts at the Armory variants should merge into 1")
         self.assertGreaterEqual(len(merged_kate[0].get("_alt_sources", [])), 2)
 
+    def test_naive_datetime_eastern_formatting(self):
+        """Verify naive datetime strings are always treated as Eastern time, even in UTC environments."""
+        from template import format_time, format_when
+
+        # 22:00 local time (10:00 PM) at Plough & Stars
+        naive_10pm = "2026-11-03T22:00:00"
+        self.assertEqual(format_time(naive_10pm), "10:00 PM")
+        self.assertEqual(format_when({"name": "Johnny Trama", "date": naive_10pm}), "10:00 PM")
+
+        # UTC-aware 03:00 UTC on Nov 4 = 10:00 PM EST on Nov 3
+        utc_10pm = "2026-11-04T03:00:00+00:00"
+        self.assertEqual(format_time(utc_10pm), "10:00 PM")
+        self.assertEqual(format_when({"name": "Johnny Trama", "date": utc_10pm}), "10:00 PM")
+
 
 if __name__ == "__main__":
     unittest.main()

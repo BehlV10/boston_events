@@ -1445,7 +1445,10 @@ def _build_gcal_link(e, title, venue, city):
     if not raw_date:
         return None
     try:
-        dt = datetime.fromisoformat(raw_date.replace("Z", "+00:00")).astimezone(timezone.utc)
+        dt = datetime.fromisoformat(str(raw_date).replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=EASTERN)
+        dt = dt.astimezone(timezone.utc)
         start_str = dt.strftime("%Y%m%dT%H%M%SZ")
         end_dt = dt + timedelta(hours=2)
         end_str = end_dt.strftime("%Y%m%dT%H%M%SZ")
@@ -1622,10 +1625,14 @@ def format_time(s):
     if not s:
         return "TBA"
     try:
-        dt = datetime.fromisoformat(s.replace("Z", "+00:00"))
+        dt = datetime.fromisoformat(str(s).replace("Z", "+00:00"))
     except (TypeError, ValueError):
-        return s
-    return dt.astimezone(EASTERN).strftime("%-I:%M %p")
+        return str(s)
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=EASTERN)
+    else:
+        dt = dt.astimezone(EASTERN)
+    return dt.strftime("%-I:%M %p")
 
 
 def format_when(e):
@@ -1635,6 +1642,11 @@ def format_when(e):
         except ValueError:
             return format_time(e.get("date"))
         return f"thru {end.month}/{end.day}"
+    t_obj = e.get("_time")
+    if t_obj:
+        raw_d = e.get("date") or ""
+        if "T" in raw_d or " " in raw_d:
+            return t_obj.strftime("%-I:%M %p")
     return format_time(e.get("date"))
 
 

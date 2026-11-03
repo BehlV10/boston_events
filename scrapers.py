@@ -5906,13 +5906,13 @@ def scrape_plough_and_stars(url, ua):
                     elif "8p" in t_low:
                         hour = 20
 
-                    dt = datetime(year, month, day_num, hour, minute)
+                    dt = datetime(year, month, day_num, hour, minute, tzinfo=EASTERN)
                     cat = "music"
                     if "trivia" in title.lower():
                         cat = "comedy"
                     events.append({
                         "name": title,
-                        "date": dt.isoformat(),
+                        "date": dt.astimezone(timezone.utc).isoformat(),
                         "url": ev_url,
                         "venue": "The Plough and Stars",
                         "category": cat,
@@ -6103,10 +6103,10 @@ def scrape_gather_here(url, ua):
                 st = e.get("start")
                 dt = None
                 if st and len(st) >= 5:
-                    dt = datetime(st[0], st[1], st[2], st[3], st[4])
+                    dt = datetime(st[0], st[1], st[2], st[3], st[4], tzinfo=EASTERN)
                 events.append({
                     "name": e.get("title"),
-                    "date": dt.isoformat() if dt else None,
+                    "date": dt.astimezone(timezone.utc).isoformat() if dt else None,
                     "url": e.get("url") or "https://gatherhereonline.com/",
                     "venue": "Gather Here",
                     "category": "arts",
@@ -6124,12 +6124,12 @@ def scrape_gather_here(url, ua):
                 st = s.get("start")
                 dt = None
                 if st and len(st) >= 5:
-                    dt = datetime(st[0], st[1], st[2], st[3], st[4])
+                    dt = datetime(st[0], st[1], st[2], st[3], st[4], tzinfo=EASTERN)
                 rel_url = s.get("url") or ""
                 full_url = "https://gatherhereonline.com" + rel_url if rel_url.startswith("/") else rel_url
                 events.append({
                     "name": f"Craft Workshop: {s.get('title')}",
-                    "date": dt.isoformat() if dt else None,
+                    "date": dt.astimezone(timezone.utc).isoformat() if dt else None,
                     "url": full_url,
                     "venue": "Gather Here",
                     "category": "arts",
