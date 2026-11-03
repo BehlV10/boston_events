@@ -1962,6 +1962,51 @@ class TestBostonEvents(unittest.TestCase):
             self.assertAlmostEqual(geo["lng"], -71.0912, places=3)
             self.assertEqual(geo["neighborhood"], "Union Square")
 
+    def test_sports_museum_tour_deduplication(self):
+        """Verify multiple hourly tour departures of The Sports Museum Tour collapse into a single event."""
+        from template import _merge_duplicates
+
+        tour_events = [
+            {
+                "name": "The Sports Museum Tour",
+                "date": "2026-11-03T15:00:00Z",
+                "venue": "The Sports Museum",
+                "url": "https://www.universe.com/events/the-sports-museum-tour-tickets-9YLR74?ref=ticketmaster",
+                "category": "sports",
+            },
+            {
+                "name": "The Sports Museum Tour",
+                "date": "2026-11-03T16:00:00Z",
+                "venue": "The Sports Museum",
+                "url": "https://www.universe.com/events/the-sports-museum-tour-tickets-9YLR74?ref=ticketmaster",
+                "category": "sports",
+            },
+            {
+                "name": "The Sports Museum Tour",
+                "date": "2026-11-03T17:00:00Z",
+                "venue": "The Sports Museum",
+                "url": "https://www.universe.com/events/the-sports-museum-tour-tickets-9YLR74?ref=ticketmaster",
+                "category": "sports",
+            },
+            {
+                "name": "The Sports Museum Tour",
+                "date": "2026-11-03T18:00:00Z",
+                "venue": "The Sports Museum",
+                "url": "https://www.universe.com/events/the-sports-museum-tour-tickets-9YLR74?ref=ticketmaster",
+                "category": "sports",
+            },
+            {
+                "name": "The Sports Museum Tour",
+                "date": "2026-11-03T19:00:00Z",
+                "venue": "The Sports Museum",
+                "url": "https://www.universe.com/events/the-sports-museum-tour-tickets-9YLR74?ref=ticketmaster",
+                "category": "sports",
+            },
+        ]
+        merged = _merge_duplicates(tour_events)
+        self.assertEqual(len(merged), 1, "Hourly Sports Museum tour departures on the same date should collapse into 1 listing")
+        self.assertIn("Hourly tours departing", merged[0].get("description", ""))
+
 
 if __name__ == "__main__":
     unittest.main()

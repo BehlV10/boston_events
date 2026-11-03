@@ -1890,6 +1890,17 @@ def _merge_duplicates(events):
     out = []
     generic_sources = {"ticketmaster", "seatgeek", "the boston calendar", "eventbrite boston", "eventbrite cambridge", "eventbrite somerville", "do617", "boston shows"}
 
+    def _is_attraction_tour(e):
+        n = (e.get("name") or "").lower().strip()
+        cat = (e.get("category") or "").lower()
+        if cat in ("music", "comedy"):
+            return False
+        if "sports museum tour" in n:
+            return True
+        if re.search(r"\b(sports\s+museum|museum|stadium|brewery|distillery|historical|historic|walking)\s+tour\b", n):
+            return True
+        return False
+
     def _is_different_show(e1, e2):
         t1 = e1.get("_time")
         t2 = e2.get("_time")
@@ -1924,6 +1935,12 @@ def _merge_duplicates(events):
         diff_mins = abs((t1 - t2).total_seconds()) / 60.0
         s1 = (e1.get("_source_venue") or e1.get("source") or "").lower()
         s2 = (e2.get("_source_venue") or e2.get("source") or "").lower()
+
+        # For recurring attraction / museum / venue tours (e.g. "The Sports Museum Tour"):
+        # collapse multiple departures on the same date into a single daily listing
+        if _is_attraction_tour(e1) and _is_attraction_tour(e2):
+            return False
+
         # Same source with >= 45m diff: distinct show sets (e.g. 7:00 PM and 9:30 PM)
         if s1 and s1 == s2 and diff_mins >= 45:
             return True
@@ -2048,6 +2065,40 @@ def _merge_duplicates(events):
                                     break
 
         if match:
+            # Consolidate multiple hourly tour departures into a single daily listing
+            if _is_attraction_tour(match) or _is_attraction_tour(e):
+                match.setdefault("_tour_times", [])
+                t_m = match.get("_time")
+                if not t_m and match.get("date"):
+                    try:
+                        t_m = datetime.fromisoformat(str(match["date"]).replace("Z", "+00:00"))
+                        t_m = t_m.replace(tzinfo=EASTERN) if t_m.tzinfo is None else t_m.astimezone(EASTERN)
+                        match["_time"] = t_m
+                    except Exception:
+                        pass
+                t_e = e.get("_time")
+                if not t_e and e.get("date"):
+                    try:
+                        t_e = datetime.fromisoformat(str(e["date"]).replace("Z", "+00:00"))
+                        t_e = t_e.replace(tzinfo=EASTERN) if t_e.tzinfo is None else t_e.astimezone(EASTERN)
+                        e["_time"] = t_e
+                    except Exception:
+                        pass
+                if t_m and t_m not in match["_tour_times"]:
+                    match["_tour_times"].append(t_m)
+                if t_e and t_e not in match["_tour_times"]:
+                    match["_tour_times"].append(t_e)
+                if t_m and t_e and t_e < t_m:
+                    match["_time"] = t_e
+                    if e.get("date"):
+                        match["date"] = e["date"]
+                all_times = sorted(match["_tour_times"])
+                if len(all_times) > 1:
+                    min_str = all_times[0].strftime("%-I:%M %p")
+                    max_str = all_times[-1].strftime("%-I:%M %p")
+                    v_label = match.get("venue") or "the venue"
+                    match["description"] = f"Hourly tours departing {min_str} to {max_str} at {v_label}."
+
             # Upgrade placeholder time (00:00 midnight or 12:00 noon) when confirmed evening showtime arrives
             m_time = match.get("_time")
             e_time = e.get("_time")
@@ -2363,8 +2414,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
             e["_source_venue"] = source
         city = _event_city(venue, source, e)
         recurring = is_recurring(e)
-        recur_flag = "weekly" if recurring else "once"
-        recur_badge = '<span class="recur">↻ weekly</span>' if recurring else ""
+        is_hourly = bool(e.get("_tour_times") and len(e["_tour_times"]) > 1)
+        recur_flag = "hourly" if is_hourly else ("weekly" if recurring else "once")
+        recur_badge = '<span class="recur">↻ hourly</span>' if is_hourly else ('<span class="recur">↻ weekly</span>' if recurring else "")
         alts = e.get("_alt_sources") or []
         alt_html = ""
         if alts:
