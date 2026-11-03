@@ -8003,24 +8003,43 @@ _WORD_BOUNDARY_PATTERNS = {
     k: re.compile(rf"\b{re.escape(k)}\b", re.I) for k in _WORD_BOUNDARY_KEYWORDS
 }
 
+EXCLUDE_UTILITY_RE = re.compile(
+    r"\b(world class|jam session|music sessions?|sunday sessions?)\b",
+    re.IGNORECASE,
+)
+
 UTILITY_EVENT_RE = re.compile(
-    r'\b(esol|esl|ell\b|ell class|ell conversation|english class|beginning english|language class|'
-    r'citizenship class|citizenship preparation|citizenship prep|'
-    r'homework help|drop-in tutoring|tutoring for teens|tutoring|'
-    r'tech help|device clinic|computer basics|digital literacy|meet your device|'
-    r'job seeker|job application|career exploration|career coaching|resume and job|resume help|'
-    r'linkedin profile\+|tax prep|library social work|social work|'
-    r'city council meeting|school committee|school building committee|zoning board|'
-    r'council on aging|virtual nutrition class|virtual general exercise|general exercise - holland|'
-    r'general exercise - ralph)\b|'
-    r'english for speakers of[\s\xa0]+other[\s\xa0]+languages|english for u\.s\. citizenship|'
-    r'english conversation|conversation practice|conversation group|conversational group|english grammar',
+    r"\b("
+    r"esol|esl|ell\b|ell class(?:es)?|ell conversation|english class(?:es)?|beginning english|language class(?:es)?|"
+    r"language courses?|spanish class(?:es)?|portuguese class(?:es)?|french class(?:es)?|italian class(?:es)?|german class(?:es)?|"
+    r"citizenship class(?:es)?|citizenship preparation|citizenship prep|"
+    r"homework help|drop-in tutoring|tutoring for teens|tutoring|"
+    r"tech help|device clinic|computer basics|digital literacy|meet your device|one-on-one tech help|"
+    r"safety training|hive safety training|serger training|3d printing 101|vinyl cutting 101|laser cutting 101|xr lab 101|studio recording 101|sewing 101|"
+    r"job seekers?|job application|career exploration|career coaching|resume and job|resume help|linkedin profile\+|job fairs?|career fairs?|"
+    r"teacher training|coach certification|food safety|first aid|cpr course|cpr class|cpr certification|overdose prevention|"
+    r"machine maintenance|machine clinic|sew by the hour|studio time - sew by the hour|longarm studio time|"
+    r"\d+[- ]sessions|\d+-(?:week|month)|"
+    r"library social work|social work|city council meeting|school committee|school building committee|zoning board|"
+    r"council on aging|virtual nutrition class|virtual general exercise|general exercise - holland|general exercise - ralph"
+    r")\b|"
+    r"english for speakers of[\s\xa0]+other[\s\xa0]+languages|english for u\.s\. citizenship|"
+    r"english conversation|conversation practice|conversation group|conversational group|english grammar|accent improvement",
     re.IGNORECASE,
 )
 
 
+def is_utility_event(name):
+    """Return True if an event is an instructional, vocational, or civic service event."""
+    if not name:
+        return False
+    if EXCLUDE_UTILITY_RE.search(name):
+        return False
+    return bool(UTILITY_EVENT_RE.search(name))
+
+
 def infer_category(name, venue, default=None):
-    if UTILITY_EVENT_RE.search(name or ""):
+    if is_utility_event(name):
         return "services"
     text = f"{name or ''} {venue or ''}".lower()
     for cat, kws in CATEGORY_KEYWORDS:

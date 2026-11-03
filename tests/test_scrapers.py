@@ -1315,8 +1315,8 @@ class TestBostonEvents(unittest.TestCase):
         self.assertEqual(events[1]["venue"], "Harvard Square")
 
     def test_utility_event_categorization(self):
-        """ESOL, ELL, citizenship, and civic services must be categorized as 'services' and bucketed in 'Classes & Services'."""
-        from scrapers import infer_category, category_bucket, UTILITY_EVENT_RE
+        """ESOL, ELL, citizenship, career fairs, studio clinics, and civic services must be categorized as 'services' and bucketed in 'Classes & Services'."""
+        from scrapers import infer_category, category_bucket, is_utility_event
 
         test_titles = [
             "Beginner ESOL Class (Central Square)",
@@ -1333,13 +1333,53 @@ class TestBostonEvents(unittest.TestCase):
             "Library Social Work: Drop-in Hours at West",
             "Free Drop-in Tutoring for Teens (Main)",
             "General Exercise - Holland Street (Council on Aging)",
+            # Group A: Commercial Language Courses
+            "BASE: Language Courses in Boston",
+            "Portuguese Class for Beginners",
+            "Spanish Classes - Multi-Week",
+            # Group B: Professional Certifications / Mandatory Trainings
+            "Strength & Group Fitness Teacher Training",
+            "Adult & Pediatric First Aid / CPR / AED Course",
+            "Overdose Prevention & Narcan Training",
+            "Food Safety Manager Certification Course",
+            # Group C: Career & Job Fairs
+            "Boston Job Fair November 4, 2026",
+            "Career Fairs Boston 2026",
+            "One-on-One Tech Help & Resume Help",
+            # Group D: Studio Rentals & Equipment Clinics
+            "Craft Workshop: Machine Maintenance - Clinic",
+            "Craft Workshop: Sew by the Hour Studio Time",
+            "Craft Workshop: Longarm Studio Time",
+            "Craft Workshop: Youth School of Sewing - 6 sessions",
+            "8-Week Clown Class with Deby Xiadani",
+            # Group E: Makerspace Technical Machine Trainings
+            "3D Printing 101",
+            "Laser Cutting 101",
+            "Hive Safety Training",
+            "Studio Recording 101",
         ]
         for title in test_titles:
-            self.assertTrue(bool(UTILITY_EVENT_RE.search(title)), f"Failed regex match: {title}")
+            self.assertTrue(is_utility_event(title), f"Failed utility match: {title}")
             cat = infer_category(title, "Cambridge Public Library")
             self.assertEqual(cat, "services", f"Failed category inference for: {title}")
             bucket = category_bucket(cat)
             self.assertEqual(bucket, "Classes & Services", f"Failed bucket lookup for: {title}")
+
+        # Creative workshops, social experiences, and music sessions must NOT be matched as utility events
+        creative_and_music_titles = [
+            "Croissant Workshop at The Foundry",
+            "Sip & Paint: Fall Workshop",
+            "Friendsgiving Candle Workshop",
+            "World Class traditional music",
+            "Traditional Irish Music Sessions at The Druid",
+            "Sunday Sessions with Special Guests",
+            "Blues Jam Session",
+            "Bachata Social Dance",
+        ]
+        for title in creative_and_music_titles:
+            self.assertFalse(is_utility_event(title), f"False positive utility match for: {title}")
+            cat = infer_category(title, "The Druid")
+            self.assertNotEqual(cat, "services", f"Incorrectly inferred as services: {title}")
 
     def test_the_platform_kendall(self):
         """The Platform Kendall venue, geo resolution, and Algolia scraper verification."""
