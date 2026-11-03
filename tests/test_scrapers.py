@@ -1544,6 +1544,85 @@ class TestBostonEvents(unittest.TestCase):
         city = _event_city(first["venue"], first.get("_source_venue") or first["venue"], first)
         self.assertEqual(city, "somerville")
 
+    def test_harvard_art_museums(self):
+        """Harvard Art Museums scraper and geo verification."""
+        from scrapers import _ALL_VENUES, scrape_harvard_art_museums
+        from venues_geo import resolve_event_geo
+        from template import _event_city
+
+        names = [v["name"] for v in _ALL_VENUES]
+        self.assertIn("Harvard Art Museums", names)
+
+        events = scrape_harvard_art_museums("https://harvardartmuseums.org/calendar", UA_CHROME)
+        self.assertGreaterEqual(len(events), 20)
+        first = events[0]
+        self.assertEqual(first["venue"], "Harvard Art Museums")
+        self.assertEqual(first["category"], "art")
+
+        geo = resolve_event_geo(first)
+        self.assertIsNotNone(geo)
+        self.assertEqual(geo["neighborhood"], "Harvard Square")
+        city = _event_city(first["venue"], first.get("_source_venue") or first["venue"], first)
+        self.assertEqual(city, "cambridge")
+
+    def test_lyric_stage_company(self):
+        """Lyric Stage Company scraper and geo verification."""
+        from scrapers import _ALL_VENUES, scrape_lyric_stage
+        from venues_geo import resolve_event_geo
+        from template import _event_city
+
+        names = [v["name"] for v in _ALL_VENUES]
+        self.assertIn("Lyric Stage Company", names)
+
+        events = scrape_lyric_stage("https://lyricstage.com/whats-on/", UA_CHROME)
+        self.assertGreaterEqual(len(events), 10)
+        first = events[0]
+        self.assertEqual(first["venue"], "Lyric Stage Company")
+        self.assertEqual(first["category"], "theater")
+
+        geo = resolve_event_geo(first)
+        self.assertIsNotNone(geo)
+        self.assertEqual(geo["neighborhood"], "Back Bay")
+        city = _event_city(first["venue"], first.get("_source_venue") or first["venue"], first)
+        self.assertEqual(city, "boston")
+
+    def test_celebrity_series(self):
+        """Celebrity Series of Boston scraper and geo verification."""
+        from scrapers import _ALL_VENUES, scrape_celebrity_series
+        from venues_geo import resolve_event_geo
+        from template import _event_city
+
+        names = [v["name"] for v in _ALL_VENUES]
+        self.assertIn("Celebrity Series of Boston", names)
+
+        events = scrape_celebrity_series("https://www.celebrityseries.org/live-performances/performance-event-calendar/", UA_CHROME)
+        self.assertGreaterEqual(len(events), 5)
+        first = events[0]
+        self.assertTrue(first["venue"].startswith("Celebrity Series"))
+        self.assertEqual(first["category"], "music")
+
+        geo = resolve_event_geo(first)
+        self.assertIsNotNone(geo)
+        city = _event_city(first["venue"], first.get("_source_venue") or first["venue"], first)
+        self.assertEqual(city, "boston")
+
+    def test_boston_lyric_opera(self):
+        """Boston Lyric Opera Tribe REST scraper and geo verification."""
+        from scrapers import _ALL_VENUES, scrape_tribe_rest
+        from venues_geo import resolve_event_geo
+        from template import _event_city
+
+        names = [v["name"] for v in _ALL_VENUES]
+        self.assertIn("Boston Lyric Opera", names)
+
+        events = scrape_tribe_rest("https://blo.org/wp-json/tribe/events/v1/events", UA_CHROME, default_venue="Boston Lyric Opera", default_category="music")
+        self.assertGreaterEqual(len(events), 5)
+        first = events[0]
+        geo = resolve_event_geo(first)
+        self.assertIsNotNone(geo)
+        city = _event_city(first["venue"], first.get("_source_venue") or first["venue"], first)
+        self.assertEqual(city, "boston")
+
 
 if __name__ == "__main__":
     unittest.main()
