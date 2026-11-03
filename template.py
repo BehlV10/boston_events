@@ -230,7 +230,7 @@ def resolve_subarea(city, event, geo=None):
     blob = f"{vn} {src} {title} {loc} {neigh}"
 
     if city == "cambridge":
-        if any(k in blob for k in ["central square", "cantab", "middle east", "sonia", "manray", "man ray", "middlesex", "phoenix landing", "plough and stars", "plough & stars", "dance complex", "mad monkfish", "la fabrica", "havana club"]):
+        if any(k in blob for k in ["central square", "cantab", "middle east", "sonia", "manray", "man ray", "middlesex", "phoenix landing", "plough and stars", "plough & stars", "dance complex", "mad monkfish", "la fabrica", "havana club", "roxy", "a4cade"]):
             return ("Central Square", "central_sq")
         if any(k in blob for k in ["harvard square", "sinclair", "brattle", "passim", "harvard book", "harvard museum", "peabody museum", "lou's", "wearelous", "sanders", "farkas", "harvard university", "ccae", "harvard art museum", "main library", "449 broadway"]):
             return ("Harvard Square", "harvard_sq")

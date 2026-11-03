@@ -2068,6 +2068,232 @@ def scrape_middlesex(url, ua):
     return events
 
 
+def scrape_roxys_arcade(url, ua):
+    """Roxy's Arcade / A4cade (Central Square) — speakeasy arcade bar, drag trivia, karaoke, Smash tournaments, DJs."""
+    events = []
+    now = datetime.now(EASTERN)
+    # Recurring schedule verified from https://www.roxysarcade.com/event-schedule
+    for i in range(45):
+        cur = now.date() + timedelta(days=i)
+        weekday = cur.weekday()
+        if weekday == 0:
+            events.append({
+                "name": "Drag Trivia Hosted by Missy Steak",
+                "date": datetime(cur.year, cur.month, cur.day, 19, 30, tzinfo=EASTERN).isoformat(),
+                "venue": "Roxy's Arcade",
+                "category": "gaming",
+                "price": "Free",
+                "url": "https://www.roxysarcade.com/event-schedule",
+                "description": "Weekly Drag Trivia hosted by Missy Steak at Roxy's Arcade in Central Square. Free to play, arcade games & grilled cheese.",
+            })
+        elif weekday == 2:
+            events.append({
+                "name": "Karaoke Night at Roxy's Arcade",
+                "date": datetime(cur.year, cur.month, cur.day, 19, 0, tzinfo=EASTERN).isoformat(),
+                "venue": "Roxy's Arcade",
+                "category": "music",
+                "price": "Free",
+                "url": "https://www.roxysarcade.com/event-schedule",
+                "description": "Weekly Wednesday karaoke night in the hidden speakeasy arcade at Roxy's Arcade in Central Square.",
+            })
+        elif weekday == 4:
+            events.append({
+                "name": "Live DJs at Roxy's Arcade",
+                "date": datetime(cur.year, cur.month, cur.day, 21, 0, tzinfo=EASTERN).isoformat(),
+                "venue": "Roxy's Arcade",
+                "category": "clubbing",
+                "price": "Free",
+                "url": "https://www.roxysarcade.com/event-schedule",
+                "description": "Friday night live DJ sets and retro arcade games at Roxy's Arcade in Central Square.",
+            })
+        elif weekday == 5:
+            is_last_sat = (cur + timedelta(days=7)).month != cur.month
+            if is_last_sat:
+                events.append({
+                    "name": "Super Smash Bros. Tournament with The Boston Gaymers",
+                    "date": datetime(cur.year, cur.month, cur.day, 13, 0, tzinfo=EASTERN).isoformat(),
+                    "venue": "Roxy's Arcade",
+                    "category": "gaming",
+                    "price": "Free",
+                    "url": "https://www.roxysarcade.com/event-schedule",
+                    "description": "Monthly Super Smash Bros tournament with The Boston Gaymers at Roxy's Arcade in Central Square.",
+                })
+            events.append({
+                "name": "Saturday Night DJs at Roxy's Arcade",
+                "date": datetime(cur.year, cur.month, cur.day, 21, 0, tzinfo=EASTERN).isoformat(),
+                "venue": "Roxy's Arcade",
+                "category": "clubbing",
+                "price": "Free",
+                "url": "https://www.roxysarcade.com/event-schedule",
+                "description": "Saturday night DJ dance party and retro arcade games at Roxy's Arcade in Central Square.",
+            })
+    return events
+
+
+def scrape_phoenix_landing(url, ua):
+    """The Phoenix Landing (Central Square) — premier electronic music, drum & bass, house/techno, and soccer pub."""
+    events = []
+    now = datetime.now(EASTERN)
+    # Residencies verified from https://www.thephoenixlanding.com/events
+    for i in range(45):
+        cur = now.date() + timedelta(days=i)
+        weekday = cur.weekday()
+        if weekday == 1:
+            events.append({
+                "name": "Infra: Underground Dance & Techno",
+                "date": datetime(cur.year, cur.month, cur.day, 22, 0, tzinfo=EASTERN).isoformat(),
+                "venue": "The Phoenix Landing",
+                "category": "clubbing",
+                "url": "https://www.thephoenixlanding.com/events",
+                "description": "Weekly underground dance and techno night hosted by Infra at The Phoenix Landing in Central Square.",
+            })
+        elif weekday == 2:
+            events.append({
+                "name": "Geeks Who Drink Trivia Night",
+                "date": datetime(cur.year, cur.month, cur.day, 19, 0, tzinfo=EASTERN).isoformat(),
+                "venue": "The Phoenix Landing",
+                "category": "gaming",
+                "price": "Free",
+                "url": "https://www.thephoenixlanding.com/events",
+                "description": "Weekly Wednesday pub trivia with Geeks Who Drink at The Phoenix Landing. Free to play, prizes for top teams.",
+            })
+            events.append({
+                "name": "Re:Set — House & Techno",
+                "date": datetime(cur.year, cur.month, cur.day, 22, 0, tzinfo=EASTERN).isoformat(),
+                "venue": "The Phoenix Landing",
+                "category": "clubbing",
+                "url": "https://www.thephoenixlanding.com/events",
+                "description": "Weekly Wednesday house and techno residency with rotating guest and resident DJs at The Phoenix Landing.",
+            })
+        elif weekday == 3:
+            events.append({
+                "name": "elements: Boston Drum & Bass",
+                "date": datetime(cur.year, cur.month, cur.day, 22, 0, tzinfo=EASTERN).isoformat(),
+                "venue": "The Phoenix Landing",
+                "category": "clubbing",
+                "url": "https://www.thephoenixlanding.com/events",
+                "description": "elements: Boston's legendary and longest-running weekly Drum & Bass party (since 1999) at The Phoenix Landing.",
+            })
+        elif weekday == 4:
+            if cur.day <= 7 or (14 < cur.day <= 21):
+                events.append({
+                    "name": "Jazz Night & Open Jam",
+                    "date": datetime(cur.year, cur.month, cur.day, 17, 0, tzinfo=EASTERN).isoformat(),
+                    "venue": "The Phoenix Landing",
+                    "category": "music",
+                    "price": "Free",
+                    "url": "https://www.thephoenixlanding.com/events",
+                    "description": "First and third Friday open jazz jam session. All-ages, free, and open to the public at The Phoenix Landing.",
+                })
+            events.append({
+                "name": "Friday Night Vibes with DJ Special K",
+                "date": datetime(cur.year, cur.month, cur.day, 22, 0, tzinfo=EASTERN).isoformat(),
+                "venue": "The Phoenix Landing",
+                "category": "clubbing",
+                "url": "https://www.thephoenixlanding.com/events",
+                "description": "Friday night dance party featuring hip hop, reggaeton, and Top 40 with resident DJ Special K at The Phoenix Landing.",
+            })
+        elif weekday == 5:
+            events.append({
+                "name": "The Boom Boom Room with DJ Vinny",
+                "date": datetime(cur.year, cur.month, cur.day, 22, 0, tzinfo=EASTERN).isoformat(),
+                "venue": "The Phoenix Landing",
+                "category": "clubbing",
+                "url": "https://www.thephoenixlanding.com/events",
+                "description": "Saturday night dance hits, classic throwbacks, and party anthems with DJ Vinny at The Phoenix Landing.",
+            })
+    return events
+
+
+def scrape_club_cafe(url, ua):
+    """Club Café (South End) — historic LGBTQ+ nightclub, cabaret, drag bingo, and dance parties."""
+    target_url = "https://www.clubcafe.com/full-calendar/"
+    events = []
+    seen = set()
+    today_str = datetime.now(EASTERN).strftime("%Y-%m-%d")
+
+    try:
+        resp = _SESSION.get(target_url, headers={"User-Agent": ua or UA_CHROME}, timeout=15)
+        if resp.status_code != 200:
+            return events
+        html = resp.text
+    except Exception as exc:
+        print(f"Error scraping Club Cafe: {exc}")
+        return events
+
+    soup = BeautifulSoup(html, "html.parser")
+
+    for art in soup.find_all(class_=re.compile(r"mec-event-article")):
+        link = art.find("a")
+        href = link.get("href") if link else target_url
+        m = re.search(r"occurrence=(\d{4}-\d{2}-\d{2})", href)
+        if not m:
+            continue
+        date_str = m.group(1)
+        if date_str < today_str:
+            continue
+
+        title_el = art.find(class_=re.compile(r"title"))
+        title = title_el.get_text(strip=True) if title_el else ""
+        if not title:
+            continue
+
+        time_match = None
+        for s in art.stripped_strings:
+            tm = re.search(r"(\d{1,2}):(\d{2})\s*(am|pm)", s, re.I)
+            if tm:
+                time_match = tm
+                break
+
+        hour, minute = 21, 0
+        if time_match:
+            h = int(time_match.group(1))
+            minute = int(time_match.group(2))
+            meridiem = time_match.group(3).lower()
+            if meridiem == "pm" and h != 12:
+                hour = h + 12
+            elif meridiem == "am" and h == 12:
+                hour = 0
+            else:
+                hour = h
+
+        try:
+            year, month, day = [int(p) for p in date_str.split("-")]
+            dt = datetime(year, month, day, hour, minute, tzinfo=EASTERN)
+        except Exception:
+            continue
+
+        event_key = (date_str, title.lower())
+        if event_key in seen:
+            continue
+        seen.add(event_key)
+
+        cat = "clubbing"
+        low = title.lower()
+        if "brunch" in low or "dinner" in low or "apps" in low:
+            cat = "food"
+        elif "bingo" in low or "trivia" in low or "board game" in low or "traitors" in low:
+            cat = "gaming"
+        elif "dance" in low or "dancing" in low:
+            cat = "dance"
+        elif "cabaret" in low or "drag show" in low:
+            cat = "theater"
+        elif "karaoke" in low:
+            cat = "music"
+
+        events.append({
+            "name": title,
+            "date": dt.isoformat(),
+            "venue": "Club Café",
+            "category": cat,
+            "url": href,
+            "description": f"{title} at Club Café (209 Columbus Ave, South End). Historic LGBTQ+ nightclub, restaurant, and cabaret lounge.",
+        })
+
+    events.sort(key=lambda x: x["date"])
+    return events
+
+
 def scrape_do617(url, ua):
     """Do617 — Scrapes upcoming Boston events via modern Svelte event cards or legacy Schema.org microdata."""
     events = []
@@ -5066,82 +5292,136 @@ def scrape_greenway(url, ua):
 
 
 def scrape_bow_market(url, ua):
-    """Bow Market in Union Square Somerville via official Ticket Tailor listings."""
-    soup = fetch_soup(url, ua)
+    """Bow Market in Union Square Somerville via official Upstairs at Bow listings and Ticket Tailor."""
     now = datetime.now(timezone.utc)
     events = []
+    seen = set()
 
-    for item in soup.select("li.main-events-listing__event, li.events-listing__item"):
-        title_el = item.select_one("h3.event__title a.event__link, a.event__link")
-        if not title_el:
-            continue
-        name = html.unescape(title_el.get_text(" ", strip=True))
-        if not name:
-            continue
+    # 1. Primary: Upstairs at Bow official Squarespace public events
+    upstairs_url = "https://www.upstairsatbow.com/public-events?format=json"
+    try:
+        resp = _SESSION.get(upstairs_url, headers={"User-Agent": ua or UA_CHROME}, timeout=10)
+        if resp.status_code == 200:
+            d = resp.json()
+            items = d.get("upcoming", []) or d.get("items", []) or []
+            for item in items:
+                title = item.get("title")
+                start_ms = item.get("startDate")
+                if not title or not start_ms:
+                    continue
+                dt = datetime.fromtimestamp(start_ms / 1000.0, tz=timezone.utc).astimezone(EASTERN)
+                if dt < now:
+                    continue
+                cat = "community"
+                low = title.lower()
+                if "tango" in low or "dance" in low or "milonga" in low:
+                    cat = "dance"
+                elif "comedy" in low or "improv" in low:
+                    cat = "comedy"
+                elif "art" in low or "auction" in low:
+                    cat = "art"
+                elif "music" in low or "concert" in low:
+                    cat = "music"
 
-        href = title_el.get("href")
-        if href and href.startswith("/"):
-            href = "https://tickettailor.com" + href
-        elif not href:
-            href = url
+                ev_url = "https://www.upstairsatbow.com" + (item.get("fullUrl") or "/public-events")
+                key = (dt.date().isoformat(), title.strip().lower())
+                if key in seen:
+                    continue
+                seen.add(key)
+                events.append({
+                    "name": title.strip(),
+                    "date": dt.isoformat(),
+                    "url": ev_url,
+                    "venue": "Upstairs at Bow",
+                    "price": None,
+                    "category": cat,
+                    "description": f"{title} at Upstairs at Bow (Bow Market, Union Square Somerville).",
+                })
+    except Exception as exc:
+        print(f"Error fetching Upstairs at Bow: {exc}")
 
-        date_el = item.select_one(".event-meta__date")
-        if not date_el:
-            continue
+    # 2. Ticket Tailor listings for courtyard / general Bow Market
+    try:
+        soup = fetch_soup(url, ua)
+        for item in soup.select("li.main-events-listing__event, li.events-listing__item"):
+            title_el = item.select_one("h3.event__title a.event__link, a.event__link")
+            if not title_el:
+                continue
+            name = html.unescape(title_el.get_text(" ", strip=True))
+            if not name:
+                continue
 
-        date_text = date_el.get_text(" ", strip=True)
-        m = re.search(r"([A-Za-z]{3,})\s+(\d{1,2})\s*,?\s*(\d{4})", date_text)
-        if not m:
-            continue
-        m_str = m.group(1)[:3].lower()
-        month = _SHORT_MONTHS.get(m_str)
-        if not month:
-            continue
-        day = int(m.group(2))
-        year = int(m.group(3))
+            href = title_el.get("href")
+            if href and href.startswith("/"):
+                href = "https://tickettailor.com" + href
+            elif not href:
+                href = url
 
-        hour, minute = 12, 0
-        tm = re.search(r"(\d{1,2}):(\d{2})\s*(AM|PM)", date_text, re.I)
-        if tm:
-            hour = int(tm.group(1))
-            minute = int(tm.group(2))
-            mer = tm.group(3).upper()
-            if mer == "PM" and hour < 12:
-                hour += 12
-            elif mer == "AM" and hour == 12:
-                hour = 0
+            date_el = item.select_one(".event-meta__date")
+            if not date_el:
+                continue
 
-        try:
-            dt = datetime(year, month, day, hour, minute, tzinfo=EASTERN).astimezone(timezone.utc)
-        except Exception:
-            continue
+            date_text = date_el.get_text(" ", strip=True)
+            m = re.search(r"([A-Za-z]{3,})\s+(\d{1,2})\s*,?\s*(\d{4})", date_text)
+            if not m:
+                continue
+            m_str = m.group(1)[:3].lower()
+            month = _SHORT_MONTHS.get(m_str)
+            if not month:
+                continue
+            day = int(m.group(2))
+            year = int(m.group(3))
 
-        if dt < now:
-            continue
+            hour, minute = 12, 0
+            tm = re.search(r"(\d{1,2}):(\d{2})\s*(AM|PM)", date_text, re.I)
+            if tm:
+                hour = int(tm.group(1))
+                minute = int(tm.group(2))
+                mer = tm.group(3).upper()
+                if mer == "PM" and hour < 12:
+                    hour += 12
+                elif mer == "AM" and hour == 12:
+                    hour = 0
 
-        loc_el = item.select_one(".event-meta__location")
-        loc_text = loc_el.get_text(" ", strip=True) if loc_el else "Bow Market"
-        venue = "Bow Market"
-        if "upstairs" in loc_text.lower():
-            venue = "Upstairs at Bow"
+            try:
+                dt = datetime(year, month, day, hour, minute, tzinfo=EASTERN).astimezone(timezone.utc)
+            except Exception:
+                continue
 
-        cat = "community"
-        low = name.lower()
-        if "fest" in low or "market" in low:
+            if dt < now:
+                continue
+
+            loc_el = item.select_one(".event-meta__location")
+            loc_text = loc_el.get_text(" ", strip=True) if loc_el else "Bow Market"
+            venue = "Bow Market"
+            if "upstairs" in loc_text.lower():
+                venue = "Upstairs at Bow"
+
             cat = "community"
-        elif "music" in low or "concert" in low:
-            cat = "music"
-        elif "comedy" in low:
-            cat = "comedy"
+            low = name.lower()
+            if "fest" in low or "market" in low:
+                cat = "community"
+            elif "music" in low or "concert" in low:
+                cat = "music"
+            elif "comedy" in low:
+                cat = "comedy"
 
-        events.append({
-            "name": name,
-            "date": dt.isoformat(),
-            "url": href,
-            "venue": venue,
-            "price": None,
-            "category": cat,
-        })
+            key = (dt.date().isoformat(), name.strip().lower())
+            if key in seen:
+                continue
+            seen.add(key)
+            events.append({
+                "name": name,
+                "date": dt.isoformat(),
+                "url": href,
+                "venue": venue,
+                "price": None,
+                "category": cat,
+            })
+    except Exception as exc:
+        print(f"Error fetching Ticket Tailor: {exc}")
+
+    events.sort(key=lambda x: x["date"])
     return events
 
 
@@ -7695,6 +7975,9 @@ _ALL_VENUES = [
     {"name": "The Anchor Boston", "url": "https://calendar.google.com/calendar/ical/theanchorbostonma%40gmail.com/public/basic.ics", "ua": UA_CHROME, "scraper": scrape_ical, "default_category": "community"},
     {"name": "ManRay Cambridge", "url": "https://manrayclub.com/monthly-calendar/", "ua": UA_CHROME, "scraper": scrape_manray, "default_category": "clubbing"},
     {"name": "Middlesex Lounge", "url": "https://www.msexcambridge.com", "ua": UA_CHROME, "scraper": scrape_middlesex, "default_category": "clubbing"},
+    {"name": "Roxy's Arcade", "url": "https://www.roxysarcade.com/event-schedule", "ua": UA_CHROME, "scraper": scrape_roxys_arcade, "default_category": "gaming"},
+    {"name": "The Phoenix Landing", "url": "https://www.thephoenixlanding.com/events", "ua": UA_CHROME, "scraper": scrape_phoenix_landing, "default_category": "clubbing"},
+    {"name": "Club Café", "url": "https://www.clubcafe.com/full-calendar/", "ua": UA_CHROME, "scraper": scrape_club_cafe, "default_category": "clubbing"},
     {"name": "Esplanade Association", "url": "https://esplanade.org/events/", "ua": UA_CHROME, "scraper": scrape_esplanade, "default_category": "outdoors"},
     {"name": "Eventbrite Cambridge", "url": "https://www.eventbrite.com/d/ma--cambridge/events/", "ua": UA_CHROME, "scraper": scrape_eventbrite_search, "default_category": None},
     {"name": "Eventbrite Somerville", "url": "https://www.eventbrite.com/d/ma--somerville/events/", "ua": UA_CHROME, "scraper": scrape_eventbrite_search, "default_category": None},
@@ -7820,7 +8103,6 @@ STATIC_LINKS = [
     ("music",   "Regattabar (jazz)", "https://www.regattabarjazz.com/"),
     ("theater", "Jacques' Cabaret (historic drag & cabaret)", "http://jacquescabaret.com/v3/"),
     ("clubbing","Dani's Queer Bar (Theater District lesbian/queer bar)", "https://danisqueerbar.com/"),
-    ("clubbing","Club Café (historic South End LGBT nightclub & cabaret)", "https://www.clubcafe.com/"),
     ("clubbing","The Alley Bar (Downtown bear & leather bar)", "http://www.thealleybar.com/"),
     ("clubbing","Gay Mafia Boston (Legacy & Candystrip parties)", "https://www.gaymafiaboston.com"),
     ("clubbing","LesbianNightLife (tea dances & queer parties)", "https://www.lesbiannightlife.com"),

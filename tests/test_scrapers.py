@@ -1451,6 +1451,99 @@ class TestBostonEvents(unittest.TestCase):
         transit = resolve_transit_lines(city, sub_slug, first, geo)
         self.assertEqual(transit, "red")
 
+    def test_roxys_arcade(self):
+        """Roxy's Arcade / A4cade venue, scraper, geo resolution, and red line transit verification."""
+        from scrapers import _ALL_VENUES, scrape_roxys_arcade
+        from venues_geo import resolve_event_geo
+        from template import _event_city, resolve_subarea, resolve_transit_lines
+
+        names = [v["name"] for v in _ALL_VENUES]
+        self.assertIn("Roxy's Arcade", names)
+
+        events = scrape_roxys_arcade("https://www.roxysarcade.com/event-schedule", UA_CHROME)
+        self.assertGreaterEqual(len(events), 10)
+
+        first = events[0]
+        self.assertEqual(first["venue"], "Roxy's Arcade")
+        geo = resolve_event_geo(first)
+        self.assertIsNotNone(geo)
+        self.assertEqual(geo["venue"], "Roxy's Arcade")
+        self.assertEqual(geo["neighborhood"], "Central Square")
+
+        city = _event_city(first["venue"], first.get("_source_venue") or first["venue"], first)
+        self.assertEqual(city, "cambridge")
+
+        sub_name, sub_slug = resolve_subarea(city, first, geo)
+        self.assertEqual(sub_slug, "central_sq")
+        self.assertEqual(resolve_transit_lines(city, sub_slug, first, geo), "red")
+
+    def test_phoenix_landing(self):
+        """The Phoenix Landing venue, scraper, geo resolution, and red line transit verification."""
+        from scrapers import _ALL_VENUES, scrape_phoenix_landing
+        from venues_geo import resolve_event_geo
+        from template import _event_city, resolve_subarea, resolve_transit_lines
+
+        names = [v["name"] for v in _ALL_VENUES]
+        self.assertIn("The Phoenix Landing", names)
+
+        events = scrape_phoenix_landing("https://www.thephoenixlanding.com/events", UA_CHROME)
+        self.assertGreaterEqual(len(events), 10)
+
+        first = events[0]
+        self.assertEqual(first["venue"], "The Phoenix Landing")
+        geo = resolve_event_geo(first)
+        self.assertIsNotNone(geo)
+        self.assertEqual(geo["venue"], "The Phoenix Landing")
+        self.assertEqual(geo["neighborhood"], "Central Square")
+
+        city = _event_city(first["venue"], first.get("_source_venue") or first["venue"], first)
+        self.assertEqual(city, "cambridge")
+
+        sub_name, sub_slug = resolve_subarea(city, first, geo)
+        self.assertEqual(sub_slug, "central_sq")
+        self.assertEqual(resolve_transit_lines(city, sub_slug, first, geo), "red")
+
+    def test_club_cafe(self):
+        """Club Café venue, scraper, geo resolution, and South End orange line transit verification."""
+        from scrapers import _ALL_VENUES, scrape_club_cafe
+        from venues_geo import resolve_event_geo
+        from template import _event_city, resolve_subarea, resolve_transit_lines
+
+        names = [v["name"] for v in _ALL_VENUES]
+        self.assertIn("Club Café", names)
+
+        events = scrape_club_cafe("https://www.clubcafe.com/full-calendar/", UA_CHROME)
+        self.assertGreaterEqual(len(events), 15)
+
+        first = events[0]
+        self.assertEqual(first["venue"], "Club Café")
+        geo = resolve_event_geo(first)
+        self.assertIsNotNone(geo)
+        self.assertEqual(geo["venue"], "Club Café")
+        self.assertEqual(geo["neighborhood"], "South End")
+
+        city = _event_city(first["venue"], first.get("_source_venue") or first["venue"], first)
+        self.assertEqual(city, "boston")
+
+        sub_name, sub_slug = resolve_subarea(city, first, geo)
+        self.assertEqual(sub_slug, "south_end")
+        self.assertEqual(resolve_transit_lines(city, sub_slug, first, geo), "orange")
+
+    def test_bow_market_upstairs(self):
+        """Bow Market / Upstairs at Bow scraper verification."""
+        from scrapers import scrape_bow_market
+        from venues_geo import resolve_event_geo
+        from template import _event_city, resolve_subarea, resolve_transit_lines
+
+        events = scrape_bow_market("https://tickettailor.com/events/bowmarket", UA_CHROME)
+        self.assertGreaterEqual(len(events), 3)
+        first = events[0]
+        geo = resolve_event_geo(first)
+        self.assertIsNotNone(geo)
+        self.assertEqual(geo["neighborhood"], "Union Square")
+        city = _event_city(first["venue"], first.get("_source_venue") or first["venue"], first)
+        self.assertEqual(city, "somerville")
+
 
 if __name__ == "__main__":
     unittest.main()
