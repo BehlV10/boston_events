@@ -1624,6 +1624,113 @@ class TestBostonEvents(unittest.TestCase):
         self.assertEqual(city, "boston")
 
 
+    def test_kid_family_category_and_detection(self):
+        """Verify is_kid_family_event and Kids & Family bucketing."""
+        from scrapers import is_kid_family_event, infer_category, category_bucket
+        from template import DEFAULT_UNCHECKED_BUCKETS, _effective_category
+
+        # Positive kid/family events
+        positives = [
+            "Baby Lapsit at Central",
+            "Crafternoon: Library Card Design Contest (Main)",
+            "Library Card Design Contest (Collins)",
+            "Toddler Story Time (Main)",
+            "Preschool Story Time (Main)",
+            "Sing-Along (Valente)",
+            "Singalong with Matt Heaton at Central",
+            "Classical Music for Babies and Kids",
+            "2026 Holiday Pops Kids' Matinee",
+            "Baby and Me Postpartum Yoga",
+            "Mindful Movement: Kids Yoga at West",
+            "Indigenous Weaving Workshop for Children",
+        ]
+        for name in positives:
+            self.assertTrue(is_kid_family_event(name), f"Should match kid event: {name}")
+            self.assertEqual(infer_category(name, "Library"), "family")
+            self.assertEqual(_effective_category({"name": name, "venue": "Library"}), "family")
+
+        # False positives to exclude
+        negatives = [
+            "A Boogie Wit Da Hoodie with DaBaby",
+            "Frost Children",
+            "Dinty Child & Mark Erelli",
+            "Bottomless Maki for $32 at Fat Baby",
+            "Marlon Wayans - Wild Child Tour",
+            "R&B Sing-Along: R&B vs. Hip-Hop Pt. 2 with Rey Royale",
+            "Ellis Paul & Friends (Beatles Singalong Night! Sam Robbins opens)",
+        ]
+        for name in negatives:
+            self.assertFalse(is_kid_family_event(name), f"Should NOT match kid event: {name}")
+
+        # Bucket & unchecked defaults
+        self.assertEqual(category_bucket("family"), "Kids & Family")
+        self.assertEqual(category_bucket("kids"), "Kids & Family")
+        self.assertIn("Kids & Family", DEFAULT_UNCHECKED_BUCKETS)
+        self.assertIn("Classes & Services", DEFAULT_UNCHECKED_BUCKETS)
+
+    def test_deduplication_mad_tsai_and_kate_nash(self):
+        """Verify deduplication for Mad Tsai (Sonia/Middle East) and Kate Nash (Arts at the Armory)."""
+        from template import _merge_duplicates, _normalize_title_head
+
+        # 1. Mad Tsai
+        tsai_events = [
+            {
+                "name": "Mad Tsai, Mykey",
+                "venue": "Sonia",
+                "date": "2026-11-03T23:30:00+00:00",
+                "price": "$33",
+                "url": "https://www.ticketweb.com/event/mad-tsai-mykey-sonia-tickets/14213774",
+                "source": "ticketweb",
+            },
+            {
+                "name": "Mad Tsai",
+                "venue": "The Middle East presents:",
+                "date": "2026-11-03T22:30:00+00:00",
+                "url": "https://do617.com/events/2026/11/3/mad-tsai-tickets",
+                "source": "do617",
+            },
+            {
+                "name": "Mad Tsai",
+                "venue": "Sonia Live Music Venue",
+                "date": "2026-11-03T23:30:00Z",
+                "url": "https://seatgeek.com/mad-tsai-tickets/cambridge-massachusetts-sonia-live-music-venue-2026-11-03-6-30-pm/concert/18664219",
+                "source": "seatgeek",
+            },
+        ]
+        merged_tsai = _merge_duplicates(tsai_events)
+        self.assertEqual(len(merged_tsai), 1, "Mad Tsai events across Sonia & Middle East presents should merge into 1")
+        self.assertEqual(merged_tsai[0]["price"], "$33")
+        self.assertGreaterEqual(len(merged_tsai[0].get("_alt_sources", [])), 2)
+
+        # 2. Kate Nash
+        kate_events = [
+            {
+                "name": "Kate Nash",
+                "venue": "The Center for Arts at the Armory",
+                "date": "2026-11-04T00:00:00Z",
+                "url": "https://seatgeek.com/kate-nash-tickets/somerville-massachusetts-the-center-for-arts-at-the-armory-1-2026-11-03-7-pm/concert/18635055",
+                "source": "seatgeek",
+            },
+            {
+                "name": "Kate Nash",
+                "venue": "The Center for Arts at the Armory Performance Hall",
+                "date": "2026-11-04T00:00:00+00:00",
+                "url": "https://www.eventbrite.com/e/kate-nash-tickets-2001392500846",
+                "source": "eventbrite",
+            },
+            {
+                "name": "An Evening with Kate Nash",
+                "venue": "Arts at the Armory",
+                "date": "2026-11-04T00:00:00+00:00",
+                "url": "https://artsatthearmory.org/events/an-evening-with-kate-nash/",
+                "_source_venue": "Arts at the Armory",
+            },
+        ]
+        merged_kate = _merge_duplicates(kate_events)
+        self.assertEqual(len(merged_kate), 1, "Kate Nash events across Arts at the Armory variants should merge into 1")
+        self.assertGreaterEqual(len(merged_kate[0].get("_alt_sources", [])), 2)
+
+
 if __name__ == "__main__":
     unittest.main()
 

@@ -23,8 +23,21 @@ from scrapers import (
     _load_community_events,
     is_placeholder_or_closed_event,
     is_utility_event,
+    is_kid_family_event,
 )
 from venues_geo import resolve_event_geo
+
+
+DEFAULT_UNCHECKED_BUCKETS = {"Classes & Services", "Kids & Family"}
+
+
+def _effective_category(e):
+    name = e.get("name") or ""
+    if is_utility_event(name):
+        return "services"
+    if is_kid_family_event(name, e.get("venue")):
+        return "family"
+    return e.get("category") or "other"
 
 
 CITY_RULES = [
@@ -844,7 +857,7 @@ def filter_events_for_hub(hub, events):
         if city_filter and _event_city(e.get("venue"), e.get("_source_venue"), e) != city_filter:
             continue
         if cat_filter:
-            c = "services" if is_utility_event(e.get("name") or "") else (e.get("category") or "other")
+            c = _effective_category(e)
             bucket = category_bucket(c)
             direct_cat = c.lower()
             if bucket != cat_filter and direct_cat != cat_filter.lower():
@@ -867,7 +880,7 @@ def filter_events_for_hub(hub, events):
             if city_filter and _event_city(e.get("venue"), e.get("_source_venue"), e) != city_filter:
                 continue
             if cat_filter:
-                c = "services" if is_utility_event(e.get("name") or "") else (e.get("category") or "other")
+                c = _effective_category(e)
                 bucket = category_bucket(c)
                 direct_cat = c.lower()
                 if bucket != cat_filter and direct_cat != cat_filter.lower():
@@ -1707,8 +1720,11 @@ def _normalize_title_head(title, venue=None):
                 t = t_clean[len(v_cand):].strip()
                 break
 
-    # 2. Strip leading generic words: "live ", "traditional ", "weekly ", "annual "
+    # 2. Strip leading generic words and prefixes
+    t = re.sub(r"^(?:an evening with|an evening of|a night with|in conversation with)\s+", "", t, flags=re.I)
+    t = re.sub(r"^(?:no cover\s+(?:drag\s+)?|free\s+)", "", t, flags=re.I)
     t = re.sub(r"^(?:live|traditional|weekly|annual)\s+", "", t, flags=re.I)
+    t = re.sub(r"^(?:a|an)\s+", "", t, flags=re.I)
 
     # 3. Strip parentheses / brackets with openers, support, guest, tour, etc.
     t = re.sub(r"\s*[\(\[][^\)\]]*(?:touring|18\+|21\+|sold out|ages|rescheduled|presale|preseason|preview|week\s*\d+|opens|opener|support|guest|special guest|featuring)[^\)\]]*[\)\]]", "", t, flags=re.I)
@@ -1736,7 +1752,7 @@ def _normalize_title_head(title, venue=None):
         if sep in t:
             parts = t.split(sep, 1)
             left = parts[0].strip()
-            if any(left.endswith(suff) for suff in GENERIC_CATEGORY_SUFFIXES):
+            if sep in (":", " - ", " – ", " — ") and any(left.endswith(suff) for suff in GENERIC_CATEGORY_SUFFIXES):
                 if len(parts[1].strip()) >= 3:
                     t = parts[1].strip()
                     continue
@@ -1749,6 +1765,7 @@ def _normalize_title_head(title, venue=None):
             t = parts[0].strip()
 
     t = re.sub(r"^(?:live|traditional|weekly|annual)\s+", "", t, flags=re.I)
+    t = re.sub(r"^(?:a|an)\s+", "", t, flags=re.I)
     t = re.sub(r"\bmusic\s+", "", t, flags=re.I)
     t = re.sub(r"[^a-z0-9]+", " ", t).strip()
     return t
@@ -1914,8 +1931,14 @@ def _merge_duplicates(events):
         if e1 and e2:
             g1 = resolve_event_geo(e1)
             g2 = resolve_event_geo(e2)
-            if g1 and g2 and g1.get("venue") and g1.get("venue") == g2.get("venue"):
-                return True
+            if g1 and g2:
+                if g1.get("venue") and g1.get("venue") == g2.get("venue"):
+                    return True
+                lat1, lng1 = g1.get("lat"), g1.get("lng")
+                lat2, lng2 = g2.get("lat"), g2.get("lng")
+                if lat1 is not None and lat2 is not None and lng1 is not None and lng2 is not None:
+                    if abs(lat1 - lat2) < 0.0015 and abs(lng1 - lng2) < 0.0015:
+                        return True
         return False
 
     for e in events:
@@ -1962,6 +1985,13 @@ def _merge_duplicates(events):
                         if (cand_head.startswith(head) or head.startswith(cand_head)) and min(len(head), len(cand_head)) >= 6:
                             match = cand
                             break
+                        h_words = head.split()
+                        c_words = cand_head.split()
+                        if len(h_words) >= 2 and len(c_words) >= 2 and h_words[:2] == c_words[:2]:
+                            prefix2 = " ".join(h_words[:2])
+                            if prefix2 not in GENERIC_HEADS and len(prefix2) >= 6:
+                                match = cand
+                                break
 
         if match:
             match.setdefault("_alt_sources", [])
@@ -2045,6 +2075,8 @@ def group_by_date(results):
             entry["venue"] = e.get("venue") or r["venue"]
             if is_utility_event(name):
                 entry["category"] = "services"
+            elif is_kid_family_event(name, entry.get("venue")):
+                entry["category"] = "family"
             raw = e.get("date")
             key = None
             if raw:
@@ -2237,10 +2269,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
         else:
             price_tag = ""
 
-        if is_utility_event(raw_title):
-            cat = "services"
-        else:
-            cat = e.get("category") or "other"
+        cat = _effective_category(e)
         genre = e.get("genre")
         if not genre and cat in ("music", "clubbing"):
             genre = infer_music_genre(e.get("name"), e.get("venue"), description=e.get("description"), category=cat)
@@ -2382,7 +2411,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
     def _render_buckets(events):
         by_bucket = {b: [] for b in bucket_name_order}
         for e in events:
-            c = "services" if is_utility_event(e.get("name") or "") else (e.get("category") or "other")
+            c = _effective_category(e)
             by_bucket.setdefault(category_bucket(c), []).append(e)
         bucket_blocks = []
         for bname in bucket_name_order:
@@ -2546,7 +2575,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
     once_count = 0
     all_events_flat = [e for _, es in dated for e in es] + list(tba)
     for e in all_events_flat:
-        c = "services" if is_utility_event(e.get("name") or "") else (e.get("category") or "other")
+        c = _effective_category(e)
         bucket_counts[category_bucket(c)] = bucket_counts.get(category_bucket(c), 0) + 1
         if c == "other":
             other_count += 1
@@ -2579,7 +2608,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
 
     cat_items = []
     for b in bucket_order:
-        is_checked = (b != "Classes & Services")
+        is_checked = (b not in DEFAULT_UNCHECKED_BUCKETS)
         chk_attr = " checked" if is_checked else ""
         item_html = f'''<label class="chk">
             <input type="checkbox" class="cat-chk" value="{escape(b)}"{chk_attr}>
@@ -3426,6 +3455,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
   .bucket[data-bucket="Food & drink"]      {{ --accent: #c678dd; }}
   .bucket[data-bucket="Community"]         {{ --accent: #8fa1b3; }}
   .bucket[data-bucket="Classes & Services"] {{ --accent: #8fa1b3; }}
+  .bucket[data-bucket="Kids & Family"]      {{ --accent: #ffb8d1; }}
   .bucket-head {{ display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); font-weight: 600; }}
   .bucket-head .count {{ background: transparent; color: var(--muted); }}
   .bucket ul {{ list-style: none; padding: 0; margin: 0; }}
@@ -8428,7 +8458,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
       updateTimeUI();
       activeGenre = 'all';
       genreBoxes.forEach(b => b.checked = true);
-      catBoxes.forEach(b => b.checked = (b.value !== 'Classes & Services'));
+      catBoxes.forEach(b => b.checked = (b.value !== 'Classes & Services' && b.value !== 'Kids & Family'));
       const subContainer = document.getElementById('subgenre-container');
       if (subContainer) subContainer.classList.remove('disabled');
       cityBoxes.forEach(b => b.checked = true);

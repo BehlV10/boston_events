@@ -8634,9 +8634,40 @@ def is_utility_event(name):
     return bool(UTILITY_EVENT_RE.search(name))
 
 
+EXCLUDE_KID_FAMILY_RE = re.compile(
+    r"\b("
+    r"dababy|frost children|dinty child|wild child|childish gambino|fat baby|"
+    r"destiny's child|child's play|children of bodom|indiana jones|"
+    r"sip & support|r&b sing-?along|beatles singalong"
+    r")\b",
+    re.IGNORECASE,
+)
+
+KID_FAMILY_EVENT_RE = re.compile(
+    r"\b("
+    r"baby|babies|lapsit|storytime|story time|singalong|sing-along|toddler|toddlers|"
+    r"preschool|preschooler|preschoolers|infant|infants|"
+    r"children|child(?:ren)?'s|for kids|for children|kid's|kids\b|"
+    r"library card design contest|pajama story|baby rave|mindful movement: kids yoga"
+    r")\b",
+    re.IGNORECASE,
+)
+
+
+def is_kid_family_event(name, venue=None):
+    """Return True if an event is meant for infants, toddlers, kids, or family storytimes."""
+    if not name:
+        return False
+    if EXCLUDE_KID_FAMILY_RE.search(name):
+        return False
+    return bool(KID_FAMILY_EVENT_RE.search(name))
+
+
 def infer_category(name, venue, default=None):
     if is_utility_event(name):
         return "services"
+    if is_kid_family_event(name, venue):
+        return "family"
     text = f"{name or ''} {venue or ''}".lower()
     for cat, kws in CATEGORY_KEYWORDS:
         for k in kws:
@@ -8684,10 +8715,11 @@ CATEGORY_BUCKETS = [
     ("Dance",              ["dance"]),
     ("Stage",              ["comedy", "theater", "stage"]),
     ("Arts & culture",     ["books", "film", "art", "arts"]),
-    ("Play",               ["gaming", "sports", "fitness", "outdoors", "family"]),
+    ("Play",               ["gaming", "sports", "fitness", "outdoors"]),
     ("Food & drink",       ["food"]),
     ("Community",          ["community", "other"]),
     ("Classes & Services", ["services"]),
+    ("Kids & Family",      ["family", "kids"]),
 ]
 _CAT_TO_BUCKET = {cat: name for name, cats in CATEGORY_BUCKETS for cat in cats}
 
