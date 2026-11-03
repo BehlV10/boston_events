@@ -1859,6 +1859,15 @@ def scrape_ical(url, ua):
         price = None
         if re.search(r'\b(free\s+(?:admission|entry|event|dance|class)|no cover)\b', desc or "", re.I) or re.search(r'\bfree\b', summary or "", re.I):
             price = "Free"
+        else:
+            m_cost = re.search(r'(?:Cost|Fee|Price|Tickets?|Admission|Cover)[\s:\-–—\xa0]+(?:[A-Za-z\s]+:\s*)?(\$[0-9]+(?:\.[0-9]{2})?(?:\s*[-–—]\s*\$[0-9]+(?:\.[0-9]{2})?)?|\bFree\b|\$0\b)', desc or "", re.I)
+            if m_cost:
+                val = m_cost.group(1).strip()
+                price = "Free" if val.lower() in ("free", "$0", "$0.00") else val
+            else:
+                m_sum = re.search(r'\(\s*(\$[0-9]+(?:\.[0-9]{2})?(?:\s*[-–—]\s*\$?[0-9]+)?)\s*\)', summary or "")
+                if m_sum:
+                    price = m_sum.group(1).strip()
         for dt in starts:
             dt_utc = dt.astimezone(timezone.utc)
             if dt_utc < now or dt_utc > cutoff:
@@ -8144,7 +8153,18 @@ def scrape_life_drawing_boston(url, ua):
         else:
             link = full_url or url
 
-        price = "$20"
+        # Check if description or excerpt mentions a specific price
+        body_html = item.get("body") or ""
+        excerpt_html = item.get("excerpt") or ""
+        combined_text = f"{title} {body_html} {excerpt_html}"
+        m_cost = re.search(r'(?:Cost|Fee|Price|Admission|Door)[\s:\-–—\xa0]+(\$[0-9]+(?:\.[0-9]{2})?|\bFree\b)', combined_text, re.I)
+        if m_cost:
+            val = m_cost.group(1).strip()
+            price = "Free" if val.lower() == "free" else val
+        else:
+            m_dollar = re.search(r'(\$[0-9]{1,3}(?:\.[0-9]{2})?)', combined_text)
+            price = m_dollar.group(1).strip() if m_dollar else "$20"
+
         key = (title, dt.isoformat())
         if key in seen:
             continue
@@ -8180,7 +8200,43 @@ def scrape_bostonfac(url, ua):
         auth_id = "raa-UXnOYOs5JPTnSb3l"
         dt_request = now.strftime("%Y-%m-%d %H:%M:%S")
         http_date = now.strftime("%a, %d %b %Y %H:%M:%S GMT")
+        csrf_parts = csrf.split(".")
+        csrf_check = f"{session_id}.{csrf_parts[0][:5]}.{csrf_parts[1]}"
 
+        # 1. Fetch class pricing map via ClassView/Element.json
+        class_prices = {}
+        try:
+            params_cv = {"k_business": "693029", "k_class": ""}
+            sig_lines_cv = ["Core\\Request\\Api::20210304-cors", dt_request, "www.wellnessliving.com", auth_id, "GET", "Wl/Classes/ClassView/Element.json", csrf]
+            for k in sorted(params_cv.keys()):
+                sig_lines_cv.append(f"{k.lower()}={params_cv[k]}")
+            sig_check_cv = "".join([hashlib.sha256(line.encode("utf-8")).hexdigest()[:1] for line in sig_lines_cv])
+            sig_hash_cv = hashlib.sha256("\n".join(sig_lines_cv).encode("utf-8")).hexdigest()
+            auth_header_cv = f"20210304-cors,{auth_id},,{csrf_check},{sig_hash_cv}.2.{sig_check_cv}.."
+
+            url_cv = "https://www.wellnessliving.com/Wl/Classes/ClassView/Element.json?" + urllib.parse.urlencode(params_cv)
+            resp_cv = _SESSION.get(url_cv, headers={
+                "User-Agent": ua or UA_CHROME,
+                "Authorization": auth_header_cv,
+                "X-Signature-Date": http_date,
+                "X-Signature-Timezone": "300"
+            }, timeout=10)
+            if resp_cv.status_code == 200:
+                cv_data = resp_cv.json().get("a_class_list", {})
+                for cid, cinfo in cv_data.items():
+                    sched = cinfo.get("a_schedule", [])
+                    for sc in sched:
+                        mp = sc.get("m_price")
+                        if mp:
+                            try:
+                                class_prices[cid] = float(mp)
+                            except Exception:
+                                pass
+                            break
+        except Exception:
+            pass
+
+        # 2. Fetch session schedule
         start_str = (now - timedelta(days=1)).strftime("%Y-%m-%d")
         end_str = (now + timedelta(days=35)).strftime("%Y-%m-%d")
 
@@ -8217,11 +8273,7 @@ def scrape_bostonfac(url, ua):
         sig_check = "".join([hashlib.sha256(line.encode("utf-8")).hexdigest()[:1] for line in sig_lines])
         full_str = "\n".join(sig_lines)
         sig_hash = hashlib.sha256(full_str.encode("utf-8")).hexdigest()
-        debug = f"2.{sig_check}.."
-        final_sig = f"{sig_hash}.{debug}"
-
-        csrf_parts = csrf.split(".")
-        csrf_check = f"{session_id}.{csrf_parts[0][:5]}.{csrf_parts[1]}"
+        final_sig = f"{sig_hash}.2.{sig_check}.."
         auth_header = f"20210304-cors,{auth_id},,{csrf_check},{final_sig}"
 
         post_url = "https://www.wellnessliving.com/Wl/Schedule/ClassList/ClassList68.json"
@@ -8256,13 +8308,20 @@ def scrape_bostonfac(url, ua):
         if dt < now:
             continue
 
+        cid = str(s.get("k_class") or "")
         link = (s.get("url_book") or "https://www.bostonfac.com/figuresessions").strip()
-        price = s.get("m_price") or ""
-        if price and not price.startswith("$"):
-            try:
-                price = f"${float(price):.0f}"
-            except Exception:
-                pass
+        desc_lower = (s.get("html_description") or "").lower()
+        t_lower = title.lower()
+
+        f_price = class_prices.get(cid)
+        if f_price is not None and f_price > 0:
+            price = f"${f_price:.0f}"
+        elif "free" in t_lower or "*free" in desc_lower or "free for members" in desc_lower or "free, members-only" in desc_lower or "opening reception" in t_lower:
+            price = "Free"
+        elif f_price == 0.0 and ("class" in t_lower or "workshop" in t_lower):
+            price = "Check link"
+        else:
+            price = "$30"
 
         key = (title, dt.isoformat())
         if key in seen:
@@ -8274,7 +8333,7 @@ def scrape_bostonfac(url, ua):
             "date": dt.isoformat(),
             "url": link,
             "venue": "Boston Figure Art Center",
-            "price": price or "$20",
+            "price": price,
             "category": "art",
         })
     events.sort(key=lambda x: x["date"])
