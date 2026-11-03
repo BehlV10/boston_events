@@ -7,8 +7,8 @@ X-WR-CALNAME:Boston Live Events & Shows
 X-WR-TIMEZONE:America/New_York
 X-WR-CALDESC:Curated live shows, concerts, and comedy across Boston, Cambridge, and Somerville.
 BEGIN:VEVENT
-UID:20261105_3179270016@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261105_3988316167@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261105
 SUMMARY:Compagnie Hervé Koubi @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -17,8 +17,8 @@ URL:https://www.theplatformkendall.org/productions/compagnie-herve-koubi-fy27/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261106_3179270016@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261106_3988316167@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261106
 SUMMARY:Compagnie Hervé Koubi @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -27,8 +27,8 @@ URL:https://www.theplatformkendall.org/productions/compagnie-herve-koubi-fy27/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261107_3910250176@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261107_5687032587@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261107
 SUMMARY:The Platform Opening Day @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -37,8 +37,8 @@ URL:https://www.theplatformkendall.org/the-platform-opening-day/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261107_3179270016@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261107_3988316167@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261107
 SUMMARY:Compagnie Hervé Koubi @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -47,8 +47,8 @@ URL:https://www.theplatformkendall.org/productions/compagnie-herve-koubi-fy27/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261110_2841970683@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261110_2139731783@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261110
 SUMMARY:Peppino D'Agostino @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -57,8 +57,8 @@ URL:https://www.theplatformkendall.org/productions/peppino-dagostino/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261111_8078494845@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261111_9177174279@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261111
 SUMMARY:Maryna Krut @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -67,8 +67,8 @@ URL:https://www.theplatformkendall.org/productions/maryna-krut-fy27/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261113_7599838687@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261113_9046488107@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261113
 SUMMARY:Strong Voice: The Tales of Roswitha @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -77,8 +77,8 @@ URL:https://www.theplatformkendall.org/productions/strong-voice-the-tales-of-ros
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261113_7273212278@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261113_8791257864@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261113
 SUMMARY:Tamara Jokić @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -87,8 +87,8 @@ URL:https://www.theplatformkendall.org/productions/tamara-jokic/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261113_4650073797@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261113_7078491782@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261113
 SUMMARY:Jean Appolon Expressions Pouvwa @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -97,8 +97,8 @@ URL:https://www.theplatformkendall.org/productions/jean-appolon-expressions-fy27
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261114_4650073797@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261114_7078491782@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261114
 SUMMARY:Jean Appolon Expressions Pouvwa @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -107,8 +107,8 @@ URL:https://www.theplatformkendall.org/productions/jean-appolon-expressions-fy27
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261120_7182536317@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261120_1211889903@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261120
 SUMMARY:Nicolás Emden @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -117,8 +117,8 @@ URL:https://www.theplatformkendall.org/productions/nicolas-emden/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261120_4857487221@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261120_3378291078@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261120
 SUMMARY:Bria Skonberg @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -127,8 +127,8 @@ URL:https://www.theplatformkendall.org/productions/bria-skonberg-fy27/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261121_3929825245@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261121_6439131522@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261121
 SUMMARY:BalletX @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -137,8 +137,8 @@ URL:https://www.theplatformkendall.org/productions/balletx-fy27/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261122_3929825245@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261122_6439131522@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261122
 SUMMARY:BalletX @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -147,8 +147,8 @@ URL:https://www.theplatformkendall.org/productions/balletx-fy27/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261122_8190760430@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261122_9047035571@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261122
 SUMMARY:Pipo Romero @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -157,8 +157,8 @@ URL:https://www.theplatformkendall.org/productions/pipo-romero/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261203_2555809346@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261203_6369446986@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261203
 SUMMARY:Zohar & Adam @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -167,8 +167,8 @@ URL:https://www.theplatformkendall.org/productions/zohar-adam-fy27/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261205_7723246191@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261205_8027046395@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261205
 SUMMARY:Laura Anglade @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -177,8 +177,8 @@ URL:https://www.theplatformkendall.org/productions/laura-anglade/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261205_7598868329@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261205_4340053859@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261205
 SUMMARY:Zoë Keating @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -187,8 +187,8 @@ URL:https://www.theplatformkendall.org/productions/zoe-keating/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261206_2632408115@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261206_2313146040@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261206
 SUMMARY:EZEKIEL'S WHEELS/RACHEL LINSKY @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -197,8 +197,8 @@ URL:https://www.theplatformkendall.org/performance/ezekiels-wheels-rachel-linsky
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261206_3188897551@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261206_1180761169@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261206
 SUMMARY:Maria Mazzotta @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -207,8 +207,8 @@ URL:https://www.theplatformkendall.org/productions/maria-mazzotta-fy27/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261206_9757825855@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261206_1174991901@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261206
 SUMMARY:Ezekiel's Wheels & ZACHOR Dance Projects @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -217,8 +217,8 @@ URL:https://www.theplatformkendall.org/productions/ezekiels-wheels-linsky-fy27/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261209_3503068410@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261209_3617050215@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261209
 SUMMARY:MANAS @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -227,8 +227,8 @@ URL:https://www.theplatformkendall.org/productions/manas/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261210_8135215808@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261210_7166984753@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261210
 SUMMARY:Magic Tuber Stringband @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -237,8 +237,8 @@ URL:https://www.theplatformkendall.org/productions/magic-tuber-stringband/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261210_7807501197@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261210_2445151869@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261210
 SUMMARY:Monty Alexander "Jamaica to Jazz" @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -247,8 +247,8 @@ URL:https://www.theplatformkendall.org/productions/monty-alexander-fy27/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261211_1849460313@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261211_6557981949@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261211
 SUMMARY:PINE TREE FLYERS @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -257,8 +257,8 @@ URL:https://www.theplatformkendall.org/productions/pine-tree-flyers/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261211_2266425772@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261211_4121823631@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261211
 SUMMARY:Subject:Matter @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -267,8 +267,8 @@ URL:https://www.theplatformkendall.org/productions/subjectmatter-fy27/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261212_2266425772@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261212_4121823631@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261212
 SUMMARY:Subject:Matter @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -277,8 +277,8 @@ URL:https://www.theplatformkendall.org/productions/subjectmatter-fy27/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261213_3984594261@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261213_6189764978@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261213
 SUMMARY:Kandace Springs @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -287,8 +287,8 @@ URL:https://www.theplatformkendall.org/productions/kandace-springs/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270109_6034982594@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270109_2342855062@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270109
 SUMMARY:Honeysuckle @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -297,8 +297,8 @@ URL:https://www.theplatformkendall.org/productions/honeysuckle/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270110_6652533486@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270110_4150022358@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270110
 SUMMARY:BOWIE CELLO SYMPHONIC @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -307,8 +307,8 @@ URL:https://www.theplatformkendall.org/productions/bowie-cello-symphonic-aura-bl
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270114_1152164956@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270114_3811301829@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270114
 SUMMARY:Gretchen Parlato @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -317,8 +317,8 @@ URL:https://www.theplatformkendall.org/productions/gretchen-parlato/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270115_1858418247@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270115_4529021883@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270115
 SUMMARY:Balla Kouyaté & Matchume Zango BALA-BILA @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -327,8 +327,8 @@ URL:https://www.theplatformkendall.org/productions/balla-kouyate-and-matchume-za
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270115_5602774900@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270115_3641027747@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270115
 SUMMARY:The Dirty Dozen Brass Band @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -337,8 +337,8 @@ URL:https://www.theplatformkendall.org/productions/the-dirty-brass-dozen-band/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270116_1075390528@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270116_6076758429@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270116
 SUMMARY:Amythyst Kiah @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -347,8 +347,8 @@ URL:https://www.theplatformkendall.org/productions/amythyst-kiah/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270117_1678083985@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270117_6117140668@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270117
 SUMMARY:Joshua Redman Quartet @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -357,8 +357,8 @@ URL:https://www.theplatformkendall.org/productions/joshua-redman-quartet/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270124_5475867892@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270124_5775980499@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270124
 SUMMARY:Alash @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -367,8 +367,8 @@ URL:https://www.theplatformkendall.org/productions/alash/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270126_6286886425@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270126_5616720173@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270126
 SUMMARY:Puuluup @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -377,8 +377,8 @@ URL:https://www.theplatformkendall.org/productions/puuluup/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270129_7352969419@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270129_4799371884@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270129
 SUMMARY:Cirque Kalabanté Afrique en Cirque @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -387,8 +387,8 @@ URL:https://www.theplatformkendall.org/productions/cirque-kabalante-afrique-en-c
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270130_7352969419@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270130_4799371884@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270130
 SUMMARY:Cirque Kalabanté Afrique en Cirque @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -397,8 +397,8 @@ URL:https://www.theplatformkendall.org/productions/cirque-kabalante-afrique-en-c
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270131_7352969419@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270131_4799371884@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270131
 SUMMARY:Cirque Kalabanté Afrique en Cirque @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -407,8 +407,8 @@ URL:https://www.theplatformkendall.org/productions/cirque-kabalante-afrique-en-c
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270205_3099223322@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270205_1559038008@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270205
 SUMMARY:Kurt Elling @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -417,8 +417,8 @@ URL:https://www.theplatformkendall.org/productions/wildflowers-kurt-elling-with-
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270206_8362173987@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270206_1965968313@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270206
 SUMMARY:The Hot Sardines @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -427,8 +427,8 @@ URL:https://www.theplatformkendall.org/productions/the-hot-sardines/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270207_8362173987@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270207_1965968313@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270207
 SUMMARY:The Hot Sardines @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -437,8 +437,8 @@ URL:https://www.theplatformkendall.org/productions/the-hot-sardines/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270212_7838914556@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270212_7932388356@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270212
 SUMMARY:Yamato @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -447,8 +447,8 @@ URL:https://www.theplatformkendall.org/productions/yamato/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270213_7838914556@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270213_7932388356@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270213
 SUMMARY:Yamato @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -457,8 +457,8 @@ URL:https://www.theplatformkendall.org/productions/yamato/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270217_5892581905@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270217_4867251604@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270217
 SUMMARY:CelloGayageum @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -467,8 +467,8 @@ URL:https://www.theplatformkendall.org/productions/cellogayageum/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270220_6606305753@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270220_8671181215@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270220
 SUMMARY:Juanito Pascual Trio Flamenco Celebration of Jimi Hendrix @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -477,8 +477,8 @@ URL:https://www.theplatformkendall.org/productions/juanito-pascual-trio-flamenco
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270227_6656402975@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270227_8757101372@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270227
 SUMMARY:PHILADANCO! @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -487,8 +487,8 @@ URL:https://www.theplatformkendall.org/productions/philadanco/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270228_6656402975@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270228_8757101372@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270228
 SUMMARY:PHILADANCO! @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -497,8 +497,8 @@ URL:https://www.theplatformkendall.org/productions/philadanco/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270302_7651518218@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270302_4383332048@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270302
 SUMMARY:International Guitar Night @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -507,8 +507,8 @@ URL:https://www.theplatformkendall.org/productions/international-guitar-night/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270304_1099964959@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270304_3887612555@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270304
 SUMMARY:Marquis Hill @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -517,8 +517,8 @@ URL:https://www.theplatformkendall.org/productions/marquis-hill/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270305_3970282566@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270305_4529982374@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270305
 SUMMARY:ISAIAH COLLIER & THE DEFIANCE @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -527,8 +527,8 @@ URL:https://www.theplatformkendall.org/performance/isaiah-collier-the-defiance-2
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270305_6716033101@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270305_2183514276@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270305
 SUMMARY:Isaiah Collier: Joy @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -537,8 +537,8 @@ URL:https://www.theplatformkendall.org/productions/isaiah-collier-the-defiance/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270306_9202566888@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270306_5937324925@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270306
 SUMMARY:Derek Gripper & Alam Khan @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -547,8 +547,8 @@ URL:https://www.theplatformkendall.org/productions/derek-gripper-alam-khan-fy27/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270307_6747982329@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270307_2246248235@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270307
 SUMMARY:Screendance Roadshow Playing Favorites @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -557,8 +557,8 @@ URL:https://www.theplatformkendall.org/productions/screendance-roadshow-playing-
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270312_6246413791@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270312_2963597583@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270312
 SUMMARY:Flamenkora @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -567,8 +567,8 @@ URL:https://www.theplatformkendall.org/productions/flamenkora/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270312_1438052544@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270312_1074459626@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270312
 SUMMARY:RUBBERBAND @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -577,8 +577,8 @@ URL:https://www.theplatformkendall.org/productions/rubberband-reckless-underdog/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270313_1438052544@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270313_1074459626@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270313
 SUMMARY:RUBBERBAND @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -587,8 +587,8 @@ URL:https://www.theplatformkendall.org/productions/rubberband-reckless-underdog/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270314_2194510140@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270314_7516315741@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270314
 SUMMARY:Ladysmith Black Mambazo @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -597,8 +597,8 @@ URL:https://www.theplatformkendall.org/productions/ladysmith-black-mambazo/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270319_7417431708@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270319_2738502383@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270319
 SUMMARY:Lucibela @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -607,8 +607,8 @@ URL:https://www.theplatformkendall.org/productions/lucibela/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270325_7988347074@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270325_7607841997@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270325
 SUMMARY:Mayrig @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -617,8 +617,8 @@ URL:https://www.theplatformkendall.org/productions/mayrig/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270327_5431789492@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270327_7702446473@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270327
 SUMMARY:Keyon Harrold @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -627,8 +627,8 @@ URL:https://www.theplatformkendall.org/productions/keyon-harrold-fy27/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270402_6599918005@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270402_7827148826@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270402
 SUMMARY:Baklava Express @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -637,8 +637,8 @@ URL:https://www.theplatformkendall.org/productions/baklava-express/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270403_8963334583@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270403_4063174917@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270403
 SUMMARY:Sole Defined @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -647,8 +647,8 @@ URL:https://www.theplatformkendall.org/productions/sole-defined-zaz/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270404_8963334583@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270404_4063174917@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270404
 SUMMARY:Sole Defined @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -657,8 +657,8 @@ URL:https://www.theplatformkendall.org/productions/sole-defined-zaz/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270415_1627704851@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270415_8479982568@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270415
 SUMMARY:Chris Potter Trio featuring Matt Brewer & Kendrick Scott @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -667,8 +667,8 @@ URL:https://www.theplatformkendall.org/productions/chris-potter-trio/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270417_3699678315@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270417_4558115617@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270417
 SUMMARY:Jack West Percussive Acoustic Guitar Duo featuring James Nash @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -677,8 +677,8 @@ URL:https://www.theplatformkendall.org/productions/jack-west-james-nash-percussi
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270417_7879899567@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270417_6343341702@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270417
 SUMMARY:Boston Dance Theater @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -687,8 +687,8 @@ URL:https://www.theplatformkendall.org/productions/boston-dance-theater/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270420_1736988841@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270420_5261033364@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270420
 SUMMARY:NILADRI KUMAAR @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -697,8 +697,8 @@ URL:https://www.theplatformkendall.org/performance/niladri-kumaar-2027-04-20-193
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270424_1533997406@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270424_5226453087@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270424
 SUMMARY:Elida Almeida @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -707,8 +707,8 @@ URL:https://www.theplatformkendall.org/productions/elida-almeida/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270425_2679964907@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270425_8035652008@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270425
 SUMMARY:Trio Mandili @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -717,8 +717,8 @@ URL:https://www.theplatformkendall.org/productions/trio-mandili/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270513_4207712479@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270513_6725099460@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270513
 SUMMARY:Step Afrika! @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -727,8 +727,8 @@ URL:https://www.theplatformkendall.org/productions/step-afrika-evolution/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270514_8830860533@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270514_1376258733@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270514
 SUMMARY:Zafarán @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -737,8 +737,8 @@ URL:https://www.theplatformkendall.org/productions/zafaran/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270514_4207712479@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270514_6725099460@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270514
 SUMMARY:Step Afrika! @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -747,8 +747,8 @@ URL:https://www.theplatformkendall.org/productions/step-afrika-evolution/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270515_4207712479@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270515_6725099460@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270515
 SUMMARY:Step Afrika! @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -757,8 +757,8 @@ URL:https://www.theplatformkendall.org/productions/step-afrika-evolution/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270522_4507540330@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270522_1549147972@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270522
 SUMMARY:Debashish Bhattacharya @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -767,8 +767,8 @@ URL:https://www.theplatformkendall.org/productions/debashish-bhattacharya/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270624_7358499884@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20270624_3042825517@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20270624
 SUMMARY:Sullivan Fortner Trio @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -777,8 +777,8 @@ URL:https://www.theplatformkendall.org/productions/sullivan-fortner-trio/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261107_1067788617@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261107_5636228108@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261107
 SUMMARY:Somerville Winter Farmers Market @ Boston
 LOCATION:Boston, Boston MA
@@ -787,8 +787,8 @@ URL:https://partiful.com/e/ODNZeSSBA000tIaAexuP
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261107_6074897819@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261107_9120467212@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261107
 SUMMARY:Cuffing Season Finale 💚🍂 @ Seven Hills Park (behind the Davis Sq Red Line + Life Alive)
 LOCATION:Seven Hills Park (behind the Davis Sq Red Line + Life Alive), Boston MA
@@ -797,8 +797,8 @@ URL:https://partiful.com/e/oKWiAZcxbw1kWLgb5CRR
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261108_2001531834@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261108_6885652883@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261108
 SUMMARY:1 year of 🔗 hyperlinked: a girl edm + hyperpop party @ Boston
 LOCATION:Boston, Boston MA
@@ -807,8 +807,8 @@ URL:https://partiful.com/e/xXASMGPMZQAl3dLOm1zI
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261110_6495884068@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261110_8404612690@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261110
 SUMMARY:Fenway Free Market @ Fenway Community Center
 LOCATION:Fenway Community Center, Boston MA
@@ -817,8 +817,8 @@ URL:https://partiful.com/e/11FX60ikL9VhCTpCna8o
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261113_5969239879@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261113_5834886553@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261113
 SUMMARY:Snowport Social - Let's Meet @ Snowport@ Seaport Blvd
 LOCATION:Snowport@ Seaport Blvd, Boston MA
@@ -827,8 +827,8 @@ URL:https://partiful.com/e/6LeS60PI2qRWJWniQfx0
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261114_8496583260@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261114_5649518301@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261114
 SUMMARY:Coffee & Collectives @ Phinista Café
 LOCATION:Phinista Café, Boston MA
@@ -837,8 +837,8 @@ URL:https://partiful.com/e/dKLUV3nxZJmLB0KAsG0N
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261114_6333951411@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261114_1426790906@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261114
 SUMMARY:GIRLSGIVING @ Boston
 LOCATION:Boston, Boston MA
@@ -847,8 +847,8 @@ URL:https://partiful.com/e/KPwyfJYxcryvOV5eRv3i
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261115_4500411599@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261115_7137893031@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261115
 SUMMARY:fruitstand’s 3rd birthday: fruit 🍑 @ 52 Church
 LOCATION:52 Church, Boston MA
@@ -857,8 +857,8 @@ URL:https://partiful.com/e/sb67WN7JRX3uyAE5LFAh
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261115_4079349608@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261115_1897161161@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261115
 SUMMARY:the art of storytelling @ shop 6\, the foundry
 LOCATION:shop 6\, the foundry, Boston MA
@@ -867,8 +867,8 @@ URL:https://partiful.com/e/ivCADCWSxLcU7jew03md
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261115_4249815091@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261115_2246929862@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261115
 SUMMARY:duck duck duck duck duck duck GOOSE! @ Make Way For Ducklings Statue\, Boston Public Garden
 LOCATION:Make Way For Ducklings Statue\, Boston Public Garden, Boston MA
@@ -877,8 +877,8 @@ URL:https://partiful.com/e/nMhM5jZffB2zl2NMgQtO
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261117_7292426474@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261117_3583311416@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261117
 SUMMARY:Stationery Craftsgiving @ Dorchester Brewing Co.
 LOCATION:Dorchester Brewing Co., Boston MA
@@ -887,8 +887,8 @@ URL:https://partiful.com/e/eVzMDTaIckS9pNInwsF0
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261121_6455191969@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261121_7215809994@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261121
 SUMMARY:Butternut Bake House Ride @ Union Square
 LOCATION:Union Square, Boston MA
@@ -897,8 +897,8 @@ URL:https://partiful.com/e/S8mvZKn72jgFCGbGtvol
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261121_6982341401@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261121_4493722006@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261121
 SUMMARY:CAFECITO & PLAY:  FRIENDSGIVING EDITION @ Boston
 LOCATION:Boston, Boston MA
@@ -907,8 +907,8 @@ URL:https://partiful.com/e/d3qs5lh70GzphvqESRB9
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261121_6925391353@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261121_5342788433@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261121
 SUMMARY:ART @ NIGHT @ First Street Market
 LOCATION:First Street Market, Boston MA
@@ -917,8 +917,8 @@ URL:https://partiful.com/e/2Al5mSQ8gkWmY5WC6dHJ
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261122_5303979847@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261122_6192229612@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261122
 SUMMARY:Uplifting Tinashe ★ a tribute party @ Boston
 LOCATION:Boston, Boston MA
@@ -927,8 +927,8 @@ URL:https://partiful.com/e/cyvBdHqEBWfqompCF2Bd
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261122_2772907421@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261122_1235871778@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261122
 SUMMARY:Dirty Water Stitch Club Holiday Market @ Time Out Market
 LOCATION:Time Out Market, Boston MA
@@ -937,8 +937,8 @@ URL:https://partiful.com/e/EnvbxdrE1eK2burB7fyW
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261203_2527165887@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261203_3370057640@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261203
 SUMMARY:Let’s Feast Cookbook Club (Dec) @ Molly's Bookstore
 LOCATION:Molly's Bookstore, Boston MA
@@ -947,8 +947,8 @@ URL:https://partiful.com/e/v4O8TBGBC7LlDQnN2UHg
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261105_6877942162@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261105_1821011439@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261105
 SUMMARY:Live Music: Alec Mac @ Cisco Brewers Fenway
 LOCATION:Cisco Brewers Fenway, Boston MA
@@ -957,8 +957,8 @@ URL:https://ciscobrewersfenway.com/calendar/live-music-alec-mac
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261105_3602295327@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261105_5063003247@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261105
 SUMMARY:Trivia Night @ Cisco Brewers Fenway
 LOCATION:Cisco Brewers Fenway, Boston MA
@@ -967,8 +967,8 @@ URL:https://ciscobrewersfenway.com/calendar/trivia-night-2
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261106_1636328766@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261106_5071561161@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261106
 SUMMARY:Live DJ: DJ Fuzzy Slippaz @ Cisco Brewers Fenway
 LOCATION:Cisco Brewers Fenway, Boston MA
@@ -977,8 +977,8 @@ URL:https://ciscobrewersfenway.com/calendar/live-music-alec-mac-fkkhe
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261107_4953228444@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261107_3153160994@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261107
 SUMMARY:Live Music: TimBear @ Cisco Brewers Fenway
 LOCATION:Cisco Brewers Fenway, Boston MA
@@ -987,8 +987,8 @@ URL:https://ciscobrewersfenway.com/calendar/live-music-alec-mac-6kcxd
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261108_8323330545@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261108_1897183393@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261108
 SUMMARY:Patriots Watch PAWTY @ Cisco Brewers Fenway
 LOCATION:Cisco Brewers Fenway, Boston MA
@@ -997,8 +997,8 @@ URL:https://ciscobrewersfenway.com/calendar/patriots-watch-pawty
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261112_6667870032@wickedbostonevents.com
-DTSTAMP:20261103T051838Z
+UID:20261112_1126724055@wickedbostonevents.com
+DTSTAMP:20261103T051938Z
 DTSTART;VALUE=DATE:20261112
 SUMMARY:Live Music: Maddi Ryan @ Cisco Brewers Fenway
 LOCATION:Cisco Brewers Fenway, Boston MA
