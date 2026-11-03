@@ -6478,6 +6478,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
 
   <script>
     const catBoxes = document.querySelectorAll('.cat-chk');
+    const defaultUncheckedCats = new Set(['Classes & Services', 'Kids & Family']);
     const genreBoxes = document.querySelectorAll('.genre-chk');
     const venueBoxes = document.querySelectorAll('.venue-chk');
     const recurBoxes = document.querySelectorAll('.recur-chk');
@@ -7444,8 +7445,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
     }}
 
     function updateMobileBadge() {{
-      const allCats = catBoxes.length;
-      const chkCats = Array.from(catBoxes).filter(b => b.checked).length;
+      const isCatFiltered = Array.from(catBoxes).some(b => defaultUncheckedCats.has(b.value) ? b.checked : !b.checked);
       const allGenres = genreBoxes.length;
       const chkGenres = Array.from(genreBoxes).filter(b => b.checked).length;
       const allVenues = venueBoxes.length;
@@ -7456,7 +7456,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
       const chkRecurs = Array.from(recurBoxes).filter(b => b.checked).length;
       const isFree = freeOnlyChk && freeOnlyChk.checked;
       const isTimeFiltered = (timeFrom !== null || timeTo !== null);
-      const isFiltered = (chkCats < allCats) || (chkGenres < allGenres) || (activeGenre !== 'all') || (chkVenues < allVenues) || (chkCities < allCities) || (chkRecurs < allRecurs) || isFree || popularOnly || starredOnly || (activeTransit !== 'all') || isTimeFiltered || (activeSubarea !== 'all') || (searchInput && !!searchInput.value.trim());
+      const isFiltered = isCatFiltered || (chkGenres < allGenres) || (activeGenre !== 'all') || (chkVenues < allVenues) || (chkCities < allCities) || (chkRecurs < allRecurs) || isFree || popularOnly || starredOnly || (activeTransit !== 'all') || isTimeFiltered || (activeSubarea !== 'all') || (searchInput && !!searchInput.value.trim());
 
       if (mobileBadge) {{
         mobileBadge.textContent = isFiltered ? 'Active' : 'All';
@@ -7488,9 +7488,20 @@ def render_page(results, weather=None, luckyseat_shows=None):
       const q = searchInput.value.trim();
       if (q) params.set('q', q);
 
-      const allCats = Array.from(catBoxes).map(b => b.value);
-      const checkedCats = Array.from(catBoxes).filter(b => b.checked).map(b => b.value);
-      if (checkedCats.length > 0 && checkedCats.length < allCats.length) params.set('cat', checkedCats.join(','));
+      const isCatFiltered = Array.from(catBoxes).some(b => defaultUncheckedCats.has(b.value) ? b.checked : !b.checked);
+      if (isCatFiltered) {{
+        const allChecked = Array.from(catBoxes).every(b => b.checked);
+        if (allChecked) {{
+          params.set('cat', 'all');
+        }} else {{
+          const checkedCats = Array.from(catBoxes).filter(b => b.checked).map(b => b.value);
+          if (checkedCats.length > 0) {{
+            params.set('cat', checkedCats.join(','));
+          }} else {{
+            params.set('cat', 'none');
+          }}
+        }}
+      }}
 
       if (activeGenre && activeGenre !== 'all') {{
         params.set('genre', activeGenre);
@@ -7577,8 +7588,15 @@ def render_page(results, weather=None, luckyseat_shows=None):
         }}
 
         if (hasParam('cat')) {{
-          const vals = new Set(getParam('cat').split(','));
-          catBoxes.forEach(b => {{ b.checked = vals.has(b.value); }});
+          const catVal = getParam('cat');
+          if (catVal === 'all') {{
+            catBoxes.forEach(b => {{ b.checked = true; }});
+          }} else if (catVal === 'none') {{
+            catBoxes.forEach(b => {{ b.checked = false; }});
+          }} else {{
+            const vals = new Set(catVal.split(','));
+            catBoxes.forEach(b => {{ b.checked = vals.has(b.value); }});
+          }}
         }}
 
         if (hasParam('genre')) {{
@@ -8458,7 +8476,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
       updateTimeUI();
       activeGenre = 'all';
       genreBoxes.forEach(b => b.checked = true);
-      catBoxes.forEach(b => b.checked = (b.value !== 'Classes & Services' && b.value !== 'Kids & Family'));
+      catBoxes.forEach(b => b.checked = !defaultUncheckedCats.has(b.value));
       const subContainer = document.getElementById('subgenre-container');
       if (subContainer) subContainer.classList.remove('disabled');
       cityBoxes.forEach(b => b.checked = true);
