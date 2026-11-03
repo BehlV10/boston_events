@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800;900&family=Montserrat:wght@800;900&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    width: 1080px;
+    height: 1350px;
+    background: #ffffff;
+    color: #000000;
+    font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Top Banner */
+  .top-banner {
+    background: #ff4338;
+    height: 145px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    padding-top: 6px;
+  }
+
+  .circle-decor-1 {
+    position: absolute;
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: #0047e1;
+    top: -40px;
+    left: -40px;
+  }
+  .circle-decor-2 {
+    position: absolute;
+    width: 170px;
+    height: 170px;
+    border-radius: 50%;
+    background: #ff7588;
+    top: -50px;
+    right: -40px;
+  }
+  .circle-decor-3 {
+    position: absolute;
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: #0047e1;
+    bottom: -35px;
+    right: 45px;
+  }
+
+  .star-white {
+    position: absolute;
+    left: 80px;
+    top: 36px;
+    width: 68px;
+    height: 68px;
+  }
+  .star-blue {
+    position: absolute;
+    right: 80px;
+    top: 48px;
+    width: 58px;
+    height: 58px;
+  }
+
+  .headline-top {
+    font-family: 'Montserrat', 'Plus Jakarta Sans', sans-serif;
+    font-size: 52px;
+    font-weight: 900;
+    color: #000000;
+    letter-spacing: -1px;
+    line-height: 0.95;
+    z-index: 2;
+    text-transform: uppercase;
+  }
+
+  .headline-box {
+    background: #ffffff;
+    color: #000000;
+    font-family: 'Montserrat', 'Plus Jakarta Sans', sans-serif;
+    font-size: 42px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    line-height: 1;
+    padding: 2px 24px 4px 24px;
+    margin-top: 4px;
+    z-index: 2;
+    text-transform: uppercase;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+
+  .subtitle-pill {
+    font-size: 16px;
+    font-weight: 800;
+    color: #000000;
+    margin-top: 6px;
+    z-index: 2;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  /* Main Grid */
+  .content-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 22px;
+    padding: 16px 22px 10px 22px;
+    background: #ffffff;
+  }
+
+  .col {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  /* Day Group */
+  .day-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+  }
+  .day-group:last-child {
+    margin-bottom: 0;
+  }
+
+  .day-pill {
+    font-family: 'Montserrat', 'Plus Jakarta Sans', sans-serif;
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: 0.6px;
+    padding: 5px 12px 6px 12px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+  }
+
+  .events-list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .event-item {
+    padding: 6px 2px 6.5px 2px;
+    border-bottom: 1.5px solid #ffccd5;
+    line-height: 1.2;
+  }
+  .event-item:last-child {
+    border-bottom: none;
+  }
+
+  .event-main {
+    font-size: 14px;
+    font-weight: 800;
+    color: #000000;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .event-time {
+    font-weight: 900;
+  }
+  .event-dash {
+    color: #64748b;
+    margin: 0 4px;
+  }
+  .event-title {
+    font-weight: 800;
+    color: #000000;
+  }
+
+  .event-venue {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #374151;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Weekend Highlights Box */
+  .highlights-box {
+    margin-top: 10px;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 2px solid #0047e1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .hl-header {
+    background: #0047e1;
+    color: #ffffff;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 21px;
+    font-weight: 900;
+    padding: 7px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    letter-spacing: 0.5px;
+  }
+  .hl-star {
+    width: 22px;
+    height: 22px;
+  }
+
+  .hl-list {
+    padding: 6px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: #ffffff;
+  }
+
+  .hl-item {
+    background: #ffdbe2;
+    color: #000000;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 900;
+    font-size: 15.5px;
+    padding: 6px 10px;
+    border-radius: 4px;
+    text-align: center;
+    letter-spacing: 0.3px;
+  }
+
+  .hl-note {
+    font-size: 11px;
+    font-weight: 700;
+    color: #111827;
+    text-align: center;
+    padding: 5px 6px 6px 6px;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .blue-dot {
+    width: 7px;
+    height: 7px;
+    background: #0047e1;
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  /* Footer */
+  .footer {
+    height: 48px;
+    background: #ffffff;
+    border-top: 2px solid #ffccd5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px 0 16px;
+  }
+
+  .footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 20px;
+    font-weight: 900;
+    color: #000000;
+    letter-spacing: -0.3px;
+  }
+  .ig-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  .footer-center {
+    font-size: 12px;
+    font-weight: 700;
+    color: #1f2937;
+    letter-spacing: 0.2px;
+  }
+
+  .footer-badge {
+    background: #0047e1;
+    color: #ffffff;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 15px;
+    font-weight: 900;
+    padding: 5px 14px 6px 14px;
+    border-radius: 4px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+
+  <!-- Top Banner -->
+  <div class="top-banner">
+    <div class="circle-decor-1"></div>
+    <div class="circle-decor-2"></div>
+    <div class="circle-decor-3"></div>
+
+    <!-- Starburst SVGs -->
+    <svg class="star-white" viewBox="0 0 100 100">
+      <polygon fill="#ffffff" points="50,0 59,38 97,25 68,50 97,75 59,62 50,100 41,62 3,75 32,50 3,25 41,38"/>
+    </svg>
+    <svg class="star-blue" viewBox="0 0 100 100">
+      <polygon fill="#0047e1" points="50,0 59,38 97,25 68,50 97,75 59,62 50,100 41,62 3,75 32,50 3,25 41,38"/>
+    </svg>
+
+    <div class="headline-top">55+ BEST EVENTS</div>
+    <div class="headline-box">BOSTON THIS WEEK</div>
+    <div class="subtitle-pill">NOVEMBER 2ND–8TH, 2026 • 1/2</div>
+  </div>
+
+  <!-- Content Grid -->
+  <div class="content-grid">
+    <div class="col left-col">
+      <div class="day-group">
+  <div class="day-pill" style="background: #0047e1; color: #ffffff;">MONDAY • NOV 2</div>
+  <div class="events-list">
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">6 PM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Saborcito: Salsa & Bachata</span>
+      </div>
+      <div class="event-venue">The Anchor • 1 Shipyard Park, Charlestown</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">7 PM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">This Is Lorelei</span>
+      </div>
+      <div class="event-venue">Royale • 279 Tremont St, Boston</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">7 PM D</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Madra Salach</span>
+      </div>
+      <div class="event-venue">The Sinclair • 52 Church St, Cambridge</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">7:30 PM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Queer Line & Partner Dancing</span>
+      </div>
+      <div class="event-venue">Club Café • 209 Columbus Ave, Boston</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">8 PM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Bluegrass: Royer Family Band</span>
+      </div>
+      <div class="event-venue">Remnant Satellite • 877 Cambridge St, Cambridge</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">8 PM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Bachata Mondays</span>
+      </div>
+      <div class="event-venue">Havana Club • 288 Green St, Cambridge</div>
+    </div>
+  </div>
+</div>
+<div class="day-group">
+  <div class="day-pill" style="background: #e62e00; color: #ffffff;">TUESDAY • NOV 3</div>
+  <div class="events-list">
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">7 PM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Free Comedy Open-Mic</span>
+      </div>
+      <div class="event-venue">The Comedy Studio • 5 JFK St, Cambridge</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">7 PM D</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">half•alive</span>
+      </div>
+      <div class="event-venue">The Sinclair • 52 Church St, Cambridge</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">7 PM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">AJ McLean: The Better Man Tour</span>
+      </div>
+      <div class="event-venue">Royale • 279 Tremont St, Boston</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">7:30 PM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Tuesday Trivia Night</span>
+      </div>
+      <div class="event-venue">Remnant Satellite • 877 Cambridge St, Cambridge</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">8 PM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Willi Carlisle</span>
+      </div>
+      <div class="event-venue">Crystal Ballroom • 55 Davis Sq, Somerville</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">8 PM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Salsa & Bachata Social</span>
+      </div>
+      <div class="event-venue">Havana Club • 288 Green St, Cambridge</div>
+    </div>
+  </div>
+</div>
+<div class="day-group">
+  <div class="day-pill" style="background: #0047e1; color: #ffffff;">WEDNESDAY • NOV 4</div>
+  <div class="events-list">
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">10 AM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Fleurs de Villes WONDER</span>
+      </div>
+      <div class="event-venue">Prudential Center • 800 Boylston St, Boston</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">11 AM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Fall Foliage Walk</span>
+      </div>
+      <div class="event-venue">Daisy Field • 217 Jamaicaway, Jamaica Plain</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">6:30 PM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Remnant Run Club</span>
+      </div>
+      <div class="event-venue">Remnant Brewing • 2 Bow Market Way, Somerville</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">7 PM D</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Michelle Branch</span>
+      </div>
+      <div class="event-venue">Roadrunner • 89 Guest St, Boston</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">7 PM D</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">half•alive</span>
+      </div>
+      <div class="event-venue">The Sinclair • 52 Church St, Cambridge</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">7:30 PM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Rising Stars Comedy Showcase</span>
+      </div>
+      <div class="event-venue">The Comedy Studio • 5 JFK St, Cambridge</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">8 PM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Karaoke Wednesdays</span>
+      </div>
+      <div class="event-venue">Club Café • 209 Columbus Ave, Boston</div>
+    </div>
+  </div>
+</div>
+    </div>
+    <div class="col right-col">
+      <div class="day-group">
+  <div class="day-pill" style="background: #ffccd5; color: #000000;">THURSDAY • NOV 5</div>
+  <div class="events-list">
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">10 AM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Fleurs de Villes WONDER</span>
+      </div>
+      <div class="event-venue">Prudential Center • 800 Boylston St, Boston</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">5 PM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">ICA Free Thursday Night</span>
+      </div>
+      <div class="event-venue">ICA Boston • 25 Harbor Shore Dr, Boston</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">5 PM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Connecting with Gratitude</span>
+      </div>
+      <div class="event-venue">Gardner Museum • 25 Evans Way, Boston</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">7 PM D</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Clara La San</span>
+      </div>
+      <div class="event-venue">Roadrunner • 89 Guest St, Boston</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">7 PM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Winyah</span>
+      </div>
+      <div class="event-venue">Royale • 279 Tremont St, Boston</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">7:30 PM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Brian Longwell & Friends</span>
+      </div>
+      <div class="event-venue">The Comedy Studio • 5 JFK St, Cambridge</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">8 PM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Emancipator</span>
+      </div>
+      <div class="event-venue">Crystal Ballroom • 55 Davis Sq, Somerville</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">9 PM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">The People's Karaoke</span>
+      </div>
+      <div class="event-venue">The Middle East • 480 Massachusetts Ave, Cambridge</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">9:30 PM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Free Game Night</span>
+      </div>
+      <div class="event-venue">The Comedy Studio • 5 JFK St, Cambridge</div>
+    </div>
+  </div>
+</div>
+<div class="day-group">
+  <div class="day-pill" style="background: #0047e1; color: #ffffff;">FRIDAY • NOV 6</div>
+  <div class="events-list">
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">10 AM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Fleurs de Villes WONDER</span>
+      </div>
+      <div class="event-venue">Prudential Center • 800 Boylston St, Boston</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">11 AM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Allandale Woods Foliage Walk</span>
+      </div>
+      <div class="event-venue">Allandale Woods • 7 VFW Pkwy, West Roxbury</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">11 AM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Snowport Holiday Market Opens</span>
+      </div>
+      <div class="event-venue">100 Seaport Blvd, Boston</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">4 PM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Boston Antiquarian Book Fair</span>
+      </div>
+      <div class="event-venue">Hynes Convention Center • 900 Boylston St, Boston</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">5 PM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">SoWa First Friday</span>
+      </div>
+      <div class="event-venue">SoWa Artists Guild • 450 Harrison Ave, Boston</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">6 PM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Colors of Rhythm: First Fridays</span>
+      </div>
+      <div class="event-venue">ICA Boston • 25 Harbor Shore Dr, Boston</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">6 PM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Hovvdy</span>
+      </div>
+      <div class="event-venue">Royale • 279 Tremont St, Boston</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">7 PM D</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">nimino</span>
+      </div>
+      <div class="event-venue">Roadrunner • 89 Guest St, Boston</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">8 PM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Deerhoof</span>
+      </div>
+      <div class="event-venue">Crystal Ballroom • 55 Davis Sq, Somerville</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">8 PM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">MFA Late Nites</span>
+      </div>
+      <div class="event-venue">Museum of Fine Arts • 465 Huntington Ave, Boston</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">10 PM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">CamelPhat</span>
+      </div>
+      <div class="event-venue">Royale • 279 Tremont St, Boston</div>
+    </div>
+  </div>
+</div>
+      
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-brand">
+      <svg class="ig-icon" viewBox="0 0 24 24">
+        <path fill="#000000" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+      </svg>
+      <span>@wickedbostonevents</span>
+    </div>
+    <div class="footer-center">EST • D = doors • Outdoor events weather permitting</div>
+    <div class="footer-badge">SWIPE FOR THE WEEKEND ➔</div>
+  </div>
+
+</body>
+</html>
