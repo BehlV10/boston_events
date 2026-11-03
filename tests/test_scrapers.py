@@ -1744,6 +1744,42 @@ class TestBostonEvents(unittest.TestCase):
         self.assertEqual(format_time(utc_10pm), "10:00 PM")
         self.assertEqual(format_when({"name": "Johnny Trama", "date": utc_10pm}), "10:00 PM")
 
+    def test_life_drawing_boston_scraper(self):
+        """Verify Life Drawing Boston scraper parses upcoming sessions with correct art category and coordinates."""
+        from scrapers import scrape_life_drawing_boston
+        events = scrape_life_drawing_boston("https://www.lifedrawingboston.com/calendar?format=json", UA_CHROME)
+        self.assertIsInstance(events, list)
+        self.assertGreater(len(events), 0, "Life Drawing Boston should return upcoming sessions")
+        for ev in events:
+            self.assertTrue(ev["name"])
+            self.assertTrue(ev["date"])
+            self.assertTrue(ev["url"].startswith("http"))
+            self.assertEqual(ev["venue"], "Life Drawing Boston")
+            self.assertEqual(ev["category"], "art")
+            geo = resolve_event_geo(ev)
+            self.assertIsNotNone(geo, f"Failed to resolve geo for Life Drawing Boston: {ev}")
+            self.assertAlmostEqual(geo["lat"], 42.3780, places=3)
+            self.assertAlmostEqual(geo["lng"], -71.0920, places=3)
+            self.assertEqual(geo["neighborhood"], "East Somerville")
+
+    def test_bostonfac_scraper(self):
+        """Verify Boston Figure Art Center scraper parses upcoming sessions with correct art category and coordinates."""
+        from scrapers import scrape_bostonfac
+        events = scrape_bostonfac("https://www.bostonfac.com/figuresessions", UA_CHROME)
+        self.assertIsInstance(events, list)
+        self.assertGreater(len(events), 0, "Boston Figure Art Center should return upcoming sessions")
+        for ev in events[:10]:
+            self.assertTrue(ev["name"])
+            self.assertTrue(ev["date"])
+            self.assertTrue(ev["url"].startswith("http"))
+            self.assertEqual(ev["venue"], "Boston Figure Art Center")
+            self.assertEqual(ev["category"], "art")
+            geo = resolve_event_geo(ev)
+            self.assertIsNotNone(geo, f"Failed to resolve geo for BFAC: {ev}")
+            self.assertAlmostEqual(geo["lat"], 42.3813, places=3)
+            self.assertAlmostEqual(geo["lng"], -71.0912, places=3)
+            self.assertEqual(geo["neighborhood"], "Union Square")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -1,10 +1,13 @@
 """Boston Events — venue scrapers and data definitions."""
 
+import hashlib
 import html
 import json
 import os
+import random
 import re
 import ssl
+import string
 import threading
 import time
 import unicodedata
@@ -8106,7 +8109,181 @@ def scrape_the_platform_kendall(url=None, ua=None):
     return events
 
 
+def scrape_life_drawing_boston(url, ua):
+    """Life Drawing Boston at The Loov (Somerville) — figure drawing & portrait club."""
+    events = []
+    now = datetime.now(timezone.utc)
+    target_url = url if "format=json" in url else url.rstrip("/") + "/?format=json"
+    try:
+        resp = _SESSION.get(target_url, headers={"User-Agent": ua or UA_CHROME}, timeout=15)
+        if resp.status_code != 200:
+            return events
+        data = resp.json()
+    except Exception:
+        return events
+
+    items = data.get("upcoming", []) or data.get("items", [])
+    seen = set()
+    for item in items:
+        title = (item.get("title") or "").strip()
+        if not title:
+            continue
+        start_ms = item.get("startDate")
+        if not start_ms:
+            continue
+        try:
+            dt = datetime.fromtimestamp(start_ms / 1000, tz=timezone.utc)
+        except Exception:
+            continue
+        if dt < now:
+            continue
+
+        full_url = item.get("fullUrl") or ""
+        if full_url and not full_url.startswith("http"):
+            link = "https://www.lifedrawingboston.com" + full_url
+        else:
+            link = full_url or url
+
+        price = "$20"
+        key = (title, dt.isoformat())
+        if key in seen:
+            continue
+        seen.add(key)
+
+        events.append({
+            "name": title,
+            "date": dt.isoformat(),
+            "url": link,
+            "venue": "Life Drawing Boston",
+            "price": price,
+            "category": "art",
+        })
+    events.sort(key=lambda x: x["date"])
+    return events
+
+
+def scrape_bostonfac(url, ua):
+    """Boston Figure Art Center (BFAC, Somerville) — figure sessions, drawing clubs, & workshops."""
+    events = []
+    now = datetime.now(timezone.utc)
+
+    try:
+        session_id = "".join(random.choices(string.ascii_letters + string.digits, k=40))
+        csrf_url = f"https://widgets-api.www.wellnessliving.com/api/csrf?sessionId={session_id}"
+        csrf_resp = _SESSION.get(csrf_url, headers={"User-Agent": ua or UA_CHROME}, timeout=10)
+        if csrf_resp.status_code != 200:
+            return events
+        csrf = csrf_resp.json().get("csrf")
+        if not csrf:
+            return events
+
+        auth_id = "raa-UXnOYOs5JPTnSb3l"
+        dt_request = now.strftime("%Y-%m-%d %H:%M:%S")
+        http_date = now.strftime("%a, %d %b %Y %H:%M:%S GMT")
+
+        start_str = (now - timedelta(days=1)).strftime("%Y-%m-%d")
+        end_str = (now + timedelta(days=35)).strftime("%Y-%m-%d")
+
+        params = {
+            "dt_date": start_str,
+            "dt_end": end_str,
+            "is_response_short": "0",
+            "is_tab_all": "1",
+            "k_business": "693029",
+            "k_class_tab": "",
+            "s_staff": "",
+            "s_staff_uid": "",
+            "show_book_status": "0",
+            "show_cancel": "0",
+            "show_class": "1",
+            "show_event": "1",
+            "show_quick_filter": "0",
+            "show_ticket": "0",
+            "uid": "",
+        }
+
+        sig_lines = [
+            "Core\\Request\\Api::20210304-cors",
+            dt_request,
+            "www.wellnessliving.com",
+            auth_id,
+            "POST",
+            "Wl/Schedule/ClassList/ClassList68.json",
+            csrf,
+        ]
+        for k in sorted(params.keys()):
+            sig_lines.append(f"{k.lower()}={params[k]}")
+
+        sig_check = "".join([hashlib.sha256(line.encode("utf-8")).hexdigest()[:1] for line in sig_lines])
+        full_str = "\n".join(sig_lines)
+        sig_hash = hashlib.sha256(full_str.encode("utf-8")).hexdigest()
+        debug = f"2.{sig_check}.."
+        final_sig = f"{sig_hash}.{debug}"
+
+        csrf_parts = csrf.split(".")
+        csrf_check = f"{session_id}.{csrf_parts[0][:5]}.{csrf_parts[1]}"
+        auth_header = f"20210304-cors,{auth_id},,{csrf_check},{final_sig}"
+
+        post_url = "https://www.wellnessliving.com/Wl/Schedule/ClassList/ClassList68.json"
+        headers = {
+            "User-Agent": ua or UA_CHROME,
+            "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+            "Authorization": auth_header,
+            "X-Signature-Date": http_date,
+            "X-Signature-Timezone": "300",
+        }
+
+        resp = _SESSION.post(post_url, data=params, headers=headers, timeout=15)
+        if resp.status_code != 200:
+            return events
+        data = resp.json()
+        sessions = data.get("a_session", [])
+    except Exception:
+        return events
+
+    seen = set()
+    for s in sessions:
+        title = (s.get("s_title") or "").strip()
+        if not title:
+            continue
+        raw_dt = s.get("dt_date")
+        if not raw_dt:
+            continue
+        try:
+            dt = datetime.strptime(raw_dt, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+        except Exception:
+            continue
+        if dt < now:
+            continue
+
+        link = (s.get("url_book") or "https://www.bostonfac.com/figuresessions").strip()
+        price = s.get("m_price") or ""
+        if price and not price.startswith("$"):
+            try:
+                price = f"${float(price):.0f}"
+            except Exception:
+                pass
+
+        key = (title, dt.isoformat())
+        if key in seen:
+            continue
+        seen.add(key)
+
+        events.append({
+            "name": title,
+            "date": dt.isoformat(),
+            "url": link,
+            "venue": "Boston Figure Art Center",
+            "price": price or "$20",
+            "category": "art",
+        })
+    events.sort(key=lambda x: x["date"])
+    return events
+
+
 _ALL_VENUES = [
+    {"name": "Life Drawing Boston", "url": "https://www.lifedrawingboston.com/calendar?format=json", "ua": UA_CHROME, "scraper": scrape_life_drawing_boston, "default_category": "art"},
+    {"name": "Boston Figure Art Center", "url": "https://www.bostonfac.com/figuresessions", "ua": UA_CHROME, "scraper": scrape_bostonfac, "default_category": "art"},
     {"name": "The Platform Kendall", "url": "https://www.theplatformkendall.org/event-listing/", "ua": UA_CHROME, "scraper": scrape_the_platform_kendall, "default_category": "stage"},
     {"name": "Partiful Boston", "url": "https://partiful.com/explore/l/bos/events", "ua": UA_CHROME, "scraper": scrape_partiful, "default_category": "community"},
     {"name": "Luma Boston", "url": "https://lu.ma/boston", "ua": UA_CHROME, "scraper": scrape_luma, "default_category": "community"},
