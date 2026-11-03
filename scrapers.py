@@ -8534,6 +8534,7 @@ _ALL_VENUES = [
     {"name": "Boston Symphony Orchestra", "url": "https://www.bso.org/events", "ua": UA_CHROME, "scraper": scrape_bso, "default_category": "music"},
     {"name": "Venture Café Cambridge", "url": "https://community.venturecafecambridge.org/", "ua": UA_CHROME, "scraper": scrape_venture_cafe, "default_category": "community"},
     {"name": "The Anchor Boston", "url": "https://calendar.google.com/calendar/ical/theanchorbostonma%40gmail.com/public/basic.ics", "ua": UA_CHROME, "scraper": scrape_ical, "default_category": "community"},
+    {"name": "Artisans Asylum", "url": "https://www.eventbrite.com/o/artisans-asylum-inc-18841526871", "ua": UA_CHROME, "scraper": scrape_eventbrite_org, "default_category": "community"},
     {"name": "ManRay Cambridge", "url": "https://manrayclub.com/monthly-calendar/", "ua": UA_CHROME, "scraper": scrape_manray, "default_category": "clubbing"},
     {"name": "Middlesex Lounge", "url": "https://www.msexcambridge.com", "ua": UA_CHROME, "scraper": scrape_middlesex, "default_category": "clubbing"},
     {"name": "Roxy's Arcade", "url": "https://www.roxysarcade.com/event-schedule", "ua": UA_CHROME, "scraper": scrape_roxys_arcade, "default_category": "gaming"},

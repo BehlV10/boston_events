@@ -15,136 +15,85 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    position: relative;
+    -webkit-font-smoothing: antialiased;
   }
 
-  /* Top Banner */
-  .top-banner {
-    background: #ff4338;
-    height: 145px;
-    position: relative;
+  /* Header Section */
+  .header {
+    padding: 24px 38px 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    padding-top: 6px;
+    text-align: center;
   }
 
-  .circle-decor-1 {
-    position: absolute;
-    width: 160px;
-    height: 160px;
-    border-radius: 50%;
-    background: #0047e1;
-    top: -40px;
-    left: -40px;
-  }
-  .circle-decor-2 {
-    position: absolute;
-    width: 170px;
-    height: 170px;
-    border-radius: 50%;
-    background: #ff7588;
-    top: -50px;
-    right: -40px;
-  }
-  .circle-decor-3 {
-    position: absolute;
-    width: 110px;
-    height: 110px;
-    border-radius: 50%;
-    background: #0047e1;
-    bottom: -35px;
-    right: 45px;
-  }
-
-  .star-white {
-    position: absolute;
-    left: 80px;
-    top: 36px;
-    width: 68px;
-    height: 68px;
-  }
-  .star-blue {
-    position: absolute;
-    right: 80px;
-    top: 48px;
-    width: 58px;
-    height: 58px;
-  }
-
-  .headline-top {
-    font-family: 'Montserrat', 'Plus Jakarta Sans', sans-serif;
-    font-size: 52px;
+  .title-top {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 32px;
     font-weight: 900;
+    letter-spacing: 2px;
     color: #000000;
-    letter-spacing: -1px;
-    line-height: 0.95;
-    z-index: 2;
+    line-height: 1.1;
+    margin-bottom: 6px;
     text-transform: uppercase;
   }
 
-  .headline-box {
-    background: #ffffff;
-    color: #000000;
-    font-family: 'Montserrat', 'Plus Jakarta Sans', sans-serif;
+  .title-box {
+    background: #000000;
+    color: #ffffff;
+    font-family: 'Montserrat', sans-serif;
     font-size: 42px;
     font-weight: 900;
-    letter-spacing: -0.5px;
-    line-height: 1;
-    padding: 2px 24px 4px 24px;
-    margin-top: 4px;
-    z-index: 2;
+    letter-spacing: 1.5px;
+    padding: 8px 32px;
+    border-radius: 4px;
     text-transform: uppercase;
+    display: inline-block;
+    margin-bottom: 8px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
   }
 
-  .subtitle-pill {
+  .subtitle {
     font-size: 16px;
     font-weight: 800;
-    color: #000000;
-    margin-top: 6px;
-    z-index: 2;
-    letter-spacing: 0.5px;
+    letter-spacing: 2.5px;
+    color: #111827;
     text-transform: uppercase;
   }
 
-  /* Main Grid */
+  /* Content Grid */
   .content-grid {
     flex: 1;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 22px;
-    padding: 16px 22px 10px 22px;
-    background: #ffffff;
+    gap: 28px;
+    padding: 8px 38px 12px;
+    overflow: hidden;
   }
 
   .col {
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    gap: 12px;
   }
 
-  /* Day Group */
   .day-group {
     display: flex;
     flex-direction: column;
-    margin-bottom: 10px;
-  }
-  .day-group:last-child {
-    margin-bottom: 0;
+    gap: 4px;
   }
 
   .day-pill {
-    font-family: 'Montserrat', 'Plus Jakarta Sans', sans-serif;
-    font-size: 20px;
+    display: inline-block;
+    align-self: flex-start;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px;
     font-weight: 900;
-    letter-spacing: 0.6px;
-    padding: 5px 12px 6px 12px;
-    border-radius: 4px;
+    letter-spacing: 1.2px;
+    padding: 4px 14px;
+    border-radius: 14px;
     text-transform: uppercase;
-    margin-bottom: 5px;
+    margin-bottom: 4px;
   }
 
   .events-list {
@@ -153,177 +102,168 @@
   }
 
   .event-item {
-    padding: 6px 2px 6.5px 2px;
-    border-bottom: 1.5px solid #ffccd5;
-    line-height: 1.2;
-  }
-  .event-item:last-child {
-    border-bottom: none;
+    padding: 3.5px 0;
+    border-bottom: 1px solid #ffccd5;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5px;
   }
 
   .event-main {
     font-size: 14px;
+    line-height: 1.22;
+    display: flex;
+    align-items: baseline;
+    flex-wrap: nowrap;
+    overflow: hidden;
+  }
+
+  .event-time {
     font-weight: 800;
+    color: #000000;
+    white-space: nowrap;
+    margin-right: 4px;
+  }
+
+  .event-dash {
+    color: #6b7280;
+    margin-right: 5px;
+    font-weight: 600;
+  }
+
+  .event-title {
+    font-weight: 700;
     color: #000000;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-  }
-
-  .event-time {
-    font-weight: 900;
-  }
-  .event-dash {
-    color: #64748b;
-    margin: 0 4px;
-  }
-  .event-title {
-    font-weight: 800;
-    color: #000000;
   }
 
   .event-venue {
     font-size: 11.5px;
     font-weight: 600;
-    color: #374151;
-    margin-top: 2px;
+    color: #64748b;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    line-height: 1.15;
   }
 
-  /* Weekend Highlights Box */
+  /* Highlights Box (Slide 2) */
   .highlights-box {
-    margin-top: 10px;
-    border-radius: 6px;
-    overflow: hidden;
-    border: 2px solid #0047e1;
+    background: #000000;
+    border-radius: 12px;
+    padding: 14px 18px 12px;
+    color: #ffffff;
     display: flex;
     flex-direction: column;
+    gap: 8px;
+    margin-top: 6px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
   }
 
   .hl-header {
-    background: #0047e1;
-    color: #ffffff;
-    font-family: 'Montserrat', sans-serif;
-    font-size: 21px;
-    font-weight: 900;
-    padding: 7px 14px;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    letter-spacing: 0.5px;
+    justify-content: space-between;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 15px;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    color: #ffccd5;
+    border-bottom: 1px solid #374151;
+    padding-bottom: 5px;
   }
+
   .hl-star {
-    width: 22px;
-    height: 22px;
+    width: 14px;
+    height: 14px;
   }
 
   .hl-list {
-    padding: 6px 10px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    background: #ffffff;
+    gap: 5px;
   }
 
   .hl-item {
-    background: #ffdbe2;
-    color: #000000;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 900;
-    font-size: 15.5px;
-    padding: 6px 10px;
-    border-radius: 4px;
-    text-align: center;
-    letter-spacing: 0.3px;
+    font-size: 12.5px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    color: #ffffff;
+    line-height: 1.25;
   }
 
   .hl-note {
-    font-size: 11px;
-    font-weight: 700;
-    color: #111827;
-    text-align: center;
-    padding: 5px 6px 6px 6px;
-    background: #ffffff;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: #9ca3af;
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 6px;
+    margin-top: 2px;
+    padding-top: 5px;
+    border-top: 1px dashed #374151;
   }
+
   .blue-dot {
-    width: 7px;
-    height: 7px;
+    width: 5px;
+    height: 5px;
     background: #0047e1;
     border-radius: 50%;
     display: inline-block;
+    flex-shrink: 0;
   }
 
   /* Footer */
   .footer {
-    height: 48px;
-    background: #ffffff;
-    border-top: 2px solid #ffccd5;
+    padding: 10px 38px 18px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 16px 0 16px;
+    border-top: 2px solid #f1f5f9;
   }
 
   .footer-brand {
     display: flex;
     align-items: center;
-    gap: 7px;
-    font-family: 'Montserrat', sans-serif;
-    font-size: 20px;
-    font-weight: 900;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 800;
     color: #000000;
-    letter-spacing: -0.3px;
   }
+
   .ig-icon {
-    width: 22px;
-    height: 22px;
+    width: 20px;
+    height: 20px;
   }
 
   .footer-center {
-    font-size: 12px;
-    font-weight: 700;
-    color: #1f2937;
-    letter-spacing: 0.2px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
   }
 
   .footer-badge {
-    background: #0047e1;
+    background: #000000;
     color: #ffffff;
-    font-family: 'Montserrat', sans-serif;
-    font-size: 15px;
-    font-weight: 900;
-    padding: 5px 14px 6px 14px;
-    border-radius: 4px;
-    letter-spacing: 0.4px;
-    text-transform: uppercase;
+    font-size: 13px;
+    font-weight: 800;
+    padding: 7px 18px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
   }
 </style>
 </head>
 <body>
 
-  <!-- Top Banner -->
-  <div class="top-banner">
-    <div class="circle-decor-1"></div>
-    <div class="circle-decor-2"></div>
-    <div class="circle-decor-3"></div>
-
-    <!-- Starburst SVGs -->
-    <svg class="star-white" viewBox="0 0 100 100">
-      <polygon fill="#ffffff" points="50,0 59,38 97,25 68,50 97,75 59,62 50,100 41,62 3,75 32,50 3,25 41,38"/>
-    </svg>
-    <svg class="star-blue" viewBox="0 0 100 100">
-      <polygon fill="#0047e1" points="50,0 59,38 97,25 68,50 97,75 59,62 50,100 41,62 3,75 32,50 3,25 41,38"/>
-    </svg>
-
-    <div class="headline-top">BOSTON THIS WEEK</div>
-    <div class="headline-box">THE WEEKEND</div>
-    <div class="subtitle-pill">NOVEMBER 7TH–8TH, 2026 • 2/2</div>
+  <!-- Header -->
+  <div class="header">
+    <div class="title-top">BOSTON THIS WEEK</div>
+    <div class="title-box">THE WEEKEND</div>
+    <div class="subtitle">NOVEMBER 7TH–8TH, 2026 • 2/2</div>
   </div>
 
   <!-- Content Grid -->
@@ -334,139 +274,139 @@
   <div class="events-list">
     <div class="event-item">
       <div class="event-main">
+        <span class="event-time">9 AM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Museums on Us from Bank of America</span>
+      </div>
+      <div class="event-venue">Museum of Fine Arts (MFA) • 465 Huntington Ave, Boston</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">9 AM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Puritans in the 21st Century: A...</span>
+      </div>
+      <div class="event-venue">American Ancestors</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
         <span class="event-time">10 AM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Bank of America Museums on Us</span>
+      </div>
+      <div class="event-venue">ICA Boston • 25 Harbor Shore Dr, Boston</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">10 AM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Saturday Portrait Study</span>
+      </div>
+      <div class="event-venue">Boston Figure Art Center • 285 Washington St, Somerville</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">11 AM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Steal My Style Market @ Castle...</span>
+      </div>
+      <div class="event-venue">Castle Island Brewing • 10 Old Colony Ave, South Boston</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">11 AM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Pop Up Market at The Anchor</span>
+      </div>
+      <div class="event-venue">The Anchor Boston • 1 Shipyard Park, Charlestown</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">11:30 AM</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">The Anastasio Sisters brunch...</span>
+      </div>
+      <div class="event-venue">Club Café • 209 Columbus Ave, Boston</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">12 PM</span>
         <span class="event-dash">—</span>
         <span class="event-title">Bow Market Renaissance Faire</span>
       </div>
-      <div class="event-venue">Bow Market • 1 Bow Market Way, Somerville</div>
+      <div class="event-venue">Remnant Brewing • 1 Bow Market Way, Somerville</div>
     </div>
     <div class="event-item">
       <div class="event-main">
-        <span class="event-time">10 AM</span>
+        <span class="event-time">5 PM</span>
         <span class="event-dash">—</span>
-        <span class="event-title">Snowport Holiday Market</span>
+        <span class="event-title">Improv Asylum's Main Stage Show</span>
       </div>
-      <div class="event-venue">100 Seaport Blvd, Boston</div>
+      <div class="event-venue">Improv Asylum • 216 Hanover St, Boston</div>
     </div>
     <div class="event-item">
       <div class="event-main">
-        <span class="event-time">10 AM</span>
+        <span class="event-time">6:30 PM</span>
         <span class="event-dash">—</span>
-        <span class="event-title">Fleurs de Villes WONDER</span>
+        <span class="event-title">Live Music Night @ The Beehive</span>
       </div>
-      <div class="event-venue">Prudential Center • 800 Boylston St, Boston</div>
+      <div class="event-venue">The Beehive • 541 Tremont St, Boston</div>
     </div>
     <div class="event-item">
       <div class="event-main">
-        <span class="event-time">11 AM</span>
+        <span class="event-time">7 PM D</span>
         <span class="event-dash">—</span>
-        <span class="event-title">Brighton Bazaar: Fall Finale</span>
+        <span class="event-title">Mr. Fantasy</span>
       </div>
-      <div class="event-venue">Brighton Elks Lodge • 326 Washington St, Brighton</div>
+      <div class="event-venue">Paradise Rock Club • 967 Commonwealth Ave, Boston</div>
     </div>
     <div class="event-item">
       <div class="event-main">
-        <span class="event-time">11 AM</span>
+        <span class="event-time">7 PM</span>
         <span class="event-dash">—</span>
-        <span class="event-title">Pumpkin Smash</span>
+        <span class="event-title">Porch Light: Hush Tour</span>
       </div>
-      <div class="event-venue">English High School lot • 144 McBride St, Jamaica Plain</div>
+      <div class="event-venue">Brighton Music Hall • 158 Brighton Ave, Allston</div>
     </div>
     <div class="event-item">
       <div class="event-main">
-        <span class="event-time">11 AM</span>
+        <span class="event-time">7:30 PM</span>
         <span class="event-dash">—</span>
-        <span class="event-title">Harboring Creativity</span>
+        <span class="event-title">Central Square Theater: The...</span>
       </div>
-      <div class="event-venue">ICA Watershed • 256 Marginal St, East Boston</div>
-    </div>
-    <div class="event-item">
-      <div class="event-main">
-        <span class="event-time">12 PM</span>
-        <span class="event-dash">—</span>
-        <span class="event-title">Boston Veterans Parade</span>
-      </div>
-      <div class="event-venue">Starts near Copley/BPL • 700 Boylston St, Boston</div>
-    </div>
-    <div class="event-item">
-      <div class="event-main">
-        <span class="event-time">12 PM</span>
-        <span class="event-dash">—</span>
-        <span class="event-title">Boston Antiquarian Book Fair</span>
-      </div>
-      <div class="event-venue">Hynes Convention Center • 900 Boylston St, Boston</div>
-    </div>
-    <div class="event-item">
-      <div class="event-main">
-        <span class="event-time">3 PM</span>
-        <span class="event-dash">—</span>
-        <span class="event-title">Americana: Ruth & Ben String Band</span>
-      </div>
-      <div class="event-venue">Remnant Satellite • 877 Cambridge St, Cambridge</div>
-    </div>
-    <div class="event-item">
-      <div class="event-main">
-        <span class="event-time">4 PM</span>
-        <span class="event-dash">—</span>
-        <span class="event-title">Loy Krathong Thai Night Market</span>
-      </div>
-      <div class="event-venue">4 Brattle St, Harvard Square, Cambridge</div>
-    </div>
-    <div class="event-item">
-      <div class="event-main">
-        <span class="event-time">6 PM D</span>
-        <span class="event-dash">—</span>
-        <span class="event-title">Earlybirds Club</span>
-      </div>
-      <div class="event-venue">The Sinclair • 52 Church St, Cambridge</div>
-    </div>
-    <div class="event-item">
-      <div class="event-main">
-        <span class="event-time">6 PM</span>
-        <span class="event-dash">—</span>
-        <span class="event-title">Fruit Bats</span>
-      </div>
-      <div class="event-venue">Royale • 279 Tremont St, Boston</div>
-    </div>
-    <div class="event-item">
-      <div class="event-main">
-        <span class="event-time">7:15 PM</span>
-        <span class="event-dash">—</span>
-        <span class="event-title">Comedy Gold</span>
-      </div>
-      <div class="event-venue">The Comedy Studio • 5 JFK St, Cambridge</div>
+      <div class="event-venue">Central Square Theater • 450 Massachusetts Ave, Cambridge</div>
     </div>
     <div class="event-item">
       <div class="event-main">
         <span class="event-time">8 PM</span>
         <span class="event-dash">—</span>
-        <span class="event-title">Now or Never: Powerhouse</span>
+        <span class="event-title">Sammy Rae & The Friends - the GET...</span>
       </div>
-      <div class="event-venue">City Hall Plaza • 1 City Hall Square, Boston</div>
+      <div class="event-venue">MGM Music Hall at Fenway • 2 Lansdowne St, Boston</div>
     </div>
     <div class="event-item">
       <div class="event-main">
         <span class="event-time">8 PM</span>
         <span class="event-dash">—</span>
-        <span class="event-title">City of Four</span>
+        <span class="event-title">LIVE MUSIC: City of Four</span>
       </div>
       <div class="event-venue">Remnant Satellite • 877 Cambridge St, Cambridge</div>
     </div>
     <div class="event-item">
       <div class="event-main">
-        <span class="event-time">9 PM D</span>
+        <span class="event-time">9:30 PM</span>
         <span class="event-dash">—</span>
-        <span class="event-title">One Year of Hyperlinked</span>
+        <span class="event-title">Irish Session</span>
       </div>
-      <div class="event-venue">The Sinclair • 52 Church St, Cambridge</div>
+      <div class="event-venue">The Burren • 247 Elm St, Somerville</div>
     </div>
     <div class="event-item">
       <div class="event-main">
-        <span class="event-time">10 PM</span>
+        <span class="event-time">9:30 PM</span>
         <span class="event-dash">—</span>
-        <span class="event-title">MPH: Boston, Forever</span>
+        <span class="event-title">Live Jazz @ Wally's</span>
       </div>
-      <div class="event-venue">Royale • 279 Tremont St, Boston</div>
+      <div class="event-venue">Wally's Café • 427 Massachusetts Ave, Boston</div>
     </div>
   </div>
 </div>
@@ -477,91 +417,83 @@
   <div class="events-list">
     <div class="event-item">
       <div class="event-main">
-        <span class="event-time">10 AM</span>
+        <span class="event-time">12 PM</span>
         <span class="event-dash">—</span>
-        <span class="event-title">Fleurs de Villes WONDER</span>
+        <span class="event-title">Bluegrass Brunch</span>
       </div>
-      <div class="event-venue">Prudential Center • 800 Boylston St, Boston</div>
+      <div class="event-venue">The Bebop • 1116 Boylston St, Boston</div>
     </div>
     <div class="event-item">
       <div class="event-main">
-        <span class="event-time">11 AM</span>
+        <span class="event-time">2 PM</span>
         <span class="event-dash">—</span>
-        <span class="event-title">Brighton Bazaar: Fall Finale</span>
+        <span class="event-title">Silents, Please! Grass: A Nation's...</span>
       </div>
-      <div class="event-venue">Brighton Elks Lodge • 326 Washington St, Brighton</div>
+      <div class="event-venue">Somerville Theatre • 55 Davis Sq, Somerville</div>
     </div>
     <div class="event-item">
       <div class="event-main">
-        <span class="event-time">11 AM</span>
+        <span class="event-time">2:30 PM</span>
         <span class="event-dash">—</span>
-        <span class="event-title">Boston Antiquarian Book Fair</span>
+        <span class="event-title">Circus Up Annual Benefit Show</span>
       </div>
-      <div class="event-venue">Hynes Convention Center • 900 Boylston St, Boston</div>
+      <div class="event-venue">Arts at the Armory • 191 Highland Ave, Somerville</div>
     </div>
     <div class="event-item">
       <div class="event-main">
-        <span class="event-time">11 AM</span>
+        <span class="event-time">3 PM</span>
         <span class="event-dash">—</span>
-        <span class="event-title">SoWa Open Market</span>
+        <span class="event-title">Vivo Performing Arts presents Igor...</span>
       </div>
-      <div class="event-venue">500 Harrison Ave, South End, Boston</div>
+      <div class="event-venue">Symphony Hall • 301 Massachusetts Ave, Boston</div>
     </div>
     <div class="event-item">
       <div class="event-main">
-        <span class="event-time">11 AM</span>
+        <span class="event-time">3:30 PM</span>
         <span class="event-dash">—</span>
-        <span class="event-title">SoWa Sunday Open Studios</span>
+        <span class="event-title">Ben Schwartz</span>
       </div>
-      <div class="event-venue">450 Harrison Ave, South End, Boston</div>
-    </div>
-    <div class="event-item">
-      <div class="event-main">
-        <span class="event-time">11 AM</span>
-        <span class="event-dash">—</span>
-        <span class="event-title">Memorial Drive Recreation Sunday</span>
-      </div>
-      <div class="event-venue">Memorial Dr • Western Ave to JFK St, Cambridge</div>
-    </div>
-    <div class="event-item">
-      <div class="event-main">
-        <span class="event-time">11 AM</span>
-        <span class="event-dash">—</span>
-        <span class="event-title">Fixit Clinic</span>
-      </div>
-      <div class="event-venue">Artisan's Asylum • 96 Holton St, Allston</div>
-    </div>
-    <div class="event-item">
-      <div class="event-main">
-        <span class="event-time">4 PM</span>
-        <span class="event-dash">—</span>
-        <span class="event-title">Somerville Art Fair Auction Night</span>
-      </div>
-      <div class="event-venue">Upstairs at Bow • 1 Bow Market Way, Somerville</div>
+      <div class="event-venue">Chevalier Theatre • 30 Forest St, Medford</div>
     </div>
     <div class="event-item">
       <div class="event-main">
         <span class="event-time">6 PM</span>
         <span class="event-dash">—</span>
-        <span class="event-title">Sunday Best Comedy</span>
+        <span class="event-title">Irish Session</span>
       </div>
-      <div class="event-venue">The Comedy Studio • 5 JFK St, Cambridge</div>
+      <div class="event-venue">The Burren • 247 Elm St, Somerville</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">7 PM D</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Wheeler Walker Jr. - Pullin' Out:...</span>
+      </div>
+      <div class="event-venue">House of Blues Boston • 15 Lansdowne St, Boston</div>
     </div>
     <div class="event-item">
       <div class="event-main">
         <span class="event-time">7 PM</span>
         <span class="event-dash">—</span>
-        <span class="event-title">Voilà: Moonbloom</span>
+        <span class="event-title">TEN - US Showcase Tour</span>
       </div>
-      <div class="event-venue">Royale • 279 Tremont St, Boston</div>
+      <div class="event-venue">Big Night Live • 110 Causeway St, Boston</div>
     </div>
     <div class="event-item">
       <div class="event-main">
-        <span class="event-time">8 PM</span>
+        <span class="event-time">7:30 PM</span>
         <span class="event-dash">—</span>
-        <span class="event-title">Sunday Karaoke</span>
+        <span class="event-title">Sunday Blues with Bruce Bears &...</span>
       </div>
-      <div class="event-venue">Remnant Satellite • 877 Cambridge St, Cambridge</div>
+      <div class="event-venue">The Beehive • 541 Tremont St, Boston</div>
+    </div>
+    <div class="event-item">
+      <div class="event-main">
+        <span class="event-time">7:45 PM D</span>
+        <span class="event-dash">—</span>
+        <span class="event-title">Boston Manor</span>
+      </div>
+      <div class="event-venue">The Sinclair • 52 Church St, Cambridge</div>
     </div>
   </div>
 </div>
@@ -572,13 +504,13 @@
             <svg class="hl-star" viewBox="0 0 24 24"><path fill="#ffffff" d="M12 0L14.5 9.5L24 12L14.5 14.5L12 24L9.5 14.5L0 12L9.5 9.5Z"/></svg>
           </div>
           <div class="hl-list">
-            <div class="hl-item">RENAISSANCE FAIRE • SAT 10 AM</div>
-<div class="hl-item">THAI NIGHT MARKET • SAT 4–10 PM</div>
-<div class="hl-item">BRIGHTON BAZAAR • SAT & SUN 11 AM–5 PM</div>
+            <div class="hl-item">SOMERVILLE WINTER FARMERS MARKET • SAT 9 AM</div>
+<div class="hl-item">STEAL MY STYLE THRIFT MARKET • SAT 11 AM</div>
+<div class="hl-item">STEVEN FEIFKE & FRIENDS - 10TH... • SAT 7 PM</div>
           </div>
           <div class="hl-note">
             <span class="blue-dot"></span>
-            <span>Bow Market opens 10 AM; Remnant activities from noon.</span>
+            <span>Free entry & local vendors • Check venue sites for weather updates</span>
             <span class="blue-dot"></span>
           </div>
         </div>
