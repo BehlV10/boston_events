@@ -170,6 +170,10 @@ def is_placeholder_or_closed_event(title: str) -> bool:
     if t.lower() in ("tba", "tbd", "to be announced", "placeholder", "no title", "closed", "dark"):
         return True
 
+    # 7. Misleading commercial promo / fake free gym passes
+    if re.search(r"\bfree\s+rock\s+climbing\b", t, re.I):
+        return True
+
     return False
 
 
@@ -762,7 +766,8 @@ _BC_NOISE_CONTAINS = re.compile(
     r"\|\s*(now\s+open|opening\s+soon|grand\s+opening)"
     r"|\bnow\s+open\b"
     r"|new\s+(location|opening)\s+(in|at)\b"
-    r"|skip\s+the\s+(traffic|drive)\b",
+    r"|skip\s+the\s+(traffic|drive)\b"
+    r"|\bfree\s+rock\s+climbing\b",
     re.I,
 )
 # Standalone restaurant-type words that make it a listing, not an event

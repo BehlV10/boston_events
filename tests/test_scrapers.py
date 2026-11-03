@@ -503,6 +503,8 @@ class TestBostonEvents(unittest.TestCase):
             "CANCELLED: Free Drop-in Tutoring for Teens",
             "Tbd",
             "TBA",
+            "Free Rock Climbing- Central Rock Cambridge",
+            "Free Rock Climbing Class",
         ]
         for title in placeholders:
             self.assertTrue(is_placeholder_or_closed_event(title), f"Failed to detect placeholder: {title}")
