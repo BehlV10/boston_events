@@ -59,7 +59,7 @@ CITY_RULES = [
         "lamplighter", "roxy's arcade", "roxys arcade",
         "venture café", "venture cafe", "cic cambridge",
         "the platform", "the platform kendall", "platform kendall",
-        "phoenix landing", "manray", "man ray", "prospect st",
+        "phoenix landing", "manray", "man ray", "prospect st", "middlesex", "middlesex lounge",
         "lilypad", "inman square", "the druid", "druid",
         "plough and stars", "plough & stars", "gather here", "mit open space",
         "remnant satellite", "satellite", "cambridge public library", "cambridge library",

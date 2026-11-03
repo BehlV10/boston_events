@@ -1414,6 +1414,43 @@ class TestBostonEvents(unittest.TestCase):
         transit = resolve_transit_lines(city, sub_slug, mock_ev, geo)
         self.assertEqual(transit, "red")
 
+    def test_middlesex_lounge(self):
+        """Middlesex Lounge venue, scraper, geo resolution, and red line transit verification."""
+        from scrapers import _ALL_VENUES, scrape_middlesex
+        from venues_geo import resolve_event_geo
+        from template import _event_city, resolve_subarea, resolve_transit_lines
+
+        # Venue registered in _ALL_VENUES
+        names = [v["name"] for v in _ALL_VENUES]
+        self.assertIn("Middlesex Lounge", names)
+
+        # Scraper returns events
+        events = scrape_middlesex("https://www.msexcambridge.com", UA_CHROME)
+        self.assertGreaterEqual(len(events), 3)
+
+        first = events[0]
+        self.assertIn("name", first)
+        self.assertIn("date", first)
+        self.assertEqual(first["venue"], "Middlesex Lounge")
+        self.assertEqual(first["category"], "clubbing")
+
+        # Geo, city, subarea, transit verification
+        geo = resolve_event_geo(first)
+        self.assertIsNotNone(geo)
+        self.assertEqual(geo["venue"], "Middlesex Lounge")
+        self.assertEqual(geo["neighborhood"], "Central Square")
+        self.assertAlmostEqual(geo["lat"], 42.3619, places=3)
+        self.assertAlmostEqual(geo["lng"], -71.0988, places=3)
+
+        city = _event_city(first["venue"], first.get("_source_venue") or first["venue"], first)
+        self.assertEqual(city, "cambridge")
+
+        sub_name, sub_slug = resolve_subarea(city, first, geo)
+        self.assertEqual(sub_slug, "central_sq")
+
+        transit = resolve_transit_lines(city, sub_slug, first, geo)
+        self.assertEqual(transit, "red")
+
 
 if __name__ == "__main__":
     unittest.main()

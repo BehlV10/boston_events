@@ -1943,6 +1943,131 @@ def scrape_manray(url, ua):
     return events
 
 
+def scrape_middlesex(url, ua):
+    """Middlesex Lounge (Central Square, Cambridge) — parses weekly party announcements, guest DJs, and throwback parties."""
+    target_url = "https://www.msexcambridge.com"
+    events = []
+    seen_dates = set()
+    now = datetime.now(EASTERN)
+
+    month_map = {
+        "jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6,
+        "jul": 7, "aug": 8, "sep": 9, "oct": 10, "nov": 11, "dec": 12,
+    }
+
+    try:
+        resp = _SESSION.get(target_url, headers={"User-Agent": ua or UA_CHROME}, timeout=15)
+        if resp.status_code != 200:
+            return events
+        html = resp.text
+    except Exception as exc:
+        print(f"Error scraping Middlesex Lounge: {exc}")
+        return events
+
+    soup = BeautifulSoup(html, "html.parser")
+
+    # 1. Primary: Parse Wix repeater items
+    items = soup.find_all(class_="wixui-repeater__item")
+    for item in items:
+        p_tags = [p.get_text(strip=True) for p in item.find_all(["p", "span"]) if p.get_text(strip=True)]
+        cleaned = []
+        for s in p_tags:
+            if not cleaned or cleaned[-1] != s:
+                cleaned.append(s)
+
+        date_obj = None
+        title_parts = []
+        date_found = False
+
+        for text in cleaned:
+            m = re.search(r"\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s+(\d{1,2})\b", text, re.I)
+            if m and not date_found:
+                month_str, day_str = m.group(1).lower(), m.group(2)
+                month = month_map.get(month_str)
+                if not month:
+                    continue
+                day = int(day_str)
+                ev_year = now.year + 1 if month < now.month - 2 else now.year
+                try:
+                    date_obj = datetime(ev_year, month, day, 21, 0, tzinfo=EASTERN)
+                except ValueError:
+                    continue
+                date_found = True
+            elif not date_found:
+                continue
+            else:
+                if text.lower() not in [t.lower() for t in title_parts]:
+                    title_parts.append(text)
+
+        if not date_obj:
+            continue
+
+        title = " ".join(title_parts).strip()
+        title = re.sub(r"\s+", " ", title)
+        if not title or title.upper() == "TBD":
+            title = "Middlesex Club Night"
+
+        date_key = date_obj.strftime("%Y-%m-%d")
+        if date_key in seen_dates:
+            for ev in events:
+                if ev["date"].startswith(date_key) and len(title) > len(ev["name"]):
+                    ev["name"] = title
+            continue
+
+        seen_dates.add(date_key)
+        events.append({
+            "name": title,
+            "date": date_obj.isoformat(),
+            "venue": "Middlesex Lounge",
+            "category": "clubbing",
+            "url": "https://www.msexcambridge.com",
+            "description": "Party and underground DJ set at Middlesex Lounge in Central Square. Lounge opens at 5 PM, party starts at 9 PM.",
+        })
+
+    # 2. Fallback: Parse plain text if repeater items empty
+    if not events:
+        lines = [line.strip() for line in soup.stripped_strings if line.strip()]
+        i = 0
+        while i < len(lines):
+            line = lines[i]
+            m = re.search(r"\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s+(\d{1,2})\b", line, re.I)
+            if m:
+                month_str, day_str = m.group(1).lower(), m.group(2)
+                month = month_map.get(month_str)
+                if month:
+                    day = int(day_str)
+                    ev_year = now.year + 1 if month < now.month - 2 else now.year
+                    title_lines = []
+                    j = i + 1
+                    while j < len(lines) and j <= i + 3:
+                        nxt = lines[j]
+                        if any(kw in nxt.upper() for kw in ["PARTY IN", "CENTRAL SQ", "THIS WEEK", "THURSDAY", "FRIDAY", "SATURDAY", "UPCOMING GUESTS", "CALENDAR", "MASSACHUSETTS AVENUE"]):
+                            break
+                        if not re.search(r"\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s+\d{1,2}\b", nxt, re.I):
+                            title_lines.append(nxt)
+                        j += 1
+                    title = " ".join(title_lines).strip() or "Middlesex Club Night"
+                    try:
+                        dt = datetime(ev_year, month, day, 21, 0, tzinfo=EASTERN)
+                        date_key = dt.strftime("%Y-%m-%d")
+                        if date_key not in seen_dates:
+                            seen_dates.add(date_key)
+                            events.append({
+                                "name": title,
+                                "date": dt.isoformat(),
+                                "venue": "Middlesex Lounge",
+                                "category": "clubbing",
+                                "url": "https://www.msexcambridge.com",
+                                "description": "Party and underground DJ set at Middlesex Lounge in Central Square. Lounge opens at 5 PM, party starts at 9 PM.",
+                            })
+                    except ValueError:
+                        pass
+            i += 1
+
+    events.sort(key=lambda x: x["date"])
+    return events
+
+
 def scrape_do617(url, ua):
     """Do617 — Scrapes upcoming Boston events via modern Svelte event cards or legacy Schema.org microdata."""
     events = []
@@ -7569,6 +7694,7 @@ _ALL_VENUES = [
     {"name": "Venture Café Cambridge", "url": "https://community.venturecafecambridge.org/", "ua": UA_CHROME, "scraper": scrape_venture_cafe, "default_category": "community"},
     {"name": "The Anchor Boston", "url": "https://calendar.google.com/calendar/ical/theanchorbostonma%40gmail.com/public/basic.ics", "ua": UA_CHROME, "scraper": scrape_ical, "default_category": "community"},
     {"name": "ManRay Cambridge", "url": "https://manrayclub.com/monthly-calendar/", "ua": UA_CHROME, "scraper": scrape_manray, "default_category": "clubbing"},
+    {"name": "Middlesex Lounge", "url": "https://www.msexcambridge.com", "ua": UA_CHROME, "scraper": scrape_middlesex, "default_category": "clubbing"},
     {"name": "Esplanade Association", "url": "https://esplanade.org/events/", "ua": UA_CHROME, "scraper": scrape_esplanade, "default_category": "outdoors"},
     {"name": "Eventbrite Cambridge", "url": "https://www.eventbrite.com/d/ma--cambridge/events/", "ua": UA_CHROME, "scraper": scrape_eventbrite_search, "default_category": None},
     {"name": "Eventbrite Somerville", "url": "https://www.eventbrite.com/d/ma--somerville/events/", "ua": UA_CHROME, "scraper": scrape_eventbrite_search, "default_category": None},
@@ -7689,7 +7815,6 @@ STATIC_LINKS = [
     ("music",   "Handel and Haydn Society", "https://handelandhaydn.org/concerts/"),
     ("music",   "Celebrity Series of Boston", "https://www.celebrityseries.org/live-performances/"),
     ("music",   "Berklee Performance Center", "https://www.berklee.edu/BPC"),
-    ("clubbing","Middlesex Lounge (Cambridge)", "https://www.msexcambridge.com/calendar"),
     ("gaming",  "Balance Patch (Esports, Smash & FGC)", "https://www.balancepatch.com/events"),
     ("gaming",  "Harvard/Central PoGO (Campfire App on iOS)", "https://apps.apple.com/us/app/niantic-campfire/id1608154490"),
     ("music",   "Regattabar (jazz)", "https://www.regattabarjazz.com/"),
