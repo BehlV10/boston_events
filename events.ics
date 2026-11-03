@@ -7,8 +7,918 @@ X-WR-CALNAME:Boston Live Events & Shows
 X-WR-TIMEZONE:America/New_York
 X-WR-CALDESC:Curated live shows, concerts, and comedy across Boston, Cambridge, and Somerville.
 BEGIN:VEVENT
-UID:20261105_3988316167@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
+UID:20261104_3603657828@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261104
+SUMMARY:Wednesday Wildcard: Portrait Club w/ Big Dave @ Life Drawing Boston
+LOCATION:Life Drawing Boston, Boston MA
+DESCRIPTION:Wednesday Wildcard: Portrait Club w/ Big Dave live at Life Drawing Boston. Zero ticket broker fees. Details: https://www.lifedrawingboston.com/calendar/wednesday-wildcard-props-costumes-w-julie-4298a-zk7c7-3ttbc-42lac-tj4k7-cj67a
+URL:https://www.lifedrawingboston.com/calendar/wednesday-wildcard-props-costumes-w-julie-4298a-zk7c7-3ttbc-42lac-tj4k7-cj67a
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261111_5785398225@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261111
+SUMMARY:Historical Portraiture w/ Cas @ Life Drawing Boston
+LOCATION:Life Drawing Boston, Boston MA
+DESCRIPTION:Historical Portraiture w/ Cas live at Life Drawing Boston. Zero ticket broker fees. Details: https://www.lifedrawingboston.com/calendar/figure-drawing-w-spanish-facilitation-gr3ln-h5hsl-wzf43-359pf-7786a-2sd2j-7den6-w3fmf-2jmrl-a2kt4
+URL:https://www.lifedrawingboston.com/calendar/figure-drawing-w-spanish-facilitation-gr3ln-h5hsl-wzf43-359pf-7786a-2sd2j-7den6-w3fmf-2jmrl-a2kt4
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261118_2163377730@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261118
+SUMMARY:Cosplay Night w/ Blake @ Life Drawing Boston
+LOCATION:Life Drawing Boston, Boston MA
+DESCRIPTION:Cosplay Night w/ Blake live at Life Drawing Boston. Zero ticket broker fees. Details: https://www.lifedrawingboston.com/calendar/figure-drawing-w-spanish-facilitation-gr3ln-a8c6w-b5pnf-9gypy
+URL:https://www.lifedrawingboston.com/calendar/figure-drawing-w-spanish-facilitation-gr3ln-a8c6w-b5pnf-9gypy
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261202_3603657828@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261202
+SUMMARY:Wednesday Wildcard: Portrait Club w/ Big Dave @ Life Drawing Boston
+LOCATION:Life Drawing Boston, Boston MA
+DESCRIPTION:Wednesday Wildcard: Portrait Club w/ Big Dave live at Life Drawing Boston. Zero ticket broker fees. Details: https://www.lifedrawingboston.com/calendar/wednesday-wildcard-props-costumes-w-julie-4298a-zk7c7-3ttbc-42lac-tj4k7-cj67a-jtnkm
+URL:https://www.lifedrawingboston.com/calendar/wednesday-wildcard-props-costumes-w-julie-4298a-zk7c7-3ttbc-42lac-tj4k7-cj67a-jtnkm
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261104_1897123315@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261104
+SUMMARY:Tuesday Drawing Club @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Tuesday Drawing Club live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-04+00%3A00%3A00&k_class_period=16601398&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-04+00%3A00%3A00&k_class_period=16601398&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261104_3029511707@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261104
+SUMMARY:Wednesday Drawing as Meditation @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Wednesday Drawing as Meditation live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-04+16%3A00%3A00&k_class_period=16660539&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-04+16%3A00%3A00&k_class_period=16660539&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261104_8356985025@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261104
+SUMMARY:Member Clubhouse @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Member Clubhouse live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-04+23%3A00%3A00&k_class_period=17669984&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-04+23%3A00%3A00&k_class_period=17669984&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261104_6314250429@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261104
+SUMMARY:Stitch 'n B*tch @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Stitch 'n B*tch live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-04+23%3A30%3A00&k_class_period=19001887&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-04+23%3A30%3A00&k_class_period=19001887&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261105_8835894288@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261105
+SUMMARY:Wednesday Medium Pose @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Wednesday Medium Pose live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-05+00%3A00%3A00&k_class_period=16660558&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-05+00%3A00%3A00&k_class_period=16660558&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261105_5927049523@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261105
+SUMMARY:Intermediate Figure Drawing (3-Week Class) @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Intermediate Figure Drawing (3-Week Class) live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-05+00%3A00%3A00&k_class_period=18832670&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-05+00%3A00%3A00&k_class_period=18832670&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261106_8913455378@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261106
+SUMMARY:Thursday Long Pose @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Thursday Long Pose live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-06+00%3A00%3A00&k_class_period=18361509&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-06+00%3A00%3A00&k_class_period=18361509&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261106_5636991767@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261106
+SUMMARY:Anatomy of the head (3-Week Class) @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Anatomy of the head (3-Week Class) live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-06+00%3A00%3A00&k_class_period=18912799&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-06+00%3A00%3A00&k_class_period=18912799&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261107_4261508873@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261107
+SUMMARY:First Friday: Opening reception @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:First Friday: Opening reception live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-07+00%3A00%3A00&k_class_period=18924323&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-07+00%3A00%3A00&k_class_period=18924323&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261107_1843507235@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261107
+SUMMARY:Saturday Portrait Study @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Saturday Portrait Study live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-07+15%3A00%3A00&k_class_period=18765309&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-07+15%3A00%3A00&k_class_period=18765309&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261108_8671708920@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261108
+SUMMARY:Saturday Evening Short Pose @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Saturday Evening Short Pose live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-08+00%3A00%3A00&k_class_period=19045618&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-08+00%3A00%3A00&k_class_period=19045618&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261108_8654501328@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261108
+SUMMARY:Sunday Portrait Study @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Sunday Portrait Study live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-08+15%3A00%3A00&k_class_period=18163166&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-08+15%3A00%3A00&k_class_period=18163166&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261108_4211606091@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261108
+SUMMARY:Sunday Morning Month Long Pose @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Sunday Morning Month Long Pose live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-08+15%3A00%3A00&k_class_period=18982579&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-08+15%3A00%3A00&k_class_period=18982579&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261108_8777400781@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261108
+SUMMARY:Cyanotypes on Fabrics @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Cyanotypes on Fabrics live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-08+18%3A30%3A00&k_class_period=18733194&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-08+18%3A30%3A00&k_class_period=18733194&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261108_2381105057@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261108
+SUMMARY:Sunday Afternoon Long Pose @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Sunday Afternoon Long Pose live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-08+19%3A00%3A00&k_class_period=17772842&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-08+19%3A00%3A00&k_class_period=17772842&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261108_8356985025@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261108
+SUMMARY:Member Clubhouse @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Member Clubhouse live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-08+19%3A00%3A00&k_class_period=17772846&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-08+19%3A00%3A00&k_class_period=17772846&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261108_7613287485@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261108
+SUMMARY:Watercolors: Birds (2-Week Class) @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Watercolors: Birds (2-Week Class) live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-08+22%3A30%3A00&k_class_period=18912367&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-08+22%3A30%3A00&k_class_period=18912367&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261109_5621962637@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261109
+SUMMARY:Pass the Pose @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Pass the Pose live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-09+22%3A00%3A00&k_class_period=19001830&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-09+22%3A00%3A00&k_class_period=19001830&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261110_4596519145@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261110
+SUMMARY:Monday Short Pose @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Monday Short Pose live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-10+00%3A00%3A00&k_class_period=16766105&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-10+00%3A00%3A00&k_class_period=16766105&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261110_5899229598@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261110
+SUMMARY:Figure Drawing Basics (3-Week Class) @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Figure Drawing Basics (3-Week Class) live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-10+00%3A00%3A00&k_class_period=18720151&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-10+00%3A00%3A00&k_class_period=18720151&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261111_1897123315@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261111
+SUMMARY:Tuesday Drawing Club @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Tuesday Drawing Club live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-11+00%3A00%3A00&k_class_period=16601398&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-11+00%3A00%3A00&k_class_period=16601398&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261111_3029511707@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261111
+SUMMARY:Wednesday Drawing as Meditation @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Wednesday Drawing as Meditation live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-11+16%3A00%3A00&k_class_period=16660539&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-11+16%3A00%3A00&k_class_period=16660539&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261111_8356985025@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261111
+SUMMARY:Member Clubhouse @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Member Clubhouse live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-11+23%3A00%3A00&k_class_period=17669984&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-11+23%3A00%3A00&k_class_period=17669984&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261112_8835894288@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261112
+SUMMARY:Wednesday Medium Pose @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Wednesday Medium Pose live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-12+00%3A00%3A00&k_class_period=16660558&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-12+00%3A00%3A00&k_class_period=16660558&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261112_5927049523@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261112
+SUMMARY:Intermediate Figure Drawing (3-Week Class) @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Intermediate Figure Drawing (3-Week Class) live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-12+00%3A00%3A00&k_class_period=18832670&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-12+00%3A00%3A00&k_class_period=18832670&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261113_8913455378@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261113
+SUMMARY:Thursday Long Pose @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Thursday Long Pose live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-13+00%3A00%3A00&k_class_period=18361509&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-13+00%3A00%3A00&k_class_period=18361509&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261113_1328793642@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261113
+SUMMARY:Queer Figure Drawing Night: Chill Version @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Queer Figure Drawing Night: Chill Version live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-13+00%3A00%3A00&k_class_period=18998135&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-13+00%3A00%3A00&k_class_period=18998135&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261113_5636991767@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261113
+SUMMARY:Anatomy of the head (3-Week Class) @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Anatomy of the head (3-Week Class) live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-13+00%3A00%3A00&k_class_period=18912799&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-13+00%3A00%3A00&k_class_period=18912799&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261114_1843507235@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261114
+SUMMARY:Saturday Portrait Study @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Saturday Portrait Study live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-14+15%3A00%3A00&k_class_period=18765309&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-14+15%3A00%3A00&k_class_period=18765309&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261115_8671708920@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261115
+SUMMARY:Saturday Evening Short Pose @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Saturday Evening Short Pose live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-15+00%3A00%3A00&k_class_period=19045618&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-15+00%3A00%3A00&k_class_period=19045618&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261115_8654501328@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261115
+SUMMARY:Sunday Portrait Study @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Sunday Portrait Study live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-15+15%3A00%3A00&k_class_period=18163166&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-15+15%3A00%3A00&k_class_period=18163166&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261115_4211606091@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261115
+SUMMARY:Sunday Morning Month Long Pose @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Sunday Morning Month Long Pose live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-15+15%3A00%3A00&k_class_period=18982579&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-15+15%3A00%3A00&k_class_period=18982579&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261115_2381105057@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261115
+SUMMARY:Sunday Afternoon Long Pose @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Sunday Afternoon Long Pose live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-15+19%3A00%3A00&k_class_period=17772842&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-15+19%3A00%3A00&k_class_period=17772842&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261115_8356985025@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261115
+SUMMARY:Member Clubhouse @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Member Clubhouse live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-15+19%3A00%3A00&k_class_period=17772846&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-15+19%3A00%3A00&k_class_period=17772846&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261115_7613287485@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261115
+SUMMARY:Watercolors: Birds (2-Week Class) @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Watercolors: Birds (2-Week Class) live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-15+22%3A30%3A00&k_class_period=18912367&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-15+22%3A30%3A00&k_class_period=18912367&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261116_5621962637@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261116
+SUMMARY:Pass the Pose @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Pass the Pose live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-16+22%3A00%3A00&k_class_period=19001830&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-16+22%3A00%3A00&k_class_period=19001830&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261117_4596519145@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261117
+SUMMARY:Monday Short Pose @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Monday Short Pose live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-17+00%3A00%3A00&k_class_period=16766105&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-17+00%3A00%3A00&k_class_period=16766105&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261117_5899229598@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261117
+SUMMARY:Figure Drawing Basics (3-Week Class) @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Figure Drawing Basics (3-Week Class) live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-17+00%3A00%3A00&k_class_period=18720151&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-17+00%3A00%3A00&k_class_period=18720151&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261118_1897123315@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261118
+SUMMARY:Tuesday Drawing Club @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Tuesday Drawing Club live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-18+00%3A00%3A00&k_class_period=16601398&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-18+00%3A00%3A00&k_class_period=16601398&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261118_3029511707@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261118
+SUMMARY:Wednesday Drawing as Meditation @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Wednesday Drawing as Meditation live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-18+16%3A00%3A00&k_class_period=16660539&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-18+16%3A00%3A00&k_class_period=16660539&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261118_8356985025@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261118
+SUMMARY:Member Clubhouse @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Member Clubhouse live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-18+23%3A00%3A00&k_class_period=17669984&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-18+23%3A00%3A00&k_class_period=17669984&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261118_6314250429@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261118
+SUMMARY:Stitch 'n B*tch @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Stitch 'n B*tch live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-18+23%3A30%3A00&k_class_period=19045739&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-18+23%3A30%3A00&k_class_period=19045739&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261119_8835894288@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261119
+SUMMARY:Wednesday Medium Pose @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Wednesday Medium Pose live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-19+00%3A00%3A00&k_class_period=16660558&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-19+00%3A00%3A00&k_class_period=16660558&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261119_5927049523@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261119
+SUMMARY:Intermediate Figure Drawing (3-Week Class) @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Intermediate Figure Drawing (3-Week Class) live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-19+00%3A00%3A00&k_class_period=18832670&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-19+00%3A00%3A00&k_class_period=18832670&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261120_8913455378@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261120
+SUMMARY:Thursday Long Pose @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Thursday Long Pose live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-20+00%3A00%3A00&k_class_period=18361509&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-20+00%3A00%3A00&k_class_period=18361509&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261120_5636991767@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261120
+SUMMARY:Anatomy of the head (3-Week Class) @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Anatomy of the head (3-Week Class) live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-20+00%3A00%3A00&k_class_period=18912799&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-20+00%3A00%3A00&k_class_period=18912799&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261120_7797369676@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261120
+SUMMARY:Thursday Costumed Drawing: Medieval @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Thursday Costumed Drawing: Medieval live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-20+00%3A00%3A00&k_class_period=19058018&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-20+00%3A00%3A00&k_class_period=19058018&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261121_1622962840@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261121
+SUMMARY:Friendsgiving Community Potluck @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Friendsgiving Community Potluck live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-21+00%3A00%3A00&k_class_period=19057757&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-21+00%3A00%3A00&k_class_period=19057757&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261121_5053288640@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261121
+SUMMARY:MUSEUM MEETUP @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:MUSEUM MEETUP live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-21+15%3A00%3A00&k_class_period=18764307&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-21+15%3A00%3A00&k_class_period=18764307&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261121_1476246569@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261121
+SUMMARY:Paint & Sip: Sweater Weather @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Paint & Sip: Sweater Weather live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-21+22%3A00%3A00&k_class_period=18939618&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-21+22%3A00%3A00&k_class_period=18939618&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261122_8671708920@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261122
+SUMMARY:Saturday Evening Short Pose @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Saturday Evening Short Pose live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-22+00%3A00%3A00&k_class_period=19045618&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-22+00%3A00%3A00&k_class_period=19045618&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261122_8654501328@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261122
+SUMMARY:Sunday Portrait Study @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Sunday Portrait Study live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-22+15%3A00%3A00&k_class_period=18163166&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-22+15%3A00%3A00&k_class_period=18163166&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261122_4211606091@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261122
+SUMMARY:Sunday Morning Month Long Pose @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Sunday Morning Month Long Pose live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-22+15%3A00%3A00&k_class_period=18982579&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-22+15%3A00%3A00&k_class_period=18982579&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261122_2381105057@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261122
+SUMMARY:Sunday Afternoon Long Pose @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Sunday Afternoon Long Pose live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-22+19%3A00%3A00&k_class_period=17772842&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-22+19%3A00%3A00&k_class_period=17772842&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261122_8356985025@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261122
+SUMMARY:Member Clubhouse @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Member Clubhouse live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-22+19%3A00%3A00&k_class_period=17772846&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-22+19%3A00%3A00&k_class_period=17772846&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261123_5621962637@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261123
+SUMMARY:Pass the Pose @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Pass the Pose live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-23+22%3A00%3A00&k_class_period=19001830&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-23+22%3A00%3A00&k_class_period=19001830&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261124_4596519145@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261124
+SUMMARY:Monday Short Pose @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Monday Short Pose live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-24+00%3A00%3A00&k_class_period=16766105&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-24+00%3A00%3A00&k_class_period=16766105&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261124_5899229598@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261124
+SUMMARY:Figure Drawing Basics (3-Week Class) @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Figure Drawing Basics (3-Week Class) live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-24+00%3A00%3A00&k_class_period=18720151&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-24+00%3A00%3A00&k_class_period=18720151&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261125_1897123315@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261125
+SUMMARY:Tuesday Drawing Club @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Tuesday Drawing Club live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-25+00%3A00%3A00&k_class_period=16601398&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-25+00%3A00%3A00&k_class_period=16601398&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261125_3029511707@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261125
+SUMMARY:Wednesday Drawing as Meditation @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Wednesday Drawing as Meditation live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-25+16%3A00%3A00&k_class_period=16660539&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-25+16%3A00%3A00&k_class_period=16660539&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261125_8356985025@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261125
+SUMMARY:Member Clubhouse @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Member Clubhouse live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-25+23%3A00%3A00&k_class_period=17669984&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-25+23%3A00%3A00&k_class_period=17669984&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261126_8835894288@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261126
+SUMMARY:Wednesday Medium Pose @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Wednesday Medium Pose live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-26+00%3A00%3A00&k_class_period=16660558&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-26+00%3A00%3A00&k_class_period=16660558&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261127_8913455378@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261127
+SUMMARY:Thursday Long Pose @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Thursday Long Pose live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-27+00%3A00%3A00&k_class_period=18361509&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-27+00%3A00%3A00&k_class_period=18361509&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261128_1843507235@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261128
+SUMMARY:Saturday Portrait Study @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Saturday Portrait Study live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-28+15%3A00%3A00&k_class_period=18765310&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-28+15%3A00%3A00&k_class_period=18765310&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261129_8671708920@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261129
+SUMMARY:Saturday Evening Short Pose @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Saturday Evening Short Pose live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-29+00%3A00%3A00&k_class_period=19045618&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-29+00%3A00%3A00&k_class_period=19045618&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261129_8654501328@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261129
+SUMMARY:Sunday Portrait Study @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Sunday Portrait Study live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-29+15%3A00%3A00&k_class_period=18163166&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-29+15%3A00%3A00&k_class_period=18163166&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261129_4211606091@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261129
+SUMMARY:Sunday Morning Month Long Pose @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Sunday Morning Month Long Pose live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-29+15%3A00%3A00&k_class_period=18982579&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-29+15%3A00%3A00&k_class_period=18982579&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261129_2381105057@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261129
+SUMMARY:Sunday Afternoon Long Pose @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Sunday Afternoon Long Pose live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-29+19%3A00%3A00&k_class_period=17772842&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-29+19%3A00%3A00&k_class_period=17772842&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261129_8356985025@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261129
+SUMMARY:Member Clubhouse @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Member Clubhouse live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-29+19%3A00%3A00&k_class_period=17772846&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-29+19%3A00%3A00&k_class_period=17772846&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261130_5621962637@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261130
+SUMMARY:Pass the Pose @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Pass the Pose live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-30+22%3A00%3A00&k_class_period=19001830&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-30+22%3A00%3A00&k_class_period=19001830&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261201_4596519145@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261201
+SUMMARY:Monday Short Pose @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Monday Short Pose live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-01+00%3A00%3A00&k_class_period=16766105&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-01+00%3A00%3A00&k_class_period=16766105&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261202_1897123315@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261202
+SUMMARY:Tuesday Drawing Club @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Tuesday Drawing Club live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-02+00%3A00%3A00&k_class_period=16601398&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-02+00%3A00%3A00&k_class_period=16601398&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261202_3029511707@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261202
+SUMMARY:Wednesday Drawing as Meditation @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Wednesday Drawing as Meditation live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-02+16%3A00%3A00&k_class_period=16660539&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-02+16%3A00%3A00&k_class_period=16660539&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261202_8356985025@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261202
+SUMMARY:Member Clubhouse @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Member Clubhouse live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-02+23%3A00%3A00&k_class_period=17669984&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-02+23%3A00%3A00&k_class_period=17669984&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261203_8835894288@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261203
+SUMMARY:Wednesday Medium Pose @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Wednesday Medium Pose live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-03+00%3A00%3A00&k_class_period=16660558&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-03+00%3A00%3A00&k_class_period=16660558&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261204_8913455378@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261204
+SUMMARY:Thursday Long Pose @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Thursday Long Pose live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-04+00%3A00%3A00&k_class_period=18361509&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-04+00%3A00%3A00&k_class_period=18361509&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261205_1843507235@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261205
+SUMMARY:Saturday Portrait Study @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Saturday Portrait Study live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-05+15%3A00%3A00&k_class_period=18765310&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-05+15%3A00%3A00&k_class_period=18765310&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261206_8671708920@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261206
+SUMMARY:Saturday Evening Short Pose @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Saturday Evening Short Pose live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-06+00%3A00%3A00&k_class_period=19045618&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-06+00%3A00%3A00&k_class_period=19045618&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261206_8654501328@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261206
+SUMMARY:Sunday Portrait Study @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Sunday Portrait Study live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-06+15%3A00%3A00&k_class_period=18163166&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-06+15%3A00%3A00&k_class_period=18163166&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261206_4211606091@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261206
+SUMMARY:Sunday Morning Month Long Pose @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Sunday Morning Month Long Pose live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-06+15%3A00%3A00&k_class_period=18982579&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-06+15%3A00%3A00&k_class_period=18982579&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261206_2381105057@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261206
+SUMMARY:Sunday Afternoon Long Pose @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Sunday Afternoon Long Pose live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-06+19%3A00%3A00&k_class_period=17772842&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-06+19%3A00%3A00&k_class_period=17772842&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261206_8356985025@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261206
+SUMMARY:Member Clubhouse @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Member Clubhouse live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-06+19%3A00%3A00&k_class_period=17772846&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-06+19%3A00%3A00&k_class_period=17772846&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261206_6710125416@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261206
+SUMMARY:Intro to Watercolors @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Intro to Watercolors live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-06+22%3A30%3A00&k_class_period=19054616&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-06+22%3A30%3A00&k_class_period=19054616&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261207_5621962637@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261207
+SUMMARY:Pass the Pose @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Pass the Pose live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-07+22%3A00%3A00&k_class_period=19001830&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-07+22%3A00%3A00&k_class_period=19001830&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261208_4596519145@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261208
+SUMMARY:Monday Short Pose @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Monday Short Pose live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-08+00%3A00%3A00&k_class_period=16766105&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-08+00%3A00%3A00&k_class_period=16766105&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261208_5899229598@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261208
+SUMMARY:Figure Drawing Basics (3-Week Class) @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Figure Drawing Basics (3-Week Class) live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-08+00%3A00%3A00&k_class_period=18720155&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-08+00%3A00%3A00&k_class_period=18720155&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261209_1897123315@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
+DTSTART;VALUE=DATE:20261209
+SUMMARY:Tuesday Drawing Club @ Boston Figure Art Center
+LOCATION:Boston Figure Art Center, Boston MA
+DESCRIPTION:Tuesday Drawing Club live at Boston Figure Art Center. Zero ticket broker fees. Details: https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-09+00%3A00%3A00&k_class_period=16601398&k_business=693029&id_mode=1
+URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-09+00%3A00%3A00&k_class_period=16601398&k_business=693029&id_mode=1
+STATUS:CONFIRMED
+END:VEVENT
+BEGIN:VEVENT
+UID:20261105_9210079350@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
 DTSTART;VALUE=DATE:20261105
 SUMMARY:Compagnie Hervé Koubi @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -17,8 +927,8 @@ URL:https://www.theplatformkendall.org/productions/compagnie-herve-koubi-fy27/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261106_3988316167@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
+UID:20261106_9210079350@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
 DTSTART;VALUE=DATE:20261106
 SUMMARY:Compagnie Hervé Koubi @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -27,8 +937,8 @@ URL:https://www.theplatformkendall.org/productions/compagnie-herve-koubi-fy27/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261107_5687032587@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
+UID:20261107_1115667328@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
 DTSTART;VALUE=DATE:20261107
 SUMMARY:The Platform Opening Day @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -37,8 +947,8 @@ URL:https://www.theplatformkendall.org/the-platform-opening-day/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261107_3988316167@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
+UID:20261107_9210079350@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
 DTSTART;VALUE=DATE:20261107
 SUMMARY:Compagnie Hervé Koubi @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -47,8 +957,8 @@ URL:https://www.theplatformkendall.org/productions/compagnie-herve-koubi-fy27/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261110_2139731783@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
+UID:20261110_1445440613@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
 DTSTART;VALUE=DATE:20261110
 SUMMARY:Peppino D'Agostino @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -57,8 +967,8 @@ URL:https://www.theplatformkendall.org/productions/peppino-dagostino/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261111_9177174279@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
+UID:20261111_2975706453@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
 DTSTART;VALUE=DATE:20261111
 SUMMARY:Maryna Krut @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -67,8 +977,8 @@ URL:https://www.theplatformkendall.org/productions/maryna-krut-fy27/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261113_9046488107@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
+UID:20261113_2164207439@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
 DTSTART;VALUE=DATE:20261113
 SUMMARY:Strong Voice: The Tales of Roswitha @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -77,8 +987,8 @@ URL:https://www.theplatformkendall.org/productions/strong-voice-the-tales-of-ros
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261113_8791257864@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
+UID:20261113_5996548056@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
 DTSTART;VALUE=DATE:20261113
 SUMMARY:Tamara Jokić @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -87,923 +997,13 @@ URL:https://www.theplatformkendall.org/productions/tamara-jokic/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261113_7078491782@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
+UID:20261113_7267162031@wickedbostonevents.com
+DTSTAMP:20261103T054552Z
 DTSTART;VALUE=DATE:20261113
 SUMMARY:Jean Appolon Expressions Pouvwa @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
 DESCRIPTION:Jean Appolon Expressions Pouvwa live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/jean-appolon-expressions-fy27/
 URL:https://www.theplatformkendall.org/productions/jean-appolon-expressions-fy27/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261114_7078491782@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261114
-SUMMARY:Jean Appolon Expressions Pouvwa @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Jean Appolon Expressions Pouvwa live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/jean-appolon-expressions-fy27/
-URL:https://www.theplatformkendall.org/productions/jean-appolon-expressions-fy27/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261120_1211889903@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261120
-SUMMARY:Nicolás Emden @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Nicolás Emden live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/nicolas-emden/
-URL:https://www.theplatformkendall.org/productions/nicolas-emden/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261120_3378291078@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261120
-SUMMARY:Bria Skonberg @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Bria Skonberg live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/bria-skonberg-fy27/
-URL:https://www.theplatformkendall.org/productions/bria-skonberg-fy27/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261121_6439131522@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261121
-SUMMARY:BalletX @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:BalletX live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/balletx-fy27/
-URL:https://www.theplatformkendall.org/productions/balletx-fy27/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261122_6439131522@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261122
-SUMMARY:BalletX @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:BalletX live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/balletx-fy27/
-URL:https://www.theplatformkendall.org/productions/balletx-fy27/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261122_9047035571@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261122
-SUMMARY:Pipo Romero @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Pipo Romero live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/pipo-romero/
-URL:https://www.theplatformkendall.org/productions/pipo-romero/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261203_6369446986@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261203
-SUMMARY:Zohar & Adam @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Zohar & Adam live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/zohar-adam-fy27/
-URL:https://www.theplatformkendall.org/productions/zohar-adam-fy27/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261205_8027046395@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261205
-SUMMARY:Laura Anglade @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Laura Anglade live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/laura-anglade/
-URL:https://www.theplatformkendall.org/productions/laura-anglade/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261205_4340053859@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261205
-SUMMARY:Zoë Keating @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Zoë Keating live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/zoe-keating/
-URL:https://www.theplatformkendall.org/productions/zoe-keating/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261206_2313146040@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261206
-SUMMARY:EZEKIEL'S WHEELS/RACHEL LINSKY @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:EZEKIEL'S WHEELS/RACHEL LINSKY live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/performance/ezekiels-wheels-rachel-linsky-2026-12-06-1930/
-URL:https://www.theplatformkendall.org/performance/ezekiels-wheels-rachel-linsky-2026-12-06-1930/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261206_1180761169@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261206
-SUMMARY:Maria Mazzotta @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Maria Mazzotta live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/maria-mazzotta-fy27/
-URL:https://www.theplatformkendall.org/productions/maria-mazzotta-fy27/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261206_1174991901@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261206
-SUMMARY:Ezekiel's Wheels & ZACHOR Dance Projects @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Ezekiel's Wheels & ZACHOR Dance Projects live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/ezekiels-wheels-linsky-fy27/
-URL:https://www.theplatformkendall.org/productions/ezekiels-wheels-linsky-fy27/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261209_3617050215@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261209
-SUMMARY:MANAS @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:MANAS live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/manas/
-URL:https://www.theplatformkendall.org/productions/manas/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261210_7166984753@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261210
-SUMMARY:Magic Tuber Stringband @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Magic Tuber Stringband live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/magic-tuber-stringband/
-URL:https://www.theplatformkendall.org/productions/magic-tuber-stringband/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261210_2445151869@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261210
-SUMMARY:Monty Alexander "Jamaica to Jazz" @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Monty Alexander "Jamaica to Jazz" live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/monty-alexander-fy27/
-URL:https://www.theplatformkendall.org/productions/monty-alexander-fy27/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261211_6557981949@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261211
-SUMMARY:PINE TREE FLYERS @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:PINE TREE FLYERS live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/pine-tree-flyers/
-URL:https://www.theplatformkendall.org/productions/pine-tree-flyers/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261211_4121823631@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261211
-SUMMARY:Subject:Matter @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Subject:Matter live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/subjectmatter-fy27/
-URL:https://www.theplatformkendall.org/productions/subjectmatter-fy27/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261212_4121823631@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261212
-SUMMARY:Subject:Matter @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Subject:Matter live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/subjectmatter-fy27/
-URL:https://www.theplatformkendall.org/productions/subjectmatter-fy27/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261213_6189764978@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261213
-SUMMARY:Kandace Springs @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Kandace Springs live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/kandace-springs/
-URL:https://www.theplatformkendall.org/productions/kandace-springs/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270109_2342855062@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270109
-SUMMARY:Honeysuckle @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Honeysuckle live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/honeysuckle/
-URL:https://www.theplatformkendall.org/productions/honeysuckle/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270110_4150022358@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270110
-SUMMARY:BOWIE CELLO SYMPHONIC @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:BOWIE CELLO SYMPHONIC live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/bowie-cello-symphonic-aura-blackstar-visualized/
-URL:https://www.theplatformkendall.org/productions/bowie-cello-symphonic-aura-blackstar-visualized/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270114_3811301829@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270114
-SUMMARY:Gretchen Parlato @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Gretchen Parlato live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/gretchen-parlato/
-URL:https://www.theplatformkendall.org/productions/gretchen-parlato/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270115_4529021883@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270115
-SUMMARY:Balla Kouyaté & Matchume Zango BALA-BILA @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Balla Kouyaté & Matchume Zango BALA-BILA live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/balla-kouyate-and-matchume-zango-bala-bila/
-URL:https://www.theplatformkendall.org/productions/balla-kouyate-and-matchume-zango-bala-bila/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270115_3641027747@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270115
-SUMMARY:The Dirty Dozen Brass Band @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:The Dirty Dozen Brass Band live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/the-dirty-brass-dozen-band/
-URL:https://www.theplatformkendall.org/productions/the-dirty-brass-dozen-band/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270116_6076758429@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270116
-SUMMARY:Amythyst Kiah @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Amythyst Kiah live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/amythyst-kiah/
-URL:https://www.theplatformkendall.org/productions/amythyst-kiah/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270117_6117140668@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270117
-SUMMARY:Joshua Redman Quartet @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Joshua Redman Quartet live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/joshua-redman-quartet/
-URL:https://www.theplatformkendall.org/productions/joshua-redman-quartet/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270124_5775980499@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270124
-SUMMARY:Alash @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Alash live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/alash/
-URL:https://www.theplatformkendall.org/productions/alash/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270126_5616720173@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270126
-SUMMARY:Puuluup @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Puuluup live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/puuluup/
-URL:https://www.theplatformkendall.org/productions/puuluup/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270129_4799371884@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270129
-SUMMARY:Cirque Kalabanté Afrique en Cirque @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Cirque Kalabanté Afrique en Cirque live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/cirque-kabalante-afrique-en-cirque/
-URL:https://www.theplatformkendall.org/productions/cirque-kabalante-afrique-en-cirque/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270130_4799371884@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270130
-SUMMARY:Cirque Kalabanté Afrique en Cirque @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Cirque Kalabanté Afrique en Cirque live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/cirque-kabalante-afrique-en-cirque/
-URL:https://www.theplatformkendall.org/productions/cirque-kabalante-afrique-en-cirque/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270131_4799371884@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270131
-SUMMARY:Cirque Kalabanté Afrique en Cirque @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Cirque Kalabanté Afrique en Cirque live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/cirque-kabalante-afrique-en-cirque/
-URL:https://www.theplatformkendall.org/productions/cirque-kabalante-afrique-en-cirque/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270205_1559038008@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270205
-SUMMARY:Kurt Elling @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Kurt Elling live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/wildflowers-kurt-elling-with-fred-hersch/
-URL:https://www.theplatformkendall.org/productions/wildflowers-kurt-elling-with-fred-hersch/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270206_1965968313@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270206
-SUMMARY:The Hot Sardines @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:The Hot Sardines live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/the-hot-sardines/
-URL:https://www.theplatformkendall.org/productions/the-hot-sardines/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270207_1965968313@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270207
-SUMMARY:The Hot Sardines @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:The Hot Sardines live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/the-hot-sardines/
-URL:https://www.theplatformkendall.org/productions/the-hot-sardines/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270212_7932388356@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270212
-SUMMARY:Yamato @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Yamato live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/yamato/
-URL:https://www.theplatformkendall.org/productions/yamato/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270213_7932388356@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270213
-SUMMARY:Yamato @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Yamato live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/yamato/
-URL:https://www.theplatformkendall.org/productions/yamato/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270217_4867251604@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270217
-SUMMARY:CelloGayageum @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:CelloGayageum live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/cellogayageum/
-URL:https://www.theplatformkendall.org/productions/cellogayageum/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270220_8671181215@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270220
-SUMMARY:Juanito Pascual Trio Flamenco Celebration of Jimi Hendrix @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Juanito Pascual Trio Flamenco Celebration of Jimi Hendrix live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/juanito-pascual-trio-flamenco-celebration-of-jimi-hendrix/
-URL:https://www.theplatformkendall.org/productions/juanito-pascual-trio-flamenco-celebration-of-jimi-hendrix/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270227_8757101372@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270227
-SUMMARY:PHILADANCO! @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:PHILADANCO! live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/philadanco/
-URL:https://www.theplatformkendall.org/productions/philadanco/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270228_8757101372@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270228
-SUMMARY:PHILADANCO! @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:PHILADANCO! live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/philadanco/
-URL:https://www.theplatformkendall.org/productions/philadanco/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270302_4383332048@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270302
-SUMMARY:International Guitar Night @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:International Guitar Night live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/international-guitar-night/
-URL:https://www.theplatformkendall.org/productions/international-guitar-night/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270304_3887612555@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270304
-SUMMARY:Marquis Hill @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Marquis Hill live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/marquis-hill/
-URL:https://www.theplatformkendall.org/productions/marquis-hill/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270305_4529982374@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270305
-SUMMARY:ISAIAH COLLIER & THE DEFIANCE @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:ISAIAH COLLIER & THE DEFIANCE live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/performance/isaiah-collier-the-defiance-2027-03-05-2000-2/
-URL:https://www.theplatformkendall.org/performance/isaiah-collier-the-defiance-2027-03-05-2000-2/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270305_2183514276@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270305
-SUMMARY:Isaiah Collier: Joy @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Isaiah Collier: Joy live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/isaiah-collier-the-defiance/
-URL:https://www.theplatformkendall.org/productions/isaiah-collier-the-defiance/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270306_5937324925@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270306
-SUMMARY:Derek Gripper & Alam Khan @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Derek Gripper & Alam Khan live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/derek-gripper-alam-khan-fy27/
-URL:https://www.theplatformkendall.org/productions/derek-gripper-alam-khan-fy27/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270307_2246248235@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270307
-SUMMARY:Screendance Roadshow Playing Favorites @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Screendance Roadshow Playing Favorites live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/screendance-roadshow-playing-favorites/
-URL:https://www.theplatformkendall.org/productions/screendance-roadshow-playing-favorites/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270312_2963597583@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270312
-SUMMARY:Flamenkora @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Flamenkora live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/flamenkora/
-URL:https://www.theplatformkendall.org/productions/flamenkora/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270312_1074459626@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270312
-SUMMARY:RUBBERBAND @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:RUBBERBAND live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/rubberband-reckless-underdog/
-URL:https://www.theplatformkendall.org/productions/rubberband-reckless-underdog/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270313_1074459626@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270313
-SUMMARY:RUBBERBAND @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:RUBBERBAND live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/rubberband-reckless-underdog/
-URL:https://www.theplatformkendall.org/productions/rubberband-reckless-underdog/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270314_7516315741@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270314
-SUMMARY:Ladysmith Black Mambazo @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Ladysmith Black Mambazo live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/ladysmith-black-mambazo/
-URL:https://www.theplatformkendall.org/productions/ladysmith-black-mambazo/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270319_2738502383@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270319
-SUMMARY:Lucibela @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Lucibela live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/lucibela/
-URL:https://www.theplatformkendall.org/productions/lucibela/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270325_7607841997@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270325
-SUMMARY:Mayrig @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Mayrig live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/mayrig/
-URL:https://www.theplatformkendall.org/productions/mayrig/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270327_7702446473@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270327
-SUMMARY:Keyon Harrold @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Keyon Harrold live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/keyon-harrold-fy27/
-URL:https://www.theplatformkendall.org/productions/keyon-harrold-fy27/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270402_7827148826@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270402
-SUMMARY:Baklava Express @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Baklava Express live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/baklava-express/
-URL:https://www.theplatformkendall.org/productions/baklava-express/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270403_4063174917@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270403
-SUMMARY:Sole Defined @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Sole Defined live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/sole-defined-zaz/
-URL:https://www.theplatformkendall.org/productions/sole-defined-zaz/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270404_4063174917@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270404
-SUMMARY:Sole Defined @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Sole Defined live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/sole-defined-zaz/
-URL:https://www.theplatformkendall.org/productions/sole-defined-zaz/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270415_8479982568@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270415
-SUMMARY:Chris Potter Trio featuring Matt Brewer & Kendrick Scott @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Chris Potter Trio featuring Matt Brewer & Kendrick Scott live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/chris-potter-trio/
-URL:https://www.theplatformkendall.org/productions/chris-potter-trio/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270417_4558115617@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270417
-SUMMARY:Jack West Percussive Acoustic Guitar Duo featuring James Nash @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Jack West Percussive Acoustic Guitar Duo featuring James Nash live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/jack-west-james-nash-percussive-acoustic-guitar-duo/
-URL:https://www.theplatformkendall.org/productions/jack-west-james-nash-percussive-acoustic-guitar-duo/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270417_6343341702@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270417
-SUMMARY:Boston Dance Theater @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Boston Dance Theater live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/boston-dance-theater/
-URL:https://www.theplatformkendall.org/productions/boston-dance-theater/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270420_5261033364@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270420
-SUMMARY:NILADRI KUMAAR @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:NILADRI KUMAAR live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/performance/niladri-kumaar-2027-04-20-1930-2/
-URL:https://www.theplatformkendall.org/performance/niladri-kumaar-2027-04-20-1930-2/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270424_5226453087@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270424
-SUMMARY:Elida Almeida @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Elida Almeida live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/elida-almeida/
-URL:https://www.theplatformkendall.org/productions/elida-almeida/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270425_8035652008@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270425
-SUMMARY:Trio Mandili @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Trio Mandili live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/trio-mandili/
-URL:https://www.theplatformkendall.org/productions/trio-mandili/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270513_6725099460@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270513
-SUMMARY:Step Afrika! @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Step Afrika! live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/step-afrika-evolution/
-URL:https://www.theplatformkendall.org/productions/step-afrika-evolution/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270514_1376258733@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270514
-SUMMARY:Zafarán @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Zafarán live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/zafaran/
-URL:https://www.theplatformkendall.org/productions/zafaran/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270514_6725099460@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270514
-SUMMARY:Step Afrika! @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Step Afrika! live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/step-afrika-evolution/
-URL:https://www.theplatformkendall.org/productions/step-afrika-evolution/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270515_6725099460@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270515
-SUMMARY:Step Afrika! @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Step Afrika! live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/step-afrika-evolution/
-URL:https://www.theplatformkendall.org/productions/step-afrika-evolution/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270522_1549147972@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270522
-SUMMARY:Debashish Bhattacharya @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Debashish Bhattacharya live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/debashish-bhattacharya/
-URL:https://www.theplatformkendall.org/productions/debashish-bhattacharya/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20270624_3042825517@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20270624
-SUMMARY:Sullivan Fortner Trio @ The Platform Kendall
-LOCATION:The Platform Kendall, Boston MA
-DESCRIPTION:Sullivan Fortner Trio live at The Platform Kendall. Zero ticket broker fees. Details: https://www.theplatformkendall.org/productions/sullivan-fortner-trio/
-URL:https://www.theplatformkendall.org/productions/sullivan-fortner-trio/
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261107_5636228108@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261107
-SUMMARY:Somerville Winter Farmers Market @ Boston
-LOCATION:Boston, Boston MA
-DESCRIPTION:Somerville Winter Farmers Market live at Boston. Zero ticket broker fees. Details: https://partiful.com/e/ODNZeSSBA000tIaAexuP
-URL:https://partiful.com/e/ODNZeSSBA000tIaAexuP
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261107_9120467212@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261107
-SUMMARY:Cuffing Season Finale 💚🍂 @ Seven Hills Park (behind the Davis Sq Red Line + Life Alive)
-LOCATION:Seven Hills Park (behind the Davis Sq Red Line + Life Alive), Boston MA
-DESCRIPTION:Cuffing Season Finale 💚🍂 live at Seven Hills Park (behind the Davis Sq Red Line + Life Alive). Zero ticket broker fees. Details: https://partiful.com/e/oKWiAZcxbw1kWLgb5CRR
-URL:https://partiful.com/e/oKWiAZcxbw1kWLgb5CRR
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261108_6885652883@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261108
-SUMMARY:1 year of 🔗 hyperlinked: a girl edm + hyperpop party @ Boston
-LOCATION:Boston, Boston MA
-DESCRIPTION:1 year of 🔗 hyperlinked: a girl edm + hyperpop party live at Boston. Zero ticket broker fees. Details: https://partiful.com/e/xXASMGPMZQAl3dLOm1zI
-URL:https://partiful.com/e/xXASMGPMZQAl3dLOm1zI
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261110_8404612690@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261110
-SUMMARY:Fenway Free Market @ Fenway Community Center
-LOCATION:Fenway Community Center, Boston MA
-DESCRIPTION:Fenway Free Market live at Fenway Community Center. Zero ticket broker fees. Details: https://partiful.com/e/11FX60ikL9VhCTpCna8o
-URL:https://partiful.com/e/11FX60ikL9VhCTpCna8o
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261113_5834886553@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261113
-SUMMARY:Snowport Social - Let's Meet @ Snowport@ Seaport Blvd
-LOCATION:Snowport@ Seaport Blvd, Boston MA
-DESCRIPTION:Snowport Social - Let's Meet live at Snowport@ Seaport Blvd. Zero ticket broker fees. Details: https://partiful.com/e/6LeS60PI2qRWJWniQfx0
-URL:https://partiful.com/e/6LeS60PI2qRWJWniQfx0
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261114_5649518301@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261114
-SUMMARY:Coffee & Collectives @ Phinista Café
-LOCATION:Phinista Café, Boston MA
-DESCRIPTION:Coffee & Collectives live at Phinista Café. Zero ticket broker fees. Details: https://partiful.com/e/dKLUV3nxZJmLB0KAsG0N
-URL:https://partiful.com/e/dKLUV3nxZJmLB0KAsG0N
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261114_1426790906@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261114
-SUMMARY:GIRLSGIVING @ Boston
-LOCATION:Boston, Boston MA
-DESCRIPTION:GIRLSGIVING live at Boston. Zero ticket broker fees. Details: https://partiful.com/e/KPwyfJYxcryvOV5eRv3i
-URL:https://partiful.com/e/KPwyfJYxcryvOV5eRv3i
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261115_7137893031@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261115
-SUMMARY:fruitstand’s 3rd birthday: fruit 🍑 @ 52 Church
-LOCATION:52 Church, Boston MA
-DESCRIPTION:fruitstand’s 3rd birthday: fruit 🍑 live at 52 Church. Zero ticket broker fees. Details: https://partiful.com/e/sb67WN7JRX3uyAE5LFAh
-URL:https://partiful.com/e/sb67WN7JRX3uyAE5LFAh
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261115_1897161161@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261115
-SUMMARY:the art of storytelling @ shop 6\, the foundry
-LOCATION:shop 6\, the foundry, Boston MA
-DESCRIPTION:the art of storytelling live at shop 6\, the foundry. Zero ticket broker fees. Details: https://partiful.com/e/ivCADCWSxLcU7jew03md
-URL:https://partiful.com/e/ivCADCWSxLcU7jew03md
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261115_2246929862@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261115
-SUMMARY:duck duck duck duck duck duck GOOSE! @ Make Way For Ducklings Statue\, Boston Public Garden
-LOCATION:Make Way For Ducklings Statue\, Boston Public Garden, Boston MA
-DESCRIPTION:duck duck duck duck duck duck GOOSE! live at Make Way For Ducklings Statue\, Boston Public Garden. Zero ticket broker fees. Details: https://partiful.com/e/nMhM5jZffB2zl2NMgQtO
-URL:https://partiful.com/e/nMhM5jZffB2zl2NMgQtO
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261117_3583311416@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261117
-SUMMARY:Stationery Craftsgiving @ Dorchester Brewing Co.
-LOCATION:Dorchester Brewing Co., Boston MA
-DESCRIPTION:Stationery Craftsgiving live at Dorchester Brewing Co.. Zero ticket broker fees. Details: https://partiful.com/e/eVzMDTaIckS9pNInwsF0
-URL:https://partiful.com/e/eVzMDTaIckS9pNInwsF0
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261121_7215809994@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261121
-SUMMARY:Butternut Bake House Ride @ Union Square
-LOCATION:Union Square, Boston MA
-DESCRIPTION:Butternut Bake House Ride live at Union Square. Zero ticket broker fees. Details: https://partiful.com/e/S8mvZKn72jgFCGbGtvol
-URL:https://partiful.com/e/S8mvZKn72jgFCGbGtvol
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261121_4493722006@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261121
-SUMMARY:CAFECITO & PLAY:  FRIENDSGIVING EDITION @ Boston
-LOCATION:Boston, Boston MA
-DESCRIPTION:CAFECITO & PLAY:  FRIENDSGIVING EDITION live at Boston. Zero ticket broker fees. Details: https://partiful.com/e/d3qs5lh70GzphvqESRB9
-URL:https://partiful.com/e/d3qs5lh70GzphvqESRB9
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261121_5342788433@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261121
-SUMMARY:ART @ NIGHT @ First Street Market
-LOCATION:First Street Market, Boston MA
-DESCRIPTION:ART @ NIGHT live at First Street Market. Zero ticket broker fees. Details: https://partiful.com/e/2Al5mSQ8gkWmY5WC6dHJ
-URL:https://partiful.com/e/2Al5mSQ8gkWmY5WC6dHJ
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261122_6192229612@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261122
-SUMMARY:Uplifting Tinashe ★ a tribute party @ Boston
-LOCATION:Boston, Boston MA
-DESCRIPTION:Uplifting Tinashe ★ a tribute party live at Boston. Zero ticket broker fees. Details: https://partiful.com/e/cyvBdHqEBWfqompCF2Bd
-URL:https://partiful.com/e/cyvBdHqEBWfqompCF2Bd
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261122_1235871778@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261122
-SUMMARY:Dirty Water Stitch Club Holiday Market @ Time Out Market
-LOCATION:Time Out Market, Boston MA
-DESCRIPTION:Dirty Water Stitch Club Holiday Market live at Time Out Market. Zero ticket broker fees. Details: https://partiful.com/e/EnvbxdrE1eK2burB7fyW
-URL:https://partiful.com/e/EnvbxdrE1eK2burB7fyW
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261203_3370057640@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261203
-SUMMARY:Let’s Feast Cookbook Club (Dec) @ Molly's Bookstore
-LOCATION:Molly's Bookstore, Boston MA
-DESCRIPTION:Let’s Feast Cookbook Club (Dec) live at Molly's Bookstore. Zero ticket broker fees. Details: https://partiful.com/e/v4O8TBGBC7LlDQnN2UHg
-URL:https://partiful.com/e/v4O8TBGBC7LlDQnN2UHg
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261105_1821011439@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261105
-SUMMARY:Live Music: Alec Mac @ Cisco Brewers Fenway
-LOCATION:Cisco Brewers Fenway, Boston MA
-DESCRIPTION:Live Music: Alec Mac live at Cisco Brewers Fenway. Zero ticket broker fees. Details: https://ciscobrewersfenway.com/calendar/live-music-alec-mac
-URL:https://ciscobrewersfenway.com/calendar/live-music-alec-mac
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261105_5063003247@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261105
-SUMMARY:Trivia Night @ Cisco Brewers Fenway
-LOCATION:Cisco Brewers Fenway, Boston MA
-DESCRIPTION:Trivia Night live at Cisco Brewers Fenway. Zero ticket broker fees. Details: https://ciscobrewersfenway.com/calendar/trivia-night-2
-URL:https://ciscobrewersfenway.com/calendar/trivia-night-2
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261106_5071561161@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261106
-SUMMARY:Live DJ: DJ Fuzzy Slippaz @ Cisco Brewers Fenway
-LOCATION:Cisco Brewers Fenway, Boston MA
-DESCRIPTION:Live DJ: DJ Fuzzy Slippaz live at Cisco Brewers Fenway. Zero ticket broker fees. Details: https://ciscobrewersfenway.com/calendar/live-music-alec-mac-fkkhe
-URL:https://ciscobrewersfenway.com/calendar/live-music-alec-mac-fkkhe
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261107_3153160994@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261107
-SUMMARY:Live Music: TimBear @ Cisco Brewers Fenway
-LOCATION:Cisco Brewers Fenway, Boston MA
-DESCRIPTION:Live Music: TimBear live at Cisco Brewers Fenway. Zero ticket broker fees. Details: https://ciscobrewersfenway.com/calendar/live-music-alec-mac-6kcxd
-URL:https://ciscobrewersfenway.com/calendar/live-music-alec-mac-6kcxd
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261108_1897183393@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261108
-SUMMARY:Patriots Watch PAWTY @ Cisco Brewers Fenway
-LOCATION:Cisco Brewers Fenway, Boston MA
-DESCRIPTION:Patriots Watch PAWTY live at Cisco Brewers Fenway. Zero ticket broker fees. Details: https://ciscobrewersfenway.com/calendar/patriots-watch-pawty
-URL:https://ciscobrewersfenway.com/calendar/patriots-watch-pawty
-STATUS:CONFIRMED
-END:VEVENT
-BEGIN:VEVENT
-UID:20261112_1126724055@wickedbostonevents.com
-DTSTAMP:20261103T051938Z
-DTSTART;VALUE=DATE:20261112
-SUMMARY:Live Music: Maddi Ryan @ Cisco Brewers Fenway
-LOCATION:Cisco Brewers Fenway, Boston MA
-DESCRIPTION:Live Music: Maddi Ryan live at Cisco Brewers Fenway. Zero ticket broker fees. Details: https://ciscobrewersfenway.com/calendar/live-music-alec-mac-6kcxd-l3rll
-URL:https://ciscobrewersfenway.com/calendar/live-music-alec-mac-6kcxd-l3rll
 STATUS:CONFIRMED
 END:VEVENT
 END:VCALENDAR
