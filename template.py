@@ -1738,6 +1738,14 @@ def _normalize_title_head(title, venue=None):
     t = re.sub(r"^(?:live|traditional|weekly|annual)\s+", "", t, flags=re.I)
     t = re.sub(r"^(?:a|an)\s+", "", t, flags=re.I)
 
+    # Strip leading author/creator possessives if remainder is a multi-word or long title
+    # (e.g. "Harper Lee's To Kill a Mockingbird" -> "to kill a mockingbird")
+    m_poss = re.match(r"^(?:[a-z\.\'\-]+\s+){0,3}[a-z\.\'\-]+(?:'s|’s|')\s+(.+)$", t, flags=re.I)
+    if m_poss:
+        rem = m_poss.group(1).strip()
+        if len(rem.split()) >= 2 or len(rem) >= 8:
+            t = rem
+
     # 3. Strip parentheses / brackets with openers, support, guest, tour, etc.
     t = re.sub(r"\s*[\(\[][^\)\]]*(?:touring|18\+|21\+|sold out|ages|rescheduled|presale|preseason|preview|week\s*\d+|opens|opener|support|guest|special guest|featuring)[^\)\]]*[\)\]]", "", t, flags=re.I)
 
@@ -1999,7 +2007,7 @@ def _merge_duplicates(events):
                 if _venue_match(venue, c_venue, e, cand) and not _is_different_show(e, cand):
                     cand_head = _normalize_title_head(cand.get("name") or "", venue=cand.get("venue"))
                     if cand_head and cand_head not in GENERIC_HEADS:
-                        if (cand_head.startswith(head) or head.startswith(cand_head)) and min(len(head), len(cand_head)) >= 6:
+                        if (cand_head in head or head in cand_head) and min(len(head), len(cand_head)) >= 6:
                             match = cand
                             break
                         h_words = head.split()
@@ -2009,6 +2017,35 @@ def _merge_duplicates(events):
                             if prefix2 not in GENERIC_HEADS and len(prefix2) >= 6:
                                 match = cand
                                 break
+
+        # 4. Same physical venue & same start time window (<= 15 mins) matching
+        if not match and venue and len(venue) >= 4:
+            for cand in out:
+                c_venue = (cand.get("venue") or "").lower()
+                if _venue_match(venue, c_venue, e, cand) and not _is_different_show(e, cand):
+                    t_e = e.get("_time")
+                    t_c = cand.get("_time")
+                    if t_e and t_c:
+                        diff_m = abs((t_e - t_c).total_seconds()) / 60.0
+                        if diff_m <= 15:
+                            # A. Domain match (both point to same official venue domain, e.g. thecomedystudio.com)
+                            u_e = e.get("url") or ""
+                            u_c = cand.get("url") or ""
+                            host_e = re.sub(r"^https?://(?:www\.)?", "", u_e).split("/")[0].lower()
+                            host_c = re.sub(r"^https?://(?:www\.)?", "", u_c).split("/")[0].lower()
+                            if host_e and host_e == host_c and host_e not in ("eventbrite.com", "ticketmaster.com", "seatgeek.com", "meetup.com", "facebook.com", "instagram.com", "thebostoncalendar.com", "do617.com"):
+                                match = cand
+                                break
+
+                            # B. Shared comedy/open mic/theater category and significant keyword overlap
+                            cat_e = (e.get("category") or "").lower()
+                            cat_c = (cand.get("category") or "").lower()
+                            if cat_e and cat_e == cat_c and cat_e in ("comedy", "theater", "dance", "community"):
+                                words_e = {w for w in re.findall(r"\w+", raw_name.lower()) if len(w) >= 4} - {"free", "night", "show", "live", "session"}
+                                words_c = {w for w in re.findall(r"\w+", (cand.get("name") or "").lower()) if len(w) >= 4} - {"free", "night", "show", "live", "session"}
+                                if (words_e and words_c and (words_e & words_c)) or ("open" in raw_name.lower() and "open" in (cand.get("name") or "").lower()):
+                                    match = cand
+                                    break
 
         if match:
             # Upgrade placeholder time (00:00 midnight or 12:00 noon) when confirmed evening showtime arrives

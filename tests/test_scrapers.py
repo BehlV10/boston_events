@@ -1851,6 +1851,65 @@ class TestBostonEvents(unittest.TestCase):
         self.assertIn("https://seatgeek.com/willi-carlisle-tickets/somerville-massachusetts-crystal-ballroom-at-somerville-theatre-2026-11-03-8-pm/concert/18376099", alt_urls)
         self.assertNotIn("https://seatgeek.com/willi-carlisle-tickets/somerville-massachusetts-crystal-ballroom-at-somerville-theatre-2026-11-03-12-pm/concert/18664484", alt_urls)
 
+        # 4. Comedy Studio (Comedy Hell: Free Comedy Night vs Free Comedy Open-Mic)
+        cs_events = [
+            {
+                "name": "Comedy Hell: Free Comedy Night",
+                "venue": "The Comedy Studio",
+                "url": "https://www.thecomedystudio.com/events",
+                "date": "2026-11-04T00:00:00+00:00",
+                "category": "comedy",
+                "_source_venue": "The Boston Calendar",
+                "_time": datetime(2026, 11, 3, 19, 0, tzinfo=_eastern),
+            },
+            {
+                "name": "Free Comedy Open-Mic",
+                "venue": "The Comedy Studio",
+                "url": "https://www.thecomedystudio.com/checkout/eecf12b6-6622-418e-9a6c-f7a881b57722",
+                "date": "2026-11-04T00:00:00+00:00",
+                "category": "comedy",
+                "_source_venue": "The Comedy Studio",
+                "_time": datetime(2026, 11, 3, 19, 0, tzinfo=_eastern),
+            },
+        ]
+        merged_cs = _merge_duplicates(cs_events)
+        self.assertEqual(len(merged_cs), 1, "Comedy Studio Comedy Hell and Free Comedy Open-Mic should merge into 1 event")
+        self.assertEqual(merged_cs[0]["_source_venue"], "The Comedy Studio")
+        self.assertEqual(merged_cs[0]["url"], "https://www.thecomedystudio.com/checkout/eecf12b6-6622-418e-9a6c-f7a881b57722")
+
+        # 5. To Kill a Mockingbird (Ticketmaster, SeatGeek, and Calderwood Pavilion / Boston Theatre Scene)
+        mb_events = [
+            {
+                "name": "To Kill a Mockingbird (Touring)",
+                "venue": "Huntington Theatre",
+                "_source_venue": "Ticketmaster",
+                "date": "2026-11-04T00:00:00Z",
+                "url": "https://www.ticketmaster.com/event/Z7r9jZ1AAv7P9",
+                "_time": datetime(2026, 11, 3, 19, 0, tzinfo=_eastern),
+            },
+            {
+                "name": "To Kill a Mockingbird - Boston",
+                "venue": "Huntington Avenue Theatre",
+                "_source_venue": "SeatGeek",
+                "date": "2026-11-04T00:00:00Z",
+                "url": "https://seatgeek.com/to-kill-a-mockingbird-tickets/broadway/2026-11-03-7-pm/18498424",
+                "_time": datetime(2026, 11, 3, 19, 0, tzinfo=_eastern),
+            },
+            {
+                "name": "Harper Lee's To Kill a Mockingbird",
+                "venue": "The Huntington Theatre",
+                "_source_venue": "Calderwood Pavilion",
+                "date": "2026-11-04T00:30:00+00:00",
+                "url": "https://www.bostontheatrescene.com/shows-and-events/tkam/",
+                "_time": datetime(2026, 11, 3, 19, 30, tzinfo=_eastern),
+            },
+        ]
+        merged_mb = _merge_duplicates(mb_events)
+        self.assertEqual(len(merged_mb), 1, "To Kill a Mockingbird across Huntington Theatre variants should merge into 1 event")
+        self.assertEqual(merged_mb[0]["_source_venue"], "Calderwood Pavilion")
+        self.assertEqual(merged_mb[0]["url"], "https://www.bostontheatrescene.com/shows-and-events/tkam/")
+        self.assertEqual(len(merged_mb[0].get("_alt_sources", [])), 2)
+
     def test_naive_datetime_eastern_formatting(self):
         """Verify naive datetime strings are always treated as Eastern time, even in UTC environments."""
         from template import format_time, format_when
