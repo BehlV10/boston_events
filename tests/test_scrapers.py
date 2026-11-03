@@ -1001,6 +1001,79 @@ class TestBostonEvents(unittest.TestCase):
         self.assertIn('id="saved-only-chk"', html)
         self.assertIn('data-transit="green"', html)
 
+    def test_harvard_book_store_instore_events(self):
+        """Verify Harvard Book Store in-store events parsing, Free price extraction, and feed.xml fallback."""
+        from unittest.mock import patch, MagicMock
+        from bs4 import BeautifulSoup
+        from scrapers import scrape_event_list, UA_CURL, _normalize_and_filter_events, VENUES
+        from venues_geo import resolve_event_geo
+
+        v_hbs = next(v for v in VENUES if v["name"] == "Harvard Book Store")
+
+        # 1. HTML in-store event with Free tag
+        fut_dt = datetime.now(timezone.utc) + timedelta(days=2)
+        fut_str = fut_dt.strftime("%B %-d, %Y - 7:00 pm")
+        hbs_instore_html = f"""
+        <article class="event-list">
+            <h3 class="event-list__title">
+                <a href="/event/author-talk">Paris Marx at Harvard Book Store</a>
+            </h3>
+            <span class="event-list__tags">
+                <div class="event-tag__term"><a href="/events/tags/free">Free</a></div>
+                <div class="event-tag__term"><a href="/events/tags/harvard-book-store">Harvard Book Store</a></div>
+            </span>
+            <div class="event-list__details--item">
+                <span class="event-list__details--label">Date:</span> {fut_str}
+            </div>
+            <div class="event-list__details--item event-details__location--location">
+                <span class="event-list__details--label">Place:</span>
+                <address>Harvard Book Store<br/>1256 Massachusetts Ave<br/>Cambridge, MA 02138</address>
+            </div>
+            <div class="event-list__body">Discussion of new book at the bookstore.</div>
+        </article>
+        """
+        with patch("scrapers.fetch_soup", return_value=BeautifulSoup(hbs_instore_html, "html.parser")), \
+             patch("scrapers.scrape_eventbrite_org", return_value=[]):
+            evs = scrape_event_list("https://www.harvard.com/events", UA_CURL)
+
+        self.assertGreaterEqual(len(evs), 1)
+        self.assertEqual(evs[0]["price"], "Free")
+        self.assertIsNone(evs[0]["venue"])  # None defaults to venue name Harvard Book Store
+        norm = _normalize_and_filter_events(evs, v_hbs)
+        self.assertEqual(norm[0]["venue"], "Harvard Book Store")
+        geo = resolve_event_geo(norm[0])
+        self.assertIsNotNone(geo)
+        self.assertEqual(geo["neighborhood"], "Harvard Square")
+        self.assertEqual(geo["venue"], "Harvard Book Store")
+
+        # 2. Resilient XML feed fallback when HTML fails
+        xml_feed = f"""
+        <rss version="2.0">
+            <channel>
+                <item>
+                    <title>Christy Scott Cashman at Harvard Book Store</title>
+                    <eventDate>{fut_dt.strftime('%A, %B %-d, %Y - 07:00pm')}</eventDate>
+                    <location>Harvard Book Store 1256 Massachusetts Ave Cambridge, MA 02138-3820</location>
+                    <link>https://www.harvard.com/event/christy-scott-cashman</link>
+                    <description>Harvard Book Store welcomes author Christy Scott Cashman for a talk.</description>
+                </item>
+            </channel>
+        </rss>
+        """
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.text = xml_feed
+        with patch("scrapers.fetch_soup", side_effect=Exception("Cloudflare 403")), \
+             patch("subprocess.run", return_value=MagicMock(stdout="")), \
+             patch("scrapers._SESSION.get", return_value=mock_resp), \
+             patch("scrapers.scrape_eventbrite_org", return_value=[]):
+            evs_fallback = scrape_event_list("https://www.harvard.com/events", UA_CURL)
+
+        self.assertGreaterEqual(len(evs_fallback), 1)
+        self.assertEqual(evs_fallback[0]["name"], "Christy Scott Cashman at Harvard Book Store")
+        self.assertEqual(evs_fallback[0]["price"], "Free")
+        self.assertIsNone(evs_fallback[0]["venue"])
+
     def test_scrapers_lizard_lounge_improv_asylum_passim_winery(self):
         """Verify scrapers for Lizard Lounge, Improv Asylum, Club Passim, and City Winery."""
         from scrapers import (

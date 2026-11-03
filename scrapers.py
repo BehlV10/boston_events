@@ -1066,15 +1066,23 @@ def scrape_jsonld(url, ua):
 def scrape_event_list(url, ua):
     """Shared scraper for Drupal sites that use `article.event-list` markup
     (Brookline Booksmith, Harvard Book Store, Trident Booksellers).
-    Fetches current month and upcoming 2 months, filters past events, and for
-    Harvard Book Store merges its Eventbrite organizer feed for prices & resilience.
+    Fetches official RSS/XML feed (/events/feed.xml) first for speed and resilience,
+    falls back to multi-month HTML article markup, and for Harvard Book Store merges
+    its Eventbrite organizer feed for ticket prices and offsite locations.
     """
+    import html as html_lib
     import subprocess
     now_est = datetime.now(EASTERN)
     today_start = datetime(now_est.year, now_est.month, now_est.day, 0, 0, tzinfo=EASTERN)
 
     base_url = url.split("?")[0].rstrip("/")
     base_url = re.sub(r"/\d{4}/\d{1,2}$", "", base_url)
+    feed_url = f"{base_url}/feed.xml"
+
+    events = []
+    seen = set()
+
+    # 1. Multi-month HTML article.event-list markup
     page_urls = [base_url]
     y_cur, m_cur = now_est.year, now_est.month
     for _ in range(2):
@@ -1083,9 +1091,6 @@ def scrape_event_list(url, ua):
             m_cur = 1
             y_cur += 1
         page_urls.append(f"{base_url}/{y_cur}/{m_cur:02d}")
-
-    events = []
-    seen = set()
 
     for page_url in page_urls:
         soup = None
@@ -1207,7 +1212,8 @@ def scrape_event_list(url, ua):
                     if txt and not re.match(r"^\d+\s+[A-Za-z]", txt) and txt.lower() not in ("place:", ""):
                         venue_name = txt
 
-            title_str = a.get_text(strip=True)
+            title_str = html_lib.unescape(a.get_text(strip=True))
+            title_str = re.sub(r"^\*{1,3}SOLD OUT\*{1,3}\s*", "", title_str, flags=re.I).strip()
             if not venue_name and " at " in title_str:
                 m_at = re.search(r"\bat\s+(?:the\s+)?(First Parish Church|Brattle Theatre|Cambridge Public Library|Harvard Science Center|Harvard Book Store)\b", title_str, re.I)
                 if m_at and "harvard book" not in m_at.group(1).lower():
@@ -1223,16 +1229,27 @@ def scrape_event_list(url, ua):
                 elif "trident" in u_low and "trident" in v_low:
                     venue_name = None
 
+            tags = [t.get_text(strip=True).lower() for t in art.select(".event-tag__term, .event-list__tags a")]
             price = None
+            if "free" in tags:
+                price = "Free"
             body = art.select_one(".event-list__body")
             body_text = body.get_text(" ", strip=True) if body else ""
             art_text = art.get_text(" ", strip=True)
-            p = re.search(r"(Free|FREE|\$\d+(?:\.\d{2})?(?:\s*[–-]\s*\$?\d+(?:\.\d{2})?)?)", body_text or art_text)
-            if p:
-                price = "Free" if p.group(1).lower() == "free" else p.group(1)
+            if not price:
+                p = re.search(r"(\$\d+(?:\.\d{2})?(?:\s*[–-]\s*\$?\d+(?:\.\d{2})?)?|\bFree\b)", body_text + " " + art_text)
+                if p:
+                    price = "Free" if p.group(1).lower() == "free" else p.group(1)
+            if not price and "harvard" in url.lower() and venue_name is None:
+                price = "Free"
 
-            key = (title_str.lower(), (iso or "")[:10])
+            key = (title_str.lower()[:30], (iso or "")[:10])
             if key in seen:
+                for ev in events:
+                    if (ev["name"].lower()[:30], (ev["date"] or "")[:10]) == key:
+                        if not ev.get("price") and price:
+                            ev["price"] = price
+                        break
                 continue
             seen.add(key)
 
@@ -1244,7 +1261,121 @@ def scrape_event_list(url, ua):
                 "price": price,
             })
 
-    # For Harvard Book Store, also merge their official Eventbrite organizer feed
+    # 2. Resilient fallback: Try official Drupal XML feed (/events/feed.xml) if HTML yielded no events
+    if not events:
+        feed_text = None
+        try:
+            r = _SESSION.get(
+                feed_url,
+                headers={
+                    "User-Agent": ua or UA_CURL,
+                    "Accept": "application/xml,text/xml,*/*;q=0.9",
+                },
+                timeout=10,
+            )
+            if r.status_code == 200 and "<item>" in r.text:
+                feed_text = r.text
+        except Exception:
+            pass
+
+        if not feed_text:
+            try:
+                res = subprocess.run(
+                    ["curl", "-sL", "-A", ua or UA_CURL, "--max-time", "10", feed_url],
+                    capture_output=True, text=True, check=False,
+                )
+                if res.stdout and "<item>" in res.stdout:
+                    feed_text = res.stdout
+            except Exception:
+                pass
+
+        if feed_text:
+            items = re.findall(r"<item>(.*?)</item>", feed_text, re.DOTALL)
+            for it in items:
+                m_title = re.search(r"<title>(.*?)</title>", it)
+                if not m_title:
+                    continue
+                title = html_lib.unescape(m_title.group(1).strip())
+                title = re.sub(r"^\*{1,3}SOLD OUT\*{1,3}\s*", "", title, flags=re.I).strip()
+
+                m_date = re.search(r"<eventdate>(.*?)</eventdate>", it, re.I)
+                date_str = m_date.group(1).strip() if m_date else ""
+
+                m_link = re.search(r"<link>(.*?)</link>", it, re.I)
+                link = m_link.group(1).strip() if m_link else ""
+
+                m_loc = re.search(r"<location>(.*?)</location>", it, re.I | re.DOTALL)
+                loc_str = " ".join(m_loc.group(1).split()) if m_loc else ""
+
+                m_desc = re.search(r"<description>(.*?)</description>", it, re.I | re.DOTALL)
+                desc_str = html_lib.unescape(m_desc.group(1).strip()) if m_desc else ""
+
+                iso = None
+                if date_str:
+                    cleaned_d = re.sub(r"^[A-Za-z]+,\s*", "", date_str)
+                    for fmt in ("%B %d, %Y - %I:%M%p", "%b %d, %Y - %I:%M%p", "%B %d, %Y - %I:%M %p"):
+                        try:
+                            dt = datetime.strptime(cleaned_d, fmt).replace(tzinfo=EASTERN)
+                            if dt < today_start:
+                                break
+                            iso = dt.astimezone(timezone.utc).isoformat()
+                            break
+                        except ValueError:
+                            pass
+                if not iso:
+                    continue
+
+                venue_name = None
+                if loc_str:
+                    loc_l = loc_str.lower()
+                    u_l = url.lower()
+                    if "harvard" in u_l:
+                        if "brattle" in loc_l:
+                            venue_name = "The Brattle Theatre"
+                        elif "cambridge public library" in loc_l:
+                            venue_name = "Cambridge Public Library"
+                        elif "science center" in loc_l:
+                            m_hall = re.search(r"(Harvard Science Center[^,]*|Science Center[^,]*)", loc_str)
+                            venue_name = m_hall.group(1).strip() if m_hall else "Harvard Science Center"
+                        elif "first parish" in loc_l:
+                            venue_name = "First Parish Church"
+                        elif "harvard book store" in loc_l or "1256 massachusetts" in loc_l:
+                            venue_name = None
+                        else:
+                            venue_name = loc_str.split("1256")[0].strip() or None
+                    elif "brookline" in u_l:
+                        if "brookline booksmith" in loc_l or "279 harvard" in loc_l:
+                            venue_name = None
+                        else:
+                            first_part = re.split(r"\d+\s+[A-Za-z]", loc_str)[0].strip()
+                            venue_name = first_part or None
+                    elif "trident" in u_l:
+                        if "trident" in loc_l or "338 newbury" in loc_l:
+                            venue_name = None
+                        else:
+                            first_part = re.split(r"\d+\s+[A-Za-z]", loc_str)[0].strip()
+                            venue_name = first_part or None
+
+                price = None
+                p = re.search(r"(\$\d+(?:\.\d{2})?(?:\s*[–-]\s*\$?\d+(?:\.\d{2})?)?|\bFree\b)", desc_str)
+                if p:
+                    price = "Free" if p.group(1).lower() == "free" else p.group(1)
+                elif "harvard" in url.lower() and venue_name is None:
+                    price = "Free"
+
+                key = (title.lower()[:30], iso[:10])
+                if key in seen:
+                    continue
+                seen.add(key)
+                events.append({
+                    "name": title,
+                    "date": iso,
+                    "url": link or url,
+                    "venue": venue_name,
+                    "price": price,
+                })
+
+    # 3. For Harvard Book Store, also merge their official Eventbrite organizer feed for ticket prices
     if "harvard.com" in url.lower():
         try:
             eb_evs = scrape_eventbrite_org("https://www.eventbrite.com/o/harvard-book-store-74507930", UA_CHROME)
