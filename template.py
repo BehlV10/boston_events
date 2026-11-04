@@ -975,7 +975,7 @@ HUBS = {
         "time_filter": None,
         "keyword_filter": None,
         "show_details": True,
-        "limit": 200,
+        "limit": 400,
         "subtitle": "Story times, baby & toddler sing-alongs, museum days, puppet shows and nature walks for kids, from local libraries, museums and Little Muse, updated daily.",
         "og_badge": "KIDS & FAMILY",
         "og_image": "og-kids-family.jpg",
