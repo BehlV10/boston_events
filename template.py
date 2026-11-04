@@ -26,18 +26,21 @@ from scrapers import (
     fix_doubled_url,
     sanitize_event_url,
     is_utility_event,
+    is_deal_event,
     is_kid_family_event,
 )
 from venues_geo import resolve_event_geo
 
 
-DEFAULT_UNCHECKED_BUCKETS = {"Classes & Services", "Kids & Family"}
+DEFAULT_UNCHECKED_BUCKETS = {"Classes & Services", "Kids & Family", "Deals & Specials"}
 
 
 def _effective_category(e):
     name = e.get("name") or ""
     if is_utility_event(name):
         return "services"
+    if is_deal_event(name):
+        return "deals"
     if is_kid_family_event(name, e.get("venue")):
         return "family"
     return e.get("category") or "other"
@@ -2278,6 +2281,8 @@ def group_by_date(results):
             entry["venue"] = e.get("venue") or r["venue"]
             if is_utility_event(name):
                 entry["category"] = "services"
+            elif is_deal_event(name):
+                entry["category"] = "deals"
             elif is_kid_family_event(name, entry.get("venue")):
                 entry["category"] = "family"
             raw = e.get("date")
@@ -3660,6 +3665,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
   .bucket[data-bucket="Community"]         {{ --accent: #8fa1b3; }}
   .bucket[data-bucket="Classes & Services"] {{ --accent: #8fa1b3; }}
   .bucket[data-bucket="Kids & Family"]      {{ --accent: #ffb8d1; }}
+  .bucket[data-bucket="Deals & Specials"]   {{ --accent: #c678dd; }}
   .bucket-head {{ display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); font-weight: 600; }}
   .bucket-head .count {{ background: transparent; color: var(--muted); }}
   .bucket ul {{ list-style: none; padding: 0; margin: 0; }}
@@ -6682,7 +6688,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
 
   <script>
     const catBoxes = document.querySelectorAll('.cat-chk');
-    const defaultUncheckedCats = new Set(['Classes & Services', 'Kids & Family']);
+    const defaultUncheckedCats = new Set({json.dumps(sorted(DEFAULT_UNCHECKED_BUCKETS))});
     const genreBoxes = document.querySelectorAll('.genre-chk');
     const venueBoxes = document.querySelectorAll('.venue-chk');
     const recurBoxes = document.querySelectorAll('.recur-chk');
