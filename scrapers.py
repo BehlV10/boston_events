@@ -129,7 +129,9 @@ def fetch_soup(url, ua):
         timeout=15,
     )
     resp.raise_for_status()
-    return BeautifulSoup(resp.text, "html.parser")
+    # Pass raw bytes so BeautifulSoup honors the page's own charset declaration; resp.text
+    # falls back to Latin-1 when the server omits a charset, producing mojibake (e.g. "Whereâs").
+    return BeautifulSoup(resp.content, "html.parser")
 
 
 def is_placeholder_or_closed_event(title: str) -> bool:
@@ -182,6 +184,56 @@ def is_placeholder_or_closed_event(title: str) -> bool:
     if re.search(r"\bvolunteer\s+opportunities\s+everyday\b", t, re.I):
         return True
 
+    return False
+
+
+_DOUBLED_URL_SPLIT_RE = re.compile(r"(?<=[A-Za-z0-9/])(?=https?://)")
+
+
+def fix_doubled_url(url):
+    """Repair URLs where two absolute URLs got glued together
+    (e.g. 'https://www.bso.orghttps://www.bso.org/events/x'). Keeps the last full URL.
+
+    Only splits where the second scheme directly follows an alphanumeric or '/', so
+    legitimate redirect/share links ('?u=https://...') are left untouched.
+    """
+    if not url or url.count("://") < 2:
+        return url
+    parts = [p for p in _DOUBLED_URL_SPLIT_RE.split(url) if p]
+    return parts[-1] if len(parts) > 1 else url
+
+
+_EXHIBIT_URL_RE = re.compile(r"revolutionaryspaces\.org/explore/exhibits/", re.I)
+_MUSEUMISH_VENUE_RE = re.compile(r"museum|athen|meeting\s+house|hall\s+of\s+fame|gallery|historical\s+society", re.I)
+_GENERIC_CAMPAIGN_RE = re.compile(r"^\s*(?:winter\s+)?coat\s+drive\s*!?\s*$", re.I)
+
+
+def is_standing_exhibit(e: dict) -> bool:
+    """Detect permanent/long-running exhibits and campaigns that sources list as if they were
+    daily events (an exhibit page is not something you attend at a specific time).
+
+    Signals (any one):
+      1. URL is an exhibit page on a known exhibit-hosting site (Revolutionary Spaces).
+      2. Do617 listing whose URL start-date is >21 days before this occurrence, at a
+         museum-type venue (a months-long run, e.g. a photography exhibition).
+      3. Generic donation-campaign title with no specific time/place (e.g. "Winter Coat Drive").
+    """
+    url = e.get("url") or ""
+    name = (e.get("name") or "").strip()
+    if _EXHIBIT_URL_RE.search(url):
+        return True
+    if _GENERIC_CAMPAIGN_RE.match(name):
+        return True
+    m = re.search(r"do617\.com/events/(\d{4})/(\d{1,2})/(\d{1,2})/", url)
+    raw = e.get("date")
+    if m and raw and _MUSEUMISH_VENUE_RE.search(e.get("venue") or ""):
+        try:
+            start = datetime(int(m.group(1)), int(m.group(2)), int(m.group(3))).date()
+            occ = datetime.fromisoformat(str(raw).replace("Z", "+00:00")).date()
+        except ValueError:
+            return False
+        if (occ - start).days > 21:
+            return True
     return False
 
 
@@ -756,7 +808,7 @@ def _bc_detail_info(bc_url, ua):
                 ext_url = href
                 break
 
-    return ext_url, price
+    return fix_doubled_url(ext_url), price
 
 
 _BC_NOISE_PREFIXES = re.compile(
@@ -1804,7 +1856,7 @@ def scrape_bso(url, ua):
         events.append({
             "name": doc.get("title"),
             "date": datetime.fromtimestamp(doc["performance_date"], tz=timezone.utc).isoformat(),
-            "url": f"https://www.bso.org{link}" if link else "https://www.bso.org/events",
+            "url": urljoin("https://www.bso.org", link) if link else "https://www.bso.org/events",
             "venue": venue_display,
             "price": None,
             "category": "music",
@@ -2647,7 +2699,7 @@ def scrape_do617(url, ua):
         try:
             resp = _SESSION.get(url, headers={"User-Agent": ua or UA_CHROME}, timeout=10)
             if resp.status_code == 200:
-                soup = BeautifulSoup(resp.text, "html.parser")
+                soup = BeautifulSoup(resp.content, "html.parser")
                 cards = soup.find_all("div", attrs={"data-card-kind": "event"})
                 for card in cards:
                     a_link = card.find("a", href=True)
@@ -2701,7 +2753,7 @@ def scrape_do617(url, ua):
             resp = _SESSION.get(day_url, headers={"User-Agent": ua or UA_CHROME}, timeout=10)
             if resp.status_code != 200:
                 continue
-            soup = BeautifulSoup(resp.text, "html.parser")
+            soup = BeautifulSoup(resp.content, "html.parser")
             cards = soup.find_all("div", attrs={"data-card-kind": "event"})
             for card in cards:
                 a_link = card.find("a", href=True)

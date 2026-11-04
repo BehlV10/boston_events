@@ -1168,6 +1168,7 @@ class TestBostonEvents(unittest.TestCase):
         mock_resp = MagicMock()
         mock_resp.status_code = 200
         mock_resp.text = sample_html
+        mock_resp.content = sample_html.encode("utf-8")
 
         with patch("scrapers._SESSION.get", return_value=mock_resp):
             events = scrape_do617("https://do617.com/events", UA_CHROME)
@@ -2048,6 +2049,65 @@ class TestBostonEvents(unittest.TestCase):
         ]
         for title in exhibits:
             self.assertTrue(is_placeholder_or_closed_event(title), f"Failed to filter exhibit: {title}")
+
+
+    def test_standing_exhibit_filter(self):
+        """Permanent exhibits/campaigns are dropped; real dated events at the same venues are kept."""
+        from scrapers import is_standing_exhibit
+
+        drop = [
+            {"name": "Experience The Ruckus!", "url": "https://revolutionaryspaces.org/explore/exhibits/ruckus/", "venue": "Old South Meeting House", "date": "2026-11-04T15:00:00+00:00"},
+            {"name": "The Road to Revolution", "url": "https://revolutionaryspaces.org/explore/exhibits/the-road-to-revolution/", "venue": "Old State House", "date": "2026-11-04T15:00:00+00:00"},
+            {"name": "Where's Boston? 50 Years Later", "url": "https://do617.com/events/2026/6/15/wheres-boston-50-years-later-tickets", "venue": "Boston Athenæum", "date": "2026-11-04T13:00:00+00:00"},
+            {"name": "Winter Coat Drive", "url": "https://do617.com/events/2026/11/3/winter-coat-drive-tickets", "venue": "Boston", "date": "2026-11-04T13:00:00+00:00"},
+        ]
+        keep = [
+            {"name": "The Enigmatic Treasure of a Nubian Queen", "url": "https://hmsc.harvard.edu/2026/04/14/the-enigmatic-treasure-of-a-nubian-queen/", "venue": "Harvard Museum of Natural History", "date": "2026-11-04T16:00:00+00:00"},
+            {"name": "Boston Lights: A Lantern Experience", "url": "https://do617.com/events/2026/8/14/boston-lights-a-lantern-experience-1785266685", "venue": "Franklin Park Zoo", "date": "2026-11-04T23:00:00+00:00"},
+            {"name": "Gallery Talk", "url": "https://do617.com/events/2026/11/2/gallery-talk-tickets", "venue": "Boston Athenæum", "date": "2026-11-04T23:00:00+00:00"},
+            {"name": "Coat Drive Volunteer Night at Allston Hall", "url": "https://do617.com/events/2026/11/4/x", "venue": "Allston Hall", "date": "2026-11-04T23:00:00+00:00"},
+        ]
+        for e in drop:
+            self.assertTrue(is_standing_exhibit(e), f"Should drop: {e['name']}")
+        for e in keep:
+            self.assertFalse(is_standing_exhibit(e), f"Should keep: {e['name']}")
+
+    def test_fetch_soup_decodes_utf8_without_charset_header(self):
+        """Pages that omit an HTTP charset must not be decoded as Latin-1 (mojibake)."""
+        from unittest import mock
+        import scrapers
+
+        class FakeResp:
+            content = "<html><body><h3>Where\u2019s Boston? Boston Athen\u00e6um</h3></body></html>".encode("utf-8")
+            text = content.decode("latin-1")
+            def raise_for_status(self): pass
+
+        with mock.patch.object(scrapers._SESSION, "get", return_value=FakeResp()):
+            soup = scrapers.fetch_soup("http://example.test", "ua")
+        self.assertEqual(soup.h3.get_text(), "Where\u2019s Boston? Boston Athen\u00e6um")
+
+
+    def test_fix_doubled_url(self):
+        """Glued absolute URLs are repaired; legitimate embedded/redirect URLs are untouched."""
+        from scrapers import fix_doubled_url
+
+        self.assertEqual(
+            fix_doubled_url("https://www.bso.orghttps://www.bso.org/events/holiday-pops-2026"),
+            "https://www.bso.org/events/holiday-pops-2026",
+        )
+        self.assertEqual(
+            fix_doubled_url("https://photowalks.com/tours/beacon-hill/https://photowalks.com/tours/beacon-hill/"),
+            "https://photowalks.com/tours/beacon-hill/",
+        )
+        untouched = [
+            "https://www.bso.org/events/holiday-pops-2026",
+            "https://example.com/redirect?url=https://other.com/page",
+            "https://www.facebook.com/sharer.php?u=https://site.com/x",
+            "",
+            None,
+        ]
+        for u in untouched:
+            self.assertEqual(fix_doubled_url(u), u)
 
 
 if __name__ == "__main__":

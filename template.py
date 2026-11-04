@@ -22,6 +22,8 @@ from scrapers import (
     fetch_luckyseat_boston,
     _load_community_events,
     is_placeholder_or_closed_event,
+    is_standing_exhibit,
+    fix_doubled_url,
     is_utility_event,
     is_kid_family_event,
 )
@@ -2188,9 +2190,11 @@ def group_by_date(results):
     for r in results:
         for e in r["events"]:
             name = e.get("name") or ""
-            if is_placeholder_or_closed_event(name):
+            if is_placeholder_or_closed_event(name) or is_standing_exhibit(e):
                 continue
             entry = {"venue_url": r["url"], **e, "_source_venue": r["venue"]}
+            if entry.get("url"):
+                entry["url"] = fix_doubled_url(entry["url"])
             entry["venue"] = e.get("venue") or r["venue"]
             if is_utility_event(name):
                 entry["category"] = "services"
