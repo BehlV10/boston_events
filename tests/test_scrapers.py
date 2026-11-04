@@ -1875,6 +1875,25 @@ class TestBostonEvents(unittest.TestCase):
             names = [e["name"] for e in scrapers.scrape_mfa_boston("https://www.mfa.org/programs", "ua")]
         self.assertEqual(names, ["MFA: Revere and Rodallega", "MFA: Late Nites"])
 
+    def test_venue_cache_discarded_when_scraper_code_changes(self):
+        import tempfile
+        from unittest.mock import patch
+        import scrapers
+        with tempfile.TemporaryDirectory() as d, patch.object(scrapers, "CACHE_DIR", d):
+            def scraper_v1(url, ua):
+                return []
+            def scraper_v2(url, ua):
+                return ["changed"]
+            v1 = {"scraper": scraper_v1, "url": "https://example.org/events"}
+            v2 = {"scraper": scraper_v2, "url": "https://example.org/events"}
+            fp1, fp2 = scrapers._scraper_fingerprint(v1), scrapers._scraper_fingerprint(v2)
+            self.assertNotEqual(fp1, fp2)
+            scrapers._save_venue_cache("Test Venue", [{"name": "x"}], fingerprint=fp1)
+            self.assertIsNotNone(scrapers._load_venue_cache("Test Venue", max_age=3600, fingerprint=fp1))
+            self.assertIsNone(scrapers._load_venue_cache("Test Venue", max_age=3600, fingerprint=fp2))
+            # stale fallback on network errors still uses whatever is on disk
+            self.assertIsNotNone(scrapers._load_venue_cache("Test Venue", max_age=None))
+
     def test_service_ads_filtered_but_classes_kept(self):
         from scrapers import is_service_ad
         self.assertTrue(is_service_ad("Stress Free Week", "A La Carte Massage"))
