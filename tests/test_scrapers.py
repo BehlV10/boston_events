@@ -1789,6 +1789,42 @@ class TestBostonEvents(unittest.TestCase):
         self.assertEqual(e["price"], "$10")
         self.assertEqual(e["locality"], "Canton")
 
+    def test_meetup_placeholder_venue_takes_real_venue_and_not_weekly(self):
+        """A Meetup group hides its venue (venue = group name); a listing elsewhere supplies the real one,
+        and the same title at a different bar each week isn't flagged as weekly-recurring."""
+        from template import group_by_date, compute_recurring
+        grp = "Hey Siri: Make Friends After College"
+        venues = [
+            {"venue": grp, "url": "https://www.meetup.com/hey-siri/events/", "events": [
+                {"name": "Skip the Small Talk", "date": "2026-11-04T19:00:00-05:00", "url": "https://www.meetup.com/hey-siri/events/1/", "venue": grp, "venue_unknown": True},
+                {"name": "Skip the Small Talk", "date": "2026-11-11T19:00:00-05:00", "url": "https://www.meetup.com/hey-siri/events/2/", "venue": grp, "venue_unknown": True},
+            ]},
+            {"venue": "Trident Booksellers & Cafe", "url": "https://tridentbookscafe.com/events", "events": [
+                {"name": "Skip the Small Talk", "date": "2026-11-04T19:00:00-05:00", "url": "https://tridentbookscafe.com/events/stst", "venue": "Trident Booksellers & Cafe"},
+            ]},
+        ]
+        dated, _, _ = group_by_date(venues)
+        nov4 = [e for d, es in dated if str(d) == "2026-11-04" for e in es]
+        self.assertEqual(len(nov4), 1)
+        self.assertEqual(nov4[0]["venue"], "Trident Booksellers & Cafe")
+        self.assertNotIn(("skip the small talk", grp, grp.lower()), compute_recurring(dated))
+
+    def test_rsvp_link_replaces_organizer_homepage(self):
+        from template import _is_event_specific_link, _is_generic_link
+        self.assertTrue(_is_event_specific_link("https://lu.ma/8ugz1m1n"))
+        self.assertFalse(_is_event_specific_link("https://lu.ma/boston"))
+        self.assertTrue(_is_generic_link("https://themillennialcrisis.com/events"))
+        self.assertTrue(_is_generic_link(" https://bostonconversations.com"))
+        self.assertFalse(_is_generic_link("https://www.aeronautbrewing.com/event/123-trivia"))
+
+    def test_service_ads_filtered_but_classes_kept(self):
+        from scrapers import is_service_ad
+        self.assertTrue(is_service_ad("Stress Free Week", "A La Carte Massage"))
+        self.assertTrue(is_service_ad("Spa After Dark at Mandarin Oriental Boston", "Mandarin Oriental Boston"))
+        self.assertTrue(is_service_ad("Social Spa Night", "Remedy Place"))
+        self.assertFalse(is_service_ad("Full Body Massage Techniques With a Partner", "CCAE"))
+        self.assertFalse(is_service_ad("Wesleaf Wellness Wednesdays", "wesleaf"))
+
     def test_deal_specials_get_default_off_bucket(self):
         from scrapers import is_deal_event, category_bucket
         from template import _effective_category, DEFAULT_UNCHECKED_BUCKETS

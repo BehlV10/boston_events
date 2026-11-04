@@ -7,7 +7,7 @@ import re
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from html import escape, unescape
-from urllib.parse import quote, quote_plus
+from urllib.parse import quote, quote_plus, urlparse
 
 from scrapers import (
     EASTERN,
@@ -22,6 +22,7 @@ from scrapers import (
     fetch_luckyseat_boston,
     _load_community_events,
     is_placeholder_or_closed_event,
+    is_service_ad,
     is_standing_exhibit,
     fix_doubled_url,
     sanitize_event_url,
@@ -1731,7 +1732,9 @@ def compute_recurring(dated):
             name = (e.get("name") or "").strip().lower()
             if not t or not name:
                 continue
-            key = (name, e.get("_source_venue") or "")
+            # Venue is part of the key: a group posting the same title at a different bar each
+            # week ("Skip the Small Talk") isn't one recurring event.
+            key = (name, e.get("_source_venue") or "", (e.get("venue") or "").strip().lower())
             groups[key].append(t)
     recurring = set()
     for key, times in groups.items():
@@ -1977,6 +1980,8 @@ _VENUE_GENERIC_WORDS = {
 def _same_physical_venue(e1, e2):
     """Stricter venue check than _merge_duplicates' _venue_match: same geo pin, or a shared
     distinctive word ("Sinclair", "Royale") — not just "Public Library" or "Music Hall"."""
+    if e1.get("_venue_unknown") or e2.get("_venue_unknown"):
+        return True
     w = lambda v: {re.sub(r"s$", "", x) for x in re.findall(r"\w+", (v or "").lower())} - _VENUE_GENERIC_WORDS
     if w(e1.get("venue")) & w(e2.get("venue")):
         return True
@@ -1996,6 +2001,33 @@ def _titles_equivalent(a, b):
             if len(short) >= 6 and long_.startswith(short):
                 return True
     return False
+
+
+_RSVP_HOSTS = ("lu.ma", "luma.com", "eventbrite.", "meetup.com", "partiful.com", "heylo.com",
+               "dice.fm", "posh.vip", "ticketmaster.", "seatgeek.com", "axs.com", "tixr.com")
+
+
+def _is_event_specific_link(url):
+    """An RSVP/ticket page for one event (lu.ma/8ugz1m1n, eventbrite.com/e/...)."""
+    try:
+        u = urlparse((url or "").strip())
+    except ValueError:
+        return False
+    path = u.path.strip("/")
+    # event slugs carry an id ("8ugz1m1n") or a sub-path ("e/..."); "lu.ma/boston" is a listing
+    return any(h in u.netloc.lower() for h in _RSVP_HOSTS) and len(path) >= 6 and bool(re.search(r"\d|/", path))
+
+
+def _is_generic_link(url):
+    """A site root or listing page rather than an event page: "x.com", "x.com/events/"."""
+    try:
+        u = urlparse((url or "").strip())
+    except ValueError:
+        return True
+    if not u.netloc:
+        return True
+    path = u.path.strip("/").lower()
+    return path in ("", "events", "calendar", "event-calendar", "upcoming-events", "whats-on") and not u.query
 
 
 def _merge_duplicates(events):
@@ -2076,6 +2108,8 @@ def _merge_duplicates(events):
 
     def _venue_match(v1, v2, e1, e2):
         if not v1 or not v2:
+            return True
+        if (e1 and e1.get("_venue_unknown")) or (e2 and e2.get("_venue_unknown")):
             return True
         v1_low = v1.lower()
         v2_low = v2.lower()
@@ -2252,6 +2286,14 @@ def _merge_duplicates(events):
             src_name = e.get("_source_venue") or e.get("venue") or "source"
             is_placeholder_url = bool(src_url and ("-12-pm/" in src_url or "-12-am/" in src_url))
 
+            # A venue feed may link only an organizer homepage ("themillennialcrisis.com/events");
+            # an RSVP page for this specific event is the better primary link.
+            if _is_event_specific_link(src_url) and _is_generic_link(match.get("url")):
+                old_url = match.get("url")
+                if old_url and not any(a.get("url") == old_url for a in match["_alt_sources"]):
+                    match["_alt_sources"].append({"venue": match.get("_source_venue"), "url": old_url, "price": match.get("price")})
+                match["url"] = src_url
+
             # If the newly arrived event has higher priority (e.g. direct venue vs aggregator)
             # or if match currently has a placeholder time/URL, upgrade primary info
             cur_prio = _source_priority(match.get("_source_venue"))
@@ -2264,7 +2306,8 @@ def _merge_duplicates(events):
                     match["_alt_sources"].append({"venue": old_src, "url": old_url, "price": match.get("price")})
                 match["url"] = e.get("url")
                 match["name"] = e.get("name")
-                match["venue"] = e.get("venue")
+                if not e.get("_venue_unknown") or match.get("_venue_unknown"):
+                    match["venue"] = e.get("venue")  # never replace a real venue with a placeholder
                 match["_source_venue"] = e.get("_source_venue")
                 if e_time and (e_time.hour != 0 or e_time.minute != 0):
                     match["_time"] = e_time
@@ -2283,8 +2326,15 @@ def _merge_duplicates(events):
             if not match.get("price") and e.get("price"):
                 match["price"] = e["price"]
 
+            if match.get("_venue_unknown") and not e.get("_venue_unknown") and e.get("venue"):
+                match["venue"] = e["venue"]
+                match.pop("_venue_unknown", None)
+                for k in ("lat", "lng", "address", "locality", "postal_code"):
+                    if e.get(k):
+                        match[k] = e[k]
+
             p_venue = (match.get("venue") or "").lower()
-            if p_venue in generic_sources and venue and venue not in generic_sources:
+            if p_venue in generic_sources and venue and venue not in generic_sources and not e.get("_venue_unknown"):
                 match["venue"] = e.get("venue")
 
             if (not match.get("category") or match.get("category") in ("other", "community")) and e.get("category") and e.get("category") not in ("other", "community"):
@@ -2327,11 +2377,17 @@ def group_by_date(results):
             name = e.get("name") or ""
             if is_placeholder_or_closed_event(name) or is_standing_exhibit(e):
                 continue
+            if is_service_ad(name, e.get("venue")):
+                continue
             entry = {"venue_url": r["url"], **e, "_source_venue": r["venue"]}
             if entry.get("url"):
                 entry["url"] = fix_doubled_url(entry["url"])
             entry["url"] = sanitize_event_url(entry.get("url"), fallback=r.get("url"))
             entry["venue"] = e.get("venue") or r["venue"]
+            if e.get("venue_unknown") or not (e.get("venue") or "").strip():
+                # The source gave no venue (e.g. Meetup hides it from non-members), so "venue" is
+                # just the group/source name. Let dedup take the real venue from another listing.
+                entry["_venue_unknown"] = True
             if is_utility_event(name):
                 entry["category"] = "services"
             elif is_deal_event(name):
@@ -2500,6 +2556,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
         return (
             (e.get("name") or "").strip().lower(),
             e.get("_source_venue") or "",
+            (e.get("venue") or "").strip().lower(),
         ) in recurring_keys
 
     def render_event(e):
@@ -2586,6 +2643,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
         sub_name, sub_slug = resolve_subarea(city, e, geo)
         if sub_slug == "suburbs_other" and e.get("locality"):
             sub_name = e["locality"]  # show the actual town; the filter group stays "Outer Suburbs"
+        elif sub_slug == "suburbs_other" and e.get("_venue_unknown"):
+            sub_name = "Location TBA"  # the source hid the venue; don't claim it's in the suburbs
         sub_attrs = f' data-subarea="{escape(sub_slug)}"'
         sub_tag = f' <span class="subarea-tag">· {escape(sub_name)}</span>'
 
