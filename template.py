@@ -2391,6 +2391,10 @@ def group_by_date(results):
             if is_service_ad(name, e.get("venue")):
                 continue
             entry = {"venue_url": r["url"], **e, "_source_venue": r["venue"]}
+            # Some sources send pre-escaped text ("R&amp;B Jam"); the page escapes again on render
+            for k in ("name", "description"):
+                if isinstance(entry.get(k), str) and "&" in entry[k]:
+                    entry[k] = unescape(entry[k])
             if entry.get("url"):
                 entry["url"] = fix_doubled_url(entry["url"])
             entry["url"] = sanitize_event_url(entry.get("url"), fallback=r.get("url"))
