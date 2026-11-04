@@ -48,7 +48,19 @@ def _venue_cache_path(vname):
     return os.path.join(CACHE_DIR, f"{slug}.json")
 
 
-def _load_venue_cache(vname, max_age=None):
+def _scraper_fingerprint(v):
+    """Hash of a source's scraper code + URL. A cache entry from different code is discarded,
+    so scraper fixes show up on the next deploy instead of after the TTL (up to 12h)."""
+    import hashlib
+    import inspect
+    try:
+        src = inspect.getsource(v["scraper"])
+    except (OSError, TypeError):
+        src = getattr(v["scraper"], "__name__", "")
+    return hashlib.sha1(f"{src}\n{v.get('url')}".encode("utf-8")).hexdigest()[:12]
+
+
+def _load_venue_cache(vname, max_age=None, fingerprint=None):
     path = _venue_cache_path(vname)
     if not os.path.exists(path):
         return None
@@ -59,12 +71,14 @@ def _load_venue_cache(vname, max_age=None):
             age = time.time() - cached.get("ts", 0)
             if age > max_age:
                 return None
+        if fingerprint is not None and cached.get("fp") != fingerprint:
+            return None  # written by older scraper code
         return cached
     except Exception:
         return None
 
 
-def _save_venue_cache(vname, events, duration=0.0):
+def _save_venue_cache(vname, events, duration=0.0, fingerprint=None):
     path = _venue_cache_path(vname)
     try:
         with open(path, "w", encoding="utf-8") as f:
@@ -72,6 +86,7 @@ def _save_venue_cache(vname, events, duration=0.0):
                 "ts": time.time(),
                 "venue": vname,
                 "duration": duration,
+                "fp": fingerprint,
                 "events": events
             }, f, ensure_ascii=False)
     except Exception:
@@ -10940,8 +10955,9 @@ def _scrape_one(v, force=False):
     t0 = time.time()
 
     # 1. Check if cached data exists and is within TTL
+    fp = _scraper_fingerprint(v)
     if not force:
-        cached = _load_venue_cache(name, max_age=ttl)
+        cached = _load_venue_cache(name, max_age=ttl, fingerprint=fp)
         if cached and cached.get("events") is not None:
             events = _normalize_and_filter_events(cached["events"], v)
             return {
@@ -10962,12 +10978,12 @@ def _scrape_one(v, force=False):
         # Update last known good and save to disk cache
         if events:
             _last_known_good[name] = events
-            _save_venue_cache(name, events, duration=dur)
+            _save_venue_cache(name, events, duration=dur, fingerprint=fp)
         elif name in _last_known_good and not events:
             # Scraper returned 0 events but previously had events: fall back to preserve data
             events = _normalize_and_filter_events(_last_known_good[name], v)
         else:
-            _save_venue_cache(name, events, duration=dur)
+            _save_venue_cache(name, events, duration=dur, fingerprint=fp)
 
         return {
             "venue": name,
