@@ -607,7 +607,7 @@ def build_json_ld(events, site_url=None):
                 "name": "How often is the Boston Events calendar updated?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "The calendar is automatically scraped and synchronized every 30 minutes directly from official venue box offices, artist calendars, and verified community sources."
+                    "text": "The calendar is automatically scraped and synchronized daily directly from official venue box offices, artist calendars, and verified community sources."
                 }
             }
         ]
@@ -828,7 +828,7 @@ def build_seo_directory_html(all_events_flat, all_venue_names):
       <!-- Venues A-Z -->
       <div class="directory-col">
         <h3>🏛️ Tracked Venues A–Z</h3>
-        <p class="hint">Official box office feeds tracked and refreshed every 30 mins.</p>
+        <p class="hint">Official box office feeds tracked and refreshed daily.</p>
         <ul class="venue-directory-list">
           {venues_html}
         </ul>
@@ -840,7 +840,7 @@ def build_seo_directory_html(all_events_flat, all_venue_names):
       <h3>Frequently Asked Questions about Greater Boston Events</h3>
       <div class="faq-item">
         <h4>Where can I find live music and theater in Boston and Cambridge tonight?</h4>
-        <p>Wicked Boston Events tracks over 100+ local stages and theater spaces every 30 minutes, including Symphony Hall, The Sinclair, Middle East, Central Square Theater, Calderwood Pavilion (BCA), Cantab Lounge, Paradise Rock Club, Midway Cafe, Club Passim, and O'Brien's Pub.</p>
+        <p>Wicked Boston Events tracks over 100+ local stages and theater spaces daily, including Symphony Hall, The Sinclair, Middle East, Central Square Theater, Calderwood Pavilion (BCA), Cantab Lounge, Paradise Rock Club, Midway Cafe, Club Passim, and O'Brien's Pub.</p>
       </div>
       <div class="faq-item">
         <h4>Are there stand-up comedy shows, plays, and free events in Boston this week?</h4>
@@ -958,7 +958,7 @@ def filter_events_for_hub(hub, events):
 
 
 HUBS = {
-    # Standalone page for parents: deduplicated (merged) cards, soonest first, with ages/details.
+    # Standalone page for parents: more cards, with ages/details.
     "kids-family-events-boston": {
         "title": "Kids & Family Events in Boston, Cambridge & Somerville",
         "h1": "Kids & Family Events",
@@ -967,9 +967,9 @@ HUBS = {
         "free_only": False,
         "time_filter": None,
         "keyword_filter": None,
-        "merged": True,
+        "show_details": True,
         "limit": 200,
-        "subtitle": "Story times, baby & toddler sing-alongs, museum days, puppet shows and nature walks for kids, from local libraries, museums and Little Muse, updated every 30 minutes.",
+        "subtitle": "Story times, baby & toddler sing-alongs, museum days, puppet shows and nature walks for kids, from local libraries, museums and Little Muse, updated daily.",
         "og_badge": "KIDS & FAMILY",
         "og_image": "og-kids-family.jpg",
         "query": "#cat=Kids+%26+Family"
@@ -1204,15 +1204,7 @@ def render_hub_page(hub_slug, events, site_url=None):
 
         t_obj = e.get("_time")
         t_str = e.get("time") or ""
-        start_date = d_str
-        if t_obj:
-            start_date = f"{d_str}T{t_obj.strftime('%H:%M:%S')}-05:00"
-        elif ":" in t_str and ("am" in t_str.lower() or "pm" in t_str.lower()):
-            try:
-                dt_tmp = datetime.strptime(t_str.strip().upper(), "%I:%M %p")
-                start_date = f"{d_str}T{dt_tmp.strftime('%H:%M:%S')}-05:00"
-            except Exception:
-                pass
+        start_date = t_obj.isoformat() if isinstance(t_obj, datetime) else d_str
 
         hub_event_items.append({
             "@type": "ListItem",
@@ -1262,7 +1254,7 @@ def render_hub_page(hub_slug, events, site_url=None):
             d_str = t_obj.strftime("%a, %b %-d")
             t_str = "" if (t_obj.hour, t_obj.minute) == (0, 0) else t_obj.strftime("%-I:%M %p")
         desc_html = ""
-        if hub.get("merged") and e.get("description"):
+        if hub.get("show_details") and e.get("description"):
             d_txt = re.sub(r"\s+", " ", str(e["description"])).strip()
             desc_html = f'<p class="hub-desc">{escape(d_txt[:160] + ("…" if len(d_txt) > 160 else ""))}</p>'
         price_val = e.get("price")
