@@ -926,7 +926,7 @@ class TestBostonEvents(unittest.TestCase):
         self.assertEqual(ev1["venue"], "100 Main St, Cambridge")
         self.assertEqual(ev1["price"], "$15")
         self.assertEqual(ev1["url"], "https://lu.ma/boston-ai-summit-2026")
-        self.assertEqual(ev1["category"], "community")
+        self.assertEqual(ev1["category"], "tech")  # AI summit -> default-off Tech & Startups
         self.assertEqual(ev1["lat"], 42.3615)
         self.assertEqual(ev1["lng"], -71.0855)
         self.assertIn("Hosted by Kendall Tech Collective", ev1["description"])
@@ -936,7 +936,7 @@ class TestBostonEvents(unittest.TestCase):
         self.assertEqual(ev2["name"], "Biotech Founder Mixer & Fireside")
         self.assertEqual(ev2["venue"], "Seaport (RSVP for address)")
         self.assertEqual(ev2["price"], "Free")
-        self.assertEqual(ev2["category"], "community")
+        self.assertEqual(ev2["category"], "tech")  # founder mixer
 
         # Check geo resolution
         geo1 = resolve_event_geo(ev1)
@@ -1836,6 +1836,31 @@ class TestBostonEvents(unittest.TestCase):
         evs = [e for _, es in dated for e in es]
         self.assertEqual(len(evs), 1, [e["name"] for e in evs])
         self.assertEqual(evs[0]["url"], "https://lu.ma/8ugz1m1n")
+
+    def test_luma_tech_events_go_to_default_off_bucket(self):
+        from scrapers import TECH_EVENT_RE, category_bucket
+        from template import DEFAULT_UNCHECKED_BUCKETS
+        for t in ["Founder After Hours", "AgeTech Innovation Showcase", "Boston Alt Cloud Meetup", "Infra Demo Night",
+                  "RoboBoston: 9th Annual Robot Block Party", "Claude 101: Setting up Your Workspace"]:
+            self.assertTrue(TECH_EVENT_RE.search(t), t)
+        for t in ["Boston Social Conversations", "Board Game Night", "Midday Unplug: Reset Your Nervous System",
+                  "Winterizing Workshop at Maple Street Food Forest"]:
+            self.assertFalse(TECH_EVENT_RE.search(t), t)
+        self.assertEqual(category_bucket("tech"), "Tech & Startups")
+        self.assertIn("Tech & Startups", DEFAULT_UNCHECKED_BUCKETS)
+
+    def test_long_live_jazz_lineup_parsing(self):
+        from unittest.mock import patch
+        from bs4 import BeautifulSoup
+        import scrapers
+        page = ("<p>Jazz Night</p><p>ThursdayS at 6pm</p><p>Nov 19</p><p>Wes Wirth &amp; Fwd</p>"
+                "<p>Dec 3</p><p>Stan Strickland &amp; Sundance</p><p>Join us for Thursday Jazz Nights!</p>")
+        with patch.object(scrapers, "fetch_soup", return_value=BeautifulSoup(page, "html.parser")):
+            evs = scrapers.scrape_long_live_roxbury("https://www.longlivebeerworks.com/boston", "ua")
+        names = [e["name"] for e in evs]
+        self.assertIn("Jazz Night: Wes Wirth & Fwd", names)
+        self.assertIn("Jazz Night: Stan Strickland & Sundance", names)
+        self.assertEqual(len(evs), 2)
 
     def test_service_ads_filtered_but_classes_kept(self):
         from scrapers import is_service_ad
