@@ -28,7 +28,7 @@ from scrapers import (
     is_utility_event,
     is_kid_family_event,
 )
-from venues_geo import resolve_event_geo
+from venues_geo import resolve_event_geo, nearest_curated_venue
 
 
 DEFAULT_UNCHECKED_BUCKETS = {"Classes & Services", "Kids & Family"}
@@ -60,7 +60,7 @@ CITY_RULES = [
         "winter hill brewing", "the independent", "olde magoun", "magoun's saloon",
         "somart", "wyllo", "jean appolon", "the biltmore", "diversity consignment",
         "boston figurative art center", "perry park", "nathan tufts park", "ward 4",
-        "the painted burro", "orlean's restaurant", "orleans restaurant",
+        "the painted burro", "orlean's restaurant", "orleans restaurant", "thotbot",
     )),
     ("cambridge", (
         "cambridge", "batifol", "passim", "club passim", "monkfish", "mad monkfish",
@@ -88,6 +88,8 @@ CITY_RULES = [
         "an sibin", "an sibín", "the coop", "forage", "52 church", "farkas hall",
         "loeb ex", "pemberton farms", "fusey bluesy", "graymist", "the grove",
         "cambridge art association", "loeb drama", "harvard film archive",
+        "graduate school of design", "harvard graduate school of education", "sheraton commander",
+        "325 binney", "microsoft new england research", "ef education first",
     )),
     ("boston", (
         "the 88 club", "88 club",
@@ -140,6 +142,13 @@ CITY_RULES = [
         "alumni stadium", "adams park", "adam park", "nathálie", "nathalie",
         "goethe-institut", "goethe institut", "broken records", "lifebloom",
         "winthrop center", "overlook st gabriel", "harvard stadium", "bright-landry", "goel center",
+        "cutler majestic", "kennedy presidential library", "jfk library", "case gymnasium", "case center",
+        "warrior ice arena", "tsai performance", "harvard business school", "klarman hall",
+        "rubenstein treehouse", "umass boston", "state house", "faneuil hall", "boston public market",
+        "egleston", "massart", "massachusetts college of art", "artists for humanity", "lenox hotel",
+        "common craft southie", "northeastern university", "cabot center", "icon nightclub",
+        "venu nightclub", "bijou", "elephant & castle", "fogo de chão", "fogo de chao", "artesani park",
+        "399 boylston", "william e mullins way", "hynes", "off the rails", "lavietes", "31 hemenway", "bully boy",
     )),
 ]
 
@@ -149,6 +158,42 @@ CITY_LABELS = {
     "somerville": "Somerville",
     "other": "Other",
 }
+
+
+_BOSTON_LOCALITIES = {
+    "boston", "allston", "brighton", "charlestown", "jamaica plain", "dorchester", "roxbury",
+    "south boston", "east boston", "mattapan", "roslindale", "hyde park", "west roxbury",
+    "mission hill", "back bay", "beacon hill", "north end", "south end", "fenway", "seaport",
+    "brookline",  # grouped with Boston, matching the geo-address fallback below
+}
+
+
+def _city_from_address(e):
+    """City from a scraped street address: the locality ("Cambridge"), else the ZIP code.
+    Returns None when there's no address or it's outside Boston/Cambridge/Somerville."""
+    if not isinstance(e, dict):
+        return None
+    loc = (e.get("locality") or "").strip().lower()
+    addr = (e.get("address") or e.get("location") or "").lower()
+    zip_m = re.search(r"\b0(2\d{3})\b", f"{e.get('postal_code') or ''} {addr}")
+    if not loc and addr:
+        m = re.search(r",\s*([a-z .'-]+?)\s*(?:,\s*(?:ma|massachusetts)\b|\s+0\d{4}\b|$)", addr)
+        loc = m.group(1).strip() if m else ""
+    if loc == "cambridge":
+        return "cambridge"
+    if loc == "somerville":
+        return "somerville"
+    if loc in _BOSTON_LOCALITIES:
+        return "boston"
+    if zip_m:
+        z = int(zip_m.group(1))
+        if 2138 <= z <= 2142:
+            return "cambridge"
+        if 2143 <= z <= 2145:
+            return "somerville"
+        if 2108 <= z <= 2137 or z in (2163, 2199, 2203, 2210, 2215, 2445, 2446):
+            return "boston"
+    return None
 
 
 def _event_city(venue, source, event=None):
@@ -184,7 +229,15 @@ def _event_city(venue, source, event=None):
                     return city
 
     ev_dict = event if isinstance(event, dict) else {"venue": venue, "_source_venue": source}
+    by_addr = _city_from_address(ev_dict)
+    if by_addr:
+        return by_addr
     geo = resolve_event_geo(ev_dict)
+    if geo and not geo.get("address") and geo.get("lat") is not None:
+        # Ticketing sources give coordinates but no address: borrow the nearest known venue's
+        near = nearest_curated_venue(float(geo["lat"]), float(geo["lng"]))
+        if near:
+            geo = near
     if geo and geo.get("address"):
         addr = geo["address"].lower()
         if ", cambridge" in addr:
@@ -2526,6 +2579,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
             geo_btn = ' <button type="button" class="venue-map-jump" title="View on Map"><span class="chip-icon">📍</span><span class="indie-jump-label">map</span></button>'
 
         sub_name, sub_slug = resolve_subarea(city, e, geo)
+        if sub_slug == "suburbs_other" and e.get("locality"):
+            sub_name = e["locality"]  # show the actual town; the filter group stays "Outer Suburbs"
         sub_attrs = f' data-subarea="{escape(sub_slug)}"'
         sub_tag = f' <span class="subarea-tag">· {escape(sub_name)}</span>'
 

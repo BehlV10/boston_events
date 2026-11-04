@@ -759,6 +759,9 @@ VENUE_RULES = [
     ("davis square t station", (42.3967, -71.1220, "Davis Square", "Holland St, Somerville", "Davis Square T Station")),
     ("life alive, union square", (42.3797, -71.0950, "Union Square", "Union Square, Somerville", "Life Alive (Union Square)")),
     ("casey's, 173 broadway", (42.3874, -71.0816, "East Somerville", "173 Broadway, Somerville", "Casey's (East Somerville)")),
+    ("dick's house of sport", (42.3489, -71.0819, "Back Bay", "760 Boylston St, Boston", "DICK'S House of Sport (Boylston St)")),
+    ("st. peter's episcopal church", (42.3673, -71.1058, "Central Square", "838 Massachusetts Ave, Cambridge", "St. Peter's Episcopal Church (Central Sq)")),
+    ("saint peter's episcopal church", (42.3673, -71.1058, "Central Square", "838 Massachusetts Ave, Cambridge", "St. Peter's Episcopal Church (Central Sq)")),
     ("carrie nation", (42.3580, -71.0613, "Beacon Hill / Downtown", "11 Beacon St, Boston", "Carrie Nation Cocktail Club")),
     ("farkas hall", (42.3722, -71.1176, "Harvard Square", "10 Holyoke St, Cambridge", "Farkas Hall (A.R.T.)")),
     ("loeb drama center", (42.3762, -71.1240, "Harvard Square", "64 Brattle St, Cambridge", "Loeb Drama Center (A.R.T.)")),
@@ -825,4 +828,23 @@ def resolve_event_geo(event: Dict[str, Any]) -> Optional[Dict[str, Any]]:
             if needle in hay:
                 return {"lat": lat, "lng": lng, "venue": cname, "neighborhood": neigh, "address": addr}
 
+    return None
+
+
+def nearest_curated_venue(lat, lng, max_meters=200):
+    """Closest curated venue (with a street address) to a coordinate, if within max_meters.
+    Used to place events whose source gives coordinates but no address."""
+    import math
+    best, best_d = None, None
+    entries = list(VENUE_COORDINATES.values()) + [v for _, v in VENUE_RULES]
+    for vlat, vlng, neigh, addr, cname in entries:
+        if not addr or "," not in addr:
+            continue
+        dy = (vlat - lat) * 111_000
+        dx = (vlng - lng) * 111_000 * math.cos(math.radians(lat))
+        d = math.hypot(dx, dy)
+        if best_d is None or d < best_d:
+            best, best_d = (vlat, vlng, neigh, addr, cname), d
+    if best is not None and best_d <= max_meters:
+        return {"lat": best[0], "lng": best[1], "neighborhood": best[2], "address": best[3], "venue": best[4]}
     return None
