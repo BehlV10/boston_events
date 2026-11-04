@@ -1862,6 +1862,19 @@ class TestBostonEvents(unittest.TestCase):
         self.assertIn("Jazz Night: Stan Strickland & Sundance", names)
         self.assertEqual(len(evs), 2)
 
+    def test_mfa_skips_daily_guided_tours_and_canceled(self):
+        from unittest.mock import patch
+        from bs4 import BeautifulSoup
+        import scrapers
+        rows = [("Guided Tour", "Gallery Highlights", ""), ("Lecture", "Revere and Rodallega", ""),
+                ("Educator Workshops", "Teaching Ancient Egypt", "Canceled"), ("Special Event", "Late Nites", "Tickets")]
+        page = "".join(f'<div class="row"><span>{t}</span><a href="/event/{i}">{n}</a>'
+                       f'<span>Wednesday, November 4, 2026</span><span>7:00 pm</span><span>{x}</span></div>'
+                       for i, (t, n, x) in enumerate(rows))
+        with patch.object(scrapers, "fetch_soup", return_value=BeautifulSoup(page, "html.parser")):
+            names = [e["name"] for e in scrapers.scrape_mfa_boston("https://www.mfa.org/programs", "ua")]
+        self.assertEqual(names, ["MFA: Revere and Rodallega", "MFA: Late Nites"])
+
     def test_service_ads_filtered_but_classes_kept(self):
         from scrapers import is_service_ad
         self.assertTrue(is_service_ad("Stress Free Week", "A La Carte Massage"))

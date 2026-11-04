@@ -3548,6 +3548,10 @@ def scrape_mfa_boston(url, ua):
         seen.add(full_url)
         row = a.find_parent("div", class_="row")
         raw_text = row.get_text(" ", strip=True) if row else ""
+        # Daily drop-in gallery tours (Gallery Highlights, Boston Stories, America at 250, ...)
+        # run once or twice every day with admission; they'd fill every day of the calendar.
+        if re.match(r"guided tour\b", raw_text, re.I) or re.search(r"\bcancell?ed\b", raw_text, re.I):
+            continue
         m = re.search(r"(?:[A-Za-z]+,\s+)?([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})", raw_text)
         tm = re.search(r"(\d{1,2}):(\d{2})\s*(am|pm)", raw_text, re.IGNORECASE)
         iso = None
