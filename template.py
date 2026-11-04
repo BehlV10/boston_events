@@ -331,17 +331,17 @@ def resolve_subarea(city, event, geo=None):
     elif city == "boston":
         if any(k in blob for k in ["fenway", "symphony", "house of blues", "mgm music", "mfa", "museum of fine arts", "jordan hall", "nec ", "nec:", "nec (", "new england conservatory", "berklee", "cafe 939", "time out", "401 park", "bill's bar", "bills bar", "loretta", "kenmore", "wbur cityspace", "890 commonwealth"]):
             return ("Fenway & Kenmore", "fenway_kenmore")
-        if any(k in blob for k in ["theater district", "theatre district", "boch", "wang", "shubert", "paramount", "colonial", "royale", "charles playhouse", "downtown", "boston common", "public garden", "duckling", "orpheum", "bsmnt", "city winery", "big night live", "td garden", "wilbur", "sports museum", "versus", "west end", "legacy", "feral"]):
+        if any(k in blob for k in ["theater district", "theatre district", "boch", "wang", "shubert", "paramount", "colonial", "royale", "charles playhouse", "downtown", "boston common", "chinatown", "north end", "public garden", "duckling", "orpheum", "bsmnt", "city winery", "big night live", "td garden", "wilbur", "sports museum", "versus", "west end", "legacy", "feral"]):
             return ("Downtown & Boston Common", "theater_downtown")
         if any(k in blob for k in ["south end", "beehive", "wally", "club cafe", "club café", "sowa", "reunion bbq", "calderwood"]):
             return ("South End", "south_end")
-        if any(k in blob for k in ["back bay", "copley", "boston public library", "bpl", "trident", "newbury", "prudential", "dani", "danis", "88 club"]):
+        if any(k in blob for k in ["back bay", "copley", "boston public library (central", "700 boylston", "trident", "newbury", "prudential", "dani", "danis", "88 club"]):
             return ("Back Bay & Copley", "back_bay")
-        if any(k in blob for k in ["seaport", "leader bank", "ica boston", "kings seaport", "kings dining", "greenway", "harbor", "scorpion", "laugh boston"]):
+        if any(k in blob for k in ["seaport", "south boston", "leader bank", "ica boston", "kings seaport", "kings dining", "greenway", "harbor", "scorpion", "laugh boston"]):
             return ("Seaport & Waterfront", "seaport_waterfront")
         if any(k in blob for k in ["allston", "brighton", "o'brien", "obrien", "brighton music", "speedway", "roadrunner", "lavietes", "notch brewing", "harvard stadium", "sunset cantina", "goel center"]):
             return ("Allston & Brighton", "allston_brighton")
-        if any(k in blob for k in ["jamaica plain", "jp", "midway cafe", "arboretum", "dorchester", "roxbury"]):
+        if any(k in blob for k in ["jamaica plain", "jp", "midway cafe", "arboretum", "dorchester", "roxbury", "mattapan", "roslindale", "hyde park"]):
             return ("JP & Dorchester", "jp_dorchester")
         if any(k in blob for k in ["charlestown", "anchor", "navy yard", "east boston", "eastie"]):
             return ("Charlestown & Eastie", "charlestown_eastie")
@@ -1914,7 +1914,7 @@ def _source_priority(s):
     s = (s or "").lower()
     if s in ("ticketmaster", "seatgeek", "eventbrite", "eventbrite boston", "eventbrite cambridge", "eventbrite somerville"):
         return 1
-    if s in ("the boston calendar", "do617", "boston shows"):
+    if s in ("the boston calendar", "do617", "boston shows", "little muse"):
         return 5
     return 10
 
@@ -2218,7 +2218,12 @@ def _merge_duplicates(events):
                             u_c = cand.get("url") or ""
                             host_e = re.sub(r"^https?://(?:www\.)?", "", u_e).split("/")[0].lower()
                             host_c = re.sub(r"^https?://(?:www\.)?", "", u_c).split("/")[0].lower()
-                            if host_e and host_e == host_c and host_e not in ("eventbrite.com", "ticketmaster.com", "seatgeek.com", "meetup.com", "facebook.com", "instagram.com", "thebostoncalendar.com", "do617.com"):
+                            # Shared platforms host many unrelated events at the same hour (every BPL
+                            # branch is on bpl.bibliocommons.com), so a shared host proves nothing there.
+                            shared_platform = any(p in host_e for p in (
+                                "libcal.com", "bibliocommons.com", "assabetinteractive.com", "lu.ma", "luma.com",
+                                "partiful.com", "heylo.com", "humanitix.com", "ticketleap.com", "sched.com"))
+                            if host_e and host_e == host_c and not shared_platform and host_e not in ("eventbrite.com", "ticketmaster.com", "seatgeek.com", "meetup.com", "facebook.com", "instagram.com", "thebostoncalendar.com", "do617.com"):
                                 match = cand
                                 break
 
