@@ -1047,6 +1047,26 @@ _EB_FAMILY_SKIP_RE = re.compile(
     r"retreat|adult child|pregnan)")
 
 
+def scrape_cafe_zing(url, ua):
+    """Cafe Zing (inside Porter Square Books): live music, songwriter rounds, craft and chess nights."""
+    events = scrape_squarespace_events(url, ua)
+    for e in events:
+        e["venue"] = "Cafe Zing"
+        e["address"] = "25 White St, Cambridge"
+        e["locality"] = "Cambridge"
+    return events
+
+
+def scrape_ikeda_center(url, ua):
+    """Ikeda Center's Eventbrite (its own event pages block scripts); Eventbrite omits the address."""
+    events = scrape_eventbrite_org(url, ua)
+    for e in events:
+        e["venue"] = "Ikeda Center"
+        e["address"] = "396 Harvard St, Cambridge"
+        e["locality"] = "Cambridge"
+    return events
+
+
 def scrape_eventbrite_family(url, ua):
     """Eventbrite's "parent" search: keep in-person outings for kids and families; drop
     the plant classes, parenting webinars, coaching pitches and certification courses it mixes in."""
@@ -5064,6 +5084,8 @@ def _luma_entry_to_event(entry, now, default_category="community"):
 # (cached), so new Boston organizers on Luma get picked up without code changes.
 LUMA_CALENDAR_SEEDS = {
     "cal-Fo5DfeIk8ur7FPY": "Millennial Crisis",  # Boston Social Conversations (Aeronaut)
+    "cal-WqHXCe1kCl1MWaL": "Human Week",          # luma.com/humanweek
+    "cal-21bcAtxY2x6CA7d": "The Story Circus",    # luma.com/thestorycircus
 }
 LUMA_CALENDARS_CACHE_PATH = os.path.join(CACHE_DIR, "luma_calendars.json")
 LUMA_LOCAL_CATEGORIES = {
@@ -9790,6 +9812,8 @@ _ALL_VENUES = [
     {"name": "Mass Audubon Boston Nature Center", "url": "https://www.massaudubon.org/programs/boston-nature-center", "ua": UA_CHROME, "scraper": scrape_mass_audubon_boston_nature_center, "default_category": "outdoors"},
     {"name": "Somerville Museum", "url": "https://www.somervillemuseum.org/calendar-events", "ua": UA_CHROME, "scraper": scrape_squarespace_events, "default_category": "community"},
     {"name": "Eventbrite (kids & parents)", "url": "https://www.eventbrite.com/d/ma--boston/parent/", "ua": UA_CHROME, "scraper": scrape_eventbrite_family, "default_category": "family"},
+    {"name": "Cafe Zing", "url": "https://www.cafezingcambridge.com/events", "ua": UA_CHROME, "scraper": scrape_cafe_zing, "default_category": "community"},
+    {"name": "Ikeda Center (via Eventbrite)", "url": "https://www.eventbrite.com/o/18029151775", "ua": UA_CHROME, "scraper": scrape_ikeda_center, "default_category": "community"},
     {"name": "Little Muse", "url": "https://littlemuse.substack.com", "ua": UA_CHROME, "scraper": scrape_little_muse, "default_category": "family"},
     {"name": "Puppet Showplace Theater", "url": "https://www.puppetshowplace.org/calendar", "ua": UA_CHROME, "scraper": scrape_puppet_showplace, "default_category": "family"},
     {"name": "Crystal Ballroom", "url": "https://www.crystalballroomboston.com/events/", "ua": UA_CHROME, "scraper": scrape_crystal_ballroom, "default_category": "music"},
