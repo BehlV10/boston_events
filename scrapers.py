@@ -209,8 +209,26 @@ def fix_doubled_url(url):
 
 # Domains that have lapsed or been taken over by unrelated sites (verified redirect targets).
 DEAD_EVENT_DOMAINS = {
+    "themillennialcrisis.com",  # Boston Social Conversations' old site; 404s since Nov 2026
     "thebiltmoregrill.com",  # now redirects to a brewery in Cortez, CO
 }
+
+
+# Paid spa/massage services posted as events: promos from massage businesses, hotel spa
+# packages ("Spa After Dark", $145), members-club spa nights. Massage *classes* (CCAE,
+# partner Thai massage workshops) and free wellness walks are real events and stay.
+_SERVICE_AD_VENUE_RE = re.compile(r"\bmassage\b(?!.*\bschool\b)|\bmed\s*spa\b|\bremedy place\b", re.I)
+_SERVICE_AD_TITLE_RE = re.compile(
+    r"\bspa (?:night|after dark|day|package|weekend)\b|\breflexology experience\b|\bstress[- ]free week\b|"
+    r"\b(?:botox|filler|iv (?:drip|therapy))\b",
+    re.I,
+)
+
+
+def is_service_ad(name, venue=None):
+    if _SERVICE_AD_TITLE_RE.search(name or ""):
+        return True
+    return bool(venue and _SERVICE_AD_VENUE_RE.search(venue))
 
 
 def sanitize_event_url(url, fallback=None):
@@ -939,7 +957,7 @@ def scrape_boston_calendar(url, ua):
                 continue
             seen_urls.add(seen_key)
             venue_txt = loc_el.get_text(strip=True) if loc_el else None
-            if venue_txt and _BC_AD_VENUE_RE.search(venue_txt):
+            if is_service_ad(name, venue_txt):
                 continue
             price = None
             if _BC_FREE_RE.search(name):
@@ -1017,8 +1035,6 @@ _BC_FREE_RE = re.compile(
     r"(?:free|no cover|complimentary)\b(?!\s*(?:week|zone|spirit|style|flow|form|hold))",
     re.I,
 )
-# Businesses that post recurring paid-service ads as events.
-_BC_AD_VENUE_RE = re.compile(r"\bmassage\b|\bmed\s*spa\b", re.I)
 
 
 def _title_from_ticket_slug(url):
@@ -1694,9 +1710,11 @@ def scrape_aeronaut(url, ua):
             dt = datetime(d.year, d.month, d.day, hour, minute, tzinfo=EASTERN)
         except ValueError:
             continue
-        link = row.get("tickets") or row.get("extlink") or "https://www.aeronautbrewing.com/visit/somerville/#events"
+        link = sanitize_event_url((row.get("tickets") or row.get("extlink") or "").strip(),
+                                  fallback="https://www.aeronautbrewing.com/visit/somerville/#events")
         events.append({
-            "name": row.get("name") or "Event",
+            # "Boston Social Conversations | Millennial Crisis": organizer suffix, not part of the name
+            "name": re.sub(r"\s*\|\s*millennial crisis\s*$", "", row.get("name") or "Event", flags=re.I),
             "date": dt.astimezone(timezone.utc).isoformat(),
             "url": link,
             "venue": "Aeronaut Brewing (Somerville)",
@@ -3530,6 +3548,10 @@ def scrape_mfa_boston(url, ua):
         seen.add(full_url)
         row = a.find_parent("div", class_="row")
         raw_text = row.get_text(" ", strip=True) if row else ""
+        # Daily drop-in gallery tours (Gallery Highlights, Boston Stories, America at 250, ...)
+        # run once or twice every day with admission; they'd fill every day of the calendar.
+        if re.match(r"guided tour\b", raw_text, re.I) or re.search(r"\bcancell?ed\b", raw_text, re.I):
+            continue
         m = re.search(r"(?:[A-Za-z]+,\s+)?([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})", raw_text)
         tm = re.search(r"(\d{1,2}):(\d{2})\s*(am|pm)", raw_text, re.IGNORECASE)
         iso = None
@@ -4538,14 +4560,15 @@ def scrape_meetup_group(url, ua):
         venue_name = venue_obj.get("name")
         if venue_obj.get("city"):
             venue_name = f"{venue_name} ({venue_obj['city']})" if venue_name else venue_obj["city"]
-        events.append({
+        ev = {
             "name": v.get("title"),
             "date": when.isoformat(),
             "url": v.get("eventUrl"),
             "venue": venue_name,
             "price": None,
             "description": (v.get("description") or "")[:200],
-        })
+        }
+        events.append(ev)
     return events
 
 
@@ -4583,6 +4606,241 @@ def scrape_meetup(url, ua):
     return events
 
 
+# Startup/tech events (mostly Luma): founders, VCs, AI, hackathons, demo/pitch nights.
+TECH_EVENT_RE = re.compile(
+    r"\b(?:startups?|founders?|co-?founder|vcs?|venture|investors?|fundrais\w*|pitch(?:es| night| showcase)?|"
+    r"demo (?:day|night)|hackathon|hack night|ai|llms?|agents?|genai|gen ai|machine learning|ml|deep ?tech|"
+    r"saas|devs?|developers?|engineers?|engineering|coding|code|software|product (?:managers?|teams?)|"
+    r"robotics?|crypto|blockchain|web3|biotech|climate ?tech|accelerator|incubator|co-?working|"
+    r"masschallenge|langchain|y ?combinator|cloud|agile|scrum|claude|chatgpt|openai|kubernetes|"
+    r"data science|cybersecurity|infra|devops|b2b|gtm|life sciences|demo day|ecosystem)\b|"
+    r"tech|robot",  # substrings: AgeTech, Health2Tech, TechWalk, TechCrunch, RoboBoston
+    re.I,
+)
+
+
+def _luma_entry_to_event(entry, now, default_category="community"):
+    """One Luma API entry ({event, calendar, hosts, ticket_info}) -> our event dict, or None."""
+    ev = entry.get("event") or {}
+    name = (ev.get("name") or "").strip()
+    if not name or is_placeholder_or_closed_event(name):
+        return None
+
+    start_at = ev.get("start_at")
+    if not start_at:
+        return None
+    try:
+        dt = datetime.fromisoformat(start_at.replace("Z", "+00:00"))
+        if dt.astimezone(timezone.utc) < now:
+            return None
+        iso_date = dt.astimezone(timezone.utc).isoformat()
+    except Exception:
+        return None
+
+    slug = ev.get("url") or ""
+    link = slug if slug.startswith("http") else f"https://lu.ma/{slug}"
+
+    geo = ev.get("geo_address_info") or {}
+    cal = entry.get("calendar") or {}
+
+    if geo.get("mode") == "shown" and (geo.get("address") or geo.get("short_address")):
+        addr = geo.get("address") or geo.get("short_address")
+        city = geo.get("city") or "Boston"
+        venue = addr if city.lower() in addr.lower() else f"{addr}, {city}"
+    elif geo.get("sublocality") or geo.get("city"):
+        subloc = geo.get("sublocality") or geo.get("city")
+        venue = f"{subloc} (RSVP for address)"
+    elif cal.get("name") and cal.get("name").lower() != "personal":
+        venue = cal.get("name")
+    else:
+        venue = "Boston"
+
+    coord = ev.get("coordinate") or geo.get("place_coordinate") or {}
+    lat = coord.get("latitude")
+    lng = coord.get("longitude")
+    address = geo.get("full_address") or geo.get("address") or ""
+    neighborhood = geo.get("sublocality") or ""
+
+    t_info = entry.get("ticket_info") or {}
+    price = None
+    if t_info.get("is_free"):
+        price = "Free"
+    elif t_info.get("price"):
+        cents = t_info["price"].get("cents")
+        if cents == 0:
+            price = "Free"
+        elif cents is not None:
+            price = f"${cents / 100:.2f}".rstrip("0").rstrip(".")
+
+    hosts = [h.get("name") for h in (entry.get("hosts") or []) if h.get("name")]
+    cal_desc = cal.get("description_short")
+    desc_parts = []
+    if hosts:
+        h_str = ", ".join(hosts[:3])
+        desc_parts.append(f"Hosted by {h_str}")
+    if cal_desc:
+        desc_parts.append(cal_desc)
+    desc = " • ".join(desc_parts)[:250] if desc_parts else None
+
+    cat = infer_category(name, venue, default=default_category)
+    cal_name = ((entry.get("calendar") or {}).get("name") or "")
+    if cat in ("community", "other") and (TECH_EVENT_RE.search(name) or TECH_EVENT_RE.search(cal_name)):
+        cat = "tech"
+
+    ev_dict = {
+        "name": name,
+        "date": iso_date,
+        "url": link,
+        "venue": venue,
+        "price": price,
+        "category": cat,
+        "description": desc,
+    }
+    if lat is not None and lng is not None:
+        ev_dict["lat"] = lat
+        ev_dict["lng"] = lng
+    if address:
+        ev_dict["address"] = address
+    if neighborhood:
+        ev_dict["neighborhood"] = neighborhood
+
+    return ev_dict
+
+
+# Luma calendars to follow. Seeded by hand; scrape_luma and other sources' lu.ma links add more
+# (cached), so new Boston organizers on Luma get picked up without code changes.
+LUMA_CALENDAR_SEEDS = {
+    "cal-Fo5DfeIk8ur7FPY": "Millennial Crisis",  # Boston Social Conversations (Aeronaut)
+}
+LUMA_CALENDARS_CACHE_PATH = os.path.join(CACHE_DIR, "luma_calendars.json")
+LUMA_LOCAL_CATEGORIES = {
+    "cat-family": "Family", "cat-books": "Books", "cat-games": "Games", "cat-fooddrink": "Food & Drink",
+    "cat-running": "Running", "cat-AzVAf6VmE9JEre4": "Arts & Culture", "cat-climate": "Climate",
+    "cat-0Km9ZnuBjFAjwFl": "Fitness", "cat-C1VaNLnt25w9t6c": "Wellness",
+    "cat-tech": "Tech", "cat-ai": "AI", "cat-crypto": "Crypto",
+}
+_LUMA_CATEGORY_DEFAULTS = {
+    "cat-tech": "tech", "cat-ai": "tech", "cat-crypto": "tech",
+    "cat-family": "family", "cat-books": "books", "cat-games": "gaming", "cat-fooddrink": "food",
+    "cat-running": "fitness", "cat-AzVAf6VmE9JEre4": "art", "cat-0Km9ZnuBjFAjwFl": "fitness",
+}
+_BOSTON_CENTER = (42.3601, -71.0589)
+
+
+def _load_luma_calendars():
+    cals = dict(LUMA_CALENDAR_SEEDS)
+    try:
+        with open(LUMA_CALENDARS_CACHE_PATH) as f:
+            cals.update(json.load(f).get("calendars") or {})
+    except (OSError, ValueError):
+        pass
+    return cals
+
+
+def _save_luma_calendars(cals, resolved_urls):
+    try:
+        os.makedirs(CACHE_DIR, exist_ok=True)
+        with open(LUMA_CALENDARS_CACHE_PATH, "w") as f:
+            json.dump({"calendars": cals, "resolved_urls": sorted(resolved_urls)}, f)
+    except OSError:
+        pass
+
+
+_LUMA_DISCOVERED = {}
+_luma_tech_urls = set()
+
+
+def _remember_luma_calendar(cal):
+    cal = cal or {}
+    api_id, name = cal.get("api_id"), (cal.get("name") or "").strip()
+    if api_id and api_id.startswith("cal-") and name and name.lower() != "personal":
+        _LUMA_DISCOVERED[api_id] = name
+
+
+def _near_boston(ev, km=25):
+    import math
+    lat, lng = ev.get("lat"), ev.get("lng")
+    if lat is None or lng is None:
+        return False  # online or hidden-location: can't tell it's local
+    dy = (float(lat) - _BOSTON_CENTER[0]) * 111.0
+    dx = (float(lng) - _BOSTON_CENTER[1]) * 111.0 * math.cos(math.radians(_BOSTON_CENTER[0]))
+    return math.hypot(dx, dy) <= km
+
+
+def _luma_links_from_last_run():
+    """lu.ma / luma.com event links any source published last run (e.g. Partiful, Do617, venues)."""
+    try:
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "events.json")) as f:
+            data = json.load(f)
+    except (OSError, ValueError):
+        return set()
+    out = set()
+    for v in data.get("venues") or []:
+        for e in v.get("events") or []:
+            for u in [e.get("url")] + [a.get("url") for a in e.get("_alt_sources") or []]:
+                m = re.match(r"https?://(?:www\.)?(?:lu\.ma|luma\.com)/([A-Za-z0-9_-]+)/?$", (u or "").strip())
+                if m and m.group(1) not in ("boston", "discover", "home", "explore"):
+                    out.add(m.group(1))
+    return out
+
+
+def scrape_luma_calendars(url, ua):
+    """Upcoming Boston-area events from every Luma calendar we follow (seeds + discovered)."""
+    from concurrent.futures import ThreadPoolExecutor
+    headers = {"User-Agent": ua, "Accept": "application/json"}
+    cals = _load_luma_calendars()
+    cals.update(_LUMA_DISCOVERED)
+    try:
+        with open(LUMA_CALENDARS_CACHE_PATH) as f:
+            resolved = set(json.load(f).get("resolved_urls") or [])
+    except (OSError, ValueError):
+        resolved = set()
+
+    # Learn the calendar behind event links other sources published (capped per run)
+    for slug in sorted(_luma_links_from_last_run() - resolved)[:25]:
+        resolved.add(slug)
+        try:
+            d = _SESSION.get(f"https://api.lu.ma/url?url={slug}", headers=headers, timeout=10).json().get("data") or {}
+        except Exception:
+            continue
+        cal = d.get("calendar") or {}
+        if cal.get("api_id") and cal.get("name") and cal["name"].lower() != "personal":
+            cals[cal["api_id"]] = cal["name"]
+
+    now = datetime.now(timezone.utc)
+
+    def fetch(cal_id):
+        try:
+            r = _SESSION.get("https://api.lu.ma/calendar/get-items",
+                             params={"calendar_api_id": cal_id, "period": "future", "pagination_limit": 50},
+                             headers=headers, timeout=15)
+            r.raise_for_status()
+            return r.json().get("entries") or []
+        except Exception:
+            return []
+
+    events, seen = [], set()
+    with ThreadPoolExecutor(max_workers=8) as ex:
+        for entries in ex.map(fetch, list(cals)[:80]):
+            cal_events = []
+            for entry in entries:
+                ev = _luma_entry_to_event(entry, now)
+                if not ev or not _near_boston(ev):
+                    continue
+                key = (ev["name"].lower(), ev["date"][:16])
+                if key not in seen:
+                    seen.add(key)
+                    cal_events.append(ev)
+            # A mostly-tech organizer's other events (mixers, lunches, info sessions) are tech too
+            if cal_events and sum(e["category"] == "tech" for e in cal_events) * 2 >= len(cal_events):
+                for e in cal_events:
+                    if e["category"] in ("community", "other"):
+                        e["category"] = "tech"
+            events.extend(cal_events)
+    _save_luma_calendars(cals, resolved)
+    return events
+
+
 def scrape_luma(url, ua):
     """Scrape curated Boston tech, AI, startup, and community events from Luma."""
     api_url = "https://api.lu.ma/discover/get-paginated-events?discover_place_api_id=discplace-VWeZ1zUvnawYHMj"
@@ -4608,97 +4866,207 @@ def scrape_luma(url, ua):
 
         entries = data.get("entries") or []
         for entry in entries:
-            ev = entry.get("event") or {}
-            name = (ev.get("name") or "").strip()
-            if not name or is_placeholder_or_closed_event(name):
+            ev_dict = _luma_entry_to_event(entry, now)
+            if not ev_dict:
                 continue
-
-            start_at = ev.get("start_at")
-            if not start_at:
-                continue
-            try:
-                dt = datetime.fromisoformat(start_at.replace("Z", "+00:00"))
-                if dt.astimezone(timezone.utc) < now:
-                    continue
-                iso_date = dt.astimezone(timezone.utc).isoformat()
-            except Exception:
-                continue
-
-            slug = ev.get("url") or ""
-            link = slug if slug.startswith("http") else f"https://lu.ma/{slug}"
-
-            key = (name.lower(), iso_date[:10])
+            key = (ev_dict["name"].lower(), ev_dict["date"][:10])
             if key in seen:
                 continue
             seen.add(key)
-
-            geo = ev.get("geo_address_info") or {}
-            cal = entry.get("calendar") or {}
-
-            if geo.get("mode") == "shown" and (geo.get("address") or geo.get("short_address")):
-                addr = geo.get("address") or geo.get("short_address")
-                city = geo.get("city") or "Boston"
-                venue = addr if city.lower() in addr.lower() else f"{addr}, {city}"
-            elif geo.get("sublocality") or geo.get("city"):
-                subloc = geo.get("sublocality") or geo.get("city")
-                venue = f"{subloc} (RSVP for address)"
-            elif cal.get("name") and cal.get("name").lower() != "personal":
-                venue = cal.get("name")
-            else:
-                venue = "Boston"
-
-            coord = ev.get("coordinate") or geo.get("place_coordinate") or {}
-            lat = coord.get("latitude")
-            lng = coord.get("longitude")
-            address = geo.get("full_address") or geo.get("address") or ""
-            neighborhood = geo.get("sublocality") or ""
-
-            t_info = entry.get("ticket_info") or {}
-            price = None
-            if t_info.get("is_free"):
-                price = "Free"
-            elif t_info.get("price"):
-                cents = t_info["price"].get("cents")
-                if cents == 0:
-                    price = "Free"
-                elif cents is not None:
-                    price = f"${cents / 100:.2f}".rstrip("0").rstrip(".")
-
-            hosts = [h.get("name") for h in (entry.get("hosts") or []) if h.get("name")]
-            cal_desc = cal.get("description_short")
-            desc_parts = []
-            if hosts:
-                h_str = ", ".join(hosts[:3])
-                desc_parts.append(f"Hosted by {h_str}")
-            if cal_desc:
-                desc_parts.append(cal_desc)
-            desc = " • ".join(desc_parts)[:250] if desc_parts else None
-
-            cat = infer_category(name, venue, default="community")
-
-            ev_dict = {
-                "name": name,
-                "date": iso_date,
-                "url": link,
-                "venue": venue,
-                "price": price,
-                "category": cat,
-                "description": desc,
-            }
-            if lat is not None and lng is not None:
-                ev_dict["lat"] = lat
-                ev_dict["lng"] = lng
-            if address:
-                ev_dict["address"] = address
-            if neighborhood:
-                ev_dict["neighborhood"] = neighborhood
-
+            _remember_luma_calendar(entry.get("calendar"))
             events.append(ev_dict)
 
         if not data.get("has_more") or not data.get("next_cursor"):
             break
         cursor = data.get("next_cursor")
 
+    # Category feeds by coordinates reach well past the ~22 curated "Boston" picks. Tech/AI/crypto
+    # (~150 startup events a fortnight) go to the default-off "Tech & Startups" bucket.
+    for cat_id in LUMA_LOCAL_CATEGORIES:
+        cursor = None
+        for _ in range(6):
+            q = (f"https://api.lu.ma/discover/get-paginated-events?latitude={_BOSTON_CENTER[0]}"
+                 f"&longitude={_BOSTON_CENTER[1]}&pagination_limit=50&discover_category_api_id={cat_id}")
+            if cursor:
+                q += f"&pagination_cursor={cursor}"
+            try:
+                data = _SESSION.get(q, headers=headers, timeout=15).json()
+            except Exception:
+                break
+            for entry in data.get("entries") or []:
+                ev_dict = _luma_entry_to_event(entry, now, _LUMA_CATEGORY_DEFAULTS.get(cat_id, "community"))
+                if ev_dict and cat_id in ("cat-tech", "cat-ai", "cat-crypto"):
+                    _luma_tech_urls.add(ev_dict["url"])  # tech even if first seen in another feed
+                if not ev_dict or not _near_boston(ev_dict) or re.match(r"\s*private event\b", ev_dict["name"], re.I):
+                    continue
+                key = (ev_dict["name"].lower(), ev_dict["date"][:10])
+                if key in seen:
+                    continue
+                seen.add(key)
+                _remember_luma_calendar(entry.get("calendar"))
+                events.append(ev_dict)
+            if not data.get("has_more") or not data.get("next_cursor"):
+                break
+            cursor = data["next_cursor"]
+
+    for ev_dict in events:
+        if ev_dict.get("category") in ("community", "other") and ev_dict["url"] in _luma_tech_urls:
+            ev_dict["category"] = "tech"
+    _luma_tech_urls.clear()
+
+    if _LUMA_DISCOVERED:  # persist so scrape_luma_calendars follows them (it may run concurrently)
+        try:
+            with open(LUMA_CALENDARS_CACHE_PATH) as f:
+                cached = json.load(f)
+        except (OSError, ValueError):
+            cached = {}
+        cals = {**(cached.get("calendars") or {}), **_LUMA_DISCOVERED}
+        _save_luma_calendars(cals, set(cached.get("resolved_urls") or []))
+    return events
+
+
+from html import unescape as _html_unescape
+
+
+def _clock_to_hm(txt):
+    """'7:00 pm' / '6pm' -> (19, 0), or None."""
+    m = re.search(r"(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m\b", txt or "", re.I)
+    if not m:
+        return None
+    h = int(m.group(1)) % 12 + (12 if m.group(3).lower() == "p" else 0)
+    return h, int(m.group(2) or 0)
+
+
+def scrape_wbur_cityspace(url, ua):
+    """WBUR CitySpace: events embedded in the Next.js data of wbur.org/events."""
+    html = _SESSION.get(url, headers={"User-Agent": ua}, timeout=15).text
+    m = re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', html, re.S)
+    if not m:
+        return []
+    found = {}
+
+    def walk(o):
+        if isinstance(o, dict):
+            if o.get("source") == "events" and o.get("start") and o.get("headline") and o.get("id"):
+                found[o["id"]] = o
+            for v in o.values():
+                walk(v)
+        elif isinstance(o, list):
+            for v in o:
+                walk(v)
+
+    walk(json.loads(m.group(1)))
+    now = datetime.now(EASTERN)
+    events = []
+    for o in found.values():
+        try:
+            dt = datetime.strptime(o["start"], "%Y-%m-%d %H:%M:%S").replace(tzinfo=EASTERN)
+        except ValueError:
+            continue
+        if dt < now - timedelta(hours=3):
+            continue
+        venue_parts = o.get("venue") or []
+        venue = venue_parts[0] if venue_parts else "WBUR CitySpace"
+        price = None
+        p = (o.get("price") or "").strip()
+        if p and re.match(r"^[\d.]+(?:-[\d.]+)?$", p):
+            lo = float(p.split("-")[0])
+            price = "Free" if lo == 0 else f"${lo:g}+" if "-" in p else f"${lo:g}"
+        events.append({
+            "name": _html_unescape(o["headline"]),
+            "date": dt.astimezone(timezone.utc).isoformat(),
+            "url": urljoin("https://www.wbur.org", o.get("relativeURL") or "/events"),
+            "venue": venue,
+            "price": price,
+            "description": (o.get("excerpt") or "")[:250] or None,
+        })
+    return events
+
+
+def scrape_hmsc(url, ua):
+    """Harvard Museums of Science & Culture (Peabody, Natural History, Ancient Near East, ...):
+    event links from the Upcoming Programs page; date/time/location from each event page.
+    Two workers: the site rate-limits (429) at higher concurrency."""
+    from concurrent.futures import ThreadPoolExecutor
+    html = _SESSION.get(url, headers={"User-Agent": ua}, timeout=15).text
+    links = sorted(set(re.findall(r"https://hmsc\.harvard\.edu/calendar_event/[a-z0-9-]+/", html)))
+    today = datetime.now(EASTERN).date()
+
+    def one(link):
+        try:
+            soup = fetch_soup(link, ua)
+        except Exception:
+            return []
+        d_el = soup.select_one("li.post-date .meta-text")
+        if not d_el:
+            return []
+        t_el = soup.select_one("li.event-time .meta-text")
+        hm = _clock_to_hm(t_el.get_text(" ", strip=True) if t_el else "") or (18, 0)
+        main = soup.find("main") or soup
+        txt = main.get_text("\n", strip=True)
+        loc = re.search(r"Location:\s*\n?(.+)", txt)
+        venue = (loc.group(1).split(",")[0].strip() if loc else None) or "Harvard Museums of Science & Culture"
+        if re.search(r"(?i)\bonline\b|\bzoom\b", venue):
+            return []
+        og = soup.find("meta", property="og:title")
+        title = _html_unescape((og.get("content") if og else "") or (soup.title.string if soup.title else ""))
+        title = re.sub(r"\s+[–-]\s+Harvard Museums of Science & Culture\s*$", "", title).strip()
+        out = []
+        for ds in re.findall(r"[A-Z][a-z]+ \d{1,2}, \d{4}", d_el.get_text(" ", strip=True)):
+            try:
+                d = datetime.strptime(ds, "%B %d, %Y").date()
+            except ValueError:
+                continue
+            if d < today:
+                continue
+            dt = datetime(d.year, d.month, d.day, hm[0], hm[1], tzinfo=EASTERN)
+            out.append({
+                "name": title,
+                "date": dt.astimezone(timezone.utc).isoformat(),
+                "url": link,
+                "venue": venue,
+                "address": loc.group(1).strip() if loc else None,
+                "price": "Free" if re.search(r"(?i)\bfree\b", txt[:200]) else None,
+            })
+        return out
+
+    with ThreadPoolExecutor(max_workers=2) as ex:
+        return [e for evs in ex.map(one, links) for e in evs if e["name"]]
+
+
+def scrape_long_live_roxbury(url, ua):
+    """Long Live Beerworks' Roxbury taproom: Thursday Jazz Night lineup, posted as text
+    ("Nov 5 / The Filipe Salles Quartet"), 6-9pm."""
+    soup = fetch_soup(url, ua)
+    lines = [l for l in soup.get_text("\n", strip=True).split("\n") if l]
+    try:
+        start = next(i for i, l in enumerate(lines) if re.match(r"(?i)thursdays? at \d", l))
+    except StopIteration:
+        return []
+    hm = _clock_to_hm(lines[start]) or (18, 0)
+    today = datetime.now(EASTERN).date()
+    events = []
+    i = start + 1
+    while i + 1 < len(lines):
+        m = re.match(r"^(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+(\d{1,2})$", lines[i], re.I)
+        if not m:
+            if events:
+                break  # end of the lineup
+            i += 1
+            continue
+        d = _roll_year(next(v for k, v in _MONTHS.items() if k.startswith(m.group(1).lower()[:3])), int(m.group(2)), today)
+        act = lines[i + 1]
+        if d and d >= today:
+            dt = datetime(d.year, d.month, d.day, hm[0], hm[1], tzinfo=EASTERN)
+            events.append({
+                "name": f"Jazz Night: {act}",
+                "date": dt.astimezone(timezone.utc).isoformat(),
+                "url": url,
+                "venue": "Long Live Roxbury",
+                "price": "Free",
+                "category": "music",
+            })
+        i += 2
     return events
 
 
@@ -8943,6 +9311,7 @@ _ALL_VENUES = [
     {"name": "The Platform Kendall", "url": "https://www.theplatformkendall.org/event-listing/", "ua": UA_CHROME, "scraper": scrape_the_platform_kendall, "default_category": "stage"},
     {"name": "Partiful Boston", "url": "https://partiful.com/explore/l/bos/events", "ua": UA_CHROME, "scraper": scrape_partiful, "default_category": "community"},
     {"name": "Luma Boston", "url": "https://lu.ma/boston", "ua": UA_CHROME, "scraper": scrape_luma, "default_category": "community"},
+    {"name": "Luma Calendars", "url": "https://lu.ma/discover", "ua": UA_CHROME, "scraper": scrape_luma_calendars, "default_category": "community"},
     {"name": "ICA Boston", "url": "https://www.icaboston.org/events/", "ua": UA_CHROME, "scraper": scrape_ica, "default_category": "art"},
     {"name": "Cisco Brewers Fenway", "url": "https://ciscobrewersfenway.com/eventschedule", "ua": UA_CHROME, "scraper": scrape_squarespace_calendar_block, "default_category": "music"},
     {"name": "Castle Island Brewing", "url": "https://castleislandbeer.com/public-events", "ua": UA_CHROME, "scraper": scrape_squarespace_calendar_block, "default_category": "food"},
@@ -9019,15 +9388,21 @@ _ALL_VENUES = [
     {"name": "CCAE (Cambridge Center for Adult Education)", "url": "https://ccae.org/events", "ua": UA_CHROME, "scraper": scrape_ccae, "default_category": "community"},
     {"name": "Brookline Booksmith", "url": "https://www.brooklinebooksmith.com/events", "ua": UA_CURL, "scraper": scrape_event_list, "default_category": "books"},
     {"name": "Gardner Museum", "url": "https://www.gardnermuseum.org/calendar", "ua": UA_CHROME, "scraper": scrape_gardner, "default_category": "community"},
-    {"name": "ICA Boston", "url": "https://www.icaboston.org/events", "ua": UA_CHROME, "scraper": scrape_ica, "default_category": "community"},
     {"name": "Brattle Theatre", "url": "https://www.brattlefilm.org/", "ua": UA_CHROME, "scraper": scrape_brattle, "default_category": "film"},
-    {"name": "Luma Boston", "url": "https://lu.ma/boston", "ua": UA_CHROME, "scraper": scrape_luma, "default_category": "community"},
     {"name": "Meetup Boston", "url": "https://www.meetup.com/find/?location=us--ma--boston&source=EVENTS&eventType=inPerson&distance=tenMiles", "ua": UA_CHROME, "scraper": scrape_meetup, "default_category": "community"},
     {"name": "Somerville Board Games Meetup", "url": "https://www.meetup.com/somerville-board-games-meetup-group/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "gaming"},
     {"name": "Beantown Gamers", "url": "https://www.meetup.com/boardgames-boston/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "gaming"},
     {"name": "Cambridge Game Night", "url": "https://www.meetup.com/CambridgeGameNight/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "gaming"},
     {"name": "Unplugged Gaming Boston", "url": "https://www.meetup.com/unplugged-gaming-of-boston-surrounding-areas/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "gaming"},
     {"name": "Boston Python", "url": "https://www.meetup.com/bostonpython/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "community"},
+    {"name": "Skip the Small Talk Boston", "url": "https://www.meetup.com/skip-the-small-talk-boston/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "community"},
+    {"name": "Boston Japanese Language Exchange", "url": "https://www.meetup.com/bostonjapanese/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "community"},
+    {"name": "Boston Indie Game Devs", "url": "https://www.meetup.com/bostongamedev/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "gaming"},
+    {"name": "Unplugged Boston", "url": "https://www.meetup.com/unplugged-boston/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "gaming"},
+    {"name": "Revolutionary Spaces", "url": "https://revolutionaryspaces.org/explore/program-calendar/", "ua": UA_CHROME, "scraper": scrape_jsonld, "default_category": "community"},
+    {"name": "WBUR CitySpace", "url": "https://www.wbur.org/events", "ua": UA_CHROME, "scraper": scrape_wbur_cityspace, "default_category": "books"},
+    {"name": "Harvard Museums of Science & Culture", "url": "https://hmsc.harvard.edu/upcoming-programs/", "ua": UA_CHROME, "scraper": scrape_hmsc, "default_category": "community"},
+    {"name": "Long Live Roxbury", "url": "https://www.longlivebeerworks.com/boston", "ua": UA_CHROME, "scraper": scrape_long_live_roxbury, "default_category": "music"},
     {"name": "Hey Siri: Make Friends After College", "url": "https://www.meetup.com/Hey-Siri-How-Do-I-Make-New-Friends-After-College/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "community"},
     {"name": "Boston Outdoor Adventures", "url": "https://www.meetup.com/boston-outdoor-adventures/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "outdoors"},
     {"name": "Boston Hiking Meetup", "url": "https://www.meetup.com/boston-hiking/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "outdoors"},
@@ -9055,7 +9430,6 @@ _ALL_VENUES = [
     {"name": "McCarthy's Toad", "url": "https://www.mccarthystoad.com/calendar", "ua": UA_CHROME, "scraper": scrape_toad, "default_category": "music"},
     {"name": "Remnant Brewing", "url": "https://www.remnantsomerville.com/live", "ua": UA_CHROME, "scraper": scrape_remnant, "default_category": "music"},
     {"name": "The Burren", "url": "https://burren.com/music.html", "ua": UA_CHROME, "scraper": scrape_burren, "default_category": "music"},
-    {"name": "Harvard Museum of Natural History", "url": "https://www.hmnh.harvard.edu/calendar", "ua": UA_CURL, "scraper": scrape_hmnh, "default_category": "community"},
     {"name": "Lovestruck Books (via Eventbrite)", "url": "https://www.eventbrite.com/o/lovestruck-books-92052235443", "ua": UA_CHROME, "scraper": scrape_eventbrite_org, "default_category": "books"},
     {"name": "The Comedy Studio", "url": "https://www.thecomedystudio.com/calendar", "ua": UA_CHROME, "scraper": scrape_comedy_studio, "default_category": "comedy"},
     {"name": "Salsa Vida Boston", "url": "https://www.salsavida.com/guides/massachusetts/", "ua": UA_CHROME, "scraper": scrape_salsavida, "default_category": "dance"},
@@ -9601,6 +9975,7 @@ CATEGORY_STYLES = {
     "community": ("#8fa1b3", "◯"),
     "services":  ("#8fa1b3", "🛠"),
     "deals":     ("#c678dd", "🏷"),
+    "tech":      ("#7aa2f7", "⌘"),
     "other":     ("#6b7280", "·"),
 }
 
@@ -9616,6 +9991,7 @@ CATEGORY_BUCKETS = [
     ("Classes & Services", ["services"]),
     ("Kids & Family",      ["family", "kids"]),
     ("Deals & Specials",   ["deals"]),
+    ("Tech & Startups",    ["tech"]),
 ]
 _CAT_TO_BUCKET = {cat: name for name, cats in CATEGORY_BUCKETS for cat in cats}
 
@@ -10163,6 +10539,7 @@ def _normalize_and_filter_events(raw_events, v):
 
         if not v_raw:
             e["venue"] = name
+            e["venue_unknown"] = True  # placeholder = source name; dedup may find the real venue
 
         cat = e.get("category")
         if cat == "classical" or (not cat and default_cat == "classical"):

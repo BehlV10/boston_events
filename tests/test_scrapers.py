@@ -926,7 +926,7 @@ class TestBostonEvents(unittest.TestCase):
         self.assertEqual(ev1["venue"], "100 Main St, Cambridge")
         self.assertEqual(ev1["price"], "$15")
         self.assertEqual(ev1["url"], "https://lu.ma/boston-ai-summit-2026")
-        self.assertEqual(ev1["category"], "community")
+        self.assertEqual(ev1["category"], "tech")  # AI summit -> default-off Tech & Startups
         self.assertEqual(ev1["lat"], 42.3615)
         self.assertEqual(ev1["lng"], -71.0855)
         self.assertIn("Hosted by Kendall Tech Collective", ev1["description"])
@@ -936,7 +936,7 @@ class TestBostonEvents(unittest.TestCase):
         self.assertEqual(ev2["name"], "Biotech Founder Mixer & Fireside")
         self.assertEqual(ev2["venue"], "Seaport (RSVP for address)")
         self.assertEqual(ev2["price"], "Free")
-        self.assertEqual(ev2["category"], "community")
+        self.assertEqual(ev2["category"], "tech")  # founder mixer
 
         # Check geo resolution
         geo1 = resolve_event_geo(ev1)
@@ -1788,6 +1788,100 @@ class TestBostonEvents(unittest.TestCase):
         self.assertEqual(e["name"], "Author Talk with Seamus Boshell")
         self.assertEqual(e["price"], "$10")
         self.assertEqual(e["locality"], "Canton")
+
+    def test_meetup_placeholder_venue_takes_real_venue_and_not_weekly(self):
+        """A Meetup group hides its venue (venue = group name); a listing elsewhere supplies the real one,
+        and the same title at a different bar each week isn't flagged as weekly-recurring."""
+        from template import group_by_date, compute_recurring
+        grp = "Hey Siri: Make Friends After College"
+        venues = [
+            {"venue": grp, "url": "https://www.meetup.com/hey-siri/events/", "events": [
+                {"name": "Skip the Small Talk", "date": "2026-11-04T19:00:00-05:00", "url": "https://www.meetup.com/hey-siri/events/1/", "venue": grp, "venue_unknown": True},
+                {"name": "Skip the Small Talk", "date": "2026-11-11T19:00:00-05:00", "url": "https://www.meetup.com/hey-siri/events/2/", "venue": grp, "venue_unknown": True},
+            ]},
+            {"venue": "Trident Booksellers & Cafe", "url": "https://tridentbookscafe.com/events", "events": [
+                {"name": "Skip the Small Talk", "date": "2026-11-04T19:00:00-05:00", "url": "https://tridentbookscafe.com/events/stst", "venue": "Trident Booksellers & Cafe"},
+            ]},
+        ]
+        dated, _, _ = group_by_date(venues)
+        nov4 = [e for d, es in dated if str(d) == "2026-11-04" for e in es]
+        self.assertEqual(len(nov4), 1)
+        self.assertEqual(nov4[0]["venue"], "Trident Booksellers & Cafe")
+        self.assertNotIn(("skip the small talk", grp, grp.lower()), compute_recurring(dated))
+
+    def test_rsvp_link_replaces_organizer_homepage(self):
+        from template import _is_event_specific_link, _is_generic_link
+        self.assertTrue(_is_event_specific_link("https://lu.ma/8ugz1m1n"))
+        self.assertFalse(_is_event_specific_link("https://lu.ma/boston"))
+        self.assertTrue(_is_generic_link("https://themillennialcrisis.com/events"))
+        self.assertTrue(_is_generic_link(" https://bostonconversations.com"))
+        self.assertFalse(_is_generic_link("https://www.aeronautbrewing.com/event/123-trivia"))
+
+    def test_boston_conversations_copies_merge(self):
+        """Aeronaut, The Boston Calendar and Luma title the same night differently; one card, Luma link."""
+        from template import group_by_date
+        when = "2026-11-04T18:30:00-05:00"
+        venues = [
+            {"venue": "Aeronaut Brewing", "url": "https://d3izki9aezxlkr.cloudfront.net/public_events.json", "events": [
+                {"name": "Boston Social Conversations", "date": when, "venue": "Aeronaut Brewing (Somerville)",
+                 "url": "https://www.aeronautbrewing.com/visit/somerville/#events"}]},
+            {"venue": "The Boston Calendar", "url": "https://www.thebostoncalendar.com/events", "events": [
+                {"name": "Boston Conversations @ Aeronaut", "date": when, "venue": "Aeronaut Brewing Company",
+                 "url": "https://bostonconversations.com/"}]},
+            {"venue": "Luma Calendars", "url": "https://lu.ma/discover", "events": [
+                {"name": "Boston Social Conversations - November Event", "date": when,
+                 "venue": "Aeronaut Brewing Company, Somerville", "url": "https://lu.ma/8ugz1m1n"}]},
+        ]
+        dated, _, _ = group_by_date(venues)
+        evs = [e for _, es in dated for e in es]
+        self.assertEqual(len(evs), 1, [e["name"] for e in evs])
+        self.assertEqual(evs[0]["url"], "https://lu.ma/8ugz1m1n")
+
+    def test_luma_tech_events_go_to_default_off_bucket(self):
+        from scrapers import TECH_EVENT_RE, category_bucket
+        from template import DEFAULT_UNCHECKED_BUCKETS
+        for t in ["Founder After Hours", "AgeTech Innovation Showcase", "Boston Alt Cloud Meetup", "Infra Demo Night",
+                  "RoboBoston: 9th Annual Robot Block Party", "Claude 101: Setting up Your Workspace"]:
+            self.assertTrue(TECH_EVENT_RE.search(t), t)
+        for t in ["Boston Social Conversations", "Board Game Night", "Midday Unplug: Reset Your Nervous System",
+                  "Winterizing Workshop at Maple Street Food Forest"]:
+            self.assertFalse(TECH_EVENT_RE.search(t), t)
+        self.assertEqual(category_bucket("tech"), "Tech & Startups")
+        self.assertIn("Tech & Startups", DEFAULT_UNCHECKED_BUCKETS)
+
+    def test_long_live_jazz_lineup_parsing(self):
+        from unittest.mock import patch
+        from bs4 import BeautifulSoup
+        import scrapers
+        page = ("<p>Jazz Night</p><p>ThursdayS at 6pm</p><p>Nov 19</p><p>Wes Wirth &amp; Fwd</p>"
+                "<p>Dec 3</p><p>Stan Strickland &amp; Sundance</p><p>Join us for Thursday Jazz Nights!</p>")
+        with patch.object(scrapers, "fetch_soup", return_value=BeautifulSoup(page, "html.parser")):
+            evs = scrapers.scrape_long_live_roxbury("https://www.longlivebeerworks.com/boston", "ua")
+        names = [e["name"] for e in evs]
+        self.assertIn("Jazz Night: Wes Wirth & Fwd", names)
+        self.assertIn("Jazz Night: Stan Strickland & Sundance", names)
+        self.assertEqual(len(evs), 2)
+
+    def test_mfa_skips_daily_guided_tours_and_canceled(self):
+        from unittest.mock import patch
+        from bs4 import BeautifulSoup
+        import scrapers
+        rows = [("Guided Tour", "Gallery Highlights", ""), ("Lecture", "Revere and Rodallega", ""),
+                ("Educator Workshops", "Teaching Ancient Egypt", "Canceled"), ("Special Event", "Late Nites", "Tickets")]
+        page = "".join(f'<div class="row"><span>{t}</span><a href="/event/{i}">{n}</a>'
+                       f'<span>Wednesday, November 4, 2026</span><span>7:00 pm</span><span>{x}</span></div>'
+                       for i, (t, n, x) in enumerate(rows))
+        with patch.object(scrapers, "fetch_soup", return_value=BeautifulSoup(page, "html.parser")):
+            names = [e["name"] for e in scrapers.scrape_mfa_boston("https://www.mfa.org/programs", "ua")]
+        self.assertEqual(names, ["MFA: Revere and Rodallega", "MFA: Late Nites"])
+
+    def test_service_ads_filtered_but_classes_kept(self):
+        from scrapers import is_service_ad
+        self.assertTrue(is_service_ad("Stress Free Week", "A La Carte Massage"))
+        self.assertTrue(is_service_ad("Spa After Dark at Mandarin Oriental Boston", "Mandarin Oriental Boston"))
+        self.assertTrue(is_service_ad("Social Spa Night", "Remedy Place"))
+        self.assertFalse(is_service_ad("Full Body Massage Techniques With a Partner", "CCAE"))
+        self.assertFalse(is_service_ad("Wesleaf Wellness Wednesdays", "wesleaf"))
 
     def test_deal_specials_get_default_off_bucket(self):
         from scrapers import is_deal_event, category_bucket

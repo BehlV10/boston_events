@@ -759,6 +759,8 @@ VENUE_RULES = [
     ("davis square t station", (42.3967, -71.1220, "Davis Square", "Holland St, Somerville", "Davis Square T Station")),
     ("life alive, union square", (42.3797, -71.0950, "Union Square", "Union Square, Somerville", "Life Alive (Union Square)")),
     ("casey's, 173 broadway", (42.3874, -71.0816, "East Somerville", "173 Broadway, Somerville", "Casey's (East Somerville)")),
+    ("wbur cityspace", (42.3503, -71.1072, "Kenmore", "890 Commonwealth Ave, Boston", "WBUR CitySpace")),
+    ("long live roxbury", (42.3326, -71.0745, "Roxbury", "152 Hampden St, Boston", "Long Live Roxbury")),
     ("dick's house of sport", (42.3489, -71.0819, "Back Bay", "760 Boylston St, Boston", "DICK'S House of Sport (Boylston St)")),
     ("st. peter's episcopal church", (42.3673, -71.1058, "Central Square", "838 Massachusetts Ave, Cambridge", "St. Peter's Episcopal Church (Central Sq)")),
     ("saint peter's episcopal church", (42.3673, -71.1058, "Central Square", "838 Massachusetts Ave, Cambridge", "St. Peter's Episcopal Church (Central Sq)")),
