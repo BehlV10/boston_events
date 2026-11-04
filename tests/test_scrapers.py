@@ -1762,6 +1762,21 @@ class TestBostonEvents(unittest.TestCase):
                                "_source_venue": "Celebrity Series of Boston"})
         self.assertEqual(g["venue"], "Arrow Street Arts")
 
+    def test_deal_specials_get_default_off_bucket(self):
+        from scrapers import is_deal_event, category_bucket
+        from template import _effective_category, DEFAULT_UNCHECKED_BUCKETS
+        deals = ["Posto South End- Happy Hour Deals!", "$1 Oysters at Vera's!", "1/2 OFF APPS at The Chester Tavern",
+                 "BOGO Hot Dogs", "Bottomless Maki for $32 at Fat Baby", "$10 Martinis at Petula's"]
+        events = ["BoGo - Boston Godot Developers Group!", "Boston Food Drive & Happy Hour", "Neurodivergent Happy Hour",
+                  "Fresh Goofs: Standup Comedy Show and $4 Drinks", "Boston Happy Hour Stroll in the South End"]
+        for n in deals:
+            self.assertTrue(is_deal_event(n), n)
+            self.assertEqual(_effective_category({"name": n, "category": "food"}), "deals")
+        for n in events:
+            self.assertFalse(is_deal_event(n), n)
+        self.assertEqual(category_bucket("deals"), "Deals & Specials")
+        self.assertIn("Deals & Specials", DEFAULT_UNCHECKED_BUCKETS)
+
     def test_midnight_runners_first_tuesday_is_5k(self):
         from scrapers import scrape_midnight_runners, EASTERN
         from datetime import datetime

@@ -9404,6 +9404,30 @@ UTILITY_EVENT_RE = re.compile(
 )
 
 
+# Recurring bar/restaurant specials that sources list as daily "events" ("Happy Hour Deals!",
+# "$1 Oysters at X", "1/2 OFF APPS"). They go in their own default-off "Deals & Specials" bucket.
+DEAL_EVENT_RE = re.compile(
+    r"happy\s+hour\s+deals?|half[-\s]?price[ds]?\b|half\s+off|1/2\s+off|"
+    r"\bbogo\s+(?!-)\w|\$\d+\s+(?:oysters|martinis|cocktails|margaritas|wings|tacos|burgers|pizza|apps|appetizers)\b|"
+    r"\boysters\b.*\$\d|bottomless\s+(?:pasta|maki|steak|mimosas)|\bbottomless\s+brunch!|"
+    r"taco\s+tuesday|\bdiscount\b|free\s+biscuit|no\s+weigh\s+wednesday|\$\d+\s+girl\s+dinner",
+    re.IGNORECASE,
+)
+# A price mention inside a real ticketed show or activity ("Standup Comedy Show and $4 Drinks").
+EXCLUDE_DEAL_RE = re.compile(
+    r"comedy|stand-?up|stroll|\btour\b|trivia|bingo|\bdj\b|live\s+music|\bshow\b|class|tasting|"
+    r"commuter\s+rail|day\s+trip|developers|food\s+drive",
+    re.IGNORECASE,
+)
+
+
+def is_deal_event(name):
+    """True for a recurring food/drink special rather than an event you attend."""
+    if not name or not DEAL_EVENT_RE.search(name):
+        return False
+    return not EXCLUDE_DEAL_RE.search(name)
+
+
 def is_utility_event(name):
     """Return True if an event is an instructional, vocational, or civic service event."""
     if not name:
@@ -9511,6 +9535,7 @@ CATEGORY_STYLES = {
     "arts":      ("#ffd866", "✦"),
     "community": ("#8fa1b3", "◯"),
     "services":  ("#8fa1b3", "🛠"),
+    "deals":     ("#c678dd", "🏷"),
     "other":     ("#6b7280", "·"),
 }
 
@@ -9525,6 +9550,7 @@ CATEGORY_BUCKETS = [
     ("Community",          ["community", "other"]),
     ("Classes & Services", ["services"]),
     ("Kids & Family",      ["family", "kids"]),
+    ("Deals & Specials",   ["deals"]),
 ]
 _CAT_TO_BUCKET = {cat: name for name, cats in CATEGORY_BUCKETS for cat in cats}
 
