@@ -1817,6 +1817,26 @@ class TestBostonEvents(unittest.TestCase):
         self.assertTrue(_is_generic_link(" https://bostonconversations.com"))
         self.assertFalse(_is_generic_link("https://www.aeronautbrewing.com/event/123-trivia"))
 
+    def test_boston_conversations_copies_merge(self):
+        """Aeronaut, The Boston Calendar and Luma title the same night differently; one card, Luma link."""
+        from template import group_by_date
+        when = "2026-11-04T18:30:00-05:00"
+        venues = [
+            {"venue": "Aeronaut Brewing", "url": "https://d3izki9aezxlkr.cloudfront.net/public_events.json", "events": [
+                {"name": "Boston Social Conversations", "date": when, "venue": "Aeronaut Brewing (Somerville)",
+                 "url": "https://www.aeronautbrewing.com/visit/somerville/#events"}]},
+            {"venue": "The Boston Calendar", "url": "https://www.thebostoncalendar.com/events", "events": [
+                {"name": "Boston Conversations @ Aeronaut", "date": when, "venue": "Aeronaut Brewing Company",
+                 "url": "https://bostonconversations.com/"}]},
+            {"venue": "Luma Calendars", "url": "https://lu.ma/discover", "events": [
+                {"name": "Boston Social Conversations - November Event", "date": when,
+                 "venue": "Aeronaut Brewing Company, Somerville", "url": "https://lu.ma/8ugz1m1n"}]},
+        ]
+        dated, _, _ = group_by_date(venues)
+        evs = [e for _, es in dated for e in es]
+        self.assertEqual(len(evs), 1, [e["name"] for e in evs])
+        self.assertEqual(evs[0]["url"], "https://lu.ma/8ugz1m1n")
+
     def test_service_ads_filtered_but_classes_kept(self):
         from scrapers import is_service_ad
         self.assertTrue(is_service_ad("Stress Free Week", "A La Carte Massage"))

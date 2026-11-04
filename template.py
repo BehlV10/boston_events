@@ -1958,7 +1958,7 @@ def _title_variants(title):
             # Only the part after the prefix: the prefix itself ("mfa") is shared by
             # unrelated events at the same venue.
             pieces.append(t.split(sep, 1)[1])
-    out = []
+    out = [key for rx, key in _SERIES_ALIASES if rx.search(t)]
     for p in pieces:
         toks = [w for w in re.findall(r"[a-z0-9]+", p) if w not in _TITLE_FILLER]
         c = "".join(toks)
@@ -1966,6 +1966,14 @@ def _title_variants(title):
             out.append(c)
     return out
 
+
+# Recurring series each source titles differently. Still only merges at the same venue within
+# 90 min (step 5 of _merge_duplicates), so the shared key can't pull in other events.
+_SERIES_ALIASES = [
+    # "Boston Social Conversations | Millennial Crisis" (Aeronaut), "Boston Conversations @ Aeronaut"
+    # (Boston Calendar), "Boston Social Conversations - November Event" (Luma)
+    (re.compile(r"\bboston (?:social )?conversations\b"), "series:bostonconversations"),
+]
 
 _GENERIC_TITLE_VARIANTS = {"boston", "cambridge", "somerville", "tour", "usa", "concert", "show", "live"}
 _VENUE_GENERIC_WORDS = {
@@ -2027,7 +2035,10 @@ def _is_generic_link(url):
     if not u.netloc:
         return True
     path = u.path.strip("/").lower()
-    return path in ("", "events", "calendar", "event-calendar", "upcoming-events", "whats-on") and not u.query
+    listing = ("", "events", "calendar", "event-calendar", "upcoming-events", "whats-on")
+    if "event" in u.fragment.lower():  # "aeronautbrewing.com/visit/somerville/#events"
+        return True
+    return path.rsplit("/", 1)[-1] in listing and not u.query
 
 
 def _merge_duplicates(events):

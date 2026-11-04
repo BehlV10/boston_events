@@ -209,6 +209,7 @@ def fix_doubled_url(url):
 
 # Domains that have lapsed or been taken over by unrelated sites (verified redirect targets).
 DEAD_EVENT_DOMAINS = {
+    "themillennialcrisis.com",  # Boston Social Conversations' old site; 404s since Nov 2026
     "thebiltmoregrill.com",  # now redirects to a brewery in Cortez, CO
 }
 
@@ -1709,9 +1710,11 @@ def scrape_aeronaut(url, ua):
             dt = datetime(d.year, d.month, d.day, hour, minute, tzinfo=EASTERN)
         except ValueError:
             continue
-        link = (row.get("tickets") or row.get("extlink") or "").strip() or "https://www.aeronautbrewing.com/visit/somerville/#events"
+        link = sanitize_event_url((row.get("tickets") or row.get("extlink") or "").strip(),
+                                  fallback="https://www.aeronautbrewing.com/visit/somerville/#events")
         events.append({
-            "name": row.get("name") or "Event",
+            # "Boston Social Conversations | Millennial Crisis": organizer suffix, not part of the name
+            "name": re.sub(r"\s*\|\s*millennial crisis\s*$", "", row.get("name") or "Event", flags=re.I),
             "date": dt.astimezone(timezone.utc).isoformat(),
             "url": link,
             "venue": "Aeronaut Brewing (Somerville)",
