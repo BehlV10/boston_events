@@ -209,8 +209,26 @@ def fix_doubled_url(url):
 
 # Domains that have lapsed or been taken over by unrelated sites (verified redirect targets).
 DEAD_EVENT_DOMAINS = {
+    "themillennialcrisis.com",  # Boston Social Conversations' old site; 404s since Nov 2026
     "thebiltmoregrill.com",  # now redirects to a brewery in Cortez, CO
 }
+
+
+# Paid spa/massage services posted as events: promos from massage businesses, hotel spa
+# packages ("Spa After Dark", $145), members-club spa nights. Massage *classes* (CCAE,
+# partner Thai massage workshops) and free wellness walks are real events and stay.
+_SERVICE_AD_VENUE_RE = re.compile(r"\bmassage\b(?!.*\bschool\b)|\bmed\s*spa\b|\bremedy place\b", re.I)
+_SERVICE_AD_TITLE_RE = re.compile(
+    r"\bspa (?:night|after dark|day|package|weekend)\b|\breflexology experience\b|\bstress[- ]free week\b|"
+    r"\b(?:botox|filler|iv (?:drip|therapy))\b",
+    re.I,
+)
+
+
+def is_service_ad(name, venue=None):
+    if _SERVICE_AD_TITLE_RE.search(name or ""):
+        return True
+    return bool(venue and _SERVICE_AD_VENUE_RE.search(venue))
 
 
 def sanitize_event_url(url, fallback=None):
@@ -939,7 +957,7 @@ def scrape_boston_calendar(url, ua):
                 continue
             seen_urls.add(seen_key)
             venue_txt = loc_el.get_text(strip=True) if loc_el else None
-            if venue_txt and _BC_AD_VENUE_RE.search(venue_txt):
+            if is_service_ad(name, venue_txt):
                 continue
             price = None
             if _BC_FREE_RE.search(name):
@@ -1017,8 +1035,6 @@ _BC_FREE_RE = re.compile(
     r"(?:free|no cover|complimentary)\b(?!\s*(?:week|zone|spirit|style|flow|form|hold))",
     re.I,
 )
-# Businesses that post recurring paid-service ads as events.
-_BC_AD_VENUE_RE = re.compile(r"\bmassage\b|\bmed\s*spa\b", re.I)
 
 
 def _title_from_ticket_slug(url):
@@ -1694,9 +1710,11 @@ def scrape_aeronaut(url, ua):
             dt = datetime(d.year, d.month, d.day, hour, minute, tzinfo=EASTERN)
         except ValueError:
             continue
-        link = row.get("tickets") or row.get("extlink") or "https://www.aeronautbrewing.com/visit/somerville/#events"
+        link = sanitize_event_url((row.get("tickets") or row.get("extlink") or "").strip(),
+                                  fallback="https://www.aeronautbrewing.com/visit/somerville/#events")
         events.append({
-            "name": row.get("name") or "Event",
+            # "Boston Social Conversations | Millennial Crisis": organizer suffix, not part of the name
+            "name": re.sub(r"\s*\|\s*millennial crisis\s*$", "", row.get("name") or "Event", flags=re.I),
             "date": dt.astimezone(timezone.utc).isoformat(),
             "url": link,
             "venue": "Aeronaut Brewing (Somerville)",
@@ -4538,14 +4556,15 @@ def scrape_meetup_group(url, ua):
         venue_name = venue_obj.get("name")
         if venue_obj.get("city"):
             venue_name = f"{venue_name} ({venue_obj['city']})" if venue_name else venue_obj["city"]
-        events.append({
+        ev = {
             "name": v.get("title"),
             "date": when.isoformat(),
             "url": v.get("eventUrl"),
             "venue": venue_name,
             "price": None,
             "description": (v.get("description") or "")[:200],
-        })
+        }
+        events.append(ev)
     return events
 
 
@@ -4583,6 +4602,206 @@ def scrape_meetup(url, ua):
     return events
 
 
+def _luma_entry_to_event(entry, now):
+    """One Luma API entry ({event, calendar, hosts, ticket_info}) -> our event dict, or None."""
+    ev = entry.get("event") or {}
+    name = (ev.get("name") or "").strip()
+    if not name or is_placeholder_or_closed_event(name):
+        return None
+
+    start_at = ev.get("start_at")
+    if not start_at:
+        return None
+    try:
+        dt = datetime.fromisoformat(start_at.replace("Z", "+00:00"))
+        if dt.astimezone(timezone.utc) < now:
+            return None
+        iso_date = dt.astimezone(timezone.utc).isoformat()
+    except Exception:
+        return None
+
+    slug = ev.get("url") or ""
+    link = slug if slug.startswith("http") else f"https://lu.ma/{slug}"
+
+    geo = ev.get("geo_address_info") or {}
+    cal = entry.get("calendar") or {}
+
+    if geo.get("mode") == "shown" and (geo.get("address") or geo.get("short_address")):
+        addr = geo.get("address") or geo.get("short_address")
+        city = geo.get("city") or "Boston"
+        venue = addr if city.lower() in addr.lower() else f"{addr}, {city}"
+    elif geo.get("sublocality") or geo.get("city"):
+        subloc = geo.get("sublocality") or geo.get("city")
+        venue = f"{subloc} (RSVP for address)"
+    elif cal.get("name") and cal.get("name").lower() != "personal":
+        venue = cal.get("name")
+    else:
+        venue = "Boston"
+
+    coord = ev.get("coordinate") or geo.get("place_coordinate") or {}
+    lat = coord.get("latitude")
+    lng = coord.get("longitude")
+    address = geo.get("full_address") or geo.get("address") or ""
+    neighborhood = geo.get("sublocality") or ""
+
+    t_info = entry.get("ticket_info") or {}
+    price = None
+    if t_info.get("is_free"):
+        price = "Free"
+    elif t_info.get("price"):
+        cents = t_info["price"].get("cents")
+        if cents == 0:
+            price = "Free"
+        elif cents is not None:
+            price = f"${cents / 100:.2f}".rstrip("0").rstrip(".")
+
+    hosts = [h.get("name") for h in (entry.get("hosts") or []) if h.get("name")]
+    cal_desc = cal.get("description_short")
+    desc_parts = []
+    if hosts:
+        h_str = ", ".join(hosts[:3])
+        desc_parts.append(f"Hosted by {h_str}")
+    if cal_desc:
+        desc_parts.append(cal_desc)
+    desc = " • ".join(desc_parts)[:250] if desc_parts else None
+
+    cat = infer_category(name, venue, default="community")
+
+    ev_dict = {
+        "name": name,
+        "date": iso_date,
+        "url": link,
+        "venue": venue,
+        "price": price,
+        "category": cat,
+        "description": desc,
+    }
+    if lat is not None and lng is not None:
+        ev_dict["lat"] = lat
+        ev_dict["lng"] = lng
+    if address:
+        ev_dict["address"] = address
+    if neighborhood:
+        ev_dict["neighborhood"] = neighborhood
+
+    return ev_dict
+
+
+# Luma calendars to follow. Seeded by hand; scrape_luma and other sources' lu.ma links add more
+# (cached), so new Boston organizers on Luma get picked up without code changes.
+LUMA_CALENDAR_SEEDS = {
+    "cal-Fo5DfeIk8ur7FPY": "Millennial Crisis",  # Boston Social Conversations (Aeronaut)
+}
+LUMA_CALENDARS_CACHE_PATH = os.path.join(CACHE_DIR, "luma_calendars.json")
+_BOSTON_CENTER = (42.3601, -71.0589)
+
+
+def _load_luma_calendars():
+    cals = dict(LUMA_CALENDAR_SEEDS)
+    try:
+        with open(LUMA_CALENDARS_CACHE_PATH) as f:
+            cals.update(json.load(f).get("calendars") or {})
+    except (OSError, ValueError):
+        pass
+    return cals
+
+
+def _save_luma_calendars(cals, resolved_urls):
+    try:
+        os.makedirs(CACHE_DIR, exist_ok=True)
+        with open(LUMA_CALENDARS_CACHE_PATH, "w") as f:
+            json.dump({"calendars": cals, "resolved_urls": sorted(resolved_urls)}, f)
+    except OSError:
+        pass
+
+
+_LUMA_DISCOVERED = {}
+
+
+def _remember_luma_calendar(cal):
+    cal = cal or {}
+    api_id, name = cal.get("api_id"), (cal.get("name") or "").strip()
+    if api_id and api_id.startswith("cal-") and name and name.lower() != "personal":
+        _LUMA_DISCOVERED[api_id] = name
+
+
+def _near_boston(ev, km=25):
+    import math
+    lat, lng = ev.get("lat"), ev.get("lng")
+    if lat is None or lng is None:
+        return False  # online or hidden-location: can't tell it's local
+    dy = (float(lat) - _BOSTON_CENTER[0]) * 111.0
+    dx = (float(lng) - _BOSTON_CENTER[1]) * 111.0 * math.cos(math.radians(_BOSTON_CENTER[0]))
+    return math.hypot(dx, dy) <= km
+
+
+def _luma_links_from_last_run():
+    """lu.ma / luma.com event links any source published last run (e.g. Partiful, Do617, venues)."""
+    try:
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "events.json")) as f:
+            data = json.load(f)
+    except (OSError, ValueError):
+        return set()
+    out = set()
+    for v in data.get("venues") or []:
+        for e in v.get("events") or []:
+            for u in [e.get("url")] + [a.get("url") for a in e.get("_alt_sources") or []]:
+                m = re.match(r"https?://(?:www\.)?(?:lu\.ma|luma\.com)/([A-Za-z0-9_-]+)/?$", (u or "").strip())
+                if m and m.group(1) not in ("boston", "discover", "home", "explore"):
+                    out.add(m.group(1))
+    return out
+
+
+def scrape_luma_calendars(url, ua):
+    """Upcoming Boston-area events from every Luma calendar we follow (seeds + discovered)."""
+    from concurrent.futures import ThreadPoolExecutor
+    headers = {"User-Agent": ua, "Accept": "application/json"}
+    cals = _load_luma_calendars()
+    cals.update(_LUMA_DISCOVERED)
+    try:
+        with open(LUMA_CALENDARS_CACHE_PATH) as f:
+            resolved = set(json.load(f).get("resolved_urls") or [])
+    except (OSError, ValueError):
+        resolved = set()
+
+    # Learn the calendar behind event links other sources published (capped per run)
+    for slug in sorted(_luma_links_from_last_run() - resolved)[:25]:
+        resolved.add(slug)
+        try:
+            d = _SESSION.get(f"https://api.lu.ma/url?url={slug}", headers=headers, timeout=10).json().get("data") or {}
+        except Exception:
+            continue
+        cal = d.get("calendar") or {}
+        if cal.get("api_id") and cal.get("name") and cal["name"].lower() != "personal":
+            cals[cal["api_id"]] = cal["name"]
+
+    now = datetime.now(timezone.utc)
+
+    def fetch(cal_id):
+        try:
+            r = _SESSION.get("https://api.lu.ma/calendar/get-items",
+                             params={"calendar_api_id": cal_id, "period": "future", "pagination_limit": 50},
+                             headers=headers, timeout=15)
+            r.raise_for_status()
+            return r.json().get("entries") or []
+        except Exception:
+            return []
+
+    events, seen = [], set()
+    with ThreadPoolExecutor(max_workers=8) as ex:
+        for entries in ex.map(fetch, list(cals)[:80]):
+            for entry in entries:
+                ev = _luma_entry_to_event(entry, now)
+                if not ev or not _near_boston(ev):
+                    continue
+                key = (ev["name"].lower(), ev["date"][:16])
+                if key not in seen:
+                    seen.add(key)
+                    events.append(ev)
+    _save_luma_calendars(cals, resolved)
+    return events
+
+
 def scrape_luma(url, ua):
     """Scrape curated Boston tech, AI, startup, and community events from Luma."""
     api_url = "https://api.lu.ma/discover/get-paginated-events?discover_place_api_id=discplace-VWeZ1zUvnawYHMj"
@@ -4608,97 +4827,28 @@ def scrape_luma(url, ua):
 
         entries = data.get("entries") or []
         for entry in entries:
-            ev = entry.get("event") or {}
-            name = (ev.get("name") or "").strip()
-            if not name or is_placeholder_or_closed_event(name):
+            ev_dict = _luma_entry_to_event(entry, now)
+            if not ev_dict:
                 continue
-
-            start_at = ev.get("start_at")
-            if not start_at:
-                continue
-            try:
-                dt = datetime.fromisoformat(start_at.replace("Z", "+00:00"))
-                if dt.astimezone(timezone.utc) < now:
-                    continue
-                iso_date = dt.astimezone(timezone.utc).isoformat()
-            except Exception:
-                continue
-
-            slug = ev.get("url") or ""
-            link = slug if slug.startswith("http") else f"https://lu.ma/{slug}"
-
-            key = (name.lower(), iso_date[:10])
+            key = (ev_dict["name"].lower(), ev_dict["date"][:10])
             if key in seen:
                 continue
             seen.add(key)
-
-            geo = ev.get("geo_address_info") or {}
-            cal = entry.get("calendar") or {}
-
-            if geo.get("mode") == "shown" and (geo.get("address") or geo.get("short_address")):
-                addr = geo.get("address") or geo.get("short_address")
-                city = geo.get("city") or "Boston"
-                venue = addr if city.lower() in addr.lower() else f"{addr}, {city}"
-            elif geo.get("sublocality") or geo.get("city"):
-                subloc = geo.get("sublocality") or geo.get("city")
-                venue = f"{subloc} (RSVP for address)"
-            elif cal.get("name") and cal.get("name").lower() != "personal":
-                venue = cal.get("name")
-            else:
-                venue = "Boston"
-
-            coord = ev.get("coordinate") or geo.get("place_coordinate") or {}
-            lat = coord.get("latitude")
-            lng = coord.get("longitude")
-            address = geo.get("full_address") or geo.get("address") or ""
-            neighborhood = geo.get("sublocality") or ""
-
-            t_info = entry.get("ticket_info") or {}
-            price = None
-            if t_info.get("is_free"):
-                price = "Free"
-            elif t_info.get("price"):
-                cents = t_info["price"].get("cents")
-                if cents == 0:
-                    price = "Free"
-                elif cents is not None:
-                    price = f"${cents / 100:.2f}".rstrip("0").rstrip(".")
-
-            hosts = [h.get("name") for h in (entry.get("hosts") or []) if h.get("name")]
-            cal_desc = cal.get("description_short")
-            desc_parts = []
-            if hosts:
-                h_str = ", ".join(hosts[:3])
-                desc_parts.append(f"Hosted by {h_str}")
-            if cal_desc:
-                desc_parts.append(cal_desc)
-            desc = " • ".join(desc_parts)[:250] if desc_parts else None
-
-            cat = infer_category(name, venue, default="community")
-
-            ev_dict = {
-                "name": name,
-                "date": iso_date,
-                "url": link,
-                "venue": venue,
-                "price": price,
-                "category": cat,
-                "description": desc,
-            }
-            if lat is not None and lng is not None:
-                ev_dict["lat"] = lat
-                ev_dict["lng"] = lng
-            if address:
-                ev_dict["address"] = address
-            if neighborhood:
-                ev_dict["neighborhood"] = neighborhood
-
+            _remember_luma_calendar(entry.get("calendar"))
             events.append(ev_dict)
 
         if not data.get("has_more") or not data.get("next_cursor"):
             break
         cursor = data.get("next_cursor")
 
+    if _LUMA_DISCOVERED:  # persist so scrape_luma_calendars follows them (it may run concurrently)
+        try:
+            with open(LUMA_CALENDARS_CACHE_PATH) as f:
+                cached = json.load(f)
+        except (OSError, ValueError):
+            cached = {}
+        cals = {**(cached.get("calendars") or {}), **_LUMA_DISCOVERED}
+        _save_luma_calendars(cals, set(cached.get("resolved_urls") or []))
     return events
 
 
@@ -8943,6 +9093,7 @@ _ALL_VENUES = [
     {"name": "The Platform Kendall", "url": "https://www.theplatformkendall.org/event-listing/", "ua": UA_CHROME, "scraper": scrape_the_platform_kendall, "default_category": "stage"},
     {"name": "Partiful Boston", "url": "https://partiful.com/explore/l/bos/events", "ua": UA_CHROME, "scraper": scrape_partiful, "default_category": "community"},
     {"name": "Luma Boston", "url": "https://lu.ma/boston", "ua": UA_CHROME, "scraper": scrape_luma, "default_category": "community"},
+    {"name": "Luma Calendars", "url": "https://lu.ma/discover", "ua": UA_CHROME, "scraper": scrape_luma_calendars, "default_category": "community"},
     {"name": "ICA Boston", "url": "https://www.icaboston.org/events/", "ua": UA_CHROME, "scraper": scrape_ica, "default_category": "art"},
     {"name": "Cisco Brewers Fenway", "url": "https://ciscobrewersfenway.com/eventschedule", "ua": UA_CHROME, "scraper": scrape_squarespace_calendar_block, "default_category": "music"},
     {"name": "Castle Island Brewing", "url": "https://castleislandbeer.com/public-events", "ua": UA_CHROME, "scraper": scrape_squarespace_calendar_block, "default_category": "food"},
@@ -9019,9 +9170,7 @@ _ALL_VENUES = [
     {"name": "CCAE (Cambridge Center for Adult Education)", "url": "https://ccae.org/events", "ua": UA_CHROME, "scraper": scrape_ccae, "default_category": "community"},
     {"name": "Brookline Booksmith", "url": "https://www.brooklinebooksmith.com/events", "ua": UA_CURL, "scraper": scrape_event_list, "default_category": "books"},
     {"name": "Gardner Museum", "url": "https://www.gardnermuseum.org/calendar", "ua": UA_CHROME, "scraper": scrape_gardner, "default_category": "community"},
-    {"name": "ICA Boston", "url": "https://www.icaboston.org/events", "ua": UA_CHROME, "scraper": scrape_ica, "default_category": "community"},
     {"name": "Brattle Theatre", "url": "https://www.brattlefilm.org/", "ua": UA_CHROME, "scraper": scrape_brattle, "default_category": "film"},
-    {"name": "Luma Boston", "url": "https://lu.ma/boston", "ua": UA_CHROME, "scraper": scrape_luma, "default_category": "community"},
     {"name": "Meetup Boston", "url": "https://www.meetup.com/find/?location=us--ma--boston&source=EVENTS&eventType=inPerson&distance=tenMiles", "ua": UA_CHROME, "scraper": scrape_meetup, "default_category": "community"},
     {"name": "Somerville Board Games Meetup", "url": "https://www.meetup.com/somerville-board-games-meetup-group/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "gaming"},
     {"name": "Beantown Gamers", "url": "https://www.meetup.com/boardgames-boston/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "gaming"},
@@ -10163,6 +10312,7 @@ def _normalize_and_filter_events(raw_events, v):
 
         if not v_raw:
             e["venue"] = name
+            e["venue_unknown"] = True  # placeholder = source name; dedup may find the real venue
 
         cat = e.get("category")
         if cat == "classical" or (not cat and default_cat == "classical"):
