@@ -976,6 +976,7 @@ HUBS = {
     },
     # 1. High-Volume Programmatic Intent Pages
     "free-events-boston-this-weekend": {
+        "limit": 200,  # three days of events; 60 ran out on Friday
         "title": "Free Events in Boston This Weekend",
         "h1": "Free Events in Boston This Weekend",
         "city_filter": None,
@@ -1041,6 +1042,7 @@ HUBS = {
         "query": "#city=boston"
     },
     "boston-events-this-weekend": {
+        "limit": 200,  # three days of events; 60 ran out on Friday
         "title": "Things to Do in Boston This Weekend",
         "h1": "Boston This Weekend",
         "city_filter": "boston",
