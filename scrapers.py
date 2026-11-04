@@ -1005,6 +1005,7 @@ def scrape_mass_audubon(url, ua, venue, address):
             if not e.get("date"):
                 continue
             blob = f"{e.get('name')} {desc}"
+            e["url"] = link  # the JSON-LD has no url; each program page is its own event
             e["venue"] = venue
             e["address"] = address
             e["category"] = "family" if re.search(r"(?i)\b(?:famil(?:y|ies)|kids?|children|toddlers?|preschool|ages? \d)", blob) else "outdoors"

@@ -931,6 +931,13 @@ def filter_events_for_hub(hub, events):
             continue
         filtered.append(e)
 
+    if time_filter == "weekend" and hub.get("limit"):
+        # Share the slots across Fri/Sat/Sun so a busy Friday doesn't crowd out the weekend
+        per_day, by_day = hub["limit"] // 3, {}
+        for e in filtered:
+            by_day.setdefault(_parse_event_eastern_date(e), []).append(e)
+        filtered = [e for evs in by_day.values() for e in evs[:per_day]]
+
     # Fallback if tonight has fewer than 5 events: expand up to 3 days out
     if time_filter in ("tonight", "today") and len(filtered) < 5:
         today = datetime.now(EASTERN).date()
