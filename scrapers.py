@@ -1024,6 +1024,27 @@ def scrape_mass_audubon_boston_nature_center(url, ua):
     return scrape_mass_audubon(url, ua, "Mass Audubon Boston Nature Center", "500 Walk Hill St, Mattapan")
 
 
+_EB_FAMILY_RE = re.compile(
+    r"(?i)\b(?:tots?|toddlers?|bab(?:y|ies)|babywearing|littles|kids?|children|famil(?:y|ies)|"
+    r"daddy|mommy|father|mother|parents? (?:&|and) (?:child|kid|caregiver)|youth|girls|boys)\b")
+_EB_FAMILY_SKIP_RE = re.compile(
+    r"(?i)\b(?:cpr|aed|first aid|certification|webinar|online|virtual|coaching|breakthrough|"
+    r"retreat|adult child|pregnan)")
+
+
+def scrape_eventbrite_family(url, ua):
+    """Eventbrite's "parent" search: keep in-person outings for kids and families; drop
+    the plant classes, parenting webinars, coaching pitches and certification courses it mixes in."""
+    out = []
+    for e in scrape_eventbrite_search(url, ua):
+        name = e.get("name") or ""
+        if not e.get("venue") or not _EB_FAMILY_RE.search(name) or _EB_FAMILY_SKIP_RE.search(name):
+            continue
+        e["category"] = "family"
+        out.append(e)
+    return out
+
+
 _BC_TIME_RE = re.compile(
     r"(Sun|Mon|Tue|Wed|Thu|Fri|Sat)[a-z]*,\s+"
     r"(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+"
@@ -9753,6 +9774,7 @@ _ALL_VENUES = [
     {"name": "Mass Audubon Magazine Beach", "url": "https://www.massaudubon.org/programs/magazine-beach", "ua": UA_CHROME, "scraper": scrape_mass_audubon_magazine_beach, "default_category": "outdoors"},
     {"name": "Mass Audubon Boston Nature Center", "url": "https://www.massaudubon.org/programs/boston-nature-center", "ua": UA_CHROME, "scraper": scrape_mass_audubon_boston_nature_center, "default_category": "outdoors"},
     {"name": "Somerville Museum", "url": "https://www.somervillemuseum.org/calendar-events", "ua": UA_CHROME, "scraper": scrape_squarespace_events, "default_category": "community"},
+    {"name": "Eventbrite (kids & parents)", "url": "https://www.eventbrite.com/d/ma--boston/parent/", "ua": UA_CHROME, "scraper": scrape_eventbrite_family, "default_category": "family"},
     {"name": "Little Muse", "url": "https://littlemuse.substack.com", "ua": UA_CHROME, "scraper": scrape_little_muse, "default_category": "family"},
     {"name": "Puppet Showplace Theater", "url": "https://www.puppetshowplace.org/calendar", "ua": UA_CHROME, "scraper": scrape_puppet_showplace, "default_category": "family"},
     {"name": "Crystal Ballroom", "url": "https://www.crystalballroomboston.com/events/", "ua": UA_CHROME, "scraper": scrape_crystal_ballroom, "default_category": "music"},

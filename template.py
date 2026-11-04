@@ -1943,7 +1943,7 @@ def _build_compare_links(e, raw_title):
 
 def _source_priority(s):
     s = (s or "").lower()
-    if s in ("ticketmaster", "seatgeek", "eventbrite", "eventbrite boston", "eventbrite cambridge", "eventbrite somerville"):
+    if s in ("ticketmaster", "seatgeek") or s.startswith("eventbrite"):
         return 1
     if s in ("the boston calendar", "do617", "boston shows", "little muse"):
         return 5
