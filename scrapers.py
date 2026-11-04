@@ -687,39 +687,377 @@ def scrape_eventbrite_search(url, ua):
     return all_events
 
 
-def scrape_bpl(url, ua):
-    """Boston Public Library via BiblioCommons gateway — paginate 5 pages (~50 events)."""
-    events = []
-    for page in range(1, 6):
-        resp = _SESSION.get(
-            "https://gateway.bibliocommons.com/v2/libraries/bpl/events",
-            params={"page": page},
-            headers={"User-Agent": ua, "Accept": "application/json"},
-            timeout=15,
-        )
+_KIDS_AUDIENCE_RE = re.compile(r"\b(?:bab(?:y|ies)|toddlers?|pre-?school|kids?|child(?:ren)?|famil(?:y|ies)|"
+                               r"early literacy|ages?\s*0|birth|grades?\s*k|elementary)\b", re.I)
+_ADULT_AUDIENCE_RE = re.compile(r"\b(?:adults?|seniors?|older adults|teens?|young adults|tweens?)\b", re.I)
+
+
+def scrape_bibliocommons(library, ua, weeks=4, max_pages=25):
+    """Events for a BiblioCommons library (gateway API). The API ignores date/audience filters
+    and returns events unordered, so read every page (200/page) and keep the next `weeks`.
+    Adds the branch to the venue and marks baby/toddler/kids/family programs as "family"."""
+    base = f"https://gateway.bibliocommons.com/v2/libraries/{library}/events"
+    headers = {"User-Agent": ua, "Accept": "application/json"}
+    now = datetime.now(EASTERN)
+    horizon = now + timedelta(weeks=weeks)
+    defs, locations, audiences = {}, {}, {}
+    for page in range(1, max_pages + 1):
+        resp = _SESSION.get(base, params={"page": page, "limit": 200}, headers=headers, timeout=30)
         resp.raise_for_status()
         data = resp.json()
-        ids = (data.get("events") or {}).get("items") or []
-        ev_entities = (data.get("entities") or {}).get("events") or {}
-        if not ids:
+        ents = data.get("entities") or {}
+        for eid, ev in (ents.get("events") or {}).items():
+            defs[eid] = ev.get("definition") or {}
+        locations.update(ents.get("locations") or {})
+        audiences.update(ents.get("eventAudiences") or {})
+        pag = (data.get("events") or {}).get("pagination") or {}
+        if page >= (pag.get("pages") or 0):
             break
-        for eid in ids:
-            ev = ev_entities.get(eid) or {}
-            d = ev.get("definition") or {}
-            start = d.get("start")
-            if start:
-                try:
-                    start = datetime.fromisoformat(start).replace(tzinfo=EASTERN).astimezone(timezone.utc).isoformat()
-                except ValueError:
-                    start = None
-            events.append({
-                "name": d.get("title"),
-                "date": start,
-                "url": f"https://bpl.bibliocommons.com/events/{eid}",
-                "venue": "Boston Public Library",
-                "price": "Free",
-            })
+    events = []
+    for eid, d in defs.items():
+        if d.get("isCancelled") or not d.get("start") or not d.get("title"):
+            continue
+        try:
+            start = datetime.fromisoformat(d["start"]).replace(tzinfo=EASTERN)
+        except ValueError:
+            continue
+        if not (now - timedelta(hours=2) <= start <= horizon):
+            continue
+        branch = (locations.get(str(d.get("branchLocationId"))) or {}).get("name")
+        aud_names = [(audiences.get(a) or {}).get("name") or "" for a in d.get("audienceIds") or []]
+        aud = " ".join(aud_names)
+        kids = bool(_KIDS_AUDIENCE_RE.search(aud)) and not (
+            _ADULT_AUDIENCE_RE.search(aud) and not re.search(r"(?i)famil", aud))
+        ev = {
+            "name": d["title"].strip(),
+            "date": start.astimezone(timezone.utc).isoformat(),
+            "url": f"https://{library}.bibliocommons.com/events/{eid}",
+            "branch": branch,
+            "price": "Free",
+            "audience": aud_names or None,
+        }
+        if kids:
+            ev["category"] = "family"
+        events.append(ev)
     return events
+
+
+# BPL branches: (match key in the BiblioCommons branch name, lat, lng, neighborhood, address).
+# Coordinates are approximate (building-level).
+_BPL_BRANCHES = [
+    ("central", 42.3496, -71.0779, "Back Bay", "700 Boylston St, Boston"),
+    ("copley", 42.3496, -71.0779, "Back Bay", "700 Boylston St, Boston"),
+    ("adams street", 42.2856, -71.0573, "Dorchester", "690 Adams St, Dorchester"),
+    ("faneuil", 42.3497, -71.1658, "Brighton", "419 Faneuil St, Brighton"),
+    ("brighton", 42.3497, -71.1567, "Brighton", "40 Academy Hill Rd, Brighton"),
+    ("charlestown", 42.3757, -71.0640, "Charlestown", "179 Main St, Charlestown"),
+    ("chinatown", 42.3523, -71.0626, "Chinatown", "2 Boylston St, Boston"),
+    ("codman", 42.2876, -71.0716, "Dorchester", "690 Washington St, Dorchester"),
+    ("connolly", 42.3209, -71.1110, "Jamaica Plain", "433 Centre St, Jamaica Plain"),
+    ("east boston", 42.3745, -71.0350, "East Boston", "365 Bremen St, East Boston"),
+    ("egleston", 42.3133, -71.0989, "Roxbury", "2044 Columbus Ave, Roxbury"),
+    ("fields corner", 42.3000, -71.0613, "Dorchester", "1520 Dorchester Ave, Dorchester"),
+    ("grove hall", 42.3087, -71.0807, "Dorchester", "41 Geneva Ave, Dorchester"),
+    ("honan", 42.3613, -71.1300, "Allston", "300 N Harvard St, Allston"),
+    ("allston", 42.3613, -71.1300, "Allston", "300 N Harvard St, Allston"),
+    ("hyde park", 42.2556, -71.1240, "Hyde Park", "35 Harvard Ave, Hyde Park"),
+    ("jamaica plain", 42.3092, -71.1153, "Jamaica Plain", "30 South St, Jamaica Plain"),
+    ("lower mills", 42.2722, -71.0679, "Dorchester", "27 Richmond St, Dorchester"),
+    ("mattapan", 42.2706, -71.0931, "Mattapan", "1350 Blue Hill Ave, Mattapan"),
+    ("north end", 42.3640, -71.0547, "North End", "25 Parmenter St, Boston"),
+    ("orient heights", 42.3874, -71.0045, "East Boston", "18 Barnes Ave, East Boston"),
+    ("parker hill", 42.3311, -71.1007, "Mission Hill", "1497 Tremont St, Roxbury"),
+    ("roslindale", 42.2870, -71.1270, "Roslindale", "4246 Washington St, Roslindale"),
+    ("dudley", 42.3289, -71.0837, "Roxbury", "149 Dudley St, Roxbury"),
+    ("roxbury", 42.3289, -71.0837, "Roxbury", "149 Dudley St, Roxbury"),
+    ("south boston", 42.3355, -71.0383, "South Boston", "646 E Broadway, South Boston"),
+    ("south end", 42.3416, -71.0763, "South End", "685 Tremont St, Boston"),
+    ("uphams", 42.3172, -71.0656, "Dorchester", "500 Columbia Rd, Dorchester"),
+    ("west end", 42.3611, -71.0655, "West End", "151 Cambridge St, Boston"),
+    ("west roxbury", 42.2843, -71.1599, "West Roxbury", "1961 Centre St, West Roxbury"),
+]
+
+
+def _bpl_branch_geo(branch):
+    low = (branch or "").lower()
+    # longest key first so "west roxbury" beats "roxbury", "faneuil" beats "brighton"
+    for key, lat, lng, neigh, addr in sorted(_BPL_BRANCHES, key=lambda b: -len(b[0])):
+        if key in low:
+            return {"lat": lat, "lng": lng, "neighborhood": neigh, "address": addr}
+    return None
+
+
+def scrape_bpl(url, ua):
+    """Boston Public Library (Central + 25 branches) via BiblioCommons, with each branch's
+    own pin and neighborhood instead of everything at Copley."""
+    events = scrape_bibliocommons("bpl", ua, weeks=3)
+    for e in events:
+        br = e.pop("branch", None)
+        e["venue"] = f"Boston Public Library ({br})" if br else "Boston Public Library"
+        geo = _bpl_branch_geo(br)
+        if geo:
+            e.update(geo)
+    return events
+
+
+def scrape_brookline_library(url, ua):
+    """Public Library of Brookline (Main, Coolidge Corner, Putterham): LibCal RSS, same feed
+    format as Cambridge's. Drops room-booking placeholders ("space unavailable")."""
+    out = []
+    for e in scrape_cpl(url, ua):
+        if re.match(r"(?i)\s*(space unavailable|closed|room reserved)\b", e.get("name") or ""):
+            continue
+        e["venue"] = re.sub(r"^Cambridge Public Library", "Brookline Public Library", e.get("venue") or "Brookline Public Library")
+        out.append(e)
+    return out
+
+
+def scrape_boston_childrens_museum(url, ua):
+    """Boston Children's Museum: event posts (EventON) from the WordPress API; start time from
+    each page's JSON-LD (offsets written "-5:00", which fromisoformat rejects)."""
+    from concurrent.futures import ThreadPoolExecutor
+    posts = _SESSION.get(url, params={"per_page": 60}, headers={"User-Agent": ua}, timeout=20).json()
+    now = datetime.now(timezone.utc)
+
+    def one(post):
+        link = post.get("link")
+        try:
+            html = _SESSION.get(link, headers={"User-Agent": ua}, timeout=20).text
+        except Exception:
+            return []
+        out = []
+        for m in re.finditer(r'"startDate"\s*:\s*"(\d{4}-\d{2}-\d{2})T(\d{1,2}):(\d{2})([+-])(\d{1,2}):?(\d{2})"', html):
+            d, hh, mm, sign, oh, om = m.groups()
+            iso = f"{d}T{int(hh):02d}:{mm}:00{sign}{int(oh):02d}:{om}"
+            try:
+                dt = datetime.fromisoformat(iso)
+            except ValueError:
+                continue
+            if dt < now - timedelta(hours=2):
+                continue
+            out.append({
+                "name": _html_unescape(_html_unescape((post.get("title") or {}).get("rendered") or "")).strip(),
+                "date": dt.astimezone(timezone.utc).isoformat(),
+                "url": link,
+                "venue": "Boston Children's Museum",
+                "price": None,
+                "category": "family",
+            })
+        return out
+
+    with ThreadPoolExecutor(max_workers=4) as ex:
+        events = [e for evs in ex.map(one, posts if isinstance(posts, list) else []) for e in evs if e["name"]]
+    seen, uniq = set(), []
+    for e in events:
+        k = (e["name"], e["date"])
+        if k not in seen:
+            seen.add(k)
+            uniq.append(e)
+    return uniq
+
+
+def scrape_puppet_showplace(url, ua):
+    """Puppet Showplace Theater (Brookline Village): Squarespace calendar of family shows."""
+    out = []
+    for e in scrape_squarespace(url, ua):
+        e["venue"] = "Puppet Showplace Theater"
+        # adult "Puppet Slams" and workshops aren't kids' shows
+        try:
+            evening = datetime.fromisoformat(e["date"]).astimezone(EASTERN).hour >= 19
+        except (KeyError, TypeError, ValueError):
+            evening = False
+        name = e.get("name") or ""
+        if re.search(r"(?i)\binfo session\b|\bvolunteer\b", name):
+            e["category"] = "community"
+        elif evening or re.search(r"(?i)\bslam\b|\b(?:18|21)\+|adults?\b|workshop", name):
+            e["category"] = "theater"  # evening shows and slams are for grown-ups
+        else:
+            e["category"] = "family"
+        out.append(e)
+    return out
+
+
+_LM_DAY_RE = re.compile(r"^(MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY|SUNDAY),?\s+([A-Za-z]+)\s+(\d{1,2})", re.I)
+_LM_TIME_RE = re.compile(r"(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?\s*[-–]\s*\d{1,2}(?::\d{2})?\s*(AM|PM)", re.I)
+
+
+def scrape_little_muse(url, ua, posts=3):
+    """Little Muse (littlemuse.substack.com): a free weekly newsletter of kids' events around
+    Cambridge/Somerville/Boston. Each listing is three <br>-separated lines:
+      "🎃 10:00-11:00 AM - <a>Title</a> (ages 0-5) ~22 min 💲✱"
+      "Venue, Street Address, Town"
+      "Description."
+    Listings link to the original event page, so copies of events we already scrape (libraries)
+    merge with ours by URL; Little Muse shows as a source on the card."""
+    headers = {"User-Agent": ua, "Accept": "application/json"}
+    base = url.rstrip("/")
+    archive = _SESSION.get(f"{base}/api/v1/archive", params={"sort": "new", "limit": posts},
+                           headers=headers, timeout=20).json()
+    now = datetime.now(EASTERN)
+    events = []
+    for meta in archive[:posts]:
+        if meta.get("audience") not in (None, "everyone"):
+            continue
+        post = _SESSION.get(f"{base}/api/v1/posts/{meta['slug']}", headers=headers, timeout=20).json()
+        post_date = datetime.fromisoformat(post["post_date"].replace("Z", "+00:00")).astimezone(EASTERN).date()
+        soup = BeautifulSoup(post.get("body_html") or "", "html.parser")
+        day = None
+        for el in soup.find_all(["h2", "h3", "p"]):
+            text = el.get_text(" ", strip=True)
+            if el.name == "h2":
+                day = None  # e.g. "All Week / Multi-Day": ongoing things, no single date
+                m = _LM_DAY_RE.match(text)
+                if m:
+                    mon = next((v for k, v in _MONTHS.items() if k.startswith(m.group(2).lower()[:3])), None)
+                    if mon:
+                        year = post_date.year + (1 if mon < post_date.month - 6 else 0)  # Dec post, Jan days
+                        try:
+                            day = date(year, mon, int(m.group(3)))
+                        except ValueError:
+                            day = None
+                continue
+            if el.name != "p" or day is None:
+                continue
+            link = el.find("a")
+            parts = [p.strip() for p in re.split(r"<br\s*/?>", el.decode_contents())]
+            if not link or len(parts) < 2:
+                continue
+            first = BeautifulSoup(parts[0], "html.parser").get_text(" ", strip=True)
+            tm = _LM_TIME_RE.search(first)
+            if not tm:
+                continue
+            h, mnt = int(tm.group(1)), int(tm.group(2) or 0)
+            ampm = (tm.group(3) or tm.group(4)).upper()
+            h = h % 12 + (12 if ampm == "PM" else 0)
+            start = datetime(day.year, day.month, day.day, h, mnt, tzinfo=EASTERN)
+            if not (now - timedelta(hours=3) <= start <= now + timedelta(days=10)):
+                continue
+            title = link.get_text(" ", strip=True)
+            ages = re.search(r"\((ages?[^)]*|all ages)\)", first, re.I)
+            where = BeautifulSoup(parts[1], "html.parser").get_text(" ", strip=True)
+            desc = BeautifulSoup(parts[2], "html.parser").get_text(" ", strip=True) if len(parts) > 2 else ""
+            bits = [b.strip() for b in where.split(",")]
+            # venue = leading parts until one starts with a street number ("123 Main St")
+            i = next((k for k, b in enumerate(bits) if re.match(r"\d", b)), len(bits))
+            venue = ", ".join(bits[:i]) or where
+            address = ", ".join(bits[i:]) if i < len(bits) else None
+            town = re.sub(r"\s*\(.*?\)\s*$", "", bits[-1]) if len(bits) > 1 else None
+            price = None
+            if "💲" in first:
+                pm = re.search(r"\$\d+(?:\.\d{2})?", desc)
+                price = f"{pm.group(0)}+" if pm else "Paid"
+            elif re.search(r"(?i)\bfree\b", desc):
+                price = "Free"
+            ev = {
+                "name": title,
+                "date": start.astimezone(timezone.utc).isoformat(),
+                "url": link.get("href"),
+                "venue": venue,
+                "price": price,
+                "category": "family",
+                "description": (f"({ages.group(1)}) " if ages else "") + desc[:220],
+                "via_url": post.get("canonical_url"),
+            }
+            if address:
+                ev["address"] = address
+            if town and not re.match(r"\d", town):
+                ev["locality"] = town
+            events.append(ev)
+    return events
+
+
+def scrape_town_library_kids(url, ua, library, town):
+    """Kids/family programs only from a nearby town's Assabet library calendar (same platform
+    as Somerville's). Their adult programs would flood the Outer Suburbs group."""
+    out = []
+    for e in scrape_somerville_library(url, ua):
+        if e.get("category") != "family" and not is_kid_family_event(e.get("name"), None):
+            continue
+        branch = re.sub(r"^Somerville Public Library\s*\(?|\)$", "", e.get("venue") or "").strip()
+        # single-branch libraries report their own name as the branch
+        same = not branch or town.lower() in branch.lower() or branch.lower() == "somerville public library"
+        e["venue"] = library if same else f"{library} ({branch})"
+        e["locality"] = town  # card shows "Watertown", not "Outer Suburbs"
+        e["category"] = "family"
+        out.append(e)
+    return out
+
+
+def scrape_watertown_library_kids(url, ua):
+    return scrape_town_library_kids(url, ua, "Watertown Free Public Library", "Watertown")
+
+
+def scrape_medford_library_kids(url, ua):
+    return scrape_town_library_kids(url, ua, "Medford Public Library", "Medford")
+
+
+def scrape_belmont_library_kids(url, ua):
+    return scrape_town_library_kids(url, ua, "Belmont Public Library", "Belmont")
+
+
+
+def scrape_mass_audubon(url, ua, venue, address):
+    """Mass Audubon center program list -> each program page's JSON-LD. Family/kids programs
+    (by title or description) go to Kids & Family, the rest to outdoors."""
+    from concurrent.futures import ThreadPoolExecutor
+    html = _SESSION.get(url, headers={"User-Agent": ua}, timeout=20).text
+    path = urlparse(url).path.rstrip("/")
+    links = sorted({urljoin(url, h) for h in re.findall(r'href="(%s/\d+[^"#?]*)"' % re.escape(path), html)})
+
+    def one(link):
+        try:
+            evs = scrape_jsonld(link, ua)
+        except Exception:
+            return []
+        try:
+            page = _SESSION.get(link, headers={"User-Agent": ua}, timeout=20).text
+            m = re.search(r'"description"\s*:\s*"([^"]{0,600})', page)
+            desc = _html_unescape(m.group(1)) if m else ""
+        except Exception:
+            desc = ""
+        out = []
+        for e in evs:
+            if not e.get("date"):
+                continue
+            blob = f"{e.get('name')} {desc}"
+            e["url"] = link  # the JSON-LD has no url; each program page is its own event
+            e["venue"] = venue
+            e["address"] = address
+            e["category"] = "family" if re.search(r"(?i)\b(?:famil(?:y|ies)|kids?|children|toddlers?|preschool|ages? \d)", blob) else "outdoors"
+            out.append(e)
+        return out
+
+    with ThreadPoolExecutor(max_workers=3) as ex:
+        return [e for evs in ex.map(one, links[:20]) for e in evs]
+
+
+def scrape_mass_audubon_magazine_beach(url, ua):
+    return scrape_mass_audubon(url, ua, "Mass Audubon Nature Center at Magazine Beach", "668 Memorial Dr, Cambridge")
+
+
+def scrape_mass_audubon_boston_nature_center(url, ua):
+    return scrape_mass_audubon(url, ua, "Mass Audubon Boston Nature Center", "500 Walk Hill St, Mattapan")
+
+
+_EB_FAMILY_RE = re.compile(
+    r"(?i)\b(?:tots?|toddlers?|bab(?:y|ies)|babywearing|littles|kids?|children|famil(?:y|ies)|"
+    r"daddy|mommy|father|mother|parents? (?:&|and) (?:child|kid|caregiver)|youth|girls|boys)\b")
+_EB_FAMILY_SKIP_RE = re.compile(
+    r"(?i)\b(?:cpr|aed|first aid|certification|webinar|online|virtual|coaching|breakthrough|"
+    r"retreat|adult child|pregnan)")
+
+
+def scrape_eventbrite_family(url, ua):
+    """Eventbrite's "parent" search: keep in-person outings for kids and families; drop
+    the plant classes, parenting webinars, coaching pitches and certification courses it mixes in."""
+    out = []
+    for e in scrape_eventbrite_search(url, ua):
+        name = e.get("name") or ""
+        if not e.get("venue") or not _EB_FAMILY_RE.search(name) or _EB_FAMILY_SKIP_RE.search(name):
+            continue
+        e["category"] = "family"
+        out.append(e)
+    return out
 
 
 _BC_TIME_RE = re.compile(
@@ -8755,14 +9093,24 @@ def scrape_northeastern(url, ua):
             continue
         seen.add(key)
 
-        events.append({
+        entry = {
             "name": html.unescape(title).strip()[:160],
             "date": iso_date,
             "url": ev_url,
             "venue": loc[:80],
             "price": "Free" if ev.get("free") else None,
-        })
+        }
+        # Engineering/CS/AI departments and tech-titled talks -> default-off Tech & Startups
+        depts = " ".join(t.get("name") or "" for t in (ev.get("filters") or {}).get("departments") or [])
+        if _NEU_TECH_DEPT_RE.search(depts) or TECH_EVENT_RE.search(entry["name"]) or re.search(r"(?i)\bstem\b|\bdata\b", entry["name"]):
+            entry["category"] = "tech"
+        events.append(entry)
     return events
+
+
+_NEU_TECH_DEPT_RE = re.compile(
+    r"\b(?:COE|College of Engineering|Khoury|Computer Science|Experiential AI|NUlab|Roux Institute|"
+    r"Network Science|Data Science|Bioengineering|Mechanical|Electrical)\b", re.I)
 
 
 PARTIFUL_SOURCES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "partiful_sources.json")
@@ -9432,6 +9780,18 @@ _ALL_VENUES = [
     {"name": "BIDA Contra Dance", "url": "https://www.bidadance.org/", "ua": UA_CHROME, "scraper": scrape_bida, "default_category": "dance"},
     {"name": "24 Hour Music", "url": "https://tickets.24hourmusic.com/", "ua": UA_CHROME, "scraper": scrape_24hour_music, "default_category": "music"},
     {"name": "Boston Public Library", "url": "https://bpl.bibliocommons.com/events/search/index", "ua": UA_CHROME, "scraper": scrape_bpl, "default_category": "community"},
+    {"name": "Brookline Public Library", "url": "https://brooklinelibrary.libcal.com/rss.php?m=month&cid=20102", "ua": UA_CHROME, "scraper": scrape_brookline_library, "default_category": "community"},
+    {"name": "Boston Children's Museum", "url": "https://bostonchildrensmuseum.org/wp-json/wp/v2/ajde_events", "ua": UA_CHROME, "scraper": scrape_boston_childrens_museum, "default_category": "family"},
+    {"name": "New England Aquarium", "url": "https://www.neaq.org/wp-json/tribe/events/v1/events", "ua": UA_CHROME, "scraper": scrape_tribe_rest, "default_category": "family"},
+    {"name": "Watertown Library (kids)", "url": "https://watertownlib.assabetinteractive.com/calendar/", "ua": UA_CHROME, "scraper": scrape_watertown_library_kids, "default_category": "family"},
+    {"name": "Medford Library (kids)", "url": "https://medfordlibrary.assabetinteractive.com/calendar/", "ua": UA_CHROME, "scraper": scrape_medford_library_kids, "default_category": "family"},
+    {"name": "Belmont Library (kids)", "url": "https://belmontpubliclibrary.assabetinteractive.com/calendar/", "ua": UA_CHROME, "scraper": scrape_belmont_library_kids, "default_category": "family"},
+    {"name": "Mass Audubon Magazine Beach", "url": "https://www.massaudubon.org/programs/magazine-beach", "ua": UA_CHROME, "scraper": scrape_mass_audubon_magazine_beach, "default_category": "outdoors"},
+    {"name": "Mass Audubon Boston Nature Center", "url": "https://www.massaudubon.org/programs/boston-nature-center", "ua": UA_CHROME, "scraper": scrape_mass_audubon_boston_nature_center, "default_category": "outdoors"},
+    {"name": "Somerville Museum", "url": "https://www.somervillemuseum.org/calendar-events", "ua": UA_CHROME, "scraper": scrape_squarespace_events, "default_category": "community"},
+    {"name": "Eventbrite (kids & parents)", "url": "https://www.eventbrite.com/d/ma--boston/parent/", "ua": UA_CHROME, "scraper": scrape_eventbrite_family, "default_category": "family"},
+    {"name": "Little Muse", "url": "https://littlemuse.substack.com", "ua": UA_CHROME, "scraper": scrape_little_muse, "default_category": "family"},
+    {"name": "Puppet Showplace Theater", "url": "https://www.puppetshowplace.org/calendar", "ua": UA_CHROME, "scraper": scrape_puppet_showplace, "default_category": "family"},
     {"name": "Crystal Ballroom", "url": "https://www.crystalballroomboston.com/events/", "ua": UA_CHROME, "scraper": scrape_crystal_ballroom, "default_category": "music"},
     {"name": "Coolidge Corner Theatre", "url": "https://coolidge.org/", "ua": UA_CHROME, "scraper": scrape_coolidge, "default_category": "film"},
     {"name": "Trident Booksellers & Cafe", "url": "https://tridentbookscafe.com/events", "ua": UA_CURL, "scraper": scrape_event_list, "default_category": "books"},
@@ -9827,6 +10187,7 @@ _WORD_BOUNDARY_KEYWORDS = {
     "bash", "rave", "edm", "jam", "fest", "tour", "expo", "gala", "poet",
     "clay", "sake", "maki", "menu", "chef", "bbq", "gym", "golf", "kids",
     "baby", "lego", "hike", "yoga", "farm", "beer", "wine", "film", "match",
+    "easter",  # not "Northeastern"
 }
 _WORD_BOUNDARY_PATTERNS = {
     k: re.compile(rf"\b{re.escape(k)}\b", re.I) for k in _WORD_BOUNDARY_KEYWORDS
@@ -9905,7 +10266,8 @@ KID_FAMILY_EVENT_RE = re.compile(
     r"baby|babies|lapsit|storytime|story time|singalong|sing-along|toddler|toddlers|"
     r"preschool|preschooler|preschoolers|infant|infants|"
     r"children|child(?:ren)?'s|for kids|for children|kid's|kids\b|"
-    r"library card design contest|pajama story|baby rave|mindful movement: kids yoga"
+    r"library card design contest|pajama story|baby rave|mindful movement: kids yoga|"
+    r"family days?|family fun|family festival|family-friendly|families"
     r")\b",
     re.IGNORECASE,
 )

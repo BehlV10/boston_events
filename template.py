@@ -331,17 +331,17 @@ def resolve_subarea(city, event, geo=None):
     elif city == "boston":
         if any(k in blob for k in ["fenway", "symphony", "house of blues", "mgm music", "mfa", "museum of fine arts", "jordan hall", "nec ", "nec:", "nec (", "new england conservatory", "berklee", "cafe 939", "time out", "401 park", "bill's bar", "bills bar", "loretta", "kenmore", "wbur cityspace", "890 commonwealth"]):
             return ("Fenway & Kenmore", "fenway_kenmore")
-        if any(k in blob for k in ["theater district", "theatre district", "boch", "wang", "shubert", "paramount", "colonial", "royale", "charles playhouse", "downtown", "boston common", "public garden", "duckling", "orpheum", "bsmnt", "city winery", "big night live", "td garden", "wilbur", "sports museum", "versus", "west end", "legacy", "feral"]):
+        if any(k in blob for k in ["theater district", "theatre district", "boch", "wang", "shubert", "paramount", "colonial", "royale", "charles playhouse", "downtown", "boston common", "chinatown", "north end", "public garden", "duckling", "orpheum", "bsmnt", "city winery", "big night live", "td garden", "wilbur", "sports museum", "versus", "west end", "legacy", "feral"]):
             return ("Downtown & Boston Common", "theater_downtown")
         if any(k in blob for k in ["south end", "beehive", "wally", "club cafe", "club café", "sowa", "reunion bbq", "calderwood"]):
             return ("South End", "south_end")
-        if any(k in blob for k in ["back bay", "copley", "boston public library", "bpl", "trident", "newbury", "prudential", "dani", "danis", "88 club"]):
+        if any(k in blob for k in ["back bay", "copley", "boston public library (central", "700 boylston", "trident", "newbury", "prudential", "dani", "danis", "88 club"]):
             return ("Back Bay & Copley", "back_bay")
-        if any(k in blob for k in ["seaport", "leader bank", "ica boston", "kings seaport", "kings dining", "greenway", "harbor", "scorpion", "laugh boston"]):
+        if any(k in blob for k in ["seaport", "south boston", "leader bank", "ica boston", "kings seaport", "kings dining", "greenway", "harbor", "scorpion", "laugh boston"]):
             return ("Seaport & Waterfront", "seaport_waterfront")
         if any(k in blob for k in ["allston", "brighton", "o'brien", "obrien", "brighton music", "speedway", "roadrunner", "lavietes", "notch brewing", "harvard stadium", "sunset cantina", "goel center"]):
             return ("Allston & Brighton", "allston_brighton")
-        if any(k in blob for k in ["jamaica plain", "jp", "midway cafe", "arboretum", "dorchester", "roxbury"]):
+        if any(k in blob for k in ["jamaica plain", "jp", "midway cafe", "arboretum", "dorchester", "roxbury", "mattapan", "roslindale", "hyde park"]):
             return ("JP & Dorchester", "jp_dorchester")
         if any(k in blob for k in ["charlestown", "anchor", "navy yard", "east boston", "eastie"]):
             return ("Charlestown & Eastie", "charlestown_eastie")
@@ -607,7 +607,7 @@ def build_json_ld(events, site_url=None):
                 "name": "How often is the Boston Events calendar updated?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "The calendar is automatically scraped and synchronized every 30 minutes directly from official venue box offices, artist calendars, and verified community sources."
+                    "text": "The calendar is automatically scraped and synchronized daily directly from official venue box offices, artist calendars, and verified community sources."
                 }
             }
         ]
@@ -821,13 +821,14 @@ def build_seo_directory_html(all_events_flat, all_venue_names):
           <li><a href="cambridge-events-tonight/">Cambridge Events Tonight</a></li>
           <li><a href="live-music-somerville/">Somerville Live Music</a></li>
           <li><a href="board-game-nights-boston/">Board Game Nights &amp; Trivia</a></li>
+          <li><a href="kids-family-events-boston/">Kids &amp; Family Events</a></li>
         </ul>
       </div>
 
       <!-- Venues A-Z -->
       <div class="directory-col">
         <h3>🏛️ Tracked Venues A–Z</h3>
-        <p class="hint">Official box office feeds tracked and refreshed every 30 mins.</p>
+        <p class="hint">Official box office feeds tracked and refreshed daily.</p>
         <ul class="venue-directory-list">
           {venues_html}
         </ul>
@@ -839,7 +840,7 @@ def build_seo_directory_html(all_events_flat, all_venue_names):
       <h3>Frequently Asked Questions about Greater Boston Events</h3>
       <div class="faq-item">
         <h4>Where can I find live music and theater in Boston and Cambridge tonight?</h4>
-        <p>Wicked Boston Events tracks over 100+ local stages and theater spaces every 30 minutes, including Symphony Hall, The Sinclair, Middle East, Central Square Theater, Calderwood Pavilion (BCA), Cantab Lounge, Paradise Rock Club, Midway Cafe, Club Passim, and O'Brien's Pub.</p>
+        <p>Wicked Boston Events tracks over 100+ local stages and theater spaces daily, including Symphony Hall, The Sinclair, Middle East, Central Square Theater, Calderwood Pavilion (BCA), Cantab Lounge, Paradise Rock Club, Midway Cafe, Club Passim, and O'Brien's Pub.</p>
       </div>
       <div class="faq-item">
         <h4>Are there stand-up comedy shows, plays, and free events in Boston this week?</h4>
@@ -930,6 +931,13 @@ def filter_events_for_hub(hub, events):
             continue
         filtered.append(e)
 
+    if time_filter == "weekend" and hub.get("limit"):
+        # Share the slots across Fri/Sat/Sun so a busy Friday doesn't crowd out the weekend
+        per_day, by_day = hub["limit"] // 3, {}
+        for e in filtered:
+            by_day.setdefault(_parse_event_eastern_date(e), []).append(e)
+        filtered = [e for evs in by_day.values() for e in evs[:per_day]]
+
     # Fallback if tonight has fewer than 5 events: expand up to 3 days out
     if time_filter in ("tonight", "today") and len(filtered) < 5:
         today = datetime.now(EASTERN).date()
@@ -957,8 +965,25 @@ def filter_events_for_hub(hub, events):
 
 
 HUBS = {
+    # Standalone page for parents: more cards, with ages/details.
+    "kids-family-events-boston": {
+        "title": "Kids & Family Events in Boston, Cambridge & Somerville",
+        "h1": "Kids & Family Events",
+        "city_filter": None,
+        "cat_filter": "Kids & Family",
+        "free_only": False,
+        "time_filter": None,
+        "keyword_filter": None,
+        "show_details": True,
+        "limit": 400,
+        "subtitle": "Story times, baby & toddler sing-alongs, museum days, puppet shows and nature walks for kids, from local libraries, museums and Little Muse, updated daily.",
+        "og_badge": "KIDS & FAMILY",
+        "og_image": "og-kids-family.jpg",
+        "query": "#cat=Kids+%26+Family"
+    },
     # 1. High-Volume Programmatic Intent Pages
     "free-events-boston-this-weekend": {
+        "limit": 200,  # three days of events; 60 ran out on Friday
         "title": "Free Events in Boston This Weekend",
         "h1": "Free Events in Boston This Weekend",
         "city_filter": None,
@@ -1024,6 +1049,7 @@ HUBS = {
         "query": "#city=boston"
     },
     "boston-events-this-weekend": {
+        "limit": 200,  # three days of events; 60 ran out on Friday
         "title": "Things to Do in Boston This Weekend",
         "h1": "Boston This Weekend",
         "city_filter": "boston",
@@ -1127,6 +1153,7 @@ def render_hub_page(hub_slug, events, site_url=None):
         return ""
 
     filtered = filter_events_for_hub(hub, events)
+    card_limit = hub.get("limit", 60)
 
     hub_canonical = f"{site_url}/{hub_slug}/"
     og_img_name = hub.get("og_image") or f"og-{hub_slug}.jpg"
@@ -1186,15 +1213,7 @@ def render_hub_page(hub_slug, events, site_url=None):
 
         t_obj = e.get("_time")
         t_str = e.get("time") or ""
-        start_date = d_str
-        if t_obj:
-            start_date = f"{d_str}T{t_obj.strftime('%H:%M:%S')}-05:00"
-        elif ":" in t_str and ("am" in t_str.lower() or "pm" in t_str.lower()):
-            try:
-                dt_tmp = datetime.strptime(t_str.strip().upper(), "%I:%M %p")
-                start_date = f"{d_str}T{dt_tmp.strftime('%H:%M:%S')}-05:00"
-            except Exception:
-                pass
+        start_date = t_obj.isoformat() if isinstance(t_obj, datetime) else d_str
 
         hub_event_items.append({
             "@type": "ListItem",
@@ -1233,12 +1252,20 @@ def render_hub_page(hub_slug, events, site_url=None):
     json_ld_str = f'<script type="application/ld+json">\n{json.dumps(hub_ld, ensure_ascii=False, indent=2)}\n</script>'
 
     cards_html = []
-    for e in filtered[:60]:
+    for e in filtered[:card_limit]:
         title = escape(e.get("title") or e.get("name") or "Event")
         venue = escape(e.get("venue") or e.get("_source_venue") or "Venue")
         url = escape(e.get("url") or e.get("link") or "#")
         d_str = escape(e.get("date") or "")
         t_str = escape(e.get("time") or "")
+        t_obj = e.get("_time")
+        if isinstance(t_obj, datetime):
+            d_str = t_obj.strftime("%a, %b %-d")
+            t_str = "" if (t_obj.hour, t_obj.minute) == (0, 0) else t_obj.strftime("%-I:%M %p")
+        desc_html = ""
+        if hub.get("show_details") and e.get("description"):
+            d_txt = re.sub(r"\s+", " ", str(e["description"])).strip()
+            desc_html = f'<p class="hub-desc">{escape(d_txt[:160] + ("…" if len(d_txt) > 160 else ""))}</p>'
         price_val = e.get("price")
         price_badge = f'<span class="badge badge-price">${escape(str(price_val))}</span>' if price_val else ""
         if _is_event_free(e):
@@ -1256,6 +1283,7 @@ def render_hub_page(hub_slug, events, site_url=None):
     <span class="hub-venue">📍 {venue}</span>
     <span class="hub-city">({city_name})</span>
   </div>
+  {desc_html}
 </article>""")
 
     cards_joined = "\n".join(cards_html) if cards_html else "<p class='no-hub-events'>No scheduled events matching this directory right now. Check the interactive calendar for all upcoming dates.</p>"
@@ -1270,6 +1298,7 @@ def render_hub_page(hub_slug, events, site_url=None):
     active_ct = 'active' if hub_slug == 'cambridge-events-tonight' else ''
     active_sm = 'active' if hub_slug == 'live-music-somerville' else ''
     active_bg = 'active' if hub_slug == 'board-game-nights-boston' else ''
+    active_kf = 'active' if hub_slug == 'kids-family-events-boston' else ''
 
     return f"""<!doctype html>
 <html lang="en">
@@ -1436,6 +1465,7 @@ def render_hub_page(hub_slug, events, site_url=None):
     align-items: center;
     gap: 6px;
   }}
+  .hub-desc {{ margin: 8px 0 0; color: var(--muted); font-size: 0.85rem; line-height: 1.4; }}
   footer {{
     border-top: 1px solid var(--border);
     padding: 24px 20px;
@@ -1455,6 +1485,7 @@ def render_hub_page(hub_slug, events, site_url=None):
     <a href="../cambridge-events-tonight/" class="{active_ct}">Cambridge Tonight</a>
     <a href="../live-music-somerville/" class="{active_sm}">Somerville Music</a>
     <a href="../board-game-nights-boston/" class="{active_bg}">Board Games</a>
+    <a href="../kids-family-events-boston/" class="{active_kf}">Kids &amp; Family</a>
     <a href="../boston/" class="{active_b}">Boston</a>
     <a href="../cambridge/" class="{active_c}">Cambridge</a>
     <a href="../somerville/" class="{active_s}">Somerville</a>
@@ -1912,9 +1943,9 @@ def _build_compare_links(e, raw_title):
 
 def _source_priority(s):
     s = (s or "").lower()
-    if s in ("ticketmaster", "seatgeek", "eventbrite", "eventbrite boston", "eventbrite cambridge", "eventbrite somerville"):
+    if s in ("ticketmaster", "seatgeek") or s.startswith("eventbrite"):
         return 1
-    if s in ("the boston calendar", "do617", "boston shows"):
+    if s in ("the boston calendar", "do617", "boston shows", "little muse"):
         return 5
     return 10
 
@@ -2218,7 +2249,12 @@ def _merge_duplicates(events):
                             u_c = cand.get("url") or ""
                             host_e = re.sub(r"^https?://(?:www\.)?", "", u_e).split("/")[0].lower()
                             host_c = re.sub(r"^https?://(?:www\.)?", "", u_c).split("/")[0].lower()
-                            if host_e and host_e == host_c and host_e not in ("eventbrite.com", "ticketmaster.com", "seatgeek.com", "meetup.com", "facebook.com", "instagram.com", "thebostoncalendar.com", "do617.com"):
+                            # Shared platforms host many unrelated events at the same hour (every BPL
+                            # branch is on bpl.bibliocommons.com), so a shared host proves nothing there.
+                            shared_platform = any(p in host_e for p in (
+                                "libcal.com", "bibliocommons.com", "assabetinteractive.com", "lu.ma", "luma.com",
+                                "partiful.com", "heylo.com", "humanitix.com", "ticketleap.com", "sched.com"))
+                            if host_e and host_e == host_c and not shared_platform and host_e not in ("eventbrite.com", "ticketmaster.com", "seatgeek.com", "meetup.com", "facebook.com", "instagram.com", "thebostoncalendar.com", "do617.com"):
                                 match = cand
                                 break
 

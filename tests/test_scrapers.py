@@ -1875,6 +1875,61 @@ class TestBostonEvents(unittest.TestCase):
             names = [e["name"] for e in scrapers.scrape_mfa_boston("https://www.mfa.org/programs", "ua")]
         self.assertEqual(names, ["MFA: Revere and Rodallega", "MFA: Late Nites"])
 
+    def test_bibliocommons_kids_audience_and_bpl_branches(self):
+        from unittest.mock import patch, MagicMock
+        from datetime import datetime, timedelta
+        import scrapers
+        soon = (datetime.now(scrapers.EASTERN) + timedelta(days=2)).strftime("%Y-%m-%dT10:30")
+        payload = {
+            "events": {"items": ["a", "b", "c"], "pagination": {"pages": 1}},
+            "entities": {
+                "events": {
+                    "a": {"definition": {"title": "Baby Lapsit", "start": soon, "branchLocationId": "1", "audienceIds": ["ba"]}},
+                    "b": {"definition": {"title": "ESL Conversation", "start": soon, "branchLocationId": "2", "audienceIds": ["ad"]}},
+                    "c": {"definition": {"title": "Canceled Thing", "start": soon, "isCancelled": True}},
+                },
+                "locations": {"1": {"name": "Jamaica Plain"}, "2": {"name": "West Roxbury"}},
+                "eventAudiences": {"ba": {"name": "Babies: 0 to 18 months"}, "ad": {"name": "Adults: 18 and up"}},
+            },
+        }
+        resp = MagicMock(); resp.json.return_value = payload; resp.raise_for_status = MagicMock()
+        with patch("scrapers._SESSION.get", return_value=resp):
+            evs = {e["name"]: e for e in scrapers.scrape_bpl("https://bpl.bibliocommons.com/events/search/index", "ua")}
+        self.assertEqual(set(evs), {"Baby Lapsit", "ESL Conversation"})
+        self.assertEqual(evs["Baby Lapsit"]["category"], "family")
+        self.assertNotIn("category", evs["ESL Conversation"])
+        self.assertEqual(evs["Baby Lapsit"]["venue"], "Boston Public Library (Jamaica Plain)")
+        self.assertEqual(evs["Baby Lapsit"]["address"], "30 South St, Jamaica Plain")
+        self.assertEqual(evs["ESL Conversation"]["neighborhood"], "West Roxbury")  # not plain "Roxbury"
+
+    def test_little_muse_listing_parsing(self):
+        from unittest.mock import patch, MagicMock
+        from datetime import datetime, timedelta
+        import scrapers
+        d = datetime.now(scrapers.EASTERN) + timedelta(days=1)
+        day_hdr = d.strftime("%A, %B %-d").upper()
+        body = (f"<h2>{day_hdr}</h2><h3>Afternoon</h3>"
+                '<p>🎃 3:30-5:30 PM - <strong><a href="https://www.eventbrite.com/e/halloween-party-at-play-union-tickets-1">'
+                "Halloween Party at Play Union</a></strong> (all ages) ~13 min 💲<br/>Play Union, 378 Somerville Ave, Somerville"
+                "<br/>A candy-free party. Pricing starting at $28.52.</p>"
+                '<p>🎃 1:00-4:00 PM - <strong><a href="https://www.massaudubon.org/programs/x">Creepy Crawly Creations</a></strong>'
+                " (all ages) ~5 min ✱<br/>Mass Audubon Nature Center, Magazine Beach Park, 668 Memorial Dr, Cambridge"
+                "<br/>Free, register.</p>")
+        archive = [{"slug": "week", "audience": "everyone"}]
+        post = {"post_date": (d - timedelta(days=2)).isoformat(), "body_html": body,
+                "canonical_url": "https://littlemuse.substack.com/p/week"}
+        def fake_get(u, **kw):
+            r = MagicMock(); r.json.return_value = archive if u.endswith("/archive") else post; return r
+        with patch("scrapers._SESSION.get", side_effect=fake_get):
+            evs = {e["name"]: e for e in scrapers.scrape_little_muse("https://littlemuse.substack.com", "ua")}
+        pu = evs["Halloween Party at Play Union"]
+        self.assertEqual((pu["venue"], pu["address"], pu["locality"], pu["price"]),
+                         ("Play Union", "378 Somerville Ave, Somerville", "Somerville", "$28.52+"))
+        self.assertEqual(datetime.fromisoformat(pu["date"]).astimezone(scrapers.EASTERN).hour, 15)
+        cc = evs["Creepy Crawly Creations"]
+        self.assertEqual(cc["venue"], "Mass Audubon Nature Center, Magazine Beach Park")
+        self.assertEqual(cc["price"], "Free")
+        self.assertEqual(cc["category"], "family")
     def test_venue_cache_discarded_when_scraper_code_changes(self):
         import tempfile
         from unittest.mock import patch

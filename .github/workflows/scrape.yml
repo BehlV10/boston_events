@@ -2,7 +2,8 @@ name: Scrape events and deploy site
 
 on:
   schedule:
-    - cron: "*/30 * * * *"
+    # Daily at 10:00 UTC (5am EST / 6am EDT), so "today"/"this weekend" pages are fresh each morning
+    - cron: "0 10 * * *"
   workflow_dispatch:
   push:
     branches:
@@ -56,7 +57,7 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add events.json index.html events.html feed.xml events.ics *.txt robots.txt sitemap.xml og-*.jpg partiful_sources.json boston/ cambridge/ somerville/ music/ comedy/ free/ free-events-boston-this-weekend/ cambridge-events-tonight/ live-music-somerville/ board-game-nights-boston/ boston-events-today/ boston-events-this-weekend/ community_events.json highlights.json luckyseat_shows.json
+          git add events.json index.html events.html feed.xml events.ics *.txt robots.txt sitemap.xml og-*.jpg partiful_sources.json boston/ cambridge/ somerville/ music/ comedy/ free/ free-events-boston-this-weekend/ cambridge-events-tonight/ live-music-somerville/ board-game-nights-boston/ kids-family-events-boston/ boston-events-today/ boston-events-this-weekend/ community_events.json highlights.json luckyseat_shows.json
           if git diff --staged --quiet; then
             echo "no changes"
           else
