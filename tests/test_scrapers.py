@@ -2007,6 +2007,48 @@ class TestBostonEvents(unittest.TestCase):
         self.assertEqual(len(merged), 1, "Hourly Sports Museum tour departures on the same date should collapse into 1 listing")
         self.assertIn("Hourly tours departing", merged[0].get("description", ""))
 
+    def test_midday_music_html_entity_deduplication(self):
+        """Verify HTML entities like &amp; in titles deduplicate across sources (Eventbrite & MIT Open Space)."""
+        from template import _merge_duplicates
+
+        events = [
+            {
+                "name": "Midday Music & Soup: Joseph Borsellino and Friends",
+                "date": "2026-11-04T17:15:00+00:00",
+                "venue": "MIT Welcome Center",
+                "url": "https://www.eventbrite.com/e/midday-music-soup-joseph-borsellino-and-friends-tickets-1994594059525",
+                "_source_venue": "The Boston Calendar",
+            },
+            {
+                "name": "Midday Music &amp; Soup: Joseph Borsellino and Friends",
+                "date": "2026-11-04T17:15:00.668000+00:00",
+                "venue": "MIT Open Space",
+                "url": "https://openspace.mit.edu/calendar/midday-music-soup-joseph-borsellino-november-2026",
+                "_source_venue": "MIT Open Space",
+            },
+        ]
+        merged = _merge_duplicates(events)
+        self.assertEqual(len(merged), 1, "Midday Music & Soup events with & vs &amp; must merge into 1")
+        self.assertNotIn("&amp;", merged[0]["name"])
+        self.assertEqual(merged[0]["name"], "Midday Music & Soup: Joseph Borsellino and Friends")
+
+    def test_ongoing_museum_exhibits_filtered(self):
+        """Verify ongoing multi-year museum exhibits and venue self-promotions are excluded."""
+        from scrapers import is_placeholder_or_closed_event
+
+        exhibits = [
+            "Rubies",
+            "Pop Quiz: 1776",
+            "Collecting Wonders: Tomorrow's Discoveries",
+            "Collecting Wonders: Tomorrow’s Discoveries",
+            "From Iran: A Visual Testimony",
+            "Harvard Museum of Natural History",
+            "The Peabody Museum of Archaeology and Ethnology",
+            "Volunteer Opportunities Everyday!",
+        ]
+        for title in exhibits:
+            self.assertTrue(is_placeholder_or_closed_event(title), f"Failed to filter exhibit: {title}")
+
 
 if __name__ == "__main__":
     unittest.main()

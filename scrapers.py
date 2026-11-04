@@ -174,6 +174,14 @@ def is_placeholder_or_closed_event(title: str) -> bool:
     if re.search(r"\bfree\s+rock\s+climbing\b", t, re.I):
         return True
 
+    # 8. Ongoing museum exhibits / static attraction listings spamming daily calendars
+    if re.search(r"\b(rubies|pop\s+quiz:\s*1776|collecting\s+wonders|from\s+iran:\s*a\s+visual\s+testimony)\b", t, re.I):
+        return True
+    if re.search(r"^\s*(the\s+)?(peabody\s+museum|harvard\s+museum\s+of\s+(natural\s+history|the\s+ancient\s+near\s+east))\b", t, re.I) and not re.search(r"\btours?\b", t, re.I):
+        return True
+    if re.search(r"\bvolunteer\s+opportunities\s+everyday\b", t, re.I):
+        return True
+
     return False
 
 
@@ -767,7 +775,9 @@ _BC_NOISE_CONTAINS = re.compile(
     r"|\bnow\s+open\b"
     r"|new\s+(location|opening)\s+(in|at)\b"
     r"|skip\s+the\s+(traffic|drive)\b"
-    r"|\bfree\s+rock\s+climbing\b",
+    r"|\bfree\s+rock\s+climbing\b"
+    r"|\b(rubies|pop\s+quiz:\s*1776|collecting\s+wonders)\b"
+    r"|volunteer\s+opportunities\s+everyday",
     re.I,
 )
 # Standalone restaurant-type words that make it a listing, not an event

@@ -6,7 +6,7 @@ import os
 import re
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
-from html import escape
+from html import escape, unescape
 from urllib.parse import quote, quote_plus
 
 from scrapers import (
@@ -1720,7 +1720,7 @@ GENERIC_DESCRIPTOR_PREFIXES = {
 
 
 def _normalize_title_head(title, venue=None):
-    t = (title or "").lower().strip()
+    t = unescape(title or "").lower().strip()
 
     # 1. Strip venue name from title if title starts with venue (e.g. "McCarthys Cambridge Irish Session")
     if venue:
@@ -1984,7 +1984,8 @@ def _merge_duplicates(events):
         return False
 
     for e in events:
-        raw_name = e.get("name") or ""
+        raw_name = unescape(e.get("name") or "").strip()
+        e["name"] = raw_name
         full = re.sub(r"[^a-z0-9]+", " ", raw_name.lower()).strip()
         venue_str = e.get("venue") or ""
         head = _normalize_title_head(raw_name, venue=venue_str)
