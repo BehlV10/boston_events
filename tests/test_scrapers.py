@@ -1762,6 +1762,33 @@ class TestBostonEvents(unittest.TestCase):
                                "_source_venue": "Celebrity Series of Boston"})
         self.assertEqual(g["venue"], "Arrow Street Arts")
 
+    def test_city_from_scraped_address(self):
+        """Venues with no named rule get their city from the scraped address, not 'Outer Suburbs'."""
+        from template import _event_city
+        cases = [
+            ({"venue": "St. Peter's Episcopal Church", "address": "838 Mass Ave., Cambridge", "locality": "Cambridge"}, "cambridge"),
+            ({"venue": "A Hall", "address": "760 Boylston St, Boston", "locality": "Boston"}, "boston"),
+            ({"venue": "B Hall", "address": "5 Elm St", "postal_code": "02144"}, "somerville"),
+            ({"venue": "C Hall", "address": "1 Kendall Sq, Cambridge, MA 02139"}, "cambridge"),
+            ({"venue": "D Hall", "address": "12 Main St, Waltham, MA 02451", "locality": "Waltham"}, "other"),
+        ]
+        for e, want in cases:
+            self.assertEqual(_event_city(e["venue"], "The Boston Calendar", e), want, e)
+
+    def test_boston_calendar_title_and_price_repairs(self):
+        from scrapers import _BC_FREE_RE, _title_from_ticket_slug, _bc_apply_details
+        self.assertIsNone(_BC_FREE_RE.search("Stress Free Week"))
+        self.assertIsNone(_BC_FREE_RE.search("Gluten-Free Baking Class"))
+        self.assertIsNotNone(_BC_FREE_RE.search("FREE Yoga in the Park"))
+        self.assertEqual(_title_from_ticket_slug("https://www.eventbrite.com/e/author-talk-with-seamus-boshell-tickets-2003750302093"),
+                         "Author Talk with Seamus Boshell")
+        e = {"name": "Book Event", "price": "Free", "_price_from_title": True}
+        _bc_apply_details(e, {"url": "https://www.eventbrite.com/e/author-talk-with-seamus-boshell-tickets-2003750302093",
+                              "price": "$10", "addr": {"street": "200 New Boston Dr", "locality": "Canton"}})
+        self.assertEqual(e["name"], "Author Talk with Seamus Boshell")
+        self.assertEqual(e["price"], "$10")
+        self.assertEqual(e["locality"], "Canton")
+
     def test_deal_specials_get_default_off_bucket(self):
         from scrapers import is_deal_event, category_bucket
         from template import _effective_category, DEFAULT_UNCHECKED_BUCKETS

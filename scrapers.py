@@ -792,9 +792,9 @@ def _bc_detail_info(bc_url, ua):
             if attempt == 0:
                 time.sleep(0.5)
                 continue
-            return None, None
+            return None, None, None
     if soup is None:
-        return None, None
+        return None, None, None
     ext_url = None
     price = None
     where_url = None
@@ -817,6 +817,20 @@ def _bc_detail_info(bc_url, ua):
     if not ext_url and where_url:
         ext_url = where_url
 
+    addr = None
+    street = soup.find(attrs={"itemprop": "streetAddress"})
+    locality = soup.find(attrs={"itemprop": "addressLocality"})
+    postal = soup.find(attrs={"itemprop": "postalCode"})
+    if street or locality:
+        addr = {
+            "street": street.get_text(" ", strip=True) if street else "",
+            "locality": locality.get_text(" ", strip=True).title() if locality else "",
+            "postal": postal.get_text(" ", strip=True) if postal else "",
+        }
+        if not addr["postal"]:
+            m = re.search(r"\b(0\d{4})\b", (soup.find(attrs={"itemprop": "address"}) or soup).get_text(" ", strip=True)[:4000])
+            addr["postal"] = m.group(1) if m else ""
+
     if not ext_url:
         for a in soup.find_all("a", href=True):
             href = a["href"].strip()
@@ -832,7 +846,7 @@ def _bc_detail_info(bc_url, ua):
                 ext_url = href
                 break
 
-    return fix_doubled_url(ext_url), price
+    return fix_doubled_url(ext_url), price, addr
 
 
 _BC_NOISE_PREFIXES = re.compile(
@@ -924,15 +938,20 @@ def scrape_boston_calendar(url, ua):
             if seen_key in seen_urls:
                 continue
             seen_urls.add(seen_key)
+            venue_txt = loc_el.get_text(strip=True) if loc_el else None
+            if venue_txt and _BC_AD_VENUE_RE.search(venue_txt):
+                continue
             price = None
-            if re.search(r"\b(?:free|no cover|complimentary)\b", name, re.IGNORECASE):
+            if _BC_FREE_RE.search(name):
                 price = "Free"
             entry = {
                 "name": name,
                 "date": iso,
                 "url": href,
-                "venue": loc_el.get_text(strip=True) if loc_el else None,
+                "venue": venue_txt,
                 "price": price,
+                "_bc_url": href,
+                "_price_from_title": bool(price),
             }
             until = _BC_GOES_UNTIL_RE.search(raw_time)
             if iso is None and until:
@@ -945,13 +964,9 @@ def scrape_boston_calendar(url, ua):
 
         # 1. Apply existing cached details immediately
         for e in events:
-            u = e.get("url")
+            u = e.get("_bc_url")
             if u and u in cache:
-                info = cache[u]
-                if info.get("url"):
-                    e["url"] = info["url"]
-                if info.get("price") and not e.get("price"):
-                    e["price"] = info["price"]
+                _bc_apply_details(e, cache[u])
 
         # 2. Identify uncached events still pointing to thebostoncalendar.com
         def _bc_sort_key(e):
@@ -961,29 +976,79 @@ def scrape_boston_calendar(url, ua):
             is_pri = 0 if any(k in v for k in ["ccae", "cambridge center", "museum", "theater", "theatre"]) else 1
             return (is_pri, d if d else "9999")
 
-        uncached = [e for e in events if "thebostoncalendar.com" in e.get("url", "") and e.get("url") not in cache]
+        # Uncached, or cached before addresses were captured (no "addr_v")
+        uncached = [e for e in events if e.get("_bc_url") and (e["_bc_url"] not in cache or "addr_v" not in cache[e["_bc_url"]])]
         sorted_uncached = sorted(uncached, key=_bc_sort_key)
-        batch = sorted_uncached[:400]
+        batch = sorted_uncached[:1000]
 
         if batch:
             with ThreadPoolExecutor(max_workers=25) as ex:
-                urls_to_fetch = [e["url"] for e in batch]
+                urls_to_fetch = [e["_bc_url"] for e in batch]
                 details = list(ex.map(lambda u: _bc_detail_info(u, ua), urls_to_fetch))
 
-            for e, (ext, p) in zip(batch, details):
-                orig = e["url"]
-                cache[orig] = {
+            for e, res in zip(batch, details):
+                ext, p, addr = res if res else (None, None, None)
+                if ext is None and p is None and addr is None and e["_bc_url"] in cache:
+                    continue  # fetch failed; keep the older cache entry
+                cache[e["_bc_url"]] = {
                     "url": ext,
                     "price": p,
+                    "addr": addr,
+                    "addr_v": 1,
                     "ts": time.time(),
                 }
-                if ext:
-                    e["url"] = ext
-                if p and not e.get("price"):
-                    e["price"] = p
+                _bc_apply_details(e, cache[e["_bc_url"]])
 
             _save_tbc_details_cache(cache)
+    for e in events:
+        e.pop("_bc_url", None)
+        e.pop("_price_from_title", None)
     return events
+
+
+# Titles that say nothing about the event ("Book Event"); use the ticket page's slug instead.
+_BC_GENERIC_TITLE_RE = re.compile(
+    r"^\s*(?:(?:book|author|music|art|film|community|special|private|live)\s+)?(?:event|talk|show|night|reading)s?\s*$",
+    re.I,
+)
+# "Free" in a title means admission, not "stress-free" or "gluten-free".
+_BC_FREE_RE = re.compile(
+    r"(?<![\w-])(?<!stress )(?<!gluten )(?<!sugar )(?<!dairy )(?<!alcohol )(?<!care )(?<!cruelty )(?<!fragrance )"
+    r"(?:free|no cover|complimentary)\b(?!\s*(?:week|zone|spirit|style|flow|form|hold))",
+    re.I,
+)
+# Businesses that post recurring paid-service ads as events.
+_BC_AD_VENUE_RE = re.compile(r"\bmassage\b|\bmed\s*spa\b", re.I)
+
+
+def _title_from_ticket_slug(url):
+    """'.../e/author-talk-with-seamus-boshell-tickets-2003750302093' -> 'Author Talk With Seamus Boshell'."""
+    m = re.search(r"eventbrite\.[a-z.]+/e/([a-z0-9-]+?)-tickets-\d+", url or "", re.I)
+    if not m:
+        return None
+    words = m.group(1).split("-")
+    small = {"a", "an", "and", "at", "by", "for", "in", "of", "on", "or", "the", "to", "with"}
+    return " ".join(w if (i and w in small) else w.capitalize() for i, w in enumerate(words))
+
+
+def _bc_apply_details(e, info):
+    """Merge a Boston Calendar detail-page record (external URL, admission, address) into e."""
+    if info.get("url"):
+        e["url"] = info["url"]
+    p = info.get("price")
+    if p and (not e.get("price") or e.get("_price_from_title")):
+        e["price"] = p  # the listed admission beats a "free" guessed from the title
+    addr = info.get("addr") or {}
+    if addr.get("street") or addr.get("locality"):
+        e["address"] = ", ".join(x for x in (addr.get("street"), addr.get("locality")) if x)
+        if addr.get("locality"):
+            e["locality"] = addr["locality"]
+        if addr.get("postal"):
+            e["postal_code"] = addr["postal"]
+    if _BC_GENERIC_TITLE_RE.match(e.get("name") or ""):
+        better = _title_from_ticket_slug(e.get("url"))
+        if better:
+            e["name"] = better
 
 
 _TUNEHATCH_VENUE_IDS = {
