@@ -1700,6 +1700,88 @@ class TestBostonEvents(unittest.TestCase):
         self.assertEqual(city, "boston")
 
 
+    def test_generic_party_words_defer_to_specific_categories(self):
+        """'Party' alone shouldn't make an event nightlife when the title says otherwise."""
+        from scrapers import infer_category
+        cases = [
+            ("Puzzle Party (Main)", "Cambridge Public Library (Main Library)", "gaming"),
+            ("Paint Party at the Library (O'Connell)", "Cambridge Public Library", "art"),
+            ("Watch Party: Boston Celtics vs. Atlanta Hawks", "Roundhead Brewing", "sports"),
+            ("Patriots Watch Party @ Eastern Edge Food Hall", "Eastern Edge Food Hall", "sports"),
+            ("Dumpling Making Party In Massachusetts (Fridays)", "The Historic Windsor Inn", "food"),
+            # Real nightlife stays clubbing, even at venues whose names hit other categories
+            ("90s PARTY", "Middlesex Lounge", "clubbing"),
+            ("Saturday Night House Party", "Club Café", "clubbing"),
+            ("1 year of hyperlinked: a girl edm + hyperpop party", "The Sinclair", "clubbing"),
+            # Band named "Puzzle" is not a puzzle event; the venue makes it music
+            ("Puzzle", "Paradise Rock Club", "music"),
+        ]
+        for name, venue, expected in cases:
+            self.assertEqual(infer_category(name, venue), expected, name)
+
+    def test_fuzzy_cross_source_duplicates_merge(self):
+        """Same show listed by two sources with formatting differences collapses to one."""
+        from template import _merge_duplicates, EASTERN
+        from datetime import datetime
+
+        def ev(name, venue, src, hh, mm=0):
+            return {"name": name, "venue": venue, "_source_venue": src,
+                    "_time": datetime(2026, 11, 6, hh, mm, tzinfo=EASTERN), "url": f"https://{src.replace(' ', '').lower()}.example/{name}"}
+
+        same = [
+            (ev("half•alive", "The Sinclair", "The Sinclair", 19), ev("halfalive", "The Sinclair - Cambridge", "SeatGeek", 20)),
+            (ev("MPH", "Royale Boston", "Ticketmaster", 22), ev("MPH", "Royale - Boston", "SeatGeek", 22)),
+            (ev("Haydn's The Creation", "Symphony Hall", "Symphony Hall", 19, 30),
+             ev("Boston Symphony Orchestra - Haydn's The Creation", "Boston Symphony Hall", "SeatGeek", 19, 30)),
+            (ev("Le Vent du Nord", "Somerville Theatre", "The Boston Calendar", 20),
+             ev("Global Arts Live presents: LE VENT DU NORD", "Somerville Theatre", "Somerville Theatre", 20)),
+            (ev("ADULT. & A Place To Bury Strangers", "The Sinclair", "The Sinclair", 19, 30),
+             ev("Adult. w/ A Place To Bury Strangers", "The Sinclair Music Hall", "Ticketmaster", 20, 30)),
+        ]
+        for a, b in same:
+            self.assertEqual(len(_merge_duplicates([a, b])), 1, f"{a['name']} / {b['name']}")
+
+        different = [
+            # A "- Boston" suffix must not make every "Boston ..." title a prefix match
+            (ev("Los Angeles Philharmonic - Boston", "Symphony Hall", "SeatGeek", 20),
+             ev("Boston Modern Orchestra Project: Delight of Muses", "Symphony Hall", "The Boston Calendar", 20)),
+            # Different library branches are different places
+            (ev("Sing-Along (Valente)", "Cambridge Public Library (Valente Branch)", "Cambridge Public Library", 10),
+             ev("Singalong with Matt Heaton at West", "Somerville Public Library (West Branch)", "Somerville Public Library", 10)),
+            # Same venue, same organizer prefix, different events
+            (ev("MFA: Gallery Highlights", "Museum of Fine Arts (MFA)", "Do617", 12),
+             ev("MFA: Ask a Conservator", "Museum of Fine Arts (MFA)", "Museum of Fine Arts", 13)),
+        ]
+        for a, b in different:
+            self.assertEqual(len(_merge_duplicates([a, b])), 2, f"{a['name']} / {b['name']}")
+
+    def test_geo_prefers_event_venue_over_presenter(self):
+        """A Celebrity Series show at Arrow Street Arts is pinned there, not at Symphony Hall."""
+        from venues_geo import resolve_event_geo
+        g = resolve_event_geo({"name": "William Basinski", "venue": "Arrow Street Arts",
+                               "_source_venue": "Celebrity Series of Boston"})
+        self.assertEqual(g["venue"], "Arrow Street Arts")
+
+    def test_midnight_runners_first_tuesday_is_5k(self):
+        from scrapers import scrape_midnight_runners, EASTERN
+        from datetime import datetime
+        evs = scrape_midnight_runners("https://www.heylo.com/events/x/", "ua")
+        self.assertGreaterEqual(len(evs), 3)
+        for e in evs:
+            dt = datetime.fromisoformat(e["date"]).astimezone(EASTERN)
+            self.assertEqual((dt.weekday(), dt.hour), (1, 19))
+            self.assertEqual("5K" in e["name"], dt.day <= 7, e["name"])
+            self.assertEqual(e["venue"], "Carrie Nation Cocktail Club")
+
+    def test_sanitize_event_url_and_moved_placeholder(self):
+        from scrapers import sanitize_event_url, is_placeholder_or_closed_event
+        fb = "https://www.thebostoncalendar.com/"
+        self.assertEqual(sanitize_event_url("/cdn-cgi/l/email-protection#abc", fb), fb)
+        self.assertEqual(sanitize_event_url("https://thebiltmoregrill.com/happenings/", fb), fb)
+        self.assertEqual(sanitize_event_url("https://www.sinclaircambridge.com/x", fb), "https://www.sinclaircambridge.com/x")
+        self.assertTrue(is_placeholder_or_closed_event("[moved to Roadrunner!] Michelle Branch"))
+        self.assertFalse(is_placeholder_or_closed_event("Michelle Branch"))
+
     def test_kid_family_category_and_detection(self):
         """Verify is_kid_family_event and Kids & Family bucketing."""
         from scrapers import is_kid_family_event, infer_category, category_bucket

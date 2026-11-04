@@ -733,6 +733,38 @@ VENUE_RULES = [
     ("wang theatre", (42.3502, -71.0649, "Theater District", "270 Tremont St, Boston", "Boch Center Wang Theatre")),
     ("shubert theatre", (42.3504, -71.0652, "Theater District", "265 Tremont St, Boston", "Boch Center Shubert Theatre")),
     ("memoire", (42.3949, -71.0706, "Everett", "1 Broadway, Everett", "Mémoire Boston")),
+    # Frequently-listed venues that previously had no pin
+    ("sanders theatre", (42.3763, -71.1147, "Harvard Square", "45 Quincy St, Cambridge", "Sanders Theatre")),
+    ("paine concert hall", (42.3779, -71.1164, "Harvard Square", "3 Oxford St, Cambridge", "John Knowles Paine Concert Hall")),
+    ("paine hall", (42.3779, -71.1164, "Harvard Square", "3 Oxford St, Cambridge", "John Knowles Paine Concert Hall")),
+    ("cathedral church of saint paul", (42.3561, -71.0623, "Downtown", "138 Tremont St, Boston", "Cathedral Church of St. Paul")),
+    ("cathedral church of st. paul", (42.3561, -71.0623, "Downtown", "138 Tremont St, Boston", "Cathedral Church of St. Paul")),
+    ("ica watershed", (42.3637, -71.0337, "East Boston", "256 Marginal St, East Boston", "ICA Watershed")),
+    ("ica/boston", (42.3528, -71.0432, "Seaport", "25 Harbor Shore Dr, Boston", "ICA Boston")),
+    ("liberty hotel", (42.3620, -71.0706, "Beacon Hill / West End", "215 Charles St, Boston", "The Liberty Hotel")),
+    ("hynes convention", (42.3478, -71.0874, "Back Bay", "900 Boylston St, Boston", "Hynes Convention Center")),
+    ("view boston", (42.3471, -71.0820, "Back Bay", "800 Boylston St, Boston", "View Boston (Prudential Tower)")),
+    ("prudential center", (42.3471, -71.0820, "Back Bay", "800 Boylston St, Boston", "Prudential Center")),
+    ("franklin park zoo", (42.3036, -71.0870, "Franklin Park", "1 Franklin Park Rd, Boston", "Franklin Park Zoo")),
+    ("samuel adams boston brewery", (42.3145, -71.1034, "Jamaica Plain", "30 Germania St, Boston", "Samuel Adams Boston Brewery")),
+    ("sam adams boston brewery", (42.3145, -71.1034, "Jamaica Plain", "30 Germania St, Boston", "Samuel Adams Boston Brewery")),
+    ("cambridgeside", (42.3681, -71.0763, "East Cambridge", "100 CambridgeSide Pl, Cambridge", "CambridgeSide")),
+    ("park street church", (42.3568, -71.0620, "Downtown", "1 Park St, Boston", "Park Street Church")),
+    ("cambridge masonic hall", (42.3893, -71.1194, "Porter Square", "1950 Massachusetts Ave, Cambridge", "Cambridge Masonic Hall")),
+    ("steriti memorial rink", (42.3680, -71.0522, "North End", "561 Commercial St, Boston", "Steriti Memorial Rink")),
+    ("boston landing", (42.3570, -71.1393, "Brighton", "Boston Landing, Brighton", "Boston Landing")),
+    ("east boston social centers", (42.3753, -71.0386, "East Boston", "68 Central Sq, East Boston", "East Boston Social Centers")),
+    ("kenney park", (42.3975, -71.1205, "Davis Square", "Kenney Park, Somerville", "Kenney Park (Davis Square)")),
+    ("seven hills park", (42.3963, -71.1214, "Davis Square", "Seven Hills Park, Somerville", "Seven Hills Park (Davis Square)")),
+    ("davis square t station", (42.3967, -71.1220, "Davis Square", "Holland St, Somerville", "Davis Square T Station")),
+    ("life alive, union square", (42.3797, -71.0950, "Union Square", "Union Square, Somerville", "Life Alive (Union Square)")),
+    ("casey's, 173 broadway", (42.3874, -71.0816, "East Somerville", "173 Broadway, Somerville", "Casey's (East Somerville)")),
+    ("carrie nation", (42.3580, -71.0613, "Beacon Hill / Downtown", "11 Beacon St, Boston", "Carrie Nation Cocktail Club")),
+    ("farkas hall", (42.3722, -71.1176, "Harvard Square", "10 Holyoke St, Cambridge", "Farkas Hall (A.R.T.)")),
+    ("loeb drama center", (42.3762, -71.1240, "Harvard Square", "64 Brattle St, Cambridge", "Loeb Drama Center (A.R.T.)")),
+    ("goel center", (42.3640, -71.1282, "Allston", "175 N Harvard St, Boston", "Goel Center for Creativity & Performance (A.R.T.)")),
+    ("harvard film archive", (42.3734, -71.1140, "Harvard Square", "24 Quincy St, Cambridge", "Harvard Film Archive")),
+    ("scandinavian cultural center", (42.3502, -71.2287, "West Newton", "206 Waltham St, Newton", "Scandinavian Cultural Center")),
 ]
 
 # Coordinate bounding box for valid Greater Boston / Eastern MA events
@@ -783,10 +815,14 @@ def resolve_event_geo(event: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         lat, lng, neigh, addr, cname = VENUE_COORDINATES[norm_v]
         return {"lat": lat, "lng": lng, "venue": cname, "neighborhood": neigh, "address": addr}
 
-    # 3. Check needle rules
+    # 3. Check needle rules — the event's own venue field first, so a source/presenter
+    # name (e.g. "Celebrity Series" -> Symphony Hall) can't override where the show actually is.
     target = f"{v_lower} {source_raw.lower()} {title_raw.lower()}"
-    for needle, (lat, lng, neigh, addr, cname) in VENUE_RULES:
-        if needle in target:
-            return {"lat": lat, "lng": lng, "venue": cname, "neighborhood": neigh, "address": addr}
+    for hay in (v_lower, target):
+        if not hay:
+            continue
+        for needle, (lat, lng, neigh, addr, cname) in VENUE_RULES:
+            if needle in hay:
+                return {"lat": lat, "lng": lng, "venue": cname, "neighborhood": neigh, "address": addr}
 
     return None

@@ -150,6 +150,10 @@ def is_placeholder_or_closed_event(title: str) -> bool:
         if not re.search(r"\bno\s+(cover|bad|pressure|static|relation|doubt|friends|more|guarantee|limit|worries|regrets|stopping)\b", t, re.I):
             return True
 
+    # 2b. Relocated shows: "[moved to Roadrunner!] Michelle Branch" — the new venue lists it too
+    if re.match(r"^\s*[\[\(]?\s*(moved|relocated)\s+to\b", t, re.I):
+        return True
+
     # 3. Check calendar placeholder
     if re.search(r"\bcheck\s+(our\s+)?calendar\b", t, re.I):
         return True
@@ -201,6 +205,26 @@ def fix_doubled_url(url):
         return url
     parts = [p for p in _DOUBLED_URL_SPLIT_RE.split(url) if p]
     return parts[-1] if len(parts) > 1 else url
+
+
+# Domains that have lapsed or been taken over by unrelated sites (verified redirect targets).
+DEAD_EVENT_DOMAINS = {
+    "thebiltmoregrill.com",  # now redirects to a brewery in Cortez, CO
+}
+
+
+def sanitize_event_url(url, fallback=None):
+    """Return a usable absolute event URL, or `fallback` when the scraped link is broken:
+    Cloudflare email-obfuscation paths, relative paths, or known-dead domains."""
+    if not url:
+        return fallback
+    u = url.strip()
+    if not re.match(r"^https?://", u, re.I) or "/cdn-cgi/l/email-protection" in u:
+        return fallback
+    host = re.sub(r"^https?://(?:www\.)?", "", u, flags=re.I).split("/")[0].split("?")[0].lower()
+    if host in DEAD_EVENT_DOMAINS:
+        return fallback
+    return u
 
 
 _EXHIBIT_URL_RE = re.compile(r"revolutionaryspaces\.org/explore/exhibits/", re.I)
@@ -3606,19 +3630,329 @@ def scrape_24hour_music(url, ua):
             dt = datetime.strptime(raw, "%A, %B %d, %Y %I:%M:%S %p").replace(tzinfo=EASTERN)
         except ValueError:
             continue
-        name = p.get("PerformanceName") or p.get("Event")
+        # "Event" is the show title; "PerformanceName" is a marketing tagline
+        # (e.g. "World Class traditional and contemporary music from ... -Dervish!").
+        name = p.get("Event") or p.get("PerformanceName")
         venue = p.get("Venue")
         city = p.get("VenueCity")
         if venue and city:
             venue = f"{venue} ({city})"
-        pid = p.get("PerformanceID")
+        eid = p.get("EventID")
+        ev = {
+            "name": name,
+            "date": dt.astimezone(timezone.utc).isoformat(),
+            # orderticket.asp?p=<PerformanceID> 404s; the event page lists all performances.
+            "url": urljoin(url, f"/eventperformances.asp?evt={eid}") if eid else url,
+            "venue": venue,
+            "price": None,
+        }
+        tagline = (p.get("PerformanceName") or "").strip()
+        if tagline and tagline != name:
+            ev["description"] = tagline
+        events.append(ev)
+    return events
+
+
+def scrape_tnew(url, ua, venue, venue_overrides=(), months=4):
+    """Tessitura TNEW storefronts (Boston Ballet, Handel and Haydn, A.R.T.).
+
+    POST /api/products/productionseasons returns every production with its individual
+    performances. TNEW doesn't expose the venue, so `venue` is the default and
+    `venue_overrides` maps a phrase in the production description (e.g. "Jordan Hall")
+    to the venue to use instead.
+    """
+    base = url.rstrip("/")
+    now = datetime.now(EASTERN)
+    body = {
+        "startDate": now.strftime("%Y-%m-%dT00:00:00"),
+        "endDate": (now + timedelta(days=30 * months)).strftime("%Y-%m-%dT23:59:59"),
+        "keywordIds": [],
+    }
+    r = _SESSION.post(f"{base}/api/products/productionseasons", json=body, headers={
+        "User-Agent": ua, "Accept": "application/json", "Referer": f"{base}/events",
+    }, timeout=20)
+    r.raise_for_status()
+    data = r.json()
+    productions = data.get("productions", []) if isinstance(data, dict) else data
+    skip = re.compile(r"concession|parking|gift|membership|donat|voucher|merch", re.I)
+    events = []
+    for prod in productions or []:
+        title = html.unescape(re.sub(r"<[^>]+>", "", prod.get("productionTitle") or "")).strip()
+        if not title or skip.search(title):
+            continue
+        desc_html = prod.get("description") or ""
+        desc = html.unescape(re.sub(r"<[^>]+>", " ", re.sub(r"<!--.*?-->", "", desc_html, flags=re.S)))
+        desc = re.sub(r"\s+", " ", desc).strip()
+        ev_venue = venue
+        for phrase, v in venue_overrides:
+            if phrase.lower() in desc.lower():
+                ev_venue = v
+                break
+        for perf in prod.get("performances") or []:
+            if perf.get("isPerformanceVisible") is False:
+                continue
+            iso = perf.get("iso8601DateString") or perf.get("performanceDate")
+            if not iso:
+                continue
+            try:
+                dt = datetime.fromisoformat(re.sub(r"\.\d+", "", iso))
+            except ValueError:
+                continue
+            status = (perf.get("performanceStatusMessage") or "").strip()
+            ev = {
+                "name": title,
+                "date": dt.astimezone(timezone.utc).isoformat(),
+                "url": perf.get("actionUrl") or prod.get("productionSeasonActionUrl") or base,
+                "venue": ev_venue,
+                "price": "Sold out" if re.search(r"sold\s*out", status, re.I) else None,
+            }
+            if desc:
+                ev["description"] = desc[:400]
+            events.append(ev)
+    return events
+
+
+def scrape_boston_ballet(url, ua):
+    return scrape_tnew(url, ua, venue="Citizens Opera House")
+
+
+def scrape_handel_haydn(url, ua):
+    return scrape_tnew(url, ua, venue="Symphony Hall", venue_overrides=(
+        ("Jordan Hall", "Jordan Hall (NEC)"),
+        ("Sanders Theatre", "Sanders Theatre"),
+        ("Emmanuel Church", "Emmanuel Church"),
+    ))
+
+
+_MONTHS = {m: i for i, m in enumerate(
+    ["january", "february", "march", "april", "may", "june", "july", "august",
+     "september", "october", "november", "december"], 1)}
+
+
+def _roll_year(month, day, today):
+    """Pick the year for a yearless 'December 4' so it lands on/after ~a month ago."""
+    for y in (today.year, today.year + 1):
+        try:
+            d = date(y, month, day)
+        except ValueError:
+            return None
+        if d >= today - timedelta(days=31):
+            return d
+    return None
+
+
+def scrape_art(url, ua):
+    """American Repertory Theater (Loeb, Farkas Hall, Oberon). The listing page gives one
+    card per show; each show page lists its performances as .c-booking-instance rows
+    (weekday, 'December 4', '7:30PM ET', price, ticket link)."""
+    today = datetime.now(EASTERN).date()
+    soup = fetch_soup(url, ua)
+    events = []
+    for card in soup.select(".c-event-card"):
+        t = card.select_one(".c-col-title")
+        link = card.select_one(".c-event-card__titles a[href]") or card.select_one("a[href]")
+        if not t or not link:
+            continue
+        title = t.get_text(" ", strip=True)
+        sub = card.select_one(".c-col-subtitle")
+        if sub and sub.get_text(strip=True).lower() not in title.lower():
+            subtitle = sub.get_text(" ", strip=True)
+        else:
+            subtitle = ""
+        venue_el = card.select_one(".c-masthead__venue")
+        venue = venue_el.get_text(" ", strip=True) if venue_el else "American Repertory Theater"
+        show_url = link["href"]
+        meta = [li.get_text(" ", strip=True) for li in card.select(".c-masthead__event-meta li")]
+        date_txt = meta[0] if meta else ""
+
+        perfs = []
+        try:
+            show = fetch_soup(show_url, ua)
+            for inst in show.select(".c-booking-instance"):
+                m_el = inst.select_one(".c-booking-instance__month")
+                tm_el = inst.select_one(".c-booking-instance__times")
+                if not m_el:
+                    continue
+                m = re.match(r"([A-Za-z]+)\s+(\d{1,2})", m_el.get_text(" ", strip=True))
+                if not m or m.group(1).lower() not in _MONTHS:
+                    continue
+                d = _roll_year(_MONTHS[m.group(1).lower()], int(m.group(2)), today)
+                tm = re.search(r"(\d{1,2})(?::(\d{2}))?\s*([AP]M)", tm_el.get_text(" ", strip=True) if tm_el else "", re.I)
+                if not d or not tm:
+                    continue
+                hh = int(tm.group(1)) % 12 + (12 if tm.group(3).upper() == "PM" else 0)
+                dt = datetime(d.year, d.month, d.day, hh, int(tm.group(2) or 0), tzinfo=EASTERN)
+                btn = inst.select_one("a.c-booking-btn[href]")
+                price_el = inst.select_one(".c-booking-instance__price")
+                price = re.sub(r"^From:\s*", "From ", price_el.get_text(" ", strip=True)) if price_el else None
+                if btn and "sold" in " ".join(btn.get("class", [])).lower():
+                    price = "Sold out"
+                perfs.append((dt, btn["href"] if btn else show_url, price))
+        except Exception:
+            pass
+
+        if not perfs:
+            # One-off events show a full date+time on the card: "Nov 9 7:30PM ET"
+            m = re.match(r"([A-Za-z]{3,9})\.?\s+(\d{1,2})\s+(\d{1,2})(?::(\d{2}))?\s*([AP]M)", date_txt, re.I)
+            mon = m and next((v for k, v in _MONTHS.items() if k.startswith(m.group(1).lower()[:3])), None)
+            if m and mon:
+                d = _roll_year(mon, int(m.group(2)), today)
+                if d:
+                    hh = int(m.group(3)) % 12 + (12 if m.group(5).upper() == "PM" else 0)
+                    btn = card.select_one("a.c-booking-btn[href]")
+                    perfs.append((datetime(d.year, d.month, d.day, hh, int(m.group(4) or 0), tzinfo=EASTERN),
+                                  btn["href"] if btn else show_url, None))
+
+        name = f"{title}: {subtitle}" if subtitle and subtitle.lower() not in ("behind the scenes",) else title
+        for dt, href, price in perfs:
+            if dt.date() < today:
+                continue
+            events.append({
+                "name": name,
+                "date": dt.astimezone(timezone.utc).isoformat(),
+                "url": href,
+                "venue": f"{venue} (A.R.T.)" if "a.r.t" not in venue.lower() else venue,
+                "price": price,
+            })
+    return events
+
+
+def scrape_harvard_film_archive(url, ua):
+    """Harvard Film Archive calendar: .m-calendar__spot--event cards with <time datetime>.
+    Fetches the current page plus next month via ?date_from=MM/01/YYYY."""
+    today = datetime.now(EASTERN).date()
+    nxt = (today.replace(day=1) + timedelta(days=32)).replace(day=1)
+    pages = [url, f"{url.split('?')[0]}?date_from={nxt.strftime('%m/%d/%Y')}"]
+    seen, events = set(), []
+    for page in pages:
+        try:
+            soup = fetch_soup(page, ua)
+        except Exception:
+            continue
+        for card in soup.select(".m-calendar__spot--event"):
+            t_el = card.select_one(".event__time time[datetime]")
+            title_el = card.select_one(".event__title")
+            a = card.select_one("a.event__link[href]")
+            if not t_el or not title_el:
+                continue
+            try:
+                dt = datetime.strptime(t_el["datetime"], "%Y-%m-%d %H:%M:%S").replace(tzinfo=EASTERN)
+            except ValueError:
+                continue
+            href = urljoin("https://harvardfilmarchive.org", a["href"]) if a else url
+            key = (href, dt)
+            if key in seen or dt.date() < today:
+                continue
+            seen.add(key)
+            info = card.select_one(".event__info")
+            labels = [x.get_text(" ", strip=True) for x in card.select(".event__labels .tooltip")]
+            desc = " · ".join(filter(None, [re.sub(r"\s+", " ", info.get_text(" ", strip=True)) if info else "", *labels]))
+            events.append({
+                "name": title_el.get_text(" ", strip=True),
+                "date": dt.astimezone(timezone.utc).isoformat(),
+                "url": href,
+                "venue": "Harvard Film Archive",
+                "price": "$5 or free with CPL card" if any("CPL" in l for l in labels) else None,
+                "category": "film",
+                **({"description": desc} if desc else {}),
+            })
+    return events
+
+
+def scrape_november_project(url, ua):
+    """November Project Boston: free Wednesday stadium-stairs workout at Harvard Stadium
+    (5:55 and 6:30am). Monday/Friday locations rotate and are only posted on Instagram,
+    so only the fixed Wednesday session is listed."""
+    today = datetime.now(EASTERN).date()
+    events = []
+    for i in range(0, 21):
+        d = today + timedelta(days=i)
+        if d.weekday() != 2:
+            continue
+        dt = datetime(d.year, d.month, d.day, 6, 30, tzinfo=EASTERN)
+        if dt < datetime.now(EASTERN):
+            continue
+        events.append({
+            "name": "November Project: Harvard Stadium Stairs (free workout)",
+            "date": dt.astimezone(timezone.utc).isoformat(),
+            "url": url,
+            "venue": "Harvard Stadium",
+            "price": "Free",
+            "category": "sports",
+            "description": "Free community workout running the Harvard Stadium stairs. Two start times: 5:55am and 6:30am. One-time waiver required.",
+        })
+    return events
+
+
+def scrape_midnight_runners(url, ua):
+    """Midnight Runners Boston: every Tuesday 7-9pm from Carrie Nation Cocktail Club.
+    The first Tuesday of the month is a Bring a Friend 5K; the others are the 5-mile
+    Bootcamp Run. Events live on Heylo (members-only), so the fixed schedule is generated.
+    (Sunday Long Run & Brunch starts from rotating spots and is omitted.)"""
+    now = datetime.now(EASTERN)
+    events = []
+    for i in range(0, 28):
+        d = now.date() + timedelta(days=i)
+        if d.weekday() != 1:
+            continue
+        dt = datetime(d.year, d.month, d.day, 19, 0, tzinfo=EASTERN)
+        if dt < now:
+            continue
+        first_tuesday = d.day <= 7
+        if first_tuesday:
+            name = "Midnight Runners: Bring a Friend 5K"
+            desc = "Free social 5K run, 7-9pm. First Tuesday of the month: bring a friend. Drinks after at Carrie Nation."
+        else:
+            name = "Midnight Runners: 5 Mile Bootcamp Run"
+            desc = ("Free 5-mile run with music and bootcamp-style exercise stops, 7-9pm. "
+                    "All paces welcome; warm-up, yoga cool-down, and drinks after at Carrie Nation.")
         events.append({
             "name": name,
             "date": dt.astimezone(timezone.utc).isoformat(),
-            "url": urljoin(url, f"/orderticket.asp?p={pid}") if pid else url,
-            "venue": venue,
-            "price": None,
+            "url": url,
+            "venue": "Carrie Nation Cocktail Club",
+            "price": "Free",
+            "category": "sports",
+            "description": desc,
         })
+    return events
+
+
+# Somerville Road Runners free weekly runs with a fixed time and meeting spot (srr.org/run-with-us
+# pages). Runs that alternate locations (Sunday No Expectations) or lack a posted start
+# (Wednesday morning) are left out. (weekday, hour, minute, name, venue, page, months or None)
+SRR_WEEKLY_RUNS = [
+    (0, 18, 45, "SRR Bur-Run: free 3-mile group run", "Kenney Park, Davis Square (Somerville)",
+     "https://srr.org/monday-night-burrun", None),
+    (1, 7, 30, "SRR Union Square Breakfast Club: 3-mile run", "Life Alive, Union Square (Somerville)",
+     "https://srr.org/usbc", None),
+    (1, 21, 0, "SRR Night Noodle: easy 3-4 mile night run", "Davis Square T Station (Somerville)",
+     "https://srr.org/tuesday-night-noodle", range(4, 10)),
+    (3, 19, 15, "SRR Thursday Night Casey's Run: 4 miles", "Casey's, 173 Broadway (Somerville)",
+     "https://srr.org/thursday-night-caseys", None),
+]
+
+
+def scrape_somerville_road_runners(url, ua):
+    """Somerville Road Runners' free, all-paces weekly runs (no membership needed)."""
+    now = datetime.now(EASTERN)
+    events = []
+    for i in range(0, 21):
+        d = now.date() + timedelta(days=i)
+        for wd, hh, mm, name, venue, page, months in SRR_WEEKLY_RUNS:
+            if d.weekday() != wd or (months and d.month not in months):
+                continue
+            dt = datetime(d.year, d.month, d.day, hh, mm, tzinfo=EASTERN)
+            if dt < now:
+                continue
+            events.append({
+                "name": name,
+                "date": dt.astimezone(timezone.utc).isoformat(),
+                "url": page,
+                "venue": venue,
+                "price": "Free",
+                "category": "sports",
+            })
     return events
 
 
@@ -5325,12 +5659,12 @@ def scrape_toad(url, ua):
                     dt = datetime.strptime(raw, "%A, %B %d, %Y %I:%M:%S %p").replace(tzinfo=EASTERN)
                 except ValueError:
                     continue
-                name = p.get("PerformanceName") or p.get("Event")
-                pid = p.get("PerformanceID")
+                name = p.get("Event") or p.get("PerformanceName")
+                eid = p.get("EventID")
                 events.append({
                     "name": name,
                     "date": dt.astimezone(timezone.utc).isoformat(),
-                    "url": f"https://tickets.24hourmusic.com/orderticket.asp?p={pid}" if pid else url,
+                    "url": f"https://tickets.24hourmusic.com/eventperformances.asp?evt={eid}" if eid else url,
                     "venue": "McCarthy's Toad",
                     "price": None,
                     "category": "music",
@@ -8628,6 +8962,7 @@ _ALL_VENUES = [
     {"name": "Beantown Gamers", "url": "https://www.meetup.com/boardgames-boston/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "gaming"},
     {"name": "Cambridge Game Night", "url": "https://www.meetup.com/CambridgeGameNight/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "gaming"},
     {"name": "Unplugged Gaming Boston", "url": "https://www.meetup.com/unplugged-gaming-of-boston-surrounding-areas/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "gaming"},
+    {"name": "Boston Python", "url": "https://www.meetup.com/bostonpython/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "community"},
     {"name": "Hey Siri: Make Friends After College", "url": "https://www.meetup.com/Hey-Siri-How-Do-I-Make-New-Friends-After-College/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "community"},
     {"name": "Boston Outdoor Adventures", "url": "https://www.meetup.com/boston-outdoor-adventures/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "outdoors"},
     {"name": "Boston Hiking Meetup", "url": "https://www.meetup.com/boston-hiking/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "outdoors"},
@@ -8698,6 +9033,15 @@ _ALL_VENUES = [
     {"name": "Harvard Art Museums", "url": "https://harvardartmuseums.org/calendar", "ua": UA_CHROME, "scraper": scrape_harvard_art_museums, "default_category": "art"},
     {"name": "Boston Lyric Opera", "url": "https://blo.org/wp-json/tribe/events/v1/events", "ua": UA_CHROME, "scraper": scrape_tribe_rest, "default_category": "music"},
     {"name": "SpeakEasy Stage", "url": "https://speakeasystage.com/wp-json/tribe/events/v1/events", "ua": UA_CHROME, "scraper": scrape_tribe_rest, "default_category": "theater"},
+    {"name": "American Repertory Theater", "url": "https://americanrepertorytheater.org/shows-events/", "ua": UA_CHROME, "scraper": scrape_art, "default_category": "theater"},
+    {"name": "Boston Ballet", "url": "https://cart.bostonballet.org", "ua": UA_CHROME, "scraper": scrape_boston_ballet, "default_category": "dance"},
+    {"name": "Handel and Haydn Society", "url": "https://cart.handelandhaydn.org", "ua": UA_CHROME, "scraper": scrape_handel_haydn, "default_category": "classical"},
+    {"name": "Harvard Film Archive", "url": "https://harvardfilmarchive.org/calendar", "ua": UA_CHROME, "scraper": scrape_harvard_film_archive, "default_category": "film"},
+    {"name": "Midnight Runners Boston", "url": "https://www.heylo.com/events/26e9657b-085f-468f-bd45-304b48d68bdb/", "ua": UA_CHROME, "scraper": scrape_midnight_runners, "default_category": "sports"},
+    {"name": "Somerville Road Runners", "url": "https://srr.org/", "ua": UA_CHROME, "scraper": scrape_somerville_road_runners, "default_category": "sports"},
+    {"name": "Davis Square Runners", "url": "https://www.meetup.com/davissquarerunners/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "sports"},
+    {"name": "November Project Boston", "url": "https://november-project.com/boston/", "ua": UA_CHROME, "scraper": scrape_november_project, "default_category": "sports"},
+    {"name": "ArtsEmerson", "url": "https://artsemerson.org/wp-json/tribe/events/v1/events", "ua": UA_CHROME, "scraper": scrape_tribe_rest, "default_category": "theater"},
     {"name": "Lyric Stage Company", "url": "https://lyricstage.com/whats-on/", "ua": UA_CHROME, "scraper": scrape_lyric_stage, "default_category": "theater"},
     {"name": "Celebrity Series of Boston", "url": "https://www.celebrityseries.org/live-performances/performance-event-calendar/", "ua": UA_CHROME, "scraper": scrape_celebrity_series, "default_category": "music"},
     {"name": "LesbianNightLife", "url": "https://www.lesbiannightlife.com", "ua": UA_CHROME, "scraper": scrape_wix_events, "default_category": "clubbing"},
@@ -8961,12 +9305,12 @@ CATEGORY_KEYWORDS = [
                    "in conversation", "conversation with", "storytelling", "novel", "memoir", "acotar", "keynote"]),
     ("gaming",    ["arcade", "mahjong", "chess", "trivia", "board game", "video game", "ttrpg", "d&d", "dungeons",
                    "tabletop", "escape room", "bingo", "pinball", "axe throw", "darts bar",
-                   "one-shot rpg", "rpg night", "cornhole", "ping pong"]),
+                   "one-shot rpg", "rpg night", "cornhole", "ping pong", "puzzle party", "puzzle night", "puzzle hunt", "puzzle swap", "jigsaw", "mah jongg", "mahjongg", "trading card", "pack wars", "pokemon"]),
     ("clubbing",  ["dj ", " dj", "edm", "house music", "techno", "rave", "dubstep", "club night",
                    "nightclub", "guestlist", "guest list", "nightlife", "drum and bass", "drum & bass",
                    "industrial night", "goth night", "darkwave", "new wave night",
                    "party", "parties", "bash", "after party", "afterparty", "soiree", "rooftop", "halloween ball",
-                   "costume party", "speakeasy", "piano bar", "dueling piano"]),
+                   "costume party", "speakeasy", "piano bar", "dueling piano", "bsmnt"]),
     ("music",     ["music", "musical", "musician", "concert", " band ", "live music", "music series", "music hall", "orchestra",
                    "symphony", "karaoke", "jazz", "hip hop", "rap", "bluegrass", "country music",
                    "country night", "folk music", "acoustic", "open mic", "irish session", "jam session",
@@ -8975,15 +9319,15 @@ CATEGORY_KEYWORDS = [
                    "record release", "live band", "live show", "live performance", "disco", "disko",
                    "jazz trio", "jazz quartet", " trio ", " quartet ", " quintet ", "anthem", "soundtrack",
                    "ukulele", "drumming", "cabaret", "blues feat", "live blues", "recital", "vocal", "instrumental",
-                   "choral", "choir", "chorus", "ensemble", "chamber music", "singing", "bands", "brass"]),
-    ("film",      ["screening", "film ", "cinema", "movie night", "movie", "movies", "brattle", "coolidge", "documentary", "baaff"]),
-    ("sports",    ["bruins", "celtics", "red sox", "revolution", "marathon", "vs.", "match", "game ",
+                   "choral", "choir", "chorus", "ensemble", "chamber music", "singing", "bands", "brass", "a cappella", "countertenor", "a far cry"]),
+    ("film",      ["screening", "film ", "cinema", "movie night", "movie", "movies", "brattle", "coolidge", "documentary", "baaff", "reel rock", "warren miller", "film fest", "in 35mm", "in 70mm"]),
+    ("sports",    ["bruins", "celtics", "red sox", "revolution", "patriots watch", "marathon", "vs.", "match", "game ",
                    " 5k", "fun run", "road race", "10k", "half marathon", "cycling event",
                    "bike race", "rowing", "regatta", "hocr", "pickleball", "tennis", "volleyball",
                    "dodgeball", "archery", "parkour", "crossfit", "rock climbing", "kickboxing",
                    "dragon boat", "wrestling", "flag football", "golf", "axe throwing",
                    "indoor cycling", "spin class", "boot camp", "fitness class", "fitness", "workout", "gym",
-                   "strength training", "pilates", "hyrox", "tailgate", "soccer", "basketball", "hockey"]),
+                   "strength training", "pilates", "hyrox", "tailgate", "soccer", "basketball", "hockey", "curling", "climb night", "rec league", "river run", "tai chi"]),
     ("food",      ["tasting", "brewery", "brewing", "beer", "wine", "dinner", "brunch", "pop-up",
                    "oyster", "cocktail", "cocktails", "martini", "happy hour", "taproom", "bar night", "fondue",
                    "taqueria", "tavern", "sushi", "maki", "whiskey", "bourbon", "food truck", "menu",
@@ -8991,10 +9335,10 @@ CATEGORY_KEYWORDS = [
                    "pasta class", "wine tasting", "beer tasting", "restaurant", "bar crawl", "pub crawl",
                    "omakase", "ramen", "dumpling", "high tea", "afternoon tea", "tea room", "cookie", "pizza",
                    "chocolate tour", "coffee", "latte", "croissant", "knife skills", "chef", "bbq", "barbecue",
-                   "cheese tasting", "sake", "mezcal", "gin tasting", "lounge"]),
+                   "cheese tasting", "sake", "mezcal", "gin tasting", "lounge", "cognac", "armagnac", "wines of", "pasta", "cast iron", "hot dog", "biscuit", "bread"]),
     ("family",    ["kids", "children", "family", "toddler", "princess", "easter", "storytime",
                    "lego", "sensory-friendly", "sensory friendly", "baby", "youth", "trick or treat", "puppet",
-                   "halloween", "spooky", "haunted"]),
+                   "halloween", "spooky", "haunted", "playgroup", "rhythm time", "bookworms"]),
     ("art",       ["art", "arts", "craft", "crafts", "makers", "exhibition", "gallery", "museum", "sculpture", "painting", "curator",
                    "art show", "art walk", "art class", "pottery", "ceramics", "printmaking",
                    "watercolor", "glass fusing", "mosaic", "screen print", "flower arrang",
@@ -9004,7 +9348,7 @@ CATEGORY_KEYWORDS = [
                    "quilling", "resin ", "tufting", "leatherwork", "woodwork", "bazaar",
                    "pressed flower", "moss art", "stamp carving", "cyanotype", "photograph", "quilt",
                    "paper marbling", "junk journal", "macrame", "succulent plant",
-                   "art studio", "open studio", "art market", "mural"]),
+                   "art studio", "open studio", "art market", "mural", "paint party", "paint night", "sip and paint", "sip & paint", "candlemaking", "needlepoint", "knit circle", "hand lettering", "enamel", "silver ring", "bracelet", "artist talk", "artist walk", "lantern", "fleurs de villes", "orchid"]),
     ("outdoors",  ["hike", "hiking", "kayak", "canoe", "paddleboard", "camping", "trail",
                    "nature walk", "nature", "birding", "birdwatching", "yoga", "outdoor yoga", "sunrise yoga",
                    "sunset yoga", "outdoor fitness", "outdoor workout", "park run", "outdoor", "outdoors",
@@ -9021,7 +9365,7 @@ CATEGORY_KEYWORDS = [
                    "artisan market", "craft fair", "flea market", "vintage market", "market", "vintage",
                    "lgbtq", "queer ", "pride ", " trans ", "bisexual", "celebration", "showcase",
                    "meditation", "meditat", "speed dating", "singles", "porchfest", "tour",
-                   "open studios", "small business", "startup", "tarot"]),
+                   "open studios", "small business", "startup", "tarot", "worship", "veterans day", "remembrance", "grand opening", "style exchange", "trunk show", "debat", "human library", "blood donor", "fireside chat"]),
 ]
 
 _WORD_BOUNDARY_KEYWORDS = {
@@ -9098,20 +9442,46 @@ def is_kid_family_event(name, venue=None):
     return bool(KID_FAMILY_EVENT_RE.search(name))
 
 
+_WEAK_CLUBBING_KEYWORDS = {"party", "parties", "bash"}
+_EXTRA_MUSIC_VENUES = ("shalin liu", "performance center", "jordan hall", "symphony hall", "scullers", "regattabar")
+
+
 def infer_category(name, venue, default=None):
     if is_utility_event(name):
         return "services"
     if is_kid_family_event(name, venue):
         return "family"
     text = f"{name or ''} {venue or ''}".lower()
+    name_text = (name or "").lower()
+
+    def _match(k, t):
+        pat = _WORD_BOUNDARY_PATTERNS.get(k)
+        return bool(pat.search(t)) if pat is not None else k in t
+
+    # Generic "party" words alone are weak evidence for nightlife ("Puzzle Party",
+    # "Watch Party: Celtics vs. ...", "Dumpling Making Party"). If one is the only
+    # clubbing hit, keep looking for a more specific match in the event's own title.
+    weak_hit = None
     for cat, kws in CATEGORY_KEYWORDS:
         for k in kws:
-            pat = _WORD_BOUNDARY_PATTERNS.get(k)
-            if pat is not None:
-                if pat.search(text):
+            if weak_hit is not None:
+                if _match(k, name_text):
                     return cat
-            elif k in text:
+                continue
+            if _match(k, text):
+                if cat == "clubbing" and k in _WEAK_CLUBBING_KEYWORDS:
+                    if any(_match(k2, text) for k2 in kws if k2 not in _WEAK_CLUBBING_KEYWORDS):
+                        return cat
+                    weak_hit = cat
+                    break
                 return cat
+    if weak_hit is not None:
+        return weak_hit
+    # Aggregator listings (Do617, The Boston Calendar) at a known music venue with no keyword hit
+    if default in (None, "other", "community"):
+        v_low = (venue or "").lower()
+        if any(k in v_low for k in MUSIC_VENUE_DEFAULTS) or any(k in v_low for k in _EXTRA_MUSIC_VENUES):
+            return "music"
     if default == "classical":
         return "music"
     if default == "arts":
