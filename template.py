@@ -24,6 +24,7 @@ from scrapers import (
     is_placeholder_or_closed_event,
     is_standing_exhibit,
     fix_doubled_url,
+    sanitize_event_url,
     is_utility_event,
     is_kid_family_event,
 )
@@ -86,7 +87,7 @@ CITY_RULES = [
         "first street market", "la fábrica", "la fabrica", "kathryn schultz",
         "an sibin", "an sibín", "the coop", "forage", "52 church", "farkas hall",
         "loeb ex", "pemberton farms", "fusey bluesy", "graymist", "the grove",
-        "cambridge art association",
+        "cambridge art association", "loeb drama", "harvard film archive",
     )),
     ("boston", (
         "the 88 club", "88 club",
@@ -138,7 +139,7 @@ CITY_RULES = [
         "church of the covenant", "capo restaurant", "bell in hand", "ashmont farmers market",
         "alumni stadium", "adams park", "adam park", "nathálie", "nathalie",
         "goethe-institut", "goethe institut", "broken records", "lifebloom",
-        "winthrop center", "overlook st gabriel", "harvard stadium", "bright-landry",
+        "winthrop center", "overlook st gabriel", "harvard stadium", "bright-landry", "goel center",
     )),
 ]
 
@@ -281,7 +282,7 @@ def resolve_subarea(city, event, geo=None):
             return ("Back Bay & Copley", "back_bay")
         if any(k in blob for k in ["seaport", "leader bank", "ica boston", "kings seaport", "kings dining", "greenway", "harbor", "scorpion", "laugh boston"]):
             return ("Seaport & Waterfront", "seaport_waterfront")
-        if any(k in blob for k in ["allston", "brighton", "o'brien", "obrien", "brighton music", "speedway", "roadrunner", "lavietes", "notch brewing", "harvard stadium", "sunset cantina"]):
+        if any(k in blob for k in ["allston", "brighton", "o'brien", "obrien", "brighton music", "speedway", "roadrunner", "lavietes", "notch brewing", "harvard stadium", "sunset cantina", "goel center"]):
             return ("Allston & Brighton", "allston_brighton")
         if any(k in blob for k in ["jamaica plain", "jp", "midway cafe", "arboretum", "dorchester", "roxbury"]):
             return ("JP & Dorchester", "jp_dorchester")
@@ -1878,6 +1879,69 @@ def _clean_event_url(u):
     return u
 
 
+_TITLE_FILLER = {"w", "with", "and", "the", "a", "an", "live", "feat", "ft", "presents", "presented", "by"}
+
+
+def _title_variants(title):
+    """Compact spellings of a title for cross-source duplicate detection: the full title and,
+    when it has an organizer/series prefix ("MFA: ...", "X presents: ...", "BSO - ..."),
+    the part after it. Each variant is lowercase alphanumerics with filler words removed."""
+    t = unescape(title or "").lower()
+    t = re.sub(r"[\(\[][^\)\]]*[\)\]]", " ", t)          # (18+), [SOLD OUT]
+    t = re.sub(r"\s+at\s+(?:the\s+)?[\w'\s\.&-]+$", "", t)  # trailing "at The Middle East"
+    t = re.sub(r"\s*[-–—|,]\s*(?:boston|cambridge|somerville)(?:,?\s*ma)?\s*$", "", t)  # "LA Phil - Boston"
+    pieces = [t]
+    m = re.search(r"\bpresents?:?\s+(.+)$", t)
+    if m:
+        pieces.append(m.group(1))
+    for sep in (":", " - ", " – ", " — ", " | "):
+        if sep in t:
+            # Only the part after the prefix: the prefix itself ("mfa") is shared by
+            # unrelated events at the same venue.
+            pieces.append(t.split(sep, 1)[1])
+    out = []
+    for p in pieces:
+        toks = [w for w in re.findall(r"[a-z0-9]+", p) if w not in _TITLE_FILLER]
+        c = "".join(toks)
+        if c and c not in _GENERIC_TITLE_VARIANTS:
+            out.append(c)
+    return out
+
+
+_GENERIC_TITLE_VARIANTS = {"boston", "cambridge", "somerville", "tour", "usa", "concert", "show", "live"}
+_VENUE_GENERIC_WORDS = {
+    "the", "at", "in", "of", "and", "boston", "cambridge", "somerville", "ma", "public", "library",
+    "branch", "main", "central", "west", "east", "north", "south", "university", "college", "school",
+    "church", "museum", "theatre", "theater", "hall", "center", "centre", "club", "bar", "pub", "cafe",
+    "café", "lounge", "room", "house", "studio", "brewing", "brewery", "company", "co", "downtown",
+    "presented", "by", "citizens", "music", "arts", "art",
+}
+
+
+def _same_physical_venue(e1, e2):
+    """Stricter venue check than _merge_duplicates' _venue_match: same geo pin, or a shared
+    distinctive word ("Sinclair", "Royale") — not just "Public Library" or "Music Hall"."""
+    w = lambda v: {re.sub(r"s$", "", x) for x in re.findall(r"\w+", (v or "").lower())} - _VENUE_GENERIC_WORDS
+    if w(e1.get("venue")) & w(e2.get("venue")):
+        return True
+    g1, g2 = resolve_event_geo(e1), resolve_event_geo(e2)
+    if g1 and g2:
+        return abs(g1["lat"] - g2["lat"]) < 0.0015 and abs(g1["lng"] - g2["lng"]) < 0.0015
+    return False
+
+
+def _titles_equivalent(a, b):
+    """True when any variant pair is identical, or one is a prefix of the other (>= 6 chars)."""
+    for x in a:
+        for y in b:
+            if x == y and len(x) >= 3:
+                return True
+            short, long_ = (x, y) if len(x) <= len(y) else (y, x)
+            if len(short) >= 6 and long_.startswith(short):
+                return True
+    return False
+
+
 def _merge_duplicates(events):
     """Collapse events sharing a normalized name or head title within the same day bucket.
 
@@ -2067,6 +2131,21 @@ def _merge_duplicates(events):
                                     match = cand
                                     break
 
+        # 5. Same venue, start within 90 min, titles that differ only in formatting
+        #    ("half•alive"/"halfalive", "MFA: Late Nites"/"Late Nites", "MPH"/"MPH",
+        #    "Global Arts Live presents: LE VENT DU NORD"/"Le Vent du Nord").
+        if not match:
+            keys_e = _title_variants(raw_name)
+            for cand in out:
+                if not _same_physical_venue(e, cand) or _is_different_show(e, cand):
+                    continue
+                t_e, t_c = e.get("_time"), cand.get("_time")
+                if not t_e or not t_c or abs((t_e - t_c).total_seconds()) > 90 * 60:
+                    continue
+                if _titles_equivalent(keys_e, _title_variants(cand.get("name") or "")):
+                    match = cand
+                    break
+
         if match:
             # Consolidate multiple hourly tour departures into a single daily listing
             if _is_attraction_tour(match) or _is_attraction_tour(e):
@@ -2195,6 +2274,7 @@ def group_by_date(results):
             entry = {"venue_url": r["url"], **e, "_source_venue": r["venue"]}
             if entry.get("url"):
                 entry["url"] = fix_doubled_url(entry["url"])
+            entry["url"] = sanitize_event_url(entry.get("url"), fallback=r.get("url"))
             entry["venue"] = e.get("venue") or r["venue"]
             if is_utility_event(name):
                 entry["category"] = "services"
