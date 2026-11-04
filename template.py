@@ -567,6 +567,12 @@ def build_json_ld(events, site_url=None):
         "url": f"{site_url}/",
         "description": "Find 8,000+ live music shows, comedy, theater, nightlife, and free events across Boston, Cambridge & Somerville. Filter by neighborhood and MBTA subway lines.",
         "inLanguage": "en-US",
+        "publisher": {
+            "@type": "Organization",
+            "name": "Wicked Boston Events",
+            "url": f"{site_url}/",
+            "logo": f"{site_url}/logo-512.png"
+        },
         "potentialAction": {
             "@type": "SearchAction",
             "target": f"{site_url}/#q={{search_term_string}}",
@@ -1145,6 +1151,53 @@ HUBS = {
 }
 
 
+def _hub_place_label(city, e):
+    """Neighborhood or town for a guide-page card: "Harvard Square, Cambridge", "Belmont"."""
+    city_label = CITY_LABELS.get(city, "Boston")
+    try:
+        sub = resolve_subarea(city, e)[0]
+    except Exception:
+        sub = ""
+    if city == "other":
+        return (e.get("locality") or "").strip() or (sub if sub and sub != "Outer Suburbs" else "Greater Boston")
+    if not sub or sub.startswith("Other ") or sub == city_label:
+        return city_label
+    return f"{sub}, {city_label}"
+
+
+_HUB_CITY_CHIPS = (("all", "All"), ("boston", "Boston"), ("cambridge", "Cambridge"),
+                   ("somerville", "Somerville"), ("other", "Nearby towns"))
+
+_HUB_CITY_JS = """<script>
+(function () {
+  var chips = document.querySelectorAll('.hub-city-chip');
+  if (!chips.length) return;
+  var cards = document.querySelectorAll('.hub-card');
+  var heads = document.querySelectorAll('.hub-day');
+  function show(city) {
+    var days = {};
+    cards.forEach(function (c) {
+      var on = city === 'all' || c.dataset.city === city;
+      c.hidden = !on;
+      if (on) days[c.dataset.day] = 1;
+    });
+    heads.forEach(function (h) { h.hidden = !days[h.dataset.day]; });
+    chips.forEach(function (b) { b.classList.toggle('active', b.dataset.city === city); });
+    var none = document.getElementById('hub-none');
+    if (none) none.hidden = Object.keys(days).length > 0;
+  }
+  chips.forEach(function (b) {
+    b.addEventListener('click', function () {
+      show(b.dataset.city);
+      history.replaceState(null, '', b.dataset.city === 'all' ? location.pathname : '#city=' + b.dataset.city);
+    });
+  });
+  var m = location.hash.match(/city=(\\w+)/);
+  show(m && document.querySelector('.hub-city-chip[data-city="' + m[1] + '"]') ? m[1] : 'all');
+})();
+</script>"""
+
+
 def render_hub_page(hub_slug, events, site_url=None):
     if not site_url:
         site_url = get_site_url()
@@ -1252,6 +1305,7 @@ def render_hub_page(hub_slug, events, site_url=None):
     json_ld_str = f'<script type="application/ld+json">\n{json.dumps(hub_ld, ensure_ascii=False, indent=2)}\n</script>'
 
     cards_html = []
+    last_day = None
     for e in filtered[:card_limit]:
         title = escape(e.get("title") or e.get("name") or "Event")
         venue = escape(e.get("venue") or e.get("_source_venue") or "Venue")
@@ -1260,22 +1314,30 @@ def render_hub_page(hub_slug, events, site_url=None):
         t_str = escape(e.get("time") or "")
         t_obj = e.get("_time")
         if isinstance(t_obj, datetime):
-            d_str = t_obj.strftime("%a, %b %-d")
-            t_str = "" if (t_obj.hour, t_obj.minute) == (0, 0) else t_obj.strftime("%-I:%M %p")
+            # A "Wednesday, November 4" header starts each day; cards then show just the time
+            if t_obj.date() != last_day:
+                last_day = t_obj.date()
+                cards_html.append(f'<h2 class="hub-day" id="{last_day.isoformat()}" data-day="{last_day.isoformat()}">{t_obj.strftime("%A, %B %-d")}</h2>')
+            d_str = ""
+            t_str = "All day" if (t_obj.hour, t_obj.minute) == (0, 0) else t_obj.strftime("%-I:%M %p")
         desc_html = ""
         if hub.get("show_details") and e.get("description"):
             d_txt = re.sub(r"\s+", " ", str(e["description"])).strip()
             desc_html = f'<p class="hub-desc">{escape(d_txt[:160] + ("…" if len(d_txt) > 160 else ""))}</p>'
         price_val = e.get("price")
-        price_badge = f'<span class="badge badge-price">${escape(str(price_val))}</span>' if price_val else ""
+        price_txt = str(price_val or "").strip()
+        if re.fullmatch(r"\d+(?:\.\d+)?", price_txt):
+            price_txt = "$" + price_txt  # bare numbers only; most prices already carry "$"
+        price_badge = f'<span class="badge badge-price">{escape(price_txt)}</span>' if price_txt else ""
         if _is_event_free(e):
             price_badge = '<span class="badge badge-free">Free</span>'
         city = _event_city(e.get("venue"), e.get("_source_venue"), e)
-        city_name = escape(CITY_LABELS.get(city, "Boston"))
+        city_name = escape(_hub_place_label(city, e))
+        day_attr = t_obj.date().isoformat() if isinstance(t_obj, datetime) else ""
 
-        cards_html.append(f"""<article class="hub-card">
+        cards_html.append(f"""<article class="hub-card" data-city="{escape(city)}" data-day="{day_attr}">
   <div class="hub-card-head">
-    <time class="hub-date">{d_str}{(' · ' + t_str) if t_str else ''}</time>
+    <time class="hub-date">{' · '.join(x for x in (d_str, t_str) if x)}</time>
     <div class="hub-badges">{price_badge}</div>
   </div>
   <h3 class="hub-title"><a href="{url}" target="_blank" rel="noopener">{title}</a></h3>
@@ -1285,6 +1347,13 @@ def render_hub_page(hub_slug, events, site_url=None):
   </div>
   {desc_html}
 </article>""")
+
+    city_chips_html = ""
+    if not hub.get("city_filter") and cards_html:
+        present = {c for c in ("boston", "cambridge", "somerville", "other") if f'data-city="{c}"' in "".join(cards_html)}
+        city_chips_html = '<div class="hub-city-chips" role="group" aria-label="Filter by city">' + "".join(
+            f'<button type="button" class="hub-city-chip" data-city="{k}">{lbl}</button>'
+            for k, lbl in _HUB_CITY_CHIPS if k == "all" or k in present) + "</div>" + _HUB_CITY_JS
 
     cards_joined = "\n".join(cards_html) if cards_html else "<p class='no-hub-events'>No scheduled events matching this directory right now. Check the interactive calendar for all upcoming dates.</p>"
 
@@ -1307,7 +1376,9 @@ def render_hub_page(hub_slug, events, site_url=None):
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
 {meta_tags}
 {json_ld_str}
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230c0e14'/%3E%3Crect x='3' y='3' width='58' height='58' rx='13' fill='none' stroke='%23ffd866' stroke-width='3'/%3E%3Ctext x='32' y='48' font-family='Impact, Arial Black, sans-serif' font-weight='900' font-size='44' fill='%235d9bff' text-anchor='middle'%3EB%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <style>
   :root {{
     --bg: #0c0e14;
@@ -1409,6 +1480,41 @@ def render_hub_page(hub_slug, events, site_url=None):
       grid-template-columns: repeat(2, 1fr);
     }}
   }}
+  .hub-day {{
+    grid-column: 1 / -1;
+    margin: 20px 0 0;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--fg);
+  }}
+  .hub-city-chips {{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 16px;
+  }}
+  .hub-city-chip {{
+    font: inherit;
+    font-size: 0.9rem;
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--fg);
+    cursor: pointer;
+  }}
+  .hub-city-chip.active {{
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #0c0e14;
+    font-weight: 600;
+  }}
+  [hidden] {{ display: none !important; }}
+  .hub-day:first-child {{
+    margin-top: 0;
+  }}
   .hub-card {{
     background: var(--card);
     border: 1px solid var(--border);
@@ -1500,9 +1606,11 @@ def render_hub_page(hub_slug, events, site_url=None):
     <p>{hub['subtitle']}</p>
     <a href="../{hub['query']}" class="cta-btn">Open Full Interactive Calendar &amp; Filters →</a>
   </div>
+  {city_chips_html}
   <div class="hub-grid">
     {cards_joined}
   </div>
+  <p id="hub-none" class="no-hub-events" hidden>Nothing in this area in the next few weeks. Try another town.</p>
 </main>
 <footer>
   <p><a href="../">Wicked Boston Events</a> · Independent Greater Boston Events Calendar · <a href="https://www.instagram.com/wickedbostonevents/" target="_blank" rel="noopener">Instagram: @wickedbostonevents</a></p>
@@ -3122,7 +3230,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
     document.documentElement.setAttribute('data-theme', t);
   }} catch(e) {{}}
 </script>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%230c0e14'/%3E%3Crect x='3' y='3' width='58' height='58' rx='13' fill='none' stroke='%23ffd866' stroke-width='3'/%3E%3Ctext x='32' y='48' font-family='Impact, Arial Black, sans-serif' font-weight='900' font-size='44' fill='%235d9bff' text-anchor='middle'%3EB%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <style>
   :root, [data-theme="classic"] {{
     --bg: #0c0e14;
@@ -7601,6 +7711,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
       visibleDaySecs.forEach(day => {{
         const dayDate = day.dataset.date;
         day.querySelectorAll('.event:not(.hidden)').forEach(li => {{
+          // Unchecked cities/categories collapse their section (.empty) without hiding each event
+          if (li.closest('.empty')) return;
           const lat = parseFloat(li.dataset.lat);
           const lng = parseFloat(li.dataset.lng);
           if (isNaN(lat) || isNaN(lng)) return;
