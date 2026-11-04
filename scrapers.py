@@ -4602,7 +4602,7 @@ def scrape_meetup(url, ua):
     return events
 
 
-def _luma_entry_to_event(entry, now):
+def _luma_entry_to_event(entry, now, default_category="community"):
     """One Luma API entry ({event, calendar, hosts, ticket_info}) -> our event dict, or None."""
     ev = entry.get("event") or {}
     name = (ev.get("name") or "").strip()
@@ -4665,7 +4665,7 @@ def _luma_entry_to_event(entry, now):
         desc_parts.append(cal_desc)
     desc = " • ".join(desc_parts)[:250] if desc_parts else None
 
-    cat = infer_category(name, venue, default="community")
+    cat = infer_category(name, venue, default=default_category)
 
     ev_dict = {
         "name": name,
@@ -4693,6 +4693,15 @@ LUMA_CALENDAR_SEEDS = {
     "cal-Fo5DfeIk8ur7FPY": "Millennial Crisis",  # Boston Social Conversations (Aeronaut)
 }
 LUMA_CALENDARS_CACHE_PATH = os.path.join(CACHE_DIR, "luma_calendars.json")
+LUMA_LOCAL_CATEGORIES = {
+    "cat-family": "Family", "cat-books": "Books", "cat-games": "Games", "cat-fooddrink": "Food & Drink",
+    "cat-running": "Running", "cat-AzVAf6VmE9JEre4": "Arts & Culture", "cat-climate": "Climate",
+    "cat-0Km9ZnuBjFAjwFl": "Fitness", "cat-C1VaNLnt25w9t6c": "Wellness",
+}
+_LUMA_CATEGORY_DEFAULTS = {
+    "cat-family": "family", "cat-books": "books", "cat-games": "gaming", "cat-fooddrink": "food",
+    "cat-running": "fitness", "cat-AzVAf6VmE9JEre4": "art", "cat-0Km9ZnuBjFAjwFl": "fitness",
+}
 _BOSTON_CENTER = (42.3601, -71.0589)
 
 
@@ -4840,6 +4849,33 @@ def scrape_luma(url, ua):
         if not data.get("has_more") or not data.get("next_cursor"):
             break
         cursor = data.get("next_cursor")
+
+    # Category feeds by coordinates reach well past the ~22 curated "Boston" picks. Tech/AI/crypto
+    # are left out: ~150 startup events a fortnight would bury the Community bucket.
+    for cat_id in LUMA_LOCAL_CATEGORIES:
+        cursor = None
+        for _ in range(3):
+            q = (f"https://api.lu.ma/discover/get-paginated-events?latitude={_BOSTON_CENTER[0]}"
+                 f"&longitude={_BOSTON_CENTER[1]}&pagination_limit=50&discover_category_api_id={cat_id}")
+            if cursor:
+                q += f"&pagination_cursor={cursor}"
+            try:
+                data = _SESSION.get(q, headers=headers, timeout=15).json()
+            except Exception:
+                break
+            for entry in data.get("entries") or []:
+                ev_dict = _luma_entry_to_event(entry, now, _LUMA_CATEGORY_DEFAULTS.get(cat_id, "community"))
+                if not ev_dict or not _near_boston(ev_dict) or re.match(r"\s*private event\b", ev_dict["name"], re.I):
+                    continue
+                key = (ev_dict["name"].lower(), ev_dict["date"][:10])
+                if key in seen:
+                    continue
+                seen.add(key)
+                _remember_luma_calendar(entry.get("calendar"))
+                events.append(ev_dict)
+            if not data.get("has_more") or not data.get("next_cursor"):
+                break
+            cursor = data["next_cursor"]
 
     if _LUMA_DISCOVERED:  # persist so scrape_luma_calendars follows them (it may run concurrently)
         try:
@@ -9177,6 +9213,11 @@ _ALL_VENUES = [
     {"name": "Cambridge Game Night", "url": "https://www.meetup.com/CambridgeGameNight/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "gaming"},
     {"name": "Unplugged Gaming Boston", "url": "https://www.meetup.com/unplugged-gaming-of-boston-surrounding-areas/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "gaming"},
     {"name": "Boston Python", "url": "https://www.meetup.com/bostonpython/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "community"},
+    {"name": "Skip the Small Talk Boston", "url": "https://www.meetup.com/skip-the-small-talk-boston/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "community"},
+    {"name": "Boston Japanese Language Exchange", "url": "https://www.meetup.com/bostonjapanese/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "community"},
+    {"name": "Boston Indie Game Devs", "url": "https://www.meetup.com/bostongamedev/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "gaming"},
+    {"name": "Unplugged Boston", "url": "https://www.meetup.com/unplugged-boston/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "gaming"},
+    {"name": "Revolutionary Spaces", "url": "https://revolutionaryspaces.org/explore/program-calendar/", "ua": UA_CHROME, "scraper": scrape_jsonld, "default_category": "community"},
     {"name": "Hey Siri: Make Friends After College", "url": "https://www.meetup.com/Hey-Siri-How-Do-I-Make-New-Friends-After-College/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "community"},
     {"name": "Boston Outdoor Adventures", "url": "https://www.meetup.com/boston-outdoor-adventures/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "outdoors"},
     {"name": "Boston Hiking Meetup", "url": "https://www.meetup.com/boston-hiking/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "outdoors"},
