@@ -2,9 +2,10 @@
 """Boston Events — scrape a handful of venue sites and serve a simple list at localhost:3000."""
 
 import json
+import copy
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from flask import Flask, jsonify, request
 
@@ -110,8 +111,7 @@ def deferred_days_html():
 def hub_page(hub_slug):
     if hub_slug in HUBS:
         venues = get_all_events(force="refresh" in request.args)
-        flat_events = [e for v in venues for e in v.get("events", [])]
-        return render_hub_page(hub_slug, flat_events, site_url=get_site_url())
+        return render_hub_page(hub_slug, _hub_events(HUBS[hub_slug], venues), site_url=get_site_url())
     return "Not Found", 404
 
 
@@ -232,7 +232,7 @@ def export_html(path="index.html", force=False, source_json="events.json"):
         for hub_slug in HUBS:
             hub_dir = os.path.join(base_dir, hub_slug)
             os.makedirs(hub_dir, exist_ok=True)
-            hub_html = render_hub_page(hub_slug, flat_events, site_url=site_url)
+            hub_html = render_hub_page(hub_slug, _hub_events(HUBS[hub_slug], venues or [], flat_events), site_url=site_url)
             hub_path = os.path.join(hub_dir, "index.html")
             with open(hub_path, "w", encoding="utf-8") as f:
                 f.write(hub_html)
@@ -250,6 +250,21 @@ def export_html(path="index.html", force=False, source_json="events.json"):
             print(f"Warning: failed to export RSS / ICS feeds: {e}")
     except Exception as e:
         print(f"Warning: failed to export directory hubs: {e}")
+
+
+def _hub_events(hub, venues, flat_events=None):
+    """Most hubs filter the raw per-source events; "merged" hubs get the same deduplicated,
+    upcoming, date-sorted cards as the main page (one card per event, sources combined)."""
+    if hub.get("merged"):
+        from template import group_by_date
+        dated, _, _ = group_by_date(copy.deepcopy(venues))
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=1)
+        # Drop timed events that started over an hour ago (all-day ones sit at midnight; keep those)
+        return [e for _, evs in dated for e in evs
+                if not (e.get("_time") and (e["_time"].hour, e["_time"].minute) != (0, 0) and e["_time"] < cutoff)]
+    if flat_events is None:
+        flat_events = [e for v in venues for e in v.get("events", [])]
+    return flat_events
 
 
 def run_diagnostics(filter_name=None):

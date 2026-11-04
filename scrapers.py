@@ -981,6 +981,48 @@ def scrape_belmont_library_kids(url, ua):
 
 
 
+def scrape_mass_audubon(url, ua, venue, address):
+    """Mass Audubon center program list -> each program page's JSON-LD. Family/kids programs
+    (by title or description) go to Kids & Family, the rest to outdoors."""
+    from concurrent.futures import ThreadPoolExecutor
+    html = _SESSION.get(url, headers={"User-Agent": ua}, timeout=20).text
+    path = urlparse(url).path.rstrip("/")
+    links = sorted({urljoin(url, h) for h in re.findall(r'href="(%s/\d+[^"#?]*)"' % re.escape(path), html)})
+
+    def one(link):
+        try:
+            evs = scrape_jsonld(link, ua)
+        except Exception:
+            return []
+        try:
+            page = _SESSION.get(link, headers={"User-Agent": ua}, timeout=20).text
+            m = re.search(r'"description"\s*:\s*"([^"]{0,600})', page)
+            desc = _html_unescape(m.group(1)) if m else ""
+        except Exception:
+            desc = ""
+        out = []
+        for e in evs:
+            if not e.get("date"):
+                continue
+            blob = f"{e.get('name')} {desc}"
+            e["venue"] = venue
+            e["address"] = address
+            e["category"] = "family" if re.search(r"(?i)\b(?:famil(?:y|ies)|kids?|children|toddlers?|preschool|ages? \d)", blob) else "outdoors"
+            out.append(e)
+        return out
+
+    with ThreadPoolExecutor(max_workers=3) as ex:
+        return [e for evs in ex.map(one, links[:20]) for e in evs]
+
+
+def scrape_mass_audubon_magazine_beach(url, ua):
+    return scrape_mass_audubon(url, ua, "Mass Audubon Nature Center at Magazine Beach", "668 Memorial Dr, Cambridge")
+
+
+def scrape_mass_audubon_boston_nature_center(url, ua):
+    return scrape_mass_audubon(url, ua, "Mass Audubon Boston Nature Center", "500 Walk Hill St, Mattapan")
+
+
 _BC_TIME_RE = re.compile(
     r"(Sun|Mon|Tue|Wed|Thu|Fri|Sat)[a-z]*,\s+"
     r"(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+"
@@ -9014,14 +9056,24 @@ def scrape_northeastern(url, ua):
             continue
         seen.add(key)
 
-        events.append({
+        entry = {
             "name": html.unescape(title).strip()[:160],
             "date": iso_date,
             "url": ev_url,
             "venue": loc[:80],
             "price": "Free" if ev.get("free") else None,
-        })
+        }
+        # Engineering/CS/AI departments and tech-titled talks -> default-off Tech & Startups
+        depts = " ".join(t.get("name") or "" for t in (ev.get("filters") or {}).get("departments") or [])
+        if _NEU_TECH_DEPT_RE.search(depts) or TECH_EVENT_RE.search(entry["name"]) or re.search(r"(?i)\bstem\b|\bdata\b", entry["name"]):
+            entry["category"] = "tech"
+        events.append(entry)
     return events
+
+
+_NEU_TECH_DEPT_RE = re.compile(
+    r"\b(?:COE|College of Engineering|Khoury|Computer Science|Experiential AI|NUlab|Roux Institute|"
+    r"Network Science|Data Science|Bioengineering|Mechanical|Electrical)\b", re.I)
 
 
 PARTIFUL_SOURCES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "partiful_sources.json")
@@ -9697,6 +9749,9 @@ _ALL_VENUES = [
     {"name": "Watertown Library (kids)", "url": "https://watertownlib.assabetinteractive.com/calendar/", "ua": UA_CHROME, "scraper": scrape_watertown_library_kids, "default_category": "family"},
     {"name": "Medford Library (kids)", "url": "https://medfordlibrary.assabetinteractive.com/calendar/", "ua": UA_CHROME, "scraper": scrape_medford_library_kids, "default_category": "family"},
     {"name": "Belmont Library (kids)", "url": "https://belmontpubliclibrary.assabetinteractive.com/calendar/", "ua": UA_CHROME, "scraper": scrape_belmont_library_kids, "default_category": "family"},
+    {"name": "Mass Audubon Magazine Beach", "url": "https://www.massaudubon.org/programs/magazine-beach", "ua": UA_CHROME, "scraper": scrape_mass_audubon_magazine_beach, "default_category": "outdoors"},
+    {"name": "Mass Audubon Boston Nature Center", "url": "https://www.massaudubon.org/programs/boston-nature-center", "ua": UA_CHROME, "scraper": scrape_mass_audubon_boston_nature_center, "default_category": "outdoors"},
+    {"name": "Somerville Museum", "url": "https://www.somervillemuseum.org/calendar-events", "ua": UA_CHROME, "scraper": scrape_squarespace_events, "default_category": "community"},
     {"name": "Little Muse", "url": "https://littlemuse.substack.com", "ua": UA_CHROME, "scraper": scrape_little_muse, "default_category": "family"},
     {"name": "Puppet Showplace Theater", "url": "https://www.puppetshowplace.org/calendar", "ua": UA_CHROME, "scraper": scrape_puppet_showplace, "default_category": "family"},
     {"name": "Crystal Ballroom", "url": "https://www.crystalballroomboston.com/events/", "ua": UA_CHROME, "scraper": scrape_crystal_ballroom, "default_category": "music"},
@@ -10094,6 +10149,7 @@ _WORD_BOUNDARY_KEYWORDS = {
     "bash", "rave", "edm", "jam", "fest", "tour", "expo", "gala", "poet",
     "clay", "sake", "maki", "menu", "chef", "bbq", "gym", "golf", "kids",
     "baby", "lego", "hike", "yoga", "farm", "beer", "wine", "film", "match",
+    "easter",  # not "Northeastern"
 }
 _WORD_BOUNDARY_PATTERNS = {
     k: re.compile(rf"\b{re.escape(k)}\b", re.I) for k in _WORD_BOUNDARY_KEYWORDS

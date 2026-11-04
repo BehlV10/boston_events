@@ -821,6 +821,7 @@ def build_seo_directory_html(all_events_flat, all_venue_names):
           <li><a href="cambridge-events-tonight/">Cambridge Events Tonight</a></li>
           <li><a href="live-music-somerville/">Somerville Live Music</a></li>
           <li><a href="board-game-nights-boston/">Board Game Nights &amp; Trivia</a></li>
+          <li><a href="kids-family-events-boston/">Kids &amp; Family Events</a></li>
         </ul>
       </div>
 
@@ -957,6 +958,22 @@ def filter_events_for_hub(hub, events):
 
 
 HUBS = {
+    # Standalone page for parents: deduplicated (merged) cards, soonest first, with ages/details.
+    "kids-family-events-boston": {
+        "title": "Kids & Family Events in Boston, Cambridge & Somerville",
+        "h1": "Kids & Family Events",
+        "city_filter": None,
+        "cat_filter": "Kids & Family",
+        "free_only": False,
+        "time_filter": None,
+        "keyword_filter": None,
+        "merged": True,
+        "limit": 200,
+        "subtitle": "Story times, baby & toddler sing-alongs, museum days, puppet shows and nature walks for kids, from local libraries, museums and Little Muse, updated every 30 minutes.",
+        "og_badge": "KIDS & FAMILY",
+        "og_image": "og-kids-family.jpg",
+        "query": "#cat=Kids+%26+Family"
+    },
     # 1. High-Volume Programmatic Intent Pages
     "free-events-boston-this-weekend": {
         "title": "Free Events in Boston This Weekend",
@@ -1127,6 +1144,7 @@ def render_hub_page(hub_slug, events, site_url=None):
         return ""
 
     filtered = filter_events_for_hub(hub, events)
+    card_limit = hub.get("limit", 60)
 
     hub_canonical = f"{site_url}/{hub_slug}/"
     og_img_name = hub.get("og_image") or f"og-{hub_slug}.jpg"
@@ -1233,12 +1251,20 @@ def render_hub_page(hub_slug, events, site_url=None):
     json_ld_str = f'<script type="application/ld+json">\n{json.dumps(hub_ld, ensure_ascii=False, indent=2)}\n</script>'
 
     cards_html = []
-    for e in filtered[:60]:
+    for e in filtered[:card_limit]:
         title = escape(e.get("title") or e.get("name") or "Event")
         venue = escape(e.get("venue") or e.get("_source_venue") or "Venue")
         url = escape(e.get("url") or e.get("link") or "#")
         d_str = escape(e.get("date") or "")
         t_str = escape(e.get("time") or "")
+        t_obj = e.get("_time")
+        if isinstance(t_obj, datetime):
+            d_str = t_obj.strftime("%a, %b %-d")
+            t_str = "" if (t_obj.hour, t_obj.minute) == (0, 0) else t_obj.strftime("%-I:%M %p")
+        desc_html = ""
+        if hub.get("merged") and e.get("description"):
+            d_txt = re.sub(r"\s+", " ", str(e["description"])).strip()
+            desc_html = f'<p class="hub-desc">{escape(d_txt[:160] + ("…" if len(d_txt) > 160 else ""))}</p>'
         price_val = e.get("price")
         price_badge = f'<span class="badge badge-price">${escape(str(price_val))}</span>' if price_val else ""
         if _is_event_free(e):
@@ -1256,6 +1282,7 @@ def render_hub_page(hub_slug, events, site_url=None):
     <span class="hub-venue">📍 {venue}</span>
     <span class="hub-city">({city_name})</span>
   </div>
+  {desc_html}
 </article>""")
 
     cards_joined = "\n".join(cards_html) if cards_html else "<p class='no-hub-events'>No scheduled events matching this directory right now. Check the interactive calendar for all upcoming dates.</p>"
@@ -1270,6 +1297,7 @@ def render_hub_page(hub_slug, events, site_url=None):
     active_ct = 'active' if hub_slug == 'cambridge-events-tonight' else ''
     active_sm = 'active' if hub_slug == 'live-music-somerville' else ''
     active_bg = 'active' if hub_slug == 'board-game-nights-boston' else ''
+    active_kf = 'active' if hub_slug == 'kids-family-events-boston' else ''
 
     return f"""<!doctype html>
 <html lang="en">
@@ -1436,6 +1464,7 @@ def render_hub_page(hub_slug, events, site_url=None):
     align-items: center;
     gap: 6px;
   }}
+  .hub-desc {{ margin: 8px 0 0; color: var(--muted); font-size: 0.85rem; line-height: 1.4; }}
   footer {{
     border-top: 1px solid var(--border);
     padding: 24px 20px;
@@ -1455,6 +1484,7 @@ def render_hub_page(hub_slug, events, site_url=None):
     <a href="../cambridge-events-tonight/" class="{active_ct}">Cambridge Tonight</a>
     <a href="../live-music-somerville/" class="{active_sm}">Somerville Music</a>
     <a href="../board-game-nights-boston/" class="{active_bg}">Board Games</a>
+    <a href="../kids-family-events-boston/" class="{active_kf}">Kids &amp; Family</a>
     <a href="../boston/" class="{active_b}">Boston</a>
     <a href="../cambridge/" class="{active_c}">Cambridge</a>
     <a href="../somerville/" class="{active_s}">Somerville</a>
