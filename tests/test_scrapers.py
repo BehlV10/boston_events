@@ -1188,17 +1188,21 @@ class TestBostonEvents(unittest.TestCase):
         <html><body>
         <article>
           <h2>When? Where? How much?</h2>
-          <p>Four nights of dancing! Sunday Nov 8th we’ll be at Cambridge Masonic Hall at 1950 Mass Ave.</p>
+          <p>November 5-8th is Little Dipper Fusion weekend! Four nights of dancing! Sunday Nov 8th we’ll be at Cambridge Masonic Hall at 1950 Mass Ave.</p>
           <p>Admission is pay-what-you-can.</p>
+          <p>Our December event will be December 13th, and we’ll be at First Street Market, 59 First Street in Cambridge. We expect to return to the Masonic Hall for our January 10 2027 dance.</p>
         </article>
         </body></html>
         """
         with patch("scrapers.fetch_soup", return_value=BeautifulSoup(prose_html, "html.parser")):
             events = scrape_second_sun_rising("https://secondsunrising.com/", UA_CHROME)
 
-        self.assertEqual(len(events), 1)
+        # Nov 5 (start of a date range) and the tentative January date are skipped
+        self.assertEqual(len(events), 2)
         self.assertEqual(events[0]["name"], "Second Sun Rising — Fusion Dance")
-        self.assertEqual(events[0]["venue"], "Cambridge Masonic Hall (Cambridge)")
+        self.assertEqual(events[0]["venue"], "Cambridge Masonic Hall")
+        self.assertEqual(events[1]["venue"], "First Street Market")
+        self.assertEqual(events[1]["address"], "59 First St, Cambridge")
         from scrapers import EASTERN
         local_dt = datetime.fromisoformat(events[0]["date"]).astimezone(EASTERN)
         self.assertEqual(local_dt.month, 11)
@@ -2408,3 +2412,47 @@ if __name__ == "__main__":
 
 
 
+
+
+class SeparateListingsMergeTests(unittest.TestCase):
+    def _ev(self, name, hour, url, source="ICA Boston", venue="ICA Boston", **kw):
+        from datetime import datetime
+        from template import EASTERN
+        e = {"name": name, "url": url, "venue": venue, "_source_venue": source,
+             "venue_url": "https://www.icaboston.org/events/", "category": kw.get("category", "family"),
+             "_time": datetime(2026, 11, 8, hour, 0, tzinfo=EASTERN)}
+        e["date"] = e["_time"].isoformat()
+        return e
+
+    def test_same_source_different_pages_stay_separate(self):
+        from template import _merge_duplicates
+        out = _merge_duplicates([
+            self._ev("Bank of America Museums on Us", 10, "https://www.icaboston.org/events/bank-america-museums-us/"),
+            self._ev("Boston Family Days", 10, "https://www.icaboston.org/events/boston-family-days/"),
+        ])
+        self.assertEqual(len(out), 2)
+
+    def test_same_title_far_apart_stays_separate(self):
+        from template import _merge_duplicates
+        out = _merge_duplicates([
+            self._ev("Boston Family Days", 9, "https://www.neaq.org/event/boston-family-days-4/",
+                     source="New England Aquarium", venue="New England Aquarium"),
+            self._ev("Boston Family Days", 10, "https://www.icaboston.org/events/boston-family-days/"),
+        ])
+        self.assertEqual(len(out), 2)
+
+    def test_same_show_from_two_sources_still_merges(self):
+        from template import _merge_duplicates
+        out = _merge_duplicates([
+            self._ev("Boston Family Days", 10, "https://www.icaboston.org/events/boston-family-days/"),
+            self._ev("Boston Family Days", 10, "https://www.thebostoncalendar.com/events/boston-family-days",
+                     source="The Boston Calendar"),
+        ])
+        self.assertEqual(len(out), 1)
+
+    def test_titles_unrelated(self):
+        from template import _titles_unrelated
+        self.assertTrue(_titles_unrelated("Thursday Long Pose", "Anatomy of the head (3-Week Class)"))
+        self.assertFalse(_titles_unrelated("half•alive", "halfalive"))
+        self.assertFalse(_titles_unrelated("Boston Family Days", "Family Days at the ICA"))
+        self.assertFalse(_titles_unrelated("Amble", None))
