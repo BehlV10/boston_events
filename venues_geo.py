@@ -432,6 +432,9 @@ VENUE_RULES = [
     ("royale", (42.3508, -71.0654, "Theater District", "279 Tremont St, Boston", "Royale")),
     ("cantab underground", (42.3662, -71.1061, "Central Square", "738 Massachusetts Ave, Cambridge (Downstairs)", "Cantab Underground")),
     ("cantab", (42.3662, -71.1061, "Central Square", "738 Massachusetts Ave, Cambridge", "The Cantab Lounge")),
+    # BPL branches before the Central Library (Copley)
+    ("honan-allston", (42.3655, -71.1290, "Allston", "300 N Harvard St, Allston", "Honan-Allston Branch Library")),
+    ("brighton branch", (42.3497, -71.1561, "Brighton", "40 Academy Hill Rd, Brighton", "Brighton Branch Library")),
     ("boston public library", (42.3496, -71.0779, "Copley Square", "700 Boylston St, Boston", "Boston Public Library")),
     ("wally", (42.3409, -71.0827, "South End", "427 Massachusetts Ave, Boston", "Wally's Café")),
     ("natural history", (42.3787, -71.1155, "Harvard Square", "26 Oxford St, Cambridge", "Harvard Museum of Natural History")),
