@@ -3585,36 +3585,33 @@
 }
 </script>
 <script>
+  var HOLIDAY_CALENDAR = {"2026-11-03": "election", "2026-11-08": "diwali", "2026-11-11": "veterans", "2026-11-25": "thanksgiving", "2026-11-26": "thanksgiving", "2026-11-27": "blackfriday", "2026-11-28": "blackfriday", "2026-11-30": "cybermonday", "2026-12-04": "hanukkah", "2026-12-16": "teaparty", "2026-12-24": "christmas", "2026-12-25": "christmas", "2026-12-31": "newyearseve", "2027-01-01": "newyear", "2027-01-18": "mlk", "2027-02-06": "lunarnewyear", "2027-02-14": "valentines", "2027-02-15": "presidents", "2027-03-09": "eid", "2027-03-14": "piday", "2027-03-17": "stpatricks", "2027-03-28": "easter", "2027-04-01": "openingday", "2027-04-19": "patriots", "2027-04-21": "passover", "2027-04-22": "earthday", "2027-05-09": "mothers", "2027-05-31": "memorial", "2027-06-01": "pride", "2027-06-17": "bunkerhill", "2027-06-19": "juneteenth", "2027-06-20": "fathers", "2027-07-04": "july4", "2027-09-06": "labor", "2027-10-11": "indigenous", "2027-10-16": "hocr", "2027-10-17": "hocr", "2027-10-29": "diwali", "2027-10-30": "halloween", "2027-10-31": "halloween", "2027-11-01": "halloween", "2027-11-02": "election", "2027-11-11": "veterans", "2027-11-24": "thanksgiving", "2027-11-25": "thanksgiving", "2027-11-26": "blackfriday", "2027-11-27": "blackfriday", "2027-11-29": "cybermonday"};
+  var HOLIDAY_KEYS = ["newyear", "mlk", "lunarnewyear", "valentines", "presidents", "stpatricks", "piday", "eid", "easter", "openingday", "patriots", "passover", "earthday", "mothers", "memorial", "pride", "bunkerhill", "juneteenth", "fathers", "july4", "labor", "indigenous", "hocr", "diwali", "halloween", "election", "veterans", "thanksgiving", "blackfriday", "cybermonday", "teaparty", "hanukkah", "christmas", "newyearseve"];
+  var HOLIDAY_META = {"newyear": {"label": "New Year's Day", "emoji": "🎆"}, "mlk": {"label": "Martin Luther King Jr. Day", "emoji": "🕊️"}, "lunarnewyear": {"label": "Lunar New Year", "emoji": "🧧"}, "valentines": {"label": "Valentine's Day", "emoji": "💘"}, "presidents": {"label": "Presidents' Day", "emoji": "🇺🇸"}, "stpatricks": {"label": "St. Patrick's Day & Evacuation Day", "emoji": "☘️"}, "piday": {"label": "Pi Day", "emoji": "🥧"}, "eid": {"label": "Eid al-Fitr", "emoji": "🌙"}, "easter": {"label": "Easter", "emoji": "🐣"}, "openingday": {"label": "Opening Day at Fenway", "emoji": "⚾"}, "patriots": {"label": "Patriots' Day & Marathon Monday", "emoji": "🏃"}, "passover": {"label": "Passover", "emoji": "🍷"}, "earthday": {"label": "Earth Day", "emoji": "🌎"}, "mothers": {"label": "Mother's Day", "emoji": "💐"}, "memorial": {"label": "Memorial Day", "emoji": "🇺🇸"}, "pride": {"label": "Pride Month", "emoji": "🏳️‍🌈"}, "bunkerhill": {"label": "Bunker Hill Day", "emoji": "🥁"}, "juneteenth": {"label": "Juneteenth", "emoji": "✊🏿"}, "fathers": {"label": "Father's Day", "emoji": "⛵"}, "july4": {"label": "Fourth of July", "emoji": "🎆"}, "labor": {"label": "Labor Day", "emoji": "☀️"}, "indigenous": {"label": "Indigenous Peoples' Day", "emoji": "🪶"}, "hocr": {"label": "Head of the Charles", "emoji": "🚣"}, "diwali": {"label": "Diwali", "emoji": "🪔"}, "halloween": {"label": "Halloween", "emoji": "🎃"}, "election": {"label": "Election Day", "emoji": "🗳️"}, "veterans": {"label": "Veterans Day", "emoji": "🎖️"}, "thanksgiving": {"label": "Thanksgiving", "emoji": "🦃"}, "blackfriday": {"label": "Black Friday", "emoji": "🏷️"}, "cybermonday": {"label": "Cyber Monday", "emoji": "⚡"}, "teaparty": {"label": "Boston Tea Party Night", "emoji": "🫖"}, "hanukkah": {"label": "Hanukkah", "emoji": "🕎"}, "christmas": {"label": "Christmas", "emoji": "🎄"}, "newyearseve": {"label": "New Year's Eve & First Night", "emoji": "🥂"}};
+  var BASE_THEMES = ['classic', 'indie', 'anime'];
+  function localISODate(dt) {
+    return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
+  }
   function getClientSeasonalTheme(dt) {
-    var y = dt.getFullYear();
-    var m = dt.getMonth() + 1;
-    var d = dt.getDate();
-    if ((m === 10 && d >= 29) || (m === 11 && d <= 1)) return 'halloween';
-    if (m === 11) {
-      var firstMon = 1;
-      while (new Date(y, 10, firstMon).getDay() !== 1) firstMon++;
-      var electionDay = firstMon + 1;
-      if (d === electionDay) return 'election';
-      if (d === 11) return 'veterans';
-      var firstThu = 1;
-      while (new Date(y, 10, firstThu).getDay() !== 4) firstThu++;
-      var tDay = firstThu + 21;
-      if (d === tDay - 1 || d === tDay) return 'thanksgiving';
-      if (d === tDay + 1 || d === tDay + 2) return 'blackfriday';
-      if (d === tDay + 4) return 'cybermonday';
-    }
-    return null;
+    return HOLIDAY_CALENDAR[localISODate(dt)] || null;
+  }
+  // Which theme to show: a ?theme= preview; else today's holiday, unless the visitor picked a
+  // theme today; else the visitor's last regular theme; else classic.
+  function pickTheme() {
+    var preview = new URLSearchParams(location.search).get('theme');
+    if (preview && (BASE_THEMES.indexOf(preview) !== -1 || HOLIDAY_KEYS.indexOf(preview) !== -1)) return preview;
+    var today = localISODate(new Date());
+    var holiday = HOLIDAY_CALENDAR[today] || null;
+    var stored = null, pickedOn = null;
+    try {
+      stored = localStorage.getItem('boston_events_theme');
+      pickedOn = localStorage.getItem('boston_events_theme_manual');
+    } catch (e) {}
+    if (holiday) return (pickedOn === today && stored) ? stored : holiday;
+    return (stored && BASE_THEMES.indexOf(stored) !== -1) ? stored : 'classic';
   }
   try {
-    var manualTheme = localStorage.getItem('boston_events_theme_manual');
-    var t = localStorage.getItem('boston_events_theme');
-    var seasonal = getClientSeasonalTheme(new Date());
-    if (!manualTheme && seasonal) {
-      t = seasonal;
-    } else if (!t) {
-      t = seasonal || 'classic';
-    }
-    document.documentElement.setAttribute('data-theme', t);
+    document.documentElement.setAttribute('data-theme', pickTheme());
   } catch(e) {}
 </script>
 <link rel="icon" href="/favicon.ico" sizes="48x48">
@@ -3711,8 +3708,12 @@
     margin: 0 auto;
     display: flex;
     flex-direction: column;
+    justify-content: flex-end;
     gap: 12px;
   }
+  /* Theme picker row sits at the top of the banner; title and stats stay at the bottom */
+  .banner { align-items: stretch; }
+  .banner-top-row { margin-bottom: auto; }
   .banner-top-tag {
     display: inline-flex;
     align-items: center;
@@ -5997,7 +5998,7 @@
      ======================================================== */
   .banner-top-row {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     width: 100%;
     gap: 12px;
@@ -6011,8 +6012,15 @@
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 999px;
-    padding: 2px;
-    margin-left: auto;
+    padding: 3px;
+    order: -1;
+  }
+  .theme-toggle-wrap .theme-pill-btn { font-size: 14px; padding: 3px 9px; }
+  .theme-pill-holiday { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: #fff; }
+  .theme-pill-holiday[hidden] { display: none; }
+  .holiday-pill-label { font-size: 12px; letter-spacing: 0.01em; white-space: nowrap; }
+  @media (max-width: 520px) {
+    .holiday-pill-label { display: none; }
   }
   .theme-toggle-label {
     display: none;
@@ -6931,22 +6939,439 @@
     color: #cffafe;
     box-shadow: 0 0 12px rgba(6, 182, 212, 0.4);
   }
+
+  /* Holiday themes generated from holiday_themes.py: banner art, greeting, palettes */
+  .holiday-greeting { display: none; }
+  .holiday-greeting { align-self: flex-start; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; font-size: 14px; font-weight: 700; color: #fff; background: rgba(0, 0, 0, 0.42); border: 1px solid var(--accent); backdrop-filter: blur(6px); }
+  [data-theme="newyear"] .holiday-greeting[data-for="newyear"] { display: inline-flex; }
+  [data-theme="newyear"] .banner { min-height: 360px; background-image: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 62%, rgba(8,8,16,0.88) 100%), url('static/holidays/newyear.jpg'); background-position: center 40%; background-size: cover; }
+  @media (max-width: 860px) { [data-theme="newyear"] .banner { min-height: 300px; background-position: center 45%; } }
+  [data-theme="newyear"] .banner-title { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(0,0,0,0.45)); }
+  [data-theme="newyear"] { --bg: #0b0a1a; --card: #15132b; --card-hover: #15132b; --fg: #f8fafc; --muted: #a8b0c0; --accent: #f5c542; --accent-glow: rgba(245, 197, 66, 0.35); --border: rgba(245, 197, 66, 0.22); --border-hover: rgba(245, 197, 66, 0.48); --green: #a78bfa; --green-bg: rgba(167, 139, 250, 0.14); --green-border: rgba(167, 139, 250, 0.35); --warn: #f5c542; --radius-lg: 16px; --radius-md: 10px; --radius-sm: 6px; }
+  [data-theme="newyear"] body { background-color: var(--bg); background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(245, 197, 66, 0.09) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 90% 40%, rgba(167, 139, 250, 0.08) 0%, transparent 60%); background-attachment: fixed; color: var(--fg); }
+  [data-theme="newyear"] .banner { border-bottom: 2px solid rgba(245, 197, 66, 0.45); box-shadow: 0 4px 30px rgba(0,0,0,0.5), 0 0 20px rgba(245, 197, 66, 0.15); }
+  [data-theme="newyear"] .banner-top-tag { color: #f5c542; text-shadow: 0 0 12px rgba(245, 197, 66, 0.6); }
+  [data-theme="newyear"] .live-pulse { background: #f5c542; box-shadow: 0 0 10px #f5c542, 0 0 20px #f5c542; }
+  [data-theme="newyear"] .banner-title { background: linear-gradient(135deg, #ffffff 25%, #f8d984 62%, #c6b4fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  [data-theme="newyear"] .pill-submit-btn { background: linear-gradient(135deg, #f5c542 0%, #a78bfa 100%); color: #fff; box-shadow: 0 0 14px rgba(245, 197, 66, 0.45); border-radius: 999px; }
+  [data-theme="newyear"] .chip.active, [data-theme="newyear"] .loc-chip.active, [data-theme="newyear"] .genre-chip.active, [data-theme="newyear"] .sub-chip.active { background: linear-gradient(135deg, rgba(245, 197, 66, 0.35) 0%, rgba(167, 139, 250, 0.3) 100%); border-color: #f5c542; color: #fff; box-shadow: 0 0 12px rgba(245, 197, 66, 0.35); }
+  [data-theme="newyear"] .theme-pill-btn.active { background: linear-gradient(135deg, #f5c542 0%, #a78bfa 100%); color: #fff; box-shadow: 0 0 10px rgba(245, 197, 66, 0.5); }
+  [data-theme="newyear"] .badge-highlight { border-color: #f5c542; color: #f5c542; }
+  [data-theme="mlk"] .holiday-greeting[data-for="mlk"] { display: inline-flex; }
+  [data-theme="mlk"] .banner { min-height: 360px; background-image: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 62%, rgba(8,8,16,0.88) 100%), url('static/holidays/mlk.jpg'); background-position: center 40%; background-size: cover; }
+  @media (max-width: 860px) { [data-theme="mlk"] .banner { min-height: 300px; background-position: center 45%; } }
+  [data-theme="mlk"] .banner-title { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(0,0,0,0.45)); }
+  [data-theme="mlk"] { --bg: #0e0c18; --card: #18152a; --card-hover: #18152a; --fg: #f8fafc; --muted: #a8b0c0; --accent: #f2b544; --accent-glow: rgba(242, 181, 68, 0.35); --border: rgba(242, 181, 68, 0.22); --border-hover: rgba(242, 181, 68, 0.48); --green: #7c6ee6; --green-bg: rgba(124, 110, 230, 0.14); --green-border: rgba(124, 110, 230, 0.35); --warn: #f2b544; --radius-lg: 16px; --radius-md: 10px; --radius-sm: 6px; }
+  [data-theme="mlk"] body { background-color: var(--bg); background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(242, 181, 68, 0.09) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 90% 40%, rgba(124, 110, 230, 0.08) 0%, transparent 60%); background-attachment: fixed; color: var(--fg); }
+  [data-theme="mlk"] .banner { border-bottom: 2px solid rgba(242, 181, 68, 0.45); box-shadow: 0 4px 30px rgba(0,0,0,0.5), 0 0 20px rgba(242, 181, 68, 0.15); }
+  [data-theme="mlk"] .banner-top-tag { color: #f2b544; text-shadow: 0 0 12px rgba(242, 181, 68, 0.6); }
+  [data-theme="mlk"] .live-pulse { background: #f2b544; box-shadow: 0 0 10px #f2b544, 0 0 20px #f2b544; }
+  [data-theme="mlk"] .banner-title { background: linear-gradient(135deg, #ffffff 25%, #f7cf85 62%, #aaa1ef 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  [data-theme="mlk"] .pill-submit-btn { background: linear-gradient(135deg, #f2b544 0%, #7c6ee6 100%); color: #fff; box-shadow: 0 0 14px rgba(242, 181, 68, 0.45); border-radius: 999px; }
+  [data-theme="mlk"] .chip.active, [data-theme="mlk"] .loc-chip.active, [data-theme="mlk"] .genre-chip.active, [data-theme="mlk"] .sub-chip.active { background: linear-gradient(135deg, rgba(242, 181, 68, 0.35) 0%, rgba(124, 110, 230, 0.3) 100%); border-color: #f2b544; color: #fff; box-shadow: 0 0 12px rgba(242, 181, 68, 0.35); }
+  [data-theme="mlk"] .theme-pill-btn.active { background: linear-gradient(135deg, #f2b544 0%, #7c6ee6 100%); color: #fff; box-shadow: 0 0 10px rgba(242, 181, 68, 0.5); }
+  [data-theme="mlk"] .badge-highlight { border-color: #f2b544; color: #f2b544; }
+  [data-theme="lunarnewyear"] .holiday-greeting[data-for="lunarnewyear"] { display: inline-flex; }
+  [data-theme="lunarnewyear"] .banner { min-height: 360px; background-image: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 62%, rgba(8,8,16,0.88) 100%), url('static/holidays/lunarnewyear.jpg'); background-position: center 40%; background-size: cover; }
+  @media (max-width: 860px) { [data-theme="lunarnewyear"] .banner { min-height: 300px; background-position: center 45%; } }
+  [data-theme="lunarnewyear"] .banner-title { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(0,0,0,0.45)); }
+  [data-theme="lunarnewyear"] { --bg: #150708; --card: #220c0e; --card-hover: #220c0e; --fg: #f8fafc; --muted: #a8b0c0; --accent: #ff4d4d; --accent-glow: rgba(255, 77, 77, 0.35); --border: rgba(255, 77, 77, 0.22); --border-hover: rgba(255, 77, 77, 0.48); --green: #f5c542; --green-bg: rgba(245, 197, 66, 0.14); --green-border: rgba(245, 197, 66, 0.35); --warn: #ff4d4d; --radius-lg: 16px; --radius-md: 10px; --radius-sm: 6px; }
+  [data-theme="lunarnewyear"] body { background-color: var(--bg); background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255, 77, 77, 0.09) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 90% 40%, rgba(245, 197, 66, 0.08) 0%, transparent 60%); background-attachment: fixed; color: var(--fg); }
+  [data-theme="lunarnewyear"] .banner { border-bottom: 2px solid rgba(255, 77, 77, 0.45); box-shadow: 0 4px 30px rgba(0,0,0,0.5), 0 0 20px rgba(255, 77, 77, 0.15); }
+  [data-theme="lunarnewyear"] .banner-top-tag { color: #ff4d4d; text-shadow: 0 0 12px rgba(255, 77, 77, 0.6); }
+  [data-theme="lunarnewyear"] .live-pulse { background: #ff4d4d; box-shadow: 0 0 10px #ff4d4d, 0 0 20px #ff4d4d; }
+  [data-theme="lunarnewyear"] .banner-title { background: linear-gradient(135deg, #ffffff 25%, #ff8b8b 62%, #f8d984 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  [data-theme="lunarnewyear"] .pill-submit-btn { background: linear-gradient(135deg, #ff4d4d 0%, #f5c542 100%); color: #fff; box-shadow: 0 0 14px rgba(255, 77, 77, 0.45); border-radius: 999px; }
+  [data-theme="lunarnewyear"] .chip.active, [data-theme="lunarnewyear"] .loc-chip.active, [data-theme="lunarnewyear"] .genre-chip.active, [data-theme="lunarnewyear"] .sub-chip.active { background: linear-gradient(135deg, rgba(255, 77, 77, 0.35) 0%, rgba(245, 197, 66, 0.3) 100%); border-color: #ff4d4d; color: #fff; box-shadow: 0 0 12px rgba(255, 77, 77, 0.35); }
+  [data-theme="lunarnewyear"] .theme-pill-btn.active { background: linear-gradient(135deg, #ff4d4d 0%, #f5c542 100%); color: #fff; box-shadow: 0 0 10px rgba(255, 77, 77, 0.5); }
+  [data-theme="lunarnewyear"] .badge-highlight { border-color: #ff4d4d; color: #ff4d4d; }
+  [data-theme="valentines"] .holiday-greeting[data-for="valentines"] { display: inline-flex; }
+  [data-theme="valentines"] .banner { min-height: 360px; background-image: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 62%, rgba(8,8,16,0.88) 100%), url('static/holidays/valentines.jpg'); background-position: center 40%; background-size: cover; }
+  @media (max-width: 860px) { [data-theme="valentines"] .banner { min-height: 300px; background-position: center 45%; } }
+  [data-theme="valentines"] .banner-title { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(0,0,0,0.45)); }
+  [data-theme="valentines"] { --bg: #160810; --card: #24101b; --card-hover: #24101b; --fg: #f8fafc; --muted: #a8b0c0; --accent: #ff5c8a; --accent-glow: rgba(255, 92, 138, 0.35); --border: rgba(255, 92, 138, 0.22); --border-hover: rgba(255, 92, 138, 0.48); --green: #ffb3c7; --green-bg: rgba(255, 179, 199, 0.14); --green-border: rgba(255, 179, 199, 0.35); --warn: #ff5c8a; --radius-lg: 16px; --radius-md: 10px; --radius-sm: 6px; }
+  [data-theme="valentines"] body { background-color: var(--bg); background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255, 92, 138, 0.09) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 90% 40%, rgba(255, 179, 199, 0.08) 0%, transparent 60%); background-attachment: fixed; color: var(--fg); }
+  [data-theme="valentines"] .banner { border-bottom: 2px solid rgba(255, 92, 138, 0.45); box-shadow: 0 4px 30px rgba(0,0,0,0.5), 0 0 20px rgba(255, 92, 138, 0.15); }
+  [data-theme="valentines"] .banner-top-tag { color: #ff5c8a; text-shadow: 0 0 12px rgba(255, 92, 138, 0.6); }
+  [data-theme="valentines"] .live-pulse { background: #ff5c8a; box-shadow: 0 0 10px #ff5c8a, 0 0 20px #ff5c8a; }
+  [data-theme="valentines"] .banner-title { background: linear-gradient(135deg, #ffffff 25%, #ff95b3 62%, #ffcedb 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  [data-theme="valentines"] .pill-submit-btn { background: linear-gradient(135deg, #ff5c8a 0%, #ffb3c7 100%); color: #fff; box-shadow: 0 0 14px rgba(255, 92, 138, 0.45); border-radius: 999px; }
+  [data-theme="valentines"] .chip.active, [data-theme="valentines"] .loc-chip.active, [data-theme="valentines"] .genre-chip.active, [data-theme="valentines"] .sub-chip.active { background: linear-gradient(135deg, rgba(255, 92, 138, 0.35) 0%, rgba(255, 179, 199, 0.3) 100%); border-color: #ff5c8a; color: #fff; box-shadow: 0 0 12px rgba(255, 92, 138, 0.35); }
+  [data-theme="valentines"] .theme-pill-btn.active { background: linear-gradient(135deg, #ff5c8a 0%, #ffb3c7 100%); color: #fff; box-shadow: 0 0 10px rgba(255, 92, 138, 0.5); }
+  [data-theme="valentines"] .badge-highlight { border-color: #ff5c8a; color: #ff5c8a; }
+  [data-theme="presidents"] .holiday-greeting[data-for="presidents"] { display: inline-flex; }
+  [data-theme="presidents"] .banner { min-height: 360px; background-image: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 62%, rgba(8,8,16,0.88) 100%), url('static/holidays/presidents.svg'); background-position: center 40%; background-size: cover; }
+  @media (max-width: 860px) { [data-theme="presidents"] .banner { min-height: 300px; background-position: center 45%; } }
+  [data-theme="presidents"] .banner-title { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(0,0,0,0.45)); }
+  [data-theme="presidents"] { --bg: #0a0e1a; --card: #131a2c; --card-hover: #131a2c; --fg: #f8fafc; --muted: #a8b0c0; --accent: #e0414f; --accent-glow: rgba(224, 65, 79, 0.35); --border: rgba(224, 65, 79, 0.22); --border-hover: rgba(224, 65, 79, 0.48); --green: #6ea8ff; --green-bg: rgba(110, 168, 255, 0.14); --green-border: rgba(110, 168, 255, 0.35); --warn: #e0414f; --radius-lg: 16px; --radius-md: 10px; --radius-sm: 6px; }
+  [data-theme="presidents"] body { background-color: var(--bg); background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(224, 65, 79, 0.09) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 90% 40%, rgba(110, 168, 255, 0.08) 0%, transparent 60%); background-attachment: fixed; color: var(--fg); }
+  [data-theme="presidents"] .banner { border-bottom: 2px solid rgba(224, 65, 79, 0.45); box-shadow: 0 4px 30px rgba(0,0,0,0.5), 0 0 20px rgba(224, 65, 79, 0.15); }
+  [data-theme="presidents"] .banner-top-tag { color: #e0414f; text-shadow: 0 0 12px rgba(224, 65, 79, 0.6); }
+  [data-theme="presidents"] .live-pulse { background: #e0414f; box-shadow: 0 0 10px #e0414f, 0 0 20px #e0414f; }
+  [data-theme="presidents"] .banner-title { background: linear-gradient(135deg, #ffffff 25%, #eb848d 62%, #a1c6ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  [data-theme="presidents"] .pill-submit-btn { background: linear-gradient(135deg, #e0414f 0%, #6ea8ff 100%); color: #fff; box-shadow: 0 0 14px rgba(224, 65, 79, 0.45); border-radius: 999px; }
+  [data-theme="presidents"] .chip.active, [data-theme="presidents"] .loc-chip.active, [data-theme="presidents"] .genre-chip.active, [data-theme="presidents"] .sub-chip.active { background: linear-gradient(135deg, rgba(224, 65, 79, 0.35) 0%, rgba(110, 168, 255, 0.3) 100%); border-color: #e0414f; color: #fff; box-shadow: 0 0 12px rgba(224, 65, 79, 0.35); }
+  [data-theme="presidents"] .theme-pill-btn.active { background: linear-gradient(135deg, #e0414f 0%, #6ea8ff 100%); color: #fff; box-shadow: 0 0 10px rgba(224, 65, 79, 0.5); }
+  [data-theme="presidents"] .badge-highlight { border-color: #e0414f; color: #e0414f; }
+  [data-theme="stpatricks"] .holiday-greeting[data-for="stpatricks"] { display: inline-flex; }
+  [data-theme="stpatricks"] .banner { min-height: 360px; background-image: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 62%, rgba(8,8,16,0.88) 100%), url('static/holidays/stpatricks.svg'); background-position: center 40%; background-size: cover; }
+  @media (max-width: 860px) { [data-theme="stpatricks"] .banner { min-height: 300px; background-position: center 45%; } }
+  [data-theme="stpatricks"] .banner-title { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(0,0,0,0.45)); }
+  [data-theme="stpatricks"] { --bg: #07140c; --card: #0e2216; --card-hover: #0e2216; --fg: #f8fafc; --muted: #a8b0c0; --accent: #2ecc71; --accent-glow: rgba(46, 204, 113, 0.35); --border: rgba(46, 204, 113, 0.22); --border-hover: rgba(46, 204, 113, 0.48); --green: #f1c40f; --green-bg: rgba(241, 196, 15, 0.14); --green-border: rgba(241, 196, 15, 0.35); --warn: #2ecc71; --radius-lg: 16px; --radius-md: 10px; --radius-sm: 6px; }
+  [data-theme="stpatricks"] body { background-color: var(--bg); background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(46, 204, 113, 0.09) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 90% 40%, rgba(241, 196, 15, 0.08) 0%, transparent 60%); background-attachment: fixed; color: var(--fg); }
+  [data-theme="stpatricks"] .banner { border-bottom: 2px solid rgba(46, 204, 113, 0.45); box-shadow: 0 4px 30px rgba(0,0,0,0.5), 0 0 20px rgba(46, 204, 113, 0.15); }
+  [data-theme="stpatricks"] .banner-top-tag { color: #2ecc71; text-shadow: 0 0 12px rgba(46, 204, 113, 0.6); }
+  [data-theme="stpatricks"] .live-pulse { background: #2ecc71; box-shadow: 0 0 10px #2ecc71, 0 0 20px #2ecc71; }
+  [data-theme="stpatricks"] .banner-title { background: linear-gradient(135deg, #ffffff 25%, #77dea3 62%, #f6d963 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  [data-theme="stpatricks"] .pill-submit-btn { background: linear-gradient(135deg, #2ecc71 0%, #f1c40f 100%); color: #fff; box-shadow: 0 0 14px rgba(46, 204, 113, 0.45); border-radius: 999px; }
+  [data-theme="stpatricks"] .chip.active, [data-theme="stpatricks"] .loc-chip.active, [data-theme="stpatricks"] .genre-chip.active, [data-theme="stpatricks"] .sub-chip.active { background: linear-gradient(135deg, rgba(46, 204, 113, 0.35) 0%, rgba(241, 196, 15, 0.3) 100%); border-color: #2ecc71; color: #fff; box-shadow: 0 0 12px rgba(46, 204, 113, 0.35); }
+  [data-theme="stpatricks"] .theme-pill-btn.active { background: linear-gradient(135deg, #2ecc71 0%, #f1c40f 100%); color: #fff; box-shadow: 0 0 10px rgba(46, 204, 113, 0.5); }
+  [data-theme="stpatricks"] .badge-highlight { border-color: #2ecc71; color: #2ecc71; }
+  [data-theme="piday"] .holiday-greeting[data-for="piday"] { display: inline-flex; }
+  [data-theme="piday"] .banner { min-height: 360px; background-image: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 62%, rgba(8,8,16,0.88) 100%), url('static/holidays/piday.svg'); background-position: center 40%; background-size: cover; }
+  @media (max-width: 860px) { [data-theme="piday"] .banner { min-height: 300px; background-position: center 45%; } }
+  [data-theme="piday"] .banner-title { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(0,0,0,0.45)); }
+  [data-theme="piday"] { --bg: #0c1a14; --card: #14261e; --card-hover: #14261e; --fg: #f8fafc; --muted: #a8b0c0; --accent: #f5c542; --accent-glow: rgba(245, 197, 66, 0.35); --border: rgba(245, 197, 66, 0.22); --border-hover: rgba(245, 197, 66, 0.48); --green: #7ee2a8; --green-bg: rgba(126, 226, 168, 0.14); --green-border: rgba(126, 226, 168, 0.35); --warn: #f5c542; --radius-lg: 16px; --radius-md: 10px; --radius-sm: 6px; }
+  [data-theme="piday"] body { background-color: var(--bg); background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(245, 197, 66, 0.09) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 90% 40%, rgba(126, 226, 168, 0.08) 0%, transparent 60%); background-attachment: fixed; color: var(--fg); }
+  [data-theme="piday"] .banner { border-bottom: 2px solid rgba(245, 197, 66, 0.45); box-shadow: 0 4px 30px rgba(0,0,0,0.5), 0 0 20px rgba(245, 197, 66, 0.15); }
+  [data-theme="piday"] .banner-top-tag { color: #f5c542; text-shadow: 0 0 12px rgba(245, 197, 66, 0.6); }
+  [data-theme="piday"] .live-pulse { background: #f5c542; box-shadow: 0 0 10px #f5c542, 0 0 20px #f5c542; }
+  [data-theme="piday"] .banner-title { background: linear-gradient(135deg, #ffffff 25%, #f8d984 62%, #abecc6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  [data-theme="piday"] .pill-submit-btn { background: linear-gradient(135deg, #f5c542 0%, #7ee2a8 100%); color: #fff; box-shadow: 0 0 14px rgba(245, 197, 66, 0.45); border-radius: 999px; }
+  [data-theme="piday"] .chip.active, [data-theme="piday"] .loc-chip.active, [data-theme="piday"] .genre-chip.active, [data-theme="piday"] .sub-chip.active { background: linear-gradient(135deg, rgba(245, 197, 66, 0.35) 0%, rgba(126, 226, 168, 0.3) 100%); border-color: #f5c542; color: #fff; box-shadow: 0 0 12px rgba(245, 197, 66, 0.35); }
+  [data-theme="piday"] .theme-pill-btn.active { background: linear-gradient(135deg, #f5c542 0%, #7ee2a8 100%); color: #fff; box-shadow: 0 0 10px rgba(245, 197, 66, 0.5); }
+  [data-theme="piday"] .badge-highlight { border-color: #f5c542; color: #f5c542; }
+  [data-theme="eid"] .holiday-greeting[data-for="eid"] { display: inline-flex; }
+  [data-theme="eid"] .banner { min-height: 360px; background-image: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 62%, rgba(8,8,16,0.88) 100%), url('static/holidays/eid.svg'); background-position: center 40%; background-size: cover; }
+  @media (max-width: 860px) { [data-theme="eid"] .banner { min-height: 300px; background-position: center 45%; } }
+  [data-theme="eid"] .banner-title { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(0,0,0,0.45)); }
+  [data-theme="eid"] { --bg: #0a1428; --card: #122038; --card-hover: #122038; --fg: #f8fafc; --muted: #a8b0c0; --accent: #2ec4b6; --accent-glow: rgba(46, 196, 182, 0.35); --border: rgba(46, 196, 182, 0.22); --border-hover: rgba(46, 196, 182, 0.48); --green: #f5c542; --green-bg: rgba(245, 197, 66, 0.14); --green-border: rgba(245, 197, 66, 0.35); --warn: #2ec4b6; --radius-lg: 16px; --radius-md: 10px; --radius-sm: 6px; }
+  [data-theme="eid"] body { background-color: var(--bg); background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(46, 196, 182, 0.09) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 90% 40%, rgba(245, 197, 66, 0.08) 0%, transparent 60%); background-attachment: fixed; color: var(--fg); }
+  [data-theme="eid"] .banner { border-bottom: 2px solid rgba(46, 196, 182, 0.45); box-shadow: 0 4px 30px rgba(0,0,0,0.5), 0 0 20px rgba(46, 196, 182, 0.15); }
+  [data-theme="eid"] .banner-top-tag { color: #2ec4b6; text-shadow: 0 0 12px rgba(46, 196, 182, 0.6); }
+  [data-theme="eid"] .live-pulse { background: #2ec4b6; box-shadow: 0 0 10px #2ec4b6, 0 0 20px #2ec4b6; }
+  [data-theme="eid"] .banner-title { background: linear-gradient(135deg, #ffffff 25%, #77d9d0 62%, #f8d984 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  [data-theme="eid"] .pill-submit-btn { background: linear-gradient(135deg, #2ec4b6 0%, #f5c542 100%); color: #fff; box-shadow: 0 0 14px rgba(46, 196, 182, 0.45); border-radius: 999px; }
+  [data-theme="eid"] .chip.active, [data-theme="eid"] .loc-chip.active, [data-theme="eid"] .genre-chip.active, [data-theme="eid"] .sub-chip.active { background: linear-gradient(135deg, rgba(46, 196, 182, 0.35) 0%, rgba(245, 197, 66, 0.3) 100%); border-color: #2ec4b6; color: #fff; box-shadow: 0 0 12px rgba(46, 196, 182, 0.35); }
+  [data-theme="eid"] .theme-pill-btn.active { background: linear-gradient(135deg, #2ec4b6 0%, #f5c542 100%); color: #fff; box-shadow: 0 0 10px rgba(46, 196, 182, 0.5); }
+  [data-theme="eid"] .badge-highlight { border-color: #2ec4b6; color: #2ec4b6; }
+  [data-theme="easter"] .holiday-greeting[data-for="easter"] { display: inline-flex; }
+  [data-theme="easter"] .banner { min-height: 360px; background-image: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 62%, rgba(8,8,16,0.88) 100%), url('static/holidays/easter.svg'); background-position: center 40%; background-size: cover; }
+  @media (max-width: 860px) { [data-theme="easter"] .banner { min-height: 300px; background-position: center 45%; } }
+  [data-theme="easter"] .banner-title { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(0,0,0,0.45)); }
+  [data-theme="easter"] { --bg: #0f0d14; --card: #1a1722; --card-hover: #1a1722; --fg: #f8fafc; --muted: #a8b0c0; --accent: #ff7ab8; --accent-glow: rgba(255, 122, 184, 0.35); --border: rgba(255, 122, 184, 0.22); --border-hover: rgba(255, 122, 184, 0.48); --green: #7ec8f0; --green-bg: rgba(126, 200, 240, 0.14); --green-border: rgba(126, 200, 240, 0.35); --warn: #ff7ab8; --radius-lg: 16px; --radius-md: 10px; --radius-sm: 6px; }
+  [data-theme="easter"] body { background-color: var(--bg); background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255, 122, 184, 0.09) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 90% 40%, rgba(126, 200, 240, 0.08) 0%, transparent 60%); background-attachment: fixed; color: var(--fg); }
+  [data-theme="easter"] .banner { border-bottom: 2px solid rgba(255, 122, 184, 0.45); box-shadow: 0 4px 30px rgba(0,0,0,0.5), 0 0 20px rgba(255, 122, 184, 0.15); }
+  [data-theme="easter"] .banner-top-tag { color: #ff7ab8; text-shadow: 0 0 12px rgba(255, 122, 184, 0.6); }
+  [data-theme="easter"] .live-pulse { background: #ff7ab8; box-shadow: 0 0 10px #ff7ab8, 0 0 20px #ff7ab8; }
+  [data-theme="easter"] .banner-title { background: linear-gradient(135deg, #ffffff 25%, #ffa9d1 62%, #abdbf5 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  [data-theme="easter"] .pill-submit-btn { background: linear-gradient(135deg, #ff7ab8 0%, #7ec8f0 100%); color: #fff; box-shadow: 0 0 14px rgba(255, 122, 184, 0.45); border-radius: 999px; }
+  [data-theme="easter"] .chip.active, [data-theme="easter"] .loc-chip.active, [data-theme="easter"] .genre-chip.active, [data-theme="easter"] .sub-chip.active { background: linear-gradient(135deg, rgba(255, 122, 184, 0.35) 0%, rgba(126, 200, 240, 0.3) 100%); border-color: #ff7ab8; color: #fff; box-shadow: 0 0 12px rgba(255, 122, 184, 0.35); }
+  [data-theme="easter"] .theme-pill-btn.active { background: linear-gradient(135deg, #ff7ab8 0%, #7ec8f0 100%); color: #fff; box-shadow: 0 0 10px rgba(255, 122, 184, 0.5); }
+  [data-theme="easter"] .badge-highlight { border-color: #ff7ab8; color: #ff7ab8; }
+  [data-theme="openingday"] .holiday-greeting[data-for="openingday"] { display: inline-flex; }
+  [data-theme="openingday"] .banner { min-height: 360px; background-image: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 62%, rgba(8,8,16,0.88) 100%), url('static/holidays/openingday.svg'); background-position: center 40%; background-size: cover; }
+  @media (max-width: 860px) { [data-theme="openingday"] .banner { min-height: 300px; background-position: center 45%; } }
+  [data-theme="openingday"] .banner-title { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(0,0,0,0.45)); }
+  [data-theme="openingday"] { --bg: #08120c; --card: #101e16; --card-hover: #101e16; --fg: #f8fafc; --muted: #a8b0c0; --accent: #e31b23; --accent-glow: rgba(227, 27, 35, 0.35); --border: rgba(227, 27, 35, 0.22); --border-hover: rgba(227, 27, 35, 0.48); --green: #2e9a4a; --green-bg: rgba(46, 154, 74, 0.14); --green-border: rgba(46, 154, 74, 0.35); --warn: #e31b23; --radius-lg: 16px; --radius-md: 10px; --radius-sm: 6px; }
+  [data-theme="openingday"] body { background-color: var(--bg); background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(227, 27, 35, 0.09) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 90% 40%, rgba(46, 154, 74, 0.08) 0%, transparent 60%); background-attachment: fixed; color: var(--fg); }
+  [data-theme="openingday"] .banner { border-bottom: 2px solid rgba(227, 27, 35, 0.45); box-shadow: 0 4px 30px rgba(0,0,0,0.5), 0 0 20px rgba(227, 27, 35, 0.15); }
+  [data-theme="openingday"] .banner-top-tag { color: #e31b23; text-shadow: 0 0 12px rgba(227, 27, 35, 0.6); }
+  [data-theme="openingday"] .live-pulse { background: #e31b23; box-shadow: 0 0 10px #e31b23, 0 0 20px #e31b23; }
+  [data-theme="openingday"] .banner-title { background: linear-gradient(135deg, #ffffff 25%, #ed6b70 62%, #77bd89 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  [data-theme="openingday"] .pill-submit-btn { background: linear-gradient(135deg, #e31b23 0%, #2e9a4a 100%); color: #fff; box-shadow: 0 0 14px rgba(227, 27, 35, 0.45); border-radius: 999px; }
+  [data-theme="openingday"] .chip.active, [data-theme="openingday"] .loc-chip.active, [data-theme="openingday"] .genre-chip.active, [data-theme="openingday"] .sub-chip.active { background: linear-gradient(135deg, rgba(227, 27, 35, 0.35) 0%, rgba(46, 154, 74, 0.3) 100%); border-color: #e31b23; color: #fff; box-shadow: 0 0 12px rgba(227, 27, 35, 0.35); }
+  [data-theme="openingday"] .theme-pill-btn.active { background: linear-gradient(135deg, #e31b23 0%, #2e9a4a 100%); color: #fff; box-shadow: 0 0 10px rgba(227, 27, 35, 0.5); }
+  [data-theme="openingday"] .badge-highlight { border-color: #e31b23; color: #e31b23; }
+  [data-theme="patriots"] .holiday-greeting[data-for="patriots"] { display: inline-flex; }
+  [data-theme="patriots"] .banner { min-height: 360px; background-image: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 62%, rgba(8,8,16,0.88) 100%), url('static/holidays/patriots.svg'); background-position: center 40%; background-size: cover; }
+  @media (max-width: 860px) { [data-theme="patriots"] .banner { min-height: 300px; background-position: center 45%; } }
+  [data-theme="patriots"] .banner-title { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(0,0,0,0.45)); }
+  [data-theme="patriots"] { --bg: #08101e; --card: #111b30; --card-hover: #111b30; --fg: #f8fafc; --muted: #a8b0c0; --accent: #ffd23f; --accent-glow: rgba(255, 210, 63, 0.35); --border: rgba(255, 210, 63, 0.22); --border-hover: rgba(255, 210, 63, 0.48); --green: #3d7bff; --green-bg: rgba(61, 123, 255, 0.14); --green-border: rgba(61, 123, 255, 0.35); --warn: #ffd23f; --radius-lg: 16px; --radius-md: 10px; --radius-sm: 6px; }
+  [data-theme="patriots"] body { background-color: var(--bg); background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255, 210, 63, 0.09) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 90% 40%, rgba(61, 123, 255, 0.08) 0%, transparent 60%); background-attachment: fixed; color: var(--fg); }
+  [data-theme="patriots"] .banner { border-bottom: 2px solid rgba(255, 210, 63, 0.45); box-shadow: 0 4px 30px rgba(0,0,0,0.5), 0 0 20px rgba(255, 210, 63, 0.15); }
+  [data-theme="patriots"] .banner-top-tag { color: #ffd23f; text-shadow: 0 0 12px rgba(255, 210, 63, 0.6); }
+  [data-theme="patriots"] .live-pulse { background: #ffd23f; box-shadow: 0 0 10px #ffd23f, 0 0 20px #ffd23f; }
+  [data-theme="patriots"] .banner-title { background: linear-gradient(135deg, #ffffff 25%, #ffe282 62%, #81a9ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  [data-theme="patriots"] .pill-submit-btn { background: linear-gradient(135deg, #ffd23f 0%, #3d7bff 100%); color: #fff; box-shadow: 0 0 14px rgba(255, 210, 63, 0.45); border-radius: 999px; }
+  [data-theme="patriots"] .chip.active, [data-theme="patriots"] .loc-chip.active, [data-theme="patriots"] .genre-chip.active, [data-theme="patriots"] .sub-chip.active { background: linear-gradient(135deg, rgba(255, 210, 63, 0.35) 0%, rgba(61, 123, 255, 0.3) 100%); border-color: #ffd23f; color: #fff; box-shadow: 0 0 12px rgba(255, 210, 63, 0.35); }
+  [data-theme="patriots"] .theme-pill-btn.active { background: linear-gradient(135deg, #ffd23f 0%, #3d7bff 100%); color: #fff; box-shadow: 0 0 10px rgba(255, 210, 63, 0.5); }
+  [data-theme="patriots"] .badge-highlight { border-color: #ffd23f; color: #ffd23f; }
+  [data-theme="passover"] .holiday-greeting[data-for="passover"] { display: inline-flex; }
+  [data-theme="passover"] .banner { min-height: 360px; background-image: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 62%, rgba(8,8,16,0.88) 100%), url('static/holidays/passover.svg'); background-position: center 40%; background-size: cover; }
+  @media (max-width: 860px) { [data-theme="passover"] .banner { min-height: 300px; background-position: center 45%; } }
+  [data-theme="passover"] .banner-title { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(0,0,0,0.45)); }
+  [data-theme="passover"] { --bg: #0a0f20; --card: #121a30; --card-hover: #121a30; --fg: #f8fafc; --muted: #a8b0c0; --accent: #7cb7ff; --accent-glow: rgba(124, 183, 255, 0.35); --border: rgba(124, 183, 255, 0.22); --border-hover: rgba(124, 183, 255, 0.48); --green: #d9c27a; --green-bg: rgba(217, 194, 122, 0.14); --green-border: rgba(217, 194, 122, 0.35); --warn: #7cb7ff; --radius-lg: 16px; --radius-md: 10px; --radius-sm: 6px; }
+  [data-theme="passover"] body { background-color: var(--bg); background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(124, 183, 255, 0.09) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 90% 40%, rgba(217, 194, 122, 0.08) 0%, transparent 60%); background-attachment: fixed; color: var(--fg); }
+  [data-theme="passover"] .banner { border-bottom: 2px solid rgba(124, 183, 255, 0.45); box-shadow: 0 4px 30px rgba(0,0,0,0.5), 0 0 20px rgba(124, 183, 255, 0.15); }
+  [data-theme="passover"] .banner-top-tag { color: #7cb7ff; text-shadow: 0 0 12px rgba(124, 183, 255, 0.6); }
+  [data-theme="passover"] .live-pulse { background: #7cb7ff; box-shadow: 0 0 10px #7cb7ff, 0 0 20px #7cb7ff; }
+  [data-theme="passover"] .banner-title { background: linear-gradient(135deg, #ffffff 25%, #aad0ff 62%, #e6d7a9 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  [data-theme="passover"] .pill-submit-btn { background: linear-gradient(135deg, #7cb7ff 0%, #d9c27a 100%); color: #fff; box-shadow: 0 0 14px rgba(124, 183, 255, 0.45); border-radius: 999px; }
+  [data-theme="passover"] .chip.active, [data-theme="passover"] .loc-chip.active, [data-theme="passover"] .genre-chip.active, [data-theme="passover"] .sub-chip.active { background: linear-gradient(135deg, rgba(124, 183, 255, 0.35) 0%, rgba(217, 194, 122, 0.3) 100%); border-color: #7cb7ff; color: #fff; box-shadow: 0 0 12px rgba(124, 183, 255, 0.35); }
+  [data-theme="passover"] .theme-pill-btn.active { background: linear-gradient(135deg, #7cb7ff 0%, #d9c27a 100%); color: #fff; box-shadow: 0 0 10px rgba(124, 183, 255, 0.5); }
+  [data-theme="passover"] .badge-highlight { border-color: #7cb7ff; color: #7cb7ff; }
+  [data-theme="earthday"] .holiday-greeting[data-for="earthday"] { display: inline-flex; }
+  [data-theme="earthday"] .banner { min-height: 360px; background-image: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 62%, rgba(8,8,16,0.88) 100%), url('static/holidays/earthday.svg'); background-position: center 40%; background-size: cover; }
+  @media (max-width: 860px) { [data-theme="earthday"] .banner { min-height: 300px; background-position: center 45%; } }
+  [data-theme="earthday"] .banner-title { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(0,0,0,0.45)); }
+  [data-theme="earthday"] { --bg: #07140c; --card: #0f2216; --card-hover: #0f2216; --fg: #f8fafc; --muted: #a8b0c0; --accent: #3aa860; --accent-glow: rgba(58, 168, 96, 0.35); --border: rgba(58, 168, 96, 0.22); --border-hover: rgba(58, 168, 96, 0.48); --green: #3a8ad8; --green-bg: rgba(58, 138, 216, 0.14); --green-border: rgba(58, 138, 216, 0.35); --warn: #3aa860; --radius-lg: 16px; --radius-md: 10px; --radius-sm: 6px; }
+  [data-theme="earthday"] body { background-color: var(--bg); background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(58, 168, 96, 0.09) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 90% 40%, rgba(58, 138, 216, 0.08) 0%, transparent 60%); background-attachment: fixed; color: var(--fg); }
+  [data-theme="earthday"] .banner { border-bottom: 2px solid rgba(58, 168, 96, 0.45); box-shadow: 0 4px 30px rgba(0,0,0,0.5), 0 0 20px rgba(58, 168, 96, 0.15); }
+  [data-theme="earthday"] .banner-top-tag { color: #3aa860; text-shadow: 0 0 12px rgba(58, 168, 96, 0.6); }
+  [data-theme="earthday"] .live-pulse { background: #3aa860; box-shadow: 0 0 10px #3aa860, 0 0 20px #3aa860; }
+  [data-theme="earthday"] .banner-title { background: linear-gradient(135deg, #ffffff 25%, #7fc698 62%, #7fb3e6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  [data-theme="earthday"] .pill-submit-btn { background: linear-gradient(135deg, #3aa860 0%, #3a8ad8 100%); color: #fff; box-shadow: 0 0 14px rgba(58, 168, 96, 0.45); border-radius: 999px; }
+  [data-theme="earthday"] .chip.active, [data-theme="earthday"] .loc-chip.active, [data-theme="earthday"] .genre-chip.active, [data-theme="earthday"] .sub-chip.active { background: linear-gradient(135deg, rgba(58, 168, 96, 0.35) 0%, rgba(58, 138, 216, 0.3) 100%); border-color: #3aa860; color: #fff; box-shadow: 0 0 12px rgba(58, 168, 96, 0.35); }
+  [data-theme="earthday"] .theme-pill-btn.active { background: linear-gradient(135deg, #3aa860 0%, #3a8ad8 100%); color: #fff; box-shadow: 0 0 10px rgba(58, 168, 96, 0.5); }
+  [data-theme="earthday"] .badge-highlight { border-color: #3aa860; color: #3aa860; }
+  [data-theme="mothers"] .holiday-greeting[data-for="mothers"] { display: inline-flex; }
+  [data-theme="mothers"] .banner { min-height: 360px; background-image: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 62%, rgba(8,8,16,0.88) 100%), url('static/holidays/mothers.svg'); background-position: center 40%; background-size: cover; }
+  @media (max-width: 860px) { [data-theme="mothers"] .banner { min-height: 300px; background-position: center 45%; } }
+  [data-theme="mothers"] .banner-title { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(0,0,0,0.45)); }
+  [data-theme="mothers"] { --bg: #120c18; --card: #1c1426; --card-hover: #1c1426; --fg: #f8fafc; --muted: #a8b0c0; --accent: #c49ae8; --accent-glow: rgba(196, 154, 232, 0.35); --border: rgba(196, 154, 232, 0.22); --border-hover: rgba(196, 154, 232, 0.48); --green: #ff7ab8; --green-bg: rgba(255, 122, 184, 0.14); --green-border: rgba(255, 122, 184, 0.35); --warn: #c49ae8; --radius-lg: 16px; --radius-md: 10px; --radius-sm: 6px; }
+  [data-theme="mothers"] body { background-color: var(--bg); background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(196, 154, 232, 0.09) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 90% 40%, rgba(255, 122, 184, 0.08) 0%, transparent 60%); background-attachment: fixed; color: var(--fg); }
+  [data-theme="mothers"] .banner { border-bottom: 2px solid rgba(196, 154, 232, 0.45); box-shadow: 0 4px 30px rgba(0,0,0,0.5), 0 0 20px rgba(196, 154, 232, 0.15); }
+  [data-theme="mothers"] .banner-top-tag { color: #c49ae8; text-shadow: 0 0 12px rgba(196, 154, 232, 0.6); }
+  [data-theme="mothers"] .live-pulse { background: #c49ae8; box-shadow: 0 0 10px #c49ae8, 0 0 20px #c49ae8; }
+  [data-theme="mothers"] .banner-title { background: linear-gradient(135deg, #ffffff 25%, #d9bdf0 62%, #ffa9d1 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  [data-theme="mothers"] .pill-submit-btn { background: linear-gradient(135deg, #c49ae8 0%, #ff7ab8 100%); color: #fff; box-shadow: 0 0 14px rgba(196, 154, 232, 0.45); border-radius: 999px; }
+  [data-theme="mothers"] .chip.active, [data-theme="mothers"] .loc-chip.active, [data-theme="mothers"] .genre-chip.active, [data-theme="mothers"] .sub-chip.active { background: linear-gradient(135deg, rgba(196, 154, 232, 0.35) 0%, rgba(255, 122, 184, 0.3) 100%); border-color: #c49ae8; color: #fff; box-shadow: 0 0 12px rgba(196, 154, 232, 0.35); }
+  [data-theme="mothers"] .theme-pill-btn.active { background: linear-gradient(135deg, #c49ae8 0%, #ff7ab8 100%); color: #fff; box-shadow: 0 0 10px rgba(196, 154, 232, 0.5); }
+  [data-theme="mothers"] .badge-highlight { border-color: #c49ae8; color: #c49ae8; }
+  [data-theme="memorial"] .holiday-greeting[data-for="memorial"] { display: inline-flex; }
+  [data-theme="memorial"] .banner { min-height: 360px; background-image: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 62%, rgba(8,8,16,0.88) 100%), url('static/holidays/memorial.svg'); background-position: center 40%; background-size: cover; }
+  @media (max-width: 860px) { [data-theme="memorial"] .banner { min-height: 300px; background-position: center 45%; } }
+  [data-theme="memorial"] .banner-title { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(0,0,0,0.45)); }
+  [data-theme="memorial"] { --bg: #0a0d17; --card: #131929; --card-hover: #131929; --fg: #f8fafc; --muted: #a8b0c0; --accent: #e0414f; --accent-glow: rgba(224, 65, 79, 0.35); --border: rgba(224, 65, 79, 0.22); --border-hover: rgba(224, 65, 79, 0.48); --green: #d4af37; --green-bg: rgba(212, 175, 55, 0.14); --green-border: rgba(212, 175, 55, 0.35); --warn: #e0414f; --radius-lg: 16px; --radius-md: 10px; --radius-sm: 6px; }
+  [data-theme="memorial"] body { background-color: var(--bg); background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(224, 65, 79, 0.09) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 90% 40%, rgba(212, 175, 55, 0.08) 0%, transparent 60%); background-attachment: fixed; color: var(--fg); }
+  [data-theme="memorial"] .banner { border-bottom: 2px solid rgba(224, 65, 79, 0.45); box-shadow: 0 4px 30px rgba(0,0,0,0.5), 0 0 20px rgba(224, 65, 79, 0.15); }
+  [data-theme="memorial"] .banner-top-tag { color: #e0414f; text-shadow: 0 0 12px rgba(224, 65, 79, 0.6); }
+  [data-theme="memorial"] .live-pulse { background: #e0414f; box-shadow: 0 0 10px #e0414f, 0 0 20px #e0414f; }
+  [data-theme="memorial"] .banner-title { background: linear-gradient(135deg, #ffffff 25%, #eb848d 62%, #e3cb7d 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  [data-theme="memorial"] .pill-submit-btn { background: linear-gradient(135deg, #e0414f 0%, #d4af37 100%); color: #fff; box-shadow: 0 0 14px rgba(224, 65, 79, 0.45); border-radius: 999px; }
+  [data-theme="memorial"] .chip.active, [data-theme="memorial"] .loc-chip.active, [data-theme="memorial"] .genre-chip.active, [data-theme="memorial"] .sub-chip.active { background: linear-gradient(135deg, rgba(224, 65, 79, 0.35) 0%, rgba(212, 175, 55, 0.3) 100%); border-color: #e0414f; color: #fff; box-shadow: 0 0 12px rgba(224, 65, 79, 0.35); }
+  [data-theme="memorial"] .theme-pill-btn.active { background: linear-gradient(135deg, #e0414f 0%, #d4af37 100%); color: #fff; box-shadow: 0 0 10px rgba(224, 65, 79, 0.5); }
+  [data-theme="memorial"] .badge-highlight { border-color: #e0414f; color: #e0414f; }
+  [data-theme="pride"] .holiday-greeting[data-for="pride"] { display: inline-flex; }
+  [data-theme="pride"] .banner { min-height: 360px; background-image: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 62%, rgba(8,8,16,0.88) 100%), url('static/holidays/pride.svg'); background-position: center 40%; background-size: cover; }
+  @media (max-width: 860px) { [data-theme="pride"] .banner { min-height: 300px; background-position: center 45%; } }
+  [data-theme="pride"] .banner-title { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(0,0,0,0.45)); }
+  [data-theme="pride"] { --bg: #0f0a20; --card: #1a1230; --card-hover: #1a1230; --fg: #f8fafc; --muted: #a8b0c0; --accent: #ff8c00; --accent-glow: rgba(255, 140, 0, 0.35); --border: rgba(255, 140, 0, 0.22); --border-hover: rgba(255, 140, 0, 0.48); --green: #732982; --green-bg: rgba(115, 41, 130, 0.14); --green-border: rgba(115, 41, 130, 0.35); --warn: #ff8c00; --radius-lg: 16px; --radius-md: 10px; --radius-sm: 6px; }
+  [data-theme="pride"] body { background-color: var(--bg); background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255, 140, 0, 0.09) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 90% 40%, rgba(115, 41, 130, 0.08) 0%, transparent 60%); background-attachment: fixed; color: var(--fg); }
+  [data-theme="pride"] .banner { border-bottom: 2px solid rgba(255, 140, 0, 0.45); box-shadow: 0 4px 30px rgba(0,0,0,0.5), 0 0 20px rgba(255, 140, 0, 0.15); }
+  [data-theme="pride"] .banner-top-tag { color: #ff8c00; text-shadow: 0 0 12px rgba(255, 140, 0, 0.6); }
+  [data-theme="pride"] .live-pulse { background: #ff8c00; box-shadow: 0 0 10px #ff8c00, 0 0 20px #ff8c00; }
+  [data-theme="pride"] .banner-title { background: linear-gradient(135deg, #ffffff 25%, #ffb459 62%, #a474ae 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  [data-theme="pride"] .pill-submit-btn { background: linear-gradient(135deg, #ff8c00 0%, #732982 100%); color: #fff; box-shadow: 0 0 14px rgba(255, 140, 0, 0.45); border-radius: 999px; }
+  [data-theme="pride"] .chip.active, [data-theme="pride"] .loc-chip.active, [data-theme="pride"] .genre-chip.active, [data-theme="pride"] .sub-chip.active { background: linear-gradient(135deg, rgba(255, 140, 0, 0.35) 0%, rgba(115, 41, 130, 0.3) 100%); border-color: #ff8c00; color: #fff; box-shadow: 0 0 12px rgba(255, 140, 0, 0.35); }
+  [data-theme="pride"] .theme-pill-btn.active { background: linear-gradient(135deg, #ff8c00 0%, #732982 100%); color: #fff; box-shadow: 0 0 10px rgba(255, 140, 0, 0.5); }
+  [data-theme="pride"] .badge-highlight { border-color: #ff8c00; color: #ff8c00; }
+  [data-theme="bunkerhill"] .holiday-greeting[data-for="bunkerhill"] { display: inline-flex; }
+  [data-theme="bunkerhill"] .banner { min-height: 360px; background-image: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 62%, rgba(8,8,16,0.88) 100%), url('static/holidays/bunkerhill.svg'); background-position: center 40%; background-size: cover; }
+  @media (max-width: 860px) { [data-theme="bunkerhill"] .banner { min-height: 300px; background-position: center 45%; } }
+  [data-theme="bunkerhill"] .banner-title { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(0,0,0,0.45)); }
+  [data-theme="bunkerhill"] { --bg: #0a0e1a; --card: #131a2c; --card-hover: #131a2c; --fg: #f8fafc; --muted: #a8b0c0; --accent: #b22234; --accent-glow: rgba(178, 34, 52, 0.35); --border: rgba(178, 34, 52, 0.22); --border-hover: rgba(178, 34, 52, 0.48); --green: #3a6ad8; --green-bg: rgba(58, 106, 216, 0.14); --green-border: rgba(58, 106, 216, 0.35); --warn: #b22234; --radius-lg: 16px; --radius-md: 10px; --radius-sm: 6px; }
+  [data-theme="bunkerhill"] body { background-color: var(--bg); background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(178, 34, 52, 0.09) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 90% 40%, rgba(58, 106, 216, 0.08) 0%, transparent 60%); background-attachment: fixed; color: var(--fg); }
+  [data-theme="bunkerhill"] .banner { border-bottom: 2px solid rgba(178, 34, 52, 0.45); box-shadow: 0 4px 30px rgba(0,0,0,0.5), 0 0 20px rgba(178, 34, 52, 0.15); }
+  [data-theme="bunkerhill"] .banner-top-tag { color: #b22234; text-shadow: 0 0 12px rgba(178, 34, 52, 0.6); }
+  [data-theme="bunkerhill"] .live-pulse { background: #b22234; box-shadow: 0 0 10px #b22234, 0 0 20px #b22234; }
+  [data-theme="bunkerhill"] .banner-title { background: linear-gradient(135deg, #ffffff 25%, #cd6f7b 62%, #7f9ee6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  [data-theme="bunkerhill"] .pill-submit-btn { background: linear-gradient(135deg, #b22234 0%, #3a6ad8 100%); color: #fff; box-shadow: 0 0 14px rgba(178, 34, 52, 0.45); border-radius: 999px; }
+  [data-theme="bunkerhill"] .chip.active, [data-theme="bunkerhill"] .loc-chip.active, [data-theme="bunkerhill"] .genre-chip.active, [data-theme="bunkerhill"] .sub-chip.active { background: linear-gradient(135deg, rgba(178, 34, 52, 0.35) 0%, rgba(58, 106, 216, 0.3) 100%); border-color: #b22234; color: #fff; box-shadow: 0 0 12px rgba(178, 34, 52, 0.35); }
+  [data-theme="bunkerhill"] .theme-pill-btn.active { background: linear-gradient(135deg, #b22234 0%, #3a6ad8 100%); color: #fff; box-shadow: 0 0 10px rgba(178, 34, 52, 0.5); }
+  [data-theme="bunkerhill"] .badge-highlight { border-color: #b22234; color: #b22234; }
+  [data-theme="juneteenth"] .holiday-greeting[data-for="juneteenth"] { display: inline-flex; }
+  [data-theme="juneteenth"] .banner { min-height: 360px; background-image: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 62%, rgba(8,8,16,0.88) 100%), url('static/holidays/juneteenth.svg'); background-position: center 40%; background-size: cover; }
+  @media (max-width: 860px) { [data-theme="juneteenth"] .banner { min-height: 300px; background-position: center 45%; } }
+  [data-theme="juneteenth"] .banner-title { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(0,0,0,0.45)); }
+  [data-theme="juneteenth"] { --bg: #0f0b08; --card: #1c1510; --card-hover: #1c1510; --fg: #f8fafc; --muted: #a8b0c0; --accent: #f5b82e; --accent-glow: rgba(245, 184, 46, 0.35); --border: rgba(245, 184, 46, 0.22); --border-hover: rgba(245, 184, 46, 0.48); --green: #e5484d; --green-bg: rgba(229, 72, 77, 0.14); --green-border: rgba(229, 72, 77, 0.35); --warn: #f5b82e; --radius-lg: 16px; --radius-md: 10px; --radius-sm: 6px; }
+  [data-theme="juneteenth"] body { background-color: var(--bg); background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(245, 184, 46, 0.09) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 90% 40%, rgba(229, 72, 77, 0.08) 0%, transparent 60%); background-attachment: fixed; color: var(--fg); }
+  [data-theme="juneteenth"] .banner { border-bottom: 2px solid rgba(245, 184, 46, 0.45); box-shadow: 0 4px 30px rgba(0,0,0,0.5), 0 0 20px rgba(245, 184, 46, 0.15); }
+  [data-theme="juneteenth"] .banner-top-tag { color: #f5b82e; text-shadow: 0 0 12px rgba(245, 184, 46, 0.6); }
+  [data-theme="juneteenth"] .live-pulse { background: #f5b82e; box-shadow: 0 0 10px #f5b82e, 0 0 20px #f5b82e; }
+  [data-theme="juneteenth"] .banner-title { background: linear-gradient(135deg, #ffffff 25%, #f8d177 62%, #ee888b 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  [data-theme="juneteenth"] .pill-submit-btn { background: linear-gradient(135deg, #f5b82e 0%, #e5484d 100%); color: #fff; box-shadow: 0 0 14px rgba(245, 184, 46, 0.45); border-radius: 999px; }
+  [data-theme="juneteenth"] .chip.active, [data-theme="juneteenth"] .loc-chip.active, [data-theme="juneteenth"] .genre-chip.active, [data-theme="juneteenth"] .sub-chip.active { background: linear-gradient(135deg, rgba(245, 184, 46, 0.35) 0%, rgba(229, 72, 77, 0.3) 100%); border-color: #f5b82e; color: #fff; box-shadow: 0 0 12px rgba(245, 184, 46, 0.35); }
+  [data-theme="juneteenth"] .theme-pill-btn.active { background: linear-gradient(135deg, #f5b82e 0%, #e5484d 100%); color: #fff; box-shadow: 0 0 10px rgba(245, 184, 46, 0.5); }
+  [data-theme="juneteenth"] .badge-highlight { border-color: #f5b82e; color: #f5b82e; }
+  [data-theme="fathers"] .holiday-greeting[data-for="fathers"] { display: inline-flex; }
+  [data-theme="fathers"] .banner { min-height: 360px; background-image: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 62%, rgba(8,8,16,0.88) 100%), url('static/holidays/fathers.svg'); background-position: center 40%; background-size: cover; }
+  @media (max-width: 860px) { [data-theme="fathers"] .banner { min-height: 300px; background-position: center 45%; } }
+  [data-theme="fathers"] .banner-title { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(0,0,0,0.45)); }
+  [data-theme="fathers"] { --bg: #08101c; --card: #101a2a; --card-hover: #101a2a; --fg: #f8fafc; --muted: #a8b0c0; --accent: #4dabf7; --accent-glow: rgba(77, 171, 247, 0.35); --border: rgba(77, 171, 247, 0.22); --border-hover: rgba(77, 171, 247, 0.48); --green: #ffb703; --green-bg: rgba(255, 183, 3, 0.14); --green-border: rgba(255, 183, 3, 0.35); --warn: #4dabf7; --radius-lg: 16px; --radius-md: 10px; --radius-sm: 6px; }
+  [data-theme="fathers"] body { background-color: var(--bg); background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(77, 171, 247, 0.09) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 90% 40%, rgba(255, 183, 3, 0.08) 0%, transparent 60%); background-attachment: fixed; color: var(--fg); }
+  [data-theme="fathers"] .banner { border-bottom: 2px solid rgba(77, 171, 247, 0.45); box-shadow: 0 4px 30px rgba(0,0,0,0.5), 0 0 20px rgba(77, 171, 247, 0.15); }
+  [data-theme="fathers"] .banner-top-tag { color: #4dabf7; text-shadow: 0 0 12px rgba(77, 171, 247, 0.6); }
+  [data-theme="fathers"] .live-pulse { background: #4dabf7; box-shadow: 0 0 10px #4dabf7, 0 0 20px #4dabf7; }
+  [data-theme="fathers"] .banner-title { background: linear-gradient(135deg, #ffffff 25%, #8bc8fa 62%, #ffd05b 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  [data-theme="fathers"] .pill-submit-btn { background: linear-gradient(135deg, #4dabf7 0%, #ffb703 100%); color: #fff; box-shadow: 0 0 14px rgba(77, 171, 247, 0.45); border-radius: 999px; }
+  [data-theme="fathers"] .chip.active, [data-theme="fathers"] .loc-chip.active, [data-theme="fathers"] .genre-chip.active, [data-theme="fathers"] .sub-chip.active { background: linear-gradient(135deg, rgba(77, 171, 247, 0.35) 0%, rgba(255, 183, 3, 0.3) 100%); border-color: #4dabf7; color: #fff; box-shadow: 0 0 12px rgba(77, 171, 247, 0.35); }
+  [data-theme="fathers"] .theme-pill-btn.active { background: linear-gradient(135deg, #4dabf7 0%, #ffb703 100%); color: #fff; box-shadow: 0 0 10px rgba(77, 171, 247, 0.5); }
+  [data-theme="fathers"] .badge-highlight { border-color: #4dabf7; color: #4dabf7; }
+  [data-theme="july4"] .holiday-greeting[data-for="july4"] { display: inline-flex; }
+  [data-theme="july4"] .banner { min-height: 360px; background-image: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 62%, rgba(8,8,16,0.88) 100%), url('static/holidays/july4.svg'); background-position: center 40%; background-size: cover; }
+  @media (max-width: 860px) { [data-theme="july4"] .banner { min-height: 300px; background-position: center 45%; } }
+  [data-theme="july4"] .banner-title { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(0,0,0,0.45)); }
+  [data-theme="july4"] { --bg: #070b18; --card: #101729; --card-hover: #101729; --fg: #f8fafc; --muted: #a8b0c0; --accent: #ff4d5e; --accent-glow: rgba(255, 77, 94, 0.35); --border: rgba(255, 77, 94, 0.22); --border-hover: rgba(255, 77, 94, 0.48); --green: #5b9cff; --green-bg: rgba(91, 156, 255, 0.14); --green-border: rgba(91, 156, 255, 0.35); --warn: #ff4d5e; --radius-lg: 16px; --radius-md: 10px; --radius-sm: 6px; }
+  [data-theme="july4"] body { background-color: var(--bg); background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255, 77, 94, 0.09) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 90% 40%, rgba(91, 156, 255, 0.08) 0%, transparent 60%); background-attachment: fixed; color: var(--fg); }
+  [data-theme="july4"] .banner { border-bottom: 2px solid rgba(255, 77, 94, 0.45); box-shadow: 0 4px 30px rgba(0,0,0,0.5), 0 0 20px rgba(255, 77, 94, 0.15); }
+  [data-theme="july4"] .banner-top-tag { color: #ff4d5e; text-shadow: 0 0 12px rgba(255, 77, 94, 0.6); }
+  [data-theme="july4"] .live-pulse { background: #ff4d5e; box-shadow: 0 0 10px #ff4d5e, 0 0 20px #ff4d5e; }
+  [data-theme="july4"] .banner-title { background: linear-gradient(135deg, #ffffff 25%, #ff8b96 62%, #94bfff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  [data-theme="july4"] .pill-submit-btn { background: linear-gradient(135deg, #ff4d5e 0%, #5b9cff 100%); color: #fff; box-shadow: 0 0 14px rgba(255, 77, 94, 0.45); border-radius: 999px; }
+  [data-theme="july4"] .chip.active, [data-theme="july4"] .loc-chip.active, [data-theme="july4"] .genre-chip.active, [data-theme="july4"] .sub-chip.active { background: linear-gradient(135deg, rgba(255, 77, 94, 0.35) 0%, rgba(91, 156, 255, 0.3) 100%); border-color: #ff4d5e; color: #fff; box-shadow: 0 0 12px rgba(255, 77, 94, 0.35); }
+  [data-theme="july4"] .theme-pill-btn.active { background: linear-gradient(135deg, #ff4d5e 0%, #5b9cff 100%); color: #fff; box-shadow: 0 0 10px rgba(255, 77, 94, 0.5); }
+  [data-theme="july4"] .badge-highlight { border-color: #ff4d5e; color: #ff4d5e; }
+  [data-theme="labor"] .holiday-greeting[data-for="labor"] { display: inline-flex; }
+  [data-theme="labor"] .banner { min-height: 360px; background-image: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 62%, rgba(8,8,16,0.88) 100%), url('static/holidays/labor.svg'); background-position: center 40%; background-size: cover; }
+  @media (max-width: 860px) { [data-theme="labor"] .banner { min-height: 300px; background-position: center 45%; } }
+  [data-theme="labor"] .banner-title { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(0,0,0,0.45)); }
+  [data-theme="labor"] { --bg: #0c0f14; --card: #161b24; --card-hover: #161b24; --fg: #f8fafc; --muted: #a8b0c0; --accent: #ff9f43; --accent-glow: rgba(255, 159, 67, 0.35); --border: rgba(255, 159, 67, 0.22); --border-hover: rgba(255, 159, 67, 0.48); --green: #22c3c3; --green-bg: rgba(34, 195, 195, 0.14); --green-border: rgba(34, 195, 195, 0.35); --warn: #ff9f43; --radius-lg: 16px; --radius-md: 10px; --radius-sm: 6px; }
+  [data-theme="labor"] body { background-color: var(--bg); background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255, 159, 67, 0.09) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 90% 40%, rgba(34, 195, 195, 0.08) 0%, transparent 60%); background-attachment: fixed; color: var(--fg); }
+  [data-theme="labor"] .banner { border-bottom: 2px solid rgba(255, 159, 67, 0.45); box-shadow: 0 4px 30px rgba(0,0,0,0.5), 0 0 20px rgba(255, 159, 67, 0.15); }
+  [data-theme="labor"] .banner-top-tag { color: #ff9f43; text-shadow: 0 0 12px rgba(255, 159, 67, 0.6); }
+  [data-theme="labor"] .live-pulse { background: #ff9f43; box-shadow: 0 0 10px #ff9f43, 0 0 20px #ff9f43; }
+  [data-theme="labor"] .banner-title { background: linear-gradient(135deg, #ffffff 25%, #ffc185 62%, #6fd8d8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  [data-theme="labor"] .pill-submit-btn { background: linear-gradient(135deg, #ff9f43 0%, #22c3c3 100%); color: #fff; box-shadow: 0 0 14px rgba(255, 159, 67, 0.45); border-radius: 999px; }
+  [data-theme="labor"] .chip.active, [data-theme="labor"] .loc-chip.active, [data-theme="labor"] .genre-chip.active, [data-theme="labor"] .sub-chip.active { background: linear-gradient(135deg, rgba(255, 159, 67, 0.35) 0%, rgba(34, 195, 195, 0.3) 100%); border-color: #ff9f43; color: #fff; box-shadow: 0 0 12px rgba(255, 159, 67, 0.35); }
+  [data-theme="labor"] .theme-pill-btn.active { background: linear-gradient(135deg, #ff9f43 0%, #22c3c3 100%); color: #fff; box-shadow: 0 0 10px rgba(255, 159, 67, 0.5); }
+  [data-theme="labor"] .badge-highlight { border-color: #ff9f43; color: #ff9f43; }
+  [data-theme="indigenous"] .holiday-greeting[data-for="indigenous"] { display: inline-flex; }
+  [data-theme="indigenous"] .banner { min-height: 360px; background-image: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 62%, rgba(8,8,16,0.88) 100%), url('static/holidays/indigenous.svg'); background-position: center 40%; background-size: cover; }
+  @media (max-width: 860px) { [data-theme="indigenous"] .banner { min-height: 300px; background-position: center 45%; } }
+  [data-theme="indigenous"] .banner-title { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(0,0,0,0.45)); }
+  [data-theme="indigenous"] { --bg: #120c08; --card: #1f1610; --card-hover: #1f1610; --fg: #f8fafc; --muted: #a8b0c0; --accent: #e07a3f; --accent-glow: rgba(224, 122, 63, 0.35); --border: rgba(224, 122, 63, 0.22); --border-hover: rgba(224, 122, 63, 0.48); --green: #2bb3a3; --green-bg: rgba(43, 179, 163, 0.14); --green-border: rgba(43, 179, 163, 0.35); --warn: #e07a3f; --radius-lg: 16px; --radius-md: 10px; --radius-sm: 6px; }
+  [data-theme="indigenous"] body { background-color: var(--bg); background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(224, 122, 63, 0.09) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 90% 40%, rgba(43, 179, 163, 0.08) 0%, transparent 60%); background-attachment: fixed; color: var(--fg); }
+  [data-theme="indigenous"] .banner { border-bottom: 2px solid rgba(224, 122, 63, 0.45); box-shadow: 0 4px 30px rgba(0,0,0,0.5), 0 0 20px rgba(224, 122, 63, 0.15); }
+  [data-theme="indigenous"] .banner-top-tag { color: #e07a3f; text-shadow: 0 0 12px rgba(224, 122, 63, 0.6); }
+  [data-theme="indigenous"] .live-pulse { background: #e07a3f; box-shadow: 0 0 10px #e07a3f, 0 0 20px #e07a3f; }
+  [data-theme="indigenous"] .banner-title { background: linear-gradient(135deg, #ffffff 25%, #eba982 62%, #75cec3 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  [data-theme="indigenous"] .pill-submit-btn { background: linear-gradient(135deg, #e07a3f 0%, #2bb3a3 100%); color: #fff; box-shadow: 0 0 14px rgba(224, 122, 63, 0.45); border-radius: 999px; }
+  [data-theme="indigenous"] .chip.active, [data-theme="indigenous"] .loc-chip.active, [data-theme="indigenous"] .genre-chip.active, [data-theme="indigenous"] .sub-chip.active { background: linear-gradient(135deg, rgba(224, 122, 63, 0.35) 0%, rgba(43, 179, 163, 0.3) 100%); border-color: #e07a3f; color: #fff; box-shadow: 0 0 12px rgba(224, 122, 63, 0.35); }
+  [data-theme="indigenous"] .theme-pill-btn.active { background: linear-gradient(135deg, #e07a3f 0%, #2bb3a3 100%); color: #fff; box-shadow: 0 0 10px rgba(224, 122, 63, 0.5); }
+  [data-theme="indigenous"] .badge-highlight { border-color: #e07a3f; color: #e07a3f; }
+  [data-theme="hocr"] .holiday-greeting[data-for="hocr"] { display: inline-flex; }
+  [data-theme="hocr"] .banner { min-height: 360px; background-image: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 62%, rgba(8,8,16,0.88) 100%), url('static/holidays/hocr.svg'); background-position: center 40%; background-size: cover; }
+  @media (max-width: 860px) { [data-theme="hocr"] .banner { min-height: 300px; background-position: center 45%; } }
+  [data-theme="hocr"] .banner-title { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(0,0,0,0.45)); }
+  [data-theme="hocr"] { --bg: #120c08; --card: #1f1610; --card-hover: #1f1610; --fg: #f8fafc; --muted: #a8b0c0; --accent: #e8822a; --accent-glow: rgba(232, 130, 42, 0.35); --border: rgba(232, 130, 42, 0.22); --border-hover: rgba(232, 130, 42, 0.48); --green: #3a64b8; --green-bg: rgba(58, 100, 184, 0.14); --green-border: rgba(58, 100, 184, 0.35); --warn: #e8822a; --radius-lg: 16px; --radius-md: 10px; --radius-sm: 6px; }
+  [data-theme="hocr"] body { background-color: var(--bg); background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(232, 130, 42, 0.09) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 90% 40%, rgba(58, 100, 184, 0.08) 0%, transparent 60%); background-attachment: fixed; color: var(--fg); }
+  [data-theme="hocr"] .banner { border-bottom: 2px solid rgba(232, 130, 42, 0.45); box-shadow: 0 4px 30px rgba(0,0,0,0.5), 0 0 20px rgba(232, 130, 42, 0.15); }
+  [data-theme="hocr"] .banner-top-tag { color: #e8822a; text-shadow: 0 0 12px rgba(232, 130, 42, 0.6); }
+  [data-theme="hocr"] .live-pulse { background: #e8822a; box-shadow: 0 0 10px #e8822a, 0 0 20px #e8822a; }
+  [data-theme="hocr"] .banner-title { background: linear-gradient(135deg, #ffffff 25%, #f0ae75 62%, #7f9ad1 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  [data-theme="hocr"] .pill-submit-btn { background: linear-gradient(135deg, #e8822a 0%, #3a64b8 100%); color: #fff; box-shadow: 0 0 14px rgba(232, 130, 42, 0.45); border-radius: 999px; }
+  [data-theme="hocr"] .chip.active, [data-theme="hocr"] .loc-chip.active, [data-theme="hocr"] .genre-chip.active, [data-theme="hocr"] .sub-chip.active { background: linear-gradient(135deg, rgba(232, 130, 42, 0.35) 0%, rgba(58, 100, 184, 0.3) 100%); border-color: #e8822a; color: #fff; box-shadow: 0 0 12px rgba(232, 130, 42, 0.35); }
+  [data-theme="hocr"] .theme-pill-btn.active { background: linear-gradient(135deg, #e8822a 0%, #3a64b8 100%); color: #fff; box-shadow: 0 0 10px rgba(232, 130, 42, 0.5); }
+  [data-theme="hocr"] .badge-highlight { border-color: #e8822a; color: #e8822a; }
+  [data-theme="diwali"] .holiday-greeting[data-for="diwali"] { display: inline-flex; }
+  [data-theme="diwali"] .banner { min-height: 360px; background-image: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 62%, rgba(8,8,16,0.88) 100%), url('static/holidays/diwali.jpg'); background-position: center 40%; background-size: cover; }
+  @media (max-width: 860px) { [data-theme="diwali"] .banner { min-height: 300px; background-position: center 45%; } }
+  [data-theme="diwali"] .banner-title { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(0,0,0,0.45)); }
+  [data-theme="diwali"] { --bg: #0e0618; --card: #1a0c26; --card-hover: #1a0c26; --fg: #f8fafc; --muted: #a8b0c0; --accent: #ffcf3f; --accent-glow: rgba(255, 207, 63, 0.35); --border: rgba(255, 207, 63, 0.22); --border-hover: rgba(255, 207, 63, 0.48); --green: #ff7ab8; --green-bg: rgba(255, 122, 184, 0.14); --green-border: rgba(255, 122, 184, 0.35); --warn: #ffcf3f; --radius-lg: 16px; --radius-md: 10px; --radius-sm: 6px; }
+  [data-theme="diwali"] body { background-color: var(--bg); background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(255, 207, 63, 0.09) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 90% 40%, rgba(255, 122, 184, 0.08) 0%, transparent 60%); background-attachment: fixed; color: var(--fg); }
+  [data-theme="diwali"] .banner { border-bottom: 2px solid rgba(255, 207, 63, 0.45); box-shadow: 0 4px 30px rgba(0,0,0,0.5), 0 0 20px rgba(255, 207, 63, 0.15); }
+  [data-theme="diwali"] .banner-top-tag { color: #ffcf3f; text-shadow: 0 0 12px rgba(255, 207, 63, 0.6); }
+  [data-theme="diwali"] .live-pulse { background: #ffcf3f; box-shadow: 0 0 10px #ffcf3f, 0 0 20px #ffcf3f; }
+  [data-theme="diwali"] .banner-title { background: linear-gradient(135deg, #ffffff 25%, #ffe082 62%, #ffa9d1 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  [data-theme="diwali"] .pill-submit-btn { background: linear-gradient(135deg, #ffcf3f 0%, #ff7ab8 100%); color: #fff; box-shadow: 0 0 14px rgba(255, 207, 63, 0.45); border-radius: 999px; }
+  [data-theme="diwali"] .chip.active, [data-theme="diwali"] .loc-chip.active, [data-theme="diwali"] .genre-chip.active, [data-theme="diwali"] .sub-chip.active { background: linear-gradient(135deg, rgba(255, 207, 63, 0.35) 0%, rgba(255, 122, 184, 0.3) 100%); border-color: #ffcf3f; color: #fff; box-shadow: 0 0 12px rgba(255, 207, 63, 0.35); }
+  [data-theme="diwali"] .theme-pill-btn.active { background: linear-gradient(135deg, #ffcf3f 0%, #ff7ab8 100%); color: #fff; box-shadow: 0 0 10px rgba(255, 207, 63, 0.5); }
+  [data-theme="diwali"] .badge-highlight { border-color: #ffcf3f; color: #ffcf3f; }
+  [data-theme="halloween"] .holiday-greeting[data-for="halloween"] { display: inline-flex; }
+  [data-theme="election"] .holiday-greeting[data-for="election"] { display: inline-flex; }
+  [data-theme="election"] .banner { min-height: 360px; background-image: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 62%, rgba(8,8,16,0.88) 100%), url('static/holidays/election.svg'); background-position: center 40%; background-size: cover; }
+  @media (max-width: 860px) { [data-theme="election"] .banner { min-height: 300px; background-position: center 45%; } }
+  [data-theme="election"] .banner-title { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(0,0,0,0.45)); }
+  [data-theme="veterans"] .holiday-greeting[data-for="veterans"] { display: inline-flex; }
+  [data-theme="veterans"] .banner { min-height: 360px; background-image: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 62%, rgba(8,8,16,0.88) 100%), url('static/holidays/veterans.jpg'); background-position: center 40%; background-size: cover; }
+  @media (max-width: 860px) { [data-theme="veterans"] .banner { min-height: 300px; background-position: center 45%; } }
+  [data-theme="veterans"] .banner-title { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(0,0,0,0.45)); }
+  [data-theme="thanksgiving"] .holiday-greeting[data-for="thanksgiving"] { display: inline-flex; }
+  [data-theme="thanksgiving"] .banner { min-height: 360px; background-image: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 62%, rgba(8,8,16,0.88) 100%), url('static/holidays/thanksgiving.jpg'); background-position: center 40%; background-size: cover; }
+  @media (max-width: 860px) { [data-theme="thanksgiving"] .banner { min-height: 300px; background-position: center 45%; } }
+  [data-theme="thanksgiving"] .banner-title { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(0,0,0,0.45)); }
+  [data-theme="blackfriday"] .holiday-greeting[data-for="blackfriday"] { display: inline-flex; }
+  [data-theme="blackfriday"] .banner { min-height: 360px; background-image: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 62%, rgba(8,8,16,0.88) 100%), url('static/holidays/blackfriday.jpg'); background-position: center 40%; background-size: cover; }
+  @media (max-width: 860px) { [data-theme="blackfriday"] .banner { min-height: 300px; background-position: center 45%; } }
+  [data-theme="blackfriday"] .banner-title { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(0,0,0,0.45)); }
+  [data-theme="cybermonday"] .holiday-greeting[data-for="cybermonday"] { display: inline-flex; }
+  [data-theme="cybermonday"] .banner { min-height: 360px; background-image: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 62%, rgba(8,8,16,0.88) 100%), url('static/holidays/cybermonday.jpg'); background-position: center 40%; background-size: cover; }
+  @media (max-width: 860px) { [data-theme="cybermonday"] .banner { min-height: 300px; background-position: center 45%; } }
+  [data-theme="cybermonday"] .banner-title { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(0,0,0,0.45)); }
+  [data-theme="teaparty"] .holiday-greeting[data-for="teaparty"] { display: inline-flex; }
+  [data-theme="teaparty"] .banner { min-height: 360px; background-image: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 62%, rgba(8,8,16,0.88) 100%), url('static/holidays/teaparty.jpg'); background-position: center 40%; background-size: cover; }
+  @media (max-width: 860px) { [data-theme="teaparty"] .banner { min-height: 300px; background-position: center 45%; } }
+  [data-theme="teaparty"] .banner-title { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(0,0,0,0.45)); }
+  [data-theme="teaparty"] { --bg: #070b18; --card: #0f1626; --card-hover: #0f1626; --fg: #f8fafc; --muted: #a8b0c0; --accent: #c9a462; --accent-glow: rgba(201, 164, 98, 0.35); --border: rgba(201, 164, 98, 0.22); --border-hover: rgba(201, 164, 98, 0.48); --green: #5b7fc7; --green-bg: rgba(91, 127, 199, 0.14); --green-border: rgba(91, 127, 199, 0.35); --warn: #c9a462; --radius-lg: 16px; --radius-md: 10px; --radius-sm: 6px; }
+  [data-theme="teaparty"] body { background-color: var(--bg); background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(201, 164, 98, 0.09) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 90% 40%, rgba(91, 127, 199, 0.08) 0%, transparent 60%); background-attachment: fixed; color: var(--fg); }
+  [data-theme="teaparty"] .banner { border-bottom: 2px solid rgba(201, 164, 98, 0.45); box-shadow: 0 4px 30px rgba(0,0,0,0.5), 0 0 20px rgba(201, 164, 98, 0.15); }
+  [data-theme="teaparty"] .banner-top-tag { color: #c9a462; text-shadow: 0 0 12px rgba(201, 164, 98, 0.6); }
+  [data-theme="teaparty"] .live-pulse { background: #c9a462; box-shadow: 0 0 10px #c9a462, 0 0 20px #c9a462; }
+  [data-theme="teaparty"] .banner-title { background: linear-gradient(135deg, #ffffff 25%, #dcc499 62%, #94acdb 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  [data-theme="teaparty"] .pill-submit-btn { background: linear-gradient(135deg, #c9a462 0%, #5b7fc7 100%); color: #fff; box-shadow: 0 0 14px rgba(201, 164, 98, 0.45); border-radius: 999px; }
+  [data-theme="teaparty"] .chip.active, [data-theme="teaparty"] .loc-chip.active, [data-theme="teaparty"] .genre-chip.active, [data-theme="teaparty"] .sub-chip.active { background: linear-gradient(135deg, rgba(201, 164, 98, 0.35) 0%, rgba(91, 127, 199, 0.3) 100%); border-color: #c9a462; color: #fff; box-shadow: 0 0 12px rgba(201, 164, 98, 0.35); }
+  [data-theme="teaparty"] .theme-pill-btn.active { background: linear-gradient(135deg, #c9a462 0%, #5b7fc7 100%); color: #fff; box-shadow: 0 0 10px rgba(201, 164, 98, 0.5); }
+  [data-theme="teaparty"] .badge-highlight { border-color: #c9a462; color: #c9a462; }
+  [data-theme="hanukkah"] .holiday-greeting[data-for="hanukkah"] { display: inline-flex; }
+  [data-theme="hanukkah"] .banner { min-height: 360px; background-image: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 62%, rgba(8,8,16,0.88) 100%), url('static/holidays/hanukkah.jpg'); background-position: center 40%; background-size: cover; }
+  @media (max-width: 860px) { [data-theme="hanukkah"] .banner { min-height: 300px; background-position: center 45%; } }
+  [data-theme="hanukkah"] .banner-title { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(0,0,0,0.45)); }
+  [data-theme="hanukkah"] { --bg: #070c18; --card: #0f172a; --card-hover: #0f172a; --fg: #f8fafc; --muted: #a8b0c0; --accent: #7cb7ff; --accent-glow: rgba(124, 183, 255, 0.35); --border: rgba(124, 183, 255, 0.22); --border-hover: rgba(124, 183, 255, 0.48); --green: #e8eef8; --green-bg: rgba(232, 238, 248, 0.14); --green-border: rgba(232, 238, 248, 0.35); --warn: #7cb7ff; --radius-lg: 16px; --radius-md: 10px; --radius-sm: 6px; }
+  [data-theme="hanukkah"] body { background-color: var(--bg); background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(124, 183, 255, 0.09) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 90% 40%, rgba(232, 238, 248, 0.08) 0%, transparent 60%); background-attachment: fixed; color: var(--fg); }
+  [data-theme="hanukkah"] .banner { border-bottom: 2px solid rgba(124, 183, 255, 0.45); box-shadow: 0 4px 30px rgba(0,0,0,0.5), 0 0 20px rgba(124, 183, 255, 0.15); }
+  [data-theme="hanukkah"] .banner-top-tag { color: #7cb7ff; text-shadow: 0 0 12px rgba(124, 183, 255, 0.6); }
+  [data-theme="hanukkah"] .live-pulse { background: #7cb7ff; box-shadow: 0 0 10px #7cb7ff, 0 0 20px #7cb7ff; }
+  [data-theme="hanukkah"] .banner-title { background: linear-gradient(135deg, #ffffff 25%, #aad0ff 62%, #f0f4fa 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  [data-theme="hanukkah"] .pill-submit-btn { background: linear-gradient(135deg, #7cb7ff 0%, #e8eef8 100%); color: #fff; box-shadow: 0 0 14px rgba(124, 183, 255, 0.45); border-radius: 999px; }
+  [data-theme="hanukkah"] .chip.active, [data-theme="hanukkah"] .loc-chip.active, [data-theme="hanukkah"] .genre-chip.active, [data-theme="hanukkah"] .sub-chip.active { background: linear-gradient(135deg, rgba(124, 183, 255, 0.35) 0%, rgba(232, 238, 248, 0.3) 100%); border-color: #7cb7ff; color: #fff; box-shadow: 0 0 12px rgba(124, 183, 255, 0.35); }
+  [data-theme="hanukkah"] .theme-pill-btn.active { background: linear-gradient(135deg, #7cb7ff 0%, #e8eef8 100%); color: #fff; box-shadow: 0 0 10px rgba(124, 183, 255, 0.5); }
+  [data-theme="hanukkah"] .badge-highlight { border-color: #7cb7ff; color: #7cb7ff; }
+  [data-theme="christmas"] .holiday-greeting[data-for="christmas"] { display: inline-flex; }
+  [data-theme="christmas"] .banner { min-height: 360px; background-image: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 62%, rgba(8,8,16,0.88) 100%), url('static/holidays/christmas.jpg'); background-position: center 40%; background-size: cover; }
+  @media (max-width: 860px) { [data-theme="christmas"] .banner { min-height: 300px; background-position: center 45%; } }
+  [data-theme="christmas"] .banner-title { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(0,0,0,0.45)); }
+  [data-theme="christmas"] { --bg: #080d10; --card: #10191e; --card-hover: #10191e; --fg: #f8fafc; --muted: #a8b0c0; --accent: #ef4444; --accent-glow: rgba(239, 68, 68, 0.35); --border: rgba(239, 68, 68, 0.22); --border-hover: rgba(239, 68, 68, 0.48); --green: #22c55e; --green-bg: rgba(34, 197, 94, 0.14); --green-border: rgba(34, 197, 94, 0.35); --warn: #ef4444; --radius-lg: 16px; --radius-md: 10px; --radius-sm: 6px; }
+  [data-theme="christmas"] body { background-color: var(--bg); background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(239, 68, 68, 0.09) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 90% 40%, rgba(34, 197, 94, 0.08) 0%, transparent 60%); background-attachment: fixed; color: var(--fg); }
+  [data-theme="christmas"] .banner { border-bottom: 2px solid rgba(239, 68, 68, 0.45); box-shadow: 0 4px 30px rgba(0,0,0,0.5), 0 0 20px rgba(239, 68, 68, 0.15); }
+  [data-theme="christmas"] .banner-top-tag { color: #ef4444; text-shadow: 0 0 12px rgba(239, 68, 68, 0.6); }
+  [data-theme="christmas"] .live-pulse { background: #ef4444; box-shadow: 0 0 10px #ef4444, 0 0 20px #ef4444; }
+  [data-theme="christmas"] .banner-title { background: linear-gradient(135deg, #ffffff 25%, #f58585 62%, #6fd996 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  [data-theme="christmas"] .pill-submit-btn { background: linear-gradient(135deg, #ef4444 0%, #22c55e 100%); color: #fff; box-shadow: 0 0 14px rgba(239, 68, 68, 0.45); border-radius: 999px; }
+  [data-theme="christmas"] .chip.active, [data-theme="christmas"] .loc-chip.active, [data-theme="christmas"] .genre-chip.active, [data-theme="christmas"] .sub-chip.active { background: linear-gradient(135deg, rgba(239, 68, 68, 0.35) 0%, rgba(34, 197, 94, 0.3) 100%); border-color: #ef4444; color: #fff; box-shadow: 0 0 12px rgba(239, 68, 68, 0.35); }
+  [data-theme="christmas"] .theme-pill-btn.active { background: linear-gradient(135deg, #ef4444 0%, #22c55e 100%); color: #fff; box-shadow: 0 0 10px rgba(239, 68, 68, 0.5); }
+  [data-theme="christmas"] .badge-highlight { border-color: #ef4444; color: #ef4444; }
+  [data-theme="newyearseve"] .holiday-greeting[data-for="newyearseve"] { display: inline-flex; }
+  [data-theme="newyearseve"] .banner { min-height: 360px; background-image: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 62%, rgba(8,8,16,0.88) 100%), url('static/holidays/newyearseve.jpg'); background-position: center 40%; background-size: cover; }
+  @media (max-width: 860px) { [data-theme="newyearseve"] .banner { min-height: 300px; background-position: center 45%; } }
+  [data-theme="newyearseve"] .banner-title { filter: drop-shadow(0 2px 2px rgba(0,0,0,0.9)) drop-shadow(0 0 10px rgba(0,0,0,0.45)); }
+  [data-theme="newyearseve"] { --bg: #0a0814; --card: #141026; --card-hover: #141026; --fg: #f8fafc; --muted: #a8b0c0; --accent: #f5c542; --accent-glow: rgba(245, 197, 66, 0.35); --border: rgba(245, 197, 66, 0.22); --border-hover: rgba(245, 197, 66, 0.48); --green: #f472b6; --green-bg: rgba(244, 114, 182, 0.14); --green-border: rgba(244, 114, 182, 0.35); --warn: #f5c542; --radius-lg: 16px; --radius-md: 10px; --radius-sm: 6px; }
+  [data-theme="newyearseve"] body { background-color: var(--bg); background-image: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(245, 197, 66, 0.09) 0%, transparent 70%), radial-gradient(ellipse 60% 40% at 90% 40%, rgba(244, 114, 182, 0.08) 0%, transparent 60%); background-attachment: fixed; color: var(--fg); }
+  [data-theme="newyearseve"] .banner { border-bottom: 2px solid rgba(245, 197, 66, 0.45); box-shadow: 0 4px 30px rgba(0,0,0,0.5), 0 0 20px rgba(245, 197, 66, 0.15); }
+  [data-theme="newyearseve"] .banner-top-tag { color: #f5c542; text-shadow: 0 0 12px rgba(245, 197, 66, 0.6); }
+  [data-theme="newyearseve"] .live-pulse { background: #f5c542; box-shadow: 0 0 10px #f5c542, 0 0 20px #f5c542; }
+  [data-theme="newyearseve"] .banner-title { background: linear-gradient(135deg, #ffffff 25%, #f8d984 62%, #f8a3d0 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  [data-theme="newyearseve"] .pill-submit-btn { background: linear-gradient(135deg, #f5c542 0%, #f472b6 100%); color: #fff; box-shadow: 0 0 14px rgba(245, 197, 66, 0.45); border-radius: 999px; }
+  [data-theme="newyearseve"] .chip.active, [data-theme="newyearseve"] .loc-chip.active, [data-theme="newyearseve"] .genre-chip.active, [data-theme="newyearseve"] .sub-chip.active { background: linear-gradient(135deg, rgba(245, 197, 66, 0.35) 0%, rgba(244, 114, 182, 0.3) 100%); border-color: #f5c542; color: #fff; box-shadow: 0 0 12px rgba(245, 197, 66, 0.35); }
+  [data-theme="newyearseve"] .theme-pill-btn.active { background: linear-gradient(135deg, #f5c542 0%, #f472b6 100%); color: #fff; box-shadow: 0 0 10px rgba(245, 197, 66, 0.5); }
+  [data-theme="newyearseve"] .badge-highlight { border-color: #f5c542; color: #f5c542; }
 </style>
 </head>
 <body>
   <div class="banner">
     <div class="banner-inner">
       <div class="banner-top-row">
+        <div class="theme-toggle-wrap">
+          <div class="theme-toggle-pills" role="radiogroup" aria-label="Visual Theme">
+            <button type="button" class="theme-pill-btn theme-pill-holiday" id="theme-pill-holiday" data-theme="" role="radio" aria-checked="false" title=" theme" hidden><span class="holiday-pill-emoji"></span><span class="holiday-pill-label"></span></button>
+            <button type="button" class="theme-pill-btn active" data-theme="classic" role="radio" aria-checked="true" title="Classic Dark Theme">🌙</button>
+            <button type="button" class="theme-pill-btn" data-theme="indie" role="radio" aria-checked="false" title="Indie Guide Theme">📰</button>
+            <button type="button" class="theme-pill-btn" data-theme="anime" role="radio" aria-checked="false" title="Anime Theme">🌸</button>
+          </div>
+        </div>
         <div class="banner-top-tag"><span class="live-pulse"></span> GREATER BOSTON LIVE EVENTS</div>
         <div class="banner-top-actions">
-          <div class="theme-toggle-wrap">
-            <div class="theme-toggle-pills" role="radiogroup" aria-label="Visual Theme">
-              
-              <button type="button" class="theme-pill-btn active" data-theme="classic" role="radio" aria-checked="true" title="Classic Dark Theme">🌙</button>
-              <button type="button" class="theme-pill-btn" data-theme="indie" role="radio" aria-checked="false" title="Indie Guide Theme">📰</button>
-              <button type="button" class="theme-pill-btn" data-theme="anime" role="radio" aria-checked="false" title="Anime Theme">🌸</button>
-            </div>
-          </div>
           <button type="button" class="pill-submit-btn" id="btn-open-submit-modal" aria-haspopup="dialog" aria-expanded="false">
             <span>＋ Add Event</span>
           </button>
@@ -6955,6 +7380,7 @@
       <div class="banner-title-row">
         <h1 class="banner-title">Wicked Boston Events</h1>
       </div>
+      <div class="holiday-greeting" data-for="newyear">🎆 Happy New Year, Boston!</div><div class="holiday-greeting" data-for="mlk">🕊️ Martin Luther King Jr. Day: a day of service</div><div class="holiday-greeting" data-for="lunarnewyear">🧧 Happy Lunar New Year! Celebrations in Chinatown</div><div class="holiday-greeting" data-for="valentines">💘 Happy Valentine&#x27;s Day! Date-night ideas below</div><div class="holiday-greeting" data-for="presidents">🇺🇸 Happy Presidents&#x27; Day</div><div class="holiday-greeting" data-for="stpatricks">☘️ Happy St. Patrick&#x27;s Day &amp; Evacuation Day!</div><div class="holiday-greeting" data-for="piday">🥧 Happy Pi Day! 3.14159…</div><div class="holiday-greeting" data-for="eid">🌙 Eid Mubarak!</div><div class="holiday-greeting" data-for="easter">🐣 Happy Easter! Swan boats &amp; spring in the Public Garden</div><div class="holiday-greeting" data-for="openingday">⚾ Opening Day at Fenway! Play ball</div><div class="holiday-greeting" data-for="patriots">🏃 Patriots&#x27; Day &amp; Marathon Monday: go runners!</div><div class="holiday-greeting" data-for="passover">🍷 Chag Pesach Sameach! The first seder is tonight</div><div class="holiday-greeting" data-for="earthday">🌎 Happy Earth Day! Cleanups, plantings &amp; green events below</div><div class="holiday-greeting" data-for="mothers">💐 Happy Mother&#x27;s Day! It&#x27;s Lilac Sunday at the Arnold Arboretum</div><div class="holiday-greeting" data-for="memorial">🇺🇸 Memorial Day: remembering those who gave everything</div><div class="holiday-greeting" data-for="pride">🏳️‍🌈 Happy Pride, Boston!</div><div class="holiday-greeting" data-for="bunkerhill">🥁 Bunker Hill Day: the Charlestown parade is today</div><div class="holiday-greeting" data-for="juneteenth">✊🏿 Juneteenth: celebrating freedom</div><div class="holiday-greeting" data-for="fathers">⛵ Happy Father&#x27;s Day!</div><div class="holiday-greeting" data-for="july4">🎆 Happy Fourth of July! Fireworks over the Charles tonight</div><div class="holiday-greeting" data-for="labor">☀️ Happy Labor Day! Last long weekend of summer</div><div class="holiday-greeting" data-for="indigenous">🪶 Indigenous Peoples&#x27; Day</div><div class="holiday-greeting" data-for="hocr">🚣 Head of the Charles Regatta this weekend</div><div class="holiday-greeting" data-for="diwali">🪔 Happy Diwali! Festival of lights</div><div class="holiday-greeting" data-for="halloween">🎃 Happy Halloween! Costume parties &amp; haunts below</div><div class="holiday-greeting" data-for="election">🗳️ It&#x27;s Election Day: polls are open 7AM–8PM</div><div class="holiday-greeting" data-for="veterans">🎖️ Veterans Day: thank you to everyone who served</div><div class="holiday-greeting" data-for="thanksgiving">🦃 Happy Thanksgiving, Boston!</div><div class="holiday-greeting" data-for="blackfriday">🏷️ Black Friday: skip the mall, go see a show</div><div class="holiday-greeting" data-for="cybermonday">⚡ Cyber Monday: log off, head out</div><div class="holiday-greeting" data-for="teaparty">🫖 On this night in 1773: the Boston Tea Party</div><div class="holiday-greeting" data-for="hanukkah">🕎 Happy Hanukkah! The first candle is lit tonight</div><div class="holiday-greeting" data-for="christmas">🎄 Merry Christmas &amp; happy holidays!</div><div class="holiday-greeting" data-for="newyearseve">🥂 First Night Boston: happy New Year&#x27;s Eve!</div>
       <div class="banner-meta-pill">
         <span class="pill-weather" title="Cloudy in Boston"><span class="chip-icon">☁️ </span>73°F <span class="weather-label">Cloudy</span></span><span class="pill-dot">·</span>
         <span class="pill-stat"><strong>8,140</strong> events · <strong>220</strong> venues</span>
@@ -13462,10 +13888,10 @@
 
     // --- Theme Switcher ---
     const THEME_KEY = 'boston_events_theme';
-    const THEME_MANUAL_KEY = 'boston_events_theme_manual';
+    const THEME_MANUAL_KEY = 'boston_events_theme_manual';  // date (YYYY-MM-DD) of the visitor's last pick
+    const validThemesAll = BASE_THEMES.concat(HOLIDAY_KEYS);
     function setTheme(t, save) {
-      const validThemes = ['classic', 'indie', 'anime', 'halloween', 'election', 'veterans', 'thanksgiving', 'blackfriday', 'cybermonday'];
-      const theme = validThemes.includes(t) ? t : 'classic';
+      const theme = validThemesAll.includes(t) ? t : 'classic';
       document.documentElement.setAttribute('data-theme', theme);
       document.querySelectorAll('.theme-pill-btn').forEach(b => {
         const isActive = (b.dataset.theme === theme);
@@ -13475,22 +13901,29 @@
       if (save !== false) {
         try {
           localStorage.setItem(THEME_KEY, theme);
-          localStorage.setItem(THEME_MANUAL_KEY, 'true');
+          localStorage.setItem(THEME_MANUAL_KEY, localISODate(new Date()));
         } catch (_) {}
       }
     }
+    // The holiday pill: today's holiday (or a ?theme= holiday preview) gets a labeled button
+    // at the front of the picker; hidden on ordinary days.
+    (function () {
+      const btn = document.getElementById('theme-pill-holiday');
+      if (!btn) return;
+      const preview = new URLSearchParams(location.search).get('theme');
+      const key = HOLIDAY_KEYS.includes(preview) ? preview : getClientSeasonalTheme(new Date());
+      const meta = key && HOLIDAY_META[key];
+      if (!meta) { btn.hidden = true; return; }
+      btn.dataset.theme = key;
+      btn.title = meta.label + ' theme';
+      btn.innerHTML = '<span class="holiday-pill-emoji">' + meta.emoji + '</span><span class="holiday-pill-label">' + meta.label + '</span>';
+      btn.hidden = false;
+    })();
     document.querySelectorAll('.theme-pill-btn').forEach(btn => {
       btn.addEventListener('click', () => setTheme(btn.dataset.theme, true));
     });
     try {
-      const manual = localStorage.getItem(THEME_MANUAL_KEY);
-      const stored = localStorage.getItem(THEME_KEY);
-      const seasonal = (typeof getClientSeasonalTheme === 'function') ? getClientSeasonalTheme(new Date()) : null;
-      if (!manual && seasonal) {
-        setTheme(seasonal, false);
-      } else {
-        setTheme(stored || seasonal || 'classic', false);
-      }
+      setTheme(pickTheme(), false);
     } catch (_) {
       setTheme('classic', false);
     }
