@@ -2438,20 +2438,40 @@ def scrape_gardner(url, ua):
 
 
 def scrape_brattle(url, ua):
-    soup = fetch_soup(url, ua)
-    events = []
-    for show in soup.select(".show"):
-        a = show.select_one("a[href*='brattlefilm.org']") or show.select_one("a")
-        h = show.select_one("h2, h3")
-        if not a or not h:
+    """Brattle Theatre screenings. /coming-soon/ lists each film (.show-details) with its showtimes,
+    grouped by day (li[data-date] = that day's UTC-midnight timestamp, link text '7:00 pm')."""
+    soup = fetch_soup("https://brattlefilm.org/coming-soon/", ua)
+    events, seen = [], set()
+    now = datetime.now(EASTERN)
+    for film in soup.select(".show-details"):
+        h = film.find(["h2", "h3"])
+        if not h:
             continue
-        events.append({
-            "name": h.get_text(strip=True),
-            "date": None,
-            "url": urljoin(url, a.get("href", "")),
-            "venue": "Brattle Theatre",
-            "price": None,
-        })
+        title = h.get_text(" ", strip=True)
+        page = film.select_one("a[href*='/movies/']")
+        for li in film.select("li[data-date]"):
+            try:
+                day = datetime.fromtimestamp(int(li["data-date"]), tz=timezone.utc).date()
+            except (TypeError, ValueError):
+                continue
+            for a in li.select("a[data-showtime_id]"):
+                if a["data-showtime_id"] in seen:
+                    continue
+                hm = _clock(a.get_text(" ", strip=True))
+                if not hm:
+                    continue
+                dt = datetime(day.year, day.month, day.day, hm[0], hm[1], tzinfo=EASTERN)
+                if dt < now - timedelta(hours=3):
+                    continue
+                seen.add(a["data-showtime_id"])
+                events.append({
+                    "name": title,
+                    "date": dt.astimezone(timezone.utc).isoformat(),
+                    "url": page["href"] if page else urljoin(url, a.get("href", "")),
+                    "venue": "Brattle Theatre",
+                    "price": None,
+                    "category": "film",
+                })
     return events
 
 
@@ -8513,7 +8533,60 @@ def scrape_comedy_studio(url, ua):
 
 
 def scrape_obriens_pub(url, ua):
-    """O'Brien's Pub in Allston — daily punk, rock, metal & indie lineups."""
+    """O'Brien's Pub in Allston — daily punk, rock, metal & indie lineups. Each show is a ticket in
+    their WooCommerce shop; its public product API gives every show with its ticket price, and the
+    SKU holds the date (20261114-2). Falls back to the home page listing if the API fails."""
+    try:
+        return _obriens_store_api(ua)
+    except Exception:
+        return _obriens_home_page(url, ua)
+
+
+def _obriens_store_api(ua):
+    resp = _SESSION.get("https://obrienspubboston.com/wp-json/wc/store/v1/products", params={"per_page": 100},
+                        headers={"User-Agent": ua or UA_CHROME}, timeout=15)
+    resp.raise_for_status()
+    products = resp.json()
+    if not isinstance(products, list) or not products:
+        raise ValueError("no products")
+    now = datetime.now(EASTERN)
+    out = []
+    for p in products:
+        m = re.match(r"(\d{4})(\d{2})(\d{2})", p.get("sku") or "")
+        if not m:
+            continue
+        try:
+            day = date(int(m.group(1)), int(m.group(2)), int(m.group(3)))
+        except ValueError:
+            continue
+        desc = BeautifulSoup(p.get("short_description") or p.get("description") or "", "html.parser").get_text(" ", strip=True)
+        hm = _clock(re.sub(r"\b20\d\d\b|\d{1,2}(?:st|nd|rd|th)\b|,\s*\w+\s+\d{1,2}\b", " ", desc)) or (19, 0)
+        dt = datetime(day.year, day.month, day.day, hm[0], hm[1], tzinfo=EASTERN)
+        if dt < now - timedelta(hours=6):
+            continue
+        price = None
+        pr = p.get("prices") or {}
+        try:
+            cents = int(pr.get("price") or 0)
+            if cents > 0:
+                v = cents / (10 ** int(pr.get("currency_minor_unit", 2)))
+                price = f"${v:g}" if v == int(v) else f"${v:.2f}"
+        except (TypeError, ValueError):
+            pass
+        if price and not p.get("is_in_stock", True):
+            price = f"{price} (sold out)"
+        out.append({
+            "name": html.unescape(p.get("name") or "").strip(),
+            "date": dt.isoformat(),
+            "url": p.get("permalink") or "https://obrienspubboston.com/",
+            "venue": "O'Brien's Pub",
+            "price": price,
+            "category": "music",
+        })
+    return out
+
+
+def _obriens_home_page(url, ua):
     try:
         resp = _SESSION.get("https://obrienspubboston.com/", headers={"User-Agent": ua}, timeout=15)
         resp.raise_for_status()
@@ -8609,17 +8682,28 @@ def scrape_nec_trumba(url, ua):
 def scrape_mad_monkfish(url, ua):
     """The Mad Monkfish jazz calendar in Central Square Cambridge."""
     endpoint = "https://www.themadmonkfish.com/jazz-schedule/"
-    try:
-        resp = _SESSION.get(endpoint, headers={"User-Agent": ua}, timeout=15)
-        resp.raise_for_status()
-    except Exception:
-        return []
-
-    soup = BeautifulSoup(resp.text, "html.parser")
     now = datetime.now(EASTERN)
     out = []
     seen = set()
+    # 10 shows a page; "Load More" fetches ?p=2, ?p=3 ... Follow it until two weeks out.
+    page_url = endpoint
+    for _ in range(6):
+        try:
+            resp = _SESSION.get(page_url, headers={"User-Agent": ua}, timeout=15)
+            resp.raise_for_status()
+        except Exception:
+            break
+        soup = BeautifulSoup(resp.text, "html.parser")
+        before = len(out)
+        _mad_monkfish_page(soup, now, out, seen)
+        nxt = soup.find(attrs={"data-paginator-next-url": True})
+        if len(out) == before or not nxt or not out or max(e["date"] for e in out) > (now + timedelta(days=16)).isoformat():
+            break
+        page_url = urljoin(endpoint, nxt["data-paginator-next-url"])
+    return out
 
+
+def _mad_monkfish_page(soup, now, out, seen):
     for a in soup.find_all("a"):
         href = a.get("href") or ""
         if "/event/" not in href:
@@ -8663,7 +8747,6 @@ def scrape_mad_monkfish(url, ua):
             "price": None,
             "category": "music",
         })
-    return out
 
 
 def scrape_club_passim(url, ua):

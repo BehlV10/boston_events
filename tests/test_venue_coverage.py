@@ -162,6 +162,56 @@ class VenuePageTests(FrozenClock):
         self.assertEqual(evs[1]["url"], "https://www.offtherailsboston.com/events/anthony-calla")
 
 
+class _Resp:
+    def __init__(self, text="", data=None):
+        self.text, self._data, self.status_code = text, data, 200
+
+    def raise_for_status(self):
+        pass
+
+    def json(self):
+        return self._data
+
+
+class ExistingVenueFixTests(FrozenClock):
+    def test_brattle_reads_dated_showtimes(self):
+        nov5 = int(_dt.datetime(2026, 11, 5, tzinfo=_dt.timezone.utc).timestamp())
+        self.soup(f"""<div class="show-list"><div class="show-details">
+          <h2>Begotten</h2><a href="https://brattlefilm.org/movies/begotten/">details</a>
+          <ol class="showtimes"><li data-date="{nov5}"><a data-showtime_id="1" href="/purchase/1/">10:30 pm</a></li>
+          <li data-date="{nov5 + 86400}"><a data-showtime_id="2" href="/purchase/2/">10:30 pm</a></li></ol>
+        </div></div>""")
+        evs = scrapers.scrape_brattle("https://www.brattlefilm.org/", scrapers.UA_CHROME)
+        self.assertEqual([(e["name"], _local(e).strftime("%m-%d %H:%M")) for e in evs],
+                         [("Begotten", "11-05 22:30"), ("Begotten", "11-06 22:30")])
+        self.assertEqual(evs[0]["url"], "https://brattlefilm.org/movies/begotten/")
+
+    def test_obriens_store_api(self):
+        products = [
+            {"sku": "20261114-2", "name": "Jordan Dean W/ Ecce Shnak", "permalink": "https://obrienspubboston.com/show/jordan-dean/",
+             "short_description": "<p>Saturday, November 14, 2026 7PM 21+</p>", "is_in_stock": True,
+             "prices": {"price": "1860", "currency_minor_unit": 2}},
+            {"sku": "20261107-1", "name": "Puppy Pile", "short_description": "Saturday, November 7 2PM 21+",
+             "is_in_stock": False, "prices": {"price": "1255", "currency_minor_unit": 2}},
+            {"sku": "20261101", "name": "Already happened", "prices": {"price": "1000"}},
+        ]
+        with mock.patch.object(scrapers._SESSION, "get", return_value=_Resp(data=products)):
+            evs = scrapers.scrape_obriens_pub("https://obrienspubboston.com/", scrapers.UA_CHROME)
+        self.assertEqual([(e["name"], _local(e).strftime("%m-%d %H:%M"), e["price"]) for e in evs],
+                         [("Jordan Dean W/ Ecce Shnak", "11-14 19:00", "$18.60"),
+                          ("Puppy Pile", "11-07 14:00", "$12.55 (sold out)")])
+
+    def test_mad_monkfish_follows_load_more(self):
+        page1 = ('<a href="/event/115-trio/">11/5 Trio 7pm</a>'
+                 '<div class="paginator" data-paginator-next-url="/jazz-schedule/?p=2"></div>')
+        page2 = '<a href="/event/1113-yoko-miwa-trio/">11/13 Yoko Miwa Trio 9pm</a>'
+        with mock.patch.object(scrapers._SESSION, "get", side_effect=[_Resp(page1), _Resp(page2)]) as get:
+            evs = scrapers.scrape_mad_monkfish("https://www.themadmonkfish.com/jazz-schedule/", scrapers.UA_CHROME)
+        self.assertEqual(get.call_args_list[1].args[0], "https://www.themadmonkfish.com/jazz-schedule/?p=2")
+        self.assertEqual([(e["name"], _local(e).strftime("%m-%d %H:%M")) for e in evs],
+                         [("Live Jazz: Trio", "11-05 19:00"), ("Live Jazz: Yoko Miwa Trio", "11-13 21:00")])
+
+
 class BostonShowsGapTests(FrozenClock):
     def test_only_venues_we_cant_read(self):
         self.soup("""<div class="date-events" data-date="2026-11-05"><table>
