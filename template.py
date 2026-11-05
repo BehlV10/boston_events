@@ -30,6 +30,8 @@ from scrapers import (
     is_utility_event,
     is_deal_event,
     is_kid_family_event,
+    is_market_or_festival,
+    _MARKET_OVERRIDABLE,
 )
 from venues_geo import resolve_event_geo, nearest_curated_venue
 
@@ -45,7 +47,12 @@ def _effective_category(e):
         return "deals"
     if is_kid_family_event(name, e.get("venue")):
         return "family"
-    return e.get("category") or "other"
+    cat = e.get("category") or "other"
+    # Also at render time, so pages built from an events.json scraped before a source's markets
+    # were classified (or kept from a degraded scrape) still fill the Markets & Festivals page
+    if cat in _MARKET_OVERRIDABLE and is_market_or_festival(name):
+        return "markets"
+    return cat
 
 
 CITY_RULES = [

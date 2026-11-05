@@ -81,6 +81,11 @@ class MarketFestivalClassifierTest(unittest.TestCase):
         self.assertEqual(out["Boston Celtic Music Festival"], "music")
         self.assertEqual(out["Boston Comedy Festival Finals"], "comedy")
 
+    def test_render_time_category_classifies_old_data_too(self):
+        self.assertEqual(template._effective_category({"name": "Somerville Flea", "category": "community"}), "markets")
+        self.assertEqual(template._effective_category({"name": "Boston Celtic Music Festival", "category": "music"}), "music")
+        self.assertEqual(template._effective_category({"name": "Story Time", "category": "community"}), "family")
+
     def test_markets_is_its_own_default_on_bucket(self):
         self.assertEqual(scrapers.category_bucket("markets"), "Markets & Festivals")
         self.assertIn("markets", scrapers.CATEGORY_STYLES)
