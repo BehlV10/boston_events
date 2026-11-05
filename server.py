@@ -96,6 +96,14 @@ def robots_txt():
     return send_from_directory(os.path.dirname(os.path.abspath(__file__)), "robots.txt")
 
 
+@app.get("/favicon.ico")
+@app.get("/favicon.svg")
+@app.get("/apple-touch-icon.png")
+@app.get("/logo-512.png")
+def site_icon():
+    return send_from_directory(os.path.dirname(os.path.abspath(__file__)), request.path.lstrip("/"))
+
+
 @app.get("/sitemap.xml")
 def sitemap_xml():
     return send_from_directory(os.path.dirname(os.path.abspath(__file__)), "sitemap.xml")
