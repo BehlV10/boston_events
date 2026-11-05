@@ -2180,6 +2180,26 @@ def _is_generic_link(url):
     return path.rsplit("/", 1)[-1] in listing and not u.query
 
 
+_TITLE_STOPWORDS = {"the", "and", "with", "at", "in", "of", "a", "an", "for", "to", "on", "live", "night",
+                    "tickets", "presents", "tour", "boston", "show", "featuring", "feat", "event", "events"}
+
+
+def _title_words(t):
+    return {w for w in re.findall(r"[a-z0-9]+", unescape(t or "").lower()) if len(w) > 2 and w not in _TITLE_STOPWORDS}
+
+
+def _titles_unrelated(t1, t2):
+    """No meaningful word in common, and not just a spacing/punctuation variant ("half•alive"/"halfalive")."""
+    if not t1 or not t2:
+        return False
+    w1, w2 = _title_words(t1), _title_words(t2)
+    if not w1 or not w2 or (w1 & w2):
+        return False
+    squash = lambda t: re.sub(r"[^a-z0-9]+", "", unescape(t).lower())
+    s1, s2 = squash(t1), squash(t2)
+    return not (s1 and s2 and (s1 in s2 or s2 in s1))
+
+
 def _merge_duplicates(events):
     """Collapse events sharing a normalized name or head title within the same day bucket.
 
@@ -2256,6 +2276,30 @@ def _merge_duplicates(events):
             return True
         return False
 
+    def _separate_listings(e1, e2):
+        """Same source, each with its own event page: the source lists them as two events
+        (ICA's "Boston Family Days" and "Museums on Us" both at 10am), so never merge them
+        on loose venue/time/keyword similarity."""
+        s1 = (e1.get("_source_venue") or "").lower()
+        u1, u2 = (e1.get("url") or "").rstrip("/"), (e2.get("url") or "").rstrip("/")
+        if not (s1 and s1 == (e2.get("_source_venue") or "").lower() and u1 and u2 and u1 != u2):
+            return False
+        # A shared fallback (the source's calendar page) is not an event page
+        return u1 != (e1.get("venue_url") or "").rstrip("/") and u2 != (e2.get("venue_url") or "").rstrip("/")
+
+    def _far_apart(e1, e2):
+        """Same title at two places we can locate, over half a mile apart: separate events,
+        e.g. citywide "Boston Family Days" at the ICA and at the Aquarium on the same Sunday."""
+        try:
+            g1, g2 = resolve_event_geo(e1), resolve_event_geo(e2)
+        except Exception:
+            return False
+        if not (g1 and g2) or g1.get("lat") is None or g2.get("lat") is None:
+            return False
+        dlat = (g1["lat"] - g2["lat"]) * 69.0
+        dlng = (g1["lng"] - g2["lng"]) * 51.3  # miles per degree of longitude at Boston's latitude
+        return (dlat * dlat + dlng * dlng) ** 0.5 > 0.5
+
     def _venue_match(v1, v2, e1, e2):
         if not v1 or not v2:
             return True
@@ -2311,7 +2355,7 @@ def _merge_duplicates(events):
         # 1. Exact match check
         if not match and full and len(full) >= 4 and full in seen_exact:
             for cand in seen_exact[full]:
-                if not _is_different_show(e, cand):
+                if not _is_different_show(e, cand) and not _far_apart(e, cand):
                     match = cand
                     break
 
@@ -2328,6 +2372,8 @@ def _merge_duplicates(events):
         if not match and head and len(head) >= 4 and head not in GENERIC_HEADS:
             for cand in out:
                 c_venue = (cand.get("venue") or "").lower()
+                if _separate_listings(e, cand):
+                    continue
                 if _venue_match(venue, c_venue, e, cand) and not _is_different_show(e, cand):
                     cand_head = _normalize_title_head(cand.get("name") or "", venue=cand.get("venue"))
                     if cand_head and cand_head not in GENERIC_HEADS:
@@ -2346,6 +2392,8 @@ def _merge_duplicates(events):
         if not match and venue and len(venue) >= 4:
             for cand in out:
                 c_venue = (cand.get("venue") or "").lower()
+                if _separate_listings(e, cand):
+                    continue
                 if _venue_match(venue, c_venue, e, cand) and not _is_different_show(e, cand):
                     t_e = e.get("_time")
                     t_c = cand.get("_time")
@@ -2382,7 +2430,7 @@ def _merge_duplicates(events):
         if not match:
             keys_e = _title_variants(raw_name)
             for cand in out:
-                if not _same_physical_venue(e, cand) or _is_different_show(e, cand):
+                if _separate_listings(e, cand) or not _same_physical_venue(e, cand) or _is_different_show(e, cand):
                     continue
                 t_e, t_c = e.get("_time"), cand.get("_time")
                 if not t_e or not t_c or abs((t_e - t_c).total_seconds()) > 90 * 60:
@@ -2446,7 +2494,7 @@ def _merge_duplicates(events):
             if _is_event_specific_link(src_url) and _is_generic_link(match.get("url")):
                 old_url = match.get("url")
                 if old_url and not any(a.get("url") == old_url for a in match["_alt_sources"]):
-                    match["_alt_sources"].append({"venue": match.get("_source_venue"), "url": old_url, "price": match.get("price")})
+                    match["_alt_sources"].append({"venue": match.get("_source_venue"), "url": old_url, "price": match.get("price"), "name": match.get("name")})
                 match["url"] = src_url
 
             # If the newly arrived event has higher priority (e.g. direct venue vs aggregator)
@@ -2458,7 +2506,7 @@ def _merge_duplicates(events):
                 old_src = match.get("_source_venue")
                 old_is_placeholder = bool(old_url and ("-12-pm/" in old_url or "-12-am/" in old_url))
                 if old_url and not old_is_placeholder and not any(a.get("url") == old_url for a in match["_alt_sources"]):
-                    match["_alt_sources"].append({"venue": old_src, "url": old_url, "price": match.get("price")})
+                    match["_alt_sources"].append({"venue": old_src, "url": old_url, "price": match.get("price"), "name": match.get("name")})
                 match["url"] = e.get("url")
                 match["name"] = e.get("name")
                 if not e.get("_venue_unknown") or match.get("_venue_unknown"):
@@ -2467,7 +2515,7 @@ def _merge_duplicates(events):
                 if e_time and (e_time.hour != 0 or e_time.minute != 0):
                     match["_time"] = e_time
             elif src_url and not is_placeholder_url and not any(a.get("url") == src_url for a in match["_alt_sources"]) and src_url != match.get("url"):
-                match["_alt_sources"].append({"venue": src_name, "url": src_url, "price": e.get("price")})
+                match["_alt_sources"].append({"venue": src_name, "url": src_url, "price": e.get("price"), "name": e.get("name")})
 
             # If match has 19:00:00 (Eventbrite discovery fallback) while e has a real/earlier time, prefer e
             m_time = match.get("_time")
@@ -2779,16 +2827,24 @@ def render_page(results, weather=None, luckyseat_shows=None):
         alts = e.get("_alt_sources") or []
         alt_html = ""
         if alts:
-            alt_parts = []
+            alt_parts, other_titles = [], []
             for a in alts:
                 if not a.get("url"):
                     continue
                 v_name = escape(a.get("venue") or "source")
                 a_price = f" ({escape(a['price'])})" if a.get("price") and a["price"] != e.get("price") else ""
-                alt_parts.append(f'<a href="{escape(a["url"])}" target="_blank" rel="noopener">{v_name}{a_price}</a>')
+                link = f'<a href="{escape(a["url"])}" target="_blank" rel="noopener">'
+                if _titles_unrelated(raw_title, a.get("name")):
+                    # Merged as the same time & place but titled differently: maybe a different
+                    # event (or a tour name vs the band). Show its title so it's never hidden.
+                    other_titles.append(f'{link}{escape(a["name"])}</a> <span class="also-src">({v_name})</span>')
+                else:
+                    alt_parts.append(f'{link}{v_name}{a_price}</a>')
             if alt_parts:
                 alt_joined = " · ".join(alt_parts)
                 alt_html = f'<span class="alt-sources">also on {alt_joined}</span>'
+            if other_titles:
+                alt_html += f'<span class="also-listed">Also listed: {" · ".join(other_titles)}</span>'
 
         compare_html = _build_compare_links(e, raw_title)
 
@@ -4114,6 +4170,10 @@ def render_page(results, weather=None, luckyseat_shows=None):
   .alt-sources {{ color: var(--muted); font-size: 11px; }}
   .alt-sources a {{ color: var(--accent); text-decoration: none; }}
   .alt-sources a:hover {{ text-decoration: underline; }}
+  .also-listed {{ display: block; color: var(--muted); font-size: 11px; margin-top: 2px; }}
+  .also-listed a {{ color: var(--accent); text-decoration: none; }}
+  .also-listed a:hover {{ text-decoration: underline; }}
+  .also-listed .also-src {{ color: var(--muted); }}
   .compare-tickets {{ color: var(--muted); font-size: 11px; }}
   .compare-tickets a {{ color: #8bb2ff; text-decoration: none; border-bottom: 1px dotted rgba(139,178,255,0.4); }}
   .compare-tickets a:hover {{ color: #fff; border-bottom-color: #fff; }}
@@ -8414,7 +8474,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
             citiesDiv.style.display = 'none';
             nearStream.style.display = 'block';
 
-            const visibleEvents = Array.from(citiesDiv.querySelectorAll('.event:not(.hidden)'));
+            // Unchecked cities/categories collapse their section (.empty) without hiding each event
+            const visibleEvents = Array.from(citiesDiv.querySelectorAll('.event:not(.hidden)')).filter(ev => !ev.closest('.empty'));
             const eventDistances = [];
             visibleEvents.forEach(ev => {{
               const lat = parseFloat(ev.dataset.lat);
