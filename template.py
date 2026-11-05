@@ -35,6 +35,7 @@ from scrapers import (
 )
 from venues_geo import resolve_event_geo, nearest_curated_venue
 from lgbtq import is_lgbtq_event
+from light_theme import LIGHT_THEME_CSS
 
 
 DEFAULT_UNCHECKED_BUCKETS = {"Classes & Services", "Kids & Family", "Deals & Specials", "Tech & Startups"}
@@ -3783,7 +3784,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
   var HOLIDAY_CALENDAR = {holiday_calendar_json};
   var HOLIDAY_KEYS = {holiday_keys_json};
   var HOLIDAY_META = {holiday_meta_json};
-  var BASE_THEMES = ['classic', 'indie', 'anime'];
+  var BASE_THEMES = ['classic', 'light', 'indie', 'anime'];
   function localISODate(dt) {{
     return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
   }}
@@ -3827,6 +3828,25 @@ def render_page(results, weather=None, luckyseat_shows=None):
     --green-bg: rgba(74, 222, 128, 0.14);
     --green-border: rgba(74, 222, 128, 0.32);
     --warn: #f0a07a;
+    --radius-lg: 16px;
+    --radius-md: 10px;
+    --radius-sm: 6px;
+  }}
+  [data-theme="light"] {{
+    color-scheme: light;
+    --bg: #f5f6fa;
+    --card: #ffffff;
+    --card-hover: #f0f2f8;
+    --fg: #161a24;
+    --muted: #5b6475;
+    --accent: #2563eb;
+    --accent-glow: rgba(37, 99, 235, 0.16);
+    --border: rgba(15, 23, 42, 0.11);
+    --border-hover: rgba(15, 23, 42, 0.24);
+    --green: #15803d;
+    --green-bg: rgba(22, 163, 74, 0.10);
+    --green-border: rgba(22, 163, 74, 0.35);
+    --warn: #c2410c;
     --radius-lg: 16px;
     --radius-md: 10px;
     --radius-sm: 6px;
@@ -7167,6 +7187,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
 
   /* Holiday themes generated from holiday_themes.py: banner art, greeting, palettes */
   {holiday_css}
+
+  /* Light theme overrides (light_theme.py) */
+{LIGHT_THEME_CSS}
 </style>
 </head>
 <body>
@@ -7177,6 +7200,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
           <div class="theme-toggle-pills" role="radiogroup" aria-label="Visual Theme">
             <button type="button" class="theme-pill-btn theme-pill-holiday{' active' if seasonal_key else ''}" id="theme-pill-holiday" data-theme="{seasonal_key or ''}" role="radio" aria-checked="{'true' if seasonal_key else 'false'}" title="{escape(seasonal_label or '')} theme"{'' if seasonal_key else ' hidden'}><span class="holiday-pill-emoji">{seasonal_icon or ''}</span><span class="holiday-pill-label">{escape(seasonal_label or '')}</span></button>
             <button type="button" class="theme-pill-btn{' active' if default_theme == 'classic' else ''}" data-theme="classic" role="radio" aria-checked="{'true' if default_theme == 'classic' else 'false'}" title="Classic Dark Theme">🌙</button>
+            <button type="button" class="theme-pill-btn{' active' if default_theme == 'light' else ''}" data-theme="light" role="radio" aria-checked="{'true' if default_theme == 'light' else 'false'}" title="Light Theme">☀️</button>
             <button type="button" class="theme-pill-btn{' active' if default_theme == 'indie' else ''}" data-theme="indie" role="radio" aria-checked="{'true' if default_theme == 'indie' else 'false'}" title="Indie Guide Theme">📰</button>
             <button type="button" class="theme-pill-btn{' active' if default_theme == 'anime' else ''}" data-theme="anime" role="radio" aria-checked="{'true' if default_theme == 'anime' else 'false'}" title="Anime Theme">🌸</button>
           </div>
