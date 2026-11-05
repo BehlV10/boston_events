@@ -84,7 +84,7 @@ class BannerTopRowTests(unittest.TestCase):
         self.assertEqual(order, sorted(order))
 
     def test_grid_areas_desktop_and_phone(self):
-        self.assertIn('grid-template-areas: "tag add themes";', self.html)
+        self.assertIn('grid-template-areas: "tag themes" ". add";', self.html)
         phone = re.search(r'@media \(max-width: 640px\) \{\s*\.banner-top-row \{(.*?)\}', self.html, re.S)
         self.assertIsNotNone(phone)
         self.assertIn('"themes themes" "tag add"', phone.group(1))

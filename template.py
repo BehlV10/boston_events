@@ -6247,19 +6247,19 @@ def render_page(results, weather=None, luckyseat_shows=None):
   /* ========================================================
      THEME SWITCHER & INDIE GUIDE THEME
      ======================================================== */
-  /* Top row: "Greater Boston Live Events" on the left, Add Event and the theme picker on the right.
-     On phones the theme picker gets the first line to itself (right-aligned) and the tag sits
-     lower, level with Add Event. */
+  /* Top row: "Greater Boston Live Events" on the left, the theme picker on the right with Add Event
+     under it. On phones the theme picker gets the first line to itself and the tag sits lower,
+     level with Add Event. */
   .banner-top-row {{
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto auto;
-    grid-template-areas: "tag add themes";
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "tag themes" ". add";
     align-items: center;
     width: 100%;
-    gap: 12px;
+    gap: 8px 12px;
   }}
   .banner-top-tag {{ grid-area: tag; justify-self: start; min-width: 0; }}
-  .banner-top-actions {{ grid-area: add; margin-left: 0; }}
+  .banner-top-actions {{ grid-area: add; justify-self: end; margin-left: 0; }}
   .theme-toggle-wrap {{
     grid-area: themes;
     justify-self: end;
