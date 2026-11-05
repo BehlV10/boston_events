@@ -32,6 +32,7 @@ from template import (  # noqa: E402
     _is_event_free, _load_highlights, compute_recurring, group_by_date,
 )
 from scrapers import TECH_EVENT_RE, category_bucket, is_kid_family_event  # noqa: E402
+from venues_geo import resolve_event_geo  # noqa: E402
 
 SITE = "https://www.wickedbostonevents.com"
 PER_DAY = 12
@@ -63,7 +64,10 @@ SKIP_TITLE_RE = re.compile(
     r"(?i)\b(?:class|classes|course|workshop|intro to|bootcamp|training|certification|summit|"
     r"conference|strategy|leadership|founders?|investors?|webinar|yoga|early bird|field trips?|"
     r"pre-?show|q&a ticket|vip|parking|upgrade|recital|seminar|prep|students?|member morning|"
-    r"members? only|camp|courtyard & historic|general admission)\b")
+    r"members? only|camp|courtyard & historic|general admission|vision board(?:ing)?|"
+    r"preliminary round|contest round|semifinal|figure drawing)\b")
+# NEC's small halls host student recitals and studio classes, not public headliners
+MINOR_ROOMS_RE = re.compile(r"(?i)\bNEC \((?:Williams|Burnes|Keller|Brown|Pierce|Plimpton)|\bCCAE\b|Cambridge Center for Adult Education")
 NEARBY_TOWNS = {"brookline", "newton", "watertown", "medford", "arlington", "belmont", "malden",
                 "everett", "chelsea", "quincy", "milton", "waltham", "winchester", "lexington"}
 # Sources whose whole calendar is for kids (Audubon and the Aquarium also run adult programs)
@@ -115,9 +119,19 @@ def _venue(e):
 
 
 def _area(e):
-    city = _event_city(e.get("venue"), e.get("_source_venue"), e)
-    area = _hub_place_label(city, e).split(",")[0].replace(" Square", " Sq")
-    return "" if area in ("Greater Boston",) or area.lower() in _venue(e).lower() else area
+    venue, source = _venue(e), e.get("_source_venue") or ""
+    words = lambda v: {w for w in re.findall(r"[a-z]{3,}", v.lower())} - {
+        "the", "boston", "hall", "center", "theatre", "theater", "room", "presented", "citizens"}
+    g = resolve_event_geo(e)
+    if g and g.get("neighborhood") and words(venue) & words(g.get("venue") or ""):
+        area = g["neighborhood"]          # this venue's own pin: "Boston Athenaeum" -> Beacon Hill
+    elif words(venue) & words(source):
+        city = _event_city(e.get("venue"), source, e)
+        area = _hub_place_label(city, e).split(",")[0]
+    else:
+        return ""                         # somewhere other than the source's home venue; don't guess
+    area = area.replace(" Square", " Sq")
+    return "" if area in ("Greater Boston",) or area.lower() in venue.lower() else area
 
 
 def _line(e, day_prefix=False, when=None):
@@ -204,7 +218,8 @@ def build(week_start):
         e["_highlight"] = _get_event_highlight(e, highlights)
         t = e["_time"]
         if not e["_highlight"]:
-            if SKIP_TITLE_RE.search(e["name"]) or TECH_EVENT_RE.search(e["name"]):
+            if SKIP_TITLE_RE.search(e["name"]) or TECH_EVENT_RE.search(e["name"]) or MINOR_ROOMS_RE.search(
+                    f"{e.get('venue')} {e.get('_source_venue')}"):
                 continue
             if "rsvp for address" in (e.get("venue") or "").lower() or e.get("_venue_unknown"):
                 continue

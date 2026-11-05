@@ -2086,5 +2086,335 @@
     "note": "Zero cover, historic walls, and scorching live jazz solos late into Tuesday night.",
     "start_date": "2026-11-10",
     "expires": "2026-11-10"
+  },
+  {
+    "id": "2026-11-11-rachelmaddow",
+    "match": {
+      "name_contains": "Rachel Maddow",
+      "venue_contains": "Orpheum"
+    },
+    "badge": "\ud83c\udfa4 Live Talk",
+    "note": "The MSNBC host and bestselling author live on stage at the Orpheum.",
+    "start_date": "2026-11-11",
+    "expires": "2026-11-11"
+  },
+  {
+    "id": "2026-11-11-beartooth",
+    "match": {
+      "name_contains": "Beartooth",
+      "venue_contains": "MGM Music"
+    },
+    "badge": "\ud83e\udd18 Metal",
+    "note": "Caleb Shomo's Ohio metalcore band brings its Pure Ecstasy tour to Fenway.",
+    "start_date": "2026-11-11",
+    "expires": "2026-11-11"
+  },
+  {
+    "id": "2026-11-11-thelongestjohns",
+    "match": {
+      "name_contains": "The Longest Johns",
+      "venue_contains": "Wilbur"
+    },
+    "badge": "\ud83c\udf0a Sea Shanties",
+    "note": "The UK shanty group behind the viral 'Wellerman' leads a theater-wide singalong.",
+    "start_date": "2026-11-11",
+    "expires": "2026-11-11"
+  },
+  {
+    "id": "2026-11-11-brutalismus3000",
+    "match": {
+      "name_contains": "Brutalismus 3000",
+      "venue_contains": "Royale"
+    },
+    "badge": "\u26a1 Techno-Punk",
+    "note": "Berlin duo's breakneck techno-punk rave.",
+    "start_date": "2026-11-11",
+    "expires": "2026-11-11"
+  },
+  {
+    "id": "2026-11-11-bedouine",
+    "match": {
+      "name_contains": "Bedouine",
+      "venue_contains": "Armory"
+    },
+    "badge": "\ud83c\udf3f Folk",
+    "note": "Azniv Korkejian's hushed, '70s-tinged folk in the Somerville Armory.",
+    "start_date": "2026-11-11",
+    "expires": "2026-11-11"
+  },
+  {
+    "id": "2026-11-11-marshallcrenshaw",
+    "match": {
+      "name_contains": "Marshall Crenshaw",
+      "venue_contains": "City Winery"
+    },
+    "badge": "\ud83c\udfb8 Power Pop",
+    "note": "The 'Someday, Someway' songwriter, up close.",
+    "start_date": "2026-11-11",
+    "expires": "2026-11-11"
+  },
+  {
+    "id": "2026-11-12-canadiensatbostonbruins",
+    "match": {
+      "name_contains": "Canadiens at Boston Bruins",
+      "venue_contains": "TD Garden"
+    },
+    "badge": "\ud83c\udfd2 Original Six",
+    "note": "Bruins vs. Canadiens, hockey's oldest rivalry.",
+    "start_date": "2026-11-12",
+    "expires": "2026-11-12"
+  },
+  {
+    "id": "2026-11-12-artmakingafterdark",
+    "match": {
+      "name_contains": "Art-Making After Dark",
+      "venue_contains": "ICA"
+    },
+    "badge": "\ud83c\udfa8 Museum Night",
+    "note": "Free evening of hands-on art-making at the ICA.",
+    "start_date": "2026-11-12",
+    "expires": "2026-11-12"
+  },
+  {
+    "id": "2026-11-12-wynaliu",
+    "match": {
+      "name_contains": "Wyna Liu",
+      "venue_contains": "WBUR"
+    },
+    "badge": "\ud83e\udde9 Puzzle Night",
+    "note": "The New York Times' Connections editor hosts a live games night.",
+    "start_date": "2026-11-12",
+    "expires": "2026-11-12"
+  },
+  {
+    "id": "2026-11-12-trishapaytas",
+    "match": {
+      "name_contains": "Trisha Paytas",
+      "venue_contains": "Crystal Ballroom"
+    },
+    "badge": "\ud83d\udcd6 Author Talk",
+    "note": "The YouTuber and podcaster on her memoir 'Crying on the Kitchen Floor' (sold out).",
+    "start_date": "2026-11-12",
+    "expires": "2026-11-12"
+  },
+  {
+    "id": "2026-11-12-giantrooks",
+    "match": {
+      "name_contains": "Giant Rooks",
+      "venue_contains": "House of Blues"
+    },
+    "badge": "\ud83c\udfb8 Indie",
+    "note": "German indie-pop band with big, anthemic choruses.",
+    "start_date": "2026-11-12",
+    "expires": "2026-11-12"
+  },
+  {
+    "id": "2026-11-12-diespitz",
+    "match": {
+      "name_contains": "Die Spitz",
+      "venue_contains": "Paradise"
+    },
+    "badge": "\ud83e\udd18 Punk",
+    "note": "Austin's ferocious young punk/grunge band.",
+    "start_date": "2026-11-12",
+    "expires": "2026-11-12"
+  },
+  {
+    "id": "2026-11-12-golijov",
+    "match": {
+      "name_contains": "Golijov",
+      "venue_contains": "Symphony Hall"
+    },
+    "badge": "\ud83c\udfbb BSO",
+    "note": "The BSO plays Argentine composer Osvaldo Golijov's 'Creation'.",
+    "start_date": "2026-11-12",
+    "expires": "2026-11-12"
+  },
+  {
+    "id": "2026-11-12-rachaelyamagata",
+    "match": {
+      "name_contains": "Rachael Yamagata",
+      "venue_contains": "City Winery"
+    },
+    "badge": "\ud83c\udfb9 Songwriter",
+    "note": "The 'Be Be Your Love' singer-songwriter, with Will Dailey.",
+    "start_date": "2026-11-12",
+    "expires": "2026-11-12"
+  },
+  {
+    "id": "2026-11-13-punchbrothers",
+    "match": {
+      "name_contains": "Punch Brothers",
+      "venue_contains": "Shubert"
+    },
+    "badge": "\ud83e\ude95 Newgrass",
+    "note": "Chris Thile's virtuosic progressive-bluegrass quintet.",
+    "start_date": "2026-11-13",
+    "expires": "2026-11-13"
+  },
+  {
+    "id": "2026-11-13-victoriamon",
+    "match": {
+      "name_contains": "Victoria Mon",
+      "venue_contains": "MGM Music"
+    },
+    "badge": "\ud83c\udfa4 R&B",
+    "note": "Grammy Best New Artist winner's Frequency of Love tour.",
+    "start_date": "2026-11-13",
+    "expires": "2026-11-13"
+  },
+  {
+    "id": "2026-11-13-jojo",
+    "match": {
+      "name_contains": "JoJo",
+      "venue_contains": "Royale"
+    },
+    "badge": "\ud83c\udfa4 Pop/R&B",
+    "note": "The 'Leave (Get Out)' singer's unplugged 20th-anniversary tour.",
+    "start_date": "2026-11-13",
+    "expires": "2026-11-13"
+  },
+  {
+    "id": "2026-11-13-phoeberobinson",
+    "match": {
+      "name_contains": "Phoebe Robinson",
+      "venue_contains": "Wilbur"
+    },
+    "badge": "\ud83d\ude02 Stand-Up",
+    "note": "The '2 Dope Queens' comedian and author's new hour.",
+    "start_date": "2026-11-13",
+    "expires": "2026-11-13"
+  },
+  {
+    "id": "2026-11-13-lucydarling",
+    "match": {
+      "name_contains": "Lucy Darling",
+      "venue_contains": "Wang"
+    },
+    "badge": "\ud83c\udfa9 Comedy Magic",
+    "note": "Brash, boozy comedy-magic act on the Wang Theatre stage.",
+    "start_date": "2026-11-13",
+    "expires": "2026-11-13"
+  },
+  {
+    "id": "2026-11-13-nemanjaradulovi",
+    "match": {
+      "name_contains": "Nemanja Radulovi",
+      "venue_contains": "Jordan Hall"
+    },
+    "badge": "\ud83c\udfbb Violin",
+    "note": "Serbian violin firebrand with his Double Sens ensemble.",
+    "start_date": "2026-11-13",
+    "expires": "2026-11-13"
+  },
+  {
+    "id": "2026-11-14-darkstarorchestra",
+    "match": {
+      "name_contains": "Dark Star Orchestra",
+      "venue_contains": "Orpheum"
+    },
+    "badge": "\ud83c\udf39 Dead Tribute",
+    "note": "Recreates actual Grateful Dead setlists, show by show.",
+    "start_date": "2026-11-14",
+    "expires": "2026-11-14"
+  },
+  {
+    "id": "2026-11-14-prateekkuhad",
+    "match": {
+      "name_contains": "Prateek Kuhad",
+      "venue_contains": "Shubert"
+    },
+    "badge": "\ud83c\udfb8 Songwriter",
+    "note": "Indian singer-songwriter behind the indie hit 'cold/mess'.",
+    "start_date": "2026-11-14",
+    "expires": "2026-11-14"
+  },
+  {
+    "id": "2026-11-14-wildatbostonbruins",
+    "match": {
+      "name_contains": "Wild at Boston Bruins",
+      "venue_contains": "TD Garden"
+    },
+    "badge": "\ud83c\udfd2 Bruins",
+    "note": "Bruins host Minnesota at TD Garden.",
+    "start_date": "2026-11-14",
+    "expires": "2026-11-14"
+  },
+  {
+    "id": "2026-11-14-anthracitefields",
+    "match": {
+      "name_contains": "Anthracite Fields",
+      "venue_contains": "Cutler Majestic"
+    },
+    "badge": "\ud83c\udfb6 Choral",
+    "note": "Julia Wolfe's Pulitzer-winning oratorio on Pennsylvania coal-mining life.",
+    "start_date": "2026-11-14",
+    "expires": "2026-11-14"
+  },
+  {
+    "id": "2026-11-14-catchyourbreath",
+    "match": {
+      "name_contains": "Catch Your Breath",
+      "venue_contains": "Big Night"
+    },
+    "badge": "\ud83e\udd18 Rock",
+    "note": "Texas rock band's Not Broken Enough tour.",
+    "start_date": "2026-11-14",
+    "expires": "2026-11-14"
+  },
+  {
+    "id": "2026-11-15-thirdeyeblind",
+    "match": {
+      "name_contains": "Third Eye Blind",
+      "venue_contains": "Roadrunner"
+    },
+    "badge": "\ud83c\udfb8 Alt-Rock",
+    "note": "'Semi-Charmed Life' hitmakers in Allston's big standing-room hall.",
+    "start_date": "2026-11-15",
+    "expires": "2026-11-15"
+  },
+  {
+    "id": "2026-11-15-adragqueenchristmas",
+    "match": {
+      "name_contains": "A Drag Queen Christmas",
+      "venue_contains": "Colonial"
+    },
+    "badge": "\ud83d\udc51 Drag",
+    "note": "Drag Race queens' annual holiday revue.",
+    "start_date": "2026-11-15",
+    "expires": "2026-11-15"
+  },
+  {
+    "id": "2026-11-15-bostonchambermusicsociet",
+    "match": {
+      "name_contains": "Boston Chamber Music Society",
+      "venue_contains": "Sanders"
+    },
+    "badge": "\ud83c\udfbb Chamber",
+    "note": "Beethoven, Dvo\u0159\u00e1k and Brahms in Harvard's wood-paneled Sanders Theatre.",
+    "start_date": "2026-11-15",
+    "expires": "2026-11-15"
+  },
+  {
+    "id": "2026-11-15-zadedirani",
+    "match": {
+      "name_contains": "Zade Dirani",
+      "venue_contains": "Symphony Hall"
+    },
+    "badge": "\ud83c\udfb9 Piano",
+    "note": "Jordanian pianist-composer's lush cinematic concert.",
+    "start_date": "2026-11-15",
+    "expires": "2026-11-15"
+  },
+  {
+    "id": "2026-11-15-jennamoynihan",
+    "match": {
+      "name_contains": "Jenna Moynihan",
+      "venue_contains": "Passim"
+    },
+    "badge": "\ud83c\udfbb Fiddle",
+    "note": "Fiddler Jenna Moynihan and guitarist Owen Marshall in Passim's basement room.",
+    "start_date": "2026-11-15",
+    "expires": "2026-11-15"
   }
 ]
