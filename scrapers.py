@@ -13,6 +13,7 @@ import time
 import unicodedata
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timedelta, timezone
+from email.utils import parsedate_to_datetime
 from urllib.parse import quote, urljoin, urlparse
 from zoneinfo import ZoneInfo
 
@@ -881,6 +882,44 @@ _LM_DAY_RE = re.compile(r"^(MONDAY|TUESDAY|WEDNESDAY|THURSDAY|FRIDAY|SATURDAY|SU
 _LM_TIME_RE = re.compile(r"(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?\s*[-–]\s*\d{1,2}(?::\d{2})?\s*(AM|PM)", re.I)
 
 
+def _little_muse_posts(base, ua, posts):
+    """Latest posts as {post_date, body_html, canonical_url}. The RSS feed carries each post's
+    full HTML and is served to GitHub's runners, which Substack's JSON API refuses (it answers
+    them with a non-JSON page); the API is the fallback."""
+    out = []
+    try:
+        r = _SESSION.get(f"{base}/feed", headers={"User-Agent": ua, "Accept": "application/rss+xml, application/xml"}, timeout=20)
+        r.raise_for_status()
+        for item in re.findall(r"<item>(.*?)</item>", r.text, re.S)[:posts]:
+            body = re.search(r"<content:encoded><!\[CDATA\[(.*?)\]\]></content:encoded>", item, re.S)
+            link = re.search(r"<link>(.*?)</link>", item)
+            when = re.search(r"<pubDate>(.*?)</pubDate>", item)
+            if not (body and when):
+                continue
+            out.append({
+                "post_date": parsedate_to_datetime(when.group(1).strip()).astimezone(EASTERN).date(),
+                "body_html": body.group(1),
+                "canonical_url": link.group(1).strip() if link else base,
+            })
+    except Exception:
+        out = []
+    if out:
+        return out
+    headers = {"User-Agent": ua, "Accept": "application/json"}
+    archive = _SESSION.get(f"{base}/api/v1/archive", params={"sort": "new", "limit": posts},
+                           headers=headers, timeout=20).json()
+    for meta in archive[:posts]:
+        if meta.get("audience") not in (None, "everyone"):
+            continue
+        post = _SESSION.get(f"{base}/api/v1/posts/{meta['slug']}", headers=headers, timeout=20).json()
+        out.append({
+            "post_date": datetime.fromisoformat(post["post_date"].replace("Z", "+00:00")).astimezone(EASTERN).date(),
+            "body_html": post.get("body_html"),
+            "canonical_url": post.get("canonical_url"),
+        })
+    return out
+
+
 def scrape_little_muse(url, ua, posts=3):
     """Little Muse (littlemuse.substack.com): a free weekly newsletter of kids' events around
     Cambridge/Somerville/Boston. Each listing is three <br>-separated lines:
@@ -889,17 +928,10 @@ def scrape_little_muse(url, ua, posts=3):
       "Description."
     Listings link to the original event page, so copies of events we already scrape (libraries)
     merge with ours by URL; Little Muse shows as a source on the card."""
-    headers = {"User-Agent": ua, "Accept": "application/json"}
-    base = url.rstrip("/")
-    archive = _SESSION.get(f"{base}/api/v1/archive", params={"sort": "new", "limit": posts},
-                           headers=headers, timeout=20).json()
     now = datetime.now(EASTERN)
     events = []
-    for meta in archive[:posts]:
-        if meta.get("audience") not in (None, "everyone"):
-            continue
-        post = _SESSION.get(f"{base}/api/v1/posts/{meta['slug']}", headers=headers, timeout=20).json()
-        post_date = datetime.fromisoformat(post["post_date"].replace("Z", "+00:00")).astimezone(EASTERN).date()
+    for post in _little_muse_posts(url.rstrip("/"), ua, posts):
+        post_date = post["post_date"]
         soup = BeautifulSoup(post.get("body_html") or "", "html.parser")
         day = None
         for el in soup.find_all(["h2", "h3", "p"]):
