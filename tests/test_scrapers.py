@@ -2482,6 +2482,18 @@ class RetitledSameEventMergeTests(unittest.TestCase):
         self.assertEqual(len(out), 1)
         self.assertTrue(out[0]["name"].startswith("Daddy Issues"))
 
+    def test_aggregator_double_listing_merges_but_numbered_variants_dont(self):
+        a = self._ev("Phoebe Robinson - Feral & Fired Up! Tour", "The Boston Calendar", "Wilbur Theatre", 18, 30)
+        a["url"] = "https://eventschaser.com/tickets/Phoebe-Robinson-Wilbur-Theatre/7826233/"
+        b = self._ev("Phoebe Robinson: Feral & Fired Up!", "The Boston Calendar", "The Wilbur", 19, 30)
+        b["url"] = "https://thewilbur.com/event/phoebe-robinson/"
+        self.assertEqual(len(self._merge([a, b])), 1)
+        out = self._merge([
+            self._ev("Speed Dating at CanalSide! Ages 27-37", "Eventbrite Boston", "CanalSide", 18, 30),
+            self._ev("Speed Dating at CanalSide! Ages 36-48", "Eventbrite Boston", "CanalSide", 18, 30),
+        ])
+        self.assertEqual(len(out), 2)
+
     def test_square_is_not_a_shared_venue(self):
         from template import _same_physical_venue
         a = {"venue": "Cambridge Public Library (Central Square Branch)"}

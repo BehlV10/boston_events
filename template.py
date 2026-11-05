@@ -2348,8 +2348,11 @@ def _merge_duplicates(events, word_freq=None):
         if _is_attraction_tour(e1) and _is_attraction_tour(e2):
             return False
 
-        # Same source with >= 45m diff: distinct show sets (e.g. 7:00 PM and 9:30 PM)
-        if s1 and s1 == s2 and diff_mins >= 45:
+        # Same source with >= 45m diff: distinct show sets (e.g. 7:00 PM and 9:30 PM), unless one
+        # listing comes from a ticket reseller, whose times are often doors or off by an hour
+        resale = any(h in f"{e1.get('url')} {e2.get('url')}".lower() for h in (
+            "eventschaser.com", "vividseats.com", "stubhub.com", "ticketnetwork.com", "tickpick.com"))
+        if s1 and s1 == s2 and diff_mins >= 45 and not resale:
             return True
         # Different sources within 90m (doors vs show time): same show
         if s1 != s2 and diff_mins <= 90:
@@ -2524,15 +2527,21 @@ def _merge_duplicates(events, word_freq=None):
             for cand in out:
                 if not _same_physical_venue(e, cand) or _is_different_show(e, cand):
                     continue
+                keys_c = _title_variants(cand.get("name") or "")
+                n_e, n_c = _title_numbers(raw_name), _title_numbers(cand.get("name"))
+                if n_e and n_c and n_e != n_c:
+                    continue  # "Ages 27-37" vs "Ages 36-48", "Round 3" vs "Round 5"
                 if _separate_listings(e, cand) and not (
-                        e.get("_time") == cand.get("_time") and keys_e[:1] == _title_variants(cand.get("name") or "")[:1]):
-                    # Same source, two pages: separate events, unless it's the same title at the same
-                    # minute (Ticketmaster's "CamelPhat" and "CamelPhat (21 and Over)")
+                        (e.get("_time") == cand.get("_time") and keys_e[:1] == keys_c[:1])
+                        or (_source_priority(e.get("_source_venue")) < 10 and _titles_equivalent(keys_e, keys_c))):
+                    # Same source, two pages: separate events, except the same title at the same minute
+                    # (Ticketmaster's "CamelPhat" / "CamelPhat (21 and Over)") or an aggregator listing
+                    # one show twice (The Boston Calendar's two "Phoebe Robinson: Feral & Fired Up!")
                     continue
                 t_e, t_c = e.get("_time"), cand.get("_time")
                 if not t_e or not t_c or abs((t_e - t_c).total_seconds()) > 90 * 60:
                     continue
-                if _titles_equivalent(keys_e, _title_variants(cand.get("name") or "")):
+                if _titles_equivalent(keys_e, keys_c):
                     match = cand
                     break
 
