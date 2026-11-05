@@ -149,6 +149,8 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
     "mccarthy's toad": (42.3892, -71.1195, "Porter Square", "1920 Massachusetts Ave, Cambridge", "Toad"),
     "toad": (42.3892, -71.1195, "Porter Square", "1920 Massachusetts Ave, Cambridge", "Toad"),
     "porter square books": (42.3888, -71.1192, "Porter Square", "25 White St, Cambridge", "Porter Square Books"),
+    "cafe zing": (42.3888, -71.1192, "Porter Square", "25 White St, Cambridge", "Cafe Zing"),
+    "ikeda center": (42.3722, -71.1110, "Harvard Square", "396 Harvard St, Cambridge", "Ikeda Center for Peace, Learning, and Dialogue"),
     "lizard lounge": (42.3809, -71.1197, "North Cambridge", "1667 Massachusetts Ave, Cambridge", "Lizard Lounge"),
     "central rock gym": (42.3912, -71.1512, "North Cambridge", "127 Smith Pl, Cambridge", "Central Rock Gym"),
 
