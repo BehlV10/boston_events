@@ -2445,3 +2445,10 @@ class SeparateListingsMergeTests(unittest.TestCase):
                      source="The Boston Calendar"),
         ])
         self.assertEqual(len(out), 1)
+
+    def test_titles_unrelated(self):
+        from template import _titles_unrelated
+        self.assertTrue(_titles_unrelated("Thursday Long Pose", "Anatomy of the head (3-Week Class)"))
+        self.assertFalse(_titles_unrelated("half•alive", "halfalive"))
+        self.assertFalse(_titles_unrelated("Boston Family Days", "Family Days at the ICA"))
+        self.assertFalse(_titles_unrelated("Amble", None))
