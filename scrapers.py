@@ -125,9 +125,124 @@ def _make_session():
             kwargs["ssl_context"] = ctx
             super().init_poolmanager(*args, **kwargs)
 
-    s = requests.Session()
+    s = _PoliteSession()
     s.mount("https://", _Adapter())
     return s
+
+
+# --- Polite crawling ------------------------------------------------------------------------
+# A daily build sends ~1,500 requests to ~130 sites. Every request goes through _SESSION and this
+# gate, so no site sees a burst: at most two requests in flight per site with a pause between
+# them (one at a time for sites with bot protection). A 429 ("slow down") or 5xx gets one retry
+# after a pause; a site that refuses us (403, or 429 again) isn't asked again for the rest of
+# the run, and its source keeps its last good data.
+HOST_POLICY_DEFAULT = (2, 0.5)  # (max requests in flight, min seconds between request starts)
+HOST_POLICY = {
+    "eventbrite.com": (1, 1.0),
+    "meetup.com": (1, 1.0),
+    "partiful.com": (1, 1.0),
+    "do617.com": (1, 0.5),
+    "bostonchildrensmuseum.org": (1, 1.0),  # answered 504 at four at a time
+}
+RETRY_STATUSES = {429, 502, 503, 504}
+MAX_RETRY_WAIT = 30
+OVERLOADED_AFTER = 3  # 5xx answers (after retrying) before we leave a site alone for the run
+
+
+class SiteRefused(requests.RequestException):
+    """A site refused us earlier this run (403/429), so we don't ask it again."""
+
+
+def _host_of(url):
+    try:
+        return (urlparse(url).hostname or "").lower()
+    except ValueError:
+        return ""
+
+
+def _host_policy(host):
+    for domain, policy in HOST_POLICY.items():
+        if host == domain or host.endswith("." + domain):
+            return policy
+    return HOST_POLICY_DEFAULT
+
+
+class _HostGate:
+    """Per-site concurrency and spacing, plus the list of sites that refused us this run."""
+
+    def __init__(self):
+        self._lock = threading.Lock()
+        self._slots = {}
+        self._next_start = {}
+        self._overloads = {}
+        self.refused = {}
+
+    def reset(self):
+        with self._lock:
+            self.refused.clear()
+            self._overloads.clear()
+
+    def acquire(self, host):
+        in_flight, gap = _host_policy(host)
+        with self._lock:
+            slot = self._slots.setdefault(host, threading.BoundedSemaphore(in_flight))
+        slot.acquire()
+        with self._lock:
+            now = time.monotonic()
+            start = max(now, self._next_start.get(host, 0.0))
+            self._next_start[host] = start + gap
+        if start > now:
+            time.sleep(start - now)
+
+    def release(self, host):
+        self._slots[host].release()
+
+    def refuse(self, host, reason):
+        with self._lock:
+            self.refused.setdefault(host, reason)
+
+    def overloaded(self, host):
+        with self._lock:
+            self._overloads[host] = self._overloads.get(host, 0) + 1
+            if self._overloads[host] >= OVERLOADED_AFTER:
+                self.refused.setdefault(host, "overloaded")
+
+
+HOST_GATE = _HostGate()
+
+
+def _retry_after_secs(resp):
+    raw = (resp.headers or {}).get("Retry-After", "")
+    if raw.strip().isdigit():
+        return min(int(raw), MAX_RETRY_WAIT)
+    try:
+        when = parsedate_to_datetime(raw)
+        return max(0, min((when - datetime.now(timezone.utc)).total_seconds(), MAX_RETRY_WAIT))
+    except (TypeError, ValueError):
+        return 5
+
+
+class _PoliteSession(requests.Session):
+    def request(self, method, url, *args, **kwargs):
+        host = _host_of(url)
+        if host in HOST_GATE.refused:
+            raise SiteRefused(f"{host} refused us earlier this run ({HOST_GATE.refused[host]})")
+        for attempt in (1, 2):
+            HOST_GATE.acquire(host)
+            try:
+                resp = super().request(method, url, *args, **kwargs)
+            finally:
+                HOST_GATE.release(host)
+            status = resp.status_code
+            if status in RETRY_STATUSES and attempt == 1:
+                time.sleep(_retry_after_secs(resp))
+                continue
+            if status in (403, 429):
+                HOST_GATE.refuse(host, str(status))
+            elif status in RETRY_STATUSES:
+                HOST_GATE.overloaded(host)
+            return resp
+        return resp
 
 
 _SESSION = _make_session()
@@ -626,23 +741,16 @@ def _parse_eventbrite_json_ld(soup):
 
 def scrape_eventbrite_search(url, ua):
     """Parse Eventbrite discovery page via embedded __SERVER_DATA__ and ItemList JSON-LD."""
-    import subprocess
 
     def fetch_eb_html(target_url):
+        # No retry through another client when Eventbrite says no: that's dodging its bot check.
         try:
             resp = _SESSION.get(target_url, headers={"User-Agent": ua or UA_CHROME}, timeout=15)
             if resp.status_code == 200 and len(resp.text) > 10000:
                 return resp.text
         except Exception:
             pass
-        try:
-            res = subprocess.run(
-                ["curl", "-sL", "-A", ua or UA_CHROME, "--max-time", "12", target_url],
-                capture_output=True, text=True, check=False,
-            )
-            return res.stdout or ""
-        except Exception:
-            return ""
+        return ""
 
     urls_to_scrape = [url]
     if "ma--boston/events" in url:
@@ -1255,6 +1363,9 @@ def _bc_extract_url_from_p(p):
 
 
 TBC_DETAILS_CACHE_PATH = os.path.join(CACHE_DIR, "tbc_details_cache.json")
+# Detail pages read per run, soonest events first. A cold cache fills in over a few days instead
+# of 1,000 requests at once.
+TBC_DETAILS_PER_RUN = 150
 
 
 def _load_tbc_details_cache():
@@ -1474,10 +1585,10 @@ def scrape_boston_calendar(url, ua):
         # Uncached, or cached before addresses were captured (no "addr_v")
         uncached = [e for e in events if e.get("_bc_url") and (e["_bc_url"] not in cache or "addr_v" not in cache[e["_bc_url"]])]
         sorted_uncached = sorted(uncached, key=_bc_sort_key)
-        batch = sorted_uncached[:1000]
+        batch = sorted_uncached[:TBC_DETAILS_PER_RUN]  # the rest fill in on later runs
 
         if batch:
-            with ThreadPoolExecutor(max_workers=25) as ex:
+            with ThreadPoolExecutor(max_workers=2) as ex:
                 urls_to_fetch = [e["_bc_url"] for e in batch]
                 details = list(ex.map(lambda u: _bc_detail_info(u, ua), urls_to_fetch))
 
@@ -1749,7 +1860,6 @@ def scrape_event_list(url, ua):
     its Eventbrite organizer feed for ticket prices and offsite locations.
     """
     import html as html_lib
-    import subprocess
     now_est = datetime.now(EASTERN)
     today_start = datetime(now_est.year, now_est.month, now_est.day, 0, 0, tzinfo=EASTERN)
 
@@ -1771,21 +1881,10 @@ def scrape_event_list(url, ua):
         page_urls.append(f"{base_url}/{y_cur}/{m_cur:02d}")
 
     for page_url in page_urls:
-        soup = None
         try:
             soup = fetch_soup(page_url, ua)
         except Exception:
-            try:
-                res = subprocess.run(
-                    ["curl", "-sL", "-A", ua or UA_CURL, "--max-time", "12", page_url],
-                    capture_output=True, text=True, check=False,
-                )
-                if res.stdout and "article" in res.stdout:
-                    soup = BeautifulSoup(res.stdout, "html.parser")
-            except Exception:
-                soup = None
-        if not soup:
-            continue
+            continue  # refused (Porter Square Books answers 403) or down: no retry through curl
 
         for art in soup.select("article.event-list"):
             a = art.select_one(".event-list__title a") or art.select_one("a[href*='/event/']")
@@ -1956,16 +2055,6 @@ def scrape_event_list(url, ua):
         except Exception:
             pass
 
-        if not feed_text:
-            try:
-                res = subprocess.run(
-                    ["curl", "-sL", "-A", ua or UA_CURL, "--max-time", "10", feed_url],
-                    capture_output=True, text=True, check=False,
-                )
-                if res.stdout and "<item>" in res.stdout:
-                    feed_text = res.stdout
-            except Exception:
-                pass
 
         if feed_text:
             items = re.findall(r"<item>(.*?)</item>", feed_text, re.DOTALL)
@@ -5746,7 +5835,6 @@ def scrape_porter_square_books(url, ua):
     """Porter Square Books embeds its full FullCalendar event list in the
     Drupal `drupalSettings` JSON blob on the calendar page. We fetch both
     the current month and the upcoming months so events do not truncate at month-end."""
-    import subprocess
     now = datetime.now(timezone.utc)
     base_url = url.split("?")[0].rstrip("/")
     base_url = re.sub(r"/\d{4}/\d{1,2}$", "", base_url)
@@ -5772,12 +5860,7 @@ def scrape_porter_square_books(url, ua):
             pass
 
         if not html:
-            try:
-                html = subprocess.check_output(
-                    ["curl", "-s", "-L", target_url], timeout=15
-                ).decode("utf-8", errors="ignore")
-            except Exception:
-                continue
+            continue  # the site answers 403 to us; asking again through curl would dodge that
 
         m_tag = re.search(
             r'data-drupal-selector="drupal-settings-json"[^>]*>(.*?)</script>',
@@ -11575,7 +11658,7 @@ def fetch_luckyseat_boston():
         }
         raw_shows = None
         try:
-            resp = requests.get(
+            resp = _SESSION.get(
                 "https://www.luckyseat.com/api/showmanagement/getshowlist",
                 headers=headers,
                 timeout=10,
@@ -11585,13 +11668,6 @@ def fetch_luckyseat_boston():
         except Exception:
             raw_shows = None
 
-        if not raw_shows or not isinstance(raw_shows, list):
-            try:
-                cmd = ["curl", "-sL", "-A", UA_CHROME, "https://www.luckyseat.com/api/showmanagement/getshowlist"]
-                c_out = subprocess.check_output(cmd, timeout=12)
-                raw_shows = json.loads(c_out)
-            except Exception:
-                raw_shows = None
 
         if isinstance(raw_shows, list) and len(raw_shows) > 0:
             for s in raw_shows:
@@ -11855,6 +11931,22 @@ def _scrape_one(v, force=False):
         events = _normalize_and_filter_events(events, v)
         dur = round(time.time() - t0, 2)
 
+        # The site refused us partway (403/429): keep what we had rather than saving a short list.
+        refused = HOST_GATE.refused.get(_host_of(v["url"]))
+        if refused:
+            stale = _load_venue_cache(name, max_age=None)
+            old = _normalize_and_filter_events((stale or {}).get("events") or [], v)
+            if old:
+                return {
+                    "venue": name,
+                    "url": v["url"],
+                    "events": dedupe(events + old),
+                    "error": None,
+                    "fallback": True,
+                    "duration": dur,
+                    "cached": True,
+                }
+
         # Update last known good and save to disk cache
         if events:
             _last_known_good[name] = events
@@ -11890,6 +11982,8 @@ def _scrape_one(v, force=False):
 
 
 def _do_scrape_all(force=False):
+    HOST_GATE.reset()  # a site that refused us yesterday gets asked again, once
+
     def _worker(v):
         return _scrape_one(v, force=force)
 
