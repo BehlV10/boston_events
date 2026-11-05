@@ -9,7 +9,10 @@ Veterans Day, Thanksgiving, Black Friday, Cyber Monday). The rest get CSS genera
 palette by holiday_theme_css().
 """
 
+import os
 from datetime import date, timedelta
+
+_ROOT = os.path.abspath(os.path.dirname(__file__))
 
 
 def _nth_weekday(y, m, weekday, n):
@@ -232,7 +235,13 @@ def holiday_calendar(start, days):
 
 
 def banner_url(h):
-    return h.get("banner") or f"static/holidays/{h['key']}.svg"
+    if h.get("banner"):
+        return h["banner"]
+    key = h["key"]
+    jpg_rel = f"static/holidays/{key}.jpg"
+    if os.path.exists(os.path.join(_ROOT, jpg_rel)):
+        return jpg_rel
+    return f"static/holidays/{key}.svg"
 
 
 def _tint(hex_color, amount):
