@@ -1506,12 +1506,41 @@ _BC_GENERIC_TITLE_RE = re.compile(
     r"^\s*(?:(?:book|author|music|art|film|community|special|private|live)\s+)?(?:event|talk|show|night|reading)s?\s*$",
     re.I,
 )
-# "Free" in a title means admission, not "stress-free" or "gluten-free".
+# "Free" in a title means admission, not "stress-free", "gluten-free", "feel free" or a band
+# called "Dogs Run Free".
 _BC_FREE_RE = re.compile(
     r"(?<![\w-])(?<!stress )(?<!gluten )(?<!sugar )(?<!dairy )(?<!alcohol )(?<!care )(?<!cruelty )(?<!fragrance )"
+    r"(?<!feel )(?<!run )(?<!runs )(?<!born )"
     r"(?:free|no cover|complimentary)\b(?!\s*(?:week|zone|spirit|style|flow|form|hold))",
     re.I,
 )
+
+
+def mentions_free(text):
+    """True when text says getting in is free ("Free show", "no cover"), not "Freebo" or "gluten-free"."""
+    return bool(_BC_FREE_RE.search(text or ""))
+
+
+# A dollar amount that is the price of getting in ("$10 cover", "Tickets: $15", "$5 Tickets",
+# "$10 CASH OR VENMO", "$15.00 + fee"), not a prize, a menu price or a fundraising total.
+# One amount or a run of them: "$15", "$40 & $30", "$20 - $30", "$10/$15".
+_PRICE_GROUP = r"\$\s?\d{1,3}(?:\.\d{2})?(?![\d,])(?:\s*(?:&|/|-|–|or|and)\s*\$?\s?\d{1,3}(?:\.\d{2})?(?![\d,]))*"
+_ADMISSION_PRICE_RE = re.compile(
+    r"(" + _PRICE_GROUP + r")(?=\s+to (?:enter|attend|play|join|register)\b|[^.!?\n$]{0,20}?(?<!\w)(?:cover|tickets?|"
+    r"admission|entry|entrance|at the door|doors?|cash|venmo|\+\s*fees?|fees?|in advance|advance|adv|per person)\b)"
+    r"|(?<!\w)(?:cover(?: charge)?|tickets?|admission|entry|entrance|cost|price)\b[^.!?\n$\d]{0,15}(" + _PRICE_GROUP + r")",
+    re.I,
+)
+
+
+def admission_price(text):
+    """'$10 CASH ONLY cover' -> '$10'; 'Tickets $15 adv / $20 door' -> '$15–$20'; None if no admission price."""
+    amounts = sorted({float(a) for m in _ADMISSION_PRICE_RE.finditer(text or "")
+                      for a in re.findall(r"\d{1,3}(?:\.\d{2})?", m.group(1) or m.group(2))} - {0.0})
+    if not amounts:
+        return None
+    fmt = lambda v: f"${v:g}" if v == int(v) else f"${v:.2f}"
+    return fmt(amounts[0]) if len(amounts) == 1 else f"{fmt(amounts[0])}–{fmt(amounts[-1])}"
 
 
 def _title_from_ticket_slug(url):
@@ -3271,6 +3300,48 @@ def scrape_wix_events(url, ua, default_venue=None, default_category="clubbing"):
     return events
 
 
+def _do617_ticket_price(event_url, ua):
+    """The ticket line on a Do617 event page: "Tickets: $5 + fee" -> "$5 + fee",
+    "Tickets: $46-$138+" -> "$46-$138+", "Tickets: Free, 21+" -> "Free"; None when the page
+    gives no price ("Tickets", "Tickets: Dates and times vary")."""
+    try:
+        resp = _SESSION.get(event_url, headers={"User-Agent": ua or UA_CHROME}, timeout=10)
+        if resp.status_code != 200:
+            return None
+        soup = BeautifulSoup(resp.content, "html.parser")
+    except Exception:
+        return None
+    sec = soup.select_one("section.ticket-section")
+    head = sec.find(["h2", "h3"]) if sec else None
+    line = re.sub(r"(?i)^\s*tickets?\s*:?\s*", "", head.get_text(" ", strip=True)) if head else ""
+    amt = r"\$\s?\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?"
+    m = re.search(amt + r"(?:\s*[-–]\s*" + amt.replace("\\$", "\\$?", 1) + r")?\+?(?:\s*\+\s*fees?)?", line)
+    if m:
+        return re.sub(r"\$(\d+)\.00\b", r"$\1", m.group(0)).strip()
+    if mentions_free(line):
+        return "Free"
+    for ld in soup.find_all("script", type="application/ld+json"):
+        try:
+            data = json.loads(ld.string or "")
+        except ValueError:
+            continue
+        for node in (data.get("@graph") or [data]) if isinstance(data, dict) else []:
+            if isinstance(node, dict) and node.get("@type") == "Event" and node.get("isAccessibleForFree") is True:
+                return "Free"
+    return None
+
+
+def _do617_fill_prices(events, ua):
+    """Do617's day lists carry no prices; each event's own page does."""
+    todo = [e for e in events if not e.get("price") and "do617.com/events/" in (e.get("url") or "")]
+    if todo:
+        with ThreadPoolExecutor(max_workers=4) as ex:
+            for e, price in zip(todo, ex.map(lambda e: _do617_ticket_price(e["url"], ua), todo)):
+                if price:
+                    e["price"] = price
+    return events
+
+
 def scrape_do617(url, ua):
     """Do617 — Scrapes upcoming Boston events via modern Svelte event cards or legacy Schema.org microdata."""
     events = []
@@ -3327,7 +3398,7 @@ def scrape_do617(url, ua):
                     })
         except Exception:
             pass
-        return events
+        return _do617_fill_prices(events, ua)
 
     # 1. Scrape today + next 4 days from Do617 date feeds
     for i in range(5):
@@ -3446,7 +3517,7 @@ def scrape_do617(url, ua):
         except Exception:
             pass
 
-    return events
+    return _do617_fill_prices(events, ua)
 
 
 def scrape_middle_east(url, ua):
@@ -4048,7 +4119,7 @@ def scrape_mfa_boston(url, ua):
                 iso = dt.astimezone(timezone.utc).isoformat()
             except ValueError:
                 pass
-        is_free = "free" in raw_text.lower()
+        is_free = mentions_free(raw_text)
         events.append({
             "name": f"MFA: {title}",
             "date": iso,
@@ -6447,7 +6518,7 @@ def scrape_burren(url, ua):
         price = None
         if "front room" in room_txt.lower():
             price = "Free"
-        elif "free" in desc.lower() or "free" in name.lower() or "no cover" in desc.lower():
+        elif mentions_free(desc) or mentions_free(name):  # whole words: "Alice Howe & Freebo" is ticketed
             price = "Free"
         events.append({
             "name": name.title() if name.isupper() else name,
@@ -8449,7 +8520,7 @@ def scrape_comedy_studio(url, ua):
                 min_p = min(prices) / 100.0
                 max_p = max(prices) / 100.0
                 price = "Free" if max_p == 0 else (f"${min_p:.0f}" if min_p == max_p else f"${min_p:.0f}–${max_p:.0f}")
-            elif "free" in ev_name.lower():
+            elif mentions_free(ev_name):
                 price = "Free"
 
             out.append({
@@ -8697,7 +8768,7 @@ def scrape_club_passim(url, ua):
                 continue
 
             cost_m = re.search(r"\$(\d+)", card_text)
-            price = f"${cost_m.group(1)}" if cost_m else ("Free" if "free" in card_text.lower() else None)
+            price = f"${cost_m.group(1)}" if cost_m else ("Free" if mentions_free(card_text) else None)
 
             seen.add(link)
             out.append({
@@ -8782,9 +8853,66 @@ def scrape_danis_queer_bar(url, ua):
     return results
 
 
+def _club_cafe_offers(soup):
+    """Event URL -> (offers.price, description) from the calendar's JSON-LD blocks.
+
+    The price is the digits of the event's "Cost" line: "5.00" for "$5.00 + fee", "0" when there's
+    no charge, "" for "No Cover"/"FREE", and run together when there are two figures ("1510" for
+    "$15 after 10 pm", "4030" for "$40 & $30 + fee").
+    """
+    out = {}
+    for s in soup.find_all("script", type="application/ld+json"):
+        try:
+            j = json.loads(s.string or "", strict=False)
+        except ValueError:
+            continue
+        if not isinstance(j, dict) or not j.get("url"):
+            continue
+        offers = j.get("offers") if isinstance(j.get("offers"), dict) else {}
+        desc = re.sub(r"<[^>]+>", " ", html.unescape(html.unescape(j.get("description") or "")))
+        info = (str(offers.get("price") if offers.get("price") is not None else "").strip(), desc)
+        out.setdefault(j["url"], info)
+        out.setdefault(j["url"].split("?")[0].rstrip("/"), info)
+    return out
+
+
+def _club_cafe_cost_line(event_url, ua):
+    """The "Cost" line on a Club Café event page: "$15 after 10 pm", "$40 & $30 + fee", "No Cover"."""
+    try:
+        resp = _SESSION.get(event_url, headers={"User-Agent": ua or UA_CHROME}, timeout=10)
+        resp.raise_for_status()
+        el = BeautifulSoup(resp.text, "html.parser").select_one(".mec-events-event-cost")
+    except Exception:
+        return None
+    return el.get_text(" ", strip=True) if el else None
+
+
+# Club Café's weekly no-cover nights, for listings that don't carry their own price.
+_CLUB_CAFE_NO_COVER = ("free", "no cover", "tea dance", "karaoke", "trivia", "drag bingo")
+
+
+def _club_cafe_price(name, ld_price, desc, cost_line=None):
+    """A price from the venue's own Cost data; never "Free" for a ticketed night (Queer Board
+    Game Night is $5 + fee even though board game nights elsewhere are usually free)."""
+    if cost_line and re.search(r"\$\s?[1-9]", cost_line):
+        return re.sub(r"\s+", " ", re.sub(r"\$(\d+)\.00\b", r"$\1", cost_line)).strip()[:32]
+    if ld_price in ("0", "0.0", "0.00"):
+        return "Free"
+    if ld_price:
+        if re.fullmatch(r"\d{1,3}(?:\.\d{1,2})?", ld_price):
+            amount = float(ld_price)
+            return f"${amount:g}" if amount == int(amount) else f"${amount:.2f}"
+        return admission_price(desc) or "Ticketed"  # two figures run together; it isn't free
+    low = (name or "").lower()
+    if any(w in low for w in _CLUB_CAFE_NO_COVER) or mentions_free(desc):
+        return "Free"
+    return None
+
+
 def scrape_club_cafe(url, ua):
     """Club Café in South End — historic LGBT nightlife, cabaret, piano bar & dance club."""
     soup = fetch_soup(url, ua)
+    offers = _club_cafe_offers(soup)
     events = []
     seen = set()
     for a in soup.find_all("article", class_=lambda c: c and "mec-event-article" in c):
@@ -8829,7 +8957,7 @@ def scrape_club_cafe(url, ua):
         else:
             cat = "music"
 
-        price = "Free" if any(w in low for w in ["free", "no cover", "tea dance", "karaoke", "trivia", "drag bingo"]) else None
+        ld_price, desc = offers.get(href) or offers.get(href.split("?")[0].rstrip("/")) or ("", "")
 
         key = (name, dt_iso)
         if key in seen:
@@ -8841,9 +8969,24 @@ def scrape_club_cafe(url, ua):
             "date": dt_iso,
             "url": href,
             "venue": venue_name,
-            "price": price,
             "category": cat,
+            "_ld_price": ld_price,
+            "_desc": desc,
         })
+
+    # Two prices squeezed into one number ("1510") can only be read off the event's own page;
+    # fetch each such event once.
+    unclear = {}
+    for e in events:
+        if e["_ld_price"] and not re.fullmatch(r"\d{1,3}(?:\.\d{1,2})?", e["_ld_price"]):
+            unclear.setdefault(e["url"].split("?")[0].rstrip("/"), e["url"])
+    cost_lines = {}
+    if unclear:
+        with ThreadPoolExecutor(max_workers=4) as ex:
+            cost_lines = dict(zip(unclear, ex.map(lambda u: _club_cafe_cost_line(u, ua), list(unclear.values())[:20])))
+    for e in events:
+        cost = cost_lines.get(e["url"].split("?")[0].rstrip("/"))
+        e["price"] = _club_cafe_price(e["name"], e.pop("_ld_price"), e.pop("_desc"), cost)
     return events
 
 
@@ -9204,7 +9347,7 @@ def scrape_berklee(url, ua):
                 "date": dt.astimezone(timezone.utc).isoformat(),
                 "url": link,
                 "venue": vname,
-                "price": "Free" if "free" in card.get_text().lower() else None,
+                "price": "Free" if mentions_free(card.get_text(" ")) else None,
                 "category": "music",
             })
 
@@ -9747,6 +9890,20 @@ def _get_partiful_targets(primary_url):
     return targets
 
 
+def _partiful_price(ev):
+    """Partiful RSVPs are free unless the host names a cover in the description ("21+, $10 CASH ONLY
+    cover", "🎟️: $10 CASH OR VENMO"); being public doesn't make an event free."""
+    text = f"{ev.get('title') or ''}\n{ev.get('description') or ''}"
+    paid = admission_price(text)
+    if paid:
+        return paid
+    if mentions_free(text):
+        return "Free"
+    if re.search(r"(?i)\b(?:tickets?|cover charge|admission|venmo|cash only)\b", text):
+        return None  # a charge is mentioned without an amount
+    return "Free" if ev.get("isPublic") else None
+
+
 def scrape_partiful(url, ua):
     """Scrape community events, parties, and Touch Grass mixers from Partiful Boston."""
     headers = {
@@ -9792,7 +9949,7 @@ def scrape_partiful(url, ua):
                         "date": start_iso,
                         "url": ev_url,
                         "venue": vname,
-                        "price": "Free" if ev.get("isPublic") else None,
+                        "price": _partiful_price(ev),
                         "category": "community",
                     })
 
@@ -9819,7 +9976,7 @@ def scrape_partiful(url, ua):
                                 "date": start_iso,
                                 "url": target_url,
                                 "venue": vname,
-                                "price": "Free" if ev.get("isPublic") else None,
+                                "price": _partiful_price(ev),
                                 "category": "community",
                             })
 
@@ -9841,7 +9998,7 @@ def scrape_partiful(url, ua):
                         "date": start_iso,
                         "url": ev_url,
                         "venue": vname,
-                        "price": "Free" if ev.get("isPublic") else None,
+                        "price": _partiful_price(ev),
                         "category": "community",
                     })
             except Exception:
@@ -9984,7 +10141,7 @@ def scrape_the_platform_kendall(url=None, ua=None):
             event_url = "https://www.theplatformkendall.org/the-platform-opening-day/"
 
         alert = (prod.get("alert_text") if prod else "") or ""
-        price = "Free" if "opening day" in clean_name.lower() or "free" in alert.lower() else None
+        price = "Free" if "opening day" in clean_name.lower() or mentions_free(alert) else None
 
         prod_genres = (prod.get("genre") if prod else None) or []
         cat = decide_category(clean_name, prod_genres)
@@ -10032,7 +10189,7 @@ def scrape_the_platform_kendall(url=None, ua=None):
             event_url = "https://www.theplatformkendall.org/the-platform-opening-day/"
 
         alert = p.get("alert_text") or ""
-        price = "Free" if "opening day" in name.lower() or "free" in alert.lower() else None
+        price = "Free" if "opening day" in name.lower() or mentions_free(alert) else None
         prod_genres = p.get("genre") or []
         cat = decide_category(name, prod_genres)
         genre = infer_music_genre(name, "The Platform Kendall", description=" ".join(prod_genres), category=cat) if cat in ("music", "clubbing") else None
