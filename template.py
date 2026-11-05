@@ -34,6 +34,7 @@ from scrapers import (
     _MARKET_OVERRIDABLE,
 )
 from venues_geo import resolve_event_geo, nearest_curated_venue
+from lgbtq import is_lgbtq_event
 
 
 DEFAULT_UNCHECKED_BUCKETS = {"Classes & Services", "Kids & Family", "Deals & Specials", "Tech & Startups"}
@@ -3445,6 +3446,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
         desc = raw_desc[:180]
         desc_html = f'<div class="desc">{escape(desc)}</div>' if desc else ""
         free_flag = "true" if is_free else "false"
+        lgbtq_attr = ' data-lgbtq="true"' if is_lgbtq_event(e) else ''
         epoch_attr = f' data-epoch="{int(t_obj.timestamp())}"' if t_obj else ''
         genre_attr = f' data-genre="{escape(genre)}"' if genre else ''
         v_prefix = f" · {venue_html}" if venue_html else ""
@@ -3461,7 +3463,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
         return (
             f'<li class="event{hl_class}" data-id="{ev_id}" data-cat="{escape(cat)}" data-bucket="{escape(bucket)}"{genre_attr} '
             f'data-venue="{escape(source)}" data-city="{escape(city)}"{sub_attrs}{transit_attr}{tod_attr}{time_attr} '
-            f'data-recur="{recur_flag}" data-free="{free_flag}"{epoch_attr}{geo_attrs}{hl_attr}>'
+            f'data-recur="{recur_flag}" data-free="{free_flag}"{lgbtq_attr}{epoch_attr}{geo_attrs}{hl_attr}>'
             f'<div class="when">{escape(format_when(e))}</div>'
             f'<div class="what">{star_btn}{link}{price_tag}{recur_badge}{hl_badge}'
             f'<div class="venue-tag">{cat_tag}{v_prefix}{sub_tag}{extra_html}{cal_html}</div>'
@@ -4758,6 +4760,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
   .city-swatch {{ display: inline-block; width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }}
   .free-toggle {{ display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; cursor: pointer; color: var(--green); user-select: none; }}
   .free-toggle input {{ accent-color: var(--green); width: 14px; height: 14px; cursor: pointer; margin: 0; }}
+  .lgbtq-toggle {{ display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 12px; font-weight: 600; cursor: pointer; color: #a855f7; user-select: none; }}
+  .lgbtq-toggle input {{ accent-color: #a855f7; width: 14px; height: 14px; cursor: pointer; margin: 0; }}
   .timeframe-toggle {{ display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; cursor: pointer; color: var(--accent); user-select: none; }}
   .timeframe-toggle input {{ accent-color: var(--accent); width: 14px; height: 14px; cursor: pointer; margin: 0; }}
 
@@ -7201,6 +7205,10 @@ def render_page(results, weather=None, luckyseat_shows=None):
           <input type="checkbox" id="free-only-chk">
           <span><span class="chip-icon">✨ </span>Free events only</span>
         </label>
+        <label class="lgbtq-toggle" for="lgbtq-only-chk">
+          <input type="checkbox" id="lgbtq-only-chk">
+          <span><span class="chip-icon">🏳️‍🌈 </span>LGBTQ+ events only</span>
+        </label>
         <div class="timeframe-toggle-wrap" style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border);">
           <label class="timeframe-toggle" for="timeframe-enable-chk">
             <input type="checkbox" id="timeframe-enable-chk">
@@ -7572,6 +7580,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
     const searchStatus = document.getElementById('search-status');
     const searchCount = document.getElementById('search-count');
     const freeOnlyChk = document.getElementById('free-only-chk');
+    const lgbtqOnlyChk = document.getElementById('lgbtq-only-chk');
 
     const locChips = document.querySelectorAll('#location-chips .loc-chip');
     const transitChips = document.querySelectorAll('.transit-chip');
@@ -8540,8 +8549,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
       const allRecurs = recurBoxes.length;
       const chkRecurs = Array.from(recurBoxes).filter(b => b.checked).length;
       const isFree = freeOnlyChk && freeOnlyChk.checked;
+      const isLgbtq = lgbtqOnlyChk && lgbtqOnlyChk.checked;
       const isTimeFiltered = (timeFrom !== null || timeTo !== null);
-      const isFiltered = isCatFiltered || (chkGenres < allGenres) || (activeGenre !== 'all') || (chkVenues < allVenues) || (chkCities < allCities) || (chkRecurs < allRecurs) || isFree || popularOnly || starredOnly || (activeTransit !== 'all') || isTimeFiltered || (activeSubarea !== 'all') || (searchInput && !!searchInput.value.trim());
+      const isFiltered = isCatFiltered || (chkGenres < allGenres) || (activeGenre !== 'all') || (chkVenues < allVenues) || (chkCities < allCities) || (chkRecurs < allRecurs) || isFree || isLgbtq || popularOnly || starredOnly || (activeTransit !== 'all') || isTimeFiltered || (activeSubarea !== 'all') || (searchInput && !!searchInput.value.trim());
 
       if (mobileBadge) {{
         mobileBadge.textContent = isFiltered ? 'Active' : 'All';
@@ -8616,6 +8626,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
       if (checkedVenues.length > 0 && checkedVenues.length < allVenues.length) params.set('venues', checkedVenues.join(';'));
 
       if (freeOnlyChk && freeOnlyChk.checked) params.set('free', '1');
+      if (lgbtqOnlyChk && lgbtqOnlyChk.checked) params.set('lgbtq', '1');
       if (popularOnly) params.set('pop', '1');
       if (featuredOnly) params.set('picks', '1');
       if (starredOnly) params.set('saved', '1');
@@ -8653,6 +8664,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
       if (hParams || sParams) {{
         if (hasParam('q')) searchInput.value = getParam('q');
         if (getParam('free') === '1' && freeOnlyChk) freeOnlyChk.checked = true;
+        if (getParam('lgbtq') === '1' && lgbtqOnlyChk) lgbtqOnlyChk.checked = true;
         if (getParam('pop') === '1') popularOnly = true;
         if (getParam('picks') === '1') featuredOnly = true;
         if (getParam('saved') === '1') {{
@@ -8783,6 +8795,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
       const cities = new Set(Array.from(cityBoxes).filter(b => b.checked).map(b => b.value));
       const searchText = searchInput.value.trim().toLowerCase();
       const freeOnly = freeOnlyChk ? freeOnlyChk.checked : false;
+      const lgbtqOnly = lgbtqOnlyChk ? lgbtqOnlyChk.checked : false;
       const week = new Set(weekDates());
 
       const todayDate = parseISO(todayISO);
@@ -8901,6 +8914,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
                   transit: li.getAttribute('data-transit') || '',
                   timeMins: tm ? parseInt(tm, 10) : -1,
                   free: li.getAttribute('data-free') === 'true',
+                  lgbtq: li.getAttribute('data-lgbtq') === 'true',
                   votes: vt ? parseInt(vt, 10) : 0,
                   id: li.getAttribute('data-id') || li.getAttribute('data-event-id') || '',
                   genre: li.getAttribute('data-genre') || '',
@@ -8937,6 +8951,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
                 }}
               }}
               const freeOk = !freeOnly || m.free;
+              const lgbtqOk = !lgbtqOnly || m.lgbtq;
               const popularOk = !popularOnly || m.votes >= 3;
               const starredOk = !starredOnly || starredEvents.has(m.id);
               const searchOk = !searchText || (m.text || (m.text = li.textContent.toLowerCase())).includes(searchText);
@@ -8965,7 +8980,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
               }}
 
               const featuredOk = !featuredOnly || m.featured;
-              const isVisible = genreOk && venueOk && recurOk && subareaOk && transitOk && todOk && searchOk && freeOk && timePastOk && popularOk && starredOk && featuredOk;
+              const isVisible = genreOk && venueOk && recurOk && subareaOk && transitOk && todOk && searchOk && freeOk && lgbtqOk && timePastOk && popularOk && starredOk && featuredOk;
 
               const isHidden = !isVisible;
               if (m.hidden !== isHidden) {{
@@ -9418,6 +9433,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
     }});
 
     if (freeOnlyChk) freeOnlyChk.addEventListener('change', apply);
+    if (lgbtqOnlyChk) lgbtqOnlyChk.addEventListener('change', apply);
     catBoxes.forEach(b => b.addEventListener('change', () => {{
       if (b.value === 'Music & nightlife') {{
         const musicChecked = b.checked;
@@ -9549,6 +9565,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
     function resetAllFilters() {{
       if (searchInput) searchInput.value = '';
       if (freeOnlyChk) freeOnlyChk.checked = false;
+      if (lgbtqOnlyChk) lgbtqOnlyChk.checked = false;
       popularOnly = false;
       featuredOnly = false;
       starredOnly = false;
