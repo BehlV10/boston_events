@@ -4683,25 +4683,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
     gap: 8px;
     color: var(--fg);
   }}
-  .near-radius-group {{
-    display: flex;
-    gap: 4px;
-  }}
-  .near-radius-btn {{
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    border-radius: 999px;
-    padding: 3px 9px;
-    font-size: 11px;
-    font-weight: 600;
-    cursor: pointer;
-  }}
-  .near-radius-btn.active {{
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #0c0e14;
-  }}
   .near-stream-clear-btn {{
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid var(--border);
@@ -7240,7 +7221,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
     let markersLayer = null;
     let mapLoading = false;
     let nearMeActive = false;
-    let nearRadius = 2;  // miles; 0 = any distance
     let userCoords = null;
 
     function haversineMiles(lat1, lon1, lat2, lon2) {{
@@ -8448,16 +8428,12 @@ def render_page(results, weather=None, luckyseat_shows=None):
               eventDistances.push({{ ev: ev, dist: dist, timeMins: timeMins }});
             }});
 
-            // Events within the chosen distance, in time order (nearest first at the same time).
-            // Sorting by distance alone put a nearby library's 1pm and 3pm classes before
-            // another's 1pm, so times jumped around.
-            const nearby = eventDistances.filter(item => item.dist < 9999 && (!nearRadius || item.dist <= nearRadius));
-            nearby.sort((a, b) => (a.timeMins - b.timeMins) || (a.dist - b.dist));
-            eventDistances.length = 0;
-            nearby.forEach(item => eventDistances.push(item));
-            const locatedCount = nearby.length;
-            const radiusBtns = [1, 2, 5, 0].map(r =>
-              `<button type="button" class="near-radius-btn${{r === nearRadius ? ' active' : ''}}" data-radius="${{r}}">${{r ? r + ' mi' : 'Any'}}</button>`).join('');
+            eventDistances.sort((a, b) => {{
+              if (a.dist !== b.dist) return a.dist - b.dist;
+              return a.timeMins - b.timeMins;
+            }});
+
+            const locatedCount = eventDistances.filter(item => item.dist < 9999).length;
             let banner = nearStream.querySelector('.near-stream-banner');
             if (!banner) {{
               banner = document.createElement('div');
@@ -8467,9 +8443,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
             banner.innerHTML = `
               <div class="near-stream-info">
                 <span class="chip-icon">📍 </span>
-                <span><strong>${{locatedCount}} event${{locatedCount === 1 ? '' : 's'}}</strong> ${{nearRadius ? 'within ' + nearRadius + ' mi' : 'at any distance'}}, by time</span>
+                <span><strong>Sorted by distance from your location</strong> (${{locatedCount}} events nearby)</span>
               </div>
-              <div class="near-radius-group" role="group" aria-label="Distance">${{radiusBtns}}</div>
               <button type="button" class="near-stream-clear-btn" id="btn-reset-near">Reset to Category View</button>
             `;
 
@@ -9319,11 +9294,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
     document.addEventListener('click', (e) => {{
       if (e.target && e.target.id === 'btn-reset-near') {{
         setNearMe(false);
-      }}
-      const rb = e.target && e.target.closest && e.target.closest('.near-radius-btn');
-      if (rb) {{
-        nearRadius = parseFloat(rb.dataset.radius) || 0;
-        apply();
       }}
     }});
 
