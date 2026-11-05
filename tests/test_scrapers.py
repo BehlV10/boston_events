@@ -21,6 +21,63 @@ from scripts.add_community_event import validate_and_normalize as validate_event
 from scripts.add_suggested_venue import validate_and_normalize as validate_venue
 
 
+# ---------------------------------------------------------------------------------------------
+# Frozen clock. These tests were written against fixtures dated early November 2026 ("tonight",
+# "next week", "past events are dropped"). With the real clock they start failing one by one as
+# those dates pass, and the daily build runs the tests before deploying, so a stale fixture
+# would block the site. Freeze "now" at the day they were written while this module runs.
+# tests/test_acceptance.py uses dates relative to the real clock instead.
+# ---------------------------------------------------------------------------------------------
+import datetime as _dt_mod  # noqa: E402
+
+FROZEN_NOW = _dt_mod.datetime(2026, 11, 3, 12, 0, tzinfo=_dt_mod.timezone(_dt_mod.timedelta(hours=-5)))
+
+
+class _FrozenDatetime(_dt_mod.datetime):
+    @classmethod
+    def now(cls, tz=None):
+        n = FROZEN_NOW.astimezone(tz) if tz else FROZEN_NOW.astimezone().replace(tzinfo=None)
+        return cls.combine(n.date(), n.timetz() if tz else n.time())
+
+    @classmethod
+    def utcnow(cls):
+        n = FROZEN_NOW.astimezone(_dt_mod.timezone.utc).replace(tzinfo=None)
+        return cls.combine(n.date(), n.time())
+
+    @classmethod
+    def today(cls):
+        return cls.now()
+
+
+class _FrozenDate(_dt_mod.date):
+    @classmethod
+    def today(cls):
+        return FROZEN_NOW.date()
+
+
+_FROZEN_MODULES = ("scrapers", "template", "server", "themes", "export_feeds", "export_og",
+                   "scripts.add_community_event", "scripts.add_suggested_venue", __name__)
+_saved_clock = []
+
+
+def setUpModule():
+    for name in _FROZEN_MODULES:
+        mod = sys.modules.get(name)
+        if mod is None:
+            continue
+        for attr, fake in (("datetime", _FrozenDatetime), ("date", _FrozenDate)):
+            real = getattr(mod, attr, None)
+            if real in (_dt_mod.datetime, _dt_mod.date):
+                _saved_clock.append((mod, attr, real))
+                setattr(mod, attr, fake)
+
+
+def tearDownModule():
+    while _saved_clock:
+        mod, attr, real = _saved_clock.pop()
+        setattr(mod, attr, real)
+
+
 class TestBostonEvents(unittest.TestCase):
 
     def test_all_venues_defined(self):
@@ -1739,7 +1796,7 @@ class TestBostonEvents(unittest.TestCase):
     def test_fuzzy_cross_source_duplicates_merge(self):
         """Same show listed by two sources with formatting differences collapses to one."""
         from template import _merge_duplicates, EASTERN
-        from datetime import datetime
+        # (uses the module's frozen clock; see setUpModule)
 
         def ev(name, venue, src, hh, mm=0):
             return {"name": name, "venue": venue, "_source_venue": src,
@@ -1894,7 +1951,7 @@ class TestBostonEvents(unittest.TestCase):
 
     def test_bibliocommons_kids_audience_and_bpl_branches(self):
         from unittest.mock import patch, MagicMock
-        from datetime import datetime, timedelta
+        # (uses the module's frozen clock; see setUpModule)
         import scrapers
         soon = (datetime.now(scrapers.EASTERN) + timedelta(days=2)).strftime("%Y-%m-%dT10:30")
         payload = {
@@ -1921,7 +1978,7 @@ class TestBostonEvents(unittest.TestCase):
 
     def test_little_muse_listing_parsing(self):
         from unittest.mock import patch, MagicMock
-        from datetime import datetime, timedelta
+        # (uses the module's frozen clock; see setUpModule)
         import scrapers
         d = datetime.now(scrapers.EASTERN) + timedelta(days=1)
         day_hdr = d.strftime("%A, %B %-d").upper()
@@ -1991,7 +2048,7 @@ class TestBostonEvents(unittest.TestCase):
 
     def test_midnight_runners_first_tuesday_is_5k(self):
         from scrapers import scrape_midnight_runners, EASTERN
-        from datetime import datetime
+        # (uses the module's frozen clock; see setUpModule)
         evs = scrape_midnight_runners("https://www.heylo.com/events/x/", "ua")
         self.assertGreaterEqual(len(evs), 3)
         for e in evs:
@@ -2147,7 +2204,7 @@ class TestBostonEvents(unittest.TestCase):
             },
         ]
         # In actual pipeline, events arrive sorted by _time so 12 PM is processed first
-        from datetime import datetime
+        # (uses the module's frozen clock; see setUpModule)
         import zoneinfo
         _eastern = zoneinfo.ZoneInfo("America/New_York")
         for e in willi_events:
@@ -2431,7 +2488,7 @@ class RetitledSameEventMergeTests(unittest.TestCase):
     """Two sources list one event under different titles (step 6 of _merge_duplicates)."""
 
     def _ev(self, name, source, venue, hour=19, minute=30):
-        from datetime import datetime
+        # (uses the module's frozen clock; see setUpModule)
         from template import EASTERN
         t = datetime(2026, 11, 12, hour, minute, tzinfo=EASTERN)
         slug = "".join(c for c in source.lower() if c.isalnum())
@@ -2517,7 +2574,7 @@ class RetitledSameEventMergeTests(unittest.TestCase):
 
 class SeparateListingsMergeTests(unittest.TestCase):
     def _ev(self, name, hour, url, source="ICA Boston", venue="ICA Boston", **kw):
-        from datetime import datetime
+        # (uses the module's frozen clock; see setUpModule)
         from template import EASTERN
         e = {"name": name, "url": url, "venue": venue, "_source_venue": source,
              "venue_url": "https://www.icaboston.org/events/", "category": kw.get("category", "family"),
