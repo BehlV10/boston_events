@@ -1188,17 +1188,21 @@ class TestBostonEvents(unittest.TestCase):
         <html><body>
         <article>
           <h2>When? Where? How much?</h2>
-          <p>Four nights of dancing! Sunday Nov 8th we’ll be at Cambridge Masonic Hall at 1950 Mass Ave.</p>
+          <p>November 5-8th is Little Dipper Fusion weekend! Four nights of dancing! Sunday Nov 8th we’ll be at Cambridge Masonic Hall at 1950 Mass Ave.</p>
           <p>Admission is pay-what-you-can.</p>
+          <p>Our December event will be December 13th, and we’ll be at First Street Market, 59 First Street in Cambridge. We expect to return to the Masonic Hall for our January 10 2027 dance.</p>
         </article>
         </body></html>
         """
         with patch("scrapers.fetch_soup", return_value=BeautifulSoup(prose_html, "html.parser")):
             events = scrape_second_sun_rising("https://secondsunrising.com/", UA_CHROME)
 
-        self.assertEqual(len(events), 1)
+        # Nov 5 (start of a date range) and the tentative January date are skipped
+        self.assertEqual(len(events), 2)
         self.assertEqual(events[0]["name"], "Second Sun Rising — Fusion Dance")
-        self.assertEqual(events[0]["venue"], "Cambridge Masonic Hall (Cambridge)")
+        self.assertEqual(events[0]["venue"], "Cambridge Masonic Hall")
+        self.assertEqual(events[1]["venue"], "First Street Market")
+        self.assertEqual(events[1]["address"], "59 First St, Cambridge")
         from scrapers import EASTERN
         local_dt = datetime.fromisoformat(events[0]["date"]).astimezone(EASTERN)
         self.assertEqual(local_dt.month, 11)
