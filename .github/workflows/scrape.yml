@@ -21,7 +21,7 @@ concurrency:
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
 
@@ -31,6 +31,13 @@ jobs:
           cache: pip
 
       - run: pip install -r requirements.txt
+
+      # Unit + acceptance tests (tests/test_acceptance.py has one test per site bug found so far).
+      # A failure stops the job before anything is scraped, committed or deployed, so the live
+      # site keeps the last good build. Runs before the HTML export because rendering in the
+      # tests rewrites deferred_days.html.
+      - name: Run tests
+        run: python -m unittest discover -s tests -v
 
       - name: Cache venue scrapers
         uses: actions/cache@v4
