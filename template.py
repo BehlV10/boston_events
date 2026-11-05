@@ -54,7 +54,7 @@ CITY_RULES = [
         "somerville, ma", "(somerville)", ", somerville",
         "davis square", "davis sq", "seven hills park", "assembly row", "union square", "union sq",
         "the burren", "burren", "mccarthy's toad", "mccarthys toad", "remnant somerville",
-        "comedy studio", "bow market", "upstairs at bow",
+        "bow market", "upstairs at bow",
         "armory", "arts at the armory", "somerville arts council",
         "the jungle", "jungle", "sally o'brien", "sally obrien", "side quest",
         "duck duck goof", "goofs comedy", "somerville library", "growing center",
@@ -69,7 +69,7 @@ CITY_RULES = [
     )),
     ("cambridge", (
         "cambridge", "batifol", "passim", "club passim", "monkfish", "mad monkfish",
-        "mit ", "m.i.t", "harvard square", "harvard book", "porter square", "sinclair",
+        "mit ", "m.i.t", "harvard square", "harvard book", "porter square", "sinclair", "comedy studio",
         "brattle", "cambridge, ma", "(cambridge)", ", cambridge",
         "kendall", "kendall center", "urban park", "central square", "inman square", "cantab",
         "havetodance", "have to dance", "ywca cambridge",
@@ -306,7 +306,7 @@ def resolve_subarea(city, event, geo=None):
     if city == "cambridge":
         if any(k in blob for k in ["central square", "cantab", "middle east", "sonia", "manray", "man ray", "middlesex", "phoenix landing", "plough and stars", "plough & stars", "dance complex", "mad monkfish", "la fabrica", "havana club", "roxy", "a4cade"]):
             return ("Central Square", "central_sq")
-        if any(k in blob for k in ["harvard square", "sinclair", "brattle", "passim", "harvard book", "harvard museum", "peabody museum", "lou's", "wearelous", "sanders", "farkas", "harvard university", "ccae", "harvard art museum", "main library", "449 broadway"]):
+        if any(k in blob for k in ["harvard square", "sinclair", "brattle", "passim", "harvard book", "harvard museum", "peabody museum", "lou's", "wearelous", "sanders", "farkas", "harvard university", "ccae", "harvard art museum", "main library", "449 broadway", "comedy studio"]):
             return ("Harvard Square", "harvard_sq")
         if any(k in blob for k in ["kendall", "mit ", "m.i.t", "venture café", "venture cafe", "cambridge crossing", "starlight", "broadway", "urban park"]):
             return ("Kendall / MIT", "kendall_mit")
@@ -319,7 +319,7 @@ def resolve_subarea(city, event, geo=None):
         return ("Other Cambridge", "cambridge_other")
 
     elif city == "somerville":
-        if any(k in blob for k in ["davis", "somerville theatre", "crystal ballroom", "burren", "rockwell", "comedy studio", "underbones", "painted burro", "west branch"]):
+        if any(k in blob for k in ["davis", "somerville theatre", "crystal ballroom", "burren", "rockwell", "underbones", "painted burro", "west branch"]):
             return ("Davis Square", "davis_sq")
         if any(k in blob for k in ["union square", "bow market", "armory", "arts at the armory", "jungle", "remnant", "sally o'brien", "sally obrien", "side quest", "duck duck goof", "dance union", "goofs comedy", "vera's", "warehouse xi", "warehouse 11", "warehouse-xi"]):
             return ("Union Square", "union_sq")
@@ -421,9 +421,13 @@ def _maps_link(venue, city):
     return f"https://www.google.com/maps/search/?api=1&query={quote(query)}"
 
 
-_FREE_TITLE_RE = re.compile(
+from scrapers import admission_price, mentions_free  # noqa: E402
+
+# Activities that are usually free ("open mic", "board games", "run club"). Only a hint: the venue
+# may still charge (Queer Board Game Night at Club Café is $5), so a listed price, a ticket link or
+# an admission-only venue outweighs it.
+_FREE_ACTIVITY_RE = re.compile(
     r"\b("
-    r"free|"
     r"honk(!|\b)|"
     r"porchfest|"
     r"parade|"
@@ -446,11 +450,27 @@ _FREE_TITLE_RE = re.compile(
     r"board games?|"
     r"storytimes?|"
     r"fun runs?|"
-    r"run clubs?|"
-    r"no cover"
+    r"run clubs?"
     r")\b",
     re.IGNORECASE,
 )
+
+# Sites that sell paid tickets. Ticketmaster, AXS and the like list paid shows, so a missing price
+# there never means free ("Iliza Shlesinger: Free Nights & Weekends" is a tour name).
+_PAID_SELLER_RE = re.compile(
+    r"(?:^|[/.])(?:ticketmaster|livenation|axs|ticketweb|etix|seetickets|dice\.fm|tixr|showclix|prekindle|"
+    r"holdmyticket|eventim|seatgeek|stubhub|vividseats)\.",
+    re.IGNORECASE,
+)
+# Any ticketing page, free or paid; enough to doubt a free guess drawn from an activity word.
+_TICKET_LINK_RE = re.compile(
+    r"(?:^|[/.])(?:eventbrite|tickettailor|simpletix|ticketleap|brownpapertickets|humanitix|universe|ludus|"
+    r"seatengine|eventcombo|withfriends)\.|//tickets?\.|/tickets?(?:[/?#-]|$)|/checkout|/buy-tickets",
+    re.IGNORECASE,
+)
+# Places where an activity is included with paid admission (storytime at the Children's Museum).
+_ADMISSION_VENUES = ("children's museum", "childrens museum", "museum of science", "aquarium", "zoo",
+                     "discovery museum", "legoland")
 
 _FREE_DESC_PHRASES = [
     "admission: free",
@@ -481,10 +501,19 @@ def _is_event_free(e):
         if re.search(r"\$[1-9]", price):
             return False
 
+    # Another listing of the same event names a price ("$5" on the venue's page).
+    alts = e.get("_alt_sources") or []
+    if not price and any(re.search(r"\$\s?[1-9]", a.get("price") or "") for a in alts):
+        return False
+
     name = (e.get("name") or "").lower()
     desc = (e.get("description") or "").lower()
     source = (e.get("_source_venue") or "").lower()
     venue = (e.get("venue") or "").lower()
+    urls = [e.get("url") or ""] + [a.get("url") or "" for a in alts]
+
+    if any(_PAID_SELLER_RE.search(u) for u in urls):
+        return False
 
     if any(k in source or k in venue for k in [
         "library", "bpl", "farmers market", "open market",
@@ -492,11 +521,16 @@ def _is_event_free(e):
     ]):
         return True
 
-    if _FREE_TITLE_RE.search(name):
+    if mentions_free(name):
         return True
 
     if any(p in desc for p in _FREE_DESC_PHRASES):
         return True
+
+    if _FREE_ACTIVITY_RE.search(name):
+        sells_tickets = any(_TICKET_LINK_RE.search(u) for u in urls)
+        charges_admission = any(k in venue or k in source for k in _ADMISSION_VENUES)
+        return not (admission_price(desc) or sells_tickets or charges_admission)
 
     return False
 
@@ -2653,7 +2687,10 @@ def _merge_duplicates(events, word_freq=None):
                 if e.get("date"):
                     match["date"] = e["date"]
 
-            if not match.get("price") and e.get("price"):
+            # The venue's own price beats a listings site's ("$5 + fee" from Club Café over "Free").
+            if new_prio > cur_prio and e.get("price"):
+                match["price"] = e["price"]
+            elif not match.get("price") and e.get("price"):
                 match["price"] = e["price"]
 
             if match.get("_venue_unknown") and not e.get("_venue_unknown") and e.get("venue"):
