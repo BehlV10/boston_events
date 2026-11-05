@@ -407,6 +407,29 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
 
 # Substring needle rules for matching variations in scraped venue titles
 VENUE_RULES = [
+    # Music venues added from the Boston Shows coverage check (addresses from the venues' own sites)
+    ("square root", (42.2869, -71.1301, "Roslindale", "2 Belgrade Ave, Roslindale", "Square Root")),
+    ("postunderground", (42.3344, -71.1226, "Brookline Village", "386 Washington St, Brookline", "POSTunderground")),
+    ("lower mills tavern", (42.2730, -71.0681, "Lower Mills", "2269 Dorchester Ave, Dorchester", "Lower Mills Tavern")),
+    ("king's chapel", (42.3580, -71.0600, "Downtown", "58 Tremont St, Boston", "King's Chapel")),
+    ("kings chapel", (42.3580, -71.0600, "Downtown", "58 Tremont St, Boston", "King's Chapel")),
+    ("faces brewing", (42.4265, -71.0686, "Malden Center", "50 Pleasant St, Malden", "Faces Brewing")),
+    ("jazz urbane", (42.3302, -71.0836, "Nubian Square", "2300 Washington St, Roxbury", "Jazz Urbane Cafe")),
+    ("medford brewing", (42.4204, -71.1336, "West Medford", "30 Harvard Ave, Medford", "Medford Brewing Company")),
+    ("village social club", (42.3328, -71.1188, "Brookline Village", "6 Harvard Square, Brookline", "Village Social Club")),
+    ("luthier collective", (42.3829, -71.1045, "Spring Hill", "487 Somerville Ave, Somerville", "Luthier Collective")),
+    ("eva broadway strings", (42.3829, -71.1045, "Spring Hill", "487 Somerville Ave, Somerville", "Luthier Collective")),
+    ("gbh fraser", (42.3569, -71.1479, "Brighton", "1 Guest St, Brighton", "GBH Fraser Performance Studio")),
+    ("gbh studios", (42.3569, -71.1479, "Brighton", "1 Guest St, Brighton", "GBH Fraser Performance Studio")),
+    ("memorial church", (42.3749, -71.1160, "Harvard Square", "Harvard Yard, Cambridge", "Memorial Church (Harvard)")),
+    ("harvard university (harvard square)", (42.3744, -71.1169, "Harvard Square", "Harvard Yard, Cambridge", "Harvard University (Harvard Square)")),
+    ("lithuanian club", (42.3379, -71.0489, "South Boston", "368 W Broadway, South Boston", "Lithuanian Club")),
+    ("an síbín", (42.3734, -71.0972, "Inman Square", "1193 Cambridge St, Cambridge", "An Síbín")),
+    ("an sibin", (42.3734, -71.0972, "Inman Square", "1193 Cambridge St, Cambridge", "An Síbín")),
+    ("rosa y marigold", (42.3475, -71.0885, "Back Bay", "400 Newbury St, Boston", "Rosa y Marigold")),
+    ("kestra", (42.3470, -71.0426, "Seaport", "Omni Boston Seaport, 450 Summer St, Boston", "Kestra (Omni Boston Seaport)")),
+    ("shaw-roxbury", (42.3293, -71.0838, "Nubian Square", "149 Dudley St, Roxbury", "Boston Public Library (Shaw-Roxbury)")),
+    ("gbh studio at the boston public library", (42.3495, -71.0780, "Back Bay", "700 Boylston St, Boston", "GBH Studio at the Boston Public Library")),
     # Kids & family venues and town libraries (specific branches before the general names)
     ("brookline public library (putterham", (42.3080, -71.1544, "Brookline", "959 West Roxbury Pkwy, Brookline", "Brookline Public Library (Putterham)")),
     ("brookline public library (coolidge", (42.3424, -71.1220, "Coolidge Corner", "31 Pleasant St, Brookline", "Brookline Public Library (Coolidge Corner)")),

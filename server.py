@@ -167,6 +167,12 @@ def export_json(path="events.json", force=False):
     force = force or (os.environ.get("FORCE_SCRAPE", "").lower() in ("1", "true"))
     venues = _do_scrape_all(force=force)
     new_total = sum(len(v["events"]) for v in venues)
+    try:  # which sources errored, refused us, or have nothing coming up (CI run summary + .cache/)
+        from source_health import write_report
+        from scrapers import HOST_GATE
+        write_report(venues, getattr(HOST_GATE, "refused", {}))
+    except Exception as ex:
+        print(f"source health report failed: {ex}")
 
     # Guard against degraded cloud scrapes (preserving existing data if scrape yields < 50% events)
     if os.path.exists(path):
