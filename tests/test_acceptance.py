@@ -316,9 +316,10 @@ class ScraperAcceptance(unittest.TestCase):
         """The December dance was listed at the Masonic Hall; it's at First Street Market."""
         from bs4 import BeautifulSoup
         from scrapers import UA_CHROME, scrape_second_sun_rising
-        year = datetime.now(EASTERN).year + 1
-        page = f"""<html><body><article><p>Our next event will be January 10th, and we'll be at First Street
-          Market, 59 First Street in Cambridge.</p><p>February 14 {year} we'll be at Cambridge Masonic Hall at
+        d1, d2 = _day_at(12, 19).date(), _day_at(40, 19).date()
+        fmt = lambda d: f"{d.strftime('%B')} {d.day} {d.year}"
+        page = f"""<html><body><article><p>Our next event will be {fmt(d1)}, and we'll be at First Street
+          Market, 59 First Street in Cambridge.</p><p>{fmt(d2)} we'll be at Cambridge Masonic Hall at
           1950 Mass Ave.</p></article></body></html>"""
         with patch("scrapers.fetch_soup", return_value=BeautifulSoup(page, "html.parser")):
             evs = scrape_second_sun_rising("https://secondsunrising.com/", UA_CHROME)
@@ -369,15 +370,16 @@ class RedditPostAcceptance(unittest.TestCase):
         title, body, _ = self.G.build(self.G._week_start(None))
         self.assertLess(len(body), 40000)
         self.assertEqual(len(re.findall(r"^\*\*(?:MON|TUES|WEDNES|THURS|FRI|SATUR|SUN)DAY, ", body, re.M)) <= 7, True)
-        # Same title on the same day twice = a duplicate (two events may share a venue's generic link)
+        # Same title at the same venue on the same day twice = a duplicate
         entries, day = [], None
         for line in body.splitlines():
             m = re.match(r"^\*\*([A-Z]+DAY), ", line)
             if m:
                 day = m.group(1)
-            m = re.match(r"^\* (?:(\w{3}) · )?\*\*\[([^\]]+)\]", line)
-            if m:
-                entries.append(((m.group(1) or day or "").upper()[:3], re.sub(r"\W+", "", m.group(2).lower())))
+            m = re.match(r"^\* (?:(\w{3}) · )?\*\*\[([^\]]+)\]\([^)]*\)\*\* @ ([^@·]+)", line)
+            if m:   # same day + title + venue; two bars may both run a "Trivia Night"
+                entries.append(((m.group(1) or day or "").upper()[:3], re.sub(r"\W+", "", m.group(2).lower()),
+                                m.group(3).strip().lower()))
         dupes = [k for k in set(entries) if entries.count(k) > 1]
         self.assertEqual(dupes, [], "an event appears twice in the post")
 
