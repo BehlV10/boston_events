@@ -108,6 +108,42 @@ class HubPageAcceptance(unittest.TestCase):
         self.assertIn("10:30", text)
 
 
+    def test_hub_filter_scripts_run_after_the_cards(self):
+        """The city chips on every hub page lit up but filtered nothing: the script ran above the
+        grid, so querySelectorAll('.hub-card') found no cards."""
+        when = _day_at(1, 10)
+        venues = [{"venue": src, "url": "https://x.test/" + city, "error": None,
+                   "events": [{"name": f"Storytime at {src}", "date": when.isoformat(), "category": "family",
+                               "url": f"https://x.test/{city}/story", "venue": src, "price": "Free"}]}
+                  for src, city in (("Cambridge Public Library", "cambridge"), ("Boston Public Library", "boston"))]
+        for slug in ("kids-family-events-boston", "free"):
+            html = self._hub(slug, venues)
+            self.assertEqual(html.count('<article class="hub-card'), 2, slug)
+            last_card = html.rindex("</article>")
+            script = html.index("var chips = document.querySelectorAll('.") if "var chips" in html else None
+            self.assertIsNotNone(script, slug)
+            self.assertGreater(script, last_card, slug)
+
+    def test_kids_hub_tags_cards_by_age_and_activity(self):
+        when = _day_at(2, 10, 30)
+        events = [
+            {"name": "Toddler Tales (ages 1.5-3)", "category": "family", "venue": "Melrose Public Library"},
+            {"name": "Family Night Hike and Owl Prowl", "category": "family", "venue": "Mass Audubon Drumlin Farm"},
+            {"name": "Baby Laptime (prewalkers)", "category": "family", "venue": "Cary Memorial Library"},
+        ]
+        html = self._hub("kids-family-events-boston", [{
+            "venue": "Kids source", "url": "https://kids.test", "error": None,
+            "events": [dict(e, date=when.isoformat(), url=f"https://kids.test/{i}") for i, e in enumerate(events)]}])
+        self.assertIn('class="kids-hub"', html)
+        self.assertRegex(html, r'data-age="toddler" data-kind="story"')
+        self.assertRegex(html, r'data-age="family" data-kind="nature"')
+        self.assertRegex(html, r'data-age="baby" data-kind="story"')
+        self.assertIn("Ages 1.5–3", _visible_text(html))
+        for chip in ('data-val="toddler"', 'data-val="baby"', 'data-val="story"', 'data-val="nature"'):
+            self.assertIn(chip, html)
+        self.assertNotIn('data-val="bigkid"', html)  # no chip for an age nobody matches
+
+
 class MergeAcceptance(unittest.TestCase):
     """Duplicates that showed as two cards, and different events that were wrongly one card."""
 
