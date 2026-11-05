@@ -99,8 +99,8 @@ def _price(e):
     if _is_event_free(e):
         return "Free"
     p = str(e.get("price") or "").strip()
-    if not p or re.fullmatch(r"\$?0(?:\.00)?", p) or len(p) > 20:
-        return ""
+    if not p or re.fullmatch(r"\$?0(?:\.00)?", p) or len(p) > 20 or not re.search(r"\d", p):
+        return ""  # "Check link", "Tickets", "TBA"
     return re.sub(r"\.00\b", "", p)
 
 
