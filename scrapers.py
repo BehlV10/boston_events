@@ -4989,6 +4989,112 @@ def scrape_meetup_group(url, ua):
     return events
 
 
+# Meetup's Boston search one topic at a time: each view server-renders only 12 events, so a sweep
+# of topics x date windows reaches a few hundred. (topic id, category, trust the topic?):
+# a narrow topic's events take its category ("Game Night", "BOINGA Game Festival" are board games,
+# a dog-park "playgroup" isn't for kids); a broad one's are read from the title. Narrow topics come
+# first so an event listed under both keeps the narrow category.
+MEETUP_FIND_TOPICS = [
+    (535, "gaming", True),       # Games
+    (612, "dance", True),        # Dancing
+    (482, "sports", True),       # Sports & Fitness
+    (684, "outdoors", True),     # Travel & Outdoor
+    (467, "books", True),        # Writing
+    (701, "community", True),    # Pets & Animals
+    (395, "music", False),       # Music (karaoke, jams, tribute shows, choirs)
+    (521, "art", False),         # Art & Culture (also improv, opera, film outings)
+    (652, "community", False),   # Social Activities
+    (571, "community", False),   # Hobbies & Passions
+    (511, "community", False),   # Health & Wellbeing
+    (622, "community", False),   # Identity & Language
+]
+MEETUP_FIND_WINDOWS = ("", "this-weekend", "next-week")
+_MEETUP_FIND_URL = ("https://www.meetup.com/find/?location=us--ma--boston&source=EVENTS"
+                    "&eventType=inPerson&distance=tenMiles&categoryId={topic}{window}")
+
+
+def _meetup_find_events(page_html):
+    """Events in a Meetup search page's Apollo state: [(event, group_name)]."""
+    m = re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', page_html or "", re.S)
+    if not m:
+        return []
+    try:
+        state = json.loads(m.group(1))["props"]["pageProps"]["__APOLLO_STATE__"]
+    except (ValueError, KeyError, TypeError):
+        return []
+    out = []
+    for k, v in state.items():
+        if k.startswith("Event:") and isinstance(v, dict) and v.get("title") and v.get("eventUrl"):
+            group = state.get((v.get("group") or {}).get("__ref") or "") or {}
+            out.append((v, (group.get("name") or "").strip()))
+    return out
+
+
+def scrape_meetup_topics(url, ua):
+    """In-person Meetup events within 10 miles of Boston across the fun topics (social, games,
+    arts, music, dance, sports, outdoors, hobbies, language, writing, pets), for the next days,
+    this weekend and next week. Tech and career networking titles go to the Tech bucket."""
+    from concurrent.futures import ThreadPoolExecutor
+    pages = [(topic, _MEETUP_FIND_URL.format(topic=topic[0], window=f"&dateRange={w}" if w else ""))
+             for topic in MEETUP_FIND_TOPICS for w in MEETUP_FIND_WINDOWS]
+
+    def fetch(job):
+        topic, page_url = job
+        try:
+            r = _SESSION.get(page_url, headers={"User-Agent": ua}, timeout=20)
+            return topic, (r.text if r.status_code == 200 else "")
+        except Exception:
+            return topic, ""
+
+    now = datetime.now(timezone.utc)
+    cutoff = now + timedelta(weeks=6)
+    events, seen = [], set()
+    with ThreadPoolExecutor(max_workers=4) as ex:
+        for topic, page_html in ex.map(fetch, pages):
+            for v, group_name in _meetup_find_events(page_html):
+                if v.get("eventType") not in (None, "PHYSICAL") or v["eventUrl"] in seen:
+                    continue
+                try:
+                    when = datetime.fromisoformat(v.get("dateTime") or "").astimezone(timezone.utc)
+                except ValueError:
+                    continue
+                if not (now <= when <= cutoff):
+                    continue
+                seen.add(v["eventUrl"])
+                venue = v.get("venue") or {}
+                vname = (venue.get("name") or "").strip()
+                if vname.lower() in ("online event", "online", "tbd", "to be determined"):
+                    vname = ""
+                if venue.get("city") and vname and venue["city"].lower() not in vname.lower():
+                    vname = f"{vname} ({venue['city']})"
+                elif not vname:
+                    vname = group_name or "Meetup"
+                title = v["title"].strip()
+                _, topic_cat, narrow = topic
+                # Title only: venue names mislead ("Open Studios" at a coffee bar isn't food)
+                category = topic_cat if narrow else infer_category(title, None, topic_cat)
+                # A tech talk that slipped into a social topic; not a tango "code" or improv "incubator"
+                if category in ("community", "other") and TECH_EVENT_RE.search(title):
+                    category = "tech"
+                fee = v.get("feeSettings") or {}
+                price = None
+                if isinstance(fee.get("amount"), (int, float)) and fee["amount"] > 0:
+                    price = f"${fee['amount']:g}"
+                ev = {
+                    "name": title,
+                    "date": when.isoformat(),
+                    "url": v["eventUrl"],
+                    "venue": vname,
+                    "price": price,
+                    "category": category,
+                    "description": re.sub(r"[*_#]+", "", v.get("description") or "")[:200],
+                }
+                if venue.get("address"):
+                    ev["address"] = ", ".join(x for x in (venue.get("address"), venue.get("city")) if x)
+                events.append(ev)
+    return events
+
+
 def scrape_meetup(url, ua):
     """Meetup in-person Boston events via JSON-LD Event array."""
     soup = fetch_soup(url, ua)
@@ -5132,6 +5238,7 @@ LUMA_CALENDAR_SEEDS = {
     "cal-21bcAtxY2x6CA7d": "The Story Circus",    # luma.com/thestorycircus
 }
 LUMA_CALENDARS_CACHE_PATH = os.path.join(CACHE_DIR, "luma_calendars.json")
+LUMA_CALENDAR_CAP = 200  # calendars fetched per run
 LUMA_LOCAL_CATEGORIES = {
     "cat-family": "Family", "cat-books": "Books", "cat-games": "Games", "cat-fooddrink": "Food & Drink",
     "cat-running": "Running", "cat-AzVAf6VmE9JEre4": "Arts & Culture", "cat-climate": "Climate",
@@ -5238,9 +5345,12 @@ def scrape_luma_calendars(url, ua):
         except Exception:
             return []
 
+    # Fun organizers first (most discovered calendars are startup ones, from Luma's tech feeds),
+    # then the cap: about 0.3s a calendar across 8 workers.
+    order = sorted(cals, key=lambda cid: (cid not in LUMA_CALENDAR_SEEDS, bool(TECH_EVENT_RE.search(cals[cid] or ""))))
     events, seen = [], set()
     with ThreadPoolExecutor(max_workers=8) as ex:
-        for entries in ex.map(fetch, list(cals)[:80]):
+        for entries in ex.map(fetch, order[:LUMA_CALENDAR_CAP]):
             cal_events = []
             for entry in entries:
                 ev = _luma_entry_to_event(entry, now)
@@ -6619,6 +6729,219 @@ def scrape_tribe_rest(url, ua, default_venue=None, default_category=None):
             "category": category,
         })
     return events
+
+
+def scrape_tribe_rest_paged(url, ua, default_venue=None, default_category=None, days=21, max_pages=6,
+                            skip_re=None):
+    """The Events Calendar API, several pages of the next `days` days (busy calendars like
+    Harvard Square's list 200+ events in three weeks; one page holds 50)."""
+    base = url.split("?")[0]
+    today = datetime.now(EASTERN)
+    start, end = today.strftime("%Y-%m-%d"), (today + timedelta(days=days)).strftime("%Y-%m-%d")
+    fallback = default_category or "community"
+    out, seen = [], set()
+    for page in range(1, max_pages + 1):
+        evs = scrape_tribe_rest(f"{base}?per_page=50&page={page}&start_date={start}&end_date={end}", ua,
+                                default_venue=default_venue, default_category=default_category)
+        if not evs:
+            if page > 1:  # past the last page the API answers 400; page 1 may be all earlier-today events
+                break
+            continue
+        for e in evs:
+            key = (e["name"], e["date"], e.get("venue"))
+            if key in seen or (skip_re and skip_re.search(e["name"])):
+                continue
+            seen.add(key)
+            # No telling calendar category (Live Music, Comedy, Art...): read the title and venue
+            if e["category"] == fallback:
+                e["category"] = infer_category(e["name"], e["venue"], fallback)
+            out.append(e)
+    return out
+
+
+def _sugar_calendar_cells(page_html):
+    """(start 'YYYY-MM-DDTHH:MM:SS' local, title, url) for each event in a Sugar Calendar month grid."""
+    out = []
+    for m in re.finditer(r'data-eventurl="([^"]+)".*?data-daydate="([^"]+)".*?'
+                         r'sugar-calendar-block__event-cell__title">\s*(.*?)\s*</div>', page_html or "", re.S):
+        try:
+            start = json.loads(html.unescape(m.group(2)))["start_date"]["datetime"]
+        except (ValueError, KeyError, TypeError):
+            continue
+        out.append((start, html.unescape(m.group(3)).strip(), html.unescape(m.group(1))))
+    return out
+
+
+def _flatten_form(prefix, obj, out):
+    """jQuery-style form encoding of a nested object (a[b][0]=...), as $.post sends it."""
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            _flatten_form(f"{prefix}[{k}]", v, out)
+    elif isinstance(obj, list):
+        for i, v in enumerate(obj):
+            _flatten_form(f"{prefix}[{i}]", v, out)
+    else:
+        out.append((prefix, "true" if obj is True else "false" if obj is False else str(obj)))
+    return out
+
+
+_BPM_SKIP_RE = re.compile(r"(?i)market closed|blood (?:donor|drive)|\bclosed\b|private event")
+# The market's weekend kids' programming (face painting, the magician, puppets, story & craft hour)
+_BPM_KIDS_RE = re.compile(r"(?i)face ?paint|magician|puppet|story ?(?:time|& craft|and craft)|sing-?along|\bkids?\b|famil")
+_BPM_FOOD_RE = re.compile(r"(?i)tasting|pairing|blending|spice|coffee|latt[eé]|tea\b|wine|beer|cider|supper|brunch|"
+                          r"munchies|nouveau|cheese|chocolate|cook|bak(?:e|ing)|dinner")
+
+
+def scrape_boston_public_market(url, ua):
+    """Boston Public Market's events calendar (Sugar Calendar): trivia nights, tastings, craft
+    club, live music, kids' activity hours and story times, pop-up and holiday markets. The page
+    shows this month; next month comes from the calendar's own month-change request."""
+    headers = {"User-Agent": ua}
+    try:
+        page = _SESSION.get(url, headers=headers, timeout=20).text
+    except Exception:
+        return []
+    cells = _sugar_calendar_cells(page)
+    now = datetime.now(EASTERN)
+    try:
+        nonce = re.search(r'var sugar_calendar_obj = \{[^}]*"nonce":"(\w+)"', page).group(1)
+        attrs = json.loads(html.unescape(re.search(r'data-attributes="([^"]+)"', page).group(1)))
+        block_id = re.search(r'name="sc_calendar_id" value="([^"]+)"', page).group(1)
+        nxt = (now.replace(day=1) + timedelta(days=32)).replace(day=1)
+        block = {"id": block_id, "attributes": attrs, "day": 1, "month": nxt.month, "year": nxt.year,
+                 "search": "", "display": "month", "visitor_tz_convert": 0,
+                 "visitor_tz": "America/New_York", "updateDisplay": False, "action": ""}
+        data = _flatten_form("calendar_block", block, [("action", "sugar_calendar_block_update"), ("nonce", nonce)])
+        ajax = url.split("/events")[0] + "/wp-admin/admin-ajax.php"
+        r = _SESSION.post(ajax, data=data, timeout=20,
+                          headers={**headers, "X-Requested-With": "XMLHttpRequest", "Referer": url})
+        cells += _sugar_calendar_cells(((r.json() or {}).get("data") or {}).get("body") or "")
+    except Exception:
+        pass  # this month only
+
+    events, seen = [], set()
+    for start, title, link in cells:
+        if (start, title) in seen or not title or _BPM_SKIP_RE.search(title):
+            continue
+        seen.add((start, title))
+        try:
+            dt = datetime.fromisoformat(start).replace(tzinfo=EASTERN)
+        except ValueError:
+            continue
+        if dt < now - timedelta(hours=2):
+            continue
+        events.append({
+            "name": title,
+            "date": dt.astimezone(timezone.utc).isoformat(),
+            "url": link,
+            "venue": "Boston Public Market",
+            "address": "100 Hanover St, Boston, MA",
+            "price": None,
+            "category": ("family" if _BPM_KIDS_RE.search(title) else
+                         "food" if _BPM_FOOD_RE.search(title) else infer_category(title, None, "community")),
+        })
+    return events
+
+
+_HSHF_DAY_HOURS_RE = re.compile(r"(?i)(Fri|Satur|Sun)days?\s*:\s*(\d{1,2})(?::(\d\d))?\s*-\s*(\d{1,2})")
+
+
+def scrape_harvard_square_holiday_fair(url, ua):
+    """Harvard Square Holiday Fair (Christmas Crafts Co-op, since 1986): two December weekends
+    of craft vendors at JFK & Winthrop St. Its one-page site lists the year's dates and hours:
+    'HARVARD SQUARE HOLIDAY FAIR 2026 ... Dec 11th - 13th ... Dec 18th - 20th ... Fridays: 12-7
+    Saturdays: 11-7 Sundays: 12-6'. One event per fair day."""
+    try:
+        soup = fetch_soup(url, ua)
+    except Exception:
+        return []
+    text = re.sub(r"\s+", " ", soup.get_text(" "))
+    year_m = re.search(r"(?i)holiday fair\s+(20\d\d)", text)
+    if not year_m:
+        return []
+    year = int(year_m.group(1))
+    opens = {}  # weekday -> (open hour 24h, close hour 24h)
+    for day, h1, m1, h2 in _HSHF_DAY_HOURS_RE.findall(text):
+        wd = {"fri": 4, "satur": 5, "sun": 6}[day.lower()]
+        start = int(h1) + (12 if int(h1) < 9 else 0)  # "12-7", "11-7": daytime hours
+        opens[wd] = (start, int(m1 or 0))
+    events = []
+    now = datetime.now(EASTERN)
+    for mon, d1, d2 in re.findall(r"(?i)\b(Nov|Dec)[a-z]*\.?\s+(\d{1,2})(?:st|nd|rd|th)?\s*[-–]\s*(?:(?:Nov|Dec)[a-z]*\.?\s+)?(\d{1,2})", text):
+        month = 11 if mon.lower().startswith("nov") else 12
+        for day in range(int(d1), int(d2) + 1):
+            try:
+                d = datetime(year, month, day, tzinfo=EASTERN)
+            except ValueError:
+                continue
+            hour, minute = opens.get(d.weekday(), (11, 0))
+            dt = d.replace(hour=hour, minute=minute)
+            if dt < now - timedelta(hours=6):
+                continue
+            events.append({
+                "name": "Harvard Square Holiday Fair",
+                "date": dt.astimezone(timezone.utc).isoformat(),
+                "url": url,
+                "venue": "Harvard Square Holiday Fair (JFK & Winthrop St)",
+                "address": "JFK St & Winthrop St, Cambridge, MA",
+                "price": "Free",
+                "category": "markets",
+                "description": "Handmade gifts from local craft vendors, two weekends every December since 1986.",
+            })
+    return events
+
+
+# Weekly worship, office hours and permitting clinics in neighborhood business-district calendars
+_DISTRICT_NOISE_RE = re.compile(
+    r"(?i)\b(?:prayer|bible study|worship|sunday service|eucharist|mass\b|vespers|compline|meditation hour|"
+    r"office hours|permitting|clinic\b|shuttle|members? only|board meeting|staff meeting|closed\b)")
+
+
+def scrape_harvard_square(url, ua):
+    """Harvard Square Business Association calendar: the square's festivals and fairs (Thai Night
+    Market, Oktoberfest, the Holiday Fair), food and chocolate tours, shop events, plus listings
+    from venues we also scrape (dedup merges those). Skips church services and office hours."""
+    return scrape_tribe_rest_paged(url, ua, default_venue="Harvard Square", skip_re=_DISTRICT_NOISE_RE)
+
+
+def scrape_kendall_square(url, ua):
+    """Kendall Square Association calendar: trivia and music bingo at CambridgeSide, rooftop
+    meetups, member socials, talks and plaza events."""
+    return scrape_tribe_rest_paged(url, ua, default_venue="Kendall Square", skip_re=_DISTRICT_NOISE_RE)
+
+
+# Brighton Main Streets also lists recovery meetings, small-business webinars, benefits clinics
+# and youth sports leagues; none of them is a night out.
+_BRIGHTON_SKIP_RE = re.compile(
+    r"(?i)\bAA\b|\bNA meeting|alcoholics|al-anon|recovery meeting|medicare|screening|scholarship|deadline|"
+    r"business|quickbooks|linkedin|marketing|networking|planning academy|advocate hours|age strong|"
+    r"enrollment|webinar|seminar|certificat|\bleague\b|price it right|ai at work|cyber ?security")
+# Family Nurturing Center playgroups ("Terrific Twos", "Wonderful Ones"), learn-to-skate, story times
+_BRIGHTON_KIDS_RE = re.compile(r"(?i)\b(?:ones|twos|threes|toddlers?|pre-?school|story ?time|"
+                               r"learn to (?:skate|play)|youth|kids?|children|playgroup|come & play)\b")
+
+
+def scrape_brighton_main_streets(url, ua):
+    """Brighton Main Streets community calendar: Irish Village and Porter Belly's live music and
+    open mics, Cafenation paint and writing nights, Irish dance classes, the Brighton Bazaar,
+    harvest fests, library story times. Events without a venue (online webinars) are skipped."""
+    events = scrape_tribe_rest_paged(url, ua, default_venue="", skip_re=_DISTRICT_NOISE_RE)
+    out = []
+    for e in events:
+        if e["venue"] in ("", "Boston Event") or _BRIGHTON_SKIP_RE.search(e["name"]):
+            continue
+        if _BRIGHTON_KIDS_RE.search(e["name"]):
+            e["category"] = "family"
+        elif e["category"] == "community" and re.search(r"(?i)live (?:entertainment|music|band)", e["name"]):
+            e["category"] = "music"
+        out.append(e)
+    return out
+
+
+def scrape_assembly_row(url, ua):
+    """Assembly Row (Somerville): live music at The Row Hotel, Baxter Park events, LEGO Discovery
+    Center adult nights, pop-ups."""
+    return scrape_tribe_rest_paged(url, ua, default_venue="Assembly Row", skip_re=_DISTRICT_NOISE_RE)
 
 
 def scrape_speedway(url, ua):
@@ -9831,6 +10154,7 @@ _ALL_VENUES = [
     {"name": "Gardner Museum", "url": "https://www.gardnermuseum.org/calendar", "ua": UA_CHROME, "scraper": scrape_gardner, "default_category": "community"},
     {"name": "Brattle Theatre", "url": "https://www.brattlefilm.org/", "ua": UA_CHROME, "scraper": scrape_brattle, "default_category": "film"},
     {"name": "Meetup Boston", "url": "https://www.meetup.com/find/?location=us--ma--boston&source=EVENTS&eventType=inPerson&distance=tenMiles", "ua": UA_CHROME, "scraper": scrape_meetup, "default_category": "community"},
+    {"name": "Meetup Boston (by topic)", "url": "https://www.meetup.com/find/?location=us--ma--boston&source=EVENTS&eventType=inPerson", "ua": UA_CHROME, "scraper": scrape_meetup_topics, "default_category": "community"},
     {"name": "Somerville Board Games Meetup", "url": "https://www.meetup.com/somerville-board-games-meetup-group/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "gaming"},
     {"name": "Beantown Gamers", "url": "https://www.meetup.com/boardgames-boston/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "gaming"},
     {"name": "Cambridge Game Night", "url": "https://www.meetup.com/CambridgeGameNight/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "gaming"},
@@ -9864,6 +10188,12 @@ _ALL_VENUES = [
     {"name": "Watertown Library (kids)", "url": "https://watertownlib.assabetinteractive.com/calendar/", "ua": UA_CHROME, "scraper": scrape_watertown_library_kids, "default_category": "family"},
     {"name": "Medford Library (kids)", "url": "https://medfordlibrary.assabetinteractive.com/calendar/", "ua": UA_CHROME, "scraper": scrape_medford_library_kids, "default_category": "family"},
     {"name": "Belmont Library (kids)", "url": "https://belmontpubliclibrary.assabetinteractive.com/calendar/", "ua": UA_CHROME, "scraper": scrape_belmont_library_kids, "default_category": "family"},
+    {"name": "Boston Public Market", "url": "https://bostonpublicmarket.org/events/", "ua": UA_CHROME, "scraper": scrape_boston_public_market, "default_category": "food"},
+    {"name": "Harvard Square Holiday Fair", "url": "https://www.harvardsquareholidayfair.com/", "ua": UA_CHROME, "scraper": scrape_harvard_square_holiday_fair, "default_category": "markets"},
+    {"name": "Harvard Square (HSBA)", "url": "https://www.harvardsquare.com/wp-json/tribe/events/v1/events", "ua": UA_CHROME, "scraper": scrape_harvard_square, "default_category": "community"},
+    {"name": "Kendall Square Association", "url": "https://www.kendallsquare.org/wp-json/tribe/events/v1/events", "ua": UA_CHROME, "scraper": scrape_kendall_square, "default_category": "community"},
+    {"name": "Brighton Main Streets", "url": "https://www.brightonmainstreets.org/wp-json/tribe/events/v1/events", "ua": UA_CHROME, "scraper": scrape_brighton_main_streets, "default_category": "community"},
+    {"name": "Assembly Row", "url": "https://www.assemblyrow.com/wp-json/tribe/events/v1/events", "ua": UA_CHROME, "scraper": scrape_assembly_row, "default_category": "community"},
     {"name": "Mass Audubon Magazine Beach", "url": "https://www.massaudubon.org/programs/magazine-beach", "ua": UA_CHROME, "scraper": scrape_mass_audubon_magazine_beach, "default_category": "outdoors"},
     {"name": "Mass Audubon Boston Nature Center", "url": "https://www.massaudubon.org/programs/boston-nature-center", "ua": UA_CHROME, "scraper": scrape_mass_audubon_boston_nature_center, "default_category": "outdoors"},
     {"name": "Somerville Museum", "url": "https://www.somervillemuseum.org/calendar-events", "ua": UA_CHROME, "scraper": scrape_squarespace_events, "default_category": "community"},
@@ -10028,6 +10358,9 @@ MANUAL_RECURRING_EVENTS = [
     ("SoWa Open Market", "https://sowaboston.com/open-market/", "community", [
         ("SoWa Open Market", "https://sowaboston.com/open-market/", 6, 10, 0),
     ]),
+    ("SoWa Vintage Market", "https://sowavintagemkt.com/", "community", [
+        ("SoWa Vintage Market", "https://sowavintagemkt.com/", 6, 11, 0, "Free"),
+    ]),
     ("Boston Fun Run", "https://www.meetup.com/boston-fun-run/", "sports", [
         ("Wednesday Run + Bar", "https://www.meetup.com/boston-fun-run/", 2, 19, 0),
     ]),
@@ -10113,6 +10446,32 @@ MANUAL_RECURRING_EVENTS = [
 ]
 
 
+# Outdoor and seasonal series: (first, last) (month, day) each year, inclusive. Dates drift a
+# little year to year, so the ends are the usual last week (farmers markets close the week of
+# Thanksgiving; SoWa Open Market runs the first Sunday of May to mid-November, the Greenway
+# Artisan Market May through October).
+MANUAL_RECURRING_SEASONS = {
+    "SoWa Open Market": ((5, 1), (11, 15)),
+    "Greenway Artisan Market": ((5, 1), (10, 31)),
+    "Central Square Farmers Market": ((5, 25), (11, 24)),
+    "Copley Square Farmers Market": ((5, 10), (11, 25)),
+    "Davis Square Farmers Market": ((5, 15), (11, 25)),
+    "Kendall Square Farmers Market": ((5, 15), (11, 25)),
+    "Union Square Farmers Market": ((5, 10), (11, 25)),
+    "Harvard University Farmers Market": ((6, 1), (11, 25)),
+    "Memorial Drive Sundays": ((4, 25), (11, 15)),
+    "Everybody Dance Now": ((5, 15), (9, 30)),
+}
+
+
+def _in_season(venue, d):
+    season = MANUAL_RECURRING_SEASONS.get(venue)
+    if not season:
+        return True
+    (m1, d1), (m2, d2) = season
+    return (m1, d1) <= (d.month, d.day) <= (m2, d2)
+
+
 def _expand_manual_recurring(weeks=8):
     """Expand MANUAL_RECURRING_EVENTS into synthetic venue results with concrete dates."""
     today = datetime.now(EASTERN).date()
@@ -10126,6 +10485,8 @@ def _expand_manual_recurring(weeks=8):
             first = today + timedelta(days=ahead)
             for i in range(weeks):
                 d = first + timedelta(weeks=i)
+                if not _in_season(venue, d):
+                    continue
                 dt = datetime(d.year, d.month, d.day, hour, minute, tzinfo=EASTERN)
                 genre = infer_music_genre(name, venue, category=default_cat) if default_cat in ("music", "clubbing") else None
                 events.append({
@@ -10355,7 +10716,8 @@ EXCLUDE_KID_FAMILY_RE = re.compile(
     r"\b("
     r"dababy|frost children|dinty child|wild child|childish gambino|fat baby|"
     r"destiny's child|child's play|children of bodom|indiana jones|"
-    r"sip & support|r&b sing-?along|beatles singalong"
+    r"sip & support|r&b sing-?along|beatles singalong|"
+    r"adults?[- ]only|adults? nights?|grown[- ]ups? only"
     r")\b",
     re.IGNORECASE,
 )
@@ -10401,7 +10763,10 @@ def infer_category(name, venue, default=None):
     # "Watch Party: Celtics vs. ...", "Dumpling Making Party"). If one is the only
     # clubbing hit, keep looking for a more specific match in the event's own title.
     weak_hit = None
+    not_for_kids = bool(EXCLUDE_KID_FAMILY_RE.search(name or ""))  # "Adult Night @ LEGO"
     for cat, kws in CATEGORY_KEYWORDS:
+        if cat == "family" and not_for_kids:
+            continue
         for k in kws:
             if weak_hit is not None:
                 if _match(k, name_text):
@@ -10452,6 +10817,7 @@ CATEGORY_STYLES = {
     "services":  ("#8fa1b3", "🛠"),
     "deals":     ("#c678dd", "🏷"),
     "tech":      ("#7aa2f7", "⌘"),
+    "markets":   ("#f4a261", "🎪"),
     "other":     ("#6b7280", "·"),
 }
 
@@ -10463,6 +10829,7 @@ CATEGORY_BUCKETS = [
     ("Arts & culture",     ["books", "film", "art", "arts"]),
     ("Play",               ["gaming", "sports", "fitness", "outdoors"]),
     ("Food & drink",       ["food"]),
+    ("Markets & Festivals", ["markets"]),
     ("Community",          ["community", "other"]),
     ("Classes & Services", ["services"]),
     ("Kids & Family",      ["family", "kids"]),
@@ -10470,6 +10837,35 @@ CATEGORY_BUCKETS = [
     ("Tech & Startups",    ["tech"]),
 ]
 _CAT_TO_BUCKET = {cat: name for name, cats in CATEGORY_BUCKETS for cat in cats}
+
+# Markets, fairs & festivals: flea and night markets, farmers markets, holiday markets and
+# bazaars, craft/vintage/artisan fairs, street festivals and food fests. Matched on the title.
+MARKET_FESTIVAL_RE = re.compile(
+    r"(?i)\b(?:flea(?:\s+market)?|night\s+market|farmers'?\s*market|open[- ]air\s+(?:produce\s+)?market|produce\s+market|"
+    r"(?:holiday|christmas|winter|spring|summer|fall|autumn|harvest|artisan|craft|crafts|makers?|maker's|vintage|antiques?|"
+    r"pop[- ]?up|open|art|artists'?|record|book|zine|plant|night|street|asian|thai|vietnamese|latin|caribbean|"
+    r"local|indie|handmade|community|sunday|saturday)\s+(?:market|bazaar|fair|faire|village|festival|fest)s?|"
+    r"(?:craft|antiques?|vintage|record|plant|flower)\s+shows?|"  # not "art show": that's a gallery show
+    r"bazaar|street\s+(?:fair|festival|party)|block\s+party|renaissance\s+faire?|"
+    r"(?:food|beer|wine|cider|taco|dumpling|chili|oyster|lobster|pie|cheese|chocolate|halal|vegan|ramen|bbq|"
+    r"lantern|lights?|moon|dragon\s+boat|harvest|heritage|cultural|music|arts?|folk|fall|autumn|winter|spring|summer|"
+    r"holiday|oktober|octoberfest|sukkot|diwali|lunar\s+new\s+year|loy\s+krathong)\s*(?:fest(?:ival)?)|"
+    r"festival|oktoberfest|snowport|swap\s+meet|yard\s+sale|craft\s+show|makers?\s+mart|"
+    r"winter\s+village|holiday\s+(?:stroll|pop[- ]?up(?!\s*bar))|tree\s+lighting)\b")
+# Fairs that aren't a day out: job fairs, college fairs, resource fairs.
+NOT_MARKET_FESTIVAL_RE = re.compile(
+    r"(?i)\b(?:job|career|college|resource|health|hiring|grad(?:uate)?|graduate school|internship|volunteer|stem|steam|"
+    r"benefits?|employment|recruit(?:ing|ment)|housing|financial aid|study abroad|science|vendor application|"
+    r"call for (?:vendors|artists)|vendor sign[- ]?up)\s+(?:fairs?|expos?|markets?|festivals?)\b|"
+    r"\bfilm\s+fest|\bfestival\s+(?:of\s+)?(?:films?|shorts)\b|"
+    r"\bcall for (?:vendors|artists|makers|artisans)\b|\bvendor (?:applications?|registration|sign[- ]?ups?)\b")
+# Categories a market/festival title may replace (a jazz or film festival stays music/film).
+_MARKET_OVERRIDABLE = {"community", "other", "food", "art", "arts", "outdoors"}
+
+
+def is_market_or_festival(name):
+    name = name or ""
+    return bool(MARKET_FESTIVAL_RE.search(name)) and not NOT_MARKET_FESTIVAL_RE.search(name)
 
 
 def category_bucket(cat):
@@ -11037,6 +11433,9 @@ def _normalize_and_filter_events(raw_events, v):
             e["category"] = infer_category(e.get("name"), e.get("venue"), default_cat)
             if not is_agg:
                 e["category"] = _keep_music_venue_category(e["category"], default_cat, e.get("description"))
+
+        if e.get("category") in _MARKET_OVERRIDABLE and is_market_or_festival(title):
+            e["category"] = "markets"
 
         if e.get("category") in ("music", "clubbing"):
             if not e.get("genre"):
