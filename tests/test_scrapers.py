@@ -78,6 +78,23 @@ def tearDownModule():
         setattr(mod, attr, real)
 
 
+import contextlib  # noqa: E402
+
+
+@contextlib.contextmanager
+def real_clock():
+    """Undo the frozen clock for a test that calls a live site: those sites answer for the real
+    date (Boston FAC's booking API rejects a request signed days in the past)."""
+    frozen = [(mod, attr, getattr(mod, attr)) for mod, attr, real in _saved_clock]
+    for mod, attr, real in _saved_clock:
+        setattr(mod, attr, real)
+    try:
+        yield
+    finally:
+        for mod, attr, fake in frozen:
+            setattr(mod, attr, fake)
+
+
 class TestBostonEvents(unittest.TestCase):
 
     def test_all_venues_defined(self):
@@ -2296,7 +2313,8 @@ class TestBostonEvents(unittest.TestCase):
     def test_life_drawing_boston_scraper(self):
         """Verify Life Drawing Boston scraper parses upcoming sessions with correct art category and coordinates."""
         from scrapers import scrape_life_drawing_boston
-        events = scrape_life_drawing_boston("https://www.lifedrawingboston.com/calendar?format=json", UA_CHROME)
+        with real_clock():
+            events = scrape_life_drawing_boston("https://www.lifedrawingboston.com/calendar?format=json", UA_CHROME)
         self.assertIsInstance(events, list)
         self.assertGreater(len(events), 0, "Life Drawing Boston should return upcoming sessions")
         for ev in events:
@@ -2314,7 +2332,8 @@ class TestBostonEvents(unittest.TestCase):
     def test_bostonfac_scraper(self):
         """Verify Boston Figure Art Center scraper parses upcoming sessions with correct art category and coordinates."""
         from scrapers import scrape_bostonfac
-        events = scrape_bostonfac("https://www.bostonfac.com/figuresessions", UA_CHROME)
+        with real_clock():
+            events = scrape_bostonfac("https://www.bostonfac.com/figuresessions", UA_CHROME)
         self.assertIsInstance(events, list)
         self.assertGreater(len(events), 0, "Boston Figure Art Center should return upcoming sessions")
         for ev in events[:10]:
