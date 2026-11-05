@@ -10200,7 +10200,7 @@ CATEGORY_KEYWORDS = [
     ("gaming",    ["arcade", "mahjong", "chess", "trivia", "board game", "video game", "ttrpg", "d&d", "dungeons",
                    "tabletop", "escape room", "bingo", "pinball", "axe throw", "darts bar",
                    "one-shot rpg", "rpg night", "cornhole", "ping pong", "puzzle party", "puzzle night", "puzzle hunt", "puzzle swap", "jigsaw", "mah jongg", "mahjongg", "trading card", "pack wars", "pokemon"]),
-    ("clubbing",  ["dj ", " dj", "edm", "house music", "techno", "rave", "dubstep", "club night",
+    ("clubbing",  ["dj", "djs", "djz", "edm", "house music", "techno", "rave", "dubstep", "club night",
                    "nightclub", "guestlist", "guest list", "nightlife", "drum and bass", "drum & bass",
                    "industrial night", "goth night", "darkwave", "new wave night",
                    "party", "parties", "bash", "after party", "afterparty", "soiree", "rooftop", "halloween ball",
@@ -10268,7 +10268,26 @@ _WORD_BOUNDARY_KEYWORDS = {
     "clay", "sake", "maki", "menu", "chef", "bbq", "gym", "golf", "kids",
     "baby", "lego", "hike", "yoga", "farm", "beer", "wine", "film", "match",
     "easter",  # not "Northeastern"
+    "dj", "djs", "djz",  # not "The Django Cadre"
 }
+
+# A music venue's own listing whose title happens to contain another category's keyword:
+# "Book Club" is a band ("COLLEGE BAND THURSDAYS!"), "Hollow Harvest" a live-music benefit.
+# If the description says it's music, keep the venue's music category. Categories that a
+# music venue really does host (trivia, comedy, kids' open mics, dance nights) are left alone.
+_MUSIC_EVIDENCE_RE = re.compile(
+    r"\b(bands?|live music|concert|gig|singer|songwriter|album|ep release|record release|"
+    r"jazz|folk|blues|bluegrass|americana|rock|punk|indie|soul|funk|reggae|hip[- ]hop|"
+    r"acoustic|quartet|trio|quintet|ensemble|lineup|headlin\w*|opener|tour)\b",
+    re.IGNORECASE,
+)
+_MUSIC_VENUE_OVERRIDABLE = {"books", "outdoors", "food", "community", "art", "other", "wellness"}
+
+
+def _keep_music_venue_category(cat, default_cat, description):
+    if default_cat == "music" and cat in _MUSIC_VENUE_OVERRIDABLE and _MUSIC_EVIDENCE_RE.search(description or ""):
+        return "music"
+    return cat
 _WORD_BOUNDARY_PATTERNS = {
     k: re.compile(rf"\b{re.escape(k)}\b", re.I) for k in _WORD_BOUNDARY_KEYWORDS
 }
@@ -11016,6 +11035,8 @@ def _normalize_and_filter_events(raw_events, v):
             e["category"] = "theater"
         elif is_agg or not cat:
             e["category"] = infer_category(e.get("name"), e.get("venue"), default_cat)
+            if not is_agg:
+                e["category"] = _keep_music_venue_category(e["category"], default_cat, e.get("description"))
 
         if e.get("category") in ("music", "clubbing"):
             if not e.get("genre"):

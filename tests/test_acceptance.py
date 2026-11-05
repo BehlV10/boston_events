@@ -275,6 +275,25 @@ class ScraperAcceptance(unittest.TestCase):
         self.assertTrue(out)
         self.assertIsNone(out[0].get("price"))
 
+    def test_music_venue_band_names_stay_music(self):
+        """The Burren's 10pm band "Book Club" was listed under Books; "The Django Cadre" (gypsy jazz)
+        under Nightlife because "Django" contains "dj"; "Hollow Harvest" (a live-music benefit) under
+        Outdoors. Real non-music nights at the same venue keep their categories."""
+        from scrapers import _normalize_and_filter_events
+        when = _day_at(1, 22).astimezone(timezone.utc).isoformat()
+        room = "The Burren \u2014 The Back Room"
+        rows = [("Book Club", "COLLEGE BAND THURSDAYS!  College Night!", "music"),
+                ("The Django Cadre", "Gypsy jazz", "music"),
+                ("Hollow Harvest", "Gather with friends for a night of live music, community, and giving back", "music"),
+                ("Trivia Night", "Trivia night in the Burren Backroom every Monday!", "gaming"),
+                ("Comedy Night", "FREE SHOW hosted by Cam Ohh!", "comedy"),
+                ("Major League DJz", "Amapiano all night", "clubbing")]
+        raw = [{"name": n, "date": when, "url": f"https://burren.com/music.html#{i}", "venue": room,
+                "description": d} for i, (n, d, _) in enumerate(rows)]
+        out = {e["name"]: e.get("category") for e in _normalize_and_filter_events(
+            raw, {"name": "The Burren", "default_category": "music"})}
+        self.assertEqual(out, {n: c for n, _, c in rows})
+
     def test_cambridge_library_kids_program_is_kids_and_family(self):
         """Twilight Music and Movement wasn't in Kids & Family: CPL only says so in the description."""
         from scrapers import scrape_cpl
