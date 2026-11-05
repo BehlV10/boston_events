@@ -30,8 +30,11 @@ from scrapers import (
     is_utility_event,
     is_deal_event,
     is_kid_family_event,
+    is_market_or_festival,
+    _MARKET_OVERRIDABLE,
 )
 from venues_geo import resolve_event_geo, nearest_curated_venue
+from lgbtq import is_lgbtq_event
 
 
 DEFAULT_UNCHECKED_BUCKETS = {"Classes & Services", "Kids & Family", "Deals & Specials", "Tech & Startups"}
@@ -45,7 +48,12 @@ def _effective_category(e):
         return "deals"
     if is_kid_family_event(name, e.get("venue")):
         return "family"
-    return e.get("category") or "other"
+    cat = e.get("category") or "other"
+    # Also at render time, so pages built from an events.json scraped before a source's markets
+    # were classified (or kept from a degraded scrape) still fill the Markets & Festivals page
+    if cat in _MARKET_OVERRIDABLE and is_market_or_festival(name):
+        return "markets"
+    return cat
 
 
 CITY_RULES = [
@@ -54,7 +62,7 @@ CITY_RULES = [
         "somerville, ma", "(somerville)", ", somerville",
         "davis square", "davis sq", "seven hills park", "assembly row", "union square", "union sq",
         "the burren", "burren", "mccarthy's toad", "mccarthys toad", "remnant somerville",
-        "comedy studio", "bow market", "upstairs at bow",
+        "bow market", "upstairs at bow",
         "armory", "arts at the armory", "somerville arts council",
         "the jungle", "jungle", "sally o'brien", "sally obrien", "side quest",
         "duck duck goof", "goofs comedy", "somerville library", "growing center",
@@ -69,7 +77,7 @@ CITY_RULES = [
     )),
     ("cambridge", (
         "cambridge", "batifol", "passim", "club passim", "monkfish", "mad monkfish",
-        "mit ", "m.i.t", "harvard square", "harvard book", "porter square", "sinclair",
+        "mit ", "m.i.t", "harvard square", "harvard book", "porter square", "sinclair", "comedy studio",
         "brattle", "cambridge, ma", "(cambridge)", ", cambridge",
         "kendall", "kendall center", "urban park", "central square", "inman square", "cantab",
         "havetodance", "have to dance", "ywca cambridge",
@@ -134,7 +142,7 @@ CITY_RULES = [
         "the greatest bar", "the bebop", "shore leave", "sidebar boston", "roundhead brewery",
         "petula's", "old south", "oak long bar", "massachusetts historical society",
         "loco taqueria", "high street place", "gray's hall", "flight club", "empire",
-        "arnold arboretum", "224 boston", "yellow door taqueria", "wyndham boston beacon hill",
+        "arnold arboretum", "franklin park", "224 boston", "yellow door taqueria", "wyndham boston beacon hill",
         "white bull tavern", "west end johnnie", "view boston", "the superette",
         "the substation", "the rocks at harbor way", "the harp", "the alley bar",
         "telegraph hill", "simmons university", "rocco's cucina", "reggie lewis",
@@ -306,7 +314,7 @@ def resolve_subarea(city, event, geo=None):
     if city == "cambridge":
         if any(k in blob for k in ["central square", "cantab", "middle east", "sonia", "manray", "man ray", "middlesex", "phoenix landing", "plough and stars", "plough & stars", "dance complex", "mad monkfish", "la fabrica", "havana club", "roxy", "a4cade"]):
             return ("Central Square", "central_sq")
-        if any(k in blob for k in ["harvard square", "sinclair", "brattle", "passim", "harvard book", "harvard museum", "peabody museum", "lou's", "wearelous", "sanders", "farkas", "harvard university", "ccae", "harvard art museum", "main library", "449 broadway"]):
+        if any(k in blob for k in ["harvard square", "sinclair", "brattle", "passim", "harvard book", "harvard museum", "peabody museum", "lou's", "wearelous", "sanders", "farkas", "harvard university", "ccae", "harvard art museum", "main library", "449 broadway", "comedy studio"]):
             return ("Harvard Square", "harvard_sq")
         if any(k in blob for k in ["kendall", "mit ", "m.i.t", "venture café", "venture cafe", "cambridge crossing", "starlight", "broadway", "urban park"]):
             return ("Kendall / MIT", "kendall_mit")
@@ -319,7 +327,7 @@ def resolve_subarea(city, event, geo=None):
         return ("Other Cambridge", "cambridge_other")
 
     elif city == "somerville":
-        if any(k in blob for k in ["davis", "somerville theatre", "crystal ballroom", "burren", "rockwell", "comedy studio", "underbones", "painted burro", "west branch"]):
+        if any(k in blob for k in ["davis", "somerville theatre", "crystal ballroom", "burren", "rockwell", "underbones", "painted burro", "west branch"]):
             return ("Davis Square", "davis_sq")
         if any(k in blob for k in ["union square", "bow market", "armory", "arts at the armory", "jungle", "remnant", "sally o'brien", "sally obrien", "side quest", "duck duck goof", "dance union", "goofs comedy", "vera's", "warehouse xi", "warehouse 11", "warehouse-xi"]):
             return ("Union Square", "union_sq")
@@ -332,7 +340,8 @@ def resolve_subarea(city, event, geo=None):
     elif city == "boston":
         if any(k in blob for k in ["fenway", "symphony", "house of blues", "mgm music", "mfa", "museum of fine arts", "jordan hall", "nec ", "nec:", "nec (", "new england conservatory", "berklee", "cafe 939", "time out", "401 park", "bill's bar", "bills bar", "loretta", "kenmore", "wbur cityspace", "890 commonwealth"]):
             return ("Fenway & Kenmore", "fenway_kenmore")
-        if any(k in blob for k in ["theater district", "theatre district", "boch", "wang", "shubert", "paramount", "colonial", "royale", "charles playhouse", "downtown", "boston common", "chinatown", "north end", "public garden", "duckling", "orpheum", "bsmnt", "city winery", "big night live", "td garden", "wilbur", "sports museum", "versus", "west end", "legacy", "feral"]):
+        if any(k in blob for k in ["theater district", "theatre district", "boch", "wang", "shubert", "paramount", "colonial", "royale", "charles playhouse", "downtown", "boston common", "chinatown", "north end", "public garden", "duckling", "orpheum", "bsmnt", "city winery", "big night live", "td garden", "wilbur", "sports museum", "versus", "west end", "legacy", "feral",
+                                    "boston public market", "haymarket", "faneuil hall", "quincy market", "city hall plaza"]):
             return ("Downtown & Boston Common", "theater_downtown")
         if any(k in blob for k in ["south end", "beehive", "wally", "club cafe", "club café", "sowa", "reunion bbq", "calderwood"]):
             return ("South End", "south_end")
@@ -342,7 +351,7 @@ def resolve_subarea(city, event, geo=None):
             return ("Seaport & Waterfront", "seaport_waterfront")
         if any(k in blob for k in ["allston", "brighton", "o'brien", "obrien", "brighton music", "speedway", "roadrunner", "lavietes", "notch brewing", "harvard stadium", "sunset cantina", "goel center"]):
             return ("Allston & Brighton", "allston_brighton")
-        if any(k in blob for k in ["jamaica plain", "jp", "midway cafe", "arboretum", "dorchester", "roxbury", "mattapan", "roslindale", "hyde park"]):
+        if any(k in blob for k in ["jamaica plain", "jp", "midway cafe", "arboretum", "franklin park", "dorchester", "roxbury", "mattapan", "roslindale", "hyde park"]):
             return ("JP & Dorchester", "jp_dorchester")
         if any(k in blob for k in ["charlestown", "anchor", "navy yard", "east boston", "eastie"]):
             return ("Charlestown & Eastie", "charlestown_eastie")
@@ -421,9 +430,13 @@ def _maps_link(venue, city):
     return f"https://www.google.com/maps/search/?api=1&query={quote(query)}"
 
 
-_FREE_TITLE_RE = re.compile(
+from scrapers import admission_price, mentions_free  # noqa: E402
+
+# Activities that are usually free ("open mic", "board games", "run club"). Only a hint: the venue
+# may still charge (Queer Board Game Night at Club Café is $5), so a listed price, a ticket link or
+# an admission-only venue outweighs it.
+_FREE_ACTIVITY_RE = re.compile(
     r"\b("
-    r"free|"
     r"honk(!|\b)|"
     r"porchfest|"
     r"parade|"
@@ -446,11 +459,27 @@ _FREE_TITLE_RE = re.compile(
     r"board games?|"
     r"storytimes?|"
     r"fun runs?|"
-    r"run clubs?|"
-    r"no cover"
+    r"run clubs?"
     r")\b",
     re.IGNORECASE,
 )
+
+# Sites that sell paid tickets. Ticketmaster, AXS and the like list paid shows, so a missing price
+# there never means free ("Iliza Shlesinger: Free Nights & Weekends" is a tour name).
+_PAID_SELLER_RE = re.compile(
+    r"(?:^|[/.])(?:ticketmaster|livenation|axs|ticketweb|etix|seetickets|dice\.fm|tixr|showclix|prekindle|"
+    r"holdmyticket|eventim|seatgeek|stubhub|vividseats)\.",
+    re.IGNORECASE,
+)
+# Any ticketing page, free or paid; enough to doubt a free guess drawn from an activity word.
+_TICKET_LINK_RE = re.compile(
+    r"(?:^|[/.])(?:eventbrite|tickettailor|simpletix|ticketleap|brownpapertickets|humanitix|universe|ludus|"
+    r"seatengine|eventcombo|withfriends)\.|//tickets?\.|/tickets?(?:[/?#-]|$)|/checkout|/buy-tickets",
+    re.IGNORECASE,
+)
+# Places where an activity is included with paid admission (storytime at the Children's Museum).
+_ADMISSION_VENUES = ("children's museum", "childrens museum", "museum of science", "aquarium", "zoo",
+                     "discovery museum", "legoland")
 
 _FREE_DESC_PHRASES = [
     "admission: free",
@@ -481,10 +510,19 @@ def _is_event_free(e):
         if re.search(r"\$[1-9]", price):
             return False
 
+    # Another listing of the same event names a price ("$5" on the venue's page).
+    alts = e.get("_alt_sources") or []
+    if not price and any(re.search(r"\$\s?[1-9]", a.get("price") or "") for a in alts):
+        return False
+
     name = (e.get("name") or "").lower()
     desc = (e.get("description") or "").lower()
     source = (e.get("_source_venue") or "").lower()
     venue = (e.get("venue") or "").lower()
+    urls = [e.get("url") or ""] + [a.get("url") or "" for a in alts]
+
+    if any(_PAID_SELLER_RE.search(u) for u in urls):
+        return False
 
     if any(k in source or k in venue for k in [
         "library", "bpl", "farmers market", "open market",
@@ -492,11 +530,16 @@ def _is_event_free(e):
     ]):
         return True
 
-    if _FREE_TITLE_RE.search(name):
+    if mentions_free(name):
         return True
 
     if any(p in desc for p in _FREE_DESC_PHRASES):
         return True
+
+    if _FREE_ACTIVITY_RE.search(name):
+        sells_tickets = any(_TICKET_LINK_RE.search(u) for u in urls)
+        charges_admission = any(k in venue or k in source for k in _ADMISSION_VENUES)
+        return not (admission_price(desc) or sells_tickets or charges_admission)
 
     return False
 
@@ -829,6 +872,7 @@ def build_seo_directory_html(all_events_flat, all_venue_names):
           <li><a href="live-music-somerville/">Somerville Live Music</a></li>
           <li><a href="board-game-nights-boston/">Board Game Nights &amp; Trivia</a></li>
           <li><a href="kids-family-events-boston/">Kids &amp; Family Events</a></li>
+          <li><a href="markets-festivals-boston/">Markets, Fairs &amp; Festivals</a></li>
         </ul>
       </div>
 
@@ -913,6 +957,42 @@ def _event_matches_keywords(e, keywords):
     return any(k.lower() in text for k in keywords)
 
 
+def _series_key(e):
+    name = re.sub(r"\b20\d\d\b|[^a-z0-9 ]+", " ", (e.get("name") or "").lower())
+    # First word of the venue: listings of one series spell it "SoWa" / "SoWa Open Market"
+    venue = re.sub(r"^the |[^a-z0-9 ]+", " ", (e.get("venue") or e.get("_source_venue") or "").lower())
+    return " ".join(name.split()), (venue.split() or [""])[0]
+
+
+def _collapse_hub_series(events, show_dates=3):
+    """One card per repeating series (a weekly farmers market, a month-long holiday market, the
+    two weekends of a fair) at its next date, its later dates listed in the card's description:
+    "Also Sat, Nov 28 · Sun, Nov 29 · Sat, Dec 5 and 11 more dates." Events must be date-sorted."""
+    groups, order = {}, []
+    for e in events:
+        k = _series_key(e)
+        if k not in groups:
+            groups[k] = []
+            order.append(k)
+        groups[k].append(e)
+    out = []
+    for k in order:
+        first, rest = groups[k][0], groups[k][1:]
+        days = []
+        for r in rest:
+            t = r.get("_time")
+            label = t.strftime("%a, %b %-d") if isinstance(t, datetime) else None
+            if label and label not in days and (not isinstance(first.get("_time"), datetime)
+                                                or t.date() != first["_time"].date()):
+                days.append(label)
+        if days:
+            more = f" and {len(days) - show_dates} more dates" if len(days) > show_dates else ""
+            note = f"Also {' · '.join(days[:show_dates])}{more}."
+            first = {**first, "description": f"{note} {first.get('description') or ''}".strip(), "_series_dates": len(days)}
+        out.append(first)
+    return out
+
+
 def filter_events_for_hub(hub, events):
     city_filter = hub.get("city_filter")
     cat_filter = hub.get("cat_filter")
@@ -982,11 +1062,29 @@ HUBS = {
         "time_filter": None,
         "keyword_filter": None,
         "show_details": True,
-        "limit": 400,
-        "subtitle": "Story times, baby & toddler sing-alongs, museum days, puppet shows and nature walks for kids, from local libraries, museums and Little Muse, updated daily.",
+        "limit": 600,
+        "style": "kids",  # light daycare-style page with age & activity filters
+        "subtitle": "Story times, baby & toddler sing-alongs, puppet shows, museum days, farm visits and nature walks for kids, gathered every day from libraries, museums, parks and nature centers around Greater Boston.",
         "og_badge": "KIDS & FAMILY",
         "og_image": "og-kids-family.jpg",
         "query": "#cat=Kids+%26+Family"
+    },
+    # Flea, night, farmers and holiday markets, craft fairs and festivals
+    "markets-festivals-boston": {
+        "title": "Markets, Fairs & Festivals in Boston, Cambridge & Somerville",
+        "h1": "Markets, Fairs & Festivals",
+        "city_filter": None,
+        "cat_filter": "Markets & Festivals",
+        "free_only": False,
+        "time_filter": None,
+        "keyword_filter": None,
+        "show_details": True,
+        "limit": 250,
+        "subtitle": "Flea markets, night markets, farmers markets, holiday markets and bazaars, craft and vintage fairs, food fests and street festivals around Greater Boston, updated daily.",
+        "collapse_series": True,  # a month of Holiday Pop-Up Market days is one card
+        "og_badge": "MARKETS & FESTIVALS",
+        "og_image": "og-markets-festivals.jpg",
+        "query": "#cat=Markets+%26+Festivals"
     },
     # 1. High-Volume Programmatic Intent Pages
     "free-events-boston-this-weekend": {
@@ -1199,6 +1297,263 @@ _HUB_CITY_JS = """<script>
 </script>"""
 
 
+# ---------------------------------------------------------------------------------------------
+# Kids & Family hub: a light, daycare-style page with age and activity filters.
+# ---------------------------------------------------------------------------------------------
+
+_KID_AGE_BUCKETS = (  # key, label, (lo, hi) years
+    ("baby", "👶 Babies", (0, 1.5)),
+    ("toddler", "🧸 Toddlers", (1, 3)),
+    ("preschool", "🖍️ Preschool", (3, 5)),
+    ("bigkid", "🎒 Big kids", (5, 12)),
+)
+_KID_AGE_WORDS = (
+    ("baby", r"\b(?:bab(?:y|ies)|newborns?|infants?|pre-?walkers?|lap ?(?:sit|time)|wee ones|0\s*[-–]\s*18 months)\b"),
+    ("toddler", r"\b(?:toddlers?|walkers|twos|tots?|little ones)\b"),
+    ("preschool", r"\b(?:pre-?school(?:ers)?|pre-?k)\b"),
+    ("bigkid", r"\b(?:school[- ]age|elementary|tweens?|kids club|grades? k\b)"),
+)
+_KID_FAMILY_RE = re.compile(r"(?i)\b(?:famil(?:y|ies)|all ages|caregivers|kids & adults|for everyone)\b")
+_KID_RANGE_RES = (
+    (re.compile(r"(?i)\bages?\s*(\d{1,2}(?:\.\d)?)\s*(?:-|–|—|to)\s*(\d{1,2}(?:\.\d)?)\b"), 1.0),
+    (re.compile(r"(?i)\b(\d{1,2})\s*(?:-|–|—|to)\s*(\d{1,2})\s*(?:months?|mos)\b"), 1 / 12),
+    (re.compile(r"(?i)\(\s*(\d{1,2}(?:\.\d)?)\s*(?:-|–|—)\s*(\d{1,2}(?:\.\d)?)\s*\)"), 1.0),
+)
+_KID_GRADE_RE = re.compile(r"(?i)\bgrades?\s*(k|pre-?k|\d{1,2})\s*(?:-|–|—|to|&)\s*(\d{1,2})\b")
+_KID_SINGLE_AGE_RE = re.compile(r"(?i)\bages?\s*(\d{1,2})\s*(?:\+|and up|& up|and older)")
+
+_KID_KINDS = (  # key, label, emoji, pattern (checked in order)
+    ("show", "Shows", "🎭", r"\b(?:puppets?|theat(?:er|re)|musical|magic(?:ian)?|circus|ballet|film|movie|cinema|perform(?:ance|ers)?|concert)\b"),
+    ("story", "Storytime", "📚", r"\b(?:stor(?:y|ies)|storytimes?|read(?:ing|-?alouds?)?|books?|lap ?time|tales|rhymes?)\b"),
+    ("music", "Music & movement", "🎵", r"\b(?:sing(?:-?along|ing)?|songs?|music(?:al)?|danc(?:e|ing)|movement|rave|jam|drums?|rhythm|beats|wiggles?|yoga|groove|ukulele|guitar)\b"),
+    ("nature", "Nature & animals", "🌿", r"\b(?:nature|walks?|hikes?|owls?|birds?|birding|gardens?|farm|goats?|animals?|zoo|aquarium|arboretum|ponds?|leaf|leaves|trails?|outdoors?|bugs?|insects?|trees?|turkeys?|fish|penguins?|seals?|whales?)\b"),
+    ("make", "Arts, crafts & STEAM", "🎨", r"\b(?:crafts?|art|arts|make|makers?|lego|paint(?:ing)?|draw(?:ing)?|build(?:ing|ers)?|steam|stem|science|scientists?|cook(?:ing)?|bak(?:e|ing)|sew(?:ing)?|clay|creat(?:e|ive|ivity)|engineer(?:ing)?|robots?|coding|experiments?|dinosaurs?|museum)\b"),
+    ("play", "Play & games", "🧸", r"\b(?:play(?:group|time|date)?s?|open gym|drop-?in|games?|puzzles?|blocks|chess|pokemon|pokémon|playground|sensory)\b"),
+)
+_KID_KIND_RES = [(k, lbl, emo, re.compile("(?i)" + pat)) for k, lbl, emo, pat in _KID_KINDS]
+_KID_OTHER = ("other", "Everything else", "🎈")
+
+
+def _kid_tags(e):
+    """(age bucket keys, kind key, emoji, age label) for a Kids & Family card, from its title and
+    description: "Toddler Tales (ages 1.5-3)" -> (["toddler"], "story", "📚", "Ages 1.5–3")."""
+    title = e.get("name") or e.get("title") or ""
+    desc = (e.get("description") or "")[:300]
+    blob = f"{title} {desc}"
+    ages, label = set(), ""
+    spans = []
+    # ages from the title; else from the description's "ages 2-5" / "for babies" wording
+    for rx, scale in _KID_RANGE_RES:
+        for m in rx.finditer(title) or ():
+            lo, hi = float(m.group(1)) * scale, float(m.group(2)) * scale
+            if 0 <= lo <= hi <= 18:
+                spans.append((lo, hi))
+                if not label:
+                    unit = " months" if scale != 1.0 else ""
+                    label = (f"Ages {m.group(1)}–{m.group(2)}" if not unit else f"{m.group(1)}–{m.group(2)} months")
+    for m in _KID_GRADE_RE.finditer(title):
+        g0 = 0 if m.group(1).lower() in ("k", "pre-k", "prek") else int(m.group(1))
+        g1 = int(m.group(2))
+        if g0 <= g1 <= 12:
+            spans.append((g0 + 5, g1 + 6))
+            label = label or f"Grades {m.group(1).upper()}–{g1}"
+    m = _KID_SINGLE_AGE_RE.search(title)
+    if m and int(m.group(1)) <= 12:
+        spans.append((int(m.group(1)), 12))
+        label = label or f"Ages {m.group(1)}+"
+    for lo, hi in spans:
+        for key, _lbl, (blo, bhi) in _KID_AGE_BUCKETS:
+            if lo < bhi and hi > blo or (lo == hi and blo <= lo <= bhi):
+                ages.add(key)
+    if not spans:
+        for key, pat in _KID_AGE_WORDS:
+            if re.search("(?i)" + pat, title):
+                ages.add(key)
+    if not spans and not ages and desc:
+        for rx, scale in _KID_RANGE_RES[:2]:  # "(3-5)" alone in prose is too loose
+            for m in rx.finditer(desc):
+                lo, hi = float(m.group(1)) * scale, float(m.group(2)) * scale
+                if 0 <= lo <= hi <= 18:
+                    spans.append((lo, hi))
+        for m in _KID_GRADE_RE.finditer(desc):
+            g0 = 0 if m.group(1).lower() in ("k", "pre-k", "prek") else int(m.group(1))
+            if g0 <= int(m.group(2)) <= 12:
+                spans.append((g0 + 5, int(m.group(2)) + 6))
+        for lo, hi in spans:
+            for key, _lbl, (blo, bhi) in _KID_AGE_BUCKETS:
+                if lo < bhi and hi > blo:
+                    ages.add(key)
+        if not spans:
+            for key, pat in _KID_AGE_WORDS:
+                if re.search("(?i)" + pat, desc):
+                    ages.add(key)
+    if not ages or _KID_FAMILY_RE.search(title):
+        ages.add("family")
+    kind = _KID_OTHER
+    for k, lbl, emo, rx in _KID_KIND_RES:
+        if rx.search(title):
+            kind = (k, lbl, emo)
+            break
+    else:
+        for k, lbl, emo, rx in _KID_KIND_RES:
+            if rx.search(blob):
+                kind = (k, lbl, emo)
+                break
+    order = [k for k, _l, _r in _KID_AGE_BUCKETS] + ["family"]
+    return sorted(ages, key=order.index), kind[0], kind[2], label
+
+
+_KID_AGE_PILL = {"baby": "Babies", "toddler": "Toddlers", "preschool": "Preschool", "bigkid": "Big kids", "family": "All ages"}
+
+_KIDS_FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">'
+               '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
+               '<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">')
+
+_KIDS_HERO_ART = """<svg class="kids-hero-art" viewBox="0 0 900 220" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
+  <defs><linearGradient id="kh-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bfe5fb"/><stop offset="1" stop-color="#e6f5fd"/></linearGradient></defs>
+  <rect width="900" height="220" fill="url(#kh-sky)"/>
+  <g opacity="0.9" fill="none" stroke-linecap="round" stroke-width="16">
+    <path d="M590,220 A160,160 0 0 1 910,220" stroke="#ffb3b3"/><path d="M606,220 A144,144 0 0 1 894,220" stroke="#ffd59e"/>
+    <path d="M622,220 A128,128 0 0 1 878,220" stroke="#fff1a8"/><path d="M638,220 A112,112 0 0 1 862,220" stroke="#c6efc9"/>
+    <path d="M654,220 A96,96 0 0 1 846,220" stroke="#b9dcff"/><path d="M670,220 A80,80 0 0 1 830,220" stroke="#dcc8ff"/>
+  </g>
+  <g transform="translate(92,62)"><circle r="34" fill="#ffd45c"/>
+    <g stroke="#ffd45c" stroke-width="7" stroke-linecap="round">
+      <line x1="0" y1="-50" x2="0" y2="-62"/><line x1="0" y1="50" x2="0" y2="62"/><line x1="-50" y1="0" x2="-62" y2="0"/><line x1="50" y1="0" x2="62" y2="0"/>
+      <line x1="35" y1="35" x2="44" y2="44"/><line x1="-35" y1="35" x2="-44" y2="44"/><line x1="35" y1="-35" x2="44" y2="-44"/><line x1="-35" y1="-35" x2="-44" y2="-44"/></g>
+    <circle cx="-11" cy="-6" r="4" fill="#6b4b1f"/><circle cx="11" cy="-6" r="4" fill="#6b4b1f"/>
+    <path d="M-13,9 Q0,21 13,9" stroke="#6b4b1f" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <circle cx="-20" cy="7" r="5" fill="#ffab7a" opacity="0.6"/><circle cx="20" cy="7" r="5" fill="#ffab7a" opacity="0.6"/></g>
+  <g fill="#ffffff"><g transform="translate(250,58)"><ellipse cx="0" cy="10" rx="58" ry="20"/><circle cx="-24" cy="0" r="22"/><circle cx="8" cy="-10" r="28"/><circle cx="34" cy="4" r="18"/></g>
+    <g transform="translate(470,40) scale(0.7)"><ellipse cx="0" cy="10" rx="58" ry="20"/><circle cx="-24" cy="0" r="22"/><circle cx="8" cy="-10" r="28"/><circle cx="34" cy="4" r="18"/></g>
+    <g transform="translate(800,70) scale(0.8)"><ellipse cx="0" cy="10" rx="58" ry="20"/><circle cx="-24" cy="0" r="22"/><circle cx="8" cy="-10" r="28"/><circle cx="34" cy="4" r="18"/></g></g>
+  <g transform="translate(560,40) rotate(12)"><polygon points="0,-34 26,0 0,40 -26,0" fill="#ff8fab"/><line x1="0" y1="-34" x2="0" y2="40" stroke="#fff" stroke-width="3"/><line x1="-26" y1="0" x2="26" y2="0" stroke="#fff" stroke-width="3"/>
+    <path d="M0,40 q-14,22 6,38 q18,16 -2,34" stroke="#7a6a9a" stroke-width="2.5" fill="none"/>
+    <path d="M-4,66 l-10,-4 l4,10 z M2,96 l-10,-2 l6,9 z" fill="#ffd45c"/></g>
+  <g font-family="Baloo 2, Trebuchet MS, sans-serif" font-weight="800" font-size="34" text-anchor="middle">
+    <g transform="translate(150,172) rotate(-6)"><rect x="-27" y="-27" width="54" height="54" rx="9" fill="#ff9aa2"/><text y="12" fill="#fff">A</text></g>
+    <g transform="translate(206,178) rotate(5)"><rect x="-27" y="-27" width="54" height="54" rx="9" fill="#7cc6f5"/><text y="12" fill="#fff">B</text></g>
+    <g transform="translate(178,124) rotate(-2)"><rect x="-27" y="-27" width="54" height="54" rx="9" fill="#8fd6a8"/><text y="12" fill="#fff">C</text></g>
+  </g>
+  <g transform="translate(380,182)"><rect x="-70" y="-9" width="140" height="18" rx="9" fill="#b9a3ff"/><polygon points="70,-9 92,0 70,9" fill="#f3d9b1"/><polygon points="84,-3 92,0 84,3" fill="#5b4a8a"/><rect x="-70" y="-9" width="22" height="18" rx="9" fill="#9a84e8"/></g>
+  <g fill="#ffd45c"><path d="M330,120 l5,11 12,2 -9,8 2,12 -10,-6 -10,6 2,-12 -9,-8 12,-2 z"/><path d="M700,30 l3,7 8,1 -6,5 2,8 -7,-4 -7,4 2,-8 -6,-5 8,-1 z"/></g>
+  <path d="M0,206 Q150,192 300,206 T600,206 T900,206 L900,220 L0,220 Z" fill="#a8dcb1"/>
+</svg>"""
+
+_KIDS_CSS = """
+  body.kids-hub {
+    --bg: #fbf6ec; --card: #ffffff; --card-hover: #ffffff; --fg: #3a3550; --muted: #7c7590;
+    --accent: #2f86c8; --border: #efe4d2; --green: #2f9e5b; --sky: #d6eefc; --sky-deep: #8fcdf0;
+    background: #fbf6ec radial-gradient(#efe2cc 1.2px, transparent 1.4px) 0 0 / 22px 22px;
+    font-family: "Nunito", "Avenir Next Rounded", "Avenir Next", "Trebuchet MS", system-ui, sans-serif;
+  }
+  .kids-hub h1, .kids-hub h2, .kids-hub h3, .kids-hub .logo, .kids-hub .kid-chip, .kids-hub .cta-btn {
+    font-family: "Baloo 2", "Avenir Next Rounded", "Trebuchet MS", system-ui, sans-serif;
+  }
+  .kids-hub header { background: #ffffffd9; backdrop-filter: blur(8px); border-bottom: 2px dashed #e7d8bf;
+    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; flex-wrap: wrap; gap: 8px; }
+  .kids-hub .logo { color: var(--fg); font-size: 18px; }
+  .kids-hub .logo span { color: #f27e9a; }
+  .kids-hub .hub-nav a { color: var(--muted); }
+  .kids-hub .hub-nav a.active, .kids-hub .hub-nav a:hover { color: var(--accent); }
+  .kids-hub main { max-width: 980px; padding-top: 22px; }
+  .kids-hub .hero { border: 0; padding: 0; margin-bottom: 18px; background: #fff; border-radius: 28px;
+    overflow: hidden; box-shadow: 0 6px 0 #e9dcc6, 0 14px 30px rgba(120, 100, 60, 0.10); }
+  .kids-hero-art { display: block; width: 100%; height: 190px; }
+  .kids-hero-copy { padding: 18px 22px 24px; }
+  .kids-hub .hero h1 { font-size: clamp(30px, 6vw, 44px); line-height: 1.05; margin: 0 0 8px; color: #2b5d86; letter-spacing: -0.01em; }
+  .kids-hub .hero h1 .wave { display: inline-block; transform-origin: 70% 70%; animation: kid-wave 2.4s ease-in-out infinite; }
+  @keyframes kid-wave { 0%, 60%, 100% { transform: rotate(0); } 10%, 30% { transform: rotate(14deg); } 20%, 40% { transform: rotate(-8deg); } }
+  @media (prefers-reduced-motion: reduce) { .kids-hub .hero h1 .wave { animation: none; } }
+  .kids-hub .hero h1 small { display: block; font-size: 0.45em; color: #b08a5a; font-weight: 700; letter-spacing: 0.01em; margin-top: 4px; }
+  .kids-hub .hero p { color: var(--muted); font-size: 16px; margin-bottom: 16px; }
+  .kids-hub .cta-btn { background: #2f86c8; color: #fff; box-shadow: 0 4px 0 #1f6aa3; font-weight: 700; font-size: 16px; padding: 9px 22px; }
+  .kids-hub .cta-btn:hover { transform: translateY(-1px); filter: brightness(1.05); }
+  .kids-stats { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 0 0 16px; }
+  .kids-stat { background: var(--sky); color: #24648f; border-radius: 999px; padding: 4px 14px; font-weight: 800; font-size: 14px; }
+  .kids-filters { background: #fff; border-radius: 22px; padding: 14px 16px 6px; margin-bottom: 18px;
+    box-shadow: 0 4px 0 #e9dcc6; border: 2px solid #f1e6d4; }
+  .kid-filter-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+  .kid-filter-label { font-weight: 800; color: #b08a5a; font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; min-width: 58px; }
+  .kid-chip { font-size: 15px; font-weight: 700; padding: 4px 14px 3px; border-radius: 999px; cursor: pointer;
+    border: 2px solid #e6dccb; background: #fffaf2; color: var(--fg); transition: transform 0.12s ease, background 0.12s ease; }
+  .kid-chip:hover { transform: translateY(-1px); border-color: var(--sky-deep); }
+  .kid-chip.active { background: var(--sky); border-color: #6dbbea; color: #1f5d88; box-shadow: 0 3px 0 #9fd3f2; }
+  .kids-hub .hub-day { border: 0; margin: 26px 0 2px; padding: 0; font-size: 22px; color: #2b5d86; display: flex; align-items: center; gap: 10px; }
+  .kids-hub .hub-day::before { content: ""; width: 34px; height: 22px; flex: none;
+    background: radial-gradient(circle at 30% 60%, #fff 9px, transparent 10px), radial-gradient(circle at 62% 45%, #fff 11px, transparent 12px), radial-gradient(circle at 82% 66%, #fff 8px, transparent 9px), var(--sky);
+    border-radius: 12px; }
+  .kids-hub .hub-day::after { content: ""; flex: 1; border-bottom: 3px dotted #e2d3ba; }
+  .kids-hub .hub-grid { gap: 14px; grid-template-columns: minmax(0, 1fr); }
+  @media (min-width: 640px) { .kids-hub .hub-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .kids-hub .hub-card a, .kids-hub .hub-desc { overflow-wrap: anywhere; }
+  .kids-hub .hub-card { border: 2px solid #f1e6d4; border-radius: 22px; padding: 0; overflow: hidden; justify-content: flex-start; min-width: 0;
+    box-shadow: 0 4px 0 #ece0cb; transition: transform 0.15s ease, box-shadow 0.15s ease; }
+  .kids-hub .hub-card:hover { transform: translateY(-2px) rotate(-0.3deg); box-shadow: 0 7px 0 #e3d4ba; border-color: #e6d6bb; }
+  .kid-card-band { height: 10px; background: var(--band, #d6eefc); }
+  .kid-card-body { padding: 12px 16px 14px; display: flex; gap: 12px; }
+  .kid-emoji { flex: none; width: 46px; height: 46px; border-radius: 16px; display: grid; place-items: center;
+    font-size: 24px; background: var(--band, #d6eefc); }
+  .kid-card-main { min-width: 0; flex: 1; }
+  .kids-hub .hub-card-head { margin-bottom: 4px; }
+  .kids-hub .hub-date { color: #2f86c8; font-size: 13px; font-weight: 800; letter-spacing: 0.02em; text-transform: none; }
+  .kids-hub .hub-title { font-family: "Nunito", system-ui, sans-serif; font-weight: 800; font-size: 16.5px; margin-bottom: 6px; }
+  .kids-hub .hub-title a { color: #3a3550; }
+  .kids-hub .hub-title a:hover { color: #2f86c8; }
+  .kids-hub .hub-meta { flex-wrap: wrap; font-size: 13px; }
+  .kids-hub .hub-desc { color: #6f6884; font-size: 13.5px; }
+  .kid-ages { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+  .kid-age { font-size: 12px; font-weight: 800; padding: 1px 9px; border-radius: 999px; background: #fff4dc; color: #9a6b24; border: 1px solid #f3dfb3; }
+  .kids-hub .badge-free { background: #dff5e6; color: #23824a; font-size: 12px; font-weight: 800; }
+  .kids-hub .badge-price { background: #f4efe6; color: #6f6884; font-size: 12px; }
+  .kid-k-story { --band: #fff1b8; } .kid-k-music { --band: #e7dcff; } .kid-k-nature { --band: #d4f3e1; }
+  .kid-k-make { --band: #ffe0cf; } .kid-k-show { --band: #ffd6e6; } .kid-k-play { --band: #d6eefc; } .kid-k-other { --band: #f1e6d4; }
+  .kids-hub .no-hub-events { text-align: center; color: var(--muted); font-size: 16px; padding: 30px 0; }
+  .kids-hub footer { border-top: 2px dashed #e7d8bf; }
+  @media (max-width: 640px) {
+    .kids-hero-art { height: 130px; }
+    .kid-filter-label { min-width: 100%; }
+    .kids-hub .hub-nav { font-size: 12px; gap: 8px 10px; }
+  }
+"""
+
+_KIDS_FILTER_JS = """<script>
+(function () {
+  var chips = document.querySelectorAll('.kid-chip');
+  if (!chips.length) return;
+  var cards = document.querySelectorAll('.hub-card');
+  var heads = document.querySelectorAll('.hub-day');
+  var state = { city: 'all', age: 'all', kind: 'all' };
+  function matches(c) {
+    if (state.city !== 'all' && c.dataset.city !== state.city) return false;
+    if (state.age !== 'all' && (' ' + c.dataset.age + ' ').indexOf(' ' + state.age + ' ') === -1) return false;
+    if (state.kind !== 'all' && c.dataset.kind !== state.kind) return false;
+    return true;
+  }
+  function render(save) {
+    var days = {}, n = 0;
+    cards.forEach(function (c) { var on = matches(c); c.hidden = !on; if (on) { days[c.dataset.day] = 1; n++; } });
+    heads.forEach(function (h) { h.hidden = !days[h.dataset.day]; });
+    chips.forEach(function (b) { b.classList.toggle('active', state[b.dataset.group] === b.dataset.val); });
+    var none = document.getElementById('hub-none');
+    if (none) none.hidden = n > 0;
+    if (save) {
+      var parts = Object.keys(state).filter(function (k) { return state[k] !== 'all'; }).map(function (k) { return k + '=' + state[k]; });
+      history.replaceState(null, '', parts.length ? '#' + parts.join('&') : location.pathname);
+    }
+  }
+  chips.forEach(function (b) {
+    b.addEventListener('click', function () { state[b.dataset.group] = b.dataset.val; render(true); });
+  });
+  location.hash.replace(/^#/, '').split('&').forEach(function (p) {
+    var kv = p.split('=');
+    if (kv.length === 2 && state.hasOwnProperty(kv[0]) && document.querySelector('.kid-chip[data-group="' + kv[0] + '"][data-val="' + kv[1] + '"]')) state[kv[0]] = kv[1];
+  });
+  render(false);
+})();
+</script>"""
+
+
 def render_hub_page(hub_slug, events, site_url=None):
     if not site_url:
         site_url = get_site_url()
@@ -1207,6 +1562,8 @@ def render_hub_page(hub_slug, events, site_url=None):
         return ""
 
     filtered = filter_events_for_hub(hub, events)
+    if hub.get("collapse_series"):
+        filtered = _collapse_hub_series(filtered)
     card_limit = hub.get("limit", 60)
 
     hub_canonical = f"{site_url}/{hub_slug}/"
@@ -1305,6 +1662,8 @@ def render_hub_page(hub_slug, events, site_url=None):
     }
     json_ld_str = f'<script type="application/ld+json">\n{json.dumps(hub_ld, ensure_ascii=False, indent=2)}\n</script>'
 
+    is_kids = hub.get("style") == "kids"
+    kid_age_counts, kid_kind_counts, kid_free, kid_places = {}, {}, 0, set()
     cards_html = []
     last_day = None
     for e in filtered[:card_limit]:
@@ -1336,6 +1695,35 @@ def render_hub_page(hub_slug, events, site_url=None):
         city_name = escape(_hub_place_label(city, e))
         day_attr = t_obj.date().isoformat() if isinstance(t_obj, datetime) else ""
 
+        if is_kids:
+            ages, kind, emoji, age_label = _kid_tags(e)
+            for a in ages:
+                kid_age_counts[a] = kid_age_counts.get(a, 0) + 1
+            kid_kind_counts[kind] = kid_kind_counts.get(kind, 0) + 1
+            kid_free += 1 if _is_event_free(e) else 0
+            kid_places.add(e.get("venue") or "")
+            pills = [age_label] if age_label else [_KID_AGE_PILL[a] for a in ages]
+            pills_html = "".join(f'<span class="kid-age">{escape(p)}</span>' for p in pills)
+            cards_html.append(f"""<article class="hub-card kid-k-{kind}" data-city="{escape(city)}" data-day="{day_attr}" data-age="{' '.join(ages)}" data-kind="{kind}">
+  <div class="kid-card-band"></div>
+  <div class="kid-card-body">
+    <div class="kid-emoji" aria-hidden="true">{emoji}</div>
+    <div class="kid-card-main">
+      <div class="hub-card-head">
+        <time class="hub-date">{' · '.join(x for x in (d_str, t_str) if x)}</time>
+        <div class="hub-badges">{price_badge}</div>
+      </div>
+      <h3 class="hub-title"><a href="{url}" target="_blank" rel="noopener">{title}</a></h3>
+      <div class="hub-meta">
+        <span class="hub-venue">📍 {venue}</span>
+        <span class="hub-city">({city_name})</span>
+      </div>
+      {desc_html}
+      <div class="kid-ages">{pills_html}</div>
+    </div>
+  </div>
+</article>""")
+            continue
         cards_html.append(f"""<article class="hub-card" data-city="{escape(city)}" data-day="{day_attr}">
   <div class="hub-card-head">
     <time class="hub-date">{' · '.join(x for x in (d_str, t_str) if x)}</time>
@@ -1349,12 +1737,49 @@ def render_hub_page(hub_slug, events, site_url=None):
   {desc_html}
 </article>""")
 
-    city_chips_html = ""
+    city_chips_html, hub_js = "", ""  # the filter script must come after the cards it filters
     if not hub.get("city_filter") and cards_html:
         present = {c for c in ("boston", "cambridge", "somerville", "other") if f'data-city="{c}"' in "".join(cards_html)}
         city_chips_html = '<div class="hub-city-chips" role="group" aria-label="Filter by city">' + "".join(
             f'<button type="button" class="hub-city-chip" data-city="{k}">{lbl}</button>'
-            for k, lbl in _HUB_CITY_CHIPS if k == "all" or k in present) + "</div>" + _HUB_CITY_JS
+            for k, lbl in _HUB_CITY_CHIPS if k == "all" or k in present) + "</div>"
+        hub_js = _HUB_CITY_JS
+
+    kids_head, kids_css, body_class = "", "", ""
+    hero_html = f"""<div class="hero">
+    <h1>{hub['title']}</h1>
+    <p>{hub['subtitle']}</p>
+    <a href="../{hub['query']}" class="cta-btn">Open Full Interactive Calendar &amp; Filters →</a>
+  </div>"""
+    if is_kids:
+        kids_head, kids_css, body_class = _KIDS_FONTS, _KIDS_CSS, ' class="kids-hub"'
+        present = {c for c in ("boston", "cambridge", "somerville", "other") if f'data-city="{c}"' in "".join(cards_html)}
+
+        def chip(group, val, label):
+            return f'<button type="button" class="kid-chip" data-group="{group}" data-val="{val}">{label}</button>'
+        where = "".join(chip("city", k, lbl) for k, lbl in _HUB_CITY_CHIPS if k == "all" or k in present)
+        ages = chip("age", "all", "All ages") + "".join(
+            chip("age", k, lbl) for k, lbl, _r in _KID_AGE_BUCKETS if kid_age_counts.get(k)) + (
+            chip("age", "family", "🏡 Whole family") if kid_age_counts.get("family") else "")
+        kinds = chip("kind", "all", "Everything") + "".join(
+            chip("kind", k, f"{emo} {lbl}") for k, lbl, emo, _rx in _KID_KIND_RES if kid_kind_counts.get(k))
+        city_chips_html = f"""<div class="kids-filters" role="group" aria-label="Filter kids events">
+    <div class="kid-filter-row"><span class="kid-filter-label">Where</span>{where}</div>
+    <div class="kid-filter-row"><span class="kid-filter-label">Ages</span>{ages}</div>
+    <div class="kid-filter-row"><span class="kid-filter-label">What</span>{kinds}</div>
+  </div>"""
+        hub_js = _KIDS_FILTER_JS
+        n_cards = sum(kid_kind_counts.values())
+        n_days = len(set(re.findall(r'<h2 class="hub-day" id="([\d-]+)"', "".join(cards_html)))) or 1
+        hero_html = f"""<div class="hero">
+    {_KIDS_HERO_ART}
+    <div class="kids-hero-copy">
+      <h1>{escape(hub.get('h1') or hub['title'])} <span class="wave" aria-hidden="true">👋</span><small>in Boston, Cambridge, Somerville &amp; nearby</small></h1>
+      <p>{hub['subtitle']}</p>
+      <div class="kids-stats"><span class="kids-stat">🗓️ {n_cards} activities in the next {n_days} days</span><span class="kids-stat">💛 {kid_free} free</span><span class="kids-stat">📍 {len(kid_places)} places</span></div>
+      <a href="../{hub['query']}" class="cta-btn">See them on the full calendar →</a>
+    </div>
+  </div>"""
 
     cards_joined = "\n".join(cards_html) if cards_html else "<p class='no-hub-events'>No scheduled events matching this directory right now. Check the interactive calendar for all upcoming dates.</p>"
 
@@ -1369,6 +1794,7 @@ def render_hub_page(hub_slug, events, site_url=None):
     active_sm = 'active' if hub_slug == 'live-music-somerville' else ''
     active_bg = 'active' if hub_slug == 'board-game-nights-boston' else ''
     active_kf = 'active' if hub_slug == 'kids-family-events-boston' else ''
+    active_mk = 'active' if hub_slug == 'markets-festivals-boston' else ''
 
     return f"""<!doctype html>
 <html lang="en">
@@ -1380,6 +1806,7 @@ def render_hub_page(hub_slug, events, site_url=None):
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+{kids_head}
 <style>
   :root {{
     --bg: #0c0e14;
@@ -1581,9 +2008,10 @@ def render_hub_page(hub_slug, events, site_url=None):
     color: var(--muted);
   }}
   footer a {{ color: var(--accent); text-decoration: none; }}
+{kids_css}
 </style>
 </head>
-<body>
+<body{body_class}>
 <header>
   <a href="../" class="logo"><span>Wicked</span> Boston Events</a>
   <nav class="hub-nav">
@@ -1593,6 +2021,7 @@ def render_hub_page(hub_slug, events, site_url=None):
     <a href="../live-music-somerville/" class="{active_sm}">Somerville Music</a>
     <a href="../board-game-nights-boston/" class="{active_bg}">Board Games</a>
     <a href="../kids-family-events-boston/" class="{active_kf}">Kids &amp; Family</a>
+    <a href="../markets-festivals-boston/" class="{active_mk}">Markets &amp; Festivals</a>
     <a href="../boston/" class="{active_b}">Boston</a>
     <a href="../cambridge/" class="{active_c}">Cambridge</a>
     <a href="../somerville/" class="{active_s}">Somerville</a>
@@ -1602,16 +2031,13 @@ def render_hub_page(hub_slug, events, site_url=None):
   </nav>
 </header>
 <main>
-  <div class="hero">
-    <h1>{hub['title']}</h1>
-    <p>{hub['subtitle']}</p>
-    <a href="../{hub['query']}" class="cta-btn">Open Full Interactive Calendar &amp; Filters →</a>
-  </div>
+  {hero_html}
   {city_chips_html}
   <div class="hub-grid">
     {cards_joined}
   </div>
   <p id="hub-none" class="no-hub-events" hidden>Nothing in this area in the next few weeks. Try another town.</p>
+  {hub_js}
 </main>
 <footer>
   <p><a href="../">Wicked Boston Events</a> · Independent Greater Boston Events Calendar · <a href="https://www.instagram.com/wickedbostonevents/" target="_blank" rel="noopener">Instagram: @wickedbostonevents</a></p>
@@ -2636,6 +3062,10 @@ def _merge_duplicates(events, word_freq=None):
                     match["_alt_sources"].append({"venue": old_src, "url": old_url, "price": match.get("price"), "name": match.get("name")})
                 match["url"] = e.get("url")
                 match["name"] = e.get("name")
+                # The category goes with the title it describes: a "Time: TBA" placeholder that
+                # absorbed a same-day "Pop Up Market" must not label the game watch that replaces it
+                if e.get("category") and e["category"] not in ("other", "community"):
+                    match["category"] = e["category"]
                 if not e.get("_venue_unknown") or match.get("_venue_unknown"):
                     match["venue"] = e.get("venue")  # never replace a real venue with a placeholder
                 match["_source_venue"] = e.get("_source_venue")
@@ -2653,7 +3083,10 @@ def _merge_duplicates(events, word_freq=None):
                 if e.get("date"):
                     match["date"] = e["date"]
 
-            if not match.get("price") and e.get("price"):
+            # The venue's own price beats a listings site's ("$5 + fee" from Club Café over "Free").
+            if new_prio > cur_prio and e.get("price"):
+                match["price"] = e["price"]
+            elif not match.get("price") and e.get("price"):
                 match["price"] = e["price"]
 
             if match.get("_venue_unknown") and not e.get("_venue_unknown") and e.get("venue"):
@@ -3013,6 +3446,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
         desc = raw_desc[:180]
         desc_html = f'<div class="desc">{escape(desc)}</div>' if desc else ""
         free_flag = "true" if is_free else "false"
+        lgbtq_attr = ' data-lgbtq="true"' if is_lgbtq_event(e) else ''
         epoch_attr = f' data-epoch="{int(t_obj.timestamp())}"' if t_obj else ''
         genre_attr = f' data-genre="{escape(genre)}"' if genre else ''
         v_prefix = f" · {venue_html}" if venue_html else ""
@@ -3029,7 +3463,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
         return (
             f'<li class="event{hl_class}" data-id="{ev_id}" data-cat="{escape(cat)}" data-bucket="{escape(bucket)}"{genre_attr} '
             f'data-venue="{escape(source)}" data-city="{escape(city)}"{sub_attrs}{transit_attr}{tod_attr}{time_attr} '
-            f'data-recur="{recur_flag}" data-free="{free_flag}"{epoch_attr}{geo_attrs}{hl_attr}>'
+            f'data-recur="{recur_flag}" data-free="{free_flag}"{lgbtq_attr}{epoch_attr}{geo_attrs}{hl_attr}>'
             f'<div class="when">{escape(format_when(e))}</div>'
             f'<div class="what">{star_btn}{link}{price_tag}{recur_badge}{hl_badge}'
             f'<div class="venue-tag">{cat_tag}{v_prefix}{sub_tag}{extra_html}{cal_html}</div>'
@@ -4091,6 +4525,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
   .bucket[data-bucket="Kids & Family"]      {{ --accent: #ffb8d1; }}
   .bucket[data-bucket="Deals & Specials"]   {{ --accent: #c678dd; }}
   .bucket[data-bucket="Tech & Startups"]    {{ --accent: #7aa2f7; }}
+  .bucket[data-bucket="Markets & Festivals"] {{ --accent: #f4a261; }}
   .bucket-head {{ display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); font-weight: 600; }}
   .bucket-head .count {{ background: transparent; color: var(--muted); }}
   .bucket ul {{ list-style: none; padding: 0; margin: 0; }}
@@ -4325,6 +4760,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
   .city-swatch {{ display: inline-block; width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }}
   .free-toggle {{ display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; cursor: pointer; color: var(--green); user-select: none; }}
   .free-toggle input {{ accent-color: var(--green); width: 14px; height: 14px; cursor: pointer; margin: 0; }}
+  .lgbtq-toggle {{ display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 12px; font-weight: 600; cursor: pointer; color: #a855f7; user-select: none; }}
+  .lgbtq-toggle input {{ accent-color: #a855f7; width: 14px; height: 14px; cursor: pointer; margin: 0; }}
   .timeframe-toggle {{ display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; cursor: pointer; color: var(--accent); user-select: none; }}
   .timeframe-toggle input {{ accent-color: var(--accent); width: 14px; height: 14px; cursor: pointer; margin: 0; }}
 
@@ -4829,6 +5266,33 @@ def render_page(results, weather=None, luckyseat_shows=None):
     font-size: 13px;
     gap: 10px;
     flex-wrap: wrap;
+  }}
+  .near-stream-actions {{
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }}
+  .pin-hint {{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 8px 12px;
+    border: 1px dashed var(--accent);
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    color: var(--fg);
+  }}
+  .pin-hint[hidden] {{ display: none; }}
+  .leaflet-map.placing-pin,
+  .leaflet-map.placing-pin .leaflet-interactive {{ cursor: crosshair; }}
+  .drop-pin-marker {{ background: none; border: none; }}
+  .drop-pin-marker span {{
+    font-size: 28px;
+    line-height: 1;
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.6));
+    cursor: grab;
   }}
   .near-stream-info {{
     display: flex;
@@ -6768,6 +7232,10 @@ def render_page(results, weather=None, luckyseat_shows=None):
           <input type="checkbox" id="free-only-chk">
           <span><span class="chip-icon">✨ </span>Free events only</span>
         </label>
+        <label class="lgbtq-toggle" for="lgbtq-only-chk">
+          <input type="checkbox" id="lgbtq-only-chk">
+          <span><span class="chip-icon">🏳️‍🌈 </span>LGBTQ+ events only</span>
+        </label>
         <div class="timeframe-toggle-wrap" style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border);">
           <label class="timeframe-toggle" for="timeframe-enable-chk">
             <input type="checkbox" id="timeframe-enable-chk">
@@ -6828,6 +7296,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
           <button type="button" class="view-btn" id="btn-near-me" data-view="near" title="Sort events by distance to your current location">
             <span id="near-me-btn-label">Near Me</span>
           </button>
+          <button type="button" class="view-btn" id="btn-drop-pin" data-view="pin" title="Tap the map to drop a pin and sort events by distance from it">
+            <span id="drop-pin-btn-label">Drop Pin</span>
+          </button>
         </div>
         <div class="view-actions">
           <button type="button" class="map-toggle-btn" id="btn-view-map" title="Toggle interactive venue map">
@@ -6871,6 +7342,10 @@ def render_page(results, weather=None, luckyseat_shows=None):
             <button type="button" id="map-label-toggle-btn" class="map-tool-btn" title="Toggle between venue names and numbers only"><span class="chip-icon">🏷️ </span>Names: On</button>
             <button type="button" id="map-recenter-btn" class="map-tool-btn" title="Center map on Boston"><span class="chip-icon">🎯 </span>Center Boston</button>
           </div>
+        </div>
+        <div id="pin-hint" class="pin-hint" hidden>
+          <span><span class="chip-icon">📌 </span><strong>Tap the map to drop your pin.</strong> Events will be sorted by distance from it.</span>
+          <button type="button" id="pin-cancel-btn" class="map-tool-btn">Cancel</button>
         </div>
         <div id="leaflet-map" class="leaflet-map"></div>
         <div id="map-selected-venue" class="map-venue-card" style="display: none;">
@@ -7139,6 +7614,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
     const searchStatus = document.getElementById('search-status');
     const searchCount = document.getElementById('search-count');
     const freeOnlyChk = document.getElementById('free-only-chk');
+    const lgbtqOnlyChk = document.getElementById('lgbtq-only-chk');
 
     const locChips = document.querySelectorAll('#location-chips .loc-chip');
     const transitChips = document.querySelectorAll('.transit-chip');
@@ -7385,6 +7861,78 @@ def render_page(results, weather=None, luckyseat_shows=None):
     let markersLayer = null;
     let mapLoading = false;
     let nearMeActive = false;
+    // A dropped pin works like Near Me, measured from wherever the pin is instead of from you.
+    let pinCoords = null;
+    let pinPlacing = false;
+    let pinMarker = null;
+
+    function nearOrigin() {{
+      if (pinCoords) return {{ lat: pinCoords.lat, lng: pinCoords.lng, kind: 'pin' }};
+      if (userCoords && userCoords.lat && userCoords.lng) return {{ lat: userCoords.lat, lng: userCoords.lng, kind: 'me' }};
+      return null;
+    }}
+
+    function updatePinUI() {{
+      const hint = document.getElementById('pin-hint');
+      if (hint) hint.hidden = !pinPlacing;
+      const mapEl = document.getElementById('leaflet-map');
+      if (mapEl) mapEl.classList.toggle('placing-pin', pinPlacing);
+      const pinBtn = document.getElementById('btn-drop-pin');
+      if (pinBtn) pinBtn.classList.toggle('active', pinPlacing || (nearMeActive && !!pinCoords));
+      const nearBtn = document.getElementById('btn-near-me');
+      if (nearBtn) nearBtn.classList.toggle('active', nearMeActive && !pinCoords);
+      const label = document.getElementById('drop-pin-btn-label');
+      if (label) label.textContent = pinPlacing ? 'Tap the map…' : (pinCoords ? 'Move Pin' : 'Drop Pin');
+    }}
+
+    function drawPin() {{
+      if (!leafletMap || typeof L === 'undefined') return;
+      if (!pinCoords) {{
+        if (pinMarker) {{ leafletMap.removeLayer(pinMarker); pinMarker = null; }}
+        return;
+      }}
+      if (!pinMarker) {{
+        pinMarker = L.marker([pinCoords.lat, pinCoords.lng], {{
+          icon: L.divIcon({{ className: 'drop-pin-marker', html: '<span>📌</span>', iconSize: [32, 32], iconAnchor: [9, 30] }}),
+          draggable: true,
+          zIndexOffset: 1000,
+          title: 'Your pin: drag to move it',
+        }}).addTo(leafletMap);
+        pinMarker.on('dragend', () => {{
+          const p = pinMarker.getLatLng();
+          placePin(p.lat, p.lng);
+        }});
+      }} else {{
+        pinMarker.setLatLng([pinCoords.lat, pinCoords.lng]);
+      }}
+    }}
+
+    function startPinDrop() {{
+      pinPlacing = true;
+      updatePinUI();
+      toggleMap(true);
+      const mapWrapper = document.getElementById('map-view-wrapper');
+      if (mapWrapper && mapWrapper.scrollIntoView) mapWrapper.scrollIntoView({{ behavior: 'smooth', block: 'start' }});
+    }}
+
+    function cancelPinDrop() {{
+      pinPlacing = false;
+      updatePinUI();
+    }}
+
+    function placePin(lat, lng) {{
+      pinCoords = {{ lat: Math.round(lat * 1e5) / 1e5, lng: Math.round(lng * 1e5) / 1e5 }};
+      pinPlacing = false;
+      drawPin();
+      setNearMe(true);
+    }}
+
+    function clearPin() {{
+      pinCoords = null;
+      pinPlacing = false;
+      drawPin();
+      updatePinUI();
+    }}
     let userCoords = null;
 
     function haversineMiles(lat1, lon1, lat2, lon2) {{
@@ -7731,6 +8279,11 @@ def render_page(results, weather=None, luckyseat_shows=None):
 
       markersLayer = L.layerGroup().addTo(leafletMap);
       updateMapMarkers();
+      leafletMap.on('click', (ev) => {{
+        if (pinPlacing) placePin(ev.latlng.lat, ev.latlng.lng);
+      }});
+      drawPin();
+      if (pinCoords) leafletMap.setView([pinCoords.lat, pinCoords.lng], 14);  // a shared pin link opens on the pin
     }}
 
     function toggleMap(forcedState) {{
@@ -7740,6 +8293,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
         mapOpen = !mapOpen;
       }}
       currentView = mapOpen ? 'map' : 'list';
+      if (!mapOpen && pinPlacing) cancelPinDrop();
       const mapBtn = document.getElementById('btn-view-map');
       const mapWrapper = document.getElementById('map-view-wrapper');
 
@@ -7767,9 +8321,13 @@ def render_page(results, weather=None, luckyseat_shows=None):
     }}
 
     function toggleNearMe() {{
-      if (nearMeActive) {{
+      if (nearMeActive && !pinCoords) {{
         setNearMe(false);
         return;
+      }}
+      if (pinCoords) {{  // Near Me measures from you, not the pin
+        clearPin();
+        setNearMe(false);
       }}
       if (userCoords && userCoords.lat && userCoords.lng) {{
         setNearMe(true);
@@ -7802,6 +8360,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
       const nearBtn = document.getElementById('btn-near-me');
       if (listBtn) listBtn.classList.toggle('active', !nearMeActive);
       if (nearBtn) nearBtn.classList.toggle('active', nearMeActive);
+      if (!nearMeActive && pinCoords) clearPin();
+      updatePinUI();
       if (!nearMeActive) {{
         daySections.forEach(day => {{
           const nearStream = day.querySelector('.near-me-stream');
@@ -8107,8 +8667,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
       const allRecurs = recurBoxes.length;
       const chkRecurs = Array.from(recurBoxes).filter(b => b.checked).length;
       const isFree = freeOnlyChk && freeOnlyChk.checked;
+      const isLgbtq = lgbtqOnlyChk && lgbtqOnlyChk.checked;
       const isTimeFiltered = (timeFrom !== null || timeTo !== null);
-      const isFiltered = isCatFiltered || (chkGenres < allGenres) || (activeGenre !== 'all') || (chkVenues < allVenues) || (chkCities < allCities) || (chkRecurs < allRecurs) || isFree || popularOnly || starredOnly || (activeTransit !== 'all') || isTimeFiltered || (activeSubarea !== 'all') || (searchInput && !!searchInput.value.trim());
+      const isFiltered = isCatFiltered || (chkGenres < allGenres) || (activeGenre !== 'all') || (chkVenues < allVenues) || (chkCities < allCities) || (chkRecurs < allRecurs) || isFree || isLgbtq || popularOnly || starredOnly || (activeTransit !== 'all') || isTimeFiltered || (activeSubarea !== 'all') || (searchInput && !!searchInput.value.trim());
 
       if (mobileBadge) {{
         mobileBadge.textContent = isFiltered ? 'Active' : 'All';
@@ -8183,6 +8744,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
       if (checkedVenues.length > 0 && checkedVenues.length < allVenues.length) params.set('venues', checkedVenues.join(';'));
 
       if (freeOnlyChk && freeOnlyChk.checked) params.set('free', '1');
+      if (lgbtqOnlyChk && lgbtqOnlyChk.checked) params.set('lgbtq', '1');
       if (popularOnly) params.set('pop', '1');
       if (featuredOnly) params.set('picks', '1');
       if (starredOnly) params.set('saved', '1');
@@ -8195,7 +8757,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
         params.set('d', fmtISO(anchor));
       }}
       if (mapOpen) params.set('map', '1');
-      if (nearMeActive) params.set('near', '1');
+      if (nearMeActive && pinCoords) params.set('pin', `${{pinCoords.lat}},${{pinCoords.lng}}`);
+      else if (nearMeActive) params.set('near', '1');
       if (showPastToday) params.set('past', '1');
 
       const hash = params.toString();
@@ -8220,6 +8783,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
       if (hParams || sParams) {{
         if (hasParam('q')) searchInput.value = getParam('q');
         if (getParam('free') === '1' && freeOnlyChk) freeOnlyChk.checked = true;
+        if (getParam('lgbtq') === '1' && lgbtqOnlyChk) lgbtqOnlyChk.checked = true;
         if (getParam('pop') === '1') popularOnly = true;
         if (getParam('picks') === '1') featuredOnly = true;
         if (getParam('saved') === '1') {{
@@ -8230,7 +8794,12 @@ def render_page(results, weather=None, luckyseat_shows=None):
         if (getParam('v') === 'map' || getParam('map') === '1') {{
           toggleMap(true);
         }}
-        if (getParam('near') === '1') {{
+        const pinParam = hasParam('pin') ? getParam('pin').split(',').map(Number) : null;
+        if (pinParam && pinParam.length === 2 && pinParam.every(n => isFinite(n)) &&
+            Math.abs(pinParam[0]) <= 90 && Math.abs(pinParam[1]) <= 180) {{
+          pinCoords = {{ lat: pinParam[0], lng: pinParam[1] }};
+          setNearMe(true);
+        }} else if (getParam('near') === '1') {{
           toggleNearMe();
         }}
 
@@ -8350,6 +8919,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
       const cities = new Set(Array.from(cityBoxes).filter(b => b.checked).map(b => b.value));
       const searchText = searchInput.value.trim().toLowerCase();
       const freeOnly = freeOnlyChk ? freeOnlyChk.checked : false;
+      const lgbtqOnly = lgbtqOnlyChk ? lgbtqOnlyChk.checked : false;
       const week = new Set(weekDates());
 
       const todayDate = parseISO(todayISO);
@@ -8468,6 +9038,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
                   transit: li.getAttribute('data-transit') || '',
                   timeMins: tm ? parseInt(tm, 10) : -1,
                   free: li.getAttribute('data-free') === 'true',
+                  lgbtq: li.getAttribute('data-lgbtq') === 'true',
                   votes: vt ? parseInt(vt, 10) : 0,
                   id: li.getAttribute('data-id') || li.getAttribute('data-event-id') || '',
                   genre: li.getAttribute('data-genre') || '',
@@ -8504,6 +9075,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
                 }}
               }}
               const freeOk = !freeOnly || m.free;
+              const lgbtqOk = !lgbtqOnly || m.lgbtq;
               const popularOk = !popularOnly || m.votes >= 3;
               const starredOk = !starredOnly || starredEvents.has(m.id);
               const searchOk = !searchText || (m.text || (m.text = li.textContent.toLowerCase())).includes(searchText);
@@ -8532,7 +9104,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
               }}
 
               const featuredOk = !featuredOnly || m.featured;
-              const isVisible = genreOk && venueOk && recurOk && subareaOk && transitOk && todOk && searchOk && freeOk && timePastOk && popularOk && starredOk && featuredOk;
+              const isVisible = genreOk && venueOk && recurOk && subareaOk && transitOk && todOk && searchOk && freeOk && lgbtqOk && timePastOk && popularOk && starredOk && featuredOk;
 
               const isHidden = !isVisible;
               if (m.hidden !== isHidden) {{
@@ -8571,7 +9143,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
           headingCount.textContent = dayVisible;
         }}
 
-        if (nearMeActive && userCoords && userCoords.lat && userCoords.lng) {{
+        const origin = nearMeActive ? nearOrigin() : null;
+        if (origin) {{
           const nearStream = day.querySelector('.near-me-stream');
           const citiesDiv = day.querySelector('.cities');
           if (nearStream && citiesDiv) {{
@@ -8586,7 +9159,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
               const lng = parseFloat(ev.dataset.lng);
               let dist = 99999;
               if (!isNaN(lat) && !isNaN(lng)) {{
-                dist = haversineMiles(userCoords.lat, userCoords.lng, lat, lng);
+                dist = haversineMiles(origin.lat, origin.lng, lat, lng);
               }}
               const timeMins = parseInt(ev.dataset.timeMins || '9999', 10);
               eventDistances.push({{ ev: ev, dist: dist, timeMins: timeMins }});
@@ -8604,12 +9177,16 @@ def render_page(results, weather=None, luckyseat_shows=None):
               banner.className = 'near-stream-banner';
               nearStream.appendChild(banner);
             }}
+            const fromPin = origin.kind === 'pin';
             banner.innerHTML = `
               <div class="near-stream-info">
-                <span class="chip-icon">📍 </span>
-                <span><strong>Sorted by distance from your location</strong> (${{locatedCount}} events nearby)</span>
+                <span class="chip-icon">${{fromPin ? '📌' : '📍'}} </span>
+                <span><strong>Sorted by distance from ${{fromPin ? 'your pin' : 'your location'}}</strong> (${{locatedCount}} events nearby)</span>
               </div>
-              <button type="button" class="near-stream-clear-btn" id="btn-reset-near">Reset to Category View</button>
+              <div class="near-stream-actions">
+                ${{fromPin ? '<button type="button" class="near-stream-clear-btn" id="btn-move-pin">Move Pin</button>' : ''}}
+                <button type="button" class="near-stream-clear-btn" id="btn-reset-near">Reset to Category View</button>
+              </div>
             `;
 
             let list = nearStream.querySelector('.near-events-list');
@@ -8624,7 +9201,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
               const clone = item.ev.cloneNode(true);
               clone.classList.remove('hidden');
               if (item.dist < 9999) {{
-                const dStr = item.dist < 0.1 ? '< 0.1 mi away' : `${{item.dist.toFixed(1)}} mi away`;
+                const away = origin.kind === 'pin' ? 'from pin' : 'away';
+                const dStr = item.dist < 0.1 ? `< 0.1 mi ${{away}}` : `${{item.dist.toFixed(1)}} mi ${{away}}`;
                 let badge = clone.querySelector('.dist-badge');
                 if (!badge) {{
                   badge = document.createElement('span');
@@ -8632,7 +9210,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
                   const vTag = clone.querySelector('.venue-tag');
                   if (vTag) vTag.appendChild(badge);
                 }}
-                badge.title = `${{item.dist.toFixed(2)}} miles away`;
+                badge.title = `${{item.dist.toFixed(2)}} miles ${{away}}`;
                 badge.innerHTML = `<span class="chip-icon">📍 </span>${{dStr}}`;
               }}
               list.appendChild(clone);
@@ -8985,6 +9563,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
     }});
 
     if (freeOnlyChk) freeOnlyChk.addEventListener('change', apply);
+    if (lgbtqOnlyChk) lgbtqOnlyChk.addEventListener('change', apply);
     catBoxes.forEach(b => b.addEventListener('change', () => {{
       if (b.value === 'Music & nightlife') {{
         const musicChecked = b.checked;
@@ -9116,6 +9695,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
     function resetAllFilters() {{
       if (searchInput) searchInput.value = '';
       if (freeOnlyChk) freeOnlyChk.checked = false;
+      if (lgbtqOnlyChk) lgbtqOnlyChk.checked = false;
       popularOnly = false;
       featuredOnly = false;
       starredOnly = false;
@@ -9446,9 +10026,19 @@ def render_page(results, weather=None, luckyseat_shows=None):
     const btnNearMe = document.getElementById('btn-near-me');
     if (btnNearMe) {{
       btnNearMe.addEventListener('click', () => {{
-        if (!nearMeActive) toggleNearMe();
+        if (!nearMeActive || pinCoords) toggleNearMe();
       }});
     }}
+
+    const btnDropPin = document.getElementById('btn-drop-pin');
+    if (btnDropPin) {{
+      btnDropPin.addEventListener('click', () => {{
+        if (pinPlacing) cancelPinDrop();
+        else startPinDrop();
+      }});
+    }}
+    const pinCancelBtn = document.getElementById('pin-cancel-btn');
+    if (pinCancelBtn) pinCancelBtn.addEventListener('click', cancelPinDrop);
 
     const btnViewMap = document.getElementById('btn-view-map');
     if (btnViewMap) {{
@@ -9458,6 +10048,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
     document.addEventListener('click', (e) => {{
       if (e.target && e.target.id === 'btn-reset-near') {{
         setNearMe(false);
+      }}
+      if (e.target && e.target.id === 'btn-move-pin') {{
+        startPinDrop();
       }}
     }});
 
