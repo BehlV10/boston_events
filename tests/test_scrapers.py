@@ -2408,3 +2408,47 @@ if __name__ == "__main__":
 
 
 
+
+
+class SeparateListingsMergeTests(unittest.TestCase):
+    def _ev(self, name, hour, url, source="ICA Boston", venue="ICA Boston", **kw):
+        from datetime import datetime
+        from template import EASTERN
+        e = {"name": name, "url": url, "venue": venue, "_source_venue": source,
+             "venue_url": "https://www.icaboston.org/events/", "category": kw.get("category", "family"),
+             "_time": datetime(2026, 11, 8, hour, 0, tzinfo=EASTERN)}
+        e["date"] = e["_time"].isoformat()
+        return e
+
+    def test_same_source_different_pages_stay_separate(self):
+        from template import _merge_duplicates
+        out = _merge_duplicates([
+            self._ev("Bank of America Museums on Us", 10, "https://www.icaboston.org/events/bank-america-museums-us/"),
+            self._ev("Boston Family Days", 10, "https://www.icaboston.org/events/boston-family-days/"),
+        ])
+        self.assertEqual(len(out), 2)
+
+    def test_same_title_far_apart_stays_separate(self):
+        from template import _merge_duplicates
+        out = _merge_duplicates([
+            self._ev("Boston Family Days", 9, "https://www.neaq.org/event/boston-family-days-4/",
+                     source="New England Aquarium", venue="New England Aquarium"),
+            self._ev("Boston Family Days", 10, "https://www.icaboston.org/events/boston-family-days/"),
+        ])
+        self.assertEqual(len(out), 2)
+
+    def test_same_show_from_two_sources_still_merges(self):
+        from template import _merge_duplicates
+        out = _merge_duplicates([
+            self._ev("Boston Family Days", 10, "https://www.icaboston.org/events/boston-family-days/"),
+            self._ev("Boston Family Days", 10, "https://www.thebostoncalendar.com/events/boston-family-days",
+                     source="The Boston Calendar"),
+        ])
+        self.assertEqual(len(out), 1)
+
+    def test_titles_unrelated(self):
+        from template import _titles_unrelated
+        self.assertTrue(_titles_unrelated("Thursday Long Pose", "Anatomy of the head (3-Week Class)"))
+        self.assertFalse(_titles_unrelated("half•alive", "halfalive"))
+        self.assertFalse(_titles_unrelated("Boston Family Days", "Family Days at the ICA"))
+        self.assertFalse(_titles_unrelated("Amble", None))

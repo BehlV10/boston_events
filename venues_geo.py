@@ -407,6 +407,20 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
 
 # Substring needle rules for matching variations in scraped venue titles
 VENUE_RULES = [
+    # Kids & family venues and town libraries (specific branches before the general names)
+    ("brookline public library (putterham", (42.3080, -71.1544, "Brookline", "959 West Roxbury Pkwy, Brookline", "Brookline Public Library (Putterham)")),
+    ("brookline public library (coolidge", (42.3424, -71.1220, "Coolidge Corner", "31 Pleasant St, Brookline", "Brookline Public Library (Coolidge Corner)")),
+    ("brookline public library", (42.3326, -71.1189, "Brookline Village", "361 Washington St, Brookline", "Brookline Public Library")),
+    ("watertown free public library", (42.3667, -71.1856, "Watertown", "123 Main St, Watertown", "Watertown Free Public Library")),
+    ("belmont public library", (42.3955, -71.1781, "Belmont", "336 Concord Ave, Belmont", "Belmont Public Library")),
+    ("medford public library", (42.4183, -71.1108, "Medford Square", "111 High St, Medford", "Medford Public Library")),
+    ("boston children's museum", (42.3518, -71.0498, "Fort Point", "308 Congress St, Boston", "Boston Children's Museum")),
+    ("new england aquarium", (42.3591, -71.0498, "Downtown / Waterfront", "1 Central Wharf, Boston", "New England Aquarium")),
+    ("somerville museum", (42.3846, -71.1063, "Spring Hill", "1 Westwood Rd, Somerville", "Somerville Museum")),
+    ("magazine beach", (42.3546, -71.1135, "Cambridgeport", "668 Memorial Dr, Cambridge", "Mass Audubon Nature Center at Magazine Beach")),
+    ("boston nature center", (42.2869, -71.1044, "Mattapan", "500 Walk Hill St, Boston", "Mass Audubon Boston Nature Center")),
+    ("puppet showplace", (42.3324, -71.1170, "Brookline Village", "32 Station St, Brookline", "Puppet Showplace Theater")),
+    ("ula cafe", (42.3155, -71.1035, "Jamaica Plain", "284 Amory St, Boston", "Ula Cafe")),
     # Top venues
     ("aeronaut", (42.3814, -71.1066, "Somerville", "14 Tyler St, Somerville", "Aeronaut Brewing")),
     ("comedy studio", (42.3968, -71.1228, "Davis Square", "55 Davis Sq, Somerville", "The Comedy Studio")),
