@@ -9268,8 +9268,11 @@ def scrape_berklee(url, ua):
     events = []
     seen = set()
     now = datetime.now(EASTERN)
+    horizon = now + timedelta(days=16)
 
-    for page in range(4):
+    # 10 concerts a page, in date order: page on until the list passes two weeks out (a busy
+    # Berklee fortnight is 12+ pages), with a hard stop so a site change can't page forever.
+    for page in range(20):
         page_url = f"{url}?page={page}" if page > 0 else url
         soup = fetch_soup(page_url, ua)
         if not soup:
@@ -9278,6 +9281,7 @@ def scrape_berklee(url, ua):
         cards = soup.select(".event.teaser")
         if not cards:
             break
+        latest = None
 
         for card in cards:
             title_el = card.select_one(".title") or card.find(["h3", "h2"])
@@ -9311,6 +9315,7 @@ def scrape_berklee(url, ua):
                 elif "a" in ampm.lower() and h == 12:
                     h = 0
                 dt = datetime(int(y_str), month_num, int(d_str), h, mn, tzinfo=EASTERN)
+                latest = max(latest, dt) if latest else dt
                 if (now - dt).total_seconds() > 24 * 3600:
                     continue
             except Exception:
@@ -9328,6 +9333,8 @@ def scrape_berklee(url, ua):
                 "price": "Free" if mentions_free(card.get_text(" ")) else None,
                 "category": "music",
             })
+        if latest and latest > horizon:
+            break
 
     return events
 
