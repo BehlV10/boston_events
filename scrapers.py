@@ -5208,6 +5208,10 @@ def scrape_meetup_group(url, ua):
         return []
     data = json.loads(m.group(1))
     state = (data.get("props") or {}).get("pageProps", {}).get("__APOLLO_STATE__") or {}
+    if not any(k.startswith("Event:") for k in state):
+        # Meetup sometimes serves the page shell with no event data at all (a group with nothing
+        # coming up still lists its past events). Raise so the crawl keeps the last good list.
+        raise RuntimeError("Meetup page came back without event data")
     cutoff = datetime.now(timezone.utc) + timedelta(weeks=6)
     events = []
     for k, v in state.items():

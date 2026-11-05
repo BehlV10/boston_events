@@ -212,6 +212,22 @@ class ExistingVenueFixTests(FrozenClock):
                          [("Live Jazz: Trio", "11-05 19:00"), ("Live Jazz: Yoko Miwa Trio", "11-13 21:00")])
 
 
+    def test_meetup_shell_page_raises_but_past_only_group_is_empty(self):
+        import json as _json
+
+        def page(state):
+            data = {"props": {"pageProps": {"__APOLLO_STATE__": state}}}
+            return _Resp(f'<script id="__NEXT_DATA__" type="application/json">{_json.dumps(data)}</script>')
+
+        url = "https://www.meetup.com/some-group/events/"
+        with mock.patch.object(scrapers._SESSION, "get", return_value=page({"ROOT_QUERY": {}})):
+            with self.assertRaises(RuntimeError):  # crawl falls back to the cached list
+                scrapers.scrape_meetup_group(url, scrapers.UA_CHROME)
+        past = {"Event:1": {"status": "PAST", "dateTime": "2025-04-12T19:00:00-04:00", "eventUrl": url + "1/"}}
+        with mock.patch.object(scrapers._SESSION, "get", return_value=page(past)):
+            self.assertEqual(scrapers.scrape_meetup_group(url, scrapers.UA_CHROME), [])
+
+
 class BostonShowsGapTests(FrozenClock):
     def test_only_venues_we_cant_read(self):
         self.soup("""<div class="date-events" data-date="2026-11-05"><table>
