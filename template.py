@@ -2815,47 +2815,11 @@ def _get_event_highlight(e, highlights):
 
 
 def get_seasonal_theme(dt: datetime):
-    """
-    Returns (theme_key, emoji_icon, display_label) if dt falls on an active seasonal event,
-    or (None, None, None) to default to 'classic' (Classic Dark Blue).
-    """
-    y, m, d = dt.year, dt.month, dt.day
-
-    # Halloween (Oct 29 - Nov 1)
-    if (m == 10 and d >= 29) or (m == 11 and d <= 1):
-        return ("halloween", "🎃", "Halloween")
-
-    if m == 11:
-        # Election Day: Tuesday after the first Monday in November (Nov 2-8 where weekday is Tuesday (1))
-        first_mon = 1
-        while datetime(y, 11, first_mon).weekday() != 0:
-            first_mon += 1
-        election_day = first_mon + 1
-        if d == election_day:
-            return ("election", "🗳️", "Election Day Edition")
-
-        # Veterans Day / Bunker Hill: Nov 11
-        if d == 11:
-            return ("veterans", "🎖️", "Bunker Hill & Veterans Day")
-
-        # Thanksgiving: 4th Thursday in November
-        first_thu = 1
-        while datetime(y, 11, first_thu).weekday() != 3:
-            first_thu += 1
-        thanksgiving_day = first_thu + 21
-        # Thanksgiving Eve & Thanksgiving Day
-        if d in (thanksgiving_day - 1, thanksgiving_day):
-            return ("thanksgiving", "🦃", "Thanksgiving Harvest")
-
-        # Black Friday: Friday & Saturday of Thanksgiving weekend
-        if d in (thanksgiving_day + 1, thanksgiving_day + 2):
-            return ("blackfriday", "🏷️", "Black Friday Deals")
-
-        # Cyber Monday: Monday following Thanksgiving
-        if d == thanksgiving_day + 4:
-            return ("cybermonday", "⚡", "Cyber Monday Tech")
-
-    return (None, None, None)
+    """(theme_key, emoji, label) for the holiday on dt's date, or (None, None, None).
+    The holiday list, dates and palettes live in holiday_themes.py."""
+    from holiday_themes import holiday_on
+    h = holiday_on(dt.date() if isinstance(dt, datetime) else dt)
+    return (h["key"], h["emoji"], h["label"]) if h else (None, None, None)
 
 
 def render_page(results, weather=None, luckyseat_shows=None):
@@ -3360,15 +3324,14 @@ def render_page(results, weather=None, luckyseat_shows=None):
 
     now_eastern = datetime.now(EASTERN)
     seasonal_key, seasonal_icon, seasonal_label = get_seasonal_theme(now_eastern)
+    from holiday_themes import holiday_calendar, HOLIDAY_KEYS, holiday_theme_css, greeting_html
+    holiday_calendar_json = json.dumps(holiday_calendar(now_eastern.date() - timedelta(days=2), 400))
+    holiday_keys_json = json.dumps(HOLIDAY_KEYS)
+    from holiday_themes import HOLIDAYS as _HOLIDAYS
+    holiday_meta_json = json.dumps({h["key"]: {"label": h["label"], "emoji": h["emoji"]} for h in _HOLIDAYS}, ensure_ascii=False)
+    holiday_css = holiday_theme_css()
+    holiday_greetings = greeting_html()
     default_theme = seasonal_key if seasonal_key else "classic"
-    seasonal_btn_html = ""
-    if seasonal_key:
-        active_cls = " active" if default_theme == seasonal_key else ""
-        aria_chk = "true" if default_theme == seasonal_key else "false"
-        seasonal_btn_html = (
-            f'<button type="button" class="theme-pill-btn{active_cls}" data-theme="{seasonal_key}" '
-            f'role="radio" aria-checked="{aria_chk}" title="{seasonal_label} Theme">{seasonal_icon}</button>'
-        )
 
     site_url = get_site_url()
     seo_meta_tags = build_seo_meta_tags(site_url)
@@ -3383,36 +3346,33 @@ def render_page(results, weather=None, luckyseat_shows=None):
 {seo_meta_tags}
 {json_ld_scripts}
 <script>
+  var HOLIDAY_CALENDAR = {holiday_calendar_json};
+  var HOLIDAY_KEYS = {holiday_keys_json};
+  var HOLIDAY_META = {holiday_meta_json};
+  var BASE_THEMES = ['classic', 'indie', 'anime'];
+  function localISODate(dt) {{
+    return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
+  }}
   function getClientSeasonalTheme(dt) {{
-    var y = dt.getFullYear();
-    var m = dt.getMonth() + 1;
-    var d = dt.getDate();
-    if ((m === 10 && d >= 29) || (m === 11 && d <= 1)) return 'halloween';
-    if (m === 11) {{
-      var firstMon = 1;
-      while (new Date(y, 10, firstMon).getDay() !== 1) firstMon++;
-      var electionDay = firstMon + 1;
-      if (d === electionDay) return 'election';
-      if (d === 11) return 'veterans';
-      var firstThu = 1;
-      while (new Date(y, 10, firstThu).getDay() !== 4) firstThu++;
-      var tDay = firstThu + 21;
-      if (d === tDay - 1 || d === tDay) return 'thanksgiving';
-      if (d === tDay + 1 || d === tDay + 2) return 'blackfriday';
-      if (d === tDay + 4) return 'cybermonday';
-    }}
-    return null;
+    return HOLIDAY_CALENDAR[localISODate(dt)] || null;
+  }}
+  // Which theme to show: a ?theme= preview; else today's holiday, unless the visitor picked a
+  // theme today; else the visitor's last regular theme; else classic.
+  function pickTheme() {{
+    var preview = new URLSearchParams(location.search).get('theme');
+    if (preview && (BASE_THEMES.indexOf(preview) !== -1 || HOLIDAY_KEYS.indexOf(preview) !== -1)) return preview;
+    var today = localISODate(new Date());
+    var holiday = HOLIDAY_CALENDAR[today] || null;
+    var stored = null, pickedOn = null;
+    try {{
+      stored = localStorage.getItem('boston_events_theme');
+      pickedOn = localStorage.getItem('boston_events_theme_manual');
+    }} catch (e) {{}}
+    if (holiday) return (pickedOn === today && stored) ? stored : holiday;
+    return (stored && BASE_THEMES.indexOf(stored) !== -1) ? stored : 'classic';
   }}
   try {{
-    var manualTheme = localStorage.getItem('boston_events_theme_manual');
-    var t = localStorage.getItem('boston_events_theme');
-    var seasonal = getClientSeasonalTheme(new Date());
-    if (!manualTheme && seasonal) {{
-      t = seasonal;
-    }} else if (!t) {{
-      t = seasonal || 'classic';
-    }}
-    document.documentElement.setAttribute('data-theme', t);
+    document.documentElement.setAttribute('data-theme', pickTheme());
   }} catch(e) {{}}
 </script>
 <link rel="icon" href="/favicon.ico" sizes="48x48">
@@ -3509,8 +3469,12 @@ def render_page(results, weather=None, luckyseat_shows=None):
     margin: 0 auto;
     display: flex;
     flex-direction: column;
+    justify-content: flex-end;
     gap: 12px;
   }}
+  /* Theme picker row sits at the top of the banner; title and stats stay at the bottom */
+  .banner {{ align-items: stretch; }}
+  .banner-top-row {{ margin-bottom: auto; }}
   .banner-top-tag {{
     display: inline-flex;
     align-items: center;
@@ -5795,7 +5759,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
      ======================================================== */
   .banner-top-row {{
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     width: 100%;
     gap: 12px;
@@ -5809,8 +5773,15 @@ def render_page(results, weather=None, luckyseat_shows=None):
     -webkit-backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 999px;
-    padding: 2px;
-    margin-left: auto;
+    padding: 3px;
+    order: -1;
+  }}
+  .theme-toggle-wrap .theme-pill-btn {{ font-size: 14px; padding: 3px 9px; }}
+  .theme-pill-holiday {{ display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: #fff; }}
+  .theme-pill-holiday[hidden] {{ display: none; }}
+  .holiday-pill-label {{ font-size: 12px; letter-spacing: 0.01em; white-space: nowrap; }}
+  @media (max-width: 520px) {{
+    .holiday-pill-label {{ display: none; }}
   }}
   .theme-toggle-label {{
     display: none;
@@ -6729,22 +6700,25 @@ def render_page(results, weather=None, luckyseat_shows=None):
     color: #cffafe;
     box-shadow: 0 0 12px rgba(6, 182, 212, 0.4);
   }}
+
+  /* Holiday themes generated from holiday_themes.py: banner art, greeting, palettes */
+  {holiday_css}
 </style>
 </head>
 <body>
   <div class="banner">
     <div class="banner-inner">
       <div class="banner-top-row">
+        <div class="theme-toggle-wrap">
+          <div class="theme-toggle-pills" role="radiogroup" aria-label="Visual Theme">
+            <button type="button" class="theme-pill-btn theme-pill-holiday{' active' if seasonal_key else ''}" id="theme-pill-holiday" data-theme="{seasonal_key or ''}" role="radio" aria-checked="{'true' if seasonal_key else 'false'}" title="{escape(seasonal_label or '')} theme"{'' if seasonal_key else ' hidden'}><span class="holiday-pill-emoji">{seasonal_icon or ''}</span><span class="holiday-pill-label">{escape(seasonal_label or '')}</span></button>
+            <button type="button" class="theme-pill-btn{' active' if default_theme == 'classic' else ''}" data-theme="classic" role="radio" aria-checked="{'true' if default_theme == 'classic' else 'false'}" title="Classic Dark Theme">🌙</button>
+            <button type="button" class="theme-pill-btn{' active' if default_theme == 'indie' else ''}" data-theme="indie" role="radio" aria-checked="{'true' if default_theme == 'indie' else 'false'}" title="Indie Guide Theme">📰</button>
+            <button type="button" class="theme-pill-btn{' active' if default_theme == 'anime' else ''}" data-theme="anime" role="radio" aria-checked="{'true' if default_theme == 'anime' else 'false'}" title="Anime Theme">🌸</button>
+          </div>
+        </div>
         <div class="banner-top-tag"><span class="live-pulse"></span> GREATER BOSTON LIVE EVENTS</div>
         <div class="banner-top-actions">
-          <div class="theme-toggle-wrap">
-            <div class="theme-toggle-pills" role="radiogroup" aria-label="Visual Theme">
-              {seasonal_btn_html}
-              <button type="button" class="theme-pill-btn{' active' if default_theme == 'classic' else ''}" data-theme="classic" role="radio" aria-checked="{'true' if default_theme == 'classic' else 'false'}" title="Classic Dark Theme">🌙</button>
-              <button type="button" class="theme-pill-btn{' active' if default_theme == 'indie' else ''}" data-theme="indie" role="radio" aria-checked="{'true' if default_theme == 'indie' else 'false'}" title="Indie Guide Theme">📰</button>
-              <button type="button" class="theme-pill-btn{' active' if default_theme == 'anime' else ''}" data-theme="anime" role="radio" aria-checked="{'true' if default_theme == 'anime' else 'false'}" title="Anime Theme">🌸</button>
-            </div>
-          </div>
           <button type="button" class="pill-submit-btn" id="btn-open-submit-modal" aria-haspopup="dialog" aria-expanded="false">
             <span>＋ Add Event</span>
           </button>
@@ -6753,6 +6727,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
       <div class="banner-title-row">
         <h1 class="banner-title">Wicked Boston Events</h1>
       </div>
+      {holiday_greetings}
       <div class="banner-meta-pill">
         {weather_pill_html}
         <span class="pill-stat"><strong>{total:,}</strong> events · <strong>{len(results)}</strong> venues</span>
@@ -10161,10 +10136,10 @@ def render_page(results, weather=None, luckyseat_shows=None):
 
     // --- Theme Switcher ---
     const THEME_KEY = 'boston_events_theme';
-    const THEME_MANUAL_KEY = 'boston_events_theme_manual';
+    const THEME_MANUAL_KEY = 'boston_events_theme_manual';  // date (YYYY-MM-DD) of the visitor's last pick
+    const validThemesAll = BASE_THEMES.concat(HOLIDAY_KEYS);
     function setTheme(t, save) {{
-      const validThemes = ['classic', 'indie', 'anime', 'halloween', 'election', 'veterans', 'thanksgiving', 'blackfriday', 'cybermonday'];
-      const theme = validThemes.includes(t) ? t : 'classic';
+      const theme = validThemesAll.includes(t) ? t : 'classic';
       document.documentElement.setAttribute('data-theme', theme);
       document.querySelectorAll('.theme-pill-btn').forEach(b => {{
         const isActive = (b.dataset.theme === theme);
@@ -10174,22 +10149,29 @@ def render_page(results, weather=None, luckyseat_shows=None):
       if (save !== false) {{
         try {{
           localStorage.setItem(THEME_KEY, theme);
-          localStorage.setItem(THEME_MANUAL_KEY, 'true');
+          localStorage.setItem(THEME_MANUAL_KEY, localISODate(new Date()));
         }} catch (_) {{}}
       }}
     }}
+    // The holiday pill: today's holiday (or a ?theme= holiday preview) gets a labeled button
+    // at the front of the picker; hidden on ordinary days.
+    (function () {{
+      const btn = document.getElementById('theme-pill-holiday');
+      if (!btn) return;
+      const preview = new URLSearchParams(location.search).get('theme');
+      const key = HOLIDAY_KEYS.includes(preview) ? preview : getClientSeasonalTheme(new Date());
+      const meta = key && HOLIDAY_META[key];
+      if (!meta) {{ btn.hidden = true; return; }}
+      btn.dataset.theme = key;
+      btn.title = meta.label + ' theme';
+      btn.innerHTML = '<span class="holiday-pill-emoji">' + meta.emoji + '</span><span class="holiday-pill-label">' + meta.label + '</span>';
+      btn.hidden = false;
+    }})();
     document.querySelectorAll('.theme-pill-btn').forEach(btn => {{
       btn.addEventListener('click', () => setTheme(btn.dataset.theme, true));
     }});
     try {{
-      const manual = localStorage.getItem(THEME_MANUAL_KEY);
-      const stored = localStorage.getItem(THEME_KEY);
-      const seasonal = (typeof getClientSeasonalTheme === 'function') ? getClientSeasonalTheme(new Date()) : null;
-      if (!manual && seasonal) {{
-        setTheme(seasonal, false);
-      }} else {{
-        setTheme(stored || seasonal || 'classic', false);
-      }}
+      setTheme(pickTheme(), false);
     }} catch (_) {{
       setTheme('{default_theme}', false);
     }}
