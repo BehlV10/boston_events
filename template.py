@@ -2256,6 +2256,30 @@ def _merge_duplicates(events):
             return True
         return False
 
+    def _separate_listings(e1, e2):
+        """Same source, each with its own event page: the source lists them as two events
+        (ICA's "Boston Family Days" and "Museums on Us" both at 10am), so never merge them
+        on loose venue/time/keyword similarity."""
+        s1 = (e1.get("_source_venue") or "").lower()
+        u1, u2 = (e1.get("url") or "").rstrip("/"), (e2.get("url") or "").rstrip("/")
+        if not (s1 and s1 == (e2.get("_source_venue") or "").lower() and u1 and u2 and u1 != u2):
+            return False
+        # A shared fallback (the source's calendar page) is not an event page
+        return u1 != (e1.get("venue_url") or "").rstrip("/") and u2 != (e2.get("venue_url") or "").rstrip("/")
+
+    def _far_apart(e1, e2):
+        """Same title at two places we can locate, over half a mile apart: separate events,
+        e.g. citywide "Boston Family Days" at the ICA and at the Aquarium on the same Sunday."""
+        try:
+            g1, g2 = resolve_event_geo(e1), resolve_event_geo(e2)
+        except Exception:
+            return False
+        if not (g1 and g2) or g1.get("lat") is None or g2.get("lat") is None:
+            return False
+        dlat = (g1["lat"] - g2["lat"]) * 69.0
+        dlng = (g1["lng"] - g2["lng"]) * 51.3  # miles per degree of longitude at Boston's latitude
+        return (dlat * dlat + dlng * dlng) ** 0.5 > 0.5
+
     def _venue_match(v1, v2, e1, e2):
         if not v1 or not v2:
             return True
@@ -2311,7 +2335,7 @@ def _merge_duplicates(events):
         # 1. Exact match check
         if not match and full and len(full) >= 4 and full in seen_exact:
             for cand in seen_exact[full]:
-                if not _is_different_show(e, cand):
+                if not _is_different_show(e, cand) and not _far_apart(e, cand):
                     match = cand
                     break
 
@@ -2328,6 +2352,8 @@ def _merge_duplicates(events):
         if not match and head and len(head) >= 4 and head not in GENERIC_HEADS:
             for cand in out:
                 c_venue = (cand.get("venue") or "").lower()
+                if _separate_listings(e, cand):
+                    continue
                 if _venue_match(venue, c_venue, e, cand) and not _is_different_show(e, cand):
                     cand_head = _normalize_title_head(cand.get("name") or "", venue=cand.get("venue"))
                     if cand_head and cand_head not in GENERIC_HEADS:
@@ -2346,6 +2372,8 @@ def _merge_duplicates(events):
         if not match and venue and len(venue) >= 4:
             for cand in out:
                 c_venue = (cand.get("venue") or "").lower()
+                if _separate_listings(e, cand):
+                    continue
                 if _venue_match(venue, c_venue, e, cand) and not _is_different_show(e, cand):
                     t_e = e.get("_time")
                     t_c = cand.get("_time")
@@ -2382,7 +2410,7 @@ def _merge_duplicates(events):
         if not match:
             keys_e = _title_variants(raw_name)
             for cand in out:
-                if not _same_physical_venue(e, cand) or _is_different_show(e, cand):
+                if _separate_listings(e, cand) or not _same_physical_venue(e, cand) or _is_different_show(e, cand):
                     continue
                 t_e, t_c = e.get("_time"), cand.get("_time")
                 if not t_e or not t_c or abs((t_e - t_c).total_seconds()) > 90 * 60:
