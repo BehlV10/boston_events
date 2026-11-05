@@ -2242,6 +2242,14 @@ def _title_numbers(title):
     return {n for n in re.findall(r"\d+", _fold(title)) if not re.fullmatch(r"(?:19|20)\d\d", n)}
 
 
+def _numbers_conflict(t1, t2):
+    """Both titles carry numbers and they differ: "Ages 27-37" vs "Ages 36-48", "Round 3" vs "Round 5"."""
+    n1, n2 = _title_numbers(t1), _title_numbers(t2)
+    # Neither contains the other: "Brutalismus 3000" vs "Brutalismus 3000 (18+)" or "Ho99o9" vs
+    # "Ho99o9 & N8NOFACE" is the same show with an extra detail, not a different one
+    return bool(n1 and n2 and not (n1 <= n2 or n2 <= n1))
+
+
 def _venue_words(v):
     return {re.sub(r"s$", "", x) for x in re.findall(r"[a-z0-9]+", _fold(v)) if len(x) >= 2} - _VENUE_GENERIC_WORDS
 
@@ -2270,8 +2278,7 @@ def _same_event_retitled(e1, e2, freq):
     vw1, vw2 = _venue_words(e1.get("venue")), _venue_words(e2.get("venue"))
     if not (vw1 & vw2):
         return False
-    n1, n2 = _title_numbers(e1.get("name")), _title_numbers(e2.get("name"))
-    if n1 and n2 and n1 != n2:
+    if _numbers_conflict(e1.get("name"), e2.get("name")):
         return False  # "Round 3" vs "Round 5"
     vw = vw1 | vw2 | {w.rstrip("s") for w in vw1 | vw2}
     shared = _distinctive_words(e1.get("name"), vw) & _distinctive_words(e2.get("name"), vw)
@@ -2452,6 +2459,8 @@ def _merge_duplicates(events, word_freq=None):
         if not match and head and len(head) >= 4 and head not in GENERIC_HEADS and head in seen_head:
             for cand in seen_head[head]:
                 c_venue = (cand.get("venue") or "").lower()
+                if _numbers_conflict(raw_name, cand.get("name")):
+                    continue
                 if _venue_match(venue, c_venue, e, cand):
                     if not _is_different_show(e, cand):
                         match = cand
@@ -2461,7 +2470,7 @@ def _merge_duplicates(events, word_freq=None):
         if not match and head and len(head) >= 4 and head not in GENERIC_HEADS:
             for cand in out:
                 c_venue = (cand.get("venue") or "").lower()
-                if _separate_listings(e, cand):
+                if _separate_listings(e, cand) or _numbers_conflict(raw_name, cand.get("name")):
                     continue
                 if _venue_match(venue, c_venue, e, cand) and not _is_different_show(e, cand):
                     cand_head = _normalize_title_head(cand.get("name") or "", venue=cand.get("venue"))
@@ -2509,8 +2518,7 @@ def _merge_duplicates(events, word_freq=None):
                             # B. Shared comedy/open mic/theater category and significant keyword overlap
                             cat_e = (e.get("category") or "").lower()
                             cat_c = (cand.get("category") or "").lower()
-                            n_e, n_c = _title_numbers(raw_name), _title_numbers(cand.get("name"))
-                            if n_e and n_c and n_e != n_c:
+                            if _numbers_conflict(raw_name, cand.get("name")):
                                 pass  # "Round 3" vs "Round 5"
                             elif cat_e and cat_e == cat_c and cat_e in ("comedy", "theater", "dance", "community"):
                                 words_e = {w for w in re.findall(r"\w+", raw_name.lower()) if len(w) >= 4} - {"free", "night", "show", "live", "session"}
@@ -2528,8 +2536,7 @@ def _merge_duplicates(events, word_freq=None):
                 if not _same_physical_venue(e, cand) or _is_different_show(e, cand):
                     continue
                 keys_c = _title_variants(cand.get("name") or "")
-                n_e, n_c = _title_numbers(raw_name), _title_numbers(cand.get("name"))
-                if n_e and n_c and n_e != n_c:
+                if _numbers_conflict(raw_name, cand.get("name")):
                     continue  # "Ages 27-37" vs "Ages 36-48", "Round 3" vs "Round 5"
                 if _separate_listings(e, cand) and not (
                         (e.get("_time") == cand.get("_time") and keys_e[:1] == keys_c[:1])
