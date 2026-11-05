@@ -2414,6 +2414,60 @@ if __name__ == "__main__":
 
 
 
+class RetitledSameEventMergeTests(unittest.TestCase):
+    """Two sources list one event under different titles (step 6 of _merge_duplicates)."""
+
+    def _ev(self, name, source, venue, hour=19, minute=30):
+        from datetime import datetime
+        from template import EASTERN
+        t = datetime(2026, 11, 12, hour, minute, tzinfo=EASTERN)
+        slug = "".join(c for c in source.lower() if c.isalnum())
+        return {"name": name, "_source_venue": source, "venue": venue, "url": f"https://{slug}.test/e/{abs(hash(name))}",
+                "venue_url": f"https://{slug}.test/", "_time": t, "date": t.isoformat(), "category": "music"}
+
+    def _merge(self, evs, background=()):
+        from template import _merge_duplicates, title_word_freq
+        return _merge_duplicates(evs, title_word_freq(list(evs) + list(background)))
+
+    def test_person_name_merges(self):
+        out = self._merge([
+            self._ev("A Conversation with Trisha Paytas", "Crystal Ballroom", "Crystal Ballroom at Somerville Theatre"),
+            self._ev("SOLD OUT! Trisha Paytas: Crying on the Kitchen Floor", "Brookline Booksmith", "Crystal Ballroom"),
+        ])
+        self.assertEqual(len(out), 1)
+
+    def test_different_round_numbers_stay_separate(self):
+        out = self._merge([
+            self._ev("COMEDY CONTEST PRELIMINARY ROUND 3", "The Boston Calendar", "City Winery", 19, 0),
+            self._ev("Boston Comedy Festival Comedy Contest Preliminary Round 5", "City Winery Boston",
+                     "Haymarket Lounge at City Winery Boston", 19, 0),
+        ])
+        self.assertEqual(len(out), 2)
+
+    def test_common_word_at_different_venues_stays_separate(self):
+        out = self._merge([
+            self._ev("Sunday Drag Brunch", "Dani's Queer Bar", "Dani's Queer Bar", 11, 30),
+            self._ev("Sunday Jazz Brunch", "The Boston Calendar", "Lou's", 11, 30),
+        ])
+        self.assertEqual(len(out), 2)
+
+    def test_common_word_same_venue_stays_separate(self):
+        # "Philharmonic" appears in many titles across the calendar, so one shared word isn't enough
+        bg = [{"name": f"Philharmonic program {i}"} for i in range(8)]
+        out = self._merge([
+            self._ev("Boston Philharmonic Youth Orchestra: Glinka", "Symphony Hall", "Symphony Hall", 20, 0),
+            self._ev("Los Angeles Philharmonic - Boston", "SeatGeek", "Boston Symphony Hall", 20, 0),
+        ], bg)
+        self.assertEqual(len(out), 2)
+
+    def test_square_is_not_a_shared_venue(self):
+        from template import _same_physical_venue
+        a = {"venue": "Cambridge Public Library (Central Square Branch)"}
+        b = {"venue": "Boston Public Library (Central Library in Copley Square)"}
+        self.assertNotIn("square", __import__("template")._venue_words(a["venue"]))
+        self.assertTrue(isinstance(_same_physical_venue(a, b), bool))
+
+
 class SeparateListingsMergeTests(unittest.TestCase):
     def _ev(self, name, hour, url, source="ICA Boston", venue="ICA Boston", **kw):
         from datetime import datetime

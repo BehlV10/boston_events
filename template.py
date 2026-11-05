@@ -4,6 +4,7 @@ import hashlib
 import json
 import os
 import re
+import unicodedata
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from html import escape, unescape
@@ -2121,6 +2122,9 @@ _VENUE_GENERIC_WORDS = {
     "church", "museum", "theatre", "theater", "hall", "center", "centre", "club", "bar", "pub", "cafe",
     "café", "lounge", "room", "house", "studio", "brewing", "brewery", "company", "co", "downtown",
     "presented", "by", "citizens", "music", "arts", "art",
+    # neighborhood / building-type words shared by unrelated places ("Central Square Branch" vs
+    # "Copley Square", "Bentley Arena" vs "Warrior Ice Arena")
+    "square", "sq", "arena", "stadium", "gymnasium", "gym", "ice", "rink", "field", "park",
 }
 
 
@@ -2129,7 +2133,7 @@ def _same_physical_venue(e1, e2):
     distinctive word ("Sinclair", "Royale") — not just "Public Library" or "Music Hall"."""
     if e1.get("_venue_unknown") or e2.get("_venue_unknown"):
         return True
-    w = lambda v: {re.sub(r"s$", "", x) for x in re.findall(r"\w+", (v or "").lower())} - _VENUE_GENERIC_WORDS
+    w = lambda v: {re.sub(r"s$", "", x) for x in re.findall(r"\w+", (v or "").lower()) if len(x) >= 2} - _VENUE_GENERIC_WORDS
     if w(e1.get("venue")) & w(e2.get("venue")):
         return True
     g1, g2 = resolve_event_geo(e1), resolve_event_geo(e2)
@@ -2200,7 +2204,72 @@ def _titles_unrelated(t1, t2):
     return not (s1 and s2 and (s1 in s2 or s2 in s1))
 
 
-def _merge_duplicates(events):
+_SHARED_WORD_STOP = _TITLE_STOPWORDS | {
+    "from", "this", "that", "your", "our", "you", "all", "new", "day", "edition", "special", "guest",
+    "guests", "sold", "out", "free", "party", "series", "club", "group", "meeting", "session", "night",
+    "nights", "music", "concert", "festival", "celebration", "annual", "part", "vs", "mens", "womens",
+    "presented", "conversation", "talk", "book", "author", "event", "premiere", "world", "american",
+    "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday", "weekly", "monthly",
+}
+
+
+def _fold(t):
+    t = unicodedata.normalize("NFKD", unescape(t or "")).encode("ascii", "ignore").decode()
+    return t.lower()
+
+
+def _distinctive_words(title, venue_words=()):
+    return {w for w in re.findall(r"[a-z]+", _fold(title))
+            if len(w) >= 3 and w not in _SHARED_WORD_STOP and w not in venue_words}
+
+
+def _title_numbers(title):
+    """Numbers in a title other than years: "Round 3", "Day 2", "No. 5"."""
+    return {n for n in re.findall(r"\d+", _fold(title)) if not re.fullmatch(r"(?:19|20)\d\d", n)}
+
+
+def _venue_words(v):
+    return {re.sub(r"s$", "", x) for x in re.findall(r"[a-z0-9]+", _fold(v)) if len(x) >= 2} - _VENUE_GENERIC_WORDS
+
+
+def title_word_freq(events):
+    """How many distinct titles each distinctive word appears in, across the whole calendar."""
+    from collections import Counter
+    freq = Counter()
+    for t in {_fold(e.get("name")).strip() for e in events}:
+        freq.update(_distinctive_words(t))
+    return freq
+
+
+def _same_event_retitled(e1, e2, freq):
+    """Two sources, same venue, same time, titled differently: "A Conversation with Trisha Paytas"
+    (the venue) and "SOLD OUT! Trisha Paytas: Crying on the Kitchen Floor" (the bookstore).
+    Requires shared words that are rare across the calendar, so "Sunday Jazz Brunch" and
+    "Sunday Drag Brunch" or two hockey games at different rinks never merge."""
+    if not freq or (e1.get("_source_venue") or "") == (e2.get("_source_venue") or ""):
+        return False
+    t1, t2 = e1.get("_time"), e2.get("_time")
+    if not t1 or not t2 or (t1.hour, t1.minute) == (0, 0) or (t2.hour, t2.minute) == (0, 0):
+        return False
+    if abs((t1 - t2).total_seconds()) > 30 * 60:
+        return False
+    vw1, vw2 = _venue_words(e1.get("venue")), _venue_words(e2.get("venue"))
+    if not (vw1 & vw2):
+        return False
+    n1, n2 = _title_numbers(e1.get("name")), _title_numbers(e2.get("name"))
+    if n1 and n2 and n1 != n2:
+        return False  # "Round 3" vs "Round 5"
+    vw = vw1 | vw2 | {w.rstrip("s") for w in vw1 | vw2}
+    shared = _distinctive_words(e1.get("name"), vw) & _distinctive_words(e2.get("name"), vw)
+    if len(shared) >= 3:
+        return True
+    rare = [w for w in shared if freq.get(w, 0) <= 6]
+    if len(shared) == 2 and rare:
+        return True
+    return len(shared) == 1 and len(rare) == 1 and len(rare[0]) >= 5 and freq.get(rare[0], 0) <= 4
+
+
+def _merge_duplicates(events, word_freq=None):
     """Collapse events sharing a normalized name or head title within the same day bucket.
 
     Preserves the best physical venue, merges prices across primary and alt sources,
@@ -2316,8 +2385,9 @@ def _merge_duplicates(events):
             "theatre", "theater", "tavern", "pub", "bar", "lounge", "brewery",
             "brewing", "cafe", "café", "center", "hall", "club", "studio", "house", "room"
         }
-        w1 = {re.sub(r"s$", "", w) for w in re.findall(r"\w+", v1_low)} - generic_vwords
-        w2 = {re.sub(r"s$", "", w) for w in re.findall(r"\w+", v2_low)} - generic_vwords
+        # len >= 2: the "s" of "Dani's" / "Lou's" is not a shared venue word
+        w1 = {re.sub(r"s$", "", w) for w in re.findall(r"\w+", v1_low) if len(w) >= 2} - generic_vwords
+        w2 = {re.sub(r"s$", "", w) for w in re.findall(r"\w+", v2_low) if len(w) >= 2} - generic_vwords
         if w1 and w2 and (w1 & w2):
             return True
         if e1 and e2:
@@ -2417,7 +2487,10 @@ def _merge_duplicates(events):
                             # B. Shared comedy/open mic/theater category and significant keyword overlap
                             cat_e = (e.get("category") or "").lower()
                             cat_c = (cand.get("category") or "").lower()
-                            if cat_e and cat_e == cat_c and cat_e in ("comedy", "theater", "dance", "community"):
+                            n_e, n_c = _title_numbers(raw_name), _title_numbers(cand.get("name"))
+                            if n_e and n_c and n_e != n_c:
+                                pass  # "Round 3" vs "Round 5"
+                            elif cat_e and cat_e == cat_c and cat_e in ("comedy", "theater", "dance", "community"):
                                 words_e = {w for w in re.findall(r"\w+", raw_name.lower()) if len(w) >= 4} - {"free", "night", "show", "live", "session"}
                                 words_c = {w for w in re.findall(r"\w+", (cand.get("name") or "").lower()) if len(w) >= 4} - {"free", "night", "show", "live", "session"}
                                 if (words_e and words_c and (words_e & words_c)) or ("open" in raw_name.lower() and "open" in (cand.get("name") or "").lower()):
@@ -2430,12 +2503,26 @@ def _merge_duplicates(events):
         if not match:
             keys_e = _title_variants(raw_name)
             for cand in out:
-                if _separate_listings(e, cand) or not _same_physical_venue(e, cand) or _is_different_show(e, cand):
+                if not _same_physical_venue(e, cand) or _is_different_show(e, cand):
+                    continue
+                if _separate_listings(e, cand) and not (
+                        e.get("_time") == cand.get("_time") and keys_e[:1] == _title_variants(cand.get("name") or "")[:1]):
+                    # Same source, two pages: separate events, unless it's the same title at the same
+                    # minute (Ticketmaster's "CamelPhat" and "CamelPhat (21 and Over)")
                     continue
                 t_e, t_c = e.get("_time"), cand.get("_time")
                 if not t_e or not t_c or abs((t_e - t_c).total_seconds()) > 90 * 60:
                     continue
                 if _titles_equivalent(keys_e, _title_variants(cand.get("name") or "")):
+                    match = cand
+                    break
+
+        # 6. Same venue and time from two sources under different titles (see _same_event_retitled)
+        if not match and word_freq:
+            for cand in out:
+                # No _far_apart check: ticket sellers' venue pins are often off by a few blocks, and
+                # the venue-name overlap required here already places both at the same venue.
+                if _same_event_retitled(e, cand, word_freq):
                     match = cand
                     break
 
@@ -2620,9 +2707,10 @@ def group_by_date(results):
                 ongoing.append(entry)
             elif key <= horizon:
                 buckets.setdefault(key, []).append(entry)
+    word_freq = title_word_freq([e for evs in buckets.values() for e in evs])
     for date_key, events in list(buckets.items()):
         events.sort(key=lambda e: e["_time"])
-        buckets[date_key] = _merge_duplicates(events)
+        buckets[date_key] = _merge_duplicates(events, word_freq)
     ongoing.sort(key=lambda e: e.get("_time") or datetime.min.replace(tzinfo=EASTERN), reverse=True)
     return sorted(buckets.items()), tba, ongoing
 
