@@ -4505,35 +4505,47 @@ _SSR_DATE_RE = re.compile(
 
 
 def scrape_second_sun_rising(url, ua):
-    """Second Sun Rising — monthly fusion dance at Cambridge Masonic Hall.
-    Parses upcoming dates from prose on this month's dance page."""
+    """Second Sun Rising: monthly fusion dance (second Sundays). The "This Month's Dance" page
+    gives each date in prose with its venue in the same sentence ("Sunday Nov 8th we'll be at
+    Cambridge Masonic Hall at 1950 Mass Ave", "December 13th ... at First Street Market, 59
+    First Street in Cambridge"). Date ranges ("November 5-8th is Little Dipper weekend") are
+    other events, not a Second Sun Rising dance, and are skipped."""
     soup = fetch_soup(url + "index.php/this-months-dance/", ua)
-    text = soup.get_text(" ", strip=True)
-    matches = _SSR_DATE_RE.findall(text)
-    if not matches:
-        return []
-
+    text = re.sub(r"\s+", " ", soup.get_text(" ", strip=True))
     now = datetime.now(EASTERN)
-    events = []
-    for dow, month_str, day_str in matches:
-        m_num = _SSR_MONTHS.get(month_str[:3].lower())
-        if not m_num:
-            continue
-        day = int(day_str)
-        year = now.year + (1 if m_num < now.month - 1 else 0)
-        try:
-            dt = datetime(year, m_num, day, 19, 0, tzinfo=EASTERN)
-            if dt >= now - timedelta(hours=4):
-                events.append({
-                    "name": "Second Sun Rising — Fusion Dance",
-                    "date": dt.astimezone(timezone.utc).isoformat(),
-                    "url": url,
-                    "venue": "Cambridge Masonic Hall (Cambridge)",
-                    "price": "pay-what-you-can $10–$30",
-                })
-        except Exception:
-            continue
-
+    events, seen = [], set()
+    for sentence in re.split(r"(?<=[.!?])\s+", text):
+        for m in _SSR_DATE_RE.finditer(sentence):
+            if re.match(r"\s*(?:-|–|to\b)", sentence[m.end():]):
+                continue  # a date range: a multi-day event, not the monthly dance
+            if re.search(r"(?i)\b(?:return|expect)", sentence[:m.start()]):
+                continue  # "We expect to return to the Masonic Hall for our January 10 dance": tentative
+            m_num = _SSR_MONTHS.get(m.group(2)[:3].lower())
+            if not m_num:
+                continue
+            year = now.year + (1 if m_num < now.month - 1 else 0)
+            try:
+                dt = datetime(year, m_num, int(m.group(3)), 19, 0, tzinfo=EASTERN)
+            except ValueError:
+                continue
+            if dt < now - timedelta(hours=4) or dt.date() in seen:
+                continue
+            venue, address = "Cambridge Masonic Hall", "1950 Mass Ave, Cambridge"
+            vm = re.search(r"(?i)\bbe at (?:the )?([A-Z][\w'&. ]+?)(?:,| at) (\d+ [^,.!]+?)(?: in ([A-Z][a-z]+))?(?=[,.!]|$)", sentence)
+            if vm:
+                venue = vm.group(1).strip()
+                address = vm.group(2).strip().replace(" Street", " St").replace(" Avenue", " Ave")
+                address += f", {vm.group(3) or 'Cambridge'}"
+            seen.add(dt.date())
+            events.append({
+                "name": "Second Sun Rising — Fusion Dance",
+                "date": dt.astimezone(timezone.utc).isoformat(),
+                "url": url,
+                "venue": venue,
+                "address": address,
+                "locality": address.rsplit(", ", 1)[-1],
+                "price": "pay-what-you-can $10–$30",
+            })
     events.sort(key=lambda e: e["date"])
     return events[:2]
 
@@ -7638,6 +7650,12 @@ def scrape_somerville_library(url, ua):
     return events
 
 
+_LIBCAL_KIDS_RE = re.compile(
+    r"(?i)\b(?:recommended for|for|ages?|designed for|perfect for)\b[^.]{0,40}\b(?:children|kids|toddlers?|babies|"
+    r"infants|preschoolers?|families|caregivers|grades? (?:k|pre-?k|\d))\b|\bages? \d{1,2}\s*(?:-|–|to)\s*\d{1,2}\b|\b(?:babies|toddlers)\b")
+_LIBCAL_ADULTS_RE = re.compile(r"(?i)\b(?:adults? only|for adults|teens? only|ages? 1[3-9]|ages? 2\d|18\+|21\+)\b")
+
+
 def scrape_cpl(url, ua):
     """Cambridge Public Library via LibCal RSS feed."""
     feed_url = url or "https://cambridgepl.libcal.com/rss.php?m=month&cid=7052"
@@ -7686,7 +7704,12 @@ def scrape_cpl(url, ua):
             continue
 
         venue_name = f"Cambridge Public Library ({campus})" if campus else "Cambridge Public Library"
+        desc_el = item.find("libcal:description") or item.find("description")
+        desc = BeautifulSoup(html.unescape(desc_el.text), "html.parser").get_text(" ", strip=True) if desc_el else ""
+        desc = re.sub(r"\s+", " ", desc.replace("\xa0", " ")).strip()
         cat = infer_category(title, venue_name, default="community")
+        if _LIBCAL_KIDS_RE.search(desc) and not _LIBCAL_ADULTS_RE.search(f"{title} {desc}"):
+            cat = "family"  # e.g. "Recommended for children of all ages and their caregivers"
         events.append({
             "name": title,
             "date": dt.isoformat() if dt else None,
@@ -7694,6 +7717,7 @@ def scrape_cpl(url, ua):
             "venue": venue_name,
             "price": "Free",
             "category": cat,
+            "description": desc[:300] or None,
         })
     return events
 
@@ -10950,6 +10974,11 @@ def _normalize_and_filter_events(raw_events, v):
                     continue
             except Exception:
                 pass
+
+        # Ticketing feeds report $0 when they have no price (e.g. Sonia shows on Ticketmaster
+        # at $29.85 elsewhere); drop it so a real price from another listing can show.
+        if name in ("Ticketmaster", "SeatGeek") and re.fullmatch(r"\$?0(?:\.00)?", str(e.get("price") or "").strip()):
+            e["price"] = None
 
         # Sanitize Loretta's Last Call URLs and correct Sunday Line Dancing to 8 PM
         url_raw = e.get("url") or ""
