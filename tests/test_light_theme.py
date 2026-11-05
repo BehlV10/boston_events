@@ -32,6 +32,14 @@ class LightThemeTest(unittest.TestCase):
         # A remembered light choice is honored on the next visit like the other regular themes.
         self.assertIn("var BASE_THEMES = ['classic', 'light', 'indie', 'anime'];", self.html)
 
+    def test_first_visit_follows_the_device(self):
+        # No saved pick: light on a light-mode device, dark otherwise; a saved pick wins.
+        self.assertIn("window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'classic'", self.html)
+        self.assertIn("return (stored && BASE_THEMES.indexOf(stored) !== -1) ? stored : systemTheme();", self.html)
+        # It keeps following the device (e.g. a phone switching at sunset) until the visitor picks.
+        self.assertIn("schemeQuery.addEventListener('change', followDevice)", self.html)
+        self.assertIn("if (!picked) setTheme(pickTheme(), false);", self.html)
+
     def test_palette_defined(self):
         block = re.search(r'\[data-theme="light"\] \{(.*?)\}', self.html, re.S).group(1)
         for token in ("--bg", "--card", "--fg", "--muted", "--accent", "--border", "--green"):

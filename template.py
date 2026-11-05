@@ -3357,8 +3357,14 @@ def render_page(results, weather=None, luckyseat_shows=None):
   function getClientSeasonalTheme(dt) {{
     return HOLIDAY_CALENDAR[localISODate(dt)] || null;
   }}
+  // Visitors who haven't picked a theme get their device's setting: light or dark.
+  function systemTheme() {{
+    try {{
+      return (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 'light' : 'classic';
+    }} catch (e) {{ return 'classic'; }}
+  }}
   // Which theme to show: a ?theme= preview; else today's holiday, unless the visitor picked a
-  // theme today; else the visitor's last regular theme; else classic.
+  // theme today; else the visitor's last regular theme; else their device's light/dark setting.
   function pickTheme() {{
     var preview = new URLSearchParams(location.search).get('theme');
     if (preview && (BASE_THEMES.indexOf(preview) !== -1 || HOLIDAY_KEYS.indexOf(preview) !== -1)) return preview;
@@ -3370,7 +3376,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
       pickedOn = localStorage.getItem('boston_events_theme_manual');
     }} catch (e) {{}}
     if (holiday) return (pickedOn === today && stored) ? stored : holiday;
-    return (stored && BASE_THEMES.indexOf(stored) !== -1) ? stored : 'classic';
+    return (stored && BASE_THEMES.indexOf(stored) !== -1) ? stored : systemTheme();
   }}
   try {{
     document.documentElement.setAttribute('data-theme', pickTheme());
@@ -10199,6 +10205,17 @@ def render_page(results, weather=None, luckyseat_shows=None):
     }} catch (_) {{
       setTheme('{default_theme}', false);
     }}
+    // Until the visitor picks a theme, follow their device when it switches light/dark (e.g. at sunset).
+    try {{
+      const schemeQuery = window.matchMedia('(prefers-color-scheme: light)');
+      const followDevice = () => {{
+        let picked = null;
+        try {{ picked = localStorage.getItem(THEME_KEY); }} catch (_) {{}}
+        if (!picked) setTheme(pickTheme(), false);
+      }};
+      if (schemeQuery.addEventListener) schemeQuery.addEventListener('change', followDevice);
+      else if (schemeQuery.addListener) schemeQuery.addListener(followDevice);
+    }} catch (_) {{}}
 
     loadUpvoteState();
     loadLocalCommunityEvents();
