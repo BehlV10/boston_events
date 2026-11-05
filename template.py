@@ -8414,7 +8414,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
             citiesDiv.style.display = 'none';
             nearStream.style.display = 'block';
 
-            const visibleEvents = Array.from(citiesDiv.querySelectorAll('.event:not(.hidden)'));
+            // Unchecked cities/categories collapse their section (.empty) without hiding each event
+            const visibleEvents = Array.from(citiesDiv.querySelectorAll('.event:not(.hidden)')).filter(ev => !ev.closest('.empty'));
             const eventDistances = [];
             visibleEvents.forEach(ev => {{
               const lat = parseFloat(ev.dataset.lat);
