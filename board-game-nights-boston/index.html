@@ -742,21 +742,21 @@
           "name": "The Comedy Studio",
           "address": {
             "@type": "PostalAddress",
-            "addressLocality": "Somerville",
+            "addressLocality": "Cambridge",
             "addressRegion": "MA",
             "addressCountry": "US",
-            "streetAddress": "55 Davis Sq, Somerville"
+            "streetAddress": "5 John F. Kennedy St, Cambridge"
           },
           "geo": {
             "@type": "GeoCoordinates",
-            "latitude": 42.3968,
-            "longitude": -71.1228
+            "latitude": 42.3727,
+            "longitude": -71.1196
           }
         },
         "image": [
           "https://www.wickedbostonevents.com/og-image.jpg"
         ],
-        "description": "The Comedy Studio Free Video Game Night live at The Comedy Studio in Somerville, MA",
+        "description": "The Comedy Studio Free Video Game Night live at The Comedy Studio in Cambridge, MA",
         "url": "https://www.thecomedystudio.com/checkout/45051b94-8ec7-4e87-9d42-1f84278e4d0e",
         "offers": {
           "@type": "Offer",
@@ -2378,6 +2378,7 @@
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
 <style>
   :root {
     --bg: #0c0e14;
@@ -2579,6 +2580,7 @@
     color: var(--muted);
   }
   footer a { color: var(--accent); text-decoration: none; }
+
 </style>
 </head>
 <body>
@@ -2591,6 +2593,7 @@
     <a href="../live-music-somerville/" class="">Somerville Music</a>
     <a href="../board-game-nights-boston/" class="active">Board Games</a>
     <a href="../kids-family-events-boston/" class="">Kids &amp; Family</a>
+    <a href="../markets-festivals-boston/" class="">Markets &amp; Festivals</a>
     <a href="../boston/" class="">Boston</a>
     <a href="../cambridge/" class="">Cambridge</a>
     <a href="../somerville/" class="">Somerville</a>
@@ -2605,34 +2608,7 @@
     <p>Weekly board game meetups, pub trivia, tabletop gaming, arcade tournaments, and social game nights across Greater Boston.</p>
     <a href="../#q=trivia" class="cta-btn">Open Full Interactive Calendar &amp; Filters →</a>
   </div>
-  <div class="hub-city-chips" role="group" aria-label="Filter by city"><button type="button" class="hub-city-chip" data-city="all">All</button><button type="button" class="hub-city-chip" data-city="boston">Boston</button><button type="button" class="hub-city-chip" data-city="cambridge">Cambridge</button><button type="button" class="hub-city-chip" data-city="somerville">Somerville</button><button type="button" class="hub-city-chip" data-city="other">Nearby towns</button></div><script>
-(function () {
-  var chips = document.querySelectorAll('.hub-city-chip');
-  if (!chips.length) return;
-  var cards = document.querySelectorAll('.hub-card');
-  var heads = document.querySelectorAll('.hub-day');
-  function show(city) {
-    var days = {};
-    cards.forEach(function (c) {
-      var on = city === 'all' || c.dataset.city === city;
-      c.hidden = !on;
-      if (on) days[c.dataset.day] = 1;
-    });
-    heads.forEach(function (h) { h.hidden = !days[h.dataset.day]; });
-    chips.forEach(function (b) { b.classList.toggle('active', b.dataset.city === city); });
-    var none = document.getElementById('hub-none');
-    if (none) none.hidden = Object.keys(days).length > 0;
-  }
-  chips.forEach(function (b) {
-    b.addEventListener('click', function () {
-      show(b.dataset.city);
-      history.replaceState(null, '', b.dataset.city === 'all' ? location.pathname : '#city=' + b.dataset.city);
-    });
-  });
-  var m = location.hash.match(/city=(\w+)/);
-  show(m && document.querySelector('.hub-city-chip[data-city="' + m[1] + '"]') ? m[1] : 'all');
-})();
-</script>
+  <div class="hub-city-chips" role="group" aria-label="Filter by city"><button type="button" class="hub-city-chip" data-city="all">All</button><button type="button" class="hub-city-chip" data-city="boston">Boston</button><button type="button" class="hub-city-chip" data-city="cambridge">Cambridge</button><button type="button" class="hub-city-chip" data-city="somerville">Somerville</button><button type="button" class="hub-city-chip" data-city="other">Nearby towns</button></div>
   <div class="hub-grid">
     <h2 class="hub-day" id="2026-11-05" data-day="2026-11-05">Thursday, November 5</h2>
 <article class="hub-card" data-city="boston" data-day="2026-11-05">
@@ -2815,7 +2791,7 @@
   </div>
   
 </article>
-<article class="hub-card" data-city="somerville" data-day="2026-11-05">
+<article class="hub-card" data-city="cambridge" data-day="2026-11-05">
   <div class="hub-card-head">
     <time class="hub-date">9:30 PM</time>
     <div class="hub-badges"><span class="badge badge-free">Free</span></div>
@@ -2823,7 +2799,7 @@
   <h3 class="hub-title"><a href="https://www.thecomedystudio.com/checkout/45051b94-8ec7-4e87-9d42-1f84278e4d0e" target="_blank" rel="noopener">The Comedy Studio Free Video Game Night</a></h3>
   <div class="hub-meta">
     <span class="hub-venue">📍 The Comedy Studio</span>
-    <span class="hub-city">(Davis Square, Somerville)</span>
+    <span class="hub-city">(Harvard Square, Cambridge)</span>
   </div>
   
 </article>
@@ -2848,7 +2824,7 @@
   <h3 class="hub-title"><a href="https://bostonpublicmarket.org/bpm-events/the-sopranos-trivia-night/" target="_blank" rel="noopener">The Sopranos Trivia Night</a></h3>
   <div class="hub-meta">
     <span class="hub-venue">📍 Boston Public Market</span>
-    <span class="hub-city">(Boston)</span>
+    <span class="hub-city">(Downtown &amp; Boston Common, Boston)</span>
   </div>
   
 </article>
@@ -3362,6 +3338,34 @@
 </article>
   </div>
   <p id="hub-none" class="no-hub-events" hidden>Nothing in this area in the next few weeks. Try another town.</p>
+  <script>
+(function () {
+  var chips = document.querySelectorAll('.hub-city-chip');
+  if (!chips.length) return;
+  var cards = document.querySelectorAll('.hub-card');
+  var heads = document.querySelectorAll('.hub-day');
+  function show(city) {
+    var days = {};
+    cards.forEach(function (c) {
+      var on = city === 'all' || c.dataset.city === city;
+      c.hidden = !on;
+      if (on) days[c.dataset.day] = 1;
+    });
+    heads.forEach(function (h) { h.hidden = !days[h.dataset.day]; });
+    chips.forEach(function (b) { b.classList.toggle('active', b.dataset.city === city); });
+    var none = document.getElementById('hub-none');
+    if (none) none.hidden = Object.keys(days).length > 0;
+  }
+  chips.forEach(function (b) {
+    b.addEventListener('click', function () {
+      show(b.dataset.city);
+      history.replaceState(null, '', b.dataset.city === 'all' ? location.pathname : '#city=' + b.dataset.city);
+    });
+  });
+  var m = location.hash.match(/city=(\w+)/);
+  show(m && document.querySelector('.hub-city-chip[data-city="' + m[1] + '"]') ? m[1] : 'all');
+})();
+</script>
 </main>
 <footer>
   <p><a href="../">Wicked Boston Events</a> · Independent Greater Boston Events Calendar · <a href="https://www.instagram.com/wickedbostonevents/" target="_blank" rel="noopener">Instagram: @wickedbostonevents</a></p>

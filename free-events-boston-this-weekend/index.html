@@ -2379,6 +2379,7 @@
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
 <style>
   :root {
     --bg: #0c0e14;
@@ -2580,6 +2581,7 @@
     color: var(--muted);
   }
   footer a { color: var(--accent); text-decoration: none; }
+
 </style>
 </head>
 <body>
@@ -2592,6 +2594,7 @@
     <a href="../live-music-somerville/" class="">Somerville Music</a>
     <a href="../board-game-nights-boston/" class="">Board Games</a>
     <a href="../kids-family-events-boston/" class="">Kids &amp; Family</a>
+    <a href="../markets-festivals-boston/" class="">Markets &amp; Festivals</a>
     <a href="../boston/" class="">Boston</a>
     <a href="../cambridge/" class="">Cambridge</a>
     <a href="../somerville/" class="">Somerville</a>
@@ -2606,34 +2609,7 @@
     <p>Curated list of completely free concerts, community markets, gallery openings, and comedy across Boston, Cambridge, and Somerville this weekend.</p>
     <a href="../#free=1" class="cta-btn">Open Full Interactive Calendar &amp; Filters →</a>
   </div>
-  <div class="hub-city-chips" role="group" aria-label="Filter by city"><button type="button" class="hub-city-chip" data-city="all">All</button><button type="button" class="hub-city-chip" data-city="boston">Boston</button><button type="button" class="hub-city-chip" data-city="cambridge">Cambridge</button><button type="button" class="hub-city-chip" data-city="somerville">Somerville</button><button type="button" class="hub-city-chip" data-city="other">Nearby towns</button></div><script>
-(function () {
-  var chips = document.querySelectorAll('.hub-city-chip');
-  if (!chips.length) return;
-  var cards = document.querySelectorAll('.hub-card');
-  var heads = document.querySelectorAll('.hub-day');
-  function show(city) {
-    var days = {};
-    cards.forEach(function (c) {
-      var on = city === 'all' || c.dataset.city === city;
-      c.hidden = !on;
-      if (on) days[c.dataset.day] = 1;
-    });
-    heads.forEach(function (h) { h.hidden = !days[h.dataset.day]; });
-    chips.forEach(function (b) { b.classList.toggle('active', b.dataset.city === city); });
-    var none = document.getElementById('hub-none');
-    if (none) none.hidden = Object.keys(days).length > 0;
-  }
-  chips.forEach(function (b) {
-    b.addEventListener('click', function () {
-      show(b.dataset.city);
-      history.replaceState(null, '', b.dataset.city === 'all' ? location.pathname : '#city=' + b.dataset.city);
-    });
-  });
-  var m = location.hash.match(/city=(\w+)/);
-  show(m && document.querySelector('.hub-city-chip[data-city="' + m[1] + '"]') ? m[1] : 'all');
-})();
-</script>
+  <div class="hub-city-chips" role="group" aria-label="Filter by city"><button type="button" class="hub-city-chip" data-city="all">All</button><button type="button" class="hub-city-chip" data-city="boston">Boston</button><button type="button" class="hub-city-chip" data-city="cambridge">Cambridge</button><button type="button" class="hub-city-chip" data-city="somerville">Somerville</button><button type="button" class="hub-city-chip" data-city="other">Nearby towns</button></div>
   <div class="hub-grid">
     <h2 class="hub-day" id="2026-11-06" data-day="2026-11-06">Friday, November 6</h2>
 <article class="hub-card" data-city="other" data-day="2026-11-06">
@@ -3521,7 +3497,7 @@
   <h3 class="hub-title"><a href="https://luma.com/mobiletourboston" target="_blank" rel="noopener">Nikon Tour Comes to Boston, MA – Hands-On Photography Events November 6-8!</a></h3>
   <div class="hub-meta">
     <span class="hub-venue">📍 Franklin Park Zoo</span>
-    <span class="hub-city">(Boston)</span>
+    <span class="hub-city">(JP &amp; Dorchester, Boston)</span>
   </div>
   
 </article>
@@ -4596,18 +4572,6 @@
 </article>
 <article class="hub-card" data-city="somerville" data-day="2026-11-08">
   <div class="hub-card-head">
-    <time class="hub-date">11:30 AM</time>
-    <div class="hub-badges"><span class="badge badge-free">Free</span></div>
-  </div>
-  <h3 class="hub-title"><a href="https://burren.com/music.html" target="_blank" rel="noopener">Kids Open Mic</a></h3>
-  <div class="hub-meta">
-    <span class="hub-venue">📍 The Burren — The Back Room</span>
-    <span class="hub-city">(Davis Square, Somerville)</span>
-  </div>
-  
-</article>
-<article class="hub-card" data-city="somerville" data-day="2026-11-08">
-  <div class="hub-card-head">
     <time class="hub-date">12:00 PM</time>
     <div class="hub-badges"><span class="badge badge-free">Free</span></div>
   </div>
@@ -5014,8 +4978,48 @@
   </div>
   
 </article>
+<article class="hub-card" data-city="boston" data-day="2026-11-08">
+  <div class="hub-card-head">
+    <time class="hub-date">5:00 PM</time>
+    <div class="hub-badges"><span class="badge badge-free">Free</span></div>
+  </div>
+  <h3 class="hub-title"><a href="https://www.berklee.edu/events/student-recital-abigail-nordan-choral-conducting" target="_blank" rel="noopener">Student Recital: Abigail Nordan, Choral Conducting</a></h3>
+  <div class="hub-meta">
+    <span class="hub-venue">📍 Studio T401 (Boston Conservatory at Berklee)</span>
+    <span class="hub-city">(Fenway &amp; Kenmore, Boston)</span>
+  </div>
+  
+</article>
   </div>
   <p id="hub-none" class="no-hub-events" hidden>Nothing in this area in the next few weeks. Try another town.</p>
+  <script>
+(function () {
+  var chips = document.querySelectorAll('.hub-city-chip');
+  if (!chips.length) return;
+  var cards = document.querySelectorAll('.hub-card');
+  var heads = document.querySelectorAll('.hub-day');
+  function show(city) {
+    var days = {};
+    cards.forEach(function (c) {
+      var on = city === 'all' || c.dataset.city === city;
+      c.hidden = !on;
+      if (on) days[c.dataset.day] = 1;
+    });
+    heads.forEach(function (h) { h.hidden = !days[h.dataset.day]; });
+    chips.forEach(function (b) { b.classList.toggle('active', b.dataset.city === city); });
+    var none = document.getElementById('hub-none');
+    if (none) none.hidden = Object.keys(days).length > 0;
+  }
+  chips.forEach(function (b) {
+    b.addEventListener('click', function () {
+      show(b.dataset.city);
+      history.replaceState(null, '', b.dataset.city === 'all' ? location.pathname : '#city=' + b.dataset.city);
+    });
+  });
+  var m = location.hash.match(/city=(\w+)/);
+  show(m && document.querySelector('.hub-city-chip[data-city="' + m[1] + '"]') ? m[1] : 'all');
+})();
+</script>
 </main>
 <footer>
   <p><a href="../">Wicked Boston Events</a> · Independent Greater Boston Events Calendar · <a href="https://www.instagram.com/wickedbostonevents/" target="_blank" rel="noopener">Instagram: @wickedbostonevents</a></p>
