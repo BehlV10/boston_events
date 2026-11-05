@@ -9873,7 +9873,22 @@ def scrape_somerville_city(url, ua):
             "venue": "Somerville City Hall",
             "price": "Free",
         })
-    return events
+    return _drop_generic_meeting_copies(events)
+
+
+def _drop_generic_meeting_copies(events):
+    """The city sometimes posts one meeting twice: 'Land Use Committee Meeting' and 'Land Use
+    Committee - Joint Session with the Planning Board' at the same time. Drop the generic one."""
+    def core(name):
+        return re.sub(r"\s+(meeting|hearing)$", "", name.lower().strip())
+    keep = []
+    for e in events:
+        c = core(e["name"])
+        if any(o is not e and o["date"] == e["date"] and len(o["name"]) > len(e["name"])
+               and o["name"].lower().startswith(c) for o in events):
+            continue
+        keep.append(e)
+    return keep
 
 
 def scrape_northeastern(url, ua):
@@ -12305,6 +12320,11 @@ _AGGREGATOR_VENUES = {
 }
 
 
+_SOLD_OUT_PREFIX_RE = re.compile(r"^\s*[\[(*]{0,3}\s*sold[\s-]*out\s*[\])*]{0,3}\s*[:\-–—|]?\s*", re.I)
+# Promoter credits that open a title and make the same show at two times look unrelated
+_PROMOTER_PREFIX_RE = re.compile(r"^(?:bill blumenreich presents|mass concerts presents)\s*:?\s*", re.I)
+
+
 def _normalize_and_filter_events(raw_events, v):
     """Filter out placeholders, past events (>18h ago), virtual events, and far-away venues,
     and normalize category & music genre."""
@@ -12318,6 +12338,16 @@ def _normalize_and_filter_events(raw_events, v):
         title = (e.get("name") or "").strip()
         if not title or is_placeholder_or_closed_event(title):
             continue
+
+        # "[SOLD OUT] Show Name" -> "Show Name", with the sold-out note on the price, so an early
+        # sold-out show and a late show read as two times of one event, not a duplicate.
+        sold = _SOLD_OUT_PREFIX_RE.match(title)
+        if sold and title[sold.end():].strip():
+            title = title[sold.end():].strip()
+            p = (e.get("price") or "").strip()
+            e["price"] = p if "sold out" in p.lower() else (f"{p} (sold out)" if p else "Sold out")
+        title = _PROMOTER_PREFIX_RE.sub("", title).strip() or title
+        e["name"] = title
 
         v_raw = (e.get("venue") or "").strip()
         v_low = v_raw.lower()

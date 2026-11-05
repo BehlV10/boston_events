@@ -6247,15 +6247,22 @@ def render_page(results, weather=None, luckyseat_shows=None):
   /* ========================================================
      THEME SWITCHER & INDIE GUIDE THEME
      ======================================================== */
+  /* Top row: "Greater Boston Live Events" on the left, Add Event and the theme picker on the right.
+     On phones the theme picker gets the first line to itself (right-aligned) and the tag sits
+     lower, level with Add Event. */
   .banner-top-row {{
-    display: flex;
-    justify-content: flex-start;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas: "tag add themes";
     align-items: center;
     width: 100%;
     gap: 12px;
-    flex-wrap: wrap;
   }}
+  .banner-top-tag {{ grid-area: tag; justify-self: start; min-width: 0; }}
+  .banner-top-actions {{ grid-area: add; margin-left: 0; }}
   .theme-toggle-wrap {{
+    grid-area: themes;
+    justify-self: end;
     display: inline-flex;
     align-items: center;
     background: rgba(15, 18, 25, 0.7);
@@ -6264,7 +6271,14 @@ def render_page(results, weather=None, luckyseat_shows=None):
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 999px;
     padding: 3px;
-    order: -1;
+  }}
+  @media (max-width: 640px) {{
+    .banner-top-row {{
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-areas: "themes themes" "tag add";
+      row-gap: 10px;
+    }}
+    .banner-top-tag {{ font-size: 10px; letter-spacing: 0.08em; white-space: nowrap; }}
   }}
   .theme-toggle-wrap .theme-pill-btn {{ font-size: 14px; padding: 3px 9px; }}
   .theme-pill-holiday {{ display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: #fff; }}
@@ -7202,6 +7216,12 @@ def render_page(results, weather=None, luckyseat_shows=None):
   <div class="banner">
     <div class="banner-inner">
       <div class="banner-top-row">
+        <div class="banner-top-tag"><span class="live-pulse"></span> GREATER BOSTON LIVE EVENTS</div>
+        <div class="banner-top-actions">
+          <button type="button" class="pill-submit-btn" id="btn-open-submit-modal" aria-haspopup="dialog" aria-expanded="false">
+            <span>＋ Add Event</span>
+          </button>
+        </div>
         <div class="theme-toggle-wrap">
           <div class="theme-toggle-pills" role="radiogroup" aria-label="Visual Theme">
             <button type="button" class="theme-pill-btn theme-pill-holiday{' active' if seasonal_key else ''}" id="theme-pill-holiday" data-theme="{seasonal_key or ''}" role="radio" aria-checked="{'true' if seasonal_key else 'false'}" title="{escape(seasonal_label or '')} theme"{'' if seasonal_key else ' hidden'}><span class="holiday-pill-emoji">{seasonal_icon or ''}</span><span class="holiday-pill-label">{escape(seasonal_label or '')}</span></button>
@@ -7210,12 +7230,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
             <button type="button" class="theme-pill-btn{' active' if default_theme == 'indie' else ''}" data-theme="indie" role="radio" aria-checked="{'true' if default_theme == 'indie' else 'false'}" title="Indie Guide Theme">📰</button>
             <button type="button" class="theme-pill-btn{' active' if default_theme == 'anime' else ''}" data-theme="anime" role="radio" aria-checked="{'true' if default_theme == 'anime' else 'false'}" title="Anime Theme">🌸</button>
           </div>
-        </div>
-        <div class="banner-top-tag"><span class="live-pulse"></span> GREATER BOSTON LIVE EVENTS</div>
-        <div class="banner-top-actions">
-          <button type="button" class="pill-submit-btn" id="btn-open-submit-modal" aria-haspopup="dialog" aria-expanded="false">
-            <span>＋ Add Event</span>
-          </button>
         </div>
       </div>
       <div class="banner-title-row">
