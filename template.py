@@ -2059,10 +2059,24 @@ def _source_priority(s):
     return 10
 
 
+# Query parameters that name the event itself: "eventperformances.asp?evt=1252" (24 Hour Music),
+# "book?perfcode=931" (Somerville Theatre), "?eventid=206566108" (Trumba). Without them every
+# event on such a site has the same URL and they'd all merge.
+_EVENT_ID_PARAMS = {"evt", "eid", "eventid", "event_id", "event", "id", "perfcode", "performance", "showid",
+                    "show_id", "occurrence", "e"}
+
+
 def _clean_event_url(u):
     if not u or not isinstance(u, str):
         return ""
+    try:
+        q = urlparse(u.strip()).query
+    except ValueError:
+        q = ""
+    keep = sorted(p for p in q.split("&") if p.split("=", 1)[0].lower() in _EVENT_ID_PARAMS)
     u = re.sub(r"[?#].*$", "", u).strip().rstrip("/")
+    if keep and u:
+        return u + "?" + "&".join(keep)
     generic = {
         "https://www.passim.org/live-music",
         "https://burren.com/music.html",
@@ -2383,7 +2397,9 @@ def _merge_duplicates(events, word_freq=None):
         generic_vwords = {
             "the", "at", "in", "of", "and", "boston", "cambridge", "somerville",
             "theatre", "theater", "tavern", "pub", "bar", "lounge", "brewery",
-            "brewing", "cafe", "café", "center", "hall", "club", "studio", "house", "room"
+            "brewing", "cafe", "café", "center", "hall", "club", "studio", "house", "room",
+            # every library shares these; branches are told apart by their own names
+            "public", "library", "branch", "main", "central", "square", "sq", "arena", "stadium",
         }
         # len >= 2: the "s" of "Dani's" / "Lou's" is not a shared venue word
         w1 = {re.sub(r"s$", "", w) for w in re.findall(r"\w+", v1_low) if len(w) >= 2} - generic_vwords
@@ -2479,7 +2495,10 @@ def _merge_duplicates(events, word_freq=None):
                             # branch is on bpl.bibliocommons.com), so a shared host proves nothing there.
                             shared_platform = any(p in host_e for p in (
                                 "libcal.com", "bibliocommons.com", "assabetinteractive.com", "lu.ma", "luma.com",
-                                "partiful.com", "heylo.com", "humanitix.com", "ticketleap.com", "sched.com"))
+                                "partiful.com", "heylo.com", "humanitix.com", "ticketleap.com", "sched.com",
+                                # ticket sellers many bands/promoters share ("Truancy" and "Chick Singer Night")
+                                "24hourmusic.com", "tickettailor.com", "etix.com", "ticketweb.com", "showclix.com",
+                                "simpletix.com", "eventim", "universe.com", "dice.fm", "tixr.com", "axs.com"))
                             if host_e and host_e == host_c and not shared_platform and host_e not in ("eventbrite.com", "ticketmaster.com", "seatgeek.com", "meetup.com", "facebook.com", "instagram.com", "thebostoncalendar.com", "do617.com"):
                                 match = cand
                                 break
@@ -2588,6 +2607,11 @@ def _merge_duplicates(events, word_freq=None):
             # or if match currently has a placeholder time/URL, upgrade primary info
             cur_prio = _source_priority(match.get("_source_venue"))
             new_prio = _source_priority(e.get("_source_venue"))
+            # Equal rank: the venue's own listing beats another organization's ("WBUR CitySpace"'s
+            # page for its talk over Brookline Booksmith's "WBUR CitySpace: Sofia Franklyn")
+            own = lambda x: bool(_venue_words(x.get("_source_venue")) & _venue_words(x.get("venue")))
+            if new_prio == cur_prio and own(e) and not own(match):
+                new_prio += 1
             if (m_is_placeholder and e_is_evening) or (new_prio > cur_prio):
                 old_url = match.get("url")
                 old_src = match.get("_source_venue")

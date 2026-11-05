@@ -2460,6 +2460,28 @@ class RetitledSameEventMergeTests(unittest.TestCase):
         ], bg)
         self.assertEqual(len(out), 2)
 
+    def test_event_id_query_kept_in_url_key(self):
+        from template import _clean_event_url
+        a = _clean_event_url("https://tickets.24hourmusic.com/eventperformances.asp?evt=1252")
+        b = _clean_event_url("https://tickets.24hourmusic.com/eventperformances.asp?evt=1557")
+        self.assertNotEqual(a, b)
+        self.assertEqual(_clean_event_url("https://x.com/e/show?utm_source=tbc"), "https://x.com/e/show")
+
+    def test_different_library_branches_stay_separate(self):
+        out = self._merge([
+            self._ev("Crafternoon: Tornado in a Jar", "Boston Public Library", "Boston Public Library (Mattapan)", 15, 0),
+            self._ev("Tween Crafternoon", "Brookline Public Library", "Brookline Public Library (Brookline Village)", 15, 0),
+        ])
+        self.assertEqual(len(out), 2)
+
+    def test_venue_own_listing_leads(self):
+        out = self._merge([
+            self._ev("WBUR CitySpace: Sofia Franklyn", "Brookline Booksmith", "WBUR CitySpace", 19, 0),
+            self._ev("Daddy Issues: Sofia Franklyn reclaims her story", "WBUR CitySpace", "WBUR CitySpace", 19, 0),
+        ])
+        self.assertEqual(len(out), 1)
+        self.assertTrue(out[0]["name"].startswith("Daddy Issues"))
+
     def test_square_is_not_a_shared_venue(self):
         from template import _same_physical_venue
         a = {"venue": "Cambridge Public Library (Central Square Branch)"}
