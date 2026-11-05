@@ -7712,6 +7712,26 @@ def scrape_arts_at_the_armory(url, ua):
             "price": None,
             "category": cat,
         })
+
+    # The list gives the time doors open ("6:30 pm - 9:00 pm"); a show's own page says
+    # "6:30 pm Doors 7:30 pm Show". Use the show time for the next two weeks' events.
+    soon = now + timedelta(days=14)
+    show_times = {}  # the list repeats many events; read each show's page once
+    for ev in events:
+        start = datetime.fromisoformat(ev["date"])
+        if start > soon or not ev["url"].startswith("https://artsatthearmory.org/events/"):
+            continue
+        if ev["url"] not in show_times:
+            try:
+                text = fetch_soup(ev["url"], ua).get_text(" ", strip=True)
+                show = re.search(r"Doors\s+(\d{1,2}(?::\d{2})?\s*[ap]\.?m\.?)\s*Show\b", text, re.I)
+                show_times[ev["url"]] = _clock(show.group(1)) if show else None
+            except Exception:
+                show_times[ev["url"]] = None
+        hm = show_times[ev["url"]]
+        if hm:
+            local = start.astimezone(EASTERN)
+            ev["date"] = local.replace(hour=hm[0], minute=hm[1]).astimezone(timezone.utc).isoformat()
     return events
 
 

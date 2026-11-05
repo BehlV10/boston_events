@@ -40,6 +40,25 @@ class SoldOutAndPromoterPrefixTests(unittest.TestCase):
         self.assertEqual(got, [("Big Show", "$20 (sold out)"), ("Other Show", "Sold out"), ("Soldier's Story", None)])
 
 
+class ArmoryShowTimeTests(unittest.TestCase):
+    def test_uses_show_time_not_doors(self):
+        from unittest import mock
+        from bs4 import BeautifulSoup
+        day = (datetime.now(scrapers.EASTERN) + timedelta(days=2)).strftime("%a. %b. %d, %Y")
+        listing = f"""
+          <div class="em-event em-item"><h3><a href="https://artsatthearmory.org/events/late-show/">Late Show</a></h3>
+            <div class="em-event-date">{day}</div><div class="em-event-time">9:00 pm - 11:00 pm</div></div>
+          <div class="em-event em-item"><h3><a href="https://artsatthearmory.org/events/late-show/">Late Show</a></h3>
+            <div class="em-event-date">{day}</div><div class="em-event-time">9:00 pm - 11:00 pm</div></div>"""
+        show_page = "<p>Get tickets now! 9:00 PM Doors 9:30 PM Show</p>"
+        pages = {"https://artsatthearmory.org/upcoming-events/": listing,
+                 "https://artsatthearmory.org/events/late-show/": show_page}
+        with mock.patch.object(scrapers, "fetch_soup", side_effect=lambda u, ua: BeautifulSoup(pages[u], "html.parser")) as fs:
+            evs = scrapers.scrape_arts_at_the_armory("https://artsatthearmory.org/upcoming-events/", "")
+        self.assertEqual({datetime.fromisoformat(e["date"]).astimezone(scrapers.EASTERN).strftime("%H:%M") for e in evs}, {"21:30"})
+        self.assertEqual(fs.call_count, 2)  # the list, then the show page once
+
+
 class SomervilleMeetingCopiesTests(unittest.TestCase):
     def test_generic_copy_dropped_only_at_the_same_time(self):
         a, b = "2026-11-05T23:30:00+00:00", "2026-11-19T23:30:00+00:00"
