@@ -30,6 +30,8 @@ from scrapers import (
     is_utility_event,
     is_deal_event,
     is_kid_family_event,
+    is_market_or_festival,
+    _MARKET_OVERRIDABLE,
 )
 from venues_geo import resolve_event_geo, nearest_curated_venue
 
@@ -45,7 +47,12 @@ def _effective_category(e):
         return "deals"
     if is_kid_family_event(name, e.get("venue")):
         return "family"
-    return e.get("category") or "other"
+    cat = e.get("category") or "other"
+    # Also at render time, so pages built from an events.json scraped before a source's markets
+    # were classified (or kept from a degraded scrape) still fill the Markets & Festivals page
+    if cat in _MARKET_OVERRIDABLE and is_market_or_festival(name):
+        return "markets"
+    return cat
 
 
 CITY_RULES = [
@@ -332,7 +339,8 @@ def resolve_subarea(city, event, geo=None):
     elif city == "boston":
         if any(k in blob for k in ["fenway", "symphony", "house of blues", "mgm music", "mfa", "museum of fine arts", "jordan hall", "nec ", "nec:", "nec (", "new england conservatory", "berklee", "cafe 939", "time out", "401 park", "bill's bar", "bills bar", "loretta", "kenmore", "wbur cityspace", "890 commonwealth"]):
             return ("Fenway & Kenmore", "fenway_kenmore")
-        if any(k in blob for k in ["theater district", "theatre district", "boch", "wang", "shubert", "paramount", "colonial", "royale", "charles playhouse", "downtown", "boston common", "chinatown", "north end", "public garden", "duckling", "orpheum", "bsmnt", "city winery", "big night live", "td garden", "wilbur", "sports museum", "versus", "west end", "legacy", "feral"]):
+        if any(k in blob for k in ["theater district", "theatre district", "boch", "wang", "shubert", "paramount", "colonial", "royale", "charles playhouse", "downtown", "boston common", "chinatown", "north end", "public garden", "duckling", "orpheum", "bsmnt", "city winery", "big night live", "td garden", "wilbur", "sports museum", "versus", "west end", "legacy", "feral",
+                                    "boston public market", "haymarket", "faneuil hall", "quincy market", "city hall plaza"]):
             return ("Downtown & Boston Common", "theater_downtown")
         if any(k in blob for k in ["south end", "beehive", "wally", "club cafe", "club café", "sowa", "reunion bbq", "calderwood"]):
             return ("South End", "south_end")
@@ -829,6 +837,7 @@ def build_seo_directory_html(all_events_flat, all_venue_names):
           <li><a href="live-music-somerville/">Somerville Live Music</a></li>
           <li><a href="board-game-nights-boston/">Board Game Nights &amp; Trivia</a></li>
           <li><a href="kids-family-events-boston/">Kids &amp; Family Events</a></li>
+          <li><a href="markets-festivals-boston/">Markets, Fairs &amp; Festivals</a></li>
         </ul>
       </div>
 
@@ -913,6 +922,42 @@ def _event_matches_keywords(e, keywords):
     return any(k.lower() in text for k in keywords)
 
 
+def _series_key(e):
+    name = re.sub(r"\b20\d\d\b|[^a-z0-9 ]+", " ", (e.get("name") or "").lower())
+    # First word of the venue: listings of one series spell it "SoWa" / "SoWa Open Market"
+    venue = re.sub(r"^the |[^a-z0-9 ]+", " ", (e.get("venue") or e.get("_source_venue") or "").lower())
+    return " ".join(name.split()), (venue.split() or [""])[0]
+
+
+def _collapse_hub_series(events, show_dates=3):
+    """One card per repeating series (a weekly farmers market, a month-long holiday market, the
+    two weekends of a fair) at its next date, its later dates listed in the card's description:
+    "Also Sat, Nov 28 · Sun, Nov 29 · Sat, Dec 5 and 11 more dates." Events must be date-sorted."""
+    groups, order = {}, []
+    for e in events:
+        k = _series_key(e)
+        if k not in groups:
+            groups[k] = []
+            order.append(k)
+        groups[k].append(e)
+    out = []
+    for k in order:
+        first, rest = groups[k][0], groups[k][1:]
+        days = []
+        for r in rest:
+            t = r.get("_time")
+            label = t.strftime("%a, %b %-d") if isinstance(t, datetime) else None
+            if label and label not in days and (not isinstance(first.get("_time"), datetime)
+                                                or t.date() != first["_time"].date()):
+                days.append(label)
+        if days:
+            more = f" and {len(days) - show_dates} more dates" if len(days) > show_dates else ""
+            note = f"Also {' · '.join(days[:show_dates])}{more}."
+            first = {**first, "description": f"{note} {first.get('description') or ''}".strip(), "_series_dates": len(days)}
+        out.append(first)
+    return out
+
+
 def filter_events_for_hub(hub, events):
     city_filter = hub.get("city_filter")
     cat_filter = hub.get("cat_filter")
@@ -988,6 +1033,23 @@ HUBS = {
         "og_badge": "KIDS & FAMILY",
         "og_image": "og-kids-family.jpg",
         "query": "#cat=Kids+%26+Family"
+    },
+    # Flea, night, farmers and holiday markets, craft fairs and festivals
+    "markets-festivals-boston": {
+        "title": "Markets, Fairs & Festivals in Boston, Cambridge & Somerville",
+        "h1": "Markets, Fairs & Festivals",
+        "city_filter": None,
+        "cat_filter": "Markets & Festivals",
+        "free_only": False,
+        "time_filter": None,
+        "keyword_filter": None,
+        "show_details": True,
+        "limit": 250,
+        "subtitle": "Flea markets, night markets, farmers markets, holiday markets and bazaars, craft and vintage fairs, food fests and street festivals around Greater Boston, updated daily.",
+        "collapse_series": True,  # a month of Holiday Pop-Up Market days is one card
+        "og_badge": "MARKETS & FESTIVALS",
+        "og_image": "og-markets-festivals.jpg",
+        "query": "#cat=Markets+%26+Festivals"
     },
     # 1. High-Volume Programmatic Intent Pages
     "free-events-boston-this-weekend": {
@@ -1465,6 +1527,8 @@ def render_hub_page(hub_slug, events, site_url=None):
         return ""
 
     filtered = filter_events_for_hub(hub, events)
+    if hub.get("collapse_series"):
+        filtered = _collapse_hub_series(filtered)
     card_limit = hub.get("limit", 60)
 
     hub_canonical = f"{site_url}/{hub_slug}/"
@@ -1695,6 +1759,7 @@ def render_hub_page(hub_slug, events, site_url=None):
     active_sm = 'active' if hub_slug == 'live-music-somerville' else ''
     active_bg = 'active' if hub_slug == 'board-game-nights-boston' else ''
     active_kf = 'active' if hub_slug == 'kids-family-events-boston' else ''
+    active_mk = 'active' if hub_slug == 'markets-festivals-boston' else ''
 
     return f"""<!doctype html>
 <html lang="en">
@@ -1921,6 +1986,7 @@ def render_hub_page(hub_slug, events, site_url=None):
     <a href="../live-music-somerville/" class="{active_sm}">Somerville Music</a>
     <a href="../board-game-nights-boston/" class="{active_bg}">Board Games</a>
     <a href="../kids-family-events-boston/" class="{active_kf}">Kids &amp; Family</a>
+    <a href="../markets-festivals-boston/" class="{active_mk}">Markets &amp; Festivals</a>
     <a href="../boston/" class="{active_b}">Boston</a>
     <a href="../cambridge/" class="{active_c}">Cambridge</a>
     <a href="../somerville/" class="{active_s}">Somerville</a>
@@ -2961,6 +3027,10 @@ def _merge_duplicates(events, word_freq=None):
                     match["_alt_sources"].append({"venue": old_src, "url": old_url, "price": match.get("price"), "name": match.get("name")})
                 match["url"] = e.get("url")
                 match["name"] = e.get("name")
+                # The category goes with the title it describes: a "Time: TBA" placeholder that
+                # absorbed a same-day "Pop Up Market" must not label the game watch that replaces it
+                if e.get("category") and e["category"] not in ("other", "community"):
+                    match["category"] = e["category"]
                 if not e.get("_venue_unknown") or match.get("_venue_unknown"):
                     match["venue"] = e.get("venue")  # never replace a real venue with a placeholder
                 match["_source_venue"] = e.get("_source_venue")
@@ -4416,6 +4486,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
   .bucket[data-bucket="Kids & Family"]      {{ --accent: #ffb8d1; }}
   .bucket[data-bucket="Deals & Specials"]   {{ --accent: #c678dd; }}
   .bucket[data-bucket="Tech & Startups"]    {{ --accent: #7aa2f7; }}
+  .bucket[data-bucket="Markets & Festivals"] {{ --accent: #f4a261; }}
   .bucket-head {{ display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); font-weight: 600; }}
   .bucket-head .count {{ background: transparent; color: var(--muted); }}
   .bucket ul {{ list-style: none; padding: 0; margin: 0; }}
