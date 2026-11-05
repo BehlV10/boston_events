@@ -2954,13 +2954,14 @@ def render_page(results, weather=None, luckyseat_shows=None):
                     continue
                 v_name = escape(a.get("venue") or "source")
                 a_price = f" ({escape(a['price'])})" if a.get("price") and a["price"] != e.get("price") else ""
-                link = f'<a href="{escape(a["url"])}" target="_blank" rel="noopener">'
+                # Not "link": that holds the card's own title link, rendered below
+                alt_a = f'<a href="{escape(a["url"])}" target="_blank" rel="noopener">'
                 if _titles_unrelated(raw_title, a.get("name")):
                     # Merged as the same time & place but titled differently: maybe a different
                     # event (or a tour name vs the band). Show its title so it's never hidden.
-                    other_titles.append(f'{link}{escape(a["name"])}</a> <span class="also-src">({v_name})</span>')
+                    other_titles.append(f'{alt_a}{escape(a["name"])}</a> <span class="also-src">({v_name})</span>')
                 else:
-                    alt_parts.append(f'{link}{v_name}{a_price}</a>')
+                    alt_parts.append(f'{alt_a}{v_name}{a_price}</a>')
             if alt_parts:
                 alt_joined = " · ".join(alt_parts)
                 alt_html = f'<span class="alt-sources">also on {alt_joined}</span>'

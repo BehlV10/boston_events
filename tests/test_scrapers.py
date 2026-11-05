@@ -136,6 +136,19 @@ class TestBostonEvents(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate_venue({"name": "Place", "url": "not-a-valid-url"})
 
+    def test_merged_card_keeps_its_title(self):
+        """A card with "also on" sources must still show its own title (the alt-source loop
+        once overwrote the title link, leaving 138 cards blank)."""
+        # Two hours from now: the homepage only renders the first days inline (later ones are deferred)
+        when = (datetime.now(timezone.utc) + timedelta(hours=2)).replace(minute=0, second=0, microsecond=0).isoformat()
+        ev = lambda src, name, url: {"venue": src, "url": f"https://{src.replace(' ', '').lower()}.test", "error": None,
+                                     "events": [{"name": name, "date": when, "url": url, "venue": "The Sinclair",
+                                                 "category": "music", "price": "$25"}]}
+        html = render_page([ev("The Sinclair", "Indie Rock Night", "https://sinclaircambridge.com/event/1"),
+                            ev("The Boston Calendar", "Indie Rock Night", "https://www.thebostoncalendar.com/events/indie-rock-night")])
+        self.assertIn('rel="noopener">Indie Rock Night</a>', html)
+        self.assertIn("also on", html)
+
     def test_template_rendering(self):
         """render_page() must render complete HTML without template exceptions."""
         mock_data = [
