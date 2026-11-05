@@ -1005,9 +1005,12 @@ def scrape_town_library_kids(url, ua, library, town):
     for e in scrape_somerville_library(url, ua):
         if e.get("category") != "family" and not is_kid_family_event(e.get("name"), None):
             continue
+        if _teen_only(e.get("name")):
+            continue
         branch = re.sub(r"^Somerville Public Library\s*\(?|\)$", "", e.get("venue") or "").strip()
         # single-branch libraries report their own name as the branch
-        same = not branch or town.lower() in branch.lower() or branch.lower() == "somerville public library"
+        same = (not branch or town.lower() in branch.lower() or branch.lower() == "somerville public library"
+                or library.lower() in branch.lower() or branch.lower() in library.lower())
         e["venue"] = library if same else f"{library} ({branch})"
         e["locality"] = town  # card shows "Watertown", not "Outer Suburbs"
         e["category"] = "family"
@@ -1025,6 +1028,59 @@ def scrape_medford_library_kids(url, ua):
 
 def scrape_belmont_library_kids(url, ua):
     return scrape_town_library_kids(url, ua, "Belmont Public Library", "Belmont")
+
+
+def scrape_malden_library_kids(url, ua):
+    return scrape_town_library_kids(url, ua, "Malden Public Library", "Malden")
+
+
+def scrape_waltham_library_kids(url, ua):
+    return scrape_town_library_kids(url, ua, "Waltham Public Library", "Waltham")
+
+
+def scrape_quincy_library_kids(url, ua):
+    return scrape_town_library_kids(url, ua, "Thomas Crane Public Library", "Quincy")
+
+
+def scrape_lexington_library_kids(url, ua):
+    return scrape_town_library_kids(url, ua, "Cary Memorial Library", "Lexington")
+
+
+def scrape_melrose_library_kids(url, ua):
+    return scrape_town_library_kids(url, ua, "Melrose Public Library", "Melrose")
+
+
+def scrape_revere_library_kids(url, ua):
+    return scrape_town_library_kids(url, ua, "Revere Public Library", "Revere")
+
+
+def scrape_libcal_town_kids(url, ua, library, town):
+    """Kids/family programs only from a nearby town's LibCal calendar (the RSS format Cambridge's
+    scraper reads). Adult programs would flood the Outer Suburbs group."""
+    out = []
+    for e in scrape_cpl(url, ua):
+        if e.get("category") != "family" and not is_kid_family_event(e.get("name"), None):
+            continue
+        if _teen_only(e.get("name")):
+            continue
+        m = re.match(r"Cambridge Public Library \((.*)\)$", e.get("venue") or "")
+        campus = (m.group(1) if m else "").strip()
+        if "virtual" in campus.lower() or "online" in campus.lower():
+            continue
+        main = not campus or campus.lower() in ("main library", library.lower()) or library.lower() in campus.lower()
+        e["venue"] = library if main else f"{library} ({campus})"
+        e["locality"] = town
+        e["category"] = "family"
+        out.append(e)
+    return out
+
+
+def scrape_newton_library_kids(url, ua):
+    return scrape_libcal_town_kids(url, ua, "Newton Free Library", "Newton")
+
+
+def scrape_milton_library_kids(url, ua):
+    return scrape_libcal_town_kids(url, ua, "Milton Public Library", "Milton")
 
 
 
@@ -1069,6 +1125,22 @@ def scrape_mass_audubon_magazine_beach(url, ua):
 
 def scrape_mass_audubon_boston_nature_center(url, ua):
     return scrape_mass_audubon(url, ua, "Mass Audubon Boston Nature Center", "500 Walk Hill St, Mattapan")
+
+
+def scrape_mass_audubon_habitat(url, ua):
+    evs = scrape_mass_audubon(url, ua, "Mass Audubon Habitat Education Center", "10 Juniper Rd, Belmont")
+    for e in evs:
+        e["locality"] = "Belmont"
+    return evs
+
+
+def scrape_mass_audubon_drumlin_farm(url, ua):
+    """Drumlin Farm in Lincoln: the working farm families drive out to (barnyard programs,
+    hayrides, farm walks)."""
+    evs = scrape_mass_audubon(url, ua, "Mass Audubon Drumlin Farm", "208 S Great Rd, Lincoln")
+    for e in evs:
+        e["locality"] = "Lincoln"
+    return evs
 
 
 _EB_FAMILY_RE = re.compile(
@@ -6554,6 +6626,10 @@ _SHORT_MONTHS = {
 }
 
 
+_TRIBE_FAMILY_CATEGORIES = {"family", "families", "kids", "children", "family programs", "family events",
+                             "kids & family", "kids & families", "kids and families", "family fun"}
+
+
 def scrape_tribe_rest(url, ua, default_venue=None, default_category=None):
     """The Events Calendar (Tribe) REST API: fetches /wp-json/tribe/events/v1/events."""
     now = datetime.now(timezone.utc)
@@ -6597,9 +6673,11 @@ def scrape_tribe_rest(url, ua, default_venue=None, default_category=None):
 
         event_url = item.get("url") or endpoint
 
-        cat_names = [c.get("name", "").lower() for c in item.get("categories", [])]
+        cat_names = [html.unescape(c.get("name", "")).lower().strip() for c in item.get("categories", [])]
         category = default_category or "community"
-        if any("music" in c for c in cat_names):
+        if any(c in _TRIBE_FAMILY_CATEGORIES for c in cat_names):
+            category = "family"
+        elif any("music" in c for c in cat_names):
             category = "music"
         elif any("film" in c or "movie" in c for c in cat_names):
             category = "film"
@@ -6619,6 +6697,123 @@ def scrape_tribe_rest(url, ua, default_venue=None, default_category=None):
             "category": category,
         })
     return events
+
+
+def scrape_arnold_arboretum(url, ua):
+    """Arnold Arboretum (Jamaica Plain): family walks, birding, owl prowls, mushroom hunts, drop-in
+    art and lectures (The Events Calendar API). Skips the twice-daily Highlights Tours, which run
+    every day and would bury the real programs (like the MFA's daily tours)."""
+    out = []
+    for e in scrape_tribe_rest(url, ua, default_venue="Arnold Arboretum", default_category="outdoors"):
+        if re.match(r"(?i)\s*arboretum highlights tour\b", e.get("name") or ""):
+            continue
+        spot = (e.get("venue") or "").strip()
+        e["venue"] = "Arnold Arboretum"
+        e["address"] = "125 Arborway, Jamaica Plain, Boston"
+        if spot and spot.lower() != "arnold arboretum":
+            e["description"] = f"Meet {spot[0].lower() + spot[1:] if spot.lower().startswith('in front') else 'at ' + spot}."
+        if e.get("category") != "family" and is_kid_family_event(e.get("name"), None):
+            e["category"] = "family"
+        out.append(e)
+    return out
+
+
+_MONTHS_RE = r"(January|February|March|April|May|June|July|August|September|October|November|December)"
+
+
+_CLOCK_TIME_RE = re.compile(r"(?i)\b(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)?(?![\d:])")
+
+
+def _first_time_in(text):
+    """(hour, minute) of the first clock time in text like "4:30 – 6:30 pm" or "12:00 pm; 7:30 pm";
+    an am/pm-less first time takes the next am/pm marker. None if there's no time."""
+    for m in _CLOCK_TIME_RE.finditer(text or ""):
+        if not (m.group(2) or m.group(3)):
+            continue  # a bare number ("27," or "2 shows") isn't a time
+        hour, minute, ampm = int(m.group(1)), int(m.group(2) or 0), m.group(3)
+        if not ampm:
+            nxt = re.search(r"(?i)\b([ap])\.?m\b", text[m.end():])
+            ampm = nxt.group(1) if nxt else ("p" if 1 <= hour <= 7 else "a")
+        if ampm.lower().startswith("p") and hour != 12:
+            hour += 12
+        elif ampm.lower().startswith("a") and hour == 12:
+            hour = 0
+        if hour < 24 and minute < 60:
+            return hour, minute
+    return None
+
+
+def scrape_museum_of_science(url, ua):
+    """Museum of Science special events (talks, planetarium nights, community days, family
+    programs) from the site's event-listing API; each result is an HTML card with a date/time
+    line, title and summary. Family programs go to Kids & Family."""
+    out, now = [], datetime.now(timezone.utc)
+    months = {m: i for i, m in enumerate(("January", "February", "March", "April", "May", "June", "July",
+                                          "August", "September", "October", "November", "December"), 1)}
+    for page in range(4):
+        resp = _SESSION.get(url, params={"items_per_page": 18, "sort_by": "date_asc", "page": page},
+                            headers={"User-Agent": ua, "Accept": "application/json"}, timeout=20)
+        resp.raise_for_status()
+        data = resp.json()
+        for row in data.get("results") or []:
+            card = row.get("event_listing") or ""
+            tm = re.search(r'<h3[^>]*>\s*<a href="([^"]+)"[^>]*>(.*?)</a>', card, re.S)
+            info = re.search(r'field--name-field-date-time-info[^>]*>(.*?)</div>', card, re.S)
+            if not tm or not info:
+                continue
+            title = html.unescape(re.sub(r"<[^>]+>", "", tm.group(2))).strip()
+            info_txt = html.unescape(re.sub(r"<[^>]+>", " ", info.group(1)))
+            info_txt = re.sub(r"\s+", " ", info_txt).strip()
+            summ = re.search(r'listing-item__summary">(.*?)</div>', card, re.S)
+            summary = re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", "", summ.group(1)))).strip() if summ else ""
+            dm = re.search(_MONTHS_RE + r"\s+(\d{1,2})(?:\s*[–-]\s*\d{1,2})?,\s*(\d{4})", info_txt)
+            if not title or not dm:
+                continue
+            hm = None if re.search(r"(?i)\ball day\b", info_txt) else _first_time_in(info_txt[dm.end():])
+            hour, minute = hm or (10, 0)
+            try:
+                dt = datetime(int(dm.group(3)), months[dm.group(1)], int(dm.group(2)), hour, minute, tzinfo=EASTERN)
+            except ValueError:
+                continue
+            if dt.astimezone(timezone.utc) < now - timedelta(hours=6):
+                continue
+            blob = f"{title} {info_txt} {summary}"
+            if re.search(r"(?i)\b(?:famil(?:y|ies)|kids?|children|toddlers?|ages? \d)", blob):
+                cat = "family"
+            else:
+                cat = infer_category(title, None, default="community")  # "Museum" in the venue would say art
+            out.append({
+                "name": title,
+                "date": dt.astimezone(timezone.utc).isoformat(),
+                "url": urljoin("https://www.mos.org", tm.group(1)),
+                "venue": "Museum of Science",
+                "address": "1 Science Park, Boston",
+                "price": None,
+                "category": cat,
+                "description": summary[:240] or None,
+            })
+        pager = data.get("pager") or {}
+        if page + 1 >= int(pager.get("total_pages") or 1):
+            break
+    return out
+
+
+def scrape_mount_auburn(url, ua):
+    """Mount Auburn Cemetery (Cambridge/Watertown line): walking tours, birding, mindfulness walks,
+    wreath and centerpiece workshops (The Events Calendar iCal feed)."""
+    out = []
+    for e in scrape_ical(url, ua):
+        e["venue"] = "Mount Auburn Cemetery"
+        e["address"] = "580 Mount Auburn St, Cambridge"
+        cat = infer_category(e.get("name"), None, default="outdoors")
+        e["category"] = "outdoors" if cat == "community" else cat  # walking tours read as community
+        out.append(e)
+    return out
+
+
+def scrape_franklin_park_coalition(url, ua):
+    """Franklin Park Coalition: Turkey Trot, park cleanups, Franklin Park Day (Events Calendar API)."""
+    return scrape_tribe_rest(url, ua, default_venue="Franklin Park", default_category="outdoors")
 
 
 def scrape_speedway(url, ua):
@@ -7648,6 +7843,15 @@ def scrape_somerville_library(url, ua):
                 "price": "Free",
             })
     return events
+
+
+# Teen-only library programs (Teen D&D, Teen Movie Fridays) aren't for parents with kids.
+_TEEN_ONLY_RE = re.compile(r"(?i)\bteens?\b")
+_NOT_TEEN_ONLY_RE = re.compile(r"(?i)\b(?:kids?|children|famil(?:y|ies)|tweens?|grades? (?:k|[1-5])\b|ages? [1-9]\b)")
+
+
+def _teen_only(name):
+    return bool(_TEEN_ONLY_RE.search(name or "")) and not _NOT_TEEN_ONLY_RE.search(name or "")
 
 
 _LIBCAL_KIDS_RE = re.compile(
@@ -9864,6 +10068,20 @@ _ALL_VENUES = [
     {"name": "Watertown Library (kids)", "url": "https://watertownlib.assabetinteractive.com/calendar/", "ua": UA_CHROME, "scraper": scrape_watertown_library_kids, "default_category": "family"},
     {"name": "Medford Library (kids)", "url": "https://medfordlibrary.assabetinteractive.com/calendar/", "ua": UA_CHROME, "scraper": scrape_medford_library_kids, "default_category": "family"},
     {"name": "Belmont Library (kids)", "url": "https://belmontpubliclibrary.assabetinteractive.com/calendar/", "ua": UA_CHROME, "scraper": scrape_belmont_library_kids, "default_category": "family"},
+    {"name": "Malden Library (kids)", "url": "https://maldenpubliclibrary.assabetinteractive.com/calendar/", "ua": UA_CHROME, "scraper": scrape_malden_library_kids, "default_category": "family"},
+    {"name": "Waltham Library (kids)", "url": "https://waltham.assabetinteractive.com/calendar/", "ua": UA_CHROME, "scraper": scrape_waltham_library_kids, "default_category": "family"},
+    {"name": "Quincy Library (kids)", "url": "https://thomascranelibrary.assabetinteractive.com/calendar/", "ua": UA_CHROME, "scraper": scrape_quincy_library_kids, "default_category": "family"},
+    {"name": "Lexington Library (kids)", "url": "https://carylibrary.assabetinteractive.com/calendar/", "ua": UA_CHROME, "scraper": scrape_lexington_library_kids, "default_category": "family"},
+    {"name": "Melrose Library (kids)", "url": "https://melrosepubliclibrary.assabetinteractive.com/calendar/", "ua": UA_CHROME, "scraper": scrape_melrose_library_kids, "default_category": "family"},
+    {"name": "Revere Library (kids)", "url": "https://reverepubliclibrary.assabetinteractive.com/calendar/", "ua": UA_CHROME, "scraper": scrape_revere_library_kids, "default_category": "family"},
+    {"name": "Newton Library (kids)", "url": "https://newtonfreelibrary.libcal.com/rss.php?m=month&cid=3836", "ua": UA_CHROME, "scraper": scrape_newton_library_kids, "default_category": "family"},
+    {"name": "Milton Library (kids)", "url": "https://miltonlibrary.libcal.com/rss.php?m=month&cid=20657", "ua": UA_CHROME, "scraper": scrape_milton_library_kids, "default_category": "family"},
+    {"name": "Arnold Arboretum", "url": "https://arboretum.harvard.edu/wp-json/tribe/events/v1/events?per_page=50", "ua": UA_CHROME, "scraper": scrape_arnold_arboretum, "default_category": "outdoors"},
+    {"name": "Museum of Science", "url": "https://www.mos.org/api/v1/event-listing/event_detail/96+101/all/all/all/all", "ua": UA_CHROME, "scraper": scrape_museum_of_science, "default_category": "community"},
+    {"name": "Mount Auburn Cemetery", "url": "https://mountauburn.org/events/?ical=1", "ua": UA_CHROME, "scraper": scrape_mount_auburn, "default_category": "outdoors"},
+    {"name": "Franklin Park Coalition", "url": "https://www.franklinparkcoalition.org/wp-json/tribe/events/v1/events", "ua": UA_CHROME, "scraper": scrape_franklin_park_coalition, "default_category": "outdoors"},
+    {"name": "Mass Audubon Habitat (Belmont)", "url": "https://www.massaudubon.org/programs/habitat", "ua": UA_CHROME, "scraper": scrape_mass_audubon_habitat, "default_category": "outdoors"},
+    {"name": "Mass Audubon Drumlin Farm", "url": "https://www.massaudubon.org/programs/drumlin-farm", "ua": UA_CHROME, "scraper": scrape_mass_audubon_drumlin_farm, "default_category": "outdoors"},
     {"name": "Mass Audubon Magazine Beach", "url": "https://www.massaudubon.org/programs/magazine-beach", "ua": UA_CHROME, "scraper": scrape_mass_audubon_magazine_beach, "default_category": "outdoors"},
     {"name": "Mass Audubon Boston Nature Center", "url": "https://www.massaudubon.org/programs/boston-nature-center", "ua": UA_CHROME, "scraper": scrape_mass_audubon_boston_nature_center, "default_category": "outdoors"},
     {"name": "Somerville Museum", "url": "https://www.somervillemuseum.org/calendar-events", "ua": UA_CHROME, "scraper": scrape_squarespace_events, "default_category": "community"},
