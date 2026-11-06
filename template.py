@@ -10209,11 +10209,25 @@ def render_page(results, weather=None, luckyseat_shows=None):
       }});
     }}
 
+    // My Schedule keeps an event for 24 hours after it starts
+    function dropPastScheduleEvents() {{
+      try {{
+        const details = JSON.parse(localStorage.getItem('boston_schedule_events') || '{{}}');
+        const cutoff = Math.floor(Date.now() / 1000) - 86400;
+        const past = Object.keys(details).filter(id => Array.isArray(details[id]) && details[id][1] < cutoff);
+        if (!past.length) return;
+        past.forEach(id => {{ delete details[id]; starredEvents.delete(id); }});
+        localStorage.setItem('boston_schedule_events', JSON.stringify(details));
+        localStorage.setItem('boston_starred_events', JSON.stringify(Array.from(starredEvents)));
+      }} catch (_) {{}}
+    }}
+
     function loadStarredState() {{
       try {{
         const raw = JSON.parse(localStorage.getItem('boston_starred_events') || '[]');
         if (Array.isArray(raw)) starredEvents = new Set(raw);
       }} catch (_) {{}}
+      dropPastScheduleEvents();
       if (!starredEvents || starredEvents.size === 0) return;
       document.querySelectorAll('.event[data-id]').forEach(li => {{
         const isStar = starredEvents.has(li.dataset.id);
@@ -10255,8 +10269,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
       if (starredOnly) apply();
     }});
 
-    // My Schedule. Sharing puts the event details in the link itself, so a shared schedule needs no
-    // account or server and keeps working after its events roll off the site.
+    // My Schedule. Sharing saves the list and gives a short link (schedule-worker/). If that isn't
+    // available, the event details go in a long link instead, which needs no server.
     const scheduleModal = document.getElementById('schedule-share-modal');
     const scheduleName = document.getElementById('schedule-share-name');
     const scheduleLink = document.getElementById('schedule-share-link');
@@ -10267,6 +10281,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
     const SCHEDULE_DETAILS_KEY = 'boston_schedule_events';
     const SCHEDULE_NAME_KEY = 'boston_schedule_name';
     let scheduleEvents = [];
+    let scheduleLinkRun = 0;
+    let scheduleNameTimer = null;
 
     function updateScheduleBar() {{
       if (!scheduleBar) return;
@@ -10315,10 +10331,31 @@ def render_page(results, weather=None, luckyseat_shows=None):
     async function refreshScheduleLink() {{
       const name = scheduleName.value.trim();
       try {{ localStorage.setItem(SCHEDULE_NAME_KEY, name); }} catch (_) {{}}
-      const hash = await encodeSchedule({{ v: 1, n: name, e: scheduleEvents }});
-      const link = `${{location.origin}}/schedule/#${{hash}}`;
+      const run = ++scheduleLinkRun;
+      const schedule = {{ v: 1, n: name, e: scheduleEvents }};
+      scheduleCopy.disabled = true;
+      scheduleLink.value = '';
+      scheduleLink.placeholder = 'Making your link...';
+      const link = await shortScheduleLink(schedule) ||
+        `${{location.origin}}/schedule/#${{await encodeSchedule(schedule)}}`;
+      if (run !== scheduleLinkRun) return;   // the name changed while this one was being made
       scheduleLink.value = link;
       scheduleOpen.href = link;
+      scheduleCopy.disabled = scheduleEvents.length === 0;
+    }}
+
+    async function shortScheduleLink(schedule) {{
+      if (!schedule.e.length) return null;
+      try {{
+        const resp = await fetch('/api/schedule', {{
+          method: 'POST',
+          headers: {{ 'Content-Type': 'application/json' }},
+          body: JSON.stringify(schedule),
+          signal: AbortSignal.timeout(4000),
+        }});
+        const url = resp.ok ? (await resp.json()).url : '';
+        return String(url).startsWith(`${{location.origin}}/s/`) ? url : null;
+      }} catch (_) {{ return null; }}
     }}
 
     function openScheduleShare() {{
@@ -10333,16 +10370,15 @@ def render_page(results, weather=None, luckyseat_shows=None):
           }}
         }});
         starredEvents.forEach(id => {{ if (!rows.has(id) && saved[id]) rows.set(id, saved[id]); }});
-        const cutoff = Math.floor(Date.now() / 1000) - 6 * 3600;   // leave out what's already over
+        const cutoff = Math.floor(Date.now() / 1000) - 86400;
         scheduleEvents = Array.from(rows.values()).filter(r => r[1] >= cutoff).sort((a, b) => a[1] - b[1]);
         const left = starredEvents.size - scheduleEvents.length;
         scheduleSub.textContent = `${{scheduleEvents.length}} upcoming ${{scheduleEvents.length === 1 ? 'event' : 'events'}}` +
           (left > 0 ? `. ${{left}} past or undated ${{left === 1 ? 'event is' : 'events are'}} left out.` : '.');
         try {{ scheduleName.value = localStorage.getItem(SCHEDULE_NAME_KEY) || ''; }} catch (_) {{}}
-        await refreshScheduleLink();
         scheduleSend.style.display = navigator.share ? 'inline-block' : 'none';
-        scheduleCopy.disabled = scheduleEvents.length === 0;
         scheduleModal.style.display = 'flex';
+        await refreshScheduleLink();
         scheduleCopy.focus();
       }});
     }}
@@ -10368,7 +10404,12 @@ def render_page(results, weather=None, luckyseat_shows=None):
       document.addEventListener('keydown', e => {{
         if (e.key === 'Escape' && scheduleModal.style.display !== 'none') closeScheduleShare();
       }});
-      scheduleName.addEventListener('input', refreshScheduleLink);
+      scheduleName.addEventListener('input', () => {{
+        // Wait for a pause in typing so each letter doesn't save a new schedule
+        scheduleCopy.disabled = true;
+        clearTimeout(scheduleNameTimer);
+        scheduleNameTimer = setTimeout(refreshScheduleLink, 700);
+      }});
       scheduleCopy.addEventListener('click', async () => {{
         try {{
           await navigator.clipboard.writeText(scheduleLink.value);
