@@ -210,5 +210,19 @@ class DirectFamilyCalendars(unittest.TestCase):
         self.assertEqual(events[0]["url"], "https://www.emeraldnecklace.org/calendar/walk")
 
 
+class TownLibraryAudienceTags(unittest.TestCase):
+    PAGE = """<div class="day-has-events day-2030-11-06">
+    <div class="listing-event event category-children category-crafts"><h3><a href="/a">Finger Knitting</a></h3>
+      <span class="event-time">3:30pm - 4:30pm</span></div>
+    <div class="listing-event event category-adult"><h3><a href="/b">Tech Help</a></h3>
+      <span class="event-time">1:00pm - 2:00pm</span></div></div>"""
+
+    def test_keeps_programs_tagged_for_children_whatever_the_title(self):
+        with patch.object(S._SESSION, "get", return_value=MagicMock(text=self.PAGE)):
+            events = S.scrape_town_library_kids("u", "ua", "Medford Public Library", "Medford")
+        self.assertEqual([e["name"] for e in events], ["Finger Knitting"])
+        self.assertNotIn("_audiences", events[0])
+
+
 if __name__ == "__main__":
     unittest.main()

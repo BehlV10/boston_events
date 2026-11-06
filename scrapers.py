@@ -1273,7 +1273,9 @@ def scrape_town_library_kids(url, ua, library, town):
     as Somerville's). Their adult programs would flood the Outer Suburbs group."""
     out = []
     for e in scrape_somerville_library(url, ua):
-        if e.get("category") != "family" and not is_kid_family_event(e.get("name"), None):
+        tagged = any(re.match(r"(?:children|kids|family|families|baby|babies|toddler|preschool)", a)
+                     for a in e.pop("_audiences", []))
+        if not tagged and e.get("category") != "family" and not is_kid_family_event(e.get("name"), None):
             continue
         if _teen_only(e.get("name")):
             continue
@@ -1594,6 +1596,21 @@ def scrape_street_chestnut_hill(url, ua):
         if re.search(r"(?i)\b(?:kids?|children|family|santa|story ?time)\b", e["name"]):
             e["category"] = "family"
     return events
+
+
+_FENWAY_KIDS_RE = re.compile(r"(?i)\b(?:playgroup|stroller|kids?|children|family|families|toddlers?|storytime)\b")
+
+
+def scrape_fenway_community_center(url, ua):
+    """Fenway Community Center's playgroups and family programs. Its calendar is mostly adult
+    classes, so only family programs are kept."""
+    events = scrape_tribe_rest_paged(url, ua, default_venue="Fenway Community Center", default_category="family")
+    out = []
+    for e in events:
+        if _FENWAY_KIDS_RE.search(e["name"]):
+            e.update(category="family", venue="Fenway Community Center", address="1282 Boylston St, Boston, MA")
+            out.append(e)
+    return out
 
 
 _CAMBRIDGE_FAMILIES_TOPIC = "{4E643AB6-0153-4FE4-A112-51C0B463F2F3}"
@@ -8823,6 +8840,7 @@ def scrape_somerville_library(url, ua):
                 "venue": f"Somerville Public Library ({branch})",
                 "category": cat,
                 "price": "Free",
+                "_audiences": [c[len("category-"):] for c in ev.get("class", []) if c.startswith("category-")],
             })
     return events
 
@@ -12008,6 +12026,7 @@ _ALL_VENUES = [
     {"name": "Macaroni KID (local parent calendars)", "url": "https://newton.macaronikid.com/events", "ua": UA_CHROME, "scraper": scrape_macaroni_kid, "default_category": "family"},
     {"name": "Boston Moms", "url": "https://bostonmoms.com/wp-json/tribe/events/v1/events", "ua": UA_CHROME, "scraper": scrape_boston_moms, "default_category": "family"},
     {"name": "City of Cambridge (families)", "url": "https://www.cambridgema.gov/citycalendar", "ua": UA_CHROME, "scraper": scrape_cambridge_families, "default_category": "family"},
+    {"name": "Fenway Community Center", "url": "https://fenwaycommunitycenter.org/wp-json/tribe/events/v1/events", "ua": UA_CHROME, "scraper": scrape_fenway_community_center, "default_category": "family"},
     {"name": "Discovery Museum", "url": "https://www.discoveryacton.org/visit/events-programs", "ua": UA_CHROME, "scraper": scrape_discovery_museum, "default_category": "family"},
     {"name": "Emerald Necklace Conservancy", "url": "https://www.emeraldnecklace.org/calendar", "ua": UA_CHROME, "scraper": scrape_emerald_necklace, "default_category": "outdoors"},
     {"name": "City of Boston", "url": "https://www.boston.gov/events", "ua": UA_CHROME, "scraper": scrape_boston_gov, "default_category": "community"},
