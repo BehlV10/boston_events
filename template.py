@@ -344,7 +344,7 @@ def resolve_subarea(city, event, geo=None):
         if any(k in blob for k in ["theater district", "theatre district", "boch", "wang", "shubert", "paramount", "colonial", "royale", "charles playhouse", "downtown", "boston common", "chinatown", "north end", "public garden", "duckling", "orpheum", "bsmnt", "city winery", "big night live", "td garden", "wilbur", "sports museum", "versus", "west end", "legacy", "feral",
                                     "boston public market", "haymarket", "faneuil hall", "quincy market", "city hall plaza"]):
             return ("Downtown & Boston Common", "theater_downtown")
-        if any(k in blob for k in ["south end", "beehive", "wally", "club cafe", "club café", "sowa", "reunion bbq", "calderwood"]):
+        if any(k in blob for k in ["south end", "beehive", "wally", "club cafe", "club café", "sowa", "reunion bbq", "calderwood", "bca plaza"]):
             return ("South End", "south_end")
         if any(k in blob for k in ["back bay", "copley", "boston public library (central", "700 boylston", "trident", "newbury", "prudential", "dani", "danis", "88 club"]):
             return ("Back Bay & Copley", "back_bay")
@@ -352,7 +352,7 @@ def resolve_subarea(city, event, geo=None):
             return ("Seaport & Waterfront", "seaport_waterfront")
         if any(k in blob for k in ["allston", "brighton", "o'brien", "obrien", "brighton music", "speedway", "roadrunner", "lavietes", "notch brewing", "harvard stadium", "sunset cantina", "goel center"]):
             return ("Allston & Brighton", "allston_brighton")
-        if any(k in blob for k in ["jamaica plain", "jp", "midway cafe", "arboretum", "franklin park", "dorchester", "roxbury", "mattapan", "roslindale", "hyde park"]):
+        if any(k in blob for k in ["jamaica plain", "jp", "midway cafe", "arboretum", "franklin park", "dorchester", "roxbury", "mattapan", "roslindale", "hyde park", "columbia point", "kennedy institute"]):
             return ("JP & Dorchester", "jp_dorchester")
         if any(k in blob for k in ["charlestown", "anchor", "navy yard", "east boston", "eastie"]):
             return ("Charlestown & Eastie", "charlestown_eastie")
@@ -650,7 +650,7 @@ def build_json_ld(events, site_url=None):
                 "name": "What neighborhoods in Greater Boston does this event guide cover?",
                 "acceptedAnswer": {
                     "@type": "Answer",
-                    "text": "The calendar covers Boston (Back Bay, Allston, Brighton, Fenway, Seaport, Downtown, South End, Dorchester), Cambridge (Harvard Square, Central Square, Kendall Square, Inman Square, Porter Square), and Somerville (Davis Square, Union Square, Assembly Row, Spring Hill)."
+                    "text": "The calendar covers Boston (Back Bay, Allston, Brighton, Fenway, Seaport, Downtown, South End, Dorchester, Roslindale), Cambridge (Harvard Square, Central Square, Kendall Square, Inman Square, Porter Square), and Somerville (Davis Square, Union Square, Assembly Row, Spring Hill)."
                 }
             },
             {
