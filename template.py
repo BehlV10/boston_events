@@ -1303,10 +1303,10 @@ _HUB_CITY_JS = """<script>
 # ---------------------------------------------------------------------------------------------
 
 _KID_AGE_BUCKETS = (  # key, label, (lo, hi) years
-    ("baby", "👶 Babies", (0, 1.5)),
-    ("toddler", "🧸 Toddlers", (1, 3)),
-    ("preschool", "🖍️ Preschool", (3, 5)),
-    ("bigkid", "🎒 Big kids", (5, 12)),
+    ("baby", "👶 Babies (0–1)", (0, 1.5)),
+    ("toddler", "🧸 Toddlers (1–3)", (1, 3)),
+    ("preschool", "🖍️ Preschool (3–5)", (3, 5)),
+    ("bigkid", "🎒 Kids (5–12)", (5, 12)),
 )
 _KID_AGE_WORDS = (
     ("baby", r"\b(?:bab(?:y|ies)|newborns?|infants?|pre-?walkers?|lap ?(?:sit|time)|wee ones|0\s*[-–]\s*18 months)\b"),
@@ -1404,7 +1404,7 @@ def _kid_tags(e):
     return sorted(ages, key=order.index), kind[0], kind[2], label
 
 
-_KID_AGE_PILL = {"baby": "Babies", "toddler": "Toddlers", "preschool": "Preschool", "bigkid": "Big kids", "family": "All ages"}
+_KID_AGE_PILL = {"baby": "Babies (0–1)", "toddler": "Toddlers (1–3)", "preschool": "Preschool (3–5)", "bigkid": "Kids (5–12)", "family": "All ages"}
 
 _KIDS_FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">'
                '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
@@ -1889,9 +1889,9 @@ def render_hub_page(hub_slug, events, site_url=None):
         def chip(group, val, label):
             return f'<button type="button" class="kid-chip" data-group="{group}" data-val="{val}">{label}</button>'
         where = "".join(chip("city", k, lbl) for k, lbl in _HUB_CITY_CHIPS if k == "all" or k in present)
-        ages = chip("age", "all", "All ages") + "".join(
+        ages = chip("age", "all", "Any age") + "".join(
             chip("age", k, lbl) for k, lbl, _r in _KID_AGE_BUCKETS if kid_age_counts.get(k)) + (
-            chip("age", "family", "🏡 Whole family") if kid_age_counts.get("family") else "")
+            chip("age", "family", "🏡 All Ages / Family") if kid_age_counts.get("family") else "")
         kinds = chip("kind", "all", "Everything") + "".join(
             chip("kind", k, f"{emo} {lbl}") for k, lbl, emo, _rx in _KID_KIND_RES if kid_kind_counts.get(k))
         city_chips_html = f"""<div class="kids-filters" role="group" aria-label="Filter kids events">

@@ -1,5 +1,11 @@
 [
   {
+    "name": "Dirty Dancing: The Musical",
+    "venue": "Emerson Colonial Theatre",
+    "price": 45.0,
+    "url": "https://www.luckyseat.com/shows/dirtydancingthemusical-boston-2026Nov"
+  },
+  {
     "name": "Hadestown",
     "venue": "Emerson Colonial Theatre",
     "price": 45.0,
@@ -10,6 +16,12 @@
     "venue": "Charles Playhouse",
     "price": 35.0,
     "url": "https://www.luckyseat.com/shows/latenitecatechism-boston-2026Oct"
+  },
+  {
+    "name": "The Sound of Music",
+    "venue": "Boch Center - Wang Theatre",
+    "price": 49.0,
+    "url": "https://www.luckyseat.com/shows/thesoundofmusic-boston-2026Oct"
   },
   {
     "name": "Wicked",
