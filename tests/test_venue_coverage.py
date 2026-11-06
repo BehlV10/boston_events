@@ -229,8 +229,13 @@ class ExistingVenueFixTests(FrozenClock):
 
 
 class BostonShowsGapTests(FrozenClock):
+    def boston_shows_page(self, markup):
+        p = mock.patch("boston_shows.get_html", return_value=markup)
+        p.start()
+        self.addCleanup(p.stop)
+
     def test_only_venues_we_cant_read(self):
-        self.soup("""<div class="date-events" data-date="2026-11-05"><table>
+        self.boston_shows_page("""<div class="date-events" data-date="2026-11-05"><table>
           <tr class="event" data-venue="Wally's Cafe"><td class="event-start">7:00pm</td>
             <td class="event-title"><a href="https://wallyscafe.com/ritual/">Benjamin Kassner Quintet</a></td>
             <td class="event-info">free / 21+</td></tr>

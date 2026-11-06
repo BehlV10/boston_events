@@ -8103,15 +8103,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
         const countHtml = countSpan ? countSpan.outerHTML : '';
         const dayName = DAYS_FULL[dObj.getDay()];
         const shortStr = `${{MONTHS[dObj.getMonth()]}} ${{dObj.getDate()}}`;
-        let prefix = dayName;
-        if (diffDays === 0) {{
-          prefix = 'Today';
-        }} else if (diffDays === 1) {{
-          prefix = 'Tomorrow';
-        }} else if (diffDays === -1) {{
-          prefix = 'Yesterday';
-        }}
-        h2.innerHTML = `${{prefix}} · ${{dayName}}, ${{shortStr}}${{countHtml}}`;
+        // "Today · Thursday, Nov 5", but just "Saturday, Nov 7" for other days (not "Saturday · Saturday")
+        const prefix = diffDays === 0 ? 'Today' : diffDays === 1 ? 'Tomorrow' : diffDays === -1 ? 'Yesterday' : '';
+        h2.innerHTML = `${{prefix ? prefix + ' · ' : ''}}${{dayName}}, ${{shortStr}}${{countHtml}}`;
       }});
     }}
 

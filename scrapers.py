@@ -8817,8 +8817,6 @@ def scrape_club_passim(url, ua):
             if not title:
                 continue
             link = a["href"] if a and "href" in a.attrs else "https://www.passim.org/live-music/"
-            if link in seen:
-                continue
 
             card_text = card.get_text(separator=" ", strip=True)
             dm = re.search(r"([A-Za-z]{3,9})\s+(\d+)(?:st|nd|rd|th)?", card_text)
@@ -8854,8 +8852,13 @@ def scrape_club_passim(url, ua):
 
             cost_m = re.search(r"\$(\d+)", card_text)
             price = f"${cost_m.group(1)}" if cost_m else ("Free" if mentions_free(card_text) else None)
+            if re.search(r"\bsold\s*out\b", card_text, re.I):
+                price = f"{price} (sold out)" if price else "Sold out"
 
-            seen.add(link)
+            # A multi-night run (Power Outage Party, Nov 17-20) shares one link: key on link + night
+            if (link, dt) in seen:
+                continue
+            seen.add((link, dt))
             out.append({
                 "name": title,
                 "date": dt.astimezone(timezone.utc).isoformat(),
@@ -11011,7 +11014,8 @@ BOSTON_SHOWS_GAP_VENUES = {
 
 def scrape_boston_shows_gaps(url, ua, days=21):
     """bostonshows.org's listings at BOSTON_SHOWS_GAP_VENUES only (one page holds the whole calendar)."""
-    soup = fetch_soup(url, ua)
+    import boston_shows
+    soup = BeautifulSoup(boston_shows.get_html(_SESSION, ua or UA_CHROME), "html.parser")
     today = datetime.now(EASTERN).date()
     end = today + timedelta(days=days)
     events = []
@@ -11399,6 +11403,7 @@ MANUAL_RECURRING_EVENTS = [
     ]),
     ("The Druid", "https://www.druidpub.com/", "music", [
         ("Traditional Irish Music Session @ The Druid", "https://www.druidpub.com/", 2, 20, 0, "Free"),
+        ("Traditional Irish Music Session @ The Druid", "https://www.druidpub.com/", 3, 21, 0, "Free"),
         ("Traditional Irish Music Session @ The Druid", "https://www.druidpub.com/", 5, 16, 0, "Free"),
         ("Traditional Irish Music Brunch Session @ The Druid", "https://www.druidpub.com/", 6, 12, 0, "Free"),
     ]),
@@ -12533,6 +12538,23 @@ def _scrape_one(v, force=False):
         }
 
 
+def _boston_shows_fill_in(results):
+    """Last step of a crawl: Boston Shows' listings for shows and prices we're missing in the next
+    two weeks (see boston_shows.py). Our own sources always win."""
+    import boston_shows
+    from venues_geo import resolve_event_geo
+    try:
+        html = boston_shows.get_html(_SESSION, UA_CHROME)
+        entry = boston_shows.apply(results, html, EASTERN, resolve_event_geo,
+                                   skip_venues=BOSTON_SHOWS_GAP_VENUES)
+    except Exception as ex:
+        return {"venue": boston_shows.SOURCE_NAME, "url": boston_shows.URL, "events": [],
+                "error": str(ex)[:200], "cached": False, "duration": 0.0}
+    cfg = {"name": boston_shows.SOURCE_NAME, "default_category": "music"}
+    entry["events"] = _normalize_and_filter_events(entry["events"], cfg)
+    return entry
+
+
 def _do_scrape_all(force=False):
     HOST_GATE.reset()  # a site that refused us yesterday gets asked again, once
 
@@ -12545,6 +12567,7 @@ def _do_scrape_all(force=False):
     results.sort(key=lambda r: order.get(r["venue"], 999))
     results.extend(_expand_manual_recurring())
     results.extend(_load_community_events())
+    results.append(_boston_shows_fill_in(results))
     with _cache_lock:
         _cache["data"] = results
         _cache["ts"] = time.time()
