@@ -858,11 +858,11 @@ def build_seo_directory_html(all_events_flat, all_venue_names):
 
         <h3 style="margin-top:18px;">🎵 Music Subgenres</h3>
         <ul class="genre-tag-list">
-          <li><a href="#cat=Music+%26+nightlife&amp;genre=indie_rock">Indie &amp; Rock</a></li>
-          <li><a href="#cat=Music+%26+nightlife&amp;genre=punk">Punk &amp; Hardcore</a></li>
-          <li><a href="#cat=Music+%26+nightlife&amp;genre=jazz">Jazz, Soul &amp; Blues</a></li>
+          <li><a href="#cat=Music+%26+nightlife&amp;genre=rock_indie">Indie &amp; Rock</a></li>
+          <li><a href="#cat=Music+%26+nightlife&amp;genre=hiphop_rnb">Hip-Hop &amp; R&amp;B</a></li>
+          <li><a href="#cat=Music+%26+nightlife&amp;genre=jazz_blues">Jazz, Soul &amp; Blues</a></li>
           <li><a href="#cat=Music+%26+nightlife&amp;genre=electronic">Electronic &amp; Techno</a></li>
-          <li><a href="#cat=Music+%26+nightlife&amp;genre=folk">Folk &amp; Americana</a></li>
+          <li><a href="#cat=Music+%26+nightlife&amp;genre=folk_trad">Folk &amp; Americana</a></li>
           <li><a href="#cat=Music+%26+nightlife&amp;genre=classical">Classical &amp; Symphony</a></li>
         </ul>
 
@@ -9092,8 +9092,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
           if (gVal.includes(',')) {{
             const vals = new Set(gVal.split(','));
             genreBoxes.forEach(b => {{ b.checked = vals.has(b.value); }});
-          }} else {{
+          }} else if (GENRES_DATA && GENRES_DATA[gVal]) {{
             activeGenre = gVal;
+            genreBoxes.forEach(b => {{ b.checked = (b.value === gVal); }});
           }}
         }}
 
