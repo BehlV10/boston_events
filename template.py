@@ -1936,7 +1936,9 @@ def render_hub_page(hub_slug, events, site_url=None):
 {json_ld_str}
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/logo-192.png" type="image/png" sizes="192x192">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
 {kids_head}
 <style>
   :root {{
@@ -3672,8 +3674,14 @@ def render_page(results, weather=None, luckyseat_shows=None):
             initial_sections.append(sec_html)
         else:
             deferred_sections.append(sec_html)
-    if tba:
-        deferred_sections.append(_render_day_section("Date TBA", tba, "tba"))
+    # Museum shows have no day of their own: keep them near the top rather than after every date
+    on_view = [e for e in tba if e.get("_exhibition")]
+    undated = [e for e in tba if not e.get("_exhibition")]
+    if on_view:
+        on_view.sort(key=lambda e: (e.get("venue") or "", e.get("name") or ""))
+        initial_sections.append(_render_day_section("On view now: museum exhibitions", on_view, "tba"))
+    if undated:
+        deferred_sections.append(_render_day_section("Date TBA", undated, "tba"))
 
     deferred_content = "".join(deferred_sections)
     try:
@@ -3948,7 +3956,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
 </script>
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/logo-192.png" type="image/png" sizes="192x192">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
 <style>
   :root, [data-theme="classic"] {{
     --bg: #0c0e14;
@@ -6423,15 +6433,22 @@ def render_page(results, weather=None, luckyseat_shows=None):
   /* ========================================================
      THEME SWITCHER & INDIE GUIDE THEME
      ======================================================== */
+  /* Top row: "Greater Boston Live Events" on the left, the theme picker on the right with Add Event
+     under it. On phones the theme picker gets the first line to itself and the tag sits lower,
+     level with Add Event. */
   .banner-top-row {{
-    display: flex;
-    justify-content: flex-start;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "tag themes" ". add";
     align-items: center;
     width: 100%;
-    gap: 12px;
-    flex-wrap: wrap;
+    gap: 8px 12px;
   }}
+  .banner-top-tag {{ grid-area: tag; justify-self: start; min-width: 0; }}
+  .banner-top-actions {{ grid-area: add; justify-self: end; margin-left: 0; }}
   .theme-toggle-wrap {{
+    grid-area: themes;
+    justify-self: end;
     display: inline-flex;
     align-items: center;
     background: rgba(15, 18, 25, 0.7);
@@ -6440,7 +6457,14 @@ def render_page(results, weather=None, luckyseat_shows=None):
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 999px;
     padding: 3px;
-    order: -1;
+  }}
+  @media (max-width: 640px) {{
+    .banner-top-row {{
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-areas: "themes themes" "tag add";
+      row-gap: 10px;
+    }}
+    .banner-top-tag {{ font-size: 10px; letter-spacing: 0.08em; white-space: nowrap; }}
   }}
   .theme-toggle-wrap .theme-pill-btn {{ font-size: 14px; padding: 3px 9px; }}
   .theme-pill-holiday {{ display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: #fff; }}
@@ -7378,6 +7402,12 @@ def render_page(results, weather=None, luckyseat_shows=None):
   <div class="banner">
     <div class="banner-inner">
       <div class="banner-top-row">
+        <div class="banner-top-tag"><span class="live-pulse"></span> GREATER BOSTON LIVE EVENTS</div>
+        <div class="banner-top-actions">
+          <button type="button" class="pill-submit-btn" id="btn-open-submit-modal" aria-haspopup="dialog" aria-expanded="false">
+            <span>＋ Add Event</span>
+          </button>
+        </div>
         <div class="theme-toggle-wrap">
           <div class="theme-toggle-pills" role="radiogroup" aria-label="Visual Theme">
             <button type="button" class="theme-pill-btn theme-pill-holiday{' active' if seasonal_key else ''}" id="theme-pill-holiday" data-theme="{seasonal_key or ''}" role="radio" aria-checked="{'true' if seasonal_key else 'false'}" title="{escape(seasonal_label or '')} theme"{'' if seasonal_key else ' hidden'}><span class="holiday-pill-emoji">{seasonal_icon or ''}</span><span class="holiday-pill-label">{escape(seasonal_label or '')}</span></button>
@@ -7386,12 +7416,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
             <button type="button" class="theme-pill-btn{' active' if default_theme == 'indie' else ''}" data-theme="indie" role="radio" aria-checked="{'true' if default_theme == 'indie' else 'false'}" title="Indie Guide Theme">📰</button>
             <button type="button" class="theme-pill-btn{' active' if default_theme == 'anime' else ''}" data-theme="anime" role="radio" aria-checked="{'true' if default_theme == 'anime' else 'false'}" title="Anime Theme">🌸</button>
           </div>
-        </div>
-        <div class="banner-top-tag"><span class="live-pulse"></span> GREATER BOSTON LIVE EVENTS</div>
-        <div class="banner-top-actions">
-          <button type="button" class="pill-submit-btn" id="btn-open-submit-modal" aria-haspopup="dialog" aria-expanded="false">
-            <span>＋ Add Event</span>
-          </button>
         </div>
       </div>
       <div class="banner-title-row">
@@ -8265,15 +8289,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
         const countHtml = countSpan ? countSpan.outerHTML : '';
         const dayName = DAYS_FULL[dObj.getDay()];
         const shortStr = `${{MONTHS[dObj.getMonth()]}} ${{dObj.getDate()}}`;
-        let prefix = dayName;
-        if (diffDays === 0) {{
-          prefix = 'Today';
-        }} else if (diffDays === 1) {{
-          prefix = 'Tomorrow';
-        }} else if (diffDays === -1) {{
-          prefix = 'Yesterday';
-        }}
-        h2.innerHTML = `${{prefix}} · ${{dayName}}, ${{shortStr}}${{countHtml}}`;
+        // "Today · Thursday, Nov 5", but just "Saturday, Nov 7" for other days (not "Saturday · Saturday")
+        const prefix = diffDays === 0 ? 'Today' : diffDays === 1 ? 'Tomorrow' : diffDays === -1 ? 'Yesterday' : '';
+        h2.innerHTML = `${{prefix ? prefix + ' · ' : ''}}${{dayName}}, ${{shortStr}}${{countHtml}}`;
       }});
     }}
 
