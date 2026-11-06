@@ -2424,7 +2424,7 @@
       "venue_contains": "TD Garden"
     },
     "badge": "\ud83c\udfc0 College Hoops Doubleheader",
-    "note": "BC vs UMass and UConn vs Michigan on one ticket at the Garden.",
+    "note": "BC vs UMass, then UConn vs Michigan. Your ticket covers both.",
     "start_date": "2026-11-06",
     "expires": "2026-11-06"
   },
@@ -2435,7 +2435,7 @@
       "venue_contains": "Wilbur"
     },
     "badge": "\ud83d\ude02 Sold-Out Comedy Weekend",
-    "note": "The podcast comic plays late and early sets Friday and Saturday.",
+    "note": "Early and late sets at The Wilbur.",
     "start_date": "2026-11-06",
     "expires": "2026-11-07"
   },
@@ -2446,7 +2446,7 @@
       "venue_contains": "Wang"
     },
     "badge": "\ud83c\udfb8 King Crimson Live",
-    "note": "Adrian Belew, Steve Vai, Tony Levin and Terry Bozzio play the band's 1980s albums.",
+    "note": "Four virtuosos take on '80s King Crimson.",
     "start_date": "2026-11-06",
     "expires": "2026-11-06"
   },
@@ -2468,7 +2468,7 @@
       "venue_contains": "Museum of Fine Arts"
     },
     "badge": "\ud83c\udfa8 Museum After Dark",
-    "note": "DJs, dancing and pop-up performances after hours at the MFA.",
+    "note": "The galleries turn into a dance floor.",
     "start_date": "2026-11-06",
     "expires": "2026-11-06"
   },
@@ -2479,7 +2479,7 @@
       "venue_contains": "ICA"
     },
     "badge": "\ud83c\udfa8 Harbor Dance Party",
-    "note": "Vinyl DJ sets and dance lessons in the ICA galleries.",
+    "note": "The ICA's monthly after-work party on the harbor.",
     "start_date": "2026-11-06",
     "expires": "2026-11-06"
   },
@@ -2512,7 +2512,7 @@
       "venue_contains": "Boylston"
     },
     "badge": "\ud83c\uddfa\ud83c\uddf8 Free Downtown Parade",
-    "note": "The city's annual Veterans Day parade.",
+    "note": "Downtown, the Saturday before Veterans Day.",
     "start_date": "2026-11-07",
     "expires": "2026-11-07"
   },
@@ -2523,7 +2523,7 @@
       "venue_contains": "Harvard Square"
     },
     "badge": "\ud83c\udfee Thai Night Market",
-    "note": "Food, handmade goods and performances in Harvard Square.",
+    "note": "Thailand's festival of lights comes to the Square.",
     "start_date": "2026-11-07",
     "expires": "2026-11-07"
   },
@@ -2589,7 +2589,7 @@
       "venue_contains": "ICA"
     },
     "badge": "\ud83e\uddd2 Family Art Afternoon",
-    "note": "Games and drawing in the ICA galleries for kids and grown-ups.",
+    "note": "A guided art adventure for kids and their grown-ups.",
     "start_date": "2026-11-08",
     "expires": "2026-11-08"
   },
@@ -2600,7 +2600,7 @@
       "venue_contains": "Boston Common"
     },
     "badge": "\ud83c\uddee\ud83c\udde9 Free Festival",
-    "note": "Free Indonesian festival on Boston Common, Sunday 10 AM to 5 PM.",
+    "note": "Food, music and dance on the Common, Sunday 10 AM to 5 PM.",
     "start_date": "2026-11-08",
     "expires": "2026-11-08"
   }
