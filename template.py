@@ -2163,14 +2163,14 @@ _EDM_FILTER_JS = """<script>
   var cards = document.querySelectorAll('.hub-card.edm-card');
   var heads = document.querySelectorAll('.hub-day');
   var citySecs = document.querySelectorAll('.edm-city-section');
-  var state = { genre: 'all', area: 'all', when: 'all', free: 'all' };
+  var state = { genre: 'all', area: 'all', when: 'all', cost: 'all' };
 
   function matches(c) {
     if (state.genre !== 'all' && c.dataset.genre !== state.genre) return false;
     if (state.area !== 'all' && c.dataset.area !== state.area) return false;
     if (state.when === 'tonight' && c.dataset.when !== 'tonight') return false;
     if (state.when === 'weekend' && c.dataset.when !== 'weekend' && c.dataset.when !== 'tonight') return false;
-    if (state.free === 'free' && c.dataset.free !== '1') return false;
+    if (state.cost === 'free' && c.dataset.free !== '1') return false;
     return true;
   }
 
@@ -2203,7 +2203,11 @@ _EDM_FILTER_JS = """<script>
   chips.forEach(function (b) {
     b.addEventListener('click', function () {
       var g = b.dataset.group, v = b.dataset.val;
-      state[g] = v;
+      if (g === 'cost' && state[g] === v && v !== 'all') {
+        state[g] = 'all';
+      } else {
+        state[g] = v;
+      }
       render(true);
     });
   });
@@ -2623,13 +2627,14 @@ def render_hub_page(hub_slug, events, site_url=None):
 <button type="button" class="edm-chip" data-group="area" data-val="other">Greater Boston</button>"""
         when_html = """<button type="button" class="edm-chip active" data-group="when" data-val="all">All Dates</button>
 <button type="button" class="edm-chip" data-group="when" data-val="tonight">🔥 Tonight</button>
-<button type="button" class="edm-chip" data-group="when" data-val="weekend">🎉 This Weekend</button>
-<span style="border-left:1px solid rgba(255,255,255,0.12); height:16px; margin:0 4px;"></span>
-<button type="button" class="edm-chip" data-group="free" data-val="free">💛 Free / No Cover</button>"""
+<button type="button" class="edm-chip" data-group="when" data-val="weekend">🎉 This Weekend</button>"""
+        cost_html = """<button type="button" class="edm-chip active" data-group="cost" data-val="all">All Prices</button>
+<button type="button" class="edm-chip" data-group="cost" data-val="free">💛 Free / No Cover</button>"""
         city_chips_html = f"""<div class="edm-filters" role="group" aria-label="Filter electronic and EDM shows">
     <div class="edm-filter-row"><span class="edm-filter-label">Vibes</span>{subgenres_html}</div>
     <div class="edm-filter-row"><span class="edm-filter-label">Area</span>{areas_html}</div>
     <div class="edm-filter-row"><span class="edm-filter-label">When</span>{when_html}</div>
+    <div class="edm-filter-row"><span class="edm-filter-label">Cost</span>{cost_html}</div>
   </div>"""
         hub_js = _EDM_FILTER_JS
         n_cards = len(filtered[:card_limit])

@@ -76,6 +76,10 @@ class EdmHubTests(unittest.TestCase):
         self.assertIn("Infra Techno Resident Night", html)
         self.assertIn("Tickets / Info", html)
         self.assertIn("Central Sq", html)
+        self.assertIn('data-group="cost"', html)
+        self.assertIn("All Prices", html)
+        self.assertIn("💛 Free / No Cover", html)
+        self.assertIn('data-free="1"', html)
 
 
 if __name__ == "__main__":

@@ -3060,9 +3060,9 @@
 <button type="button" class="edm-chip" data-group="area" data-val="other">Greater Boston</button></div>
     <div class="edm-filter-row"><span class="edm-filter-label">When</span><button type="button" class="edm-chip active" data-group="when" data-val="all">All Dates</button>
 <button type="button" class="edm-chip" data-group="when" data-val="tonight">🔥 Tonight</button>
-<button type="button" class="edm-chip" data-group="when" data-val="weekend">🎉 This Weekend</button>
-<span style="border-left:1px solid rgba(255,255,255,0.12); height:16px; margin:0 4px;"></span>
-<button type="button" class="edm-chip" data-group="free" data-val="free">💛 Free / No Cover</button></div>
+<button type="button" class="edm-chip" data-group="when" data-val="weekend">🎉 This Weekend</button></div>
+    <div class="edm-filter-row"><span class="edm-filter-label">Cost</span><button type="button" class="edm-chip active" data-group="cost" data-val="all">All Prices</button>
+<button type="button" class="edm-chip" data-group="cost" data-val="free">💛 Free / No Cover</button></div>
   </div>
   <div class="hub-grid">
     <h2 class="hub-day" id="2026-11-06" data-day="2026-11-06">Friday, November 6</h2>
@@ -10006,14 +10006,14 @@
   var cards = document.querySelectorAll('.hub-card.edm-card');
   var heads = document.querySelectorAll('.hub-day');
   var citySecs = document.querySelectorAll('.edm-city-section');
-  var state = { genre: 'all', area: 'all', when: 'all', free: 'all' };
+  var state = { genre: 'all', area: 'all', when: 'all', cost: 'all' };
 
   function matches(c) {
     if (state.genre !== 'all' && c.dataset.genre !== state.genre) return false;
     if (state.area !== 'all' && c.dataset.area !== state.area) return false;
     if (state.when === 'tonight' && c.dataset.when !== 'tonight') return false;
     if (state.when === 'weekend' && c.dataset.when !== 'weekend' && c.dataset.when !== 'tonight') return false;
-    if (state.free === 'free' && c.dataset.free !== '1') return false;
+    if (state.cost === 'free' && c.dataset.free !== '1') return false;
     return true;
   }
 
@@ -10046,7 +10046,11 @@
   chips.forEach(function (b) {
     b.addEventListener('click', function () {
       var g = b.dataset.group, v = b.dataset.val;
-      state[g] = v;
+      if (g === 'cost' && state[g] === v && v !== 'all') {
+        state[g] = 'all';
+      } else {
+        state[g] = v;
+      }
       render(true);
     });
   });
