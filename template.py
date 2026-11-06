@@ -3597,7 +3597,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
         extra_html = (" · " + " · ".join(extra_tags)) if extra_tags else ""
 
         cal_html = '<span class="cal-links"><button type="button" class="cal-btn gcal-btn" title="Add to Google Calendar">+ GCal</button> <button type="button" class="cal-btn ics-btn" title="Download .ics">+ .ics</button></span>' if e.get("date") else ""
-        star_btn = '<button type="button" class="star-btn" title="Save to My Shortlist" aria-label="Save event">☆</button>'
+        star_btn = '<button type="button" class="star-btn" title="Add to My Schedule" aria-label="Add to My Schedule">☆</button>'
 
         raw_desc = (e.get("description") or "").replace("***", "").replace("**", "").replace("__", "").replace("`", "").strip()
         if "[" in raw_desc:
@@ -6224,6 +6224,60 @@ def render_page(results, weather=None, luckyseat_shows=None):
   }}
 
   /* Submission Modal Overlay */
+  .schedule-bar {{
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    z-index: 9000;
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    background: var(--card);
+    border: 1px solid var(--border-hover, var(--border));
+    border-radius: 999px;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+    max-width: calc(100vw - 32px);
+  }}
+  .schedule-bar button {{
+    border: 0;
+    border-radius: 999px;
+    padding: 8px 14px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+  }}
+  .schedule-bar-view {{ background: transparent; color: var(--fg); }}
+  .schedule-bar-view[aria-pressed="true"] {{ background: rgba(127, 127, 127, 0.18); }}
+  .schedule-bar-share {{ background: var(--accent); color: #0c0e14; }}
+  .schedule-bar button:focus-visible {{ outline: 2px solid var(--accent); outline-offset: 2px; }}
+  .schedule-share-card {{ max-width: 460px; display: grid; gap: 8px; }}
+  .schedule-share-label {{ font-size: 13px; font-weight: 600; color: var(--muted); margin-top: 6px; }}
+  .schedule-share-card input {{
+    width: 100%;
+    box-sizing: border-box;
+    padding: 9px 10px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: rgba(127, 127, 127, 0.1);
+    color: var(--fg);
+    font: inherit;
+    font-size: 14px;
+  }}
+  .schedule-share-actions {{ display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 10px; }}
+  .schedule-share-copy, .schedule-share-send {{
+    border: 0;
+    border-radius: var(--radius-sm);
+    padding: 9px 16px;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }}
+  .schedule-share-copy {{ background: var(--accent); color: #0c0e14; }}
+  .schedule-share-send {{ background: rgba(127, 127, 127, 0.18); color: var(--fg); }}
+  .schedule-share-open {{ color: var(--accent); font-size: 14px; }}
   .modal-overlay {{
     position: fixed;
     top: 0;
@@ -7657,6 +7711,30 @@ def render_page(results, weather=None, luckyseat_shows=None):
     <p style="margin-top:6px; font-size:11px; opacity:0.85;">Data compiled directly from venue calendars and official local community feeds. Not affiliated with any commercial ticketing broker. · <a href="https://www.instagram.com/wickedbostonevents/" target="_blank" rel="noopener" class="footer-social-link">Instagram: @wickedbostonevents</a><span id="pwa-install-wrap" hidden> · <button type="button" class="footer-pwa-btn" onclick="installPWA()">📲 Add to Home Screen</button></span></p>
   </footer>
   <!-- Community Event Submission Modal -->
+  <div id="schedule-bar" class="schedule-bar" style="display:none;">
+    <button type="button" class="schedule-bar-view" id="schedule-view" aria-pressed="false">★ My Schedule <span id="schedule-count"></span></button>
+    <button type="button" class="schedule-bar-share" id="schedule-share">Share</button>
+  </div>
+  <div id="schedule-share-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="schedule-share-title" style="display:none;">
+    <div class="modal-card schedule-share-card">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title" id="schedule-share-title">Share your schedule</h2>
+          <p class="modal-sub" id="schedule-share-sub"></p>
+        </div>
+        <button type="button" class="modal-close-btn" id="schedule-share-close" aria-label="Close">✕</button>
+      </div>
+      <label class="schedule-share-label" for="schedule-share-name">Your name (optional)</label>
+      <input type="text" id="schedule-share-name" maxlength="40" placeholder="Shows as “Sam's weekend”" autocomplete="given-name">
+      <label class="schedule-share-label" for="schedule-share-link">Link to send</label>
+      <input type="text" id="schedule-share-link" readonly>
+      <div class="schedule-share-actions">
+        <button type="button" class="schedule-share-copy" id="schedule-share-copy">Copy link</button>
+        <button type="button" class="schedule-share-send" id="schedule-share-send" style="display:none;">Send</button>
+        <a class="schedule-share-open" id="schedule-share-open" href="/schedule/" target="_blank" rel="noopener">Preview</a>
+      </div>
+    </div>
+  </div>
   <div id="submit-event-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-submit-title" style="display:none;">
     <div class="modal-card" id="submit-modal-card">
       <div class="modal-header">
@@ -8120,6 +8198,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
     const savedOnlyChk = document.getElementById('saved-only-chk');
     const savedCountEl = document.getElementById('saved-count');
     const btnCopyPlan = document.getElementById('btn-copy-plan');
+    const scheduleBar = document.getElementById('schedule-bar');
+    const scheduleCount = document.getElementById('schedule-count');
+    const scheduleView = document.getElementById('schedule-view');
     let popularOnly = false;
     let featuredOnly = false;
     let userUpvotes = new Set();
@@ -8829,6 +8910,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
       if (btnCopyPlan) {{
         btnCopyPlan.style.display = n > 0 ? 'inline-flex' : 'none';
       }}
+      updateScheduleBar();
       if (quickActiveGenreChip && activeGenreLabel) {{
         if (activeGenre !== 'all' && GENRES_DATA && GENRES_DATA[activeGenre]) {{
           const gi = GENRES_DATA[activeGenre];
@@ -10156,6 +10238,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
       try {{
         localStorage.setItem('boston_starred_events', JSON.stringify(Array.from(starredEvents)));
       }} catch (_) {{}}
+      rememberScheduleEvent(evId, nowStarred ? li : null);
       document.querySelectorAll(`.event[data-id="${{evId}}"] .star-btn`).forEach(b => {{
         b.classList.toggle('starred', nowStarred);
         b.textContent = nowStarred ? '★' : '☆';
@@ -10168,6 +10251,135 @@ def render_page(results, weather=None, luckyseat_shows=None):
       updateQuickChipsUI();
       if (starredOnly) apply();
     }});
+
+    // My Schedule. Sharing puts the event details in the link itself, so a shared schedule needs no
+    // account or server and keeps working after its events roll off the site.
+    const scheduleModal = document.getElementById('schedule-share-modal');
+    const scheduleName = document.getElementById('schedule-share-name');
+    const scheduleLink = document.getElementById('schedule-share-link');
+    const scheduleSub = document.getElementById('schedule-share-sub');
+    const scheduleCopy = document.getElementById('schedule-share-copy');
+    const scheduleSend = document.getElementById('schedule-share-send');
+    const scheduleOpen = document.getElementById('schedule-share-open');
+    const SCHEDULE_DETAILS_KEY = 'boston_schedule_events';
+    const SCHEDULE_NAME_KEY = 'boston_schedule_name';
+    let scheduleEvents = [];
+
+    function updateScheduleBar() {{
+      if (!scheduleBar) return;
+      const n = starredEvents ? starredEvents.size : 0;
+      scheduleBar.style.display = n > 0 ? 'flex' : 'none';
+      scheduleCount.textContent = n > 0 ? `(${{n}})` : '';
+      scheduleView.setAttribute('aria-pressed', starredOnly ? 'true' : 'false');
+    }}
+
+    function scheduleDetails() {{
+      try {{
+        const d = JSON.parse(localStorage.getItem(SCHEDULE_DETAILS_KEY) || '{{}}');
+        return (d && typeof d === 'object') ? d : {{}};
+      }} catch (_) {{ return {{}}; }}
+    }}
+
+    function scheduleRow(li) {{
+      const m = extractEventMetaFromLi(li);
+      if (!m.dt || isNaN(m.dt.getTime())) return null;
+      // The last field marks a listing with a date but no time, so it isn't shown at a made-up hour
+      return [m.title, Math.floor(m.dt.getTime() / 1000), m.venue, m.url, li.dataset.epoch ? 0 : 1];
+    }}
+
+    function rememberScheduleEvent(id, li) {{
+      const d = scheduleDetails();
+      const row = li ? scheduleRow(li) : null;
+      if (row) d[id] = row; else delete d[id];
+      try {{ localStorage.setItem(SCHEDULE_DETAILS_KEY, JSON.stringify(d)); }} catch (_) {{}}
+    }}
+
+    async function encodeSchedule(obj) {{
+      let bytes = new TextEncoder().encode(JSON.stringify(obj));
+      let tag = 'j';
+      if (window.CompressionStream) {{
+        try {{
+          const stream = new Blob([bytes]).stream().pipeThrough(new CompressionStream('deflate-raw'));
+          bytes = new Uint8Array(await new Response(stream).arrayBuffer());
+          tag = 'z';
+        }} catch (_) {{}}
+      }}
+      let bin = '';
+      bytes.forEach(b => {{ bin += String.fromCharCode(b); }});
+      return tag + btoa(bin).split('+').join('-').split('/').join('_').split('=').join('');
+    }}
+
+    async function refreshScheduleLink() {{
+      const name = scheduleName.value.trim();
+      try {{ localStorage.setItem(SCHEDULE_NAME_KEY, name); }} catch (_) {{}}
+      const hash = await encodeSchedule({{ v: 1, n: name, e: scheduleEvents }});
+      const link = `${{location.origin}}/schedule/#${{hash}}`;
+      scheduleLink.value = link;
+      scheduleOpen.href = link;
+    }}
+
+    function openScheduleShare() {{
+      ensureDeferredDaysHydrated(async () => {{
+        const saved = scheduleDetails();
+        const rows = new Map();
+        document.querySelectorAll('.event[data-id]').forEach(li => {{
+          const id = li.dataset.id;
+          if (starredEvents.has(id) && !rows.has(id)) {{
+            const row = scheduleRow(li);
+            if (row) rows.set(id, row);
+          }}
+        }});
+        starredEvents.forEach(id => {{ if (!rows.has(id) && saved[id]) rows.set(id, saved[id]); }});
+        const cutoff = Math.floor(Date.now() / 1000) - 6 * 3600;   // leave out what's already over
+        scheduleEvents = Array.from(rows.values()).filter(r => r[1] >= cutoff).sort((a, b) => a[1] - b[1]);
+        const left = starredEvents.size - scheduleEvents.length;
+        scheduleSub.textContent = `${{scheduleEvents.length}} upcoming ${{scheduleEvents.length === 1 ? 'event' : 'events'}}` +
+          (left > 0 ? `. ${{left}} past or undated ${{left === 1 ? 'event is' : 'events are'}} left out.` : '.');
+        try {{ scheduleName.value = localStorage.getItem(SCHEDULE_NAME_KEY) || ''; }} catch (_) {{}}
+        await refreshScheduleLink();
+        scheduleSend.style.display = navigator.share ? 'inline-block' : 'none';
+        scheduleCopy.disabled = scheduleEvents.length === 0;
+        scheduleModal.style.display = 'flex';
+        scheduleCopy.focus();
+      }});
+    }}
+
+    function closeScheduleShare() {{
+      scheduleModal.style.display = 'none';
+    }}
+
+    if (scheduleBar) {{
+      scheduleView.addEventListener('click', () => {{
+        starredOnly = !starredOnly;
+        if (savedOnlyChk) savedOnlyChk.checked = starredOnly;
+        if (starredOnly && timeFilter === 'today') {{
+          timeFilter = 'all';
+          showAll = true;
+        }}
+        apply();
+        if (starredOnly) window.scrollTo({{ top: 0 }});
+      }});
+      document.getElementById('schedule-share').addEventListener('click', openScheduleShare);
+      document.getElementById('schedule-share-close').addEventListener('click', closeScheduleShare);
+      scheduleModal.addEventListener('click', e => {{ if (e.target === scheduleModal) closeScheduleShare(); }});
+      document.addEventListener('keydown', e => {{
+        if (e.key === 'Escape' && scheduleModal.style.display !== 'none') closeScheduleShare();
+      }});
+      scheduleName.addEventListener('input', refreshScheduleLink);
+      scheduleCopy.addEventListener('click', async () => {{
+        try {{
+          await navigator.clipboard.writeText(scheduleLink.value);
+        }} catch (_) {{
+          scheduleLink.select();
+          document.execCommand('copy');
+        }}
+        scheduleCopy.textContent = 'Copied';
+        setTimeout(() => {{ scheduleCopy.textContent = 'Copy link'; }}, 1500);
+      }});
+      scheduleSend.addEventListener('click', () => {{
+        navigator.share({{ title: 'My schedule', url: scheduleLink.value }}).catch(() => {{}});
+      }});
+    }}
 
     if (btnCopyPlan) {{
       btnCopyPlan.addEventListener('click', async () => {{

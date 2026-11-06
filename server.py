@@ -106,6 +106,11 @@ def site_icon():
     return send_from_directory(os.path.dirname(os.path.abspath(__file__)), request.path.lstrip("/"))
 
 
+@app.get("/schedule/")
+def shared_schedule():
+    return send_from_directory(os.path.join(os.path.dirname(os.path.abspath(__file__)), "schedule"), "index.html")
+
+
 @app.get("/sitemap.xml")
 def sitemap_xml():
     return send_from_directory(os.path.dirname(os.path.abspath(__file__)), "sitemap.xml")
