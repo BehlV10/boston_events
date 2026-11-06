@@ -2,6 +2,8 @@
 handles that text, and that the home page's schedule script declares what it uses before load."""
 import os
 import re
+import shutil
+import subprocess
 import unittest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -47,12 +49,28 @@ class ScheduleOnHomePage(unittest.TestCase):
         self.assertTrue(re.search(r'class="star-btn" title="Add to My Schedule"', self.template))
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class StarsAreVisible(unittest.TestCase):
     def test_nothing_hides_the_star_button(self):
         """The stars are how events get into My Schedule."""
         for rule in re.findall(r"\.star-btn[^{}]*\{\{(.*?)\}\}", read("template.py"), re.S):
             self.assertNotIn("display: none", rule)
+
+
+class ShortLinks(unittest.TestCase):
+    def test_worker_rules(self):
+        if not shutil.which("node"):
+            self.skipTest("needs node")
+        result = subprocess.run(["node", "--test", "worker.test.mjs"], cwd=os.path.join(ROOT, "schedule-worker"),
+                                capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_share_falls_back_to_the_long_link(self):
+        self.assertIn("await shortScheduleLink(schedule) ||", read("template.py"))
+
+    def test_events_drop_off_a_day_after_they_start(self):
+        self.assertIn("var KEEP_SECONDS = 86400;", read("schedule", "index.html"))
+        self.assertIn("function dropPastScheduleEvents()", read("template.py"))
+
+
+if __name__ == "__main__":
+    unittest.main()

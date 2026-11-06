@@ -62,14 +62,15 @@
   </div>
   <section class="days" id="days" aria-label="Schedule by day"></section>
   <section class="empty" id="empty" hidden>
-    <h2>This link doesn't have a schedule in it</h2>
-    <p>It may have been cut off when it was sent. Ask for the link again, or <a href="/">browse events</a> to make your own.</p>
+    <h2 id="empty-title">This link doesn't have a schedule in it</h2>
+    <p><span id="empty-text">It may have been cut off when it was sent. Ask for the link again, or</span> <a href="/">browse events</a> to make your own.</p>
   </section>
 </main>
 <script>
 (function () {
   var TZ = 'America/New_York';
   var HOURS = 2;   // listings have no end time
+  var KEEP_SECONDS = 86400;   // an event drops off a day after it starts
 
   function fromBase64(text) {
     var bin = atob(text.split('-').join('+').split('_').join('/'));
@@ -103,7 +104,7 @@
     (data && Array.isArray(data.e) ? data.e : []).forEach(function (r) {
       if (!Array.isArray(r)) return;
       var epoch = Number(r[1]);
-      if (!r[0] || !isFinite(epoch) || epoch <= 0) return;
+      if (!r[0] || !isFinite(epoch) || epoch <= 0 || epoch < Date.now() / 1000 - KEEP_SECONDS) return;
       out.push({ title: String(r[0]).slice(0, 200), epoch: epoch, venue: String(r[2] || '').slice(0, 120), url: safeUrl(r[3]), untimed: !!r[4] });
     });
     return out.sort(function (a, b) { return a.epoch - b.epoch; });
@@ -224,12 +225,27 @@
 
   function showEmpty() {
     document.getElementById('title').textContent = 'My Schedule';
+    if (ended) {
+      document.getElementById('empty-title').textContent = 'This schedule has ended';
+      document.getElementById('empty-text').textContent = 'All of its events have passed. You can';
+    }
     document.getElementById('empty').hidden = false;
   }
 
+  // A short link has the schedule embedded in the page; a long one carries it in the link.
+  var saved = document.getElementById('schedule-data');
   var hash = location.hash.slice(1);
-  if (!hash) { showEmpty(); return; }
-  decode(hash).then(render).catch(showEmpty);
+  var ended = location.pathname.indexOf('/s/') === 0;
+  if (saved) {
+    try { render(JSON.parse(saved.textContent)); } catch (e) { showEmpty(); }
+  } else if (hash) {
+    decode(hash).then(function (data) {
+      ended = data && Array.isArray(data.e) && data.e.length > 0;
+      render(data);
+    }).catch(showEmpty);
+  } else {
+    showEmpty();
+  }
 })();
 </script>
 </body>
