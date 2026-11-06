@@ -9700,7 +9700,7 @@ def scrape_ticketmaster_discovery(url, ua):
                     price = f"${int(p_min)}" if p_min == int(p_min) else f"${p_min:.2f}"
                 else:
                     price = f"${int(p_min)}-${int(p_max)}"
-            elif p_min is not None:
+            elif p_min:
                 price = f"From ${int(p_min)}"
 
         classifications = ev.get("classifications") or []
