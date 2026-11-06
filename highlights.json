@@ -2416,5 +2416,192 @@
     "note": "Fiddler Jenna Moynihan and guitarist Owen Marshall in Passim's basement room.",
     "start_date": "2026-11-15",
     "expires": "2026-11-15"
+  },
+  {
+    "id": "2026-11-06-wknd-hall-of-fame",
+    "match": {
+      "name_contains": "Hall of Fame",
+      "venue_contains": "TD Garden"
+    },
+    "badge": "\ud83c\udfc0 College Hoops Doubleheader",
+    "note": "BC vs UMass, then UConn vs Michigan. Your ticket covers both.",
+    "start_date": "2026-11-06",
+    "expires": "2026-11-06"
+  },
+  {
+    "id": "2026-11-06-wknd-tim-dillon",
+    "match": {
+      "name_contains": "Tim Dillon",
+      "venue_contains": "Wilbur"
+    },
+    "badge": "\ud83d\ude02 Sold-Out Comedy Weekend",
+    "note": "Early and late sets at The Wilbur.",
+    "start_date": "2026-11-06",
+    "expires": "2026-11-07"
+  },
+  {
+    "id": "2026-11-06-wknd-beat",
+    "match": {
+      "name_contains": "BEAT",
+      "venue_contains": "Wang"
+    },
+    "badge": "\ud83c\udfb8 King Crimson Live",
+    "note": "Four virtuosos take on '80s King Crimson.",
+    "start_date": "2026-11-06",
+    "expires": "2026-11-06"
+  },
+  {
+    "id": "2026-11-06-wknd-deerhoof",
+    "match": {
+      "name_contains": "Deerhoof",
+      "venue_contains": "Crystal Ballroom"
+    },
+    "badge": "\ud83c\udfb8 Art-Rock Legends",
+    "note": "Three decades of joyful noise at Somerville's Crystal Ballroom.",
+    "start_date": "2026-11-06",
+    "expires": "2026-11-06"
+  },
+  {
+    "id": "2026-11-06-wknd-late-nites",
+    "match": {
+      "name_contains": "Late Nites",
+      "venue_contains": "Museum of Fine Arts"
+    },
+    "badge": "\ud83c\udfa8 Museum After Dark",
+    "note": "The galleries turn into a dance floor.",
+    "start_date": "2026-11-06",
+    "expires": "2026-11-06"
+  },
+  {
+    "id": "2026-11-06-wknd-first-fridays",
+    "match": {
+      "name_contains": "First Fridays",
+      "venue_contains": "ICA"
+    },
+    "badge": "\ud83c\udfa8 Harbor Dance Party",
+    "note": "The ICA's monthly after-work party on the harbor.",
+    "start_date": "2026-11-06",
+    "expires": "2026-11-06"
+  },
+  {
+    "id": "2026-11-06-wknd-boogie-wit-da-hood",
+    "match": {
+      "name_contains": "Boogie Wit Da Hoodie",
+      "venue_contains": "Agganis"
+    },
+    "badge": "\ud83c\udfa4 Arena Hip-Hop",
+    "note": "Ten years of Artist, two nights at Agganis Arena.",
+    "start_date": "2026-11-06",
+    "expires": "2026-11-07"
+  },
+  {
+    "id": "2026-11-07-wknd-comics-come-home",
+    "match": {
+      "name_contains": "Comics Come Home",
+      "venue_contains": "TD Garden"
+    },
+    "badge": "\ud83d\ude02 30th Annual Benefit",
+    "note": "Denis Leary's benefit for the Cam Neely Foundation.",
+    "start_date": "2026-11-07",
+    "expires": "2026-11-07"
+  },
+  {
+    "id": "2026-11-07-wknd-boston-veterans-pa",
+    "match": {
+      "name_contains": "Boston Veterans Parade",
+      "venue_contains": "Boylston"
+    },
+    "badge": "\ud83c\uddfa\ud83c\uddf8 Free Downtown Parade",
+    "note": "Downtown, the Saturday before Veterans Day.",
+    "start_date": "2026-11-07",
+    "expires": "2026-11-07"
+  },
+  {
+    "id": "2026-11-07-wknd-loy-krathong",
+    "match": {
+      "name_contains": "Loy Krathong",
+      "venue_contains": "Harvard Square"
+    },
+    "badge": "\ud83c\udfee Thai Night Market",
+    "note": "Thailand's festival of lights comes to the Square.",
+    "start_date": "2026-11-07",
+    "expires": "2026-11-07"
+  },
+  {
+    "id": "2026-11-07-wknd-jimmy-webb",
+    "match": {
+      "name_contains": "Jimmy Webb",
+      "venue_contains": "City Winery"
+    },
+    "badge": "\ud83c\udfb9 Songwriting Legend",
+    "note": "The writer of \"Wichita Lineman\" up close at City Winery.",
+    "start_date": "2026-11-07",
+    "expires": "2026-11-07"
+  },
+  {
+    "id": "2026-11-07-wknd-le-vent-du-nord",
+    "match": {
+      "name_contains": "Le Vent du Nord",
+      "venue_contains": "Somerville Theatre"
+    },
+    "badge": "\ud83e\ude95 Quebecois Folk",
+    "note": "Global Arts Live brings Quebec's folk favorites to Davis Square.",
+    "start_date": "2026-11-07",
+    "expires": "2026-11-07"
+  },
+  {
+    "id": "2026-11-08-wknd-panthers",
+    "match": {
+      "name_contains": "Panthers",
+      "venue_contains": "TD Garden"
+    },
+    "badge": "\ud83c\udfd2 Bruins Matinee",
+    "note": "A 1PM Sunday game at the Garden.",
+    "start_date": "2026-11-08",
+    "expires": "2026-11-08"
+  },
+  {
+    "id": "2026-11-08-wknd-packers",
+    "match": {
+      "name_contains": "Packers",
+      "venue_contains": "Gillette"
+    },
+    "badge": "\ud83c\udfc8 Patriots at Home",
+    "note": "Sunday late-afternoon kickoff in Foxborough.",
+    "start_date": "2026-11-08",
+    "expires": "2026-11-08"
+  },
+  {
+    "id": "2026-11-08-wknd-weilerstein",
+    "match": {
+      "name_contains": "Weilerstein",
+      "venue_contains": "Cathedral"
+    },
+    "badge": "\ud83c\udfbb Cello Recital",
+    "note": "Alisa Weilerstein in an intimate downtown recital.",
+    "start_date": "2026-11-08",
+    "expires": "2026-11-08"
+  },
+  {
+    "id": "2026-11-08-wknd-family-art-trek",
+    "match": {
+      "name_contains": "Family ART-trek",
+      "venue_contains": "ICA"
+    },
+    "badge": "\ud83e\uddd2 Family Art Afternoon",
+    "note": "A guided art adventure for kids and their grown-ups.",
+    "start_date": "2026-11-08",
+    "expires": "2026-11-08"
+  },
+  {
+    "id": "2026-11-08-wknd-indonesian-festival",
+    "match": {
+      "name_contains": "Indonesian Festival",
+      "venue_contains": "Boston Common"
+    },
+    "badge": "\ud83c\uddee\ud83c\udde9 Free Festival",
+    "note": "Food, music and dance on the Common, Sunday 10 AM to 5 PM.",
+    "start_date": "2026-11-08",
+    "expires": "2026-11-08"
   }
 ]
