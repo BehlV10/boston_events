@@ -1176,6 +1176,18 @@ def scrape_jeffjam(url, ua):
     return events
 
 
+_ZOO_HOURS_RE = re.compile(r"(\d{1,2})(?::(\d{2}))?\s*(?:([ap])\.?m\.?)?\s*[-–—]\s*\d{1,2}(?::\d{2})?\s*([ap])\.?m", re.I)
+
+
+def _zoo_start(text):
+    """'5:00 – 10:30 p.m.' -> (17, 0); '9:00 a.m. - 4:00 p.m.' -> (9, 0); None without hours."""
+    m = _ZOO_HOURS_RE.search(text)
+    if not m:
+        return None
+    hour, meridiem = int(m.group(1)) % 12, (m.group(3) or m.group(4)).lower()
+    return (hour + (12 if meridiem == "p" else 0), int(m.group(2) or 0))
+
+
 def scrape_zoo_new_england(url, ua):
     """Zoo New England (Franklin Park Zoo & Stone Zoo): special family events, festivals & encounters."""
     now = datetime.now(EASTERN)
@@ -1208,7 +1220,9 @@ def scrape_zoo_new_england(url, ua):
             month_name, day_num = m.group(1), int(m.group(2))
             year_num = int(m.group(3)) if m.group(3) else now.year
             try:
-                dt = datetime.strptime(f"{month_name} {day_num} {year_num} 10:00", "%B %d %Y %H:%M").replace(tzinfo=EASTERN)
+                hour, minute = _zoo_start(txt[m.end():]) or (10, 0)
+                dt = datetime.strptime(f"{month_name} {day_num} {year_num}", "%B %d %Y").replace(
+                    hour=hour, minute=minute, tzinfo=EASTERN)
                 events.append({
                     "name": title,
                     "date": dt.astimezone(timezone.utc).isoformat(),
@@ -1814,8 +1828,9 @@ def _title_from_ticket_slug(url):
 
 def _bc_apply_details(e, info):
     """Merge a Boston Calendar detail-page record (external URL, admission, address) into e."""
-    if info.get("url"):
-        e["url"] = info["url"]
+    link = sanitize_event_url(info.get("url"))
+    if link:
+        e["url"] = link
     p = info.get("price")
     if p and (not e.get("price") or e.get("_price_from_title")):
         e["price"] = p  # the listed admission beats a "free" guessed from the title
@@ -5087,9 +5102,9 @@ def scrape_calderwood_pavilion(url, ua):
             is_calderwood = any(k in card_text.lower() for k in ["calderwood", "wimberly", "527 tremont", "539 tremont", "bca", "plaza theatre", "black box"])
             is_huntington = any(k in card_text.lower() for k in ["huntington ave", "huntington theatre", "264 huntington"])
 
-            venue_name = "Calderwood Pavilion"
             if is_huntington and not is_calderwood:
-                venue_name = "The Huntington Theatre"
+                continue  # the Huntington has its own source, with its real performances
+            venue_name = "BCA Plaza Theatre" if "plaza theatre" in card_text.lower() else "Calderwood Pavilion"
 
             time_el = card.select_one(".c-event-card__daterange")
             date_raw = time_el.get_text(strip=True) if time_el else ""
@@ -5140,11 +5155,34 @@ def scrape_calderwood_pavilion(url, ua):
                     "url": href,
                     "venue": venue_name,
                     "category": "theater",
-                    "price": "$25+",
+                    "price": None,
                     "description": f"{title} presented at {venue_name}. {date_raw}",
                 })
 
     return events
+
+
+def _central_square_performances(show_url, title, ua):
+    """The real performances from a show's ticket page: 'The Getaway Driver 07 nov 2:00 pm'. Talks
+    named 'Artists & Audiences for The Getaway Driver' are left out."""
+    show = fetch_soup(show_url, ua)
+    buy = show.find("a", href=re.compile(r"/calendar/buy-tickets-to-"))
+    if not buy:
+        return []
+    text = re.sub(r"\s+", " ", fetch_soup(urljoin(show_url, buy["href"]), ua).get_text(" ", strip=True))
+    now = datetime.now(EASTERN)
+    out = []
+    pattern = rf"(?<!for ){re.escape(title)}(?: \(captioned\))? (\d{{1,2}}) ([a-z]{{3}}) (\d{{1,2}}):(\d{{2}}) (am|pm)"
+    for day, month, hour, minute, meridiem in re.findall(pattern, text, re.I):
+        try:
+            when = datetime.strptime(f"{day} {month} {now.year}", "%d %b %Y").replace(
+                hour=int(hour) % 12 + (12 if meridiem.lower() == "pm" else 0), minute=int(minute), tzinfo=EASTERN)
+        except ValueError:
+            continue
+        if when < now - timedelta(days=60):
+            when = when.replace(year=when.year + 1)
+        out.append(when)
+    return out
 
 
 def scrape_central_square_theater(url, ua):
@@ -5200,9 +5238,15 @@ def scrape_central_square_theater(url, ua):
                     days_emitted += 1
                 cur += timedelta(days=1)
 
+            try:
+                performances = [d for d in _central_square_performances(href, title, ua) if d >= now - timedelta(hours=3)]
+            except Exception:
+                performances = []
+            dates_to_add = performances or dates_to_add
+
             for dt in dates_to_add:
                 iso = dt.astimezone(timezone.utc).isoformat()
-                key = (title.lower(), iso[:10])
+                key = (title.lower(), iso[:16])
                 if key in seen:
                     continue
                 seen.add(key)
@@ -10979,6 +11023,70 @@ def scrape_postunderground(url, ua):
     return events
 
 
+# --- Roslindale, West Roxbury and Dorchester ------------------------------------------------------
+
+_SUBSTATION_SKIP_RE = re.compile(r"(?i)closed for|^the substation bar$")
+
+
+def scrape_substation(url, ua):
+    """The Substation (Roslindale Square): bingo, screenings, concerts, card shows. The calendar also
+    has private bookings and a plain 'The Substation Bar' entry for regular opening hours."""
+    events = []
+    for e in scrape_squarespace_events(url, ua):
+        name = html.unescape(e.get("name") or "").strip()
+        if not name or _SUBSTATION_SKIP_RE.search(name):
+            continue
+        e.update(name=name, venue="The Substation (Roslindale)", address="4228 Washington St, Roslindale, MA 02131")
+        events.append(e)
+    return events
+
+
+def scrape_music_on_centre(url, ua):
+    """Music on Centre (West Roxbury): folk concerts, listed on the Boston Coffeehouses calendar."""
+    events = scrape_tribe_rest_paged(url, ua, default_category="music", days=210, max_pages=4)
+    return [dict(e, venue="Music on Centre", address="1859 Centre St, West Roxbury, MA 02132")
+            for e in events if "music on centre" in (e.get("venue") or "").lower()]
+
+
+_EMK_DATE_RE = re.compile(r"[A-Z][a-z]+day, ([A-Z][a-z]+ \d{1,2}, \d{4})(?: at (\d{1,2})(?::(\d{2}))?\s*(am|pm))?", re.I)
+
+
+def scrape_kennedy_institute(url, ua):
+    """Edward M. Kennedy Institute (Columbia Point, Dorchester): talks and screenings. The page lists
+    past programs too, and a program without a time on it is a past one."""
+    now = datetime.now(EASTERN)
+    events = []
+    for item in fetch_soup(url, ua).select(".list-item-area"):
+        title, when = item.find("h2"), _EMK_DATE_RE.search(item.get_text(" ", strip=True))
+        if not title or not when or not when.group(2):
+            continue
+        day = datetime.strptime(when.group(1), "%B %d, %Y").date()
+        hour = int(when.group(2)) % 12 + (12 if when.group(4).lower() == "pm" else 0)
+        if day < now.date():
+            continue
+        link = title.find("a", href=True)
+        events.append({"name": title.get_text(" ", strip=True), "date": _et_iso(day, (hour, int(when.group(3) or 0))),
+                       "url": link["href"] if link else url, "venue": "Edward M. Kennedy Institute",
+                       "address": "210 Morrissey Blvd, Dorchester, MA 02125", "category": "community"})
+    return events
+
+
+def scrape_dorchester_historical(url, ua):
+    """Dorchester Historical Society: 'Upcoming Events', then a title and 'Nov 15, 2026, 11:00 AM – 3:00 PM'."""
+    lines = _text_lines(fetch_soup(url, ua))
+    events = []
+    for title, line in zip(lines, lines[1:]):
+        m = re.match(r"([A-Z][a-z]{2}) (\d{1,2}), (\d{4}), (\d{1,2}):(\d{2}) (AM|PM)", line)
+        if not m:
+            continue
+        day = datetime.strptime(" ".join(m.group(1, 2, 3)), "%b %d %Y").date()
+        hour = int(m.group(4)) % 12 + (12 if m.group(6) == "PM" else 0)
+        events.append({"name": f"Dorchester Historical Society: {title}", "date": _et_iso(day, (hour, int(m.group(5)))),
+                       "url": url, "venue": "Dorchester Historical Society",
+                       "address": "195 Boston St, Dorchester, MA 02125", "price": "Free", "category": "art"})
+    return events
+
+
 # --- Lower Mills Tavern (Dorchester) -----------------------------------------------------------------
 
 def scrape_lower_mills_tavern(url, ua):
@@ -11402,6 +11510,10 @@ def scrape_museum_exhibitions(url, ua):
 
 _ALL_VENUES = [
     # Added from the Boston Shows coverage check: venues' own calendars
+    {"name": "The Substation (Roslindale)", "url": "https://thesubstation.space/events-all", "ua": UA_CHROME, "scraper": scrape_substation, "default_category": "community"},
+    {"name": "Music on Centre", "url": "https://bostoncoffeehouses.org/wp-json/tribe/events/v1/events", "ua": UA_CHROME, "scraper": scrape_music_on_centre, "default_category": "music"},
+    {"name": "Edward M. Kennedy Institute", "url": "https://www.emkinstitute.org/events", "ua": UA_CHROME, "scraper": scrape_kennedy_institute, "default_category": "community"},
+    {"name": "Dorchester Historical Society", "url": "https://www.dorchesterhistoricalsociety.org/", "ua": UA_CHROME, "scraper": scrape_dorchester_historical, "default_category": "art"},
     {"name": "Square Root", "url": "https://tockify.com/api/feeds/ics/sqrozzietester", "ua": UA_CHROME, "scraper": scrape_ical, "default_category": "music"},
     {"name": "POSTunderground", "url": "https://postunderground.com/", "ua": UA_CHROME, "scraper": scrape_postunderground, "default_category": "music"},
     {"name": "Lower Mills Tavern", "url": "https://www.lowermillstavern.com/livemusicschedule/", "ua": UA_CHROME, "scraper": scrape_lower_mills_tavern, "default_category": "music"},
@@ -12921,7 +13033,53 @@ _WRONG_LISTINGS = (
     ("los angeles philharmonic", "symphony hall", "2026-11-06"),
     # Moved to March 18, 2027; The Boston Calendar still has the old date
     ("blondshell", "house of blues", "2026-11-07"),
+    # Called off for wind and rain, per the zoo
+    ("boston lights", "franklin park zoo", "2026-11-06"),
+    # Harvard Square's calendar has one entry and no venue; Opera Cambridge's run is in community_events.json
+    ("down in the valley", "harvard square", "2026-11-06"),
 )
+
+# Details a source has wrong, checked against the organizer: (title, venue or source, local date or
+# None for every date, changes). "hm" sets the start time; "hours" sets it by weekday (Monday = 0).
+_SNOWPORT_OPENS = {0: (15, 0), 1: (15, 0), 2: (15, 0), 3: (15, 0), 4: (11, 0), 5: (10, 0), 6: (11, 0)}
+_LISTING_FIXES = (
+    ("snowport", "do617", None, {"hours": _SNOWPORT_OPENS}),
+    ("sowa first friday", "", None, {"url": "https://www.sowaboston.com/first-fridays"}),
+    ("the great pumpkin smash", "english high", "2026-11-07",
+     {"hm": (11, 0), "url": "https://www.boston.gov/calendar/pumpkin-smash",
+      "address": "144 McBride St, Jamaica Plain, MA 02130"}),
+    ("antiquarian book fair", "", None, {"price": "$10 - $25"}),
+    ("antiquarian book fair", "", "2026-11-06", {"price": "$25"}),
+    ("antiquarian book fair", "", "2026-11-07", {"price": "$15"}),
+    ("antiquarian book fair", "", "2026-11-08", {"price": "$10"}),
+    ("the wash", "calderwood", None, {"price": "$10 - $60"}),
+    ("the wash", "calderwood", "2026-11-08", {"hm": (14, 0)}),
+    ("the wash", "calderwood", "2026-11-12", {"hm": (19, 0)}),
+    ("the wash", "calderwood", "2026-11-19", {"hm": (19, 0)}),
+    ("the wash", "calderwood", "2026-11-22", {"hm": (14, 0)}),
+    ("to kill a mockingbird", "huntington", "2026-11-08", {"hm": (14, 0)}),
+)
+
+
+def _fix_listings(results):
+    """Apply _LISTING_FIXES in place."""
+    for r in results:
+        source = (r.get("venue") or "").lower()
+        for e in r.get("events") or []:
+            name, where = (e.get("name") or "").lower(), f"{(e.get('venue') or '').lower()} {source}"
+            for title, place, on, fix in _LISTING_FIXES:
+                if not re.search(rf"\b{re.escape(title)}\b", name) or place not in where:
+                    continue
+                try:
+                    day = datetime.fromisoformat(str(e.get("date")).replace("Z", "+00:00")).astimezone(EASTERN).date()
+                except ValueError:
+                    day = None
+                if on and (not day or day.isoformat() != on):
+                    continue
+                hm = fix.get("hm") or (fix["hours"][day.weekday()] if day and "hours" in fix else None)
+                e.update({k: v for k, v in fix.items() if k not in ("hm", "hours")})
+                if hm and day:
+                    e["date"] = _et_iso(day, hm)
 
 
 def _use_show_times(results):
@@ -12999,6 +13157,7 @@ def _do_scrape_all(force=False):
     results.sort(key=lambda r: order.get(r["venue"], 999))
     results.extend(_expand_manual_recurring())
     results.extend(_load_community_events())
+    _fix_listings(results)
     _use_show_times(results)
     results.append(_boston_shows_fill_in(results))
     with _cache_lock:
