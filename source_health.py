@@ -19,8 +19,6 @@ KNOWN_UNSCRAPABLE = [
      "reason": "403 to scripts", "next_step": "Some forums appear via Eventbrite; ask the library for a calendar feed"},
     {"venue": "Roslindale Village Main Street", "url": "https://www.roslindale.net/events",
      "reason": "Calendar loads in a Wix widget, nothing in the page", "next_step": "Ask them for a public calendar link"},
-    {"venue": "City of Boston calendar (Strand Theatre, neighborhood concerts)", "url": "https://www.boston.gov/events",
-     "reason": "Bot check", "next_step": "The Boston Calendar carries some of these; ask the city for a feed"},
     {"venue": "Wally's Cafe", "url": "https://wallyscafe.com/ritual/",
      "reason": "Cloudflare bot check on the whole site (even robots.txt)",
      "next_step": "Covered via Boston Shows; ask Wally's for a calendar feed"},
