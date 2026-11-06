@@ -1584,11 +1584,12 @@ _KIDS_FILTER_JS = """<script>
   var cards = document.querySelectorAll('.hub-card');
   var heads = document.querySelectorAll('.hub-day');
   var citySecs = document.querySelectorAll('.kid-city-section');
-  var state = { city: 'all', age: 'all', kind: 'all' };
+  var state = { city: 'all', age: 'all', kind: 'all', price: 'all' };
   function matches(c) {
     if (state.city !== 'all' && c.dataset.city !== state.city) return false;
     if (state.age !== 'all' && (' ' + c.dataset.age + ' ').indexOf(' ' + state.age + ' ') === -1) return false;
     if (state.kind !== 'all' && c.dataset.kind !== state.kind) return false;
+    if (state.price !== 'all' && c.dataset.price !== state.price) return false;
     return true;
   }
   function render(save) {
@@ -1766,9 +1767,10 @@ def render_hub_page(hub_slug, events, site_url=None):
             kid_kind_counts[kind] = kid_kind_counts.get(kind, 0) + 1
             kid_free += 1 if _is_event_free(e) else 0
             kid_places.add(e.get("venue") or "")
+            price_attr = "free" if _is_event_free(e) else "paid"
             pills = [age_label] if age_label else [_KID_AGE_PILL[a] for a in ages]
             pills_html = "".join(f'<span class="kid-age">{escape(p)}</span>' for p in pills)
-            return f"""<article class="hub-card kid-k-{kind}" data-city="{escape(city)}" data-day="{day_attr}" data-age="{' '.join(ages)}" data-kind="{kind}">
+            return f"""<article class="hub-card kid-k-{kind}" data-city="{escape(city)}" data-day="{day_attr}" data-age="{' '.join(ages)}" data-kind="{kind}" data-price="{price_attr}">
   <div class="kid-card-band"></div>
   <div class="kid-card-body">
     <div class="kid-emoji" aria-hidden="true">{emoji}</div>
@@ -1894,10 +1896,12 @@ def render_hub_page(hub_slug, events, site_url=None):
             chip("age", "family", "🏡 All Ages / Family") if kid_age_counts.get("family") else "")
         kinds = chip("kind", "all", "Everything") + "".join(
             chip("kind", k, f"{emo} {lbl}") for k, lbl, emo, _rx in _KID_KIND_RES if kid_kind_counts.get(k))
+        prices = chip("price", "all", "Any price") + chip("price", "free", "💛 Free only")
         city_chips_html = f"""<div class="kids-filters" role="group" aria-label="Filter kids events">
     <div class="kid-filter-row"><span class="kid-filter-label">Where</span>{where}</div>
     <div class="kid-filter-row"><span class="kid-filter-label">Ages</span>{ages}</div>
     <div class="kid-filter-row"><span class="kid-filter-label">What</span>{kinds}</div>
+    <div class="kid-filter-row"><span class="kid-filter-label">Cost</span>{prices}</div>
   </div>"""
         hub_js = _KIDS_FILTER_JS
         n_cards = sum(kid_kind_counts.values())
