@@ -3512,7 +3512,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
                 continue
             city_blocks.append(f'''
           <div class="city-section" data-city="{escape(cname)}">
-            <h3 class="city-head"><span>{escape(CITY_LABELS[cname])}</span><span class="count">{len(city_events)}</span></h3>
+            <h3 class="city-head"><span class="city-pill"><span class="city-dot"></span>{escape(CITY_LABELS[cname])}</span><span class="count">{len(city_events)}</span></h3>
             <div class="buckets">{_render_buckets(city_events)}</div>
           </div>''')
         is_today = (date_attr == today_iso)
@@ -4532,16 +4532,62 @@ def render_page(results, weather=None, luckyseat_shows=None):
   }}
   .day h2 {{ margin: 0 0 12px; font-size: 17px; font-weight: 700; display:flex; align-items:center; gap:8px; color: var(--fg); position: sticky; top: 0; background: var(--card); padding: 4px 0 8px; z-index: 2; }}
   .count {{ background: rgba(255, 255, 255, 0.06); color: var(--muted); font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 500; }}
-  .cities {{ display: flex; flex-direction: column; gap: 14px; }}
-  .city-section {{ --city-color: var(--accent); border-top: 1px solid var(--border); padding-top: 12px; padding-left: 10px; border-left: 3px solid var(--city-color); }}
-  .city-section:first-child {{ border-top: none; padding-top: 0; }}
+  .cities {{ display: flex; flex-direction: column; gap: 18px; margin-top: 6px; }}
+  .city-section {{
+    --city-color: var(--accent);
+    --city-bg: rgba(255, 255, 255, 0.02);
+    background: var(--city-bg);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--city-color);
+    border-radius: var(--radius-md);
+    padding: 14px 14px 10px 14px;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }}
+  .city-section:hover {{
+    border-color: rgba(255, 255, 255, 0.18);
+  }}
   .city-section.empty {{ display: none; }}
-  .city-section[data-city="boston"]    {{ --city-color: #5d9bff; }}
-  .city-section[data-city="cambridge"] {{ --city-color: #e05a6b; }}
-  .city-section[data-city="somerville"]{{ --city-color: #f29e4c; }}
-  .city-section[data-city="other"]     {{ --city-color: #9aa3b2; }}
-  .city-head {{ margin: 0 0 8px; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--city-color); display: flex; align-items: center; gap: 8px; }}
-  .city-head .count {{ background: transparent; color: var(--muted); font-weight: 500; letter-spacing: 0; }}
+  .city-section[data-city="cambridge"] {{ --city-color: #f43f5e; --city-bg: rgba(244, 63, 94, 0.035); }}
+  .city-section[data-city="somerville"]{{ --city-color: #f59e0b; --city-bg: rgba(245, 158, 11, 0.035); }}
+  .city-section[data-city="boston"]    {{ --city-color: #3b82f6; --city-bg: rgba(59, 130, 246, 0.035); }}
+  .city-section[data-city="other"]     {{ --city-color: #a855f7; --city-bg: rgba(168, 85, 247, 0.035); }}
+  .city-head {{
+    margin: 0 0 12px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--fg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }}
+  .city-pill {{
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--city-color);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }}
+  .city-pill .city-dot {{
+    background: var(--city-color);
+    box-shadow: 0 0 8px var(--city-color);
+  }}
+  .city-head .count {{
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--muted);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-weight: 600;
+  }}
   .buckets {{ display: flex; flex-direction: column; gap: 10px; }}
   .bucket {{ border-left: 3px solid var(--accent, #7aa2f7); padding: 2px 0 2px 12px; border-left-color: var(--accent); }}
   .bucket[data-bucket="Music & nightlife"] {{ --accent: #7aa2f7; }}
