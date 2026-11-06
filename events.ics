@@ -7,8 +7,8 @@ X-WR-CALNAME:Boston Live Events & Shows
 X-WR-TIMEZONE:America/New_York
 X-WR-CALDESC:Curated live shows, concerts, and comedy across Boston, Cambridge, and Somerville.
 BEGIN:VEVENT
-UID:20261111_4282086646@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261111_3733239442@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261111
 SUMMARY:Historical Portraiture w/ Cas @ Life Drawing Boston
 LOCATION:Life Drawing Boston, Boston MA
@@ -17,8 +17,8 @@ URL:https://www.lifedrawingboston.com/calendar/figure-drawing-w-spanish-facilita
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261118_8384177015@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261118_4311917624@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261118
 SUMMARY:Cosplay Night w/ Blake @ Life Drawing Boston
 LOCATION:Life Drawing Boston, Boston MA
@@ -27,8 +27,8 @@ URL:https://www.lifedrawingboston.com/calendar/figure-drawing-w-spanish-facilita
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261202_3333376466@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261202_2987141206@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261202
 SUMMARY:Wednesday Wildcard: Portrait Club w/ Big Dave @ Life Drawing Boston
 LOCATION:Life Drawing Boston, Boston MA
@@ -37,8 +37,8 @@ URL:https://www.lifedrawingboston.com/calendar/wednesday-wildcard-props-costumes
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261106_4507290573@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261106_1536592171@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261106
 SUMMARY:Thursday Long Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -47,8 +47,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-06+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261107_3191343787@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261107_2515330689@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261107
 SUMMARY:First Friday: Opening reception @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -57,8 +57,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-07+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261107_3314602439@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261107_6288151592@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261107
 SUMMARY:Saturday Portrait Study @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -67,8 +67,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-07+15%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261108_3764824942@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261108_3945015336@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261108
 SUMMARY:Saturday Evening Short Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -77,8 +77,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-08+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261108_4274179089@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261108_5900825811@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261108
 SUMMARY:Sunday Portrait Study @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -87,8 +87,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-08+15%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261108_6949425809@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261108_3617718334@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261108
 SUMMARY:Sunday Morning Month Long Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -97,8 +97,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-08+15%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261108_4553748115@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261108_7295376405@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261108
 SUMMARY:Cyanotypes on Fabrics @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -107,8 +107,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-08+18%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261108_5358589252@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261108_5788739150@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261108
 SUMMARY:Sunday Afternoon Long Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -117,8 +117,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-08+19%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261108_3169936458@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261108_3300229740@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261108
 SUMMARY:Member Clubhouse @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -127,8 +127,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-08+19%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261108_8269510115@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261108_6411029907@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261108
 SUMMARY:Watercolors: Birds (2-Week Class) @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -137,8 +137,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-08+22%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261109_4026073281@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261109_7462557930@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261109
 SUMMARY:Pass the Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -147,8 +147,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-09+22%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261110_6377341466@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261110_4260252156@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261110
 SUMMARY:Monday Short Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -157,8 +157,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-10+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261110_4110134196@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261110_3017322495@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261110
 SUMMARY:Figure Drawing Basics (3-Week Class) @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -167,8 +167,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-10+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261111_2799155450@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261111_3602362546@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261111
 SUMMARY:Tuesday Drawing Club @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -177,8 +177,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-11+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261111_4852956714@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261111_7467362623@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261111
 SUMMARY:Wednesday Drawing as Meditation @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -187,8 +187,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-11+16%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261111_3169936458@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261111_3300229740@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261111
 SUMMARY:Member Clubhouse @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -197,8 +197,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-11+23%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261112_6612550109@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261112_4642392442@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261112
 SUMMARY:Wednesday Medium Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -207,8 +207,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-12+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261112_5342251212@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261112_5738458108@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261112
 SUMMARY:Intermediate Figure Drawing (3-Week Class) @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -217,8 +217,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-12+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261113_4507290573@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261113_1536592171@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261113
 SUMMARY:Thursday Long Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -227,8 +227,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-13+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261113_5280575677@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261113_7983083166@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261113
 SUMMARY:Queer Figure Drawing Night: Chill Version @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -237,8 +237,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-13+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261113_1226005698@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261113_3406500464@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261113
 SUMMARY:Anatomy of the head (3-Week Class) @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -247,8 +247,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-13+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261114_3314602439@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261114_6288151592@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261114
 SUMMARY:Saturday Portrait Study @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -257,8 +257,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-14+15%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261115_3764824942@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261115_3945015336@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261115
 SUMMARY:Saturday Evening Short Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -267,8 +267,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-15+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261115_4274179089@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261115_5900825811@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261115
 SUMMARY:Sunday Portrait Study @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -277,8 +277,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-15+15%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261115_6949425809@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261115_3617718334@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261115
 SUMMARY:Sunday Morning Month Long Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -287,8 +287,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-15+15%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261115_5358589252@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261115_5788739150@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261115
 SUMMARY:Sunday Afternoon Long Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -297,8 +297,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-15+19%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261115_3169936458@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261115_3300229740@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261115
 SUMMARY:Member Clubhouse @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -307,8 +307,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-15+19%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261115_8269510115@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261115_6411029907@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261115
 SUMMARY:Watercolors: Birds (2-Week Class) @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -317,8 +317,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-15+22%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261116_4026073281@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261116_7462557930@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261116
 SUMMARY:Pass the Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -327,8 +327,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-16+22%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261117_6377341466@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261117_4260252156@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261117
 SUMMARY:Monday Short Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -337,8 +337,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-17+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261117_4110134196@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261117_3017322495@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261117
 SUMMARY:Figure Drawing Basics (3-Week Class) @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -347,8 +347,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-17+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261118_2799155450@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261118_3602362546@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261118
 SUMMARY:Tuesday Drawing Club @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -357,8 +357,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-18+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261118_4852956714@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261118_7467362623@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261118
 SUMMARY:Wednesday Drawing as Meditation @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -367,8 +367,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-18+16%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261118_3169936458@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261118_3300229740@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261118
 SUMMARY:Member Clubhouse @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -377,8 +377,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-18+23%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261118_7238656422@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261118_8862208406@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261118
 SUMMARY:Stitch 'n B*tch @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -387,8 +387,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-18+23%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261119_6612550109@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261119_4642392442@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261119
 SUMMARY:Wednesday Medium Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -397,8 +397,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-19+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261119_5342251212@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261119_5738458108@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261119
 SUMMARY:Intermediate Figure Drawing (3-Week Class) @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -407,8 +407,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-19+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261120_4507290573@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261120_1536592171@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261120
 SUMMARY:Thursday Long Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -417,8 +417,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-20+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261120_7483491264@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261120_3267555314@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261120
 SUMMARY:Thursday Costumed Drawing: Medieval @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -427,8 +427,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-20+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261120_1226005698@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261120_3406500464@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261120
 SUMMARY:Anatomy of the head (3-Week Class) @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -437,8 +437,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-20+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261120_8595081155@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261120_4869322253@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261120
 SUMMARY:Portrait Party (Members Only!) @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -447,8 +447,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-20+23%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261121_4353708762@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261121_6489171482@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261121
 SUMMARY:Friendsgiving Community Potluck & Portrait Party! @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -457,8 +457,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-21+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261121_4948896916@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261121_5395802471@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261121
 SUMMARY:MUSEUM MEETUP @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -467,8 +467,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-21+15%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261121_2909953153@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261121_5096963157@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261121
 SUMMARY:Paint & Sip: Sweater Weather @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -477,8 +477,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-21+22%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261122_3764824942@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261122_3945015336@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261122
 SUMMARY:Saturday Evening Short Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -487,8 +487,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-22+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261122_4274179089@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261122_5900825811@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261122
 SUMMARY:Sunday Portrait Study @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -497,8 +497,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-22+15%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261122_6949425809@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261122_3617718334@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261122
 SUMMARY:Sunday Morning Month Long Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -507,8 +507,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-22+15%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261122_5358589252@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261122_5788739150@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261122
 SUMMARY:Sunday Afternoon Long Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -517,8 +517,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-22+19%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261122_3169936458@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261122_3300229740@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261122
 SUMMARY:Member Clubhouse @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -527,8 +527,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-22+19%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261123_4026073281@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261123_7462557930@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261123
 SUMMARY:Pass the Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -537,8 +537,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-23+22%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261124_6377341466@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261124_4260252156@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261124
 SUMMARY:Monday Short Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -547,8 +547,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-24+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261124_4110134196@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261124_3017322495@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261124
 SUMMARY:Figure Drawing Basics (3-Week Class) @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -557,8 +557,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-24+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261125_2799155450@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261125_3602362546@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261125
 SUMMARY:Tuesday Drawing Club @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -567,8 +567,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-25+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261125_4852956714@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261125_7467362623@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261125
 SUMMARY:Wednesday Drawing as Meditation @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -577,8 +577,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-25+16%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261125_3169936458@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261125_3300229740@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261125
 SUMMARY:Member Clubhouse @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -587,8 +587,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-25+23%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261126_6612550109@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261126_4642392442@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261126
 SUMMARY:Wednesday Medium Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -597,8 +597,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-26+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261127_4507290573@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261127_1536592171@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261127
 SUMMARY:Thursday Long Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -607,8 +607,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-27+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261128_3314602439@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261128_6288151592@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261128
 SUMMARY:Saturday Portrait Study @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -617,8 +617,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-28+15%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261129_3764824942@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261129_3945015336@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261129
 SUMMARY:Saturday Evening Short Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -627,8 +627,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-29+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261129_4274179089@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261129_5900825811@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261129
 SUMMARY:Sunday Portrait Study @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -637,8 +637,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-29+15%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261129_6949425809@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261129_3617718334@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261129
 SUMMARY:Sunday Morning Month Long Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -647,8 +647,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-29+15%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261129_5358589252@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261129_5788739150@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261129
 SUMMARY:Sunday Afternoon Long Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -657,8 +657,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-29+19%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261129_3169936458@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261129_3300229740@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261129
 SUMMARY:Member Clubhouse @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -667,8 +667,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-29+19%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261130_4026073281@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261130_7462557930@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261130
 SUMMARY:Pass the Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -677,8 +677,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-11-30+22%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261201_6377341466@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261201_4260252156@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261201
 SUMMARY:Monday Short Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -687,8 +687,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-01+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261202_2799155450@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261202_3602362546@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261202
 SUMMARY:Tuesday Drawing Club @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -697,8 +697,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-02+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261202_4852956714@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261202_7467362623@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261202
 SUMMARY:Wednesday Drawing as Meditation @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -707,8 +707,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-02+16%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261202_3169936458@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261202_3300229740@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261202
 SUMMARY:Member Clubhouse @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -717,8 +717,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-02+23%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261203_6612550109@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261203_4642392442@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261203
 SUMMARY:Wednesday Medium Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -727,8 +727,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-03+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261204_4507290573@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261204_1536592171@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261204
 SUMMARY:Thursday Long Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -737,8 +737,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-04+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261205_3314602439@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261205_6288151592@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261205
 SUMMARY:Saturday Portrait Study @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -747,8 +747,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-05+15%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261206_3764824942@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261206_3945015336@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261206
 SUMMARY:Saturday Evening Short Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -757,8 +757,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-06+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261206_4274179089@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261206_5900825811@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261206
 SUMMARY:Sunday Portrait Study @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -767,8 +767,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-06+15%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261206_6949425809@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261206_3617718334@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261206
 SUMMARY:Sunday Morning Month Long Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -777,8 +777,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-06+15%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261206_5358589252@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261206_5788739150@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261206
 SUMMARY:Sunday Afternoon Long Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -787,8 +787,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-06+19%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261206_3169936458@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261206_3300229740@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261206
 SUMMARY:Member Clubhouse @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -797,8 +797,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-06+19%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261206_2238076519@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261206_2453051374@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261206
 SUMMARY:Intro to Watercolors @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -807,8 +807,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-06+22%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261207_4026073281@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261207_7462557930@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261207
 SUMMARY:Pass the Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -817,8 +817,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-07+22%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261208_6377341466@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261208_4260252156@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261208
 SUMMARY:Monday Short Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -827,8 +827,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-08+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261208_4110134196@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261208_3017322495@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261208
 SUMMARY:Figure Drawing Basics (3-Week Class) @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -837,8 +837,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-08+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261208_6201328123@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261208_8080675272@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261208
 SUMMARY:Jewelry Workshop: Hammer Textured Rings @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -847,8 +847,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-08+23%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261209_2799155450@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261209_3602362546@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261209
 SUMMARY:Tuesday Drawing Club @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -857,8 +857,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-09+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261209_4852956714@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261209_7467362623@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261209
 SUMMARY:Wednesday Drawing as Meditation @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -867,8 +867,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-09+16%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261209_3169936458@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261209_3300229740@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261209
 SUMMARY:Member Clubhouse @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -877,8 +877,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-09+23%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261210_6612550109@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261210_4642392442@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261210
 SUMMARY:Wednesday Medium Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -887,8 +887,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-10+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261211_4507290573@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261211_1536592171@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261211
 SUMMARY:Thursday Long Pose @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -897,8 +897,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-11+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261211_5280575677@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261211_7983083166@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261211
 SUMMARY:Queer Figure Drawing Night: Chill Version @ Boston Figure Art Center
 LOCATION:Boston Figure Art Center, Boston MA
@@ -907,8 +907,8 @@ URL:https://www.wellnessliving.com/rs/book-process.html?dt_date=2026-12-11+00%3A
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261105_3689768681@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261105_6486741385@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261105
 SUMMARY:Compagnie Hervé Koubi @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -917,8 +917,8 @@ URL:https://www.theplatformkendall.org/productions/compagnie-herve-koubi-fy27/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261106_3689768681@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261106_6486741385@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261106
 SUMMARY:Compagnie Hervé Koubi @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -927,8 +927,8 @@ URL:https://www.theplatformkendall.org/productions/compagnie-herve-koubi-fy27/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261107_6802453717@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261107_7343068731@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261107
 SUMMARY:The Platform Opening Day @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -937,8 +937,8 @@ URL:https://www.theplatformkendall.org/the-platform-opening-day/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261107_3689768681@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261107_6486741385@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261107
 SUMMARY:Compagnie Hervé Koubi @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -947,8 +947,8 @@ URL:https://www.theplatformkendall.org/productions/compagnie-herve-koubi-fy27/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261110_6313077280@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261110_8773443867@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261110
 SUMMARY:Peppino D'Agostino @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -957,8 +957,8 @@ URL:https://www.theplatformkendall.org/productions/peppino-dagostino/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261111_2174087643@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261111_3727476759@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261111
 SUMMARY:Maryna Krut @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -967,8 +967,8 @@ URL:https://www.theplatformkendall.org/productions/maryna-krut-fy27/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261113_3786602631@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261113_7752264209@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261113
 SUMMARY:Strong Voice: The Tales of Roswitha @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -977,8 +977,8 @@ URL:https://www.theplatformkendall.org/productions/strong-voice-the-tales-of-ros
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261113_5604098394@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261113_5895646922@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261113
 SUMMARY:Tamara Jokić @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -987,8 +987,8 @@ URL:https://www.theplatformkendall.org/productions/tamara-jokic/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261113_5096327105@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261113_1469541875@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261113
 SUMMARY:Jean Appolon Expressions Pouvwa @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
@@ -997,8 +997,8 @@ URL:https://www.theplatformkendall.org/productions/jean-appolon-expressions-fy27
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261114_5096327105@wickedbostonevents.com
-DTSTAMP:20261105T201927Z
+UID:20261114_1469541875@wickedbostonevents.com
+DTSTAMP:20261106T062430Z
 DTSTART;VALUE=DATE:20261114
 SUMMARY:Jean Appolon Expressions Pouvwa @ The Platform Kendall
 LOCATION:The Platform Kendall, Boston MA
