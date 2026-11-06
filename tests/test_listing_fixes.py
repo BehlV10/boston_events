@@ -134,3 +134,20 @@ class CentralSquarePerformances(unittest.TestCase):
         with mock.patch.object(scrapers, "fetch_soup", side_effect=pages):
             found = scrapers._central_square_performances("https://site/shows/x/", "The Getaway Driver", "ua")
         self.assertEqual([d.strftime("%m-%d %H:%M") for d in found], ["12-28 14:00", "12-29 19:30"])
+
+
+class MiddlesexNights(unittest.TestCase):
+    def night(self, name):
+        return [{"name": name, "date": "2026-11-07T21:00:00-05:00", "venue": "Middlesex Lounge"}]
+
+    def test_party_then_guest_becomes_two_listings(self):
+        party, guest = scrapers._split_middlesex_nights(self.night("90s PARTY then SLICK VICK"))
+        self.assertEqual((party["name"], party["date"]), ("90s PARTY", "2026-11-07T19:00:00-05:00"))
+        self.assertEqual((guest["name"], guest["date"]), ("SLICK VICK", "2026-11-07T22:00:00-05:00"))
+
+    def test_party_alone_moves_to_the_early_slot(self):
+        events = scrapers._split_middlesex_nights(self.night("90s PARTY"))
+        self.assertEqual([e["date"] for e in events], ["2026-11-07T19:00:00-05:00"])
+
+    def test_guest_nights_are_unchanged(self):
+        self.assertEqual(scrapers._split_middlesex_nights(self.night("KNIFE")), self.night("KNIFE"))

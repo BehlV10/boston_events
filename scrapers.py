@@ -3038,6 +3038,29 @@ def scrape_manray(url, ua):
     return events
 
 
+_MIDDLESEX_PARTY_THEN_RE = re.compile(r"(?i)^(.+?\bparty)\s+then\s+(.+)$")
+_MIDDLESEX_PARTY_RE = re.compile(r"(?i)^.+\bparty$")
+
+
+def _split_middlesex_nights(events):
+    """'90s PARTY then SLICK VICK' is two things: an early throwback party, then a DJ. The site gives
+    no times, so these are the usual 7 to 10 PM party and a 10 PM guest."""
+    out = []
+    for e in events:
+        then = _MIDDLESEX_PARTY_THEN_RE.match(e["name"])
+        party = then.group(1) if then else e["name"] if _MIDDLESEX_PARTY_RE.match(e["name"]) else None
+        if not party:
+            out.append(e)
+            continue
+        start = datetime.fromisoformat(e["date"])
+        out.append(dict(e, name=party, date=start.replace(hour=19).isoformat(),
+                        description="Throwback party at Middlesex Lounge in Central Square, usually about 7 to 10 PM."))
+        if then:
+            out.append(dict(e, name=then.group(2), date=start.replace(hour=22).isoformat(),
+                            description=f"DJ set at Middlesex Lounge in Central Square, after the {party}."))
+    return out
+
+
 def scrape_middlesex(url, ua):
     """Middlesex Lounge (Central Square, Cambridge) — parses weekly party announcements, guest DJs, and throwback parties."""
     target_url = "https://www.msexcambridge.com"
@@ -3159,6 +3182,7 @@ def scrape_middlesex(url, ua):
                         pass
             i += 1
 
+    events = _split_middlesex_nights(events)
     events.sort(key=lambda x: x["date"])
     return events
 
