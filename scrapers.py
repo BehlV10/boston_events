@@ -6558,7 +6558,8 @@ def scrape_ticketmaster(_url, _ua):
         price = None
         prs = ev.get("priceRanges") or []
         if prs:
-            price = _format_price_range(prs[0].get("min"), prs[0].get("max"), prs[0].get("currency", "USD"))
+            # Ticketmaster sends a $0 range for shows without a published price, not for free ones
+            price = _format_price_range(prs[0].get("min") or None, prs[0].get("max"), prs[0].get("currency", "USD"))
             
         cat = None
         cls = ev.get("classifications") or []
@@ -9694,7 +9695,7 @@ def scrape_ticketmaster_discovery(url, ua):
         if price_ranges:
             p_min = price_ranges[0].get("min")
             p_max = price_ranges[0].get("max")
-            if p_min is not None and p_max is not None:
+            if p_min and p_max:  # a $0 range means no published price, not a free show
                 if p_min == p_max:
                     price = f"${int(p_min)}" if p_min == int(p_min) else f"${p_min:.2f}"
                 else:
@@ -11718,7 +11719,7 @@ MANUAL_RECURRING_EVENTS = [
         ("Union Square Farmers Market", "https://www.unionsquaremain.org/union-square-farmers-market", 5, 9, 0),
     ]),
     ("SoWa Open Market", "https://sowaboston.com/open-market/", "community", [
-        ("SoWa Open Market", "https://sowaboston.com/open-market/", 6, 10, 0),
+        ("SoWa Open Market", "https://sowaboston.com/open-market/", 6, 11, 0),
     ]),
     ("SoWa Vintage Market", "https://sowavintagemkt.com/", "community", [
         ("SoWa Vintage Market", "https://sowavintagemkt.com/", 6, 11, 0, "Free"),
@@ -11801,17 +11802,17 @@ MANUAL_RECURRING_EVENTS = [
 
 
 # Outdoor and seasonal series: (first, last) (month, day) each year, inclusive. Dates drift a
-# little year to year, so the ends are the usual last week (farmers markets close the week of
-# Thanksgiving; SoWa Open Market runs the first Sunday of May to mid-November, the Greenway
+# little year to year, so the ends are the usual last week (most farmers markets close the week
+# of Thanksgiving, Kendall in early October and Union Square at the end of October; SoWa Open Market runs the first Sunday of May to mid-November, the Greenway
 # Artisan Market May through October).
 MANUAL_RECURRING_SEASONS = {
     "SoWa Open Market": ((5, 1), (11, 15)),
     "Greenway Artisan Market": ((5, 1), (10, 31)),
-    "Central Square Farmers Market": ((5, 25), (11, 24)),
+    "Central Square Farmers Market": ((5, 18), (11, 23)),
     "Copley Square Farmers Market": ((5, 10), (11, 25)),
     "Davis Square Farmers Market": ((5, 15), (11, 25)),
-    "Kendall Square Farmers Market": ((5, 15), (11, 25)),
-    "Union Square Farmers Market": ((5, 10), (11, 25)),
+    "Kendall Square Farmers Market": ((5, 28), (10, 8)),
+    "Union Square Farmers Market": ((5, 9), (10, 31)),
     "Harvard University Farmers Market": ((6, 1), (11, 25)),
     "Memorial Drive Sundays": ((4, 25), (11, 15)),
     "Everybody Dance Now": ((5, 15), (9, 30)),
@@ -12906,6 +12907,12 @@ def _scrape_one(v, force=False):
 
 # Their own calendars give doors, about an hour before the show. Bowery Presents' feed has the show.
 _DOORS_TIME_VENUES = ("royale", "sinclair")
+# Which feed has the real show time for a venue whose own listing doesn't. Big Night Live's site
+# gives only a date, so scrape_big_night_live has to assume 7 PM.
+_SHOW_TIME_FEEDS = (
+    ("Bowery Presents Boston", _DOORS_TIME_VENUES),
+    ("Leader Bank Pavilion", ("big night live",)),
+)
 
 
 # Listings that a source has wrong and that nothing else corrects: (title, venue, local date).
@@ -12918,18 +12925,10 @@ _WRONG_LISTINGS = (
 
 
 def _use_show_times(results):
-    """Move every listing of a Royale or Sinclair show (their own calendars, Do617, Harvard Square's
-    calendar) to the show time in the Bowery Presents feed, so they read as one event at the
-    right time. Club nights aren't in that feed and keep the time they have."""
+    """Move every listing of a show at a venue in _SHOW_TIME_FEEDS (its own calendar, Do617, Harvard
+    Square's calendar) to the show time in that venue's feed, so they read as one event at the
+    right time. Club nights aren't in those feeds and keep the time they have."""
     from boston_shows import _first_tok, _toks
-
-    feed = next((r for r in results if r.get("venue") == "Bowery Presents Boston"), None)
-    if not feed:
-        return
-
-    def where(e, source):
-        v = f"{e.get('venue') or ''} {source}".lower()
-        return next((k for k in _DOORS_TIME_VENUES if k in v), None)
 
     def day(e):
         try:
@@ -12937,27 +12936,38 @@ def _use_show_times(results):
         except ValueError:
             return None
 
-    def words(e):
-        name = e.get("name") or ""
-        return _first_tok(name), _toks(name) - set(_DOORS_TIME_VENUES)
-
-    shows = {}
-    for e in feed.get("events") or []:
-        v = where(e, "")
-        if v and day(e):
-            shows.setdefault((v, day(e)), []).append((words(e), e["date"]))
-    for r in results:
-        if r is feed:
+    for feed_name, venues in _SHOW_TIME_FEEDS:
+        feed = next((r for r in results if r.get("venue") == feed_name), None)
+        if not feed:
             continue
-        for e in r.get("events") or []:
-            v = where(e, r.get("venue") or "")
-            if not v or not e.get("date"):
+
+        def where(e, source):
+            v = f"{e.get('venue') or ''} {source}".lower()
+            return next((k for k in venues if k in v), None)
+
+        venue_words = {w for k in venues for w in k.split()}
+
+        def words(e):
+            name = e.get("name") or ""
+            return _first_tok(name), _toks(name) - venue_words
+
+        shows = {}
+        for e in feed.get("events") or []:
+            v = where(e, "")
+            if v and day(e):
+                shows.setdefault((v, day(e)), []).append((words(e), e["date"]))
+        for r in results:
+            if r is feed:
                 continue
-            head, ours = words(e)
-            for (their_head, theirs), when in shows.get((v, day(e)), ()):
-                if ours and theirs and (head == their_head or len(ours & theirs) * 2 >= min(len(ours), len(theirs))):
-                    e["date"] = when
-                    break
+            for e in r.get("events") or []:
+                v = where(e, r.get("venue") or "")
+                if not v or not e.get("date"):
+                    continue
+                head, ours = words(e)
+                for (their_head, theirs), when in shows.get((v, day(e)), ()):
+                    if ours and theirs and (head == their_head or len(ours & theirs) * 2 >= min(len(ours), len(theirs))):
+                        e["date"] = when
+                        break
 
 
 def _boston_shows_fill_in(results):
