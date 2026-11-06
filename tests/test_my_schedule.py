@@ -49,3 +49,10 @@ class ScheduleOnHomePage(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class StarsAreVisible(unittest.TestCase):
+    def test_nothing_hides_the_star_button(self):
+        """The stars are how events get into My Schedule."""
+        for rule in re.findall(r"\.star-btn[^{}]*\{\{(.*?)\}\}", read("template.py"), re.S):
+            self.assertNotIn("display: none", rule)
