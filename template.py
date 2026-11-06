@@ -4623,7 +4623,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
     color: #fff;
   }}
   .star-btn {{
-    display: none !important;
     background: none;
     border: none;
     color: var(--muted);
@@ -4644,6 +4643,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
     opacity: 1;
     color: #ffd866;
     text-shadow: 0 0 8px rgba(255, 216, 102, 0.45);
+  }}
+  @media (pointer: coarse) {{
+    .star-btn {{ font-size: 18px; padding: 8px 10px 8px 2px; opacity: 0.8; }}
   }}
   .transit-sep {{
     width: 1px;
