@@ -11,6 +11,11 @@ from typing import Optional, Dict, Any, Tuple
 # Curated coordinates for Greater Boston venues
 # (lat, lng, neighborhood, street_address, canonical_name)
 VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
+    # Candlelight concert rooms (sold through Fever)
+    "simons theatre": (42.3591, -71.0496, "Waterfront", "1 Central Wharf, Boston, MA 02110", "Simons Theatre"),
+    "old south church": (42.3501, -71.0781, "Back Bay", "645 Boylston St, Boston, MA 02116", "Old South Church"),
+    "temple ohabei shalom": (42.3459, -71.1205, "Brookline", "1187 Beacon St, Brookline, MA 02446", "Temple Ohabei Shalom"),
+    "hyatt regency boston": (42.3530, -71.0612, "Downtown", "1 Avenue de Lafayette, Boston, MA 02111", "Hyatt Regency Boston"),
     # Harvard Square & West Cambridge
     "the sinclair": (42.3746, -71.1207, "Harvard Square", "52 Church St, Cambridge", "The Sinclair"),
     "lou's": (42.3747, -71.1206, "Harvard Square", "50 Church St, Cambridge", "Lou's (Harvard Square)"),

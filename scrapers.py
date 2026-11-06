@@ -455,42 +455,44 @@ def scrape_crystal_ballroom(url, ua):
     return events
 
 
-def parse_coolidge_date(text):
-    """Parse 'Mon 4/20'-style dates; guess year based on current date."""
-    if not text:
-        return None
-    m = re.search(r"(\d{1,2})/(\d{1,2})", text)
+def _coolidge_minutes(text):
+    m = re.fullmatch(r"(\d{1,2}):(\d{2})\s*([ap])m", text.strip(), re.I)
     if not m:
         return None
-    month, day = int(m.group(1)), int(m.group(2))
-    now = datetime.now(EASTERN)
-    try:
-        candidate = datetime(now.year, month, day, 19, 0, tzinfo=EASTERN)
-    except ValueError:
-        return None
-    if (candidate - now).days < -1:
-        candidate = candidate.replace(year=now.year + 1)
-    return candidate.astimezone(timezone.utc).isoformat()
+    return (int(m.group(1)) % 12 + (12 if m.group(3).lower() == "p" else 0)) * 60 + int(m.group(2))
 
 
 def scrape_coolidge(url, ua):
-    soup = fetch_soup(url, ua)
-    events = []
-    for card in soup.select(".film-card.film-card__narrow"):
-        a = card.select_one(".film-card__title a") or card.select_one("h2 a, h3 a")
-        if not a:
+    """Coolidge's /showtimes page, one day at a time. A new release plays four or five times a
+    day across several screens, so each film gets one listing per day: at its first showing from
+    5pm on (a single late show like Eraserhead keeps its own time), with all of the day's times
+    in the description."""
+    today = datetime.now(EASTERN).date()
+    events, failed = [], 0
+    for offset in range(14):
+        day = today + timedelta(days=offset)
+        try:
+            soup = fetch_soup(f"{urljoin(url, '/showtimes')}?date={day.isoformat()}", ua)
+        except Exception:
+            failed += 1
             continue
-        name = a.get_text(strip=True) or a.get("title", "")
-        if not name:
-            continue
-        href = a.get("href") or ""
-        date_el = card.select_one(".datepicker__date")
-        date_text = date_el.get_text(strip=True) if date_el else ""
-        events.append({
-            "name": name,
-            "date": parse_coolidge_date(date_text) or date_text or None,
-            "url": urljoin(url, href) if href else url,
-        })
+        for card in soup.select(".film-card"):
+            a = card.select_one(".film-card__title a")
+            shows = [el.get_text(strip=True) for el in card.select(".showtime-ticket__time")]
+            minutes = sorted({m for m in map(_coolidge_minutes, shows) if m is not None})
+            if not a or not minutes:
+                continue
+            start = next((m for m in minutes if m >= 17 * 60), minutes[-1])
+            dt = datetime(day.year, day.month, day.day, start // 60, start % 60, tzinfo=EASTERN)
+            labels = [f"{(m // 60 - 1) % 12 + 1}:{m % 60:02d}{'am' if m < 12 * 60 else 'pm'}" for m in minutes]
+            events.append({
+                "name": a.get_text(strip=True),
+                "date": dt.astimezone(timezone.utc).isoformat(),
+                "url": urljoin(url, a.get("href") or ""),
+                "description": f"Showtimes on {day.strftime('%b %-d')}: {', '.join(labels)}",
+            })
+    if failed == 14:
+        raise RuntimeError("no showtimes page could be read")
     return events
 
 
@@ -11051,6 +11053,206 @@ def scrape_boston_shows_gaps(url, ua, days=21):
             })
     return events
 
+def _fever_state(html):
+    m = re.search(r'<script id="serverapp-state" type="application/json">(.*?)</script>', html, re.S)
+    plans = []
+
+    def walk(o):
+        if isinstance(o, dict):
+            if "sessions" in o and "location" in o and o.get("id"):
+                plans.append(o)
+            for v in o.values():
+                walk(v)
+        elif isinstance(o, list):
+            for v in o:
+                walk(v)
+
+    if m:
+        walk(json.loads(m.group(1)))
+    return plans
+
+
+def _fever_price(html):
+    """Plan id -> "From $39", from the page's schema.org offers."""
+    prices = {}
+    for blob in re.findall(r'<script[^>]*ld\+json[^>]*>(.*?)</script>', html, re.S):
+        for price, pid in re.findall(r'"price":\s*"?([\d.]+)"?.{0,200}?feverup\.com/m/(\d+)', blob, re.S):
+            prices.setdefault(pid, f"From ${float(price):g}")
+    return prices
+
+
+def _fever_ld_events(html):
+    found = []
+
+    def walk(o):
+        if isinstance(o, dict):
+            if str(o.get("@type", "")).endswith("Event") and o.get("startDate") and o.get("name"):
+                found.append(o)
+            for v in o.values():
+                walk(v)
+        elif isinstance(o, list):
+            for v in o:
+                walk(v)
+
+    for blob in re.findall(r'<script[^>]*ld\+json[^>]*>(.*?)</script>', html, re.S):
+        try:
+            walk(json.loads(blob))
+        except ValueError:
+            pass
+    return found
+
+
+def scrape_fever(url, ua):
+    """Fever sells Candlelight concerts (Simons Theatre, Old South, St. Paul's, First Church
+    Cambridge), The Jazz Room at Scullers and the Theater of Magic at the Liberty Hotel; none of
+    them is on the venues' own calendars. Candlelight's page carries every session of every
+    program in its page state. The other two pages give each program's next date, so later
+    dates appear as the earlier ones pass. Session times there are local, whatever the offset."""
+    pages = ("https://feverup.com/en/boston/candlelight",
+             "https://feverup.com/en/boston/venue/scullers-jazz-club",
+             "https://feverup.com/m/429302")
+    events, seen, errors = [], set(), []
+
+    def add(name, when, venue, plan_id, price, sold_out=False):
+        key = (name, when[:16])
+        if key in seen or re.search(r"(?i)wait\s?list", name or ""):
+            return
+        seen.add(key)
+        dt = datetime.fromisoformat(when[:19]).replace(tzinfo=EASTERN)
+        events.append({
+            "name": name,
+            "date": dt.astimezone(timezone.utc).isoformat(),
+            "url": f"https://feverup.com/m/{plan_id}",
+            "venue": re.sub(r"^The Sanctuary\s*-\s*|\s+in Boston$", "", venue).strip(),
+            "price": "Sold out" if sold_out else price,
+            "category": "music",
+        })
+
+    for page in pages:
+        try:
+            resp = _SESSION.get(page, headers={"User-Agent": ua}, timeout=20)
+            resp.raise_for_status()
+            html = resp.text
+        except Exception as ex:
+            errors.append(str(ex))
+            continue
+        prices = _fever_price(html)
+        for plan in _fever_state(html):
+            for s in (plan.get("sessions") or []) + (plan.get("also_happening_on") or []):
+                if s.get("value"):
+                    add(plan.get("name"), s["value"], (plan.get("location") or {}).get("name") or "",
+                        plan["id"], prices.get(str(plan["id"])), s.get("is_sold_out"))
+        for e in _fever_ld_events(html):
+            pid = re.search(r"/m/(\d+)", str(e.get("url") or e.get("@id") or ""))
+            place = e.get("location") or {}
+            if pid and isinstance(place, dict) and place.get("name"):
+                add(e["name"], e["startDate"], place["name"], pid.group(1), prices.get(pid.group(1)))
+    if len(errors) == len(pages):
+        raise RuntimeError(errors[0][:200])
+    return events
+
+
+_EXHIBIT_DATE_RE = re.compile(
+    r"\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s+(\d{1,2})(?:,?\s+(\d{4}))?")
+_EXHIBIT_MONTHS = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
+
+def _exhibit_dates(text):
+    """(start or None, end) from "Through January 24, 2027", "Jan 23 – Dec 31, 2026" and
+    "August 6, 2026 - January 18, 2027"."""
+    found = _EXHIBIT_DATE_RE.findall(text or "")
+    if not found or not found[-1][2]:
+        return None, None
+    mon, day, year = found[-1]
+    end = date(int(year), _EXHIBIT_MONTHS.index(mon) + 1, int(day))
+    if len(found) < 2:
+        return None, end
+    mon, day, year = found[0]
+    start = date(int(year or end.year), _EXHIBIT_MONTHS.index(mon) + 1, int(day))
+    return (start.replace(year=start.year - 1) if start > end else start), end
+
+
+def _exhibition(name, link, when, venue, today):
+    start, end = _exhibit_dates(when)
+    name = re.sub(r"\s+", " ", name or "").strip()
+    if not name or not end or end < today or (start and start > today):
+        return None   # upcoming, closed, or a permanent gallery
+    return {"name": f"{name} (through {end.strftime('%b %-d')})", "date": None, "url": link,
+            "venue": venue, "price": None, "category": "art", "_exhibition": True,
+            "description": f"Exhibition on view through {end.strftime('%B %-d, %Y')}."}
+
+
+def _exhibits_mfa(soup, base):
+    for h in soup.select("h2 a[href^='/exhibition/']"):
+        info = h.find_parent("h2").find_next_sibling("p")
+        yield h.get_text(" "), urljoin(base, h["href"]), info.get_text(" ") if info else ""
+
+
+def _exhibits_ica(soup, base):
+    seen = set()
+    for h in soup.select(".teaser-title a[href*='/exhibitions/']"):
+        box = h.find_parent(["article", "li", "div"])
+        while box is not None and not _EXHIBIT_DATE_RE.search(box.get_text(" ")):
+            box = box.find_parent(["article", "li", "div"])
+        if box is not None and h["href"] not in seen:
+            seen.add(h["href"])
+            yield h.get_text(), h["href"], box.get_text(" ")
+
+
+def _exhibits_gardner(soup, base):
+    for h in soup.select(".isg-card__title a[href*='exhibition']"):
+        info = h.find_parent("h3").find_next_sibling(class_="richtext")
+        yield h.get_text(), urljoin(base, h["href"]), info.get_text(" ") if info else ""
+
+
+def _exhibits_harvard(soup, base):
+    for box in soup.select("a[href*='/exhibitions/']"):
+        kind, title, when = (box.select_one(c) for c in (".exhibition-row__type", ".exhibition-row__title", "time"))
+        if kind and title and when and kind.get_text(strip=True) == "Current":
+            yield title.get_text(), box["href"], when.get_text(" ")
+
+
+def _exhibits_pem(soup, base):
+    for box in soup.select(".threeList__block"):
+        a, h = box.select_one("a[href*='/exhibitions/']"), box.select_one(".threeList__blockHeader")
+        text = box.select_one(".threeList__text")
+        if a and h and text:
+            yield h.get_text(), a["href"], text.get_text(" ")
+
+
+_EXHIBITION_PAGES = (
+    ("Museum of Fine Arts (MFA)", "https://www.mfa.org/exhibitions", _exhibits_mfa),
+    ("ICA Boston", "https://www.icaboston.org/exhibitions/", _exhibits_ica),
+    ("Isabella Stewart Gardner Museum", "https://www.gardnermuseum.org/exhibitions", _exhibits_gardner),
+    ("Harvard Art Museums", "https://harvardartmuseums.org/visit/exhibitions", _exhibits_harvard),
+    ("Peabody Essex Museum", "https://www.pem.org/exhibitions", _exhibits_pem),
+)
+# Shows with no closing date, from pages with no list to read
+_OPEN_ENDED_EXHIBITIONS = (
+    ("Music America", "https://www.bochcenter.org/", "Boch Center Wang Theatre"),
+)
+
+
+def scrape_museum_exhibitions(url, ua):
+    """What's on view at the big museums. These have no date of their own, so they go in the
+    site's "On view now" section instead of on a day."""
+    today = datetime.now(EASTERN).date()
+    events, errors = [], []
+    for venue, page, parse in _EXHIBITION_PAGES:
+        try:
+            soup = fetch_soup(page, ua)
+            found = [_exhibition(n, link, when, venue, today) for n, link, when in parse(soup, page)]
+            events += [e for e in found if e]
+        except Exception as ex:
+            errors.append(f"{venue}: {ex}")
+    if len(errors) == len(_EXHIBITION_PAGES):
+        raise RuntimeError(errors[0][:200])
+    for name, link, venue in _OPEN_ENDED_EXHIBITIONS:
+        events.append({"name": name, "date": None, "url": link, "venue": venue, "price": None,
+                       "category": "art", "_exhibition": True, "description": "Exhibition on view."})
+    return events
+
+
 _ALL_VENUES = [
     # Added from the Boston Shows coverage check: venues' own calendars
     {"name": "Square Root", "url": "https://tockify.com/api/feeds/ics/sqrozzietester", "ua": UA_CHROME, "scraper": scrape_ical, "default_category": "music"},
@@ -11205,6 +11407,8 @@ _ALL_VENUES = [
     {"name": "Little Muse", "url": "https://littlemuse.substack.com", "ua": UA_CHROME, "scraper": scrape_little_muse, "default_category": "family"},
     {"name": "Puppet Showplace Theater", "url": "https://www.puppetshowplace.org/calendar", "ua": UA_CHROME, "scraper": scrape_puppet_showplace, "default_category": "family"},
     {"name": "Crystal Ballroom", "url": "https://www.crystalballroomboston.com/events/", "ua": UA_CHROME, "scraper": scrape_crystal_ballroom, "default_category": "music"},
+    {"name": "Fever (Candlelight, The Jazz Room)", "url": "https://feverup.com/en/boston/candlelight", "ua": UA_CHROME, "scraper": scrape_fever, "default_category": "music"},
+    {"name": "Museum Exhibitions", "url": "https://www.mfa.org/exhibitions", "ua": UA_CHROME, "scraper": scrape_museum_exhibitions, "default_category": "art"},
     {"name": "Coolidge Corner Theatre", "url": "https://coolidge.org/", "ua": UA_CHROME, "scraper": scrape_coolidge, "default_category": "film"},
     {"name": "Trident Booksellers & Cafe", "url": "https://tridentbookscafe.com/events", "ua": UA_CURL, "scraper": scrape_event_list, "default_category": "books"},
     {"name": "Harvard Book Store", "url": "https://www.harvard.com/events", "ua": UA_CURL, "scraper": scrape_event_list, "default_category": "books"},
@@ -12350,6 +12554,15 @@ _SOLD_OUT_PREFIX_RE = re.compile(r"^\s*[\[(*]{0,3}\s*sold[\s-]*out\s*[\])*]{0,3}
 _PROMOTER_PREFIX_RE = re.compile(r"^(?:bill blumenreich presents|mass concerts presents)\s*:?\s*", re.I)
 
 
+def _is_wrong_listing(e):
+    name, venue = (e.get("name") or "").lower(), (e.get("venue") or "").lower()
+    try:
+        day = datetime.fromisoformat(str(e.get("date")).replace("Z", "+00:00")).astimezone(EASTERN).date().isoformat()
+    except ValueError:
+        return False
+    return any(t in name and v in venue and d == day for t, v, d in _WRONG_LISTINGS)
+
+
 def _normalize_and_filter_events(raw_events, v):
     """Filter out placeholders, past events (>18h ago), virtual events, and far-away venues,
     and normalize category & music genre."""
@@ -12373,6 +12586,9 @@ def _normalize_and_filter_events(raw_events, v):
             e["price"] = p if "sold out" in p.lower() else (f"{p} (sold out)" if p else "Sold out")
         title = _PROMOTER_PREFIX_RE.sub("", title).strip() or title
         e["name"] = title
+
+        if _is_wrong_listing(e):
+            continue
 
         v_raw = (e.get("venue") or "").strip()
         v_low = v_raw.lower()
@@ -12538,6 +12754,62 @@ def _scrape_one(v, force=False):
         }
 
 
+# Their own calendars give doors, about an hour before the show. Bowery Presents' feed has the show.
+_DOORS_TIME_VENUES = ("royale", "sinclair")
+
+
+# Listings that a source has wrong and that nothing else corrects: (title, venue, local date).
+_WRONG_LISTINGS = (
+    # SeatGeek has this in the Boston Philharmonic Youth Orchestra's slot at Symphony Hall
+    ("los angeles philharmonic", "symphony hall", "2026-11-06"),
+    # Moved to March 18, 2027; The Boston Calendar still has the old date
+    ("blondshell", "house of blues", "2026-11-07"),
+)
+
+
+def _use_show_times(results):
+    """Move every listing of a Royale or Sinclair show (their own calendars, Do617, Harvard Square's
+    calendar) to the show time in the Bowery Presents feed, so they read as one event at the
+    right time. Club nights aren't in that feed and keep the time they have."""
+    from boston_shows import _first_tok, _toks
+
+    feed = next((r for r in results if r.get("venue") == "Bowery Presents Boston"), None)
+    if not feed:
+        return
+
+    def where(e, source):
+        v = f"{e.get('venue') or ''} {source}".lower()
+        return next((k for k in _DOORS_TIME_VENUES if k in v), None)
+
+    def day(e):
+        try:
+            return datetime.fromisoformat(str(e.get("date")).replace("Z", "+00:00")).astimezone(EASTERN).date()
+        except ValueError:
+            return None
+
+    def words(e):
+        name = e.get("name") or ""
+        return _first_tok(name), _toks(name) - set(_DOORS_TIME_VENUES)
+
+    shows = {}
+    for e in feed.get("events") or []:
+        v = where(e, "")
+        if v and day(e):
+            shows.setdefault((v, day(e)), []).append((words(e), e["date"]))
+    for r in results:
+        if r is feed:
+            continue
+        for e in r.get("events") or []:
+            v = where(e, r.get("venue") or "")
+            if not v or not e.get("date"):
+                continue
+            head, ours = words(e)
+            for (their_head, theirs), when in shows.get((v, day(e)), ()):
+                if ours and theirs and (head == their_head or len(ours & theirs) * 2 >= min(len(ours), len(theirs))):
+                    e["date"] = when
+                    break
+
+
 def _boston_shows_fill_in(results):
     """Last step of a crawl: Boston Shows' listings for shows and prices we're missing in the next
     two weeks (see boston_shows.py). Our own sources always win."""
@@ -12567,6 +12839,7 @@ def _do_scrape_all(force=False):
     results.sort(key=lambda r: order.get(r["venue"], 999))
     results.extend(_expand_manual_recurring())
     results.extend(_load_community_events())
+    _use_show_times(results)
     results.append(_boston_shows_fill_in(results))
     with _cache_lock:
         _cache["data"] = results

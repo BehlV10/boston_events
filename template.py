@@ -3544,8 +3544,14 @@ def render_page(results, weather=None, luckyseat_shows=None):
             initial_sections.append(sec_html)
         else:
             deferred_sections.append(sec_html)
-    if tba:
-        deferred_sections.append(_render_day_section("Date TBA", tba, "tba"))
+    # Museum shows have no day of their own: keep them near the top rather than after every date
+    on_view = [e for e in tba if e.get("_exhibition")]
+    undated = [e for e in tba if not e.get("_exhibition")]
+    if on_view:
+        on_view.sort(key=lambda e: (e.get("venue") or "", e.get("name") or ""))
+        initial_sections.append(_render_day_section("On view now: museum exhibitions", on_view, "tba"))
+    if undated:
+        deferred_sections.append(_render_day_section("Date TBA", undated, "tba"))
 
     deferred_content = "".join(deferred_sections)
     try:
