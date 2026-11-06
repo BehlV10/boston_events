@@ -1806,7 +1806,9 @@ def render_hub_page(hub_slug, events, site_url=None):
 {json_ld_str}
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/logo-192.png" type="image/png" sizes="192x192">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
 {kids_head}
 <style>
   :root {{
@@ -3818,7 +3820,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
 </script>
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/logo-192.png" type="image/png" sizes="192x192">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
 <style>
   :root, [data-theme="classic"] {{
     --bg: #0c0e14;

@@ -99,7 +99,9 @@ def robots_txt():
 @app.get("/favicon.ico")
 @app.get("/favicon.svg")
 @app.get("/apple-touch-icon.png")
+@app.get("/logo-192.png")
 @app.get("/logo-512.png")
+@app.get("/site.webmanifest")
 def site_icon():
     return send_from_directory(os.path.dirname(os.path.abspath(__file__)), request.path.lstrip("/"))
 

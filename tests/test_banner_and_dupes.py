@@ -78,6 +78,17 @@ class BannerTopRowTests(unittest.TestCase):
     def setUpClass(cls):
         cls.html = render_page([])
 
+    def test_icons_are_linked_and_exist(self):
+        import json
+        for href in ("/favicon.ico", "/favicon.svg", "/logo-192.png", "/apple-touch-icon.png", "/site.webmanifest"):
+            self.assertIn(f'href="{href}"', self.html)
+            self.assertTrue(os.path.exists(os.path.join(BASE_DIR, href.lstrip("/"))), href)
+        manifest = json.load(open(os.path.join(BASE_DIR, "site.webmanifest"), encoding="utf-8"))
+        for icon in manifest["icons"]:
+            self.assertTrue(os.path.exists(os.path.join(BASE_DIR, icon["src"].lstrip("/"))), icon["src"])
+        svg = open(os.path.join(BASE_DIR, "favicon.svg"), encoding="utf-8").read()
+        self.assertNotIn("<text", svg)  # the letter is an outline, so no font is needed
+
     def test_tag_first_themes_last(self):
         row = re.search(r'<div class="banner-top-row">(.*?)<div class="banner-title-row">', self.html, re.S).group(1)
         order = [row.index(k) for k in ('class="banner-top-tag"', 'id="btn-open-submit-modal"', 'class="theme-toggle-wrap"')]
