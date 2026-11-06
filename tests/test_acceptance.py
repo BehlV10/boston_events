@@ -143,6 +143,17 @@ class HubPageAcceptance(unittest.TestCase):
             self.assertIn(chip, html)
         self.assertNotIn('data-val="bigkid"', html)  # no chip for an age nobody matches
 
+    def test_kids_hub_can_show_only_free_events(self):
+        when = _day_at(2, 10, 30)
+        events = [{"name": "Story Time", "price": "Free"}, {"name": "Puppet Show", "price": "$18"}]
+        html = self._hub("kids-family-events-boston", [{
+            "venue": "Kids source", "url": "https://kids.test", "error": None,
+            "events": [dict(e, date=when.isoformat(), url=f"https://kids.test/{i}", category="family",
+                            venue="Melrose Public Library") for i, e in enumerate(events)]}])
+        self.assertIn('data-group="price" data-val="free"', html)
+        self.assertEqual(html.count('data-price="free"'), 1)
+        self.assertEqual(html.count('data-price="paid"'), 1)
+
 
 class MergeAcceptance(unittest.TestCase):
     """Duplicates that showed as two cards, and different events that were wrongly one card."""
