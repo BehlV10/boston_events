@@ -1507,6 +1507,65 @@ _KIDS_CSS = """
   .kid-age { font-size: 12px; font-weight: 800; padding: 1px 9px; border-radius: 999px; background: #fff4dc; color: #9a6b24; border: 1px solid #f3dfb3; }
   .kids-hub .badge-free { background: #dff5e6; color: #23824a; font-size: 12px; font-weight: 800; }
   .kids-hub .badge-price { background: #f4efe6; color: #6f6884; font-size: 12px; }
+  .kid-city-section {
+    grid-column: 1 / -1;
+    margin-bottom: 22px;
+    background: #ffffff;
+    border: 1px solid #efe4d2;
+    border-left: 4px solid var(--city-color, #2f86c8);
+    border-radius: 18px;
+    padding: 16px;
+    box-shadow: 0 4px 0 #ede1cd;
+  }
+  .kid-city-section[data-city="cambridge"] { --city-color: #f43f5e; }
+  .kid-city-section[data-city="somerville"] { --city-color: #f59e0b; }
+  .kid-city-section[data-city="boston"] { --city-color: #2f86c8; }
+  .kid-city-section[data-city="other"] { --city-color: #8b5cf6; }
+  .kid-city-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 10px;
+    margin-bottom: 14px;
+    border-bottom: 2px dashed #f2e7d5;
+  }
+  .kid-city-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--city-color);
+    font-size: 13.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .kid-city-pill .city-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--city-color);
+    box-shadow: 0 0 6px var(--city-color);
+    display: inline-block;
+  }
+  .kid-city-head .count {
+    background: #fbf6ec;
+    color: #7c7590;
+    font-size: 12px;
+    font-weight: 800;
+    padding: 2px 9px;
+    border-radius: 999px;
+    border: 1px solid #efe4d2;
+  }
+  .kid-city-cards {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+  @media (min-width: 640px) {
+    .kid-city-cards {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
   .kid-k-story { --band: #fff1b8; } .kid-k-music { --band: #e7dcff; } .kid-k-nature { --band: #d4f3e1; }
   .kid-k-make { --band: #ffe0cf; } .kid-k-show { --band: #ffd6e6; } .kid-k-play { --band: #d6eefc; } .kid-k-other { --band: #f1e6d4; }
   .kids-hub .no-hub-events { text-align: center; color: var(--muted); font-size: 16px; padding: 30px 0; }
@@ -1524,6 +1583,7 @@ _KIDS_FILTER_JS = """<script>
   if (!chips.length) return;
   var cards = document.querySelectorAll('.hub-card');
   var heads = document.querySelectorAll('.hub-day');
+  var citySecs = document.querySelectorAll('.kid-city-section');
   var state = { city: 'all', age: 'all', kind: 'all' };
   function matches(c) {
     if (state.city !== 'all' && c.dataset.city !== state.city) return false;
@@ -1535,6 +1595,12 @@ _KIDS_FILTER_JS = """<script>
     var days = {}, n = 0;
     cards.forEach(function (c) { var on = matches(c); c.hidden = !on; if (on) { days[c.dataset.day] = 1; n++; } });
     heads.forEach(function (h) { h.hidden = !days[h.dataset.day]; });
+    citySecs.forEach(function (sec) {
+      var visible = sec.querySelectorAll('.hub-card:not([hidden])').length;
+      sec.hidden = (visible === 0);
+      var cCount = sec.querySelector('.kid-city-head .count');
+      if (cCount) cCount.textContent = visible;
+    });
     chips.forEach(function (b) { b.classList.toggle('active', state[b.dataset.group] === b.dataset.val); });
     var none = document.getElementById('hub-none');
     if (none) none.hidden = n > 0;
@@ -1666,37 +1732,34 @@ def render_hub_page(hub_slug, events, site_url=None):
     is_kids = hub.get("style") == "kids"
     kid_age_counts, kid_kind_counts, kid_free, kid_places = {}, {}, 0, set()
     cards_html = []
-    last_day = None
-    for e in filtered[:card_limit]:
-        title = escape(e.get("title") or e.get("name") or "Event")
-        venue = escape(e.get("venue") or e.get("_source_venue") or "Venue")
-        url = escape(e.get("url") or e.get("link") or "#")
-        d_str = escape(e.get("date") or "")
-        t_str = escape(e.get("time") or "")
-        t_obj = e.get("_time")
-        if isinstance(t_obj, datetime):
-            # A "Wednesday, November 4" header starts each day; cards then show just the time
-            if t_obj.date() != last_day:
-                last_day = t_obj.date()
-                cards_html.append(f'<h2 class="hub-day" id="{last_day.isoformat()}" data-day="{last_day.isoformat()}">{t_obj.strftime("%A, %B %-d")}</h2>')
-            d_str = ""
-            t_str = "All day" if (t_obj.hour, t_obj.minute) == (0, 0) else t_obj.strftime("%-I:%M %p")
-        desc_html = ""
-        if hub.get("show_details") and e.get("description"):
-            d_txt = re.sub(r"\s+", " ", str(e["description"])).strip()
-            desc_html = f'<p class="hub-desc">{escape(d_txt[:160] + ("…" if len(d_txt) > 160 else ""))}</p>'
-        price_val = e.get("price")
-        price_txt = str(price_val or "").strip()
-        if re.fullmatch(r"\d+(?:\.\d+)?", price_txt):
-            price_txt = "$" + price_txt  # bare numbers only; most prices already carry "$"
-        price_badge = f'<span class="badge badge-price">{escape(price_txt)}</span>' if price_txt else ""
-        if _is_event_free(e):
-            price_badge = '<span class="badge badge-free">Free</span>'
-        city = _event_city(e.get("venue"), e.get("_source_venue"), e)
-        city_name = escape(_hub_place_label(city, e))
-        day_attr = t_obj.date().isoformat() if isinstance(t_obj, datetime) else ""
 
-        if is_kids:
+    if is_kids:
+        def _render_kid_card(e):
+            nonlocal kid_free
+            title = escape(e.get("title") or e.get("name") or "Event")
+            venue = escape(e.get("venue") or e.get("_source_venue") or "Venue")
+            url = escape(e.get("url") or e.get("link") or "#")
+            d_str = escape(e.get("date") or "")
+            t_str = escape(e.get("time") or "")
+            t_obj = e.get("_time")
+            if isinstance(t_obj, datetime):
+                d_str = ""
+                t_str = "All day" if (t_obj.hour, t_obj.minute) == (0, 0) else t_obj.strftime("%-I:%M %p")
+            desc_html = ""
+            if hub.get("show_details") and e.get("description"):
+                d_txt = re.sub(r"\s+", " ", str(e["description"])).strip()
+                desc_html = f'<p class="hub-desc">{escape(d_txt[:160] + ("…" if len(d_txt) > 160 else ""))}</p>'
+            price_val = e.get("price")
+            price_txt = str(price_val or "").strip()
+            if re.fullmatch(r"\d+(?:\.\d+)?", price_txt):
+                price_txt = "$" + price_txt
+            price_badge = f'<span class="badge badge-price">{escape(price_txt)}</span>' if price_txt else ""
+            if _is_event_free(e):
+                price_badge = '<span class="badge badge-free">Free</span>'
+            city = _event_city(e.get("venue"), e.get("_source_venue"), e)
+            city_name = escape(_hub_place_label(city, e))
+            day_attr = t_obj.date().isoformat() if isinstance(t_obj, datetime) else ""
+
             ages, kind, emoji, age_label = _kid_tags(e)
             for a in ages:
                 kid_age_counts[a] = kid_age_counts.get(a, 0) + 1
@@ -1705,7 +1768,7 @@ def render_hub_page(hub_slug, events, site_url=None):
             kid_places.add(e.get("venue") or "")
             pills = [age_label] if age_label else [_KID_AGE_PILL[a] for a in ages]
             pills_html = "".join(f'<span class="kid-age">{escape(p)}</span>' for p in pills)
-            cards_html.append(f"""<article class="hub-card kid-k-{kind}" data-city="{escape(city)}" data-day="{day_attr}" data-age="{' '.join(ages)}" data-kind="{kind}">
+            return f"""<article class="hub-card kid-k-{kind}" data-city="{escape(city)}" data-day="{day_attr}" data-age="{' '.join(ages)}" data-kind="{kind}">
   <div class="kid-card-band"></div>
   <div class="kid-card-body">
     <div class="kid-emoji" aria-hidden="true">{emoji}</div>
@@ -1723,9 +1786,76 @@ def render_hub_page(hub_slug, events, site_url=None):
       <div class="kid-ages">{pills_html}</div>
     </div>
   </div>
-</article>""")
-            continue
-        cards_html.append(f"""<article class="hub-card" data-city="{escape(city)}" data-day="{day_attr}">
+</article>"""
+
+        by_day = {}
+        for e in filtered[:card_limit]:
+            t_obj = e.get("_time")
+            d_key = t_obj.date() if isinstance(t_obj, datetime) else None
+            by_day.setdefault(d_key, []).append(e)
+
+        city_order = ["cambridge", "somerville", "boston", "other"]
+        for day_obj, day_events in by_day.items():
+            if day_obj:
+                day_iso = day_obj.isoformat()
+                day_heading = day_obj.strftime("%A, %B %-d")
+                cards_html.append(f'<h2 class="hub-day" id="{day_iso}" data-day="{day_iso}">{day_heading}</h2>')
+            else:
+                day_iso = "tba"
+                cards_html.append('<h2 class="hub-day" id="tba" data-day="tba">Date TBA</h2>')
+
+            by_city = {c: [] for c in city_order}
+            for e in day_events:
+                c = _event_city(e.get("venue"), e.get("_source_venue"), e)
+                by_city.setdefault(c, []).append(e)
+
+            for cname in city_order:
+                cevents = by_city.get(cname) or []
+                if not cevents:
+                    continue
+                cevents.sort(key=lambda ev: ev.get("_time") or datetime.max.replace(tzinfo=EASTERN))
+                city_cards = [_render_kid_card(e) for e in cevents]
+                city_label = CITY_LABELS.get(cname, cname.title())
+                cards_html.append(f'''<div class="kid-city-section" data-city="{escape(cname)}" data-day="{day_iso}">
+  <div class="kid-city-head">
+    <span class="kid-city-pill"><span class="city-dot"></span>{escape(city_label)}</span>
+    <span class="count">{len(cevents)}</span>
+  </div>
+  <div class="kid-city-cards">
+    {"".join(city_cards)}
+  </div>
+</div>''')
+    else:
+        last_day = None
+        for e in filtered[:card_limit]:
+            title = escape(e.get("title") or e.get("name") or "Event")
+            venue = escape(e.get("venue") or e.get("_source_venue") or "Venue")
+            url = escape(e.get("url") or e.get("link") or "#")
+            d_str = escape(e.get("date") or "")
+            t_str = escape(e.get("time") or "")
+            t_obj = e.get("_time")
+            if isinstance(t_obj, datetime):
+                # A "Wednesday, November 4" header starts each day; cards then show just the time
+                if t_obj.date() != last_day:
+                    last_day = t_obj.date()
+                    cards_html.append(f'<h2 class="hub-day" id="{last_day.isoformat()}" data-day="{last_day.isoformat()}">{t_obj.strftime("%A, %B %-d")}</h2>')
+                d_str = ""
+                t_str = "All day" if (t_obj.hour, t_obj.minute) == (0, 0) else t_obj.strftime("%-I:%M %p")
+            desc_html = ""
+            if hub.get("show_details") and e.get("description"):
+                d_txt = re.sub(r"\s+", " ", str(e["description"])).strip()
+                desc_html = f'<p class="hub-desc">{escape(d_txt[:160] + ("…" if len(d_txt) > 160 else ""))}</p>'
+            price_val = e.get("price")
+            price_txt = str(price_val or "").strip()
+            if re.fullmatch(r"\d+(?:\.\d+)?", price_txt):
+                price_txt = "$" + price_txt  # bare numbers only; most prices already carry "$"
+            price_badge = f'<span class="badge badge-price">{escape(price_txt)}</span>' if price_txt else ""
+            if _is_event_free(e):
+                price_badge = '<span class="badge badge-free">Free</span>'
+            city = _event_city(e.get("venue"), e.get("_source_venue"), e)
+            city_name = escape(_hub_place_label(city, e))
+            day_attr = t_obj.date().isoformat() if isinstance(t_obj, datetime) else ""
+            cards_html.append(f"""<article class="hub-card" data-city="{escape(city)}" data-day="{day_attr}">
   <div class="hub-card-head">
     <time class="hub-date">{' · '.join(x for x in (d_str, t_str) if x)}</time>
     <div class="hub-badges">{price_badge}</div>
@@ -1806,7 +1936,9 @@ def render_hub_page(hub_slug, events, site_url=None):
 {json_ld_str}
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/logo-192.png" type="image/png" sizes="192x192">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
 {kids_head}
 <style>
   :root {{
@@ -3510,7 +3642,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
                 continue
             city_blocks.append(f'''
           <div class="city-section" data-city="{escape(cname)}">
-            <h3 class="city-head"><span>{escape(CITY_LABELS[cname])}</span><span class="count">{len(city_events)}</span></h3>
+            <h3 class="city-head"><span class="city-pill"><span class="city-dot"></span>{escape(CITY_LABELS[cname])}</span><span class="count">{len(city_events)}</span></h3>
             <div class="buckets">{_render_buckets(city_events)}</div>
           </div>''')
         is_today = (date_attr == today_iso)
@@ -3542,8 +3674,14 @@ def render_page(results, weather=None, luckyseat_shows=None):
             initial_sections.append(sec_html)
         else:
             deferred_sections.append(sec_html)
-    if tba:
-        deferred_sections.append(_render_day_section("Date TBA", tba, "tba"))
+    # Museum shows have no day of their own: keep them near the top rather than after every date
+    on_view = [e for e in tba if e.get("_exhibition")]
+    undated = [e for e in tba if not e.get("_exhibition")]
+    if on_view:
+        on_view.sort(key=lambda e: (e.get("venue") or "", e.get("name") or ""))
+        initial_sections.append(_render_day_section("On view now: museum exhibitions", on_view, "tba"))
+    if undated:
+        deferred_sections.append(_render_day_section("Date TBA", undated, "tba"))
 
     deferred_content = "".join(deferred_sections)
     try:
@@ -3818,7 +3956,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
 </script>
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/logo-192.png" type="image/png" sizes="192x192">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
 <style>
   :root, [data-theme="classic"] {{
     --bg: #0c0e14;
@@ -4528,16 +4668,62 @@ def render_page(results, weather=None, luckyseat_shows=None):
   }}
   .day h2 {{ margin: 0 0 12px; font-size: 17px; font-weight: 700; display:flex; align-items:center; gap:8px; color: var(--fg); position: sticky; top: 0; background: var(--card); padding: 4px 0 8px; z-index: 2; }}
   .count {{ background: rgba(255, 255, 255, 0.06); color: var(--muted); font-size: 11px; padding: 2px 8px; border-radius: 999px; font-weight: 500; }}
-  .cities {{ display: flex; flex-direction: column; gap: 14px; }}
-  .city-section {{ --city-color: var(--accent); border-top: 1px solid var(--border); padding-top: 12px; padding-left: 10px; border-left: 3px solid var(--city-color); }}
-  .city-section:first-child {{ border-top: none; padding-top: 0; }}
+  .cities {{ display: flex; flex-direction: column; gap: 18px; margin-top: 6px; }}
+  .city-section {{
+    --city-color: var(--accent);
+    --city-bg: rgba(255, 255, 255, 0.02);
+    background: var(--city-bg);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--city-color);
+    border-radius: var(--radius-md);
+    padding: 14px 14px 10px 14px;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }}
+  .city-section:hover {{
+    border-color: rgba(255, 255, 255, 0.18);
+  }}
   .city-section.empty {{ display: none; }}
-  .city-section[data-city="boston"]    {{ --city-color: #5d9bff; }}
-  .city-section[data-city="cambridge"] {{ --city-color: #e05a6b; }}
-  .city-section[data-city="somerville"]{{ --city-color: #f29e4c; }}
-  .city-section[data-city="other"]     {{ --city-color: #9aa3b2; }}
-  .city-head {{ margin: 0 0 8px; font-size: 12px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--city-color); display: flex; align-items: center; gap: 8px; }}
-  .city-head .count {{ background: transparent; color: var(--muted); font-weight: 500; letter-spacing: 0; }}
+  .city-section[data-city="cambridge"] {{ --city-color: #f43f5e; --city-bg: rgba(244, 63, 94, 0.035); }}
+  .city-section[data-city="somerville"]{{ --city-color: #f59e0b; --city-bg: rgba(245, 158, 11, 0.035); }}
+  .city-section[data-city="boston"]    {{ --city-color: #3b82f6; --city-bg: rgba(59, 130, 246, 0.035); }}
+  .city-section[data-city="other"]     {{ --city-color: #a855f7; --city-bg: rgba(168, 85, 247, 0.035); }}
+  .city-head {{
+    margin: 0 0 12px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--fg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }}
+  .city-pill {{
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--city-color);
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }}
+  .city-pill .city-dot {{
+    background: var(--city-color);
+    box-shadow: 0 0 8px var(--city-color);
+  }}
+  .city-head .count {{
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--muted);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-weight: 600;
+  }}
   .buckets {{ display: flex; flex-direction: column; gap: 10px; }}
   .bucket {{ border-left: 3px solid var(--accent, #7aa2f7); padding: 2px 0 2px 12px; border-left-color: var(--accent); }}
   .bucket[data-bucket="Music & nightlife"] {{ --accent: #7aa2f7; }}
@@ -6247,15 +6433,22 @@ def render_page(results, weather=None, luckyseat_shows=None):
   /* ========================================================
      THEME SWITCHER & INDIE GUIDE THEME
      ======================================================== */
+  /* Top row: "Greater Boston Live Events" on the left, the theme picker on the right with Add Event
+     under it. On phones the theme picker gets the first line to itself and the tag sits lower,
+     level with Add Event. */
   .banner-top-row {{
-    display: flex;
-    justify-content: flex-start;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "tag themes" ". add";
     align-items: center;
     width: 100%;
-    gap: 12px;
-    flex-wrap: wrap;
+    gap: 8px 12px;
   }}
+  .banner-top-tag {{ grid-area: tag; justify-self: start; min-width: 0; }}
+  .banner-top-actions {{ grid-area: add; justify-self: end; margin-left: 0; }}
   .theme-toggle-wrap {{
+    grid-area: themes;
+    justify-self: end;
     display: inline-flex;
     align-items: center;
     background: rgba(15, 18, 25, 0.7);
@@ -6264,7 +6457,14 @@ def render_page(results, weather=None, luckyseat_shows=None):
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 999px;
     padding: 3px;
-    order: -1;
+  }}
+  @media (max-width: 640px) {{
+    .banner-top-row {{
+      grid-template-columns: minmax(0, 1fr) auto;
+      grid-template-areas: "themes themes" "tag add";
+      row-gap: 10px;
+    }}
+    .banner-top-tag {{ font-size: 10px; letter-spacing: 0.08em; white-space: nowrap; }}
   }}
   .theme-toggle-wrap .theme-pill-btn {{ font-size: 14px; padding: 3px 9px; }}
   .theme-pill-holiday {{ display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: #fff; }}
@@ -7202,6 +7402,12 @@ def render_page(results, weather=None, luckyseat_shows=None):
   <div class="banner">
     <div class="banner-inner">
       <div class="banner-top-row">
+        <div class="banner-top-tag"><span class="live-pulse"></span> GREATER BOSTON LIVE EVENTS</div>
+        <div class="banner-top-actions">
+          <button type="button" class="pill-submit-btn" id="btn-open-submit-modal" aria-haspopup="dialog" aria-expanded="false">
+            <span>＋ Add Event</span>
+          </button>
+        </div>
         <div class="theme-toggle-wrap">
           <div class="theme-toggle-pills" role="radiogroup" aria-label="Visual Theme">
             <button type="button" class="theme-pill-btn theme-pill-holiday{' active' if seasonal_key else ''}" id="theme-pill-holiday" data-theme="{seasonal_key or ''}" role="radio" aria-checked="{'true' if seasonal_key else 'false'}" title="{escape(seasonal_label or '')} theme"{'' if seasonal_key else ' hidden'}><span class="holiday-pill-emoji">{seasonal_icon or ''}</span><span class="holiday-pill-label">{escape(seasonal_label or '')}</span></button>
@@ -7210,12 +7416,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
             <button type="button" class="theme-pill-btn{' active' if default_theme == 'indie' else ''}" data-theme="indie" role="radio" aria-checked="{'true' if default_theme == 'indie' else 'false'}" title="Indie Guide Theme">📰</button>
             <button type="button" class="theme-pill-btn{' active' if default_theme == 'anime' else ''}" data-theme="anime" role="radio" aria-checked="{'true' if default_theme == 'anime' else 'false'}" title="Anime Theme">🌸</button>
           </div>
-        </div>
-        <div class="banner-top-tag"><span class="live-pulse"></span> GREATER BOSTON LIVE EVENTS</div>
-        <div class="banner-top-actions">
-          <button type="button" class="pill-submit-btn" id="btn-open-submit-modal" aria-haspopup="dialog" aria-expanded="false">
-            <span>＋ Add Event</span>
-          </button>
         </div>
       </div>
       <div class="banner-title-row">
@@ -8089,15 +8289,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
         const countHtml = countSpan ? countSpan.outerHTML : '';
         const dayName = DAYS_FULL[dObj.getDay()];
         const shortStr = `${{MONTHS[dObj.getMonth()]}} ${{dObj.getDate()}}`;
-        let prefix = dayName;
-        if (diffDays === 0) {{
-          prefix = 'Today';
-        }} else if (diffDays === 1) {{
-          prefix = 'Tomorrow';
-        }} else if (diffDays === -1) {{
-          prefix = 'Yesterday';
-        }}
-        h2.innerHTML = `${{prefix}} · ${{dayName}}, ${{shortStr}}${{countHtml}}`;
+        // "Today · Thursday, Nov 5", but just "Saturday, Nov 7" for other days (not "Saturday · Saturday")
+        const prefix = diffDays === 0 ? 'Today' : diffDays === 1 ? 'Tomorrow' : diffDays === -1 ? 'Yesterday' : '';
+        h2.innerHTML = `${{prefix ? prefix + ' · ' : ''}}${{dayName}}, ${{shortStr}}${{countHtml}}`;
       }});
     }}
 

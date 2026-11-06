@@ -103,7 +103,8 @@ class KidsVenuesRegisteredTest(unittest.TestCase):
     def test_new_sources_are_scraped(self):
         names = {v["name"] for v in S._ALL_VENUES}
         for n in ("Museum of Science", "Arnold Arboretum", "Newton Library (kids)", "Malden Library (kids)",
-                  "Mass Audubon Drumlin Farm", "Mount Auburn Cemetery"):
+                  "Mass Audubon Drumlin Farm", "Mount Auburn Cemetery", "Jeff Jam Singalongs",
+                  "Zoo New England", "Artysh Lab", "The Street Chestnut Hill"):
             self.assertIn(n, names)
 
 
