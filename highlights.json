@@ -2592,5 +2592,16 @@
     "note": "Games and drawing in the ICA galleries for kids and grown-ups.",
     "start_date": "2026-11-08",
     "expires": "2026-11-08"
+  },
+  {
+    "id": "2026-11-08-wknd-indonesian-festival",
+    "match": {
+      "name_contains": "Indonesian Festival",
+      "venue_contains": "Boston Common"
+    },
+    "badge": "\ud83c\uddee\ud83c\udde9 Free Festival",
+    "note": "Free Indonesian festival on Boston Common, Sunday 10 AM to 5 PM.",
+    "start_date": "2026-11-08",
+    "expires": "2026-11-08"
   }
 ]

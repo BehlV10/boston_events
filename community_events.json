@@ -68,5 +68,19 @@
     "_is_community": true,
     "_source_venue": "Community Submission",
     "submitted_at": "2026-11-03T01:43:00.000000+00:00"
+  },
+  {
+    "name": "Indonesian Festival on Boston Common",
+    "venue": "Boston Common",
+    "date": "2026-11-08T10:00:00-05:00",
+    "url": "https://www.facebook.com/NEIndoFest",
+    "category": "community",
+    "price": "Free",
+    "city": "boston",
+    "address": "Boston Common, Boston, MA 02108",
+    "description": "Free Indonesian festival on Boston Common, 10 AM to 5 PM.",
+    "_is_community": true,
+    "_source_venue": "Community Submission",
+    "submitted_at": "2026-11-06T18:00:00+00:00"
   }
 ]
