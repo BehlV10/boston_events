@@ -1108,6 +1108,152 @@ def scrape_little_muse(url, ua, posts=3):
     return events
 
 
+def scrape_jeffjam(url, ua):
+    """Jeff Jam (jeffjam.com): children's performer doing weekly singalongs across
+    Cambridge, Somerville, Arlington, and Watertown."""
+    now = datetime.now(EASTERN)
+    events = []
+    try:
+        r = _SESSION.get(url, headers={"User-Agent": ua}, timeout=15)
+        r.raise_for_status()
+        soup = BeautifulSoup(r.text, "html.parser")
+    except Exception:
+        return []
+
+    for ev in soup.find_all("div", class_="event-detail"):
+        t_tag = ev.find("h2", class_="event-title")
+        title = t_tag.get_text(strip=True) if t_tag else "Jeff Jam Singalong"
+        link_tag = t_tag.find("a", href=True) if t_tag else None
+        link = link_tag["href"] if link_tag else url
+
+        time_tag = ev.find("time", class_="from")
+        date_str = ""
+        time_str = ""
+        if time_tag:
+            d_span = time_tag.find("span", class_="date")
+            t_span = time_tag.find("span", class_="time")
+            date_str = d_span.get_text(strip=True) if d_span else ""
+            time_str = t_span.get_text(strip=True) if t_span else ""
+
+        loc_tag = ev.find("p", class_="event-location")
+        loc_str = loc_tag.get_text(" ", strip=True) if loc_tag else "Cambridge / Somerville"
+
+        dt = None
+        for fmt in ("%A, %B %d", "%B %d", "%a, %b %d", "%b %d"):
+            try:
+                parsed = datetime.strptime(date_str, fmt)
+                y = now.year
+                dt_temp = parsed.replace(year=y)
+                if (now.month - dt_temp.month) > 6:
+                    y += 1
+                    dt_temp = parsed.replace(year=y)
+                hr, mn = 10, 30
+                if time_str:
+                    tm_m = re.match(r"(\d{1,2}):(\d{2})\s*(AM|PM)?", time_str, re.I)
+                    if tm_m:
+                        hr = int(tm_m.group(1))
+                        mn = int(tm_m.group(2))
+                        ampm = (tm_m.group(3) or "").upper()
+                        if ampm == "PM" and hr < 12:
+                            hr += 12
+                        elif ampm == "AM" and hr == 12:
+                            hr = 0
+                dt = dt_temp.replace(hour=hr, minute=mn, tzinfo=EASTERN)
+                break
+            except Exception:
+                continue
+
+        if dt:
+            venue = loc_str.split(",")[0].strip() or "Jeff Jam Singalong"
+            events.append({
+                "name": title,
+                "date": dt.astimezone(timezone.utc).isoformat(),
+                "venue": venue,
+                "address": loc_str,
+                "url": link,
+                "category": "family",
+            })
+    return events
+
+
+def scrape_zoo_new_england(url, ua):
+    """Zoo New England (Franklin Park Zoo & Stone Zoo): special family events, festivals & encounters."""
+    now = datetime.now(EASTERN)
+    events = []
+    try:
+        r = _SESSION.get(url, headers={"User-Agent": ua}, timeout=15)
+        r.raise_for_status()
+        soup = BeautifulSoup(r.text, "html.parser")
+    except Exception:
+        return []
+
+    events_ul = soup.find("ul", id="events")
+    if not events_ul:
+        return []
+
+    for li in events_ul.find_all("li", recursive=False):
+        h3 = li.find("h3")
+        if not h3:
+            continue
+        title = h3.get_text(strip=True)
+        a = li.find("a", href=True)
+        link = f"https://www.zoonewengland.org{a['href']}" if a and a["href"].startswith("/") else (a["href"] if a else url)
+        txt = li.get_text(" ", strip=True)
+
+        venue = "Franklin Park Zoo" if "Franklin Park" in txt else ("Stone Zoo" if "Stone Zoo" in txt else "Zoo New England")
+        addr = "1 Franklin Park Rd, Boston, MA" if venue == "Franklin Park Zoo" else "149 Pond St, Stoneham, MA"
+
+        m = re.search(r"\b(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{1,2})(?:st|nd|rd|th)?(?:\s*,\s*(\d{4}))?", txt)
+        if m:
+            month_name, day_num = m.group(1), int(m.group(2))
+            year_num = int(m.group(3)) if m.group(3) else now.year
+            try:
+                dt = datetime.strptime(f"{month_name} {day_num} {year_num} 10:00", "%B %d %Y %H:%M").replace(tzinfo=EASTERN)
+                events.append({
+                    "name": title,
+                    "date": dt.astimezone(timezone.utc).isoformat(),
+                    "venue": venue,
+                    "address": addr,
+                    "url": link,
+                    "category": "family",
+                })
+            except Exception:
+                pass
+    return events
+
+
+def scrape_artysh_lab(url, ua):
+    """Artysh Lab: classical concerts for babies and toddlers (ages 0-5) in Boston & Cambridge."""
+    events = []
+    try:
+        r = _SESSION.get(url, headers={"User-Agent": ua}, timeout=15)
+        r.raise_for_status()
+        soup = BeautifulSoup(r.text, "html.parser")
+    except Exception:
+        return []
+
+    for script in soup.find_all("script", type="application/ld+json"):
+        try:
+            data = json.loads(script.string)
+            if data.get("@type") == "Event":
+                loc = data.get("location") or {}
+                v_name = loc.get("name", "The Foundry")
+                v_addr = loc.get("address", "101 Rogers St, Cambridge, MA")
+                start_iso = data.get("startDate")
+                if start_iso:
+                    events.append({
+                        "name": data.get("name"),
+                        "date": start_iso,
+                        "venue": v_name,
+                        "address": v_addr,
+                        "url": loc.get("url") or url,
+                        "category": "family",
+                    })
+        except Exception:
+            pass
+    return events
+
+
 def scrape_town_library_kids(url, ua, library, town):
     """Kids/family programs only from a nearby town's Assabet library calendar (same platform
     as Somerville's). Their adult programs would flood the Outer Suburbs group."""
@@ -11405,6 +11551,10 @@ _ALL_VENUES = [
     {"name": "Cafe Zing", "url": "https://www.cafezingcambridge.com/events", "ua": UA_CHROME, "scraper": scrape_cafe_zing, "default_category": "community"},
     {"name": "Ikeda Center (via Eventbrite)", "url": "https://www.eventbrite.com/o/18029151775", "ua": UA_CHROME, "scraper": scrape_ikeda_center, "default_category": "community"},
     {"name": "Little Muse", "url": "https://littlemuse.substack.com", "ua": UA_CHROME, "scraper": scrape_little_muse, "default_category": "family"},
+    {"name": "Jeff Jam Singalongs", "url": "https://jeffjam.com/shows", "ua": UA_CHROME, "scraper": scrape_jeffjam, "default_category": "family"},
+    {"name": "Zoo New England", "url": "https://www.zoonewengland.org/engage/", "ua": UA_CHROME, "scraper": scrape_zoo_new_england, "default_category": "family"},
+    {"name": "Artysh Lab", "url": "https://www.artyshlab.com/events-1", "ua": UA_CHROME, "scraper": scrape_artysh_lab, "default_category": "family"},
+    {"name": "The Street Chestnut Hill", "url": "https://thestreetchestnuthill.com/wp-json/tribe/events/v1/events", "ua": UA_CHROME, "scraper": lambda u, ua: scrape_tribe_rest(u, ua, default_venue="The Street Chestnut Hill", default_category="family"), "default_category": "family"},
     {"name": "Puppet Showplace Theater", "url": "https://www.puppetshowplace.org/calendar", "ua": UA_CHROME, "scraper": scrape_puppet_showplace, "default_category": "family"},
     {"name": "Crystal Ballroom", "url": "https://www.crystalballroomboston.com/events/", "ua": UA_CHROME, "scraper": scrape_crystal_ballroom, "default_category": "music"},
     {"name": "Fever (Candlelight, The Jazz Room)", "url": "https://feverup.com/en/boston/candlelight", "ua": UA_CHROME, "scraper": scrape_fever, "default_category": "music"},
