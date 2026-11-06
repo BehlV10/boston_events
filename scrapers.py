@@ -1273,7 +1273,9 @@ def scrape_town_library_kids(url, ua, library, town):
     as Somerville's). Their adult programs would flood the Outer Suburbs group."""
     out = []
     for e in scrape_somerville_library(url, ua):
-        if e.get("category") != "family" and not is_kid_family_event(e.get("name"), None):
+        tagged = any(re.match(r"(?:children|kids|family|families|baby|babies|toddler|preschool)", a)
+                     for a in e.pop("_audiences", []))
+        if not tagged and e.get("category") != "family" and not is_kid_family_event(e.get("name"), None):
             continue
         if _teen_only(e.get("name")):
             continue
@@ -1594,6 +1596,132 @@ def scrape_street_chestnut_hill(url, ua):
         if re.search(r"(?i)\b(?:kids?|children|family|santa|story ?time)\b", e["name"]):
             e["category"] = "family"
     return events
+
+
+_FENWAY_KIDS_RE = re.compile(r"(?i)\b(?:playgroup|stroller|kids?|children|family|families|toddlers?|storytime)\b")
+
+
+def scrape_fenway_community_center(url, ua):
+    """Fenway Community Center's playgroups and family programs. Its calendar is mostly adult
+    classes, so only family programs are kept."""
+    events = scrape_tribe_rest_paged(url, ua, default_venue="Fenway Community Center", default_category="family")
+    out = []
+    for e in events:
+        if _FENWAY_KIDS_RE.search(e["name"]):
+            e.update(category="family", venue="Fenway Community Center", address="1282 Boylston St, Boston, MA")
+            out.append(e)
+    return out
+
+
+_CAMBRIDGE_FAMILIES_TOPIC = "{4E643AB6-0153-4FE4-A112-51C0B463F2F3}"
+_CAMBRIDGE_FORM = "body_0$content_0$"
+_CAMBRIDGE_SKIP_RE = re.compile(r"(?i)\b(?:meeting|hearing|commission|committee|board of)\b")
+
+
+def _cambridge_form(page):
+    return {k: html.unescape(v) for k, v in
+            re.findall(r'<input[^>]+type="hidden"[^>]+name="([^"]+)"[^>]+value="([^"]*)"', page)}
+
+
+def _cambridge_rows(page):
+    """(start, title, link, place, summary) from a page of the city calendar."""
+    rows = []
+    for item in re.split(r'(?=<li class="eventItem">)', page)[1:]:
+        # The datetime attribute is 12-hour with no AM/PM, so the time comes from the visible text
+        when = re.search(r'<time datetime="(\d{4}-\d\d-\d\d)[^>]*>.*?(\d{1,2}:\d\d [AP]M)', item, re.S)
+        link = re.search(r'href="(/citycalendar/view\.aspx\?guid=\w+)"[^>]*>([^<]+)</a>', item)
+        if not when or not link:
+            continue
+        place = re.search(r'class="location">([^<]*)', item)
+        summary = re.search(r"<p>(.*?)</p>", item, re.S)
+        clean = lambda m: re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", m.group(1)))).strip() if m else ""
+        start = datetime.strptime(" ".join(when.groups()), "%Y-%m-%d %I:%M %p").replace(tzinfo=EASTERN)
+        rows.append((start, html.unescape(link.group(2)).strip(), link.group(1), clean(place), clean(summary)))
+    return rows
+
+
+def scrape_cambridge_families(url, ua):
+    """Cambridge's Center for Families events, from the city calendar. Its topic filter is an ASP.NET
+    form post, so each step sends back the page's hidden fields, filter first and then month view."""
+    session = requests.Session()
+    session.headers["User-Agent"] = ua
+
+    def post(page, target):
+        form = {**_cambridge_form(page), f"{_CAMBRIDGE_FORM}ddlTopic": _CAMBRIDGE_FAMILIES_TOPIC,
+                "__EVENTTARGET": target, "__EVENTARGUMENT": ""}
+        time.sleep(1.5)
+        return session.post(url, data=form, timeout=30).text
+
+    try:
+        page = post(post(session.get(url, timeout=25).text, f"{_CAMBRIDGE_FORM}submitFilter"),
+                    f"{_CAMBRIDGE_FORM}viewMonth")
+    except Exception:
+        return []
+    now = datetime.now(EASTERN)
+    return [{"name": title, "date": start.astimezone(timezone.utc).isoformat(),
+             "url": f"https://www.cambridgema.gov{link}", "venue": place.split(",")[0][:80] or "City of Cambridge",
+             "address": place, "price": "Free" if re.search(r"(?i)\bfree\b", summary) else None,
+             "category": "family", "description": summary[:200]}
+            for start, title, link, place, summary in _cambridge_rows(page)
+            if start >= now and not _CAMBRIDGE_SKIP_RE.search(title)]
+
+
+def scrape_discovery_museum(url, ua):
+    """Discovery Museum in Acton: story, science and music programs and First Friday Nights Free.
+    Members-only evenings are left out."""
+    out, seen = [], set()
+    now = datetime.now(EASTERN)
+    for number in range(6):
+        try:
+            page = _SESSION.get(f"{url}?page={number}", headers={"User-Agent": ua}, timeout=20).text
+        except Exception:
+            break
+        found = re.findall(r'<h3 class="teaser-title[^>]*><a href="([^"]+)">(.*?)</a>.*?<time datetime="([^"]+)"', page, re.S)
+        if not found:
+            break
+        for link, title, start in found:
+            title = html.unescape(re.sub(r"<[^>]+>", "", title)).strip()
+            day = datetime.fromisoformat(start)
+            if (title, start) in seen or day < now or re.search(r"(?i)members?[- ]only", title):
+                continue
+            seen.add((title, start))
+            out.append({"name": title, "date": day.astimezone(timezone.utc).isoformat(),
+                        "url": urljoin(url, link), "venue": "Discovery Museum", "address": "177 Main St, Acton, MA",
+                        "price": None, "category": "family"})
+        time.sleep(1)
+    return out
+
+
+_EMERALD_CARD_RE = re.compile(r"([A-Z][a-z]{2}) (\d{1,2}) (?:Sun|Mon|Tue|Wed|Thu|Fri|Sat) (.+?) (\d{1,2})(?::(\d\d))?([ap])m")
+
+
+def scrape_emerald_necklace(url, ua):
+    """Emerald Necklace Conservancy's calendar. Each card reads 'Nov 14 Sat Second Saturdays Jamaica
+    Pond 10:00am - 12:00pm'; ones without a time are month-long campaigns and are skipped."""
+    try:
+        page = _SESSION.get(url, headers={"User-Agent": ua}, timeout=20).text
+    except Exception:
+        return []
+    out, seen = [], set()
+    now = datetime.now(EASTERN)
+    for link, body in re.findall(r'<a [^>]*href="\./calendar/([\w-]+)"[^>]*>(.*?)</a>', page, re.S):
+        text = re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", body))).strip()
+        card = _EMERALD_CARD_RE.search(text)
+        if not card or link in seen:
+            continue
+        seen.add(link)
+        month, day, rest, hour, minute, half = card.groups()
+        words = rest.split(" ")
+        start = datetime.strptime(f"{month} {day} {now.year} {int(hour) % 12 + (12 if half == 'p' else 0)}:{minute or '00'}",
+                                  "%b %d %Y %H:%M").replace(tzinfo=EASTERN)
+        if start < now - timedelta(days=30):
+            start = start.replace(year=now.year + 1)
+        if start < now:
+            continue
+        out.append({"name": f"Emerald Necklace: {rest}", "date": start.astimezone(timezone.utc).isoformat(),
+                    "url": urljoin(url + "/", link), "venue": " ".join(words[-2:]), "price": None,
+                    "category": infer_category(rest, None, "outdoors")})
+    return out
 
 
 def scrape_cafe_zing(url, ua):
@@ -8712,6 +8840,7 @@ def scrape_somerville_library(url, ua):
                 "venue": f"Somerville Public Library ({branch})",
                 "category": cat,
                 "price": "Free",
+                "_audiences": [c[len("category-"):] for c in ev.get("class", []) if c.startswith("category-")],
             })
     return events
 
@@ -11896,6 +12025,10 @@ _ALL_VENUES = [
     {"name": "The Street Chestnut Hill", "url": "https://thestreetchestnuthill.com/wp-json/tribe/events/v1/events", "ua": UA_CHROME, "scraper": scrape_street_chestnut_hill, "default_category": "community"},
     {"name": "Macaroni KID (local parent calendars)", "url": "https://newton.macaronikid.com/events", "ua": UA_CHROME, "scraper": scrape_macaroni_kid, "default_category": "family"},
     {"name": "Boston Moms", "url": "https://bostonmoms.com/wp-json/tribe/events/v1/events", "ua": UA_CHROME, "scraper": scrape_boston_moms, "default_category": "family"},
+    {"name": "City of Cambridge (families)", "url": "https://www.cambridgema.gov/citycalendar", "ua": UA_CHROME, "scraper": scrape_cambridge_families, "default_category": "family"},
+    {"name": "Fenway Community Center", "url": "https://fenwaycommunitycenter.org/wp-json/tribe/events/v1/events", "ua": UA_CHROME, "scraper": scrape_fenway_community_center, "default_category": "family"},
+    {"name": "Discovery Museum", "url": "https://www.discoveryacton.org/visit/events-programs", "ua": UA_CHROME, "scraper": scrape_discovery_museum, "default_category": "family"},
+    {"name": "Emerald Necklace Conservancy", "url": "https://www.emeraldnecklace.org/calendar", "ua": UA_CHROME, "scraper": scrape_emerald_necklace, "default_category": "outdoors"},
     {"name": "City of Boston", "url": "https://www.boston.gov/events", "ua": UA_CHROME, "scraper": scrape_boston_gov, "default_category": "community"},
     {"name": "Puppet Showplace Theater", "url": "https://www.puppetshowplace.org/calendar", "ua": UA_CHROME, "scraper": scrape_puppet_showplace, "default_category": "family"},
     {"name": "Crystal Ballroom", "url": "https://www.crystalballroomboston.com/events/", "ua": UA_CHROME, "scraper": scrape_crystal_ballroom, "default_category": "music"},
