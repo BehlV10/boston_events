@@ -2,6 +2,7 @@
 
 import os
 import sys
+import json
 import unittest
 from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock, patch
@@ -106,6 +107,76 @@ class KidsVenuesRegisteredTest(unittest.TestCase):
                   "Mass Audubon Drumlin Farm", "Mount Auburn Cemetery", "Jeff Jam Singalongs",
                   "Zoo New England", "Artysh Lab", "The Street Chestnut Hill"):
             self.assertIn(n, names)
+
+
+class ParentCalendarsAndCityEvents(unittest.TestCase):
+    CITY_PAGE = """<h2 class="listing-group-title">November 28, 2030</h2>
+    <article id="a"><span class="time-range"> 5:00pm-6:00pm </span><div class="title"> Lighting of the Ship </div>
+    <div itemprop="streetAddress" class="addr-a"> Martins Park <br /> 64 Sleeper Street </div>
+    <span itemprop="addressLocality" class="locality">Boston</span>
+    <div class="dl-t">Price:</div> <div class="detail-item__body--secondary dl-d"> FREE </div>
+    <div class="intro-text"><p>Holiday crafts for kids.</p></div>
+    <a class="button" href="/node/10836">Event details</a></article>
+    <article id="b"><span class="time-range"> 6:00pm-7:00pm </span><div class="title"> Back Bay: 207 Newbury St Abutters Meeting </div>
+    <div itemprop="streetAddress"> Virtual </div><a class="button" href="/node/2">Event details</a></article>
+    <article id="c"><span class="time-range"> 10:00am-11:00am </span><div class="title"> Support Group For Dementia Care Partners </div>
+    <div itemprop="streetAddress"> BCYF </div><a class="button" href="/node/3">Event details</a></article>"""
+
+    class Reply:
+        status_code = 200
+
+        def __init__(self, text):
+            self.text = text
+
+    def test_city_events_keep_the_citys_price_and_skip_civic_meetings(self):
+        replies = lambda u, **k: self.Reply(self.CITY_PAGE)
+        with patch.object(S._SESSION, "get", replies), patch.object(S.time, "sleep"):
+            events = S.scrape_boston_gov("https://www.boston.gov/events", "ua")
+        self.assertEqual([e["name"] for e in events], ["Lighting of the Ship"])
+        e = events[0]
+        self.assertEqual((e["price"], e["venue"], e["category"]), ("Free", "Martins Park", "family"))
+        self.assertEqual(e["url"], "https://www.boston.gov/node/10836")
+        self.assertTrue(e["date"].startswith("2030-11-28T22:00"))
+
+    def test_city_scraper_stops_when_refused(self):
+        calls = []
+
+        def refused(url, **k):
+            calls.append(url)
+            reply = self.Reply("")
+            reply.status_code = 503
+            return reply
+        with patch.object(S._SESSION, "get", refused), patch.object(S.time, "sleep"):
+            self.assertEqual(S.scrape_boston_gov("https://www.boston.gov/events", "ua"), [])
+        self.assertEqual(len(calls), 2)  # one for the calendar, one for the family list; no retries
+
+    def test_macaroni_keeps_new_local_kids_events_only(self):
+        soon = (datetime.now(timezone.utc) + timedelta(days=5)).strftime("%Y%m%dT%H%M%SZ")
+        row = {"id": "a1", "title": "Turtle Storytime", "place": "224 Washington St, Brookline, MA 02445",
+               "org": "Turtle Books", "orgName": "", "cats": ["Kids & Family"], "multi": False, "allDay": False,
+               "utcFrom": soon, "desc": "Songs"}
+        rows = [row,
+                {**row, "id": "a2", "title": "Far Away", "place": "2 Baker St, Foxborough, MA 02035"},
+                {**row, "id": "a3", "title": "Virginia", "place": "1 Main St, Arlington, VA 22203"},
+                {**row, "id": "a4", "title": "Have It", "org": "Cary Memorial Library"},
+                {**row, "id": "a5", "title": "Parent Workshop"},
+                {**row, "id": "a6", "title": "Grown-ups", "cats": ["Lifestyle"]},
+                {**row, "id": "a7"}]  # the same event from another edition
+        page = '<script id="mk-list-data">' + json.dumps({"tz": "x", "events": rows}) + "</script>"
+        with patch.object(S._SESSION, "get", lambda u, **k: self.Reply(page)), \
+                patch.object(S.time, "sleep"):
+            events = S.scrape_macaroni_kid("x", "ua")
+        self.assertEqual([e["name"] for e in events], ["Turtle Storytime"])
+        self.assertEqual(events[0]["url"], "https://newton.macaronikid.com/events?yodelEventId=a1")
+        self.assertEqual(events[0]["venue"], "Turtle Books")
+
+    def test_eventbrite_free_flag_inside_ticket_availability(self):
+        event = {"name": "Dance Party", "url": "https://www.eventbrite.com/e/1", "start_date": "2030-01-05",
+                 "start_time": "10:00", "timezone": "America/New_York",
+                 "ticket_availability": {"is_free": True}}
+        page = "window.__SERVER_DATA__ = " + json.dumps({"events": {"results": [event]}}) + ";</script>"
+        found = S._parse_eventbrite_server_data(page)
+        self.assertEqual([e["price"] for e in found], ["Free"])
 
 
 if __name__ == "__main__":

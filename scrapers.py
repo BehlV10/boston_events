@@ -671,17 +671,17 @@ def _parse_eventbrite_server_data(html):
         lng = addr.get("longitude")
 
         price = None
-        if ev.get("is_free"):
+        ticket_avail = ev.get("ticket_availability") or {}
+        if ev.get("is_free") or ticket_avail.get("is_free"):
             price = "Free"
         else:
-            ticket_avail = ev.get("ticket_availability") or {}
             min_price = ticket_avail.get("minimum_ticket_price") or {}
-            if min_price.get("major_value"):
-                try:
-                    val = float(min_price["major_value"])
-                    price = "Free" if val == 0 else f"${val:g}"
-                except Exception:
-                    pass
+            try:
+                val = float(min_price["major_value"]) if min_price.get("major_value") else (min_price.get("value") or 0) / 100
+                if val > 0:   # $0 without is_free is pay-what-you-wish or donation
+                    price = f"${val:g}"
+            except Exception:
+                pass
 
         events.append({
             "name": name,
@@ -1418,7 +1418,182 @@ _EB_FAMILY_RE = re.compile(
     r"daddy|mommy|father|mother|parents? (?:&|and) (?:child|kid|caregiver)|youth|girls|boys)\b")
 _EB_FAMILY_SKIP_RE = re.compile(
     r"(?i)\b(?:cpr|aed|first aid|certification|webinar|online|virtual|coaching|breakthrough|"
-    r"retreat|adult child|pregnan)")
+    r"retreat|adult child|pregnan|listening session|policy)")
+
+
+# Towns close enough for a family outing; the parent sites below also cover far-off suburbs.
+_KIDS_AREA_TOWNS = {
+    "boston", "allston", "brighton", "charlestown", "dorchester", "east boston", "hyde park", "jamaica plain",
+    "mattapan", "roslindale", "roxbury", "south boston", "west roxbury", "cambridge", "somerville", "brookline",
+    "chestnut hill", "newton", "auburndale", "newton centre", "newton highlands", "newton upper falls",
+    "newtonville", "waban", "west newton", "arlington", "belmont", "burlington", "chelsea", "dedham", "everett",
+    "lexington", "lincoln", "malden", "medford", "melrose", "milton", "needham", "quincy", "revere", "stoneham",
+    "waltham", "watertown", "wellesley", "winchester", "woburn",
+}
+# Other Macaroni KID editions share these names: arlington is Virginia, medford Oregon, winchester Virginia.
+_MACARONI_EDITIONS = ("newton", "waltham", "dorchester", "lexington", "burlingtonma")
+_MACARONI_DIRECT_SOURCES_RE = re.compile(
+    r"(?i)boston public library|bloomberg|cary memorial|waltham public library|belmont public library|"
+    r"newton free library|brookline (?:public )?library|public library of brookline|watertown|"
+    r"medford (?:public )?library|puppet showplace|kidcreate|museum of fine arts|booksmith|"
+    r"museum of science|children's museum|new england aquarium|franklin park zoo|stone zoo")
+_MACARONI_NOT_FOR_KIDS_RE = re.compile(
+    r"(?i)\b(?:parents? (?:workshop|support|group|night)|caregiver (?:support|group)|open house|"
+    r"information(?:al)? session|info session|admissions|webinar|fundraiser|gala)\b|families conversations")
+
+
+def scrape_macaroni_kid(url, ua):
+    """Macaroni KID's local parent calendars, for hosts we don't otherwise read: suburban libraries,
+    bookstores, synagogues, community theaters. Each edition's page embeds its event list as JSON."""
+    out, seen = [], set()
+    now = datetime.now(timezone.utc)
+    last = now + timedelta(days=45)
+    for edition in _MACARONI_EDITIONS:
+        base = f"https://{edition}.macaronikid.com/events"
+        try:
+            page = _SESSION.get(base, headers={"User-Agent": ua}, timeout=25).text
+            rows = json.loads(re.search(r'id="mk-list-data"[^>]*>(.*?)</script>', page, re.S).group(1))["events"]
+        except Exception:
+            continue
+        time.sleep(1)
+        for e in rows:
+            town = re.search(r"([^,]+),\s*MA\b", e.get("place") or "")
+            title = html.unescape(e.get("title") or "").strip()
+            host = (e.get("orgName") if e.get("org") == "Multiple Organizations" else e.get("org")) or ""
+            if (not town or town.group(1).strip().lower() not in _KIDS_AREA_TOWNS or e.get("multi")
+                    or e.get("allDay") or "Kids & Family" not in (e.get("cats") or []) or not title
+                    or _MACARONI_DIRECT_SOURCES_RE.search(f"{host} {e.get('place')}")
+                    or _MACARONI_NOT_FOR_KIDS_RE.search(title)):
+                continue
+            try:
+                start = datetime.strptime(e["utcFrom"], "%Y%m%dT%H%M%SZ").replace(tzinfo=timezone.utc)
+            except (KeyError, TypeError, ValueError):
+                continue
+            key = (title.lower(), e["utcFrom"])
+            if not now <= start <= last or key in seen:
+                continue
+            seen.add(key)
+            out.append({"name": title, "date": start.isoformat(),
+                        "url": f"{base}?yodelEventId={e['id']}",
+                        "venue": html.unescape(host).strip() or e["place"].split(",")[0],
+                        "address": e["place"], "price": None, "category": "family",
+                        "description": html.unescape(e.get("desc") or "")[:160]})
+    return out
+
+
+def scrape_boston_moms(url, ua):
+    """Boston Moms' family calendar (The Events Calendar API). Most of it is New Bedford and Salem,
+    so keep nearby towns, the Discovery Museum, and venue-less listings that name a nearby town."""
+    towns = _KIDS_AREA_TOWNS | {"acton"}
+    places = {}
+
+    def note_town(event, item):
+        venue = item.get("venue")
+        places[event["url"]] = (venue.get("city") or "") if isinstance(venue, dict) else ""
+
+    out = []
+    for e in scrape_tribe_rest_paged(url, ua, default_venue="", default_category="family", days=45,
+                                     on_item=note_town):
+        city = places.get(e["url"], "").strip().lower()
+        named = re.findall(r"[a-z]+", e["name"].lower())
+        if (city and city not in towns) or (not city and not towns & set(named)):
+            continue
+        e["category"] = "family"
+        if e["venue"] in ("", "Boston Event"):
+            e["venue"] = e["name"].split(" at ")[-1] if " at " in e["name"] else "Greater Boston"
+        out.append(e)
+    return out
+
+
+_BOSTON_GOV_SKIP_RE = re.compile(
+    r"(?i)\b(?:abutters?|hearing|commission|board of|committee|task force|meeting|office hours|"
+    r"informational session|enrollment|networking|neighborhood association|zoom|support group|"
+    r"memory cafe|immigration consultations?|homeownership|career services|alarm installation|"
+    r"drop-off|flag raising)\b|^canceled")
+_BOSTON_GOV_FAMILY_TYPE = "151"
+
+
+def _boston_gov_rows(page):
+    """(day, time range, title, node link, address, price, summary) from a boston.gov/events page."""
+    rows = []
+    parts = re.split(r'<h2 class="listing-group-title">([^<]+)</h2>', page)
+    for day, block in zip(parts[1::2], parts[2::2]):
+        for card in re.split(r"(?=<article )", block)[1:]:
+            title = re.search(r'class="title">\s*(.*?)\s*</div>', card, re.S)
+            link = re.search(r'class="button" href="(/[^"]+)"', card)
+            if not title or not link:
+                continue
+            clock = re.search(r'time-range">\s*(.*?)\s*</span>', card, re.S)
+            street = re.search(r'itemprop="streetAddress"[^>]*>\s*(.*?)\s*</div>', card, re.S)
+            town = re.search(r'itemprop="addressLocality"[^>]*>([^<]*)', card)
+            price = re.search(r'Price:</div>\s*<div[^>]*>\s*(.*?)\s*</div>', card, re.S)
+            intro = re.search(r'intro-text[^>]*>(.*?)</div>', card, re.S)
+            text = lambda m: re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", m.group(1)))).strip() if m else ""
+            place = re.split(r"<br\s*/?>", street.group(1)) if street else []
+            rows.append((day.strip(), text(clock), text(title), link.group(1),
+                         [re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", p))).strip() for p in place],
+                         text(town), text(price), text(intro)))
+    return rows
+
+
+def scrape_boston_gov(url, ua):
+    """City of Boston events from boston.gov/events, a page at a time: concerts, parades, tree
+    lightings, parks programs. Civic meetings and virtual sessions are left out. Stops at the
+    first refusal, because the city's site has answered scripts with a bot check before."""
+    headers = {"User-Agent": ua}
+    rows, family = [], set()
+
+    def listing(query):
+        r = _SESSION.get(f"{url}?{query}", headers=headers, timeout=25)
+        time.sleep(2)
+        return _boston_gov_rows(r.text) if r.status_code == 200 else None
+
+    for page in range(4):  # about five weeks of the calendar
+        found = listing(f"page={page}")
+        if not found:
+            break
+        rows += found
+    for page in range(2):
+        found = listing(f"field_event_type_target_id[]={_BOSTON_GOV_FAMILY_TYPE}&page={page}")
+        if not found:
+            break
+        family |= {r[3] for r in found}
+
+    out, seen = [], set()
+    now = datetime.now(EASTERN)
+    for day, clock, title, link, place, town, price, intro in rows:
+        street = " ".join(place)
+        when = re.match(r"(\d{1,2})(?::(\d\d))?\s*([ap])m", clock, re.I)
+        if not when or (link, day) in seen or _BOSTON_GOV_SKIP_RE.search(title):
+            continue
+        if re.search(r"(?i)virtual|zoom", f"{street} {intro}"):
+            continue
+        seen.add((link, day))
+        try:
+            d = datetime.strptime(day, "%B %d, %Y").date()
+        except ValueError:
+            continue
+        hour = int(when.group(1)) % 12 + (12 if when.group(3).lower() == "p" else 0)
+        start = datetime(d.year, d.month, d.day, hour, int(when.group(2) or 0), tzinfo=EASTERN)
+        if start < now:
+            continue
+        cost = "Free" if re.search(r"(?i)\bfree\b", price) else (price if "$" in price else None)
+        category = "family" if link in family else infer_category(title, street, "community")
+        out.append({"name": title, "date": start.astimezone(timezone.utc).isoformat(),
+                    "url": f"https://www.boston.gov{link}",
+                    "venue": re.sub(r"(?i)^approximate location:\s*", "", place[0])[:80] if place else "Boston",
+                    "address": ", ".join(x for x in (*place, town, "MA") if x), "price": cost,
+                    "category": category, "description": intro[:200]})
+    return out
+
+
+def scrape_street_chestnut_hill(url, ua):
+    """The Street Chestnut Hill: mostly shop and restaurant promotions; only its kids' events are family."""
+    events = scrape_tribe_rest(url, ua, default_venue="The Street Chestnut Hill", default_category="community")
+    for e in events:
+        if re.search(r"(?i)\b(?:kids?|children|family|santa|story ?time)\b", e["name"]):
+            e["category"] = "family"
+    return events
 
 
 def scrape_cafe_zing(url, ua):
@@ -7066,8 +7241,9 @@ _TRIBE_FAMILY_CATEGORIES = {"family", "families", "kids", "children", "family pr
                              "kids & family", "kids & families", "kids and families", "family fun"}
 
 
-def scrape_tribe_rest(url, ua, default_venue=None, default_category=None):
-    """The Events Calendar (Tribe) REST API: fetches /wp-json/tribe/events/v1/events."""
+def scrape_tribe_rest(url, ua, default_venue=None, default_category=None, on_item=None):
+    """The Events Calendar (Tribe) REST API: fetches /wp-json/tribe/events/v1/events.
+    on_item(event, item) lets a source read fields of the API's row that aren't kept."""
     now = datetime.now(timezone.utc)
     events = []
     if "/wp-json/tribe/events/v1/events" not in url:
@@ -7132,6 +7308,8 @@ def scrape_tribe_rest(url, ua, default_venue=None, default_category=None):
             "price": price,
             "category": category,
         })
+        if on_item:
+            on_item(events[-1], item)
     return events
 
 
@@ -7502,7 +7680,7 @@ def scrape_greenway(url, ua):
 
 
 def scrape_tribe_rest_paged(url, ua, default_venue=None, default_category=None, days=21, max_pages=6,
-                            skip_re=None):
+                            skip_re=None, on_item=None):
     """The Events Calendar API, several pages of the next `days` days (busy calendars like
     Harvard Square's list 200+ events in three weeks; one page holds 50)."""
     base = url.split("?")[0]
@@ -7511,8 +7689,9 @@ def scrape_tribe_rest_paged(url, ua, default_venue=None, default_category=None, 
     fallback = default_category or "community"
     out, seen = [], set()
     for page in range(1, max_pages + 1):
+        extra = {"on_item": on_item} if on_item else {}
         evs = scrape_tribe_rest(f"{base}?per_page=50&page={page}&start_date={start}&end_date={end}", ua,
-                                default_venue=default_venue, default_category=default_category)
+                                default_venue=default_venue, default_category=default_category, **extra)
         if not evs:
             if page > 1:  # past the last page the API answers 400; page 1 may be all earlier-today events
                 break
@@ -7560,6 +7739,10 @@ _BPM_SKIP_RE = re.compile(r"(?i)market closed|blood (?:donor|drive)|\bclosed\b|p
 _BPM_KIDS_RE = re.compile(r"(?i)face ?paint|magician|puppet|story ?(?:time|& craft|and craft)|sing-?along|\bkids?\b|famil")
 _BPM_FOOD_RE = re.compile(r"(?i)tasting|pairing|blending|spice|coffee|latt[eé]|tea\b|wine|beer|cider|supper|brunch|"
                           r"munchies|nouveau|cheese|chocolate|cook|bak(?:e|ing)|dinner")
+
+
+_BPM_FREE_RE = re.compile(r"(?i)\b(?:this (?:event|performance) is free|free event|free weekly event|"
+                          r"free performance|free face painting)\b")
 
 
 def scrape_boston_public_market(url, ua):
@@ -7610,6 +7793,17 @@ def scrape_boston_public_market(url, ua):
             "category": ("family" if _BPM_KIDS_RE.search(title) else
                          "food" if _BPM_FOOD_RE.search(title) else infer_category(title, None, "community")),
         })
+    # Each kids' program says on its own page whether it's free, not on the calendar
+    answers = {}
+    for e in events:
+        if e["category"] == "family":
+            if e["name"] not in answers:
+                try:
+                    answers[e["name"]] = bool(_BPM_FREE_RE.search(_SESSION.get(e["url"], headers=headers, timeout=20).text))
+                except Exception:
+                    answers[e["name"]] = False
+            if answers[e["name"]]:
+                e["price"] = "Free"
     return events
 
 
@@ -7695,11 +7889,19 @@ def scrape_brighton_main_streets(url, ua):
     """Brighton Main Streets community calendar: Irish Village and Porter Belly's live music and
     open mics, Cafenation paint and writing nights, Irish dance classes, the Brighton Bazaar,
     harvest fests, library story times. Events without a venue (online webinars) are skipped."""
-    events = scrape_tribe_rest_paged(url, ua, default_venue="", skip_re=_DISTRICT_NOISE_RE)
+    says_free = set()
+
+    def note_free(event, item):
+        if re.search(r"\bFREE\b", item.get("description") or ""):
+            says_free.add(event["url"])
+
+    events = scrape_tribe_rest_paged(url, ua, default_venue="", skip_re=_DISTRICT_NOISE_RE, on_item=note_free)
     out = []
     for e in events:
         if e["venue"] in ("", "Boston Event") or _BRIGHTON_SKIP_RE.search(e["name"]):
             continue
+        if not e.get("price") and e.get("url") in says_free:
+            e["price"] = "Free"
         if _BRIGHTON_KIDS_RE.search(e["name"]):
             e["category"] = "family"
         elif e["category"] == "community" and re.search(r"(?i)live (?:entertainment|music|band)", e["name"]):
@@ -11691,7 +11893,10 @@ _ALL_VENUES = [
     {"name": "Jeff Jam Singalongs", "url": "https://jeffjam.com/shows", "ua": UA_CHROME, "scraper": scrape_jeffjam, "default_category": "family"},
     {"name": "Zoo New England", "url": "https://www.zoonewengland.org/engage/", "ua": UA_CHROME, "scraper": scrape_zoo_new_england, "default_category": "family"},
     {"name": "Artysh Lab", "url": "https://www.artyshlab.com/events-1", "ua": UA_CHROME, "scraper": scrape_artysh_lab, "default_category": "family"},
-    {"name": "The Street Chestnut Hill", "url": "https://thestreetchestnuthill.com/wp-json/tribe/events/v1/events", "ua": UA_CHROME, "scraper": lambda u, ua: scrape_tribe_rest(u, ua, default_venue="The Street Chestnut Hill", default_category="family"), "default_category": "family"},
+    {"name": "The Street Chestnut Hill", "url": "https://thestreetchestnuthill.com/wp-json/tribe/events/v1/events", "ua": UA_CHROME, "scraper": scrape_street_chestnut_hill, "default_category": "community"},
+    {"name": "Macaroni KID (local parent calendars)", "url": "https://newton.macaronikid.com/events", "ua": UA_CHROME, "scraper": scrape_macaroni_kid, "default_category": "family"},
+    {"name": "Boston Moms", "url": "https://bostonmoms.com/wp-json/tribe/events/v1/events", "ua": UA_CHROME, "scraper": scrape_boston_moms, "default_category": "family"},
+    {"name": "City of Boston", "url": "https://www.boston.gov/events", "ua": UA_CHROME, "scraper": scrape_boston_gov, "default_category": "community"},
     {"name": "Puppet Showplace Theater", "url": "https://www.puppetshowplace.org/calendar", "ua": UA_CHROME, "scraper": scrape_puppet_showplace, "default_category": "family"},
     {"name": "Crystal Ballroom", "url": "https://www.crystalballroomboston.com/events/", "ua": UA_CHROME, "scraper": scrape_crystal_ballroom, "default_category": "music"},
     {"name": "Fever (Candlelight, The Jazz Room)", "url": "https://feverup.com/en/boston/candlelight", "ua": UA_CHROME, "scraper": scrape_fever, "default_category": "music"},
@@ -13067,6 +13272,11 @@ _WRONG_LISTINGS = (
 # None for every date, changes). "hm" sets the start time; "hours" sets it by weekday (Monday = 0).
 _SNOWPORT_OPENS = {0: (15, 0), 1: (15, 0), 2: (15, 0), 3: (15, 0), 4: (11, 0), 5: (10, 0), 6: (11, 0)}
 _LISTING_FIXES = (
+    # 21+ with IDs checked at the gate, per the zoo
+    ("jingle beers", "stone zoo", None, {"category": "food"}),
+    # The market lists him among its free kids' programs; the museum's page says free for everyone
+    ("magician peter o'malley", "boston public market", None, {"price": "Free"}),
+    ("beyond the spectrum kids", "museum of fine arts", None, {"price": "Free"}),
     ("snowport", "do617", None, {"hours": _SNOWPORT_OPENS}),
     ("sowa first friday", "", None, {"url": "https://www.sowaboston.com/first-fridays"}),
     ("the great pumpkin smash", "english high", "2026-11-07",

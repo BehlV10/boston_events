@@ -1122,7 +1122,7 @@ HUBS = {
         "time_filter": None,
         "keyword_filter": None,
         "show_details": True,
-        "limit": 600,
+        "limit": 900,
         "style": "kids",  # light daycare-style page with age & activity filters
         "subtitle": "Story times, baby & toddler sing-alongs, puppet shows, museum days, farm visits and nature walks for kids, gathered every day from libraries, museums, parks and nature centers around Greater Boston.",
         "og_badge": "KIDS & FAMILY",
