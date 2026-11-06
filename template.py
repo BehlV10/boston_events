@@ -1507,6 +1507,65 @@ _KIDS_CSS = """
   .kid-age { font-size: 12px; font-weight: 800; padding: 1px 9px; border-radius: 999px; background: #fff4dc; color: #9a6b24; border: 1px solid #f3dfb3; }
   .kids-hub .badge-free { background: #dff5e6; color: #23824a; font-size: 12px; font-weight: 800; }
   .kids-hub .badge-price { background: #f4efe6; color: #6f6884; font-size: 12px; }
+  .kid-city-section {
+    grid-column: 1 / -1;
+    margin-bottom: 22px;
+    background: #ffffff;
+    border: 1px solid #efe4d2;
+    border-left: 4px solid var(--city-color, #2f86c8);
+    border-radius: 18px;
+    padding: 16px;
+    box-shadow: 0 4px 0 #ede1cd;
+  }
+  .kid-city-section[data-city="cambridge"] { --city-color: #f43f5e; }
+  .kid-city-section[data-city="somerville"] { --city-color: #f59e0b; }
+  .kid-city-section[data-city="boston"] { --city-color: #2f86c8; }
+  .kid-city-section[data-city="other"] { --city-color: #8b5cf6; }
+  .kid-city-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 10px;
+    margin-bottom: 14px;
+    border-bottom: 2px dashed #f2e7d5;
+  }
+  .kid-city-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--city-color);
+    font-size: 13.5px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .kid-city-pill .city-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--city-color);
+    box-shadow: 0 0 6px var(--city-color);
+    display: inline-block;
+  }
+  .kid-city-head .count {
+    background: #fbf6ec;
+    color: #7c7590;
+    font-size: 12px;
+    font-weight: 800;
+    padding: 2px 9px;
+    border-radius: 999px;
+    border: 1px solid #efe4d2;
+  }
+  .kid-city-cards {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+  }
+  @media (min-width: 640px) {
+    .kid-city-cards {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
   .kid-k-story { --band: #fff1b8; } .kid-k-music { --band: #e7dcff; } .kid-k-nature { --band: #d4f3e1; }
   .kid-k-make { --band: #ffe0cf; } .kid-k-show { --band: #ffd6e6; } .kid-k-play { --band: #d6eefc; } .kid-k-other { --band: #f1e6d4; }
   .kids-hub .no-hub-events { text-align: center; color: var(--muted); font-size: 16px; padding: 30px 0; }
@@ -1524,6 +1583,7 @@ _KIDS_FILTER_JS = """<script>
   if (!chips.length) return;
   var cards = document.querySelectorAll('.hub-card');
   var heads = document.querySelectorAll('.hub-day');
+  var citySecs = document.querySelectorAll('.kid-city-section');
   var state = { city: 'all', age: 'all', kind: 'all' };
   function matches(c) {
     if (state.city !== 'all' && c.dataset.city !== state.city) return false;
@@ -1535,6 +1595,12 @@ _KIDS_FILTER_JS = """<script>
     var days = {}, n = 0;
     cards.forEach(function (c) { var on = matches(c); c.hidden = !on; if (on) { days[c.dataset.day] = 1; n++; } });
     heads.forEach(function (h) { h.hidden = !days[h.dataset.day]; });
+    citySecs.forEach(function (sec) {
+      var visible = sec.querySelectorAll('.hub-card:not([hidden])').length;
+      sec.hidden = (visible === 0);
+      var cCount = sec.querySelector('.kid-city-head .count');
+      if (cCount) cCount.textContent = visible;
+    });
     chips.forEach(function (b) { b.classList.toggle('active', state[b.dataset.group] === b.dataset.val); });
     var none = document.getElementById('hub-none');
     if (none) none.hidden = n > 0;
@@ -1666,37 +1732,34 @@ def render_hub_page(hub_slug, events, site_url=None):
     is_kids = hub.get("style") == "kids"
     kid_age_counts, kid_kind_counts, kid_free, kid_places = {}, {}, 0, set()
     cards_html = []
-    last_day = None
-    for e in filtered[:card_limit]:
-        title = escape(e.get("title") or e.get("name") or "Event")
-        venue = escape(e.get("venue") or e.get("_source_venue") or "Venue")
-        url = escape(e.get("url") or e.get("link") or "#")
-        d_str = escape(e.get("date") or "")
-        t_str = escape(e.get("time") or "")
-        t_obj = e.get("_time")
-        if isinstance(t_obj, datetime):
-            # A "Wednesday, November 4" header starts each day; cards then show just the time
-            if t_obj.date() != last_day:
-                last_day = t_obj.date()
-                cards_html.append(f'<h2 class="hub-day" id="{last_day.isoformat()}" data-day="{last_day.isoformat()}">{t_obj.strftime("%A, %B %-d")}</h2>')
-            d_str = ""
-            t_str = "All day" if (t_obj.hour, t_obj.minute) == (0, 0) else t_obj.strftime("%-I:%M %p")
-        desc_html = ""
-        if hub.get("show_details") and e.get("description"):
-            d_txt = re.sub(r"\s+", " ", str(e["description"])).strip()
-            desc_html = f'<p class="hub-desc">{escape(d_txt[:160] + ("…" if len(d_txt) > 160 else ""))}</p>'
-        price_val = e.get("price")
-        price_txt = str(price_val or "").strip()
-        if re.fullmatch(r"\d+(?:\.\d+)?", price_txt):
-            price_txt = "$" + price_txt  # bare numbers only; most prices already carry "$"
-        price_badge = f'<span class="badge badge-price">{escape(price_txt)}</span>' if price_txt else ""
-        if _is_event_free(e):
-            price_badge = '<span class="badge badge-free">Free</span>'
-        city = _event_city(e.get("venue"), e.get("_source_venue"), e)
-        city_name = escape(_hub_place_label(city, e))
-        day_attr = t_obj.date().isoformat() if isinstance(t_obj, datetime) else ""
 
-        if is_kids:
+    if is_kids:
+        def _render_kid_card(e):
+            nonlocal kid_free
+            title = escape(e.get("title") or e.get("name") or "Event")
+            venue = escape(e.get("venue") or e.get("_source_venue") or "Venue")
+            url = escape(e.get("url") or e.get("link") or "#")
+            d_str = escape(e.get("date") or "")
+            t_str = escape(e.get("time") or "")
+            t_obj = e.get("_time")
+            if isinstance(t_obj, datetime):
+                d_str = ""
+                t_str = "All day" if (t_obj.hour, t_obj.minute) == (0, 0) else t_obj.strftime("%-I:%M %p")
+            desc_html = ""
+            if hub.get("show_details") and e.get("description"):
+                d_txt = re.sub(r"\s+", " ", str(e["description"])).strip()
+                desc_html = f'<p class="hub-desc">{escape(d_txt[:160] + ("…" if len(d_txt) > 160 else ""))}</p>'
+            price_val = e.get("price")
+            price_txt = str(price_val or "").strip()
+            if re.fullmatch(r"\d+(?:\.\d+)?", price_txt):
+                price_txt = "$" + price_txt
+            price_badge = f'<span class="badge badge-price">{escape(price_txt)}</span>' if price_txt else ""
+            if _is_event_free(e):
+                price_badge = '<span class="badge badge-free">Free</span>'
+            city = _event_city(e.get("venue"), e.get("_source_venue"), e)
+            city_name = escape(_hub_place_label(city, e))
+            day_attr = t_obj.date().isoformat() if isinstance(t_obj, datetime) else ""
+
             ages, kind, emoji, age_label = _kid_tags(e)
             for a in ages:
                 kid_age_counts[a] = kid_age_counts.get(a, 0) + 1
@@ -1705,7 +1768,7 @@ def render_hub_page(hub_slug, events, site_url=None):
             kid_places.add(e.get("venue") or "")
             pills = [age_label] if age_label else [_KID_AGE_PILL[a] for a in ages]
             pills_html = "".join(f'<span class="kid-age">{escape(p)}</span>' for p in pills)
-            cards_html.append(f"""<article class="hub-card kid-k-{kind}" data-city="{escape(city)}" data-day="{day_attr}" data-age="{' '.join(ages)}" data-kind="{kind}">
+            return f"""<article class="hub-card kid-k-{kind}" data-city="{escape(city)}" data-day="{day_attr}" data-age="{' '.join(ages)}" data-kind="{kind}">
   <div class="kid-card-band"></div>
   <div class="kid-card-body">
     <div class="kid-emoji" aria-hidden="true">{emoji}</div>
@@ -1723,9 +1786,76 @@ def render_hub_page(hub_slug, events, site_url=None):
       <div class="kid-ages">{pills_html}</div>
     </div>
   </div>
-</article>""")
-            continue
-        cards_html.append(f"""<article class="hub-card" data-city="{escape(city)}" data-day="{day_attr}">
+</article>"""
+
+        by_day = {}
+        for e in filtered[:card_limit]:
+            t_obj = e.get("_time")
+            d_key = t_obj.date() if isinstance(t_obj, datetime) else None
+            by_day.setdefault(d_key, []).append(e)
+
+        city_order = ["cambridge", "somerville", "boston", "other"]
+        for day_obj, day_events in by_day.items():
+            if day_obj:
+                day_iso = day_obj.isoformat()
+                day_heading = day_obj.strftime("%A, %B %-d")
+                cards_html.append(f'<h2 class="hub-day" id="{day_iso}" data-day="{day_iso}">{day_heading}</h2>')
+            else:
+                day_iso = "tba"
+                cards_html.append('<h2 class="hub-day" id="tba" data-day="tba">Date TBA</h2>')
+
+            by_city = {c: [] for c in city_order}
+            for e in day_events:
+                c = _event_city(e.get("venue"), e.get("_source_venue"), e)
+                by_city.setdefault(c, []).append(e)
+
+            for cname in city_order:
+                cevents = by_city.get(cname) or []
+                if not cevents:
+                    continue
+                cevents.sort(key=lambda ev: ev.get("_time") or datetime.max.replace(tzinfo=EASTERN))
+                city_cards = [_render_kid_card(e) for e in cevents]
+                city_label = CITY_LABELS.get(cname, cname.title())
+                cards_html.append(f'''<div class="kid-city-section" data-city="{escape(cname)}" data-day="{day_iso}">
+  <div class="kid-city-head">
+    <span class="kid-city-pill"><span class="city-dot"></span>{escape(city_label)}</span>
+    <span class="count">{len(cevents)}</span>
+  </div>
+  <div class="kid-city-cards">
+    {"".join(city_cards)}
+  </div>
+</div>''')
+    else:
+        last_day = None
+        for e in filtered[:card_limit]:
+            title = escape(e.get("title") or e.get("name") or "Event")
+            venue = escape(e.get("venue") or e.get("_source_venue") or "Venue")
+            url = escape(e.get("url") or e.get("link") or "#")
+            d_str = escape(e.get("date") or "")
+            t_str = escape(e.get("time") or "")
+            t_obj = e.get("_time")
+            if isinstance(t_obj, datetime):
+                # A "Wednesday, November 4" header starts each day; cards then show just the time
+                if t_obj.date() != last_day:
+                    last_day = t_obj.date()
+                    cards_html.append(f'<h2 class="hub-day" id="{last_day.isoformat()}" data-day="{last_day.isoformat()}">{t_obj.strftime("%A, %B %-d")}</h2>')
+                d_str = ""
+                t_str = "All day" if (t_obj.hour, t_obj.minute) == (0, 0) else t_obj.strftime("%-I:%M %p")
+            desc_html = ""
+            if hub.get("show_details") and e.get("description"):
+                d_txt = re.sub(r"\s+", " ", str(e["description"])).strip()
+                desc_html = f'<p class="hub-desc">{escape(d_txt[:160] + ("…" if len(d_txt) > 160 else ""))}</p>'
+            price_val = e.get("price")
+            price_txt = str(price_val or "").strip()
+            if re.fullmatch(r"\d+(?:\.\d+)?", price_txt):
+                price_txt = "$" + price_txt  # bare numbers only; most prices already carry "$"
+            price_badge = f'<span class="badge badge-price">{escape(price_txt)}</span>' if price_txt else ""
+            if _is_event_free(e):
+                price_badge = '<span class="badge badge-free">Free</span>'
+            city = _event_city(e.get("venue"), e.get("_source_venue"), e)
+            city_name = escape(_hub_place_label(city, e))
+            day_attr = t_obj.date().isoformat() if isinstance(t_obj, datetime) else ""
+            cards_html.append(f"""<article class="hub-card" data-city="{escape(city)}" data-day="{day_attr}">
   <div class="hub-card-head">
     <time class="hub-date">{' · '.join(x for x in (d_str, t_str) if x)}</time>
     <div class="hub-badges">{price_badge}</div>
