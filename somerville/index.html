@@ -2597,6 +2597,17 @@
     color: var(--muted);
   }
   footer a { color: var(--accent); text-decoration: none; }
+  .footer-pwa-btn {
+    background: none;
+    border: none;
+    color: inherit;
+    font: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0;
+    display: inline;
+  }
+  .footer-pwa-btn:hover { color: var(--accent); }
 
 </style>
 </head>
@@ -3354,7 +3365,25 @@
   
 </main>
 <footer>
-  <p><a href="../">Wicked Boston Events</a> · Independent Greater Boston Events Calendar · <a href="https://www.instagram.com/wickedbostonevents/" target="_blank" rel="noopener">Instagram: @wickedbostonevents</a></p>
+  <p><a href="../">Wicked Boston Events</a> · Independent Greater Boston Events Calendar · <a href="https://www.instagram.com/wickedbostonevents/" target="_blank" rel="noopener">Instagram: @wickedbostonevents</a><span id="pwa-install-wrap" hidden> · <button type="button" class="footer-pwa-btn" onclick="installPWA()">📲 Add to Home Screen</button></span></p>
 </footer>
+<script>
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    window._pwaPrompt = e;
+    var wrap = document.getElementById('pwa-install-wrap');
+    if (wrap) wrap.hidden = false;
+  });
+  function installPWA() {
+    if (window._pwaPrompt) {
+      window._pwaPrompt.prompt();
+      window._pwaPrompt.userChoice.finally(function () {
+        window._pwaPrompt = null;
+        var wrap = document.getElementById('pwa-install-wrap');
+        if (wrap) wrap.hidden = true;
+      });
+    }
+  }
+</script>
 </body>
 </html>

@@ -2141,6 +2141,17 @@ def render_hub_page(hub_slug, events, site_url=None):
     color: var(--muted);
   }}
   footer a {{ color: var(--accent); text-decoration: none; }}
+  .footer-pwa-btn {{
+    background: none;
+    border: none;
+    color: inherit;
+    font: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0;
+    display: inline;
+  }}
+  .footer-pwa-btn:hover {{ color: var(--accent); }}
 {kids_css}
 </style>
 </head>
@@ -2173,8 +2184,26 @@ def render_hub_page(hub_slug, events, site_url=None):
   {hub_js}
 </main>
 <footer>
-  <p><a href="../">Wicked Boston Events</a> · Independent Greater Boston Events Calendar · <a href="https://www.instagram.com/wickedbostonevents/" target="_blank" rel="noopener">Instagram: @wickedbostonevents</a></p>
+  <p><a href="../">Wicked Boston Events</a> · Independent Greater Boston Events Calendar · <a href="https://www.instagram.com/wickedbostonevents/" target="_blank" rel="noopener">Instagram: @wickedbostonevents</a><span id="pwa-install-wrap" hidden> · <button type="button" class="footer-pwa-btn" onclick="installPWA()">📲 Add to Home Screen</button></span></p>
 </footer>
+<script>
+  window.addEventListener('beforeinstallprompt', function (e) {{
+    e.preventDefault();
+    window._pwaPrompt = e;
+    var wrap = document.getElementById('pwa-install-wrap');
+    if (wrap) wrap.hidden = false;
+  }});
+  function installPWA() {{
+    if (window._pwaPrompt) {{
+      window._pwaPrompt.prompt();
+      window._pwaPrompt.userChoice.finally(function () {{
+        window._pwaPrompt = null;
+        var wrap = document.getElementById('pwa-install-wrap');
+        if (wrap) wrap.hidden = true;
+      }});
+    }}
+  }}
+</script>
 </body>
 </html>"""
 
@@ -4256,6 +4285,20 @@ def render_page(results, weather=None, luckyseat_shows=None):
     opacity: 0.9;
   }}
   .footer-social-link:hover {{
+    opacity: 1;
+  }}
+  .footer-pwa-btn {{
+    background: none;
+    border: none;
+    color: inherit;
+    font: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0;
+    display: inline;
+    opacity: 0.9;
+  }}
+  .footer-pwa-btn:hover {{
     opacity: 1;
   }}
 
@@ -7611,7 +7654,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
   </div>
   <footer>
     <p>Boston Events · Live local music, comedy, arts, outdoors &amp; community events across Greater Boston.</p>
-    <p style="margin-top:6px; font-size:11px; opacity:0.85;">Data compiled directly from venue calendars and official local community feeds. Not affiliated with any commercial ticketing broker. · <a href="https://www.instagram.com/wickedbostonevents/" target="_blank" rel="noopener" class="footer-social-link">Instagram: @wickedbostonevents</a></p>
+    <p style="margin-top:6px; font-size:11px; opacity:0.85;">Data compiled directly from venue calendars and official local community feeds. Not affiliated with any commercial ticketing broker. · <a href="https://www.instagram.com/wickedbostonevents/" target="_blank" rel="noopener" class="footer-social-link">Instagram: @wickedbostonevents</a><span id="pwa-install-wrap" hidden> · <button type="button" class="footer-pwa-btn" onclick="installPWA()">📲 Add to Home Screen</button></span></p>
   </footer>
   <!-- Community Event Submission Modal -->
   <div id="submit-event-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-submit-title" style="display:none;">
@@ -11012,6 +11055,23 @@ def render_page(results, weather=None, luckyseat_shows=None):
     initTimeDropdowns();
     hashToState();
     apply();
+
+    window.addEventListener('beforeinstallprompt', function (e) {{
+      e.preventDefault();
+      window._pwaPrompt = e;
+      var wrap = document.getElementById('pwa-install-wrap');
+      if (wrap) wrap.hidden = false;
+    }});
+    window.installPWA = function () {{
+      if (window._pwaPrompt) {{
+        window._pwaPrompt.prompt();
+        window._pwaPrompt.userChoice.finally(function () {{
+          window._pwaPrompt = null;
+          var wrap = document.getElementById('pwa-install-wrap');
+          if (wrap) wrap.hidden = true;
+        }});
+      }}
+    }};
   </script>
 </body>
 </html>"""

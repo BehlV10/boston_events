@@ -100,6 +100,15 @@ class BannerTopRowTests(unittest.TestCase):
         self.assertIsNotNone(phone)
         self.assertIn('"themes themes" "tag add"', phone.group(1))
 
+    def test_pwa_install_is_unobtrusive(self):
+        from template import render_hub_page
+        hub_html = render_hub_page("boston", [])
+        for html in (self.html, hub_html):
+            self.assertIn('beforeinstallprompt', html)
+            self.assertIn('e.preventDefault()', html)
+            self.assertIn('id="pwa-install-wrap" hidden', html)
+            self.assertIn('class="footer-pwa-btn"', html)
+
 
 if __name__ == "__main__":
     unittest.main()
