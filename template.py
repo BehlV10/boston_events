@@ -3236,10 +3236,11 @@ def render_hub_page(hub_slug, events, site_url=None):
         area_filter_html = """<button type="button" class="camp-chip active" data-group="region" data-val="all">All Locations</button>
 <button type="button" class="camp-chip" data-group="region" data-val="boston">Boston Proper</button>
 <button type="button" class="camp-chip" data-group="region" data-val="cambridge">Cambridge &amp; Somerville</button>
-<button type="button" class="camp-chip" data-group="region" data-val="metrowest">MetroWest (0–20 mi)</button>
+<button type="button" class="camp-chip" data-group="region" data-val="innersuburbs">Brookline, Newton &amp; Nearby</button>
+<button type="button" class="camp-chip" data-group="region" data-val="metrowest">MetroWest</button>
 <button type="button" class="camp-chip" data-group="region" data-val="northshore">North Shore</button>
 <button type="button" class="camp-chip" data-group="region" data-val="southshore">South Shore</button>
-<button type="button" class="camp-chip" data-group="region" data-val="massachusetts">Greater MA &amp; New England</button>"""
+<button type="button" class="camp-chip" data-group="region" data-val="regional">Greater MA &amp; Overnight</button>"""
 
         focus_filter_html = """<button type="button" class="camp-chip active" data-group="cat" data-val="all">All Tracks</button>
 <button type="button" class="camp-chip" data-group="cat" data-val="traditional">🏕️ Traditional Day Camp</button>
@@ -3258,8 +3259,8 @@ def render_hub_page(hub_slug, events, site_url=None):
         cost_filter_html = """<button type="button" class="camp-chip active" data-group="price" data-val="all">All Budgets</button>
 <button type="button" class="camp-chip" data-group="price" data-val="free">💚 Free / BCYF</button>
 <button type="button" class="camp-chip" data-group="price" data-val="sliding">💛 Sliding Scale / Financial Aid</button>
-<button type="button" class="camp-chip" data-group="price" data-val="mid">Under $600 / week</button>
-<button type="button" class="camp-chip" data-group="price" data-val="premium">Specialty &amp; STEM ($600+)</button>
+<button type="button" class="camp-chip" data-group="price" data-val="mid">Community &amp; Day ($350–$650/wk)</button>
+<button type="button" class="camp-chip" data-group="price" data-val="premium">Campus &amp; Specialty ($700+/wk)</button>
 <button type="button" class="camp-chip" data-group="price" data-val="overnight">Overnight Sleepaway</button>"""
 
         city_chips_html = f"""<div class="camps-filters" role="group" aria-label="Filter Greater Boston summer camps">
