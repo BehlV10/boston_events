@@ -1054,6 +1054,10 @@ def filter_events_for_hub(hub, events):
             filtered = filtered[:hub["limit"]]
         return filtered
 
+    if hub.get("style") == "camps":
+        from camps_scraper import fetch_all_camps
+        return fetch_all_camps(force=False)
+
     city_filter = hub.get("city_filter")
     cat_filter = hub.get("cat_filter")
     free_only = hub.get("free_only", False)
@@ -1133,6 +1137,23 @@ HUBS = {
         "og_badge": "KIDS & FAMILY",
         "og_image": "og-kids-family.jpg",
         "query": "#cat=Kids+%26+Family"
+    },
+    # Greater Boston & Massachusetts Summer Camps Guide
+    "summer-camps": {
+        "title": "Summer Camps in Boston, Cambridge & Massachusetts",
+        "h1": "Greater Boston Summer Camps Guide",
+        "city_filter": None,
+        "cat_filter": None,
+        "free_only": False,
+        "time_filter": None,
+        "keyword_filter": None,
+        "show_details": True,
+        "limit": 500,
+        "style": "camps",
+        "subtitle": "Accredited day camps, overnight sleepaways, STEM, nature, arts, and sports camps across Boston, MetroWest, and Massachusetts with dates, hours, ages, and weekly pricing.",
+        "og_badge": "SUMMER CAMPS GUIDE",
+        "og_image": "og-summer-camps.jpg",
+        "query": "summer-camps/"
     },
     # Dedicated Cyber Club / Rave guide for electronic shows and club nights
     "boston-edm": {
@@ -2279,6 +2300,427 @@ _EDM_FILTER_JS = """<script>
 })();
 </script>"""
 
+_CAMPS_HERO_ART = """<svg class="camps-hero-art" viewBox="0 0 900 200" aria-hidden="true" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="camps-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#bae6fd"/>
+      <stop offset="60%" stop-color="#e0f2fe"/>
+      <stop offset="100%" stop-color="#fef3c7"/>
+    </linearGradient>
+    <linearGradient id="camps-lake" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+    <linearGradient id="camps-sun" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fde047"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="200" fill="url(#camps-sky)"/>
+  <circle cx="450" cy="90" r="46" fill="url(#camps-sun)" opacity="0.95"/>
+  <circle cx="450" cy="90" r="65" fill="#fde047" opacity="0.25"/>
+  <polygon points="0,150 90,105 210,145 320,95 450,135 560,90 690,140 780,100 900,150 900,200 0,200" fill="#93c5fd" opacity="0.5"/>
+  <polygon points="0,165 140,120 280,160 410,115 540,155 670,110 820,160 900,135 900,200 0,200" fill="#60a5fa" opacity="0.4"/>
+  <rect x="0" y="150" width="900" height="50" fill="url(#camps-lake)"/>
+  <polygon points="20,165 35,115 50,165" fill="#14532d"/>
+  <polygon points="40,165 58,105 76,165" fill="#166534"/>
+  <polygon points="65,170 82,120 100,170" fill="#15803d"/>
+  <polygon points="90,172 105,130 120,172" fill="#166534"/>
+  <polygon points="110,175 125,135 140,175" fill="#14532d"/>
+  <polygon points="760,175 775,135 790,175" fill="#14532d"/>
+  <polygon points="780,172 795,125 810,172" fill="#166534"/>
+  <polygon points="800,170 818,115 836,170" fill="#15803d"/>
+  <polygon points="825,165 842,105 860,165" fill="#166534"/>
+  <polygon points="850,165 865,118 880,165" fill="#14532d"/>
+  <g transform="translate(420, 165)">
+    <path d="M 0,12 C 15,18 45,18 60,12 C 55,20 20,20 0,12 Z" fill="#dc2626"/>
+    <polygon points="24,10 26,1 28,10" fill="#fef08a"/>
+    <polygon points="34,10 36,1 38,10" fill="#fef08a"/>
+    <line x1="20" y1="8" x2="42" y2="18" stroke="#78350f" stroke-width="2"/>
+  </g>
+  <polygon points="145,178 165,145 185,178" fill="#ea580c"/>
+  <polygon points="165,145 185,178 178,178 165,152" fill="#c2410c"/>
+  <polygon points="158,162 165,152 172,162 165,178" fill="#431407"/>
+  <g transform="translate(200, 172)">
+    <line x1="-6" y1="4" x2="6" y2="-2" stroke="#78350f" stroke-width="2.5"/>
+    <line x1="-6" y1="-2" x2="6" y2="4" stroke="#78350f" stroke-width="2.5"/>
+    <polygon points="-4,2 0,-8 4,2" fill="#ef4444"/>
+    <polygon points="-2,2 0,-5 2,2" fill="#facc15"/>
+  </g>
+  <g transform="translate(450, 26)">
+    <rect x="-120" y="-12" width="240" height="24" rx="12" fill="#ffffff" stroke="#15803d" stroke-width="1.5" opacity="0.95"/>
+    <text x="0" y="4" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="800" fill="#15803d" letter-spacing="1.5">🏕️ 2026 SUMMER CAMPS GUIDE</text>
+  </g>
+</svg>"""
+
+_CAMPS_CSS = """
+  .camps-hub {
+    --bg: #f8faf8;
+    --card: #ffffff;
+    --card-hover: #ffffff;
+    --fg: #132a13;
+    --muted: #4b6354;
+    --accent: #15803d;
+    --border: #d6e2d8;
+    background: var(--bg) !important;
+    color: var(--fg) !important;
+  }
+  .camps-hub header {
+    background: rgba(248, 250, 248, 0.95) !important;
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border) !important;
+  }
+  .camps-hub .logo { color: #14532d !important; font-weight: 800; }
+  .camps-hub .logo span { color: #ea580c !important; }
+  .camps-hub .hub-nav a { color: var(--muted); }
+  .camps-hub .hub-nav a.active, .camps-hub .hub-nav a:hover { color: #15803d; font-weight: 700; }
+  .camps-hub main { max-width: 1040px; padding-top: 22px; }
+  .camps-hub .hero {
+    border: 1px solid var(--border);
+    background: #ffffff;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(20, 83, 45, 0.08);
+    margin-bottom: 22px;
+  }
+  .camps-hero-art { display: block; width: 100%; height: 190px; }
+  .camps-hero-copy { padding: 22px 24px 26px; text-align: center; }
+  .camps-hub .hero h1 {
+    font-size: clamp(26px, 5vw, 40px);
+    font-weight: 800;
+    margin: 0 0 8px;
+    color: #14532d;
+    letter-spacing: -0.02em;
+  }
+  .camps-hub .hero h1 small {
+    display: block;
+    font-size: 0.44em;
+    color: #ea580c;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+  .camps-hub .hero p {
+    color: var(--muted);
+    font-size: 15px;
+    max-width: 720px;
+    margin: 0 auto 18px;
+    line-height: 1.5;
+  }
+  .camps-stats { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 0 0 18px; }
+  .camps-stat {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+    border-radius: 999px;
+    padding: 4px 14px;
+    font-weight: 700;
+    font-size: 13px;
+  }
+  .camps-hub .cta-btn {
+    background: #15803d;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 14.5px;
+    padding: 9px 24px;
+    border-radius: 999px;
+    box-shadow: 0 3px 12px rgba(21, 128, 61, 0.25);
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.15s ease;
+  }
+  .camps-hub .cta-btn:hover { background: #166534; transform: translateY(-1px); }
+  .camps-filters {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 16px 18px 8px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+  }
+  .camp-filter-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
+  .camp-filter-label {
+    font-weight: 700;
+    color: #14532d;
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    min-width: 58px;
+  }
+  .camp-chip {
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    border: 1px solid #d1d5db;
+    background: #f9fafb;
+    color: #374151;
+    transition: all 0.15s ease;
+  }
+  .camp-chip:hover {
+    border-color: #15803d;
+    background: #f0fdf4;
+    color: #166534;
+  }
+  .camp-chip.active {
+    background: #15803d;
+    border-color: #15803d;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(21, 128, 61, 0.25);
+  }
+  .camps-count-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--muted);
+    margin: 0 4px 14px;
+  }
+  .camps-hub .hub-grid, .camps-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  @media (min-width: 700px) {
+    .camps-hub .hub-grid, .camps-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  .camps-hub #hub-none {
+    grid-column: 1 / -1;
+    text-align: center;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px 20px;
+    color: var(--muted);
+    font-size: 15px;
+  }
+  .camp-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .camp-card:hover {
+    transform: translateY(-2px);
+    border-color: #15803d;
+    box-shadow: 0 8px 24px rgba(21, 128, 61, 0.12);
+  }
+  .camp-card-band {
+    height: 4px;
+    background: #15803d;
+  }
+  .camp-cat-nature .camp-card-band { background: #16a34a; }
+  .camp-cat-stem .camp-card-band { background: #4f46e5; }
+  .camp-cat-arts .camp-card-band { background: #e11d48; }
+  .camp-cat-sports .camp-card-band { background: #d97706; }
+  .camp-cat-sleepaway .camp-card-band { background: #0284c7; }
+  .camp-cat-traditional .camp-card-band { background: #059669; }
+  .camp-card-body {
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+  }
+  .camp-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .camp-cat-badge {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #166534;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+  .camp-price-badge {
+    font-size: 12px;
+    font-weight: 800;
+    padding: 3px 9px;
+    border-radius: 999px;
+  }
+  .camp-price-badge.free { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+  .camp-price-badge.sliding { background: #fef9c3; color: #854d0e; border: 1px solid #fde047; }
+  .camp-price-badge.mid { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+  .camp-price-badge.premium { background: #f3e8ff; color: #6b21a8; border: 1px solid #d8b4fe; }
+  .camp-price-badge.overnight { background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
+  .camp-card-title {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  .camp-card-title a {
+    color: #111827;
+    text-decoration: none;
+  }
+  .camp-card-title a:hover {
+    color: #15803d;
+    text-decoration: underline;
+  }
+  .camp-loc-row {
+    font-size: 13px;
+    color: #4b5563;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .camp-dist-pill {
+    font-size: 11px;
+    color: #15803d;
+    background: #f0fdf4;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  .camp-type-pill {
+    font-size: 11px;
+    color: #6b7280;
+    background: #f3f4f6;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  .camp-grid-details {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 5px;
+    background: #f9fafb;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 12.5px;
+  }
+  .camp-detail-item {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+  .camp-detail-label {
+    font-weight: 700;
+    color: #4b5563;
+    min-width: 60px;
+  }
+  .camp-detail-val {
+    color: #111827;
+    font-weight: 500;
+  }
+  .camp-desc {
+    font-size: 12.5px;
+    color: #4b5563;
+    line-height: 1.45;
+    margin: 0;
+  }
+  .camp-card-footer {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 12px;
+    border-top: 1px solid #f3f4f6;
+    gap: 8px;
+  }
+  .camp-badge-aca {
+    font-size: 11px;
+    font-weight: 700;
+    color: #15803d;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .camp-cta-btn {
+    background: #15803d;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: background 0.15s ease;
+  }
+  .camp-cta-btn:hover {
+    background: #166534;
+    text-decoration: none;
+  }
+  @media (max-width: 640px) {
+    .camps-hero-art { height: 130px; }
+    .camp-filter-label { min-width: 100%; }
+    .camps-hub .hub-nav { font-size: 12px; gap: 8px 10px; }
+  }
+"""
+
+_CAMPS_FILTER_JS = """<script>
+(function () {
+  var chips = document.querySelectorAll('.camp-chip');
+  if (!chips.length) return;
+  var cards = document.querySelectorAll('.camp-card');
+  var countEl = document.getElementById('camp-results-count');
+  var state = { region: 'all', cat: 'all', age: 'all', price: 'all' };
+
+  function matches(c) {
+    if (state.region !== 'all' && c.dataset.region !== state.region) return false;
+    if (state.cat !== 'all' && c.dataset.cat !== state.cat) return false;
+    if (state.age !== 'all' && (' ' + c.dataset.age + ' ').indexOf(' ' + state.age + ' ') === -1) return false;
+    if (state.price !== 'all' && c.dataset.price !== state.price) return false;
+    return true;
+  }
+
+  function render(save) {
+    var visibleCount = 0;
+    cards.forEach(function (c) {
+      var on = matches(c);
+      c.hidden = !on;
+      if (on) visibleCount++;
+    });
+    chips.forEach(function (b) {
+      var g = b.dataset.group, v = b.dataset.val;
+      b.classList.toggle('active', state[g] === v);
+    });
+    if (countEl) countEl.textContent = visibleCount;
+    var none = document.getElementById('hub-none');
+    if (none) none.hidden = visibleCount > 0;
+    if (save) {
+      var parts = Object.keys(state).filter(function (k) { return state[k] !== 'all'; }).map(function (k) { return k + '=' + state[k]; });
+      history.replaceState(null, '', parts.length ? '#' + parts.join('&') : location.pathname);
+    }
+  }
+
+  chips.forEach(function (b) {
+    b.addEventListener('click', function () {
+      var g = b.dataset.group, v = b.dataset.val;
+      if (state[g] === v && v !== 'all') {
+        state[g] = 'all';
+      } else {
+        state[g] = v;
+      }
+      render(true);
+    });
+  });
+
+  location.hash.replace(/^#/, '').split('&').forEach(function (p) {
+    var kv = p.split('=');
+    if (kv.length === 2 && state.hasOwnProperty(kv[0])) {
+      state[kv[0]] = kv[1];
+    }
+  });
+  render(false);
+})();
+</script>"""
+
 
 def render_hub_page(hub_slug, events, site_url=None):
     if not site_url:
@@ -2378,6 +2820,33 @@ def render_hub_page(hub_slug, events, site_url=None):
             }
         })
 
+    is_kids = hub.get("style") == "kids"
+    is_edm = hub.get("style") == "edm"
+    is_camps = hub.get("style") == "camps"
+    if is_camps:
+        for idx, c in enumerate(filtered[:50]):
+            c_name = c.get("name") or "Camp"
+            c_url = c.get("url") or hub_canonical
+            c_city = c.get("city") or "Boston"
+            c_state = c.get("state") or "MA"
+            c_desc = c.get("price_note") or f"{c_name} in {c_city}, {c_state}"
+            hub_event_items.append({
+                "@type": "ListItem",
+                "position": idx + 1,
+                "item": {
+                    "@type": "EducationalOrganization",
+                    "name": c_name,
+                    "url": c_url,
+                    "description": c_desc,
+                    "address": {
+                        "@type": "PostalAddress",
+                        "addressLocality": c_city,
+                        "addressRegion": c_state,
+                        "addressCountry": "US"
+                    }
+                }
+            })
+
     hub_ld = {
         "@context": "https://schema.org",
         "@type": "ItemList",
@@ -2388,8 +2857,6 @@ def render_hub_page(hub_slug, events, site_url=None):
     }
     json_ld_str = f'<script type="application/ld+json">\n{json.dumps(hub_ld, ensure_ascii=False, indent=2)}\n</script>'
 
-    is_kids = hub.get("style") == "kids"
-    is_edm = hub.get("style") == "edm"
     kid_age_counts, kid_kind_counts, kid_free, kid_places = {}, {}, 0, set()
     edm_sub_counts, edm_free_count, edm_places = {}, 0, set()
     cards_html = []
@@ -2581,6 +3048,65 @@ def render_hub_page(hub_slug, events, site_url=None):
     {"".join(city_cards)}
   </div>
 </div>''')
+    elif is_camps:
+        def _render_camp_card(c):
+            name = escape(c.get("name") or "Camp")
+            city = escape(c.get("city") or "Boston")
+            state_val = escape(c.get("state") or "MA")
+            url = escape(c.get("url") or "#")
+            dist = c.get("distance_miles")
+            dist_str = f"{dist:.1f} mi from Boston" if dist is not None else ""
+            ctype = escape(c.get("type") or "Day")
+            region = escape(c.get("region") or "boston")
+            cat = escape(c.get("category") or "traditional")
+            cat_label = escape(c.get("category_label") or "🏕️ Traditional Day Camp")
+            price_tier = escape(c.get("price_tier") or "mid")
+            price_wk = escape(c.get("price_weekly") or "Inquire for rates")
+            ages = escape(c.get("ages") or "All ages")
+            dates = escape(c.get("dates") or "Summer 2026")
+            hours = escape(c.get("hours") or "Full day")
+            note = escape(c.get("price_note") or "")
+            age_groups = " ".join(c.get("age_groups") or ["elementary"])
+
+            dist_pill = f'<span class="camp-dist-pill">{dist_str}</span>' if dist_str else ""
+            desc_html = f'<p class="camp-desc">{note}</p>' if note else ""
+
+            return f"""<article class="camp-card camp-cat-{cat}" data-region="{region}" data-cat="{cat}" data-age="{age_groups}" data-price="{price_tier}">
+  <div class="camp-card-band"></div>
+  <div class="camp-card-body">
+    <div class="camp-card-top">
+      <span class="camp-cat-badge">{cat_label}</span>
+      <span class="camp-price-badge {price_tier}">{price_wk}</span>
+    </div>
+    <h3 class="camp-card-title"><a href="{url}" target="_blank" rel="noopener">{name}</a></h3>
+    <div class="camp-loc-row">
+      <span>📍 {city}, {state_val}</span>
+      {dist_pill}
+      <span class="camp-type-pill">{ctype} Camp</span>
+    </div>
+    <div class="camp-grid-details">
+      <div class="camp-detail-item">
+        <span class="camp-detail-label">Ages:</span>
+        <span class="camp-detail-val">{ages}</span>
+      </div>
+      <div class="camp-detail-item">
+        <span class="camp-detail-label">Dates:</span>
+        <span class="camp-detail-val">{dates}</span>
+      </div>
+      <div class="camp-detail-item">
+        <span class="camp-detail-label">Hours:</span>
+        <span class="camp-detail-val">{hours}</span>
+      </div>
+    </div>
+    {desc_html}
+    <div class="camp-card-footer">
+      <span class="camp-badge-aca">✓ ACA Accredited</span>
+      <a href="{url}" target="_blank" rel="noopener" class="camp-cta-btn">Camp Info &amp; Register →</a>
+    </div>
+  </div>
+</article>"""
+
+        cards_html = [_render_camp_card(c) for c in filtered[:card_limit]]
     else:
         last_day = None
         for e in filtered[:card_limit]:
@@ -2705,6 +3231,65 @@ def render_hub_page(hub_slug, events, site_url=None):
       <a href="../{hub['query']}" class="cta-btn">View on interactive calendar →</a>
     </div>
   </div>"""
+    elif is_camps:
+        kids_head, kids_css, body_class = "", _CAMPS_CSS, ' class="camps-hub"'
+        area_filter_html = """<button type="button" class="camp-chip active" data-group="region" data-val="all">All Locations</button>
+<button type="button" class="camp-chip" data-group="region" data-val="boston">Boston Proper</button>
+<button type="button" class="camp-chip" data-group="region" data-val="cambridge">Cambridge &amp; Somerville</button>
+<button type="button" class="camp-chip" data-group="region" data-val="metrowest">MetroWest (0–20 mi)</button>
+<button type="button" class="camp-chip" data-group="region" data-val="northshore">North Shore</button>
+<button type="button" class="camp-chip" data-group="region" data-val="southshore">South Shore</button>
+<button type="button" class="camp-chip" data-group="region" data-val="massachusetts">Greater MA &amp; New England</button>"""
+
+        focus_filter_html = """<button type="button" class="camp-chip active" data-group="cat" data-val="all">All Tracks</button>
+<button type="button" class="camp-chip" data-group="cat" data-val="traditional">🏕️ Traditional Day Camp</button>
+<button type="button" class="camp-chip" data-group="cat" data-val="nature">🌿 Nature &amp; Outdoors</button>
+<button type="button" class="camp-chip" data-group="cat" data-val="stem">🤖 STEM, Coding &amp; Robotics</button>
+<button type="button" class="camp-chip" data-group="cat" data-val="arts">🎨 Arts, Theater &amp; Music</button>
+<button type="button" class="camp-chip" data-group="cat" data-val="sports">⚽ Sports &amp; Sailing</button>
+<button type="button" class="camp-chip" data-group="cat" data-val="sleepaway">🌲 Overnight Sleepaway</button>"""
+
+        ages_filter_html = """<button type="button" class="camp-chip active" data-group="age" data-val="all">All Ages</button>
+<button type="button" class="camp-chip" data-group="age" data-val="preschool">Preschool &amp; Kinder (Ages 3–5)</button>
+<button type="button" class="camp-chip" data-group="age" data-val="elementary">Elementary (Ages 6–10)</button>
+<button type="button" class="camp-chip" data-group="age" data-val="middle">Middle School (Ages 11–13)</button>
+<button type="button" class="camp-chip" data-group="age" data-val="teens">Teens &amp; CIT (Ages 14–17)</button>"""
+
+        cost_filter_html = """<button type="button" class="camp-chip active" data-group="price" data-val="all">All Budgets</button>
+<button type="button" class="camp-chip" data-group="price" data-val="free">💚 Free / BCYF</button>
+<button type="button" class="camp-chip" data-group="price" data-val="sliding">💛 Sliding Scale / Financial Aid</button>
+<button type="button" class="camp-chip" data-group="price" data-val="mid">Under $600 / week</button>
+<button type="button" class="camp-chip" data-group="price" data-val="premium">Specialty &amp; STEM ($600+)</button>
+<button type="button" class="camp-chip" data-group="price" data-val="overnight">Overnight Sleepaway</button>"""
+
+        city_chips_html = f"""<div class="camps-filters" role="group" aria-label="Filter Greater Boston summer camps">
+    <div class="camp-filter-row"><span class="camp-filter-label">Area</span>{area_filter_html}</div>
+    <div class="camp-filter-row"><span class="camp-filter-label">Focus</span>{focus_filter_html}</div>
+    <div class="camp-filter-row"><span class="camp-filter-label">Ages</span>{ages_filter_html}</div>
+    <div class="camp-filter-row"><span class="camp-filter-label">Cost</span>{cost_filter_html}</div>
+  </div>
+  <div class="camps-count-bar">
+    <span>Showing <strong id="camp-results-count">{len(filtered[:card_limit])}</strong> summer camps</span>
+    <span>Summer 2026</span>
+  </div>"""
+
+        hub_js = _CAMPS_FILTER_JS
+        n_camps = len(filtered[:card_limit])
+        free_or_sliding = sum(1 for c in filtered if c.get("price_tier") in ("free", "sliding"))
+        n_cities = len(set(c.get("city") for c in filtered if c.get("city")))
+        hero_html = f"""<div class="hero">
+    {_CAMPS_HERO_ART}
+    <div class="camps-hero-copy">
+      <h1>{escape(hub.get('h1') or hub['title'])}<small>Boston · Cambridge · Somerville · MetroWest · North &amp; South Shore · Massachusetts</small></h1>
+      <p>{hub['subtitle']}</p>
+      <div class="camps-stats">
+        <span class="camps-stat">🏕️ {n_camps} accredited camps</span>
+        <span class="camps-stat">💛 {free_or_sliding} free &amp; financial aid options</span>
+        <span class="camps-stat">📍 {n_cities} Massachusetts towns</span>
+      </div>
+      <a href="../kids-family-events-boston/" class="cta-btn">View year-round kids &amp; family events →</a>
+    </div>
+  </div>"""
 
     cards_joined = "\n".join(cards_html) if cards_html else "<p class='no-hub-events'>No scheduled events matching this directory right now. Check the interactive calendar for all upcoming dates.</p>"
 
@@ -2719,6 +3304,7 @@ def render_hub_page(hub_slug, events, site_url=None):
     active_sm = 'active' if hub_slug == 'live-music-somerville' else ''
     active_bg = 'active' if hub_slug == 'board-game-nights-boston' else ''
     active_kf = 'active' if hub_slug == 'kids-family-events-boston' else ''
+    active_sc = 'active' if hub_slug == 'summer-camps' else ''
     active_mk = 'active' if hub_slug == 'markets-festivals-boston' else ''
     active_edm = 'active' if hub_slug == 'boston-edm' else ''
 
@@ -2961,6 +3547,7 @@ def render_hub_page(hub_slug, events, site_url=None):
     <a href="../boston-edm/" class="{active_edm}">Boston EDM</a>
     <a href="../board-game-nights-boston/" class="{active_bg}">Board Games</a>
     <a href="../kids-family-events-boston/" class="{active_kf}">Kids &amp; Family</a>
+    <a href="../summer-camps/" class="{active_sc}">Summer Camps</a>
     <a href="../markets-festivals-boston/" class="{active_mk}">Markets &amp; Festivals</a>
     <a href="../boston/" class="{active_b}">Boston</a>
     <a href="../cambridge/" class="{active_c}">Cambridge</a>
