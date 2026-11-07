@@ -1660,13 +1660,65 @@ _KIDS_CSS = """
 
 _KIDS_FILTER_JS = """<script>
 (function () {
+  var cards = document.querySelectorAll('.hub-card');
+  // The When buttons are made here, not in the page, so "Today" and the week labels stay right
+  // on a page built days ago. Weeks run Monday to Sunday and dates are Boston's.
+  var ranges = {};
+  (function () {
+    var row = document.getElementById('kid-when');
+    if (!row) return;
+    var parts = {};
+    new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' })
+      .formatToParts(new Date()).forEach(function (p) { parts[p.type] = p.value; });
+    var today = parts.year + '-' + parts.month + '-' + parts.day;
+    function utc(iso) { return new Date(iso + 'T12:00:00Z'); }
+    function addDays(iso, n) { var d = utc(iso); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
+    function month(iso) { return utc(iso).toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' }); }
+    function dayNum(iso) { return String(parseInt(iso.slice(8), 10)); }
+    function label(a, b) {
+      if (a === b) return month(a) + ' ' + dayNum(a);
+      return month(a) + ' ' + dayNum(a) + '–' + (month(a) === month(b) ? '' : month(b) + ' ') + dayNum(b);
+    }
+    var days = [];
+    cards.forEach(function (c) { if (c.dataset.day) days.push(c.dataset.day); });
+    if (!days.length) return;
+    var last = days.reduce(function (a, b) { return a > b ? a : b; });
+    var seen = {};
+    function add(val, text, from, to) {
+      var key = from + to;
+      if (seen[key] || !days.some(function (d) { return d >= from && d <= to; })) return;
+      seen[key] = 1;
+      ranges[val] = [from, to];
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'kid-chip';
+      b.dataset.group = 'when';
+      b.dataset.val = val;
+      b.textContent = text;
+      row.appendChild(b);
+    }
+    var fromMonday = (utc(today).getUTCDay() + 6) % 7;
+    var sunday = addDays(today, 6 - fromMonday);
+    var friday = addDays(today, 4 - fromMonday);
+    add('today', 'Today', today, today);
+    add('weekend', 'This weekend', friday > today ? friday : today, sunday);
+    add('thisweek', 'This week', today, sunday);
+    for (var monday = addDays(sunday, 1); monday <= last; monday = addDays(monday, 7)) {
+      var end = addDays(monday, 6);
+      if (end > last) end = last;
+      add(monday, label(monday, end), monday, end);
+    }
+  })();
   var chips = document.querySelectorAll('.kid-chip');
   if (!chips.length) return;
-  var cards = document.querySelectorAll('.hub-card');
   var heads = document.querySelectorAll('.hub-day');
   var citySecs = document.querySelectorAll('.kid-city-section');
-  var state = { city: 'all', age: 'all', kind: 'all', price: 'all' };
+  var state = { when: 'all', city: 'all', age: 'all', kind: 'all', price: 'all' };
   function matches(c) {
+    if (state.when !== 'all') {
+      var range = ranges[state.when], day = c.dataset.day || '';
+      if (!range || day < range[0] || day > range[1]) return false;
+    }
     if (state.city !== 'all' && c.dataset.city !== state.city) return false;
     if (state.age !== 'all' && (' ' + c.dataset.age + ' ').indexOf(' ' + state.age + ' ') === -1) return false;
     if (state.kind !== 'all' && c.dataset.kind !== state.kind) return false;
@@ -2600,6 +2652,7 @@ def render_hub_page(hub_slug, events, site_url=None):
             chip("kind", k, f"{emo} {lbl}") for k, lbl, emo, _rx in _KID_KIND_RES if kid_kind_counts.get(k))
         prices = chip("price", "all", "Any price") + chip("price", "free", "💛 Free only")
         city_chips_html = f"""<div class="kids-filters" role="group" aria-label="Filter kids events">
+    <div class="kid-filter-row" id="kid-when"><span class="kid-filter-label">When</span>{chip("when", "all", "Any day")}</div>
     <div class="kid-filter-row"><span class="kid-filter-label">Where</span>{where}</div>
     <div class="kid-filter-row"><span class="kid-filter-label">Ages</span>{ages}</div>
     <div class="kid-filter-row"><span class="kid-filter-label">What</span>{kinds}</div>

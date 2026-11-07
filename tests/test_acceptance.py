@@ -153,6 +153,8 @@ class HubPageAcceptance(unittest.TestCase):
         self.assertIn('data-group="price" data-val="free"', html)
         self.assertEqual(html.count('data-price="free"'), 1)
         self.assertEqual(html.count('data-price="paid"'), 1)
+        self.assertIn('id="kid-when"', html)
+        self.assertIn('data-group="when" data-val="all"', html)
 
 
 class MergeAcceptance(unittest.TestCase):
