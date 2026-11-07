@@ -528,6 +528,24 @@ def _parse_eventbrite_card_date(text):
     return dt.astimezone(timezone.utc).isoformat()
 
 
+def _eventbrite_abroad(tz_name):
+    """Eventbrite's Boston search also returns events elsewhere, like online UK workshops."""
+    return bool(tz_name) and not tz_name.startswith("America/")
+
+
+def _eventbrite_start(start, tz_name, online):
+    """UTC start for a naive Eventbrite time. In-person events are here, so their time is Boston
+    time whatever zone the organizer's account is set to: a 10 PM Legacy show set to Pacific
+    is not at 1 AM. Online events do run on the zone they list."""
+    zone = EASTERN
+    if online and tz_name:
+        try:
+            zone = ZoneInfo(tz_name)
+        except Exception:
+            pass
+    return start.replace(tzinfo=zone).astimezone(timezone.utc).isoformat()
+
+
 def _eventbrite_org_json_events(html, base_url):
     events = []
     seen = set()
@@ -541,10 +559,11 @@ def _eventbrite_org_json_events(html, base_url):
         if re.search(r'"is_cancelled":true', chunk[:1500]):
             continue
         seen.add(href)
+        if _eventbrite_abroad(field("timezone")):
+            continue
         try:
             start = datetime.strptime(f"{start_date} {field('start_time') or '19:00:00'}", "%Y-%m-%d %H:%M:%S")
-            start = start.replace(tzinfo=ZoneInfo(field("timezone") or "America/New_York"))
-            iso = start.astimezone(timezone.utc).isoformat()
+            iso = _eventbrite_start(start, field("timezone"), '"is_online_event":true' in chunk)
         except (ValueError, KeyError):
             iso = None
         price = None
@@ -654,14 +673,12 @@ def _parse_eventbrite_server_data(html):
         if u in seen:
             continue
         seen.add(u)
+        if _eventbrite_abroad(tz_str):
+            continue
 
         try:
             dt = datetime.strptime(f"{start_date} {start_time}", "%Y-%m-%d %H:%M")
-            try:
-                dt = dt.replace(tzinfo=ZoneInfo(tz_str))
-            except Exception:
-                dt = dt.replace(tzinfo=EASTERN)
-            iso = dt.astimezone(timezone.utc).isoformat()
+            iso = _eventbrite_start(dt, tz_str, ev.get("is_online_event"))
         except Exception:
             iso = None
 
@@ -721,7 +738,11 @@ def _parse_eventbrite_json_ld(soup):
                     iso = None
             elif iso:
                 try:
-                    iso = datetime.fromisoformat(iso).astimezone(timezone.utc).isoformat()
+                    start = datetime.fromisoformat(iso.replace("Z", "+00:00"))
+                    online = (ev.get("location") or {}).get("@type") == "VirtualLocation"
+                    if not online and start.utcoffset():  # as in _eventbrite_start
+                        start = start.replace(tzinfo=EASTERN)
+                    iso = start.astimezone(timezone.utc).isoformat()
                 except ValueError:
                     iso = None
             loc = ev.get("location") or {}
@@ -1970,6 +1991,8 @@ def _parse_boston_calendar_time(text):
         hour += 12
     if ampm.lower() == "a" and hour == 12:
         hour = 0
+    if ampm.lower() == "a" and 1 <= hour < 6:  # submitters' slips: "2:00a" for a 2 PM library talk
+        hour += 12
     try:
         dt = datetime(int(year), _BC_MONTHS[mon.title()[:3]], int(day), hour, minute, tzinfo=EASTERN)
     except (ValueError, KeyError):
@@ -2128,6 +2151,7 @@ _BC_NOISE_CONTAINS = re.compile(
     r"|new\s+(location|opening)\s+(in|at)\b"
     r"|skip\s+the\s+(traffic|drive)\b"
     r"|\bfree\s+rock\s+climbing\b"
+    r"|\bcommuter\s+rail\s+weekends\b"
     r"|\b(rubies|pop\s+quiz:\s*1776|collecting\s+wonders)\b"
     r"|volunteer\s+opportunities\s+everyday",
     re.I,
@@ -9483,21 +9507,24 @@ def _mad_monkfish_page(soup, now, out, seen):
 
         hour = 19
         minute = 0
-        tm = re.search(r"(\d{1,2})(?::(\d{2}))?\s*(am|pm)", artist, re.I)
+        # "12-1am" starts at 12, not 1; "11-1am" starts at 11 PM
+        tm = re.search(r"(\d{1,2})(?::(\d{2}))?(?:\s*-\s*(\d{1,2})(?::\d{2})?)?\s*(am|pm)", artist, re.I)
         if tm:
             h = int(tm.group(1))
             mn = int(tm.group(2) or 0)
-            ampm = tm.group(3).lower()
-            if ampm == "pm" and h < 12:
-                h += 12
-            elif ampm == "am" and h == 12:
+            ampm = tm.group(4).lower()
+            if ampm == "am" and h == 12:
                 h = 0
+            elif ampm == "pm" and h < 12 or ampm == "am" and tm.group(3) and h > int(tm.group(3)):
+                h += 12
             hour, minute = h, mn
 
         try:
             dt = datetime(now.year, int(month), int(day), hour, minute, tzinfo=EASTERN)
             if dt < now - timedelta(days=1):
                 dt = dt.replace(year=now.year + 1)
+            if hour < 6:  # titles are dated by the night: "11/7 ... 12-1am" is early on Nov 8
+                dt += timedelta(days=1)
         except Exception:
             continue
 
@@ -13711,6 +13738,30 @@ def _boston_shows_fill_in(results):
     return entry
 
 
+OVERNIGHT_DROPPED = []  # the latest crawl's, for the source health report
+
+
+def _drop_overnight_starts(results):
+    """Nothing in Boston starts between 1 and 6 AM, so a time there is wrong and the event can't be
+    shown as listed. Each one is reported, to be fixed at its source. Midnight sets are fine."""
+    OVERNIGHT_DROPPED.clear()
+    for result in results:
+        kept = []
+        for e in result.get("events") or []:
+            try:
+                start = datetime.fromisoformat(str(e.get("date")).replace("Z", "+00:00"))
+            except ValueError:
+                start = None
+            if start:
+                start = (start if start.tzinfo else start.replace(tzinfo=EASTERN)).astimezone(EASTERN)
+            if start and 1 <= start.hour < 6:
+                OVERNIGHT_DROPPED.append({"source": result.get("venue"), "name": e.get("name"),
+                                          "start": start.isoformat(), "url": e.get("url")})
+            else:
+                kept.append(e)
+        result["events"] = kept
+
+
 def _do_scrape_all(force=False):
     HOST_GATE.reset()  # a site that refused us yesterday gets asked again, once
 
@@ -13726,6 +13777,7 @@ def _do_scrape_all(force=False):
     _fix_listings(results)
     _use_show_times(results)
     results.append(_boston_shows_fill_in(results))
+    _drop_overnight_starts(results)
     with _cache_lock:
         _cache["data"] = results
         _cache["ts"] = time.time()

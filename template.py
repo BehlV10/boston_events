@@ -1078,6 +1078,10 @@ def filter_events_for_hub(hub, events):
             continue
         filtered.append(e)
 
+    if hub.get("window_days"):
+        last_day = datetime.now(EASTERN).date() + timedelta(days=hub["window_days"])
+        filtered = [e for e in filtered if (_parse_event_eastern_date(e) or last_day) <= last_day]
+
     if time_filter == "weekend" and hub.get("limit"):
         # Share the slots across Fri/Sat/Sun so a busy Friday doesn't crowd out the weekend
         per_day, by_day = hub["limit"] // 3, {}
@@ -1122,7 +1126,8 @@ HUBS = {
         "time_filter": None,
         "keyword_filter": None,
         "show_details": True,
-        "limit": 900,
+        "limit": None,
+        "window_days": 21,
         "style": "kids",  # light daycare-style page with age & activity filters
         "subtitle": "Story times, baby & toddler sing-alongs, puppet shows, museum days, farm visits and nature walks for kids, gathered every day from libraries, museums, parks and nature centers around Greater Boston.",
         "og_badge": "KIDS & FAMILY",
