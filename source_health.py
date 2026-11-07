@@ -83,7 +83,7 @@ def source_status(venues, refused=None, now=None, days=WINDOW_DAYS):
     return rows
 
 
-def _markdown(rows):
+def _markdown(rows, overnight=()):
     count = lambda s: sum(1 for r in rows if r["status"] == s)
     out = ["## Source health", "",
            f"{len(rows)} sources: **{count('ok')} OK**, {count('error')} errored, {count('refused')} refused us, "
@@ -95,23 +95,31 @@ def _markdown(rows):
             note = r["error"] or ("kept last good data" if r["kept_last_good"] else "")
             out.append(f"| [{r['source']}]({r['url']}) | {r['status']} | {r['events']} | {r['next_event'] or '—'} | {note} |")
         out.append("")
+    if overnight:
+        out += ["### Removed for a 1–6 AM start", "", "Each of these has a wrong time at its source.", "",
+                "| Source | Event | Listed start |", "|---|---|---|"]
+        out += [f"| {o['source']} | [{o['name']}]({o['url']}) | {o['start'][:16]} |" for o in overnight]
+        out.append("")
     out += ["### Venues we can't read", "", "| Venue | Why | Next step |", "|---|---|---|"]
     out += [f"| [{k['venue']}]({k['url']}) | {k['reason']} | {k['next_step']} |" for k in KNOWN_UNSCRAPABLE]
     return "\n".join(out) + "\n"
 
 
-def write_report(venues, refused=None, path=os.path.join(".cache", "source_status.json")):
+def write_report(venues, refused=None, path=os.path.join(".cache", "source_status.json"), overnight=()):
     rows = source_status(venues, refused)
     os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
         json.dump({"generated_at": datetime.now(timezone.utc).isoformat(), "window_days": WINDOW_DAYS,
-                   "sources": rows, "known_unscrapable": KNOWN_UNSCRAPABLE}, f, indent=1)
+                   "sources": rows, "known_unscrapable": KNOWN_UNSCRAPABLE,
+                   "overnight_removed": list(overnight)}, f, indent=1)
     summary = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary:
         with open(summary, "a", encoding="utf-8") as f:
-            f.write(_markdown(rows))
+            f.write(_markdown(rows, overnight))
     for r in rows:
         if r["status"] != "ok":
             print(f"source {r['status']:7s} {r['source']}: {r['events']} events, next {r['next_event'] or 'none'}"
                   + (f" ({r['error']})" if r["error"] else ""))
+    for o in overnight:
+        print(f"overnight start removed: {o['source']}: {o['name']} ({o['start'][:16]})")
     return rows
