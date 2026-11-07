@@ -1767,6 +1767,43 @@ def scrape_mosesian_center(url, ua):
     return out
 
 
+_WHEELOCK_SHOW_RE = re.compile(r'href="(https://www\.wheelockfamilytheatre\.org/performances/current-season/[a-z0-9-]+/?)"')
+
+
+def scrape_wheelock_family_theatre(url, ua):
+    """Wheelock Family Theatre's performances. Its season page links each show's page, which
+    links the ticket system's production, whose public listing has the real showtimes."""
+    resp = _SESSION.get(url, headers={"User-Agent": ua}, timeout=20)
+    resp.raise_for_status()
+    now = datetime.now(EASTERN)
+    out = []
+    for show in sorted(set(_WHEELOCK_SHOW_RE.findall(resp.text))):
+        page = _SESSION.get(show, headers={"User-Agent": ua}, timeout=20).text
+        production = re.search(r"ovationtix\.com/177/production/(\d+)", page)
+        if not production:
+            continue
+        time.sleep(1)
+        listing = _SESSION.get(f"https://web.ovationtix.com/trs/api/rest/Production({production.group(1)})/performance",
+                               headers={"User-Agent": ua, "clientId": "177", "Accept": "application/json"}, timeout=20)
+        if listing.status_code != 200:
+            continue
+        data = listing.json()
+        name = re.sub(r"\bPixars\b", "Pixar's", html.unescape(data.get("productionName") or "").strip())
+        for perf in data.get("performances") or []:
+            start = datetime.strptime(perf["startDate"], "%Y-%m-%d %H:%M").replace(tzinfo=EASTERN)
+            if start < now or perf.get("shutOff"):
+                continue
+            out.append({
+                "name": name,
+                "date": start.astimezone(timezone.utc).isoformat(),
+                "url": show,
+                "venue": "Wheelock Family Theatre",
+                "address": "180 Riverway, Boston, MA",
+                "category": "family",
+            })
+    return out
+
+
 _CAMBRIDGE_FAMILIES_TOPIC = "{4E643AB6-0153-4FE4-A112-51C0B463F2F3}"
 _CAMBRIDGE_FORM = "body_0$content_0$"
 _CAMBRIDGE_SKIP_RE = re.compile(r"(?i)\b(?:meeting|hearing|commission|committee|board of)\b")
@@ -12187,6 +12224,7 @@ _ALL_VENUES = [
     {"name": "Temple Israel (family)", "url": "https://www.tisrael.org/wp-json/tribe/events/v1/events", "ua": UA_SITE, "scraper": scrape_temple_israel_family, "default_category": "family"},
     {"name": "USS Constitution Museum", "url": "https://ussconstitutionmuseum.org/events/", "ua": UA_SITE, "scraper": scrape_uss_constitution_museum, "default_category": "community"},
     {"name": "Mosesian Center for the Arts", "url": "https://www.mosesianarts.org/events/", "ua": UA_SITE, "scraper": scrape_mosesian_center, "default_category": "art"},
+    {"name": "Wheelock Family Theatre", "url": "https://www.wheelockfamilytheatre.org/performances/current-season/", "ua": UA_SITE, "scraper": scrape_wheelock_family_theatre, "default_category": "family"},
     {"name": "Fenway Community Center", "url": "https://fenwaycommunitycenter.org/wp-json/tribe/events/v1/events", "ua": UA_CHROME, "scraper": scrape_fenway_community_center, "default_category": "family"},
     {"name": "Discovery Museum", "url": "https://www.discoveryacton.org/visit/events-programs", "ua": UA_CHROME, "scraper": scrape_discovery_museum, "default_category": "family"},
     {"name": "Emerald Necklace Conservancy", "url": "https://www.emeraldnecklace.org/calendar", "ua": UA_CHROME, "scraper": scrape_emerald_necklace, "default_category": "outdoors"},
