@@ -282,5 +282,27 @@ class MoreDirectSources(unittest.TestCase):
                          [("Lantern Making Workshop", "2030-11-09 10:00", "family")])
 
 
+class WheelockShowtimes(unittest.TestCase):
+    def test_reads_each_show_from_the_ticket_listing(self):
+        show = "https://www.wheelockfamilytheatre.org/performances/current-season/finding-nemo-2030/"
+        gone = "https://www.wheelockfamilytheatre.org/performances/current-season/old-show/"
+        def fake(url, **kwargs):
+            if url == "season":
+                return MagicMock(text=f'<a href="{show}">Nemo</a> <a href="{gone}">Old</a>')
+            if url == show:
+                return MagicMock(text='<a href="https://ci.ovationtix.com/177/production/42">Tickets</a>')
+            if url == gone:
+                return MagicMock(text="<p>Closed</p>")
+            self.assertIn("Production(42)", url)
+            self.assertEqual(kwargs["headers"]["clientId"], "177")
+            return MagicMock(status_code=200, json=lambda: {"productionName": "Disney and Pixars Finding Nemo", "performances": [
+                {"startDate": "2030-11-16 10:30"}, {"startDate": "2030-11-16 14:00", "shutOff": True},
+                {"startDate": "2020-11-16 10:30"}]})
+        with patch.object(S._SESSION, "get", side_effect=fake), patch.object(S.time, "sleep"):
+            events = S.scrape_wheelock_family_theatre("season", "ua")
+        self.assertEqual([(e["name"], e["url"]) for e in events], [("Disney and Pixar's Finding Nemo", show)])
+        self.assertEqual(datetime.fromisoformat(events[0]["date"]).astimezone(EASTERN).strftime("%H:%M"), "10:30")
+
+
 if __name__ == "__main__":
     unittest.main()
