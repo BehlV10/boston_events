@@ -179,5 +179,50 @@ class ParentCalendarsAndCityEvents(unittest.TestCase):
         self.assertEqual([e["price"] for e in found], ["Free"])
 
 
+
+class DirectFamilyCalendars(unittest.TestCase):
+    def test_cambridge_reads_the_visible_time_not_the_12_hour_attribute(self):
+        page = """<li class="eventItem"><time datetime="2030-11-05 06:15:00"><strong><span>6:15 PM</span></strong></time>
+        <a id="x" href="/citycalendar/view.aspx?guid=abc123">Family Literacy Night</a>
+        <em class="location">City Hall, 795 Massachusetts Ave</em><p>Free for families.</p></li>"""
+        (start, title, link, place, summary), = S._cambridge_rows(page)
+        self.assertEqual((start.hour, start.minute, title), (18, 15, "Family Literacy Night"))
+        self.assertEqual(place, "City Hall, 795 Massachusetts Ave")
+
+    def test_discovery_museum_skips_members_only(self):
+        card = ('<h3 class="teaser-title h2"><a href="/events-programs/{0}">{1}</a></h3>'
+                '<time datetime="2030-11-12T10:00:00-05:00">10:00am</time>')
+        page = card.format("eat", "Eat Like a Bird") + card.format("m", "Members-Only Evening")
+        replies = [MagicMock(text=page), MagicMock(text="")]
+        with patch.object(S._SESSION, "get", side_effect=replies), patch.object(S.time, "sleep"):
+            events = S.scrape_discovery_museum("https://www.discoveryacton.org/visit/events-programs", "ua")
+        self.assertEqual([e["name"] for e in events], ["Eat Like a Bird"])
+        self.assertEqual(events[0]["url"], "https://www.discoveryacton.org/events-programs/eat")
+
+    def test_emerald_necklace_skips_cards_without_a_time(self):
+        page = ('<a class="c" href="./calendar/walk">Nov 14 Sat Second Saturdays Jamaica Pond 10:00am - 12:00pm</a>'
+                '<a class="c" href="./calendar/drive">Oct 19 Mon Winter Clothing Drive</a>')
+        now = datetime(2030, 11, 1, tzinfo=EASTERN)
+        with patch.object(S._SESSION, "get", return_value=MagicMock(text=page)), patch.object(S, "datetime", wraps=datetime) as fake:
+            fake.now.return_value = now
+            events = S.scrape_emerald_necklace("https://www.emeraldnecklace.org/calendar", "ua")
+        self.assertEqual([e["venue"] for e in events], ["Jamaica Pond"])
+        self.assertEqual(events[0]["url"], "https://www.emeraldnecklace.org/calendar/walk")
+
+
+class TownLibraryAudienceTags(unittest.TestCase):
+    PAGE = """<div class="day-has-events day-2030-11-06">
+    <div class="listing-event event category-children category-crafts"><h3><a href="/a">Finger Knitting</a></h3>
+      <span class="event-time">3:30pm - 4:30pm</span></div>
+    <div class="listing-event event category-adult"><h3><a href="/b">Tech Help</a></h3>
+      <span class="event-time">1:00pm - 2:00pm</span></div></div>"""
+
+    def test_keeps_programs_tagged_for_children_whatever_the_title(self):
+        with patch.object(S._SESSION, "get", return_value=MagicMock(text=self.PAGE)):
+            events = S.scrape_town_library_kids("u", "ua", "Medford Public Library", "Medford")
+        self.assertEqual([e["name"] for e in events], ["Finger Knitting"])
+        self.assertNotIn("_audiences", events[0])
+
+
 if __name__ == "__main__":
     unittest.main()
