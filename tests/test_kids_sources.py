@@ -224,5 +224,63 @@ class TownLibraryAudienceTags(unittest.TestCase):
         self.assertNotIn("_audiences", events[0])
 
 
+class MoreDirectSources(unittest.TestCase):
+    def local(self, event):
+        return datetime.fromisoformat(event["date"]).astimezone(EASTERN).strftime("%Y-%m-%d %H:%M")
+
+    def test_revolutionary_spaces_takes_the_time_its_page_shows(self):
+        block = lambda start, link: (
+            '<script type="application/ld+json">' + json.dumps({"@type": "Event", "name": "Sensory-Friendly Mornings",
+            "startDate": start, "offers": {"url": link, "price": "0"}, "location": {"name": "Old State House"}}) + "</script>")
+        pages = {"list": block("2030-11-30T04:00:00-05:00", "shifted") + block("2030-12-01T14:00:00-05:00", "fixed")
+                 + block("2030-12-02T04:00:00-05:00", "unknown"),
+                 "shifted": "Saturday - 9AM-10AM. Adults $5", "fixed": "Doors at 2:00 PM", "unknown": "Call us"}
+        with patch.object(S._SESSION, "get", side_effect=lambda u, **k: MagicMock(text=pages[u])):
+            events = S.scrape_revolutionary_spaces("list", "ua")
+        self.assertEqual([self.local(e) for e in events], ["2030-11-30 09:00", "2030-12-01 14:00"])
+        self.assertIsNone(events[0].get("price"))
+        self.assertEqual(events[0]["category"], "family")
+
+    def test_temple_israel_reads_utc_start_and_keeps_only_family_service(self):
+        rows = [{"title": "Thank Goodness It&#8217;s Shabbat!", "start_date": "2030-11-09 15:00:00",
+                 "utc_start_date": "2030-11-09 15:00:00", "url": "a", "categories": []},
+                {"title": "Evening Minyan", "start_date": "2030-11-09 23:00:00",
+                 "utc_start_date": "2030-11-09 23:00:00", "url": "b", "categories": []}]
+        with patch.object(S._SESSION, "get", return_value=MagicMock(status_code=200, json=lambda: {"events": rows})):
+            events = S.scrape_temple_israel_family("https://x/wp-json/tribe/events/v1/events", "ua")
+        self.assertEqual([self.local(e) for e in events], ["2030-11-09 10:00"])
+
+    def test_cache_skips_library_all_day_rows_and_long_classes(self):
+        kids = [{"slug": "childrens-programs"}]
+        row = lambda title, venue, **k: dict({"title": title, "start_date": "2030-11-09 10:00:00", "url": title,
+                                              "venue": {"venue": venue}, "categories": kids}, **k)
+        rows = [row("Storytime", "Moon and Back Bookstore"), row("Story Time", "Medford Public Library"),
+                row("Stuffie Sleepover", "Moon and Back Bookstore", all_day=True),
+                row("Sewing", "Arts Collaborative Medford", cost="$221"),
+                row("Gala", "Chevalier Theatre", categories=[{"slug": "music"}])]
+        with patch.object(S._SESSION, "get", return_value=MagicMock(status_code=200, json=lambda: {"events": rows})):
+            events = S.scrape_cache_medford("https://x/wp-json/tribe/events/v1/events", "ua")
+        self.assertEqual([e["name"] for e in events], ["Storytime"])
+
+    def test_uss_constitution_skips_daily_and_flags_kid_programs(self):
+        page = """<a class="column" href="https://u/events/golf"><h4>Daily 10:00 AM - 4:00 PM</h4><h3>Mini Golf</h3></a>
+        <a class="column" href="https://u/events/sf"><h4><span>Next Session: November 17, 2030</span> 9:00 am- 10:00 am</h4>
+        <h3><i>Sensory Friendly Sunday</i></h3></a>"""
+        with patch.object(S._SESSION, "get", return_value=MagicMock(text=page)):
+            events = S.scrape_uss_constitution_museum("u", "ua")
+        self.assertEqual([(e["name"], self.local(e), e["category"]) for e in events],
+                         [("Sensory Friendly Sunday", "2030-11-17 09:00", "family")])
+
+    def test_mosesian_skips_weekly_classes(self):
+        row = lambda name, day: f"""<div class="sugar-calendar-event-list-block__listview__event">
+        <time datetime="{day}T10:00:00">Sat</time>
+        <h4 class="sugar-calendar-event-list-block__event__title"><a href="https://m/{day}">{name}</a></h4></div>"""
+        page = row("Lantern Making Workshop", "2030-11-09") + row("BDT Pro Fall", "2030-11-10")
+        with patch.object(S._SESSION, "get", return_value=MagicMock(text=page)):
+            events = S.scrape_mosesian_center("u", "ua")
+        self.assertEqual([(e["name"], self.local(e), e["category"]) for e in events],
+                         [("Lantern Making Workshop", "2030-11-09 10:00", "family")])
+
+
 if __name__ == "__main__":
     unittest.main()

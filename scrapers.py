@@ -103,6 +103,7 @@ UA_CHROME = (
     "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
 )
 UA_CURL = "curl/8.4.0"
+UA_SITE = "Mozilla/5.0 (compatible; WickedBostonEvents/1.0)"
 
 _HS_CERTIFI = "/opt/homebrew/var/hs-certifi/cacert.pem"
 
@@ -1273,7 +1274,7 @@ def scrape_town_library_kids(url, ua, library, town):
     as Somerville's). Their adult programs would flood the Outer Suburbs group."""
     out = []
     for e in scrape_somerville_library(url, ua):
-        tagged = any(re.match(r"(?:children|kids|family|families|baby|babies|toddler|preschool)", a)
+        tagged = any(re.match(r"(?:children|kids|youth|family|families|baby|babies|toddler|preschool)", a)
                      for a in e.pop("_audiences", []))
         if not tagged and e.get("category") != "family" and not is_kid_family_event(e.get("name"), None):
             continue
@@ -1292,6 +1293,10 @@ def scrape_town_library_kids(url, ua, library, town):
 
 def scrape_watertown_library_kids(url, ua):
     return scrape_town_library_kids(url, ua, "Watertown Free Public Library", "Watertown")
+
+
+def scrape_everett_library_kids(url, ua):
+    return scrape_town_library_kids(url, ua, "Everett Public Libraries", "Everett")
 
 
 def scrape_medford_library_kids(url, ua):
@@ -1610,6 +1615,155 @@ def scrape_fenway_community_center(url, ua):
         if _FENWAY_KIDS_RE.search(e["name"]):
             e.update(category="family", venue="Fenway Community Center", address="1282 Boylston St, Boston, MA")
             out.append(e)
+    return out
+
+
+def _tribe_category(url, ua, slug, default_venue, days=45):
+    """One category of a Tribe calendar. The paged reader drops query strings, so the
+    category comes from each row instead of the API's filter."""
+    def mark(event, item):
+        # all-day rows carry a made-up start time
+        event["_in_category"] = not item.get("all_day") and any(
+            c.get("slug") == slug for c in item.get("categories") or [])
+    events = scrape_tribe_rest_paged(url, ua, default_venue=default_venue, default_category="family",
+                                     days=days, max_pages=10, on_item=mark)
+    out = [e for e in events if e.pop("_in_category", False)]
+    for e in out:
+        e["category"] = "family"
+    return out
+
+
+def scrape_cache_medford(url, ua):
+    """Medford's arts council calendar, which carries Moon and Back Bookstore's story times and
+    Arts Collaborative Medford. The library is read directly, and $100+ rows are multi-week classes."""
+    return [e for e in _tribe_category(url, ua, "childrens-programs", "Medford")
+            if "medford public library" not in (e.get("venue") or "").lower()
+            and not re.search(r"\$\d{3}", e.get("price") or "")]
+
+
+def scrape_hale_family(url, ua):
+    """Hale's family programs. Its calendar is otherwise camp and member events."""
+    return _tribe_category(url, ua, "family-fun", "Hale", days=60)
+
+
+def scrape_paul_revere_house(url, ua):
+    return scrape_tribe_rest(url, ua, default_venue="Paul Revere House", default_category="community")
+
+
+def _tribe_utc_start(event, item):
+    """For Tribe sites whose start_date is really UTC."""
+    event["date"] = datetime.strptime(item["utc_start_date"], "%Y-%m-%d %H:%M:%S").replace(
+        tzinfo=timezone.utc).isoformat()
+
+
+def scrape_temple_israel_family(url, ua):
+    """Temple Israel's service for children six and under. Almost everything else on the
+    calendar is for adults."""
+    events = scrape_tribe_rest_paged(url, ua, default_venue="Temple Israel of Boston", default_category="family",
+                                     days=45, on_item=_tribe_utc_start)
+    out = []
+    for e in events:
+        if re.search(r"(?i)thank goodness|tot shabbat", e["name"]):
+            e.update(category="family", venue="Temple Israel of Boston", address="477 Longwood Ave, Boston, MA")
+            out.append(e)
+    return out
+
+
+_MUSEUM_KIDS_RE = re.compile(r"(?i)\b(?:sensory|scouts?|kids?|family|families|children|hands-on)\b")
+
+
+def scrape_uss_constitution_museum(url, ua):
+    resp = _SESSION.get(url, headers={"User-Agent": ua}, timeout=20)
+    resp.raise_for_status()
+    soup = BeautifulSoup(resp.text, "html.parser")
+    out = []
+    for a in soup.select('a.column[href*="/events/"]'):
+        when, title = a.find("h4"), a.find("h3")
+        if not when or not title:
+            continue
+        m = re.search(r"([A-Z][a-z]+ \d{1,2}, \d{4})\s+(\d{1,2}:\d{2})\s*([AP]M)", when.get_text(" ", strip=True), re.I)
+        if not m:  # "Daily" exhibits have no date
+            continue
+        start = datetime.strptime(f"{m.group(1)} {m.group(2)} {m.group(3).upper()}", "%B %d, %Y %I:%M %p")
+        name = title.get_text(" ", strip=True)
+        out.append({
+            "name": name,
+            "date": start.replace(tzinfo=EASTERN).astimezone(timezone.utc).isoformat(),
+            "url": a["href"],
+            "venue": "USS Constitution Museum",
+            "category": "family" if _MUSEUM_KIDS_RE.search(name) else "community",
+        })
+    return out
+
+
+def _time_shown(page, when):
+    """Whether a page's text gives this clock time, as 9AM, 9:00 AM or 6:15 pm."""
+    hour = when.hour % 12 or 12
+    minutes = f":{when.minute:02d}" if when.minute else "(?::00)?"
+    return bool(re.search(rf"\b{hour}{minutes}\s*{when.strftime('%p')[0]}\.?M", page, re.I))
+
+
+def scrape_revolutionary_spaces(url, ua):
+    """Old State House and Old South Meeting House programs. The start times in the page's
+    structured data run five hours early, so a time is kept only if the program's own page shows
+    it. Its prices all say 0 even for paid programs, so they are ignored."""
+    resp = _SESSION.get(url, headers={"User-Agent": ua}, timeout=20)
+    resp.raise_for_status()
+    soup = BeautifulSoup(resp.text, "html.parser")
+    pages, out = {}, []
+    for tag in soup.find_all("script", type="application/ld+json"):
+        try:
+            item = json.loads(tag.string or "")
+        except ValueError:
+            continue
+        if not isinstance(item, dict) or item.get("@type") != "Event":
+            continue
+        link = (item.get("offers") or {}).get("url") or item.get("url")
+        if not link or not item.get("startDate"):
+            continue
+        if link not in pages:
+            pages[link] = _SESSION.get(link, headers={"User-Agent": ua}, timeout=20).text
+        listed = datetime.fromisoformat(item["startDate"][:19])
+        start = next((t for t in (listed, listed + timedelta(hours=5)) if _time_shown(pages[link], t)), None)
+        if not start:
+            continue
+        name = html.unescape(item.get("name") or "").strip()
+        out.append({
+            "name": name,
+            "date": start.replace(tzinfo=EASTERN).astimezone(timezone.utc).isoformat(),
+            "url": link,
+            "venue": (item.get("location") or {}).get("name") or "Revolutionary Spaces",
+            "category": "family" if _MUSEUM_KIDS_RE.search(name) else "community",
+        })
+    return out
+
+
+_MOSESIAN_KIDS_RE = re.compile(r"(?i)\b(?:lantern|school edition|grades?|kids?|family|families|children)\b")
+
+
+def scrape_mosesian_center(url, ua):
+    """Mosesian Center for the Arts. The list shows the next few events; later ones load by
+    script, so this is a rolling window. Weekly dance company classes are left out."""
+    resp = _SESSION.get(url, headers={"User-Agent": ua}, timeout=20)
+    resp.raise_for_status()
+    soup = BeautifulSoup(resp.text, "html.parser")
+    out = []
+    for link in soup.select("h4.sugar-calendar-event-list-block__event__title a"):
+        name = html.unescape(link.get_text(strip=True))
+        row = link.find_parent(class_="sugar-calendar-event-list-block__listview__event")
+        when = row.find("time", attrs={"datetime": True}) if row else None
+        if not when or name.startswith("BDT"):
+            continue
+        start = datetime.fromisoformat(when["datetime"]).replace(tzinfo=EASTERN)
+        out.append({
+            "name": name,
+            "date": start.astimezone(timezone.utc).isoformat(),
+            "url": link["href"],
+            "venue": "Mosesian Center for the Arts",
+            "address": "321 Arsenal St, Watertown, MA",
+            "locality": "Watertown",
+            "category": "family" if _MOSESIAN_KIDS_RE.search(name) else "art",
+        })
     return out
 
 
@@ -11974,7 +12128,7 @@ _ALL_VENUES = [
     {"name": "Boston Japanese Language Exchange", "url": "https://www.meetup.com/bostonjapanese/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "community"},
     {"name": "Boston Indie Game Devs", "url": "https://www.meetup.com/bostongamedev/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "gaming"},
     {"name": "Unplugged Boston", "url": "https://www.meetup.com/unplugged-boston/events/", "ua": UA_CHROME, "scraper": scrape_meetup_group, "default_category": "gaming"},
-    {"name": "Revolutionary Spaces", "url": "https://revolutionaryspaces.org/explore/program-calendar/", "ua": UA_CHROME, "scraper": scrape_jsonld, "default_category": "community"},
+    {"name": "Revolutionary Spaces", "url": "https://revolutionaryspaces.org/explore/program-calendar/", "ua": UA_SITE, "scraper": scrape_revolutionary_spaces, "default_category": "community"},
     {"name": "WBUR CitySpace", "url": "https://www.wbur.org/events", "ua": UA_CHROME, "scraper": scrape_wbur_cityspace, "default_category": "books"},
     {"name": "Harvard Museums of Science & Culture", "url": "https://hmsc.harvard.edu/upcoming-programs/", "ua": UA_CHROME, "scraper": scrape_hmsc, "default_category": "community"},
     {"name": "Long Live Roxbury", "url": "https://www.longlivebeerworks.com/boston", "ua": UA_CHROME, "scraper": scrape_long_live_roxbury, "default_category": "music"},
@@ -12026,6 +12180,13 @@ _ALL_VENUES = [
     {"name": "Macaroni KID (local parent calendars)", "url": "https://newton.macaronikid.com/events", "ua": UA_CHROME, "scraper": scrape_macaroni_kid, "default_category": "family"},
     {"name": "Boston Moms", "url": "https://bostonmoms.com/wp-json/tribe/events/v1/events", "ua": UA_CHROME, "scraper": scrape_boston_moms, "default_category": "family"},
     {"name": "City of Cambridge (families)", "url": "https://www.cambridgema.gov/citycalendar", "ua": UA_CHROME, "scraper": scrape_cambridge_families, "default_category": "family"},
+    {"name": "Everett Library (kids)", "url": "https://everettpubliclibraries.assabetinteractive.com/calendar/", "ua": UA_SITE, "scraper": scrape_everett_library_kids, "default_category": "family"},
+    {"name": "CACHE in Medford (kids)", "url": "https://www.cacheinmedford.org/wp-json/tribe/events/v1/events", "ua": UA_SITE, "scraper": scrape_cache_medford, "default_category": "family"},
+    {"name": "Hale Family Programs", "url": "https://hale.education/wp-json/tribe/events/v1/events", "ua": UA_SITE, "scraper": scrape_hale_family, "default_category": "family"},
+    {"name": "Paul Revere House", "url": "https://www.paulreverehouse.org/wp-json/tribe/events/v1/events?per_page=50", "ua": UA_SITE, "scraper": scrape_paul_revere_house, "default_category": "community"},
+    {"name": "Temple Israel (family)", "url": "https://www.tisrael.org/wp-json/tribe/events/v1/events", "ua": UA_SITE, "scraper": scrape_temple_israel_family, "default_category": "family"},
+    {"name": "USS Constitution Museum", "url": "https://ussconstitutionmuseum.org/events/", "ua": UA_SITE, "scraper": scrape_uss_constitution_museum, "default_category": "community"},
+    {"name": "Mosesian Center for the Arts", "url": "https://www.mosesianarts.org/events/", "ua": UA_SITE, "scraper": scrape_mosesian_center, "default_category": "art"},
     {"name": "Fenway Community Center", "url": "https://fenwaycommunitycenter.org/wp-json/tribe/events/v1/events", "ua": UA_CHROME, "scraper": scrape_fenway_community_center, "default_category": "family"},
     {"name": "Discovery Museum", "url": "https://www.discoveryacton.org/visit/events-programs", "ua": UA_CHROME, "scraper": scrape_discovery_museum, "default_category": "family"},
     {"name": "Emerald Necklace Conservancy", "url": "https://www.emeraldnecklace.org/calendar", "ua": UA_CHROME, "scraper": scrape_emerald_necklace, "default_category": "outdoors"},
