@@ -176,8 +176,8 @@ def export_json(path="events.json", force=False):
     new_total = sum(len(v["events"]) for v in venues)
     try:  # which sources errored, refused us, or have nothing coming up (CI run summary + .cache/)
         from source_health import write_report
-        from scrapers import HOST_GATE
-        write_report(venues, getattr(HOST_GATE, "refused", {}))
+        from scrapers import HOST_GATE, OVERNIGHT_DROPPED
+        write_report(venues, getattr(HOST_GATE, "refused", {}), overnight=OVERNIGHT_DROPPED)
     except Exception as ex:
         print(f"source health report failed: {ex}")
 
