@@ -67,8 +67,6 @@ class EdmHubTests(unittest.TestCase):
         ]
         html = template.render_hub_page("boston-edm", events)
         self.assertIn('class="edm-hub"', html)
-        self.assertIn("Orbitron", html)
-        self.assertIn("Syne", html)
         self.assertIn("edm-hero-art", html)
         self.assertIn("edm-filters", html)
         self.assertIn("All Electronic", html)

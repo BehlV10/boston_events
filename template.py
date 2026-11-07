@@ -1743,9 +1743,7 @@ def _edm_tags(e):
     return sub, sub_label, sub_emoji, neigh, time_tag, is_free
 
 
-_EDM_FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">'
-              '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
-              '<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;800;900&family=Syne:wght@700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">')
+_EDM_FONTS = ""
 
 _EDM_HERO_ART = """<svg class="edm-hero-art" viewBox="0 0 900 200" aria-hidden="true" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
   <defs>
@@ -1826,7 +1824,7 @@ _EDM_HERO_ART = """<svg class="edm-hero-art" viewBox="0 0 900 200" aria-hidden="
   </g>
   <g transform="translate(450, 26)">
     <rect x="-95" y="-12" width="190" height="24" rx="12" fill="#000" stroke="#00f0ff" stroke-width="1.5" opacity="0.85"/>
-    <text x="0" y="4" text-anchor="middle" font-family="'Orbitron', monospace" font-size="10.5" font-weight="800" fill="#00f0ff" letter-spacing="3">BOSTON RAVE FREQ</text>
+    <text x="0" y="4" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" font-weight="700" fill="#00f0ff" letter-spacing="1">BOSTON RAVE FREQ</text>
   </g>
 </svg>"""
 
@@ -1846,8 +1844,8 @@ _EDM_CSS = """
     background: var(--bg) !important;
     color: var(--fg) !important;
   }
-  .edm-hub h1, .edm-hub h2, .edm-hub h3, .edm-hub .logo, .edm-hub .edm-chip, .edm-hub .cta-btn, .edm-hub .edm-card-subgenre {
-    font-family: "Syne", "Orbitron", -apple-system, sans-serif;
+  .edm-hub h1, .edm-hub h2, .edm-hub h3, .edm-hub .logo, .edm-hub .edm-chip, .edm-hub .cta-btn, .edm-hub .edm-card-subgenre, .edm-filter-label {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   }
   .edm-hub header {
     background: rgba(7, 8, 15, 0.9) !important;
@@ -1883,10 +1881,10 @@ _EDM_CSS = """
   }
   .edm-hub .hero h1 small {
     display: block;
-    font-size: 0.42em;
+    font-size: 0.44em;
     color: var(--cyan);
     font-weight: 700;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.02em;
     text-transform: uppercase;
     margin-top: 6px;
     -webkit-text-fill-color: var(--cyan);
@@ -1932,23 +1930,23 @@ _EDM_CSS = """
   }
   .edm-filter-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
   .edm-filter-label {
-    font-family: "Orbitron", monospace;
-    font-weight: 800;
+    font-weight: 700;
     color: var(--cyan);
-    font-size: 11px;
+    font-size: 11.5px;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    min-width: 65px;
+    letter-spacing: 0.02em;
+    min-width: 58px;
   }
   .edm-chip {
-    font-size: 13.5px;
-    font-weight: 700;
-    padding: 5px 14px 4px;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 14px;
     border-radius: 999px;
     cursor: pointer;
     border: 1px solid rgba(255, 255, 255, 0.12);
     background: #0d1122;
     color: var(--fg);
+    letter-spacing: normal;
     transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
   }
   .edm-chip:hover {
@@ -1964,8 +1962,8 @@ _EDM_CSS = """
   }
   .edm-hub .hub-day {
     margin: 32px 0 14px;
-    font-size: 20px;
-    font-weight: 800;
+    font-size: 19px;
+    font-weight: 700;
     letter-spacing: -0.01em;
     color: #fff;
     display: flex;
@@ -2000,9 +1998,9 @@ _EDM_CSS = """
     padding: 0 4px;
   }
   .edm-city-pill {
-    font-size: 11.5px;
-    font-weight: 800;
-    letter-spacing: 0.08em;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
     text-transform: uppercase;
     padding: 3px 10px;
     border-radius: 999px;
@@ -2085,8 +2083,8 @@ _EDM_CSS = """
   }
   .edm-card-subgenre {
     font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.06em;
+    font-weight: 700;
+    letter-spacing: 0.02em;
     text-transform: uppercase;
     color: var(--edm-band);
     display: flex;
@@ -2095,9 +2093,10 @@ _EDM_CSS = """
   }
   .edm-card-title {
     margin: 0;
-    font-size: 17px;
+    font-size: 16px;
     font-weight: 700;
-    line-height: 1.25;
+    line-height: 1.3;
+    letter-spacing: normal;
   }
   .edm-card-title a {
     color: #fff;
