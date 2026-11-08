@@ -273,9 +273,13 @@ def holiday_theme_css():
         if h.get("banner") is None:
             # Holiday art is drawn 1600x600 with the subject in the upper-middle; show more of it on
             # the day (taller banner) and darken the bottom so the title stays readable.
+            b_url = banner_url(h)
+            full_b = os.path.join(_ROOT, b_url)
+            if os.path.exists(full_b):
+                b_url = f"{b_url}?v={int(os.path.getmtime(full_b))}"
             rules.append(
                 f"{sel} .banner {{ min-height: 360px; background-image: linear-gradient(180deg, rgba(0,0,0,0.10) 0%, "
-                f"rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 62%, rgba(8,8,16,0.88) 100%), url('{banner_url(h)}'); "
+                f"rgba(0,0,0,0) 30%, rgba(0,0,0,0.25) 62%, rgba(8,8,16,0.88) 100%), url('{b_url}'); "
                 f"background-position: center 40%; background-size: cover; }}")
             rules.append(f"@media (max-width: 860px) {{ {sel} .banner {{ min-height: 300px; background-position: center 45%; }} }}")
             # Gradient title text can vanish over bright daytime art; a soft shadow keeps it legible.

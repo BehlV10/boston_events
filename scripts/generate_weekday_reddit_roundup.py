@@ -61,6 +61,17 @@ CITY_CAPS = {"boston": 10, "cambridge": 9, "somerville": 7}
 REDDIT_LIMIT = 40000      # Reddit self-post body limit (characters)
 SIZE_TARGET = 38500       # leave headroom for hand edits before posting
 
+# Reddit's spam filters (and r/boston mods) block or bury posts linking social networks, so
+# those links are swapped for another listing's direct link, the venue's own events page,
+# or dropped (title shown in bold, unlinked).
+SOCIAL_URL_RE = re.compile(
+    r"(?i)^https?://(?:[\w-]+\.)*(?:facebook\.com|fb\.(?:com|me|watch)|instagram\.com|instagr\.am|"
+    r"twitter\.com|x\.com|t\.co|threads\.(?:net|com)|tiktok\.com)(?:/|$)"
+)
+VENUE_EVENT_PAGES = {
+    "aeronaut": "https://www.aeronautbrewing.com/visit/somerville/#events",
+}
+
 SKIP_TITLE_RE = re.compile(
     r"(?i)\b(?:class|classes|course|workshop|training|certification|summit|"
     r"conference|webinar|yoga|zoom|exam|prep|figure drawing|infant|toddler|"
@@ -258,6 +269,21 @@ def build_weekday_roundup(start_monday=None):
     def _is_trivia(e):
         return bool(re.search(r"(?i)\btrivia\b", e.get("name") or ""))
 
+    direct_urls = defaultdict(list)  # (start minute, room) -> non-social links for that listing
+    all_raw = [e for evs in raw_events_by_day.values() for e in evs] + [e for evs in runs.values() for e in evs]
+    for e in all_raw:
+        u = e.get("url") or ""
+        if u.startswith("http") and not SOCIAL_URL_RE.match(u):
+            direct_urls[(e["_time"].replace(second=0, microsecond=0), _room_key(e["venue"]))].append(u)
+    for e in all_raw:
+        u = e.get("url") or ""
+        if not SOCIAL_URL_RE.match(u):
+            continue
+        alts = direct_urls.get((e["_time"].replace(second=0, microsecond=0), _room_key(e["venue"])))
+        v_low = f"{e.get('venue')} {e.get('_source_venue')}".lower()
+        page = next((pg for k, pg in VENUE_EVENT_PAGES.items() if k in v_low), None)
+        e["url"] = (alts or [page])[0]  # None -> rendered as bold text without a link
+
     picked_by_day_city = {d: {c: [] for c in city_keys} for d in weekdays}
 
     for d in weekdays:
@@ -403,15 +429,7 @@ def build_weekday_roundup(start_monday=None):
             "",
             "### 🔗 More on Wicked Boston Events",
             f"- **Full calendar** (filter by neighborhood & T line): [{SITE}]({SITE})",
-            f"- **Today in Boston**: [{SITE}/boston-events-today/]({SITE}/boston-events-today/)",
-            f"- **This weekend**: [{SITE}/boston-events-this-weekend/]({SITE}/boston-events-this-weekend/) · "
-            f"**Free this weekend**: [{SITE}/free-events-boston-this-weekend/]({SITE}/free-events-boston-this-weekend/)",
-            f"- **By city**: [Boston]({SITE}/boston/) · [Cambridge]({SITE}/cambridge/) · "
-            f"[Cambridge tonight]({SITE}/cambridge-events-tonight/) · [Somerville]({SITE}/somerville/) · "
-            f"[Somerville live music]({SITE}/live-music-somerville/)",
-            f"- **By interest**: [Music]({SITE}/music/) · [Comedy]({SITE}/comedy/) · [Free]({SITE}/free/) · "
-            f"[EDM & nightlife]({SITE}/boston-edm/) · [Board game nights]({SITE}/board-game-nights-boston/) · "
-            f"[Markets & festivals]({SITE}/markets-festivals-boston/) · [Kids & family]({SITE}/kids-family-events-boston/)",
+            f"- **For parents** (kids & family events): [{SITE}/kids-family-events-boston/]({SITE}/kids-family-events-boston/)",
             "",
             f"*Curated from 200+ local venue, theatre, museum, and community calendars at **[wickedbostonevents.com]({SITE})** (ad-free & independent).*",
         ]
@@ -425,6 +443,8 @@ def build_weekday_roundup(start_monday=None):
         c = max(caps, key=lambda k: caps[k])
         caps[c] -= 1
         title, body = _render(caps)
+    social = re.findall(r"\]\((https?://[^)\s]+)\)", body)
+    assert not any(SOCIAL_URL_RE.match(u) for u in social), "social-network link left in post"
     assert len(body) <= REDDIT_LIMIT, f"post is {len(body):,} chars, over Reddit's {REDDIT_LIMIT:,}"
     return title, body
 
