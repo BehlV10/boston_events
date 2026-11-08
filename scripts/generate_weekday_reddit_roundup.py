@@ -44,11 +44,21 @@ MAJOR_VENUES = (
     "the burren", "aeronaut", "remnant", "portico", "castle island"
 )
 
+# Arenas and big theaters: a highlighted show here outranks one at a club the same night
+BIG_VENUES = (
+    "td garden", "mgm music hall", "roadrunner", "agganis", "leader bank pavilion", "fenway park",
+    "orpheum", "wang theatre", "shubert", "emerson colonial", "symphony hall", "house of blues",
+)
+
+AGGREGATOR_SOURCES = ("seatgeek", "ticketmaster", "boston shows", "boston calendar", "do617",
+                      "eventschaser", "eventbrite")
+
 SKIP_TITLE_RE = re.compile(
     r"(?i)\b(?:class|classes|course|workshop|training|certification|summit|"
     r"conference|webinar|yoga|zoom|exam|prep|figure drawing|infant|toddler|"
     r"storytime|story time|committee|meeting|retirement board|clubhouse|board of health|"
-    r"luthier collective|preview session|open house)\b"
+    r"luthier collective|preview session|open house|pose|poses|drawing club|runners|group run|"
+    r"stair climb|happy hour deals|virtual|council on aging)\b"
 )
 
 
@@ -142,6 +152,20 @@ def build_weekday_roundup(start_monday=None):
     # Filter events to Mon-Fri and target cities
     city_keys = ("boston", "cambridge", "somerville")
     raw_events_by_day = {d: [] for d in weekdays}
+    sold_out = set()  # (start time, venue) of sold-out listings; other listings of that show go too
+
+    def _room_key(v):
+        v = re.sub(r"^the\s+", "", (v or "").lower())
+        return re.sub(r"[^a-z]", "", v)[:12]
+
+    def _head_slug(name):
+        n = (name or "").lower().strip()
+        n = re.sub(r"^(?:the\s+bowery\s+presents:?\s*|an\s+evening\s+with\s+|a\s+conversation\s+with\s+|sold\s+out:?\s*|!\s*)", "", n)
+        n = re.sub(r"\s+(?:with|w/|ft\.|feat\.|presents|opened by)\s+.*$", "", n)
+        n = re.sub(r"\s+[-–—:]\s+.*$", "", n)
+        n = re.sub(r"\s*\((?:18\+|21\+|ages?\s+\d+\+?|boston|cambridge|somerville)\)$", "", n)
+        n = re.sub(r"[^a-z0-9]+", "", n)
+        return n[:16]
 
     for v in venues:
         vname = v["venue"]
@@ -166,6 +190,9 @@ def build_weekday_roundup(start_monday=None):
             name = e.get("name") or e.get("title") or ""
             if SKIP_TITLE_RE.search(name) or re.search(r"(?i)\b(?:closed|closure|canceled|cancelled|postponed)\b", name):
                 continue
+            if re.search(r"(?i)\bsold[ -]?out\b", f"{name} {e.get('price') or ''}"):
+                sold_out.add((ev_time.replace(second=0, microsecond=0), _room_key(e.get("venue") or vname)))
+                continue
 
             ev = dict(e)
             ev["_time"] = ev_time
@@ -175,15 +202,6 @@ def build_weekday_roundup(start_monday=None):
             ev["_highlight"] = _get_event_highlight(ev, highlights)
             raw_events_by_day[ev_date].append(ev)
 
-    def _head_slug(name):
-        n = (name or "").lower().strip()
-        n = re.sub(r"^(?:the\s+bowery\s+presents:?\s*|an\s+evening\s+with\s+|a\s+conversation\s+with\s+|sold\s+out:?\s*|!\s*)", "", n)
-        n = re.sub(r"\s+(?:with|w/|ft\.|feat\.|presents|opened by)\s+.*$", "", n)
-        n = re.sub(r"\s+[-–—:]\s+.*$", "", n)
-        n = re.sub(r"\s*\((?:18\+|21\+|ages?\s+\d+\+?|boston|cambridge|somerville)\)$", "", n)
-        n = re.sub(r"[^a-z0-9]+", "", n)
-        return n[:16]
-
     def score(e):
         s = 0
         if e.get("_highlight"):
@@ -191,8 +209,13 @@ def build_weekday_roundup(start_monday=None):
         v_low = f"{e.get('venue')} {e.get('_source_venue')}".lower()
         if any(mv in v_low for mv in MAJOR_VENUES):
             s += 40
+        if e.get("_highlight") and any(bv in v_low for bv in BIG_VENUES):
+            s += 25
         if _is_event_free(e):
             s += 15
+        # Library book groups / craft hours are free but rarely Reddit-worthy unless curated
+        if ("public library" in v_low or "city hall" in v_low) and not e.get("_highlight"):
+            s -= 40
         if e.get("price"):
             s += 10
         if _time(e):
@@ -200,17 +223,48 @@ def build_weekday_roundup(start_monday=None):
         # Deprioritize aggregator duplicates or missing times
         if not _time(e):
             s -= 15
+        # Weekday post is for after work: daytime talks/matinees only fill gaps
+        elif e["_time"].hour < 17:
+            s -= 60
         src = (e.get("_source_venue") or "").lower()
         if src in ("ticketmaster", "seatgeek", "eventschaser"):
             s -= 5
         return s
 
+    def _venue_key(e):
+        v = _venue(e).lower()
+        v = re.split(r"\s+[—–-]\s+", v)[0]
+        v = re.sub(r"^the\s+|\s+(?:company|co\.?)$", "", v)
+        return v.strip()
+
+    def _same_listing(a, b):
+        if a["_time"].replace(second=0, microsecond=0) != b["_time"].replace(second=0, microsecond=0):
+            return False
+        an, bn = a["name"].lower(), b["name"].lower()
+        return _venue_key(b) in an or _venue_key(a) in bn
+
+    def _is_trivia(e):
+        return bool(re.search(r"(?i)\btrivia\b", e.get("name") or ""))
+
     picked_by_day_city = {d: {c: [] for c in city_keys} for d in weekdays}
 
     for d in weekdays:
-        day_events = raw_events_by_day[d]
+        day_events = [e for e in raw_events_by_day[d]
+                      if (e["_time"].replace(second=0, microsecond=0), _room_key(e["venue"])) not in sold_out]
         if not day_events:
             continue
+        # One act can't play two cities the same night: when aggregators put a show somewhere
+        # the venue's own calendar doesn't, drop the aggregator-only city.
+        head_cities = defaultdict(lambda: defaultdict(bool))
+        for e in day_events:
+            src = (e.get("_source_venue") or "").lower()
+            first_party = not any(a in src for a in AGGREGATOR_SOURCES)
+            head_cities[_head_slug(e["name"])][e["_city"]] |= first_party
+        def _wrong_city(e):
+            cities = head_cities[_head_slug(e["name"])]
+            return len(cities) > 1 and not cities[e["_city"]] and any(cities.values())
+        day_events = [e for e in day_events if not _wrong_city(e)]
+        day_heads = set()
         w_freq = title_word_freq(day_events)
         merged_day = _merge_duplicates(day_events, w_freq)
 
@@ -225,7 +279,7 @@ def build_weekday_roundup(start_monday=None):
             evs = city_pools[c]
             evs.sort(key=lambda e: (-score(e), e["_time"]))
             day_picked = []
-            seen_heads = set()
+            seen_heads = day_heads
             seen_venue = Counter()
 
             # First pass: try strictly 1 event per venue and unique headliner
@@ -233,12 +287,14 @@ def build_weekday_roundup(start_monday=None):
                 if len(day_picked) >= 5:
                     break
                 slug = _head_slug(e["name"])
-                v_clean = _venue(e).lower()
+                v_clean = _venue_key(e)
                 if slug and slug in seen_heads:
                     continue
                 if seen_venue[v_clean] >= 1:
                     continue
-                if "trivia" in slug and any("trivia" in _head_slug(p["name"]) for p in day_picked if _venue(p).lower() == v_clean):
+                if _is_trivia(e) and any(_is_trivia(p) for p in day_picked):
+                    continue
+                if any(_same_listing(e, p) for p in day_picked):
                     continue
 
                 if slug:
@@ -252,8 +308,12 @@ def build_weekday_roundup(start_monday=None):
                     if len(day_picked) >= 5:
                         break
                     slug = _head_slug(e["name"])
-                    v_clean = _venue(e).lower()
+                    v_clean = _venue_key(e)
                     if e in day_picked:
+                        continue
+                    if _is_trivia(e) and any(_is_trivia(p) for p in day_picked):
+                        continue
+                    if any(_same_listing(e, p) for p in day_picked):
                         continue
                     if slug and slug in seen_heads:
                         continue
