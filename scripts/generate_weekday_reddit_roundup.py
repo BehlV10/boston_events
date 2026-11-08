@@ -53,12 +53,19 @@ BIG_VENUES = (
 AGGREGATOR_SOURCES = ("seatgeek", "ticketmaster", "boston shows", "boston calendar", "do617",
                       "eventschaser", "eventbrite")
 
+# Picks per city per day. The first BASE_PICKS fill on score; anything past that must carry a
+# highlights.json blurb, so the extra slots go to curated events, never filler.
+BASE_PICKS = 5
+CITY_CAPS = {"boston": 9, "cambridge": 8, "somerville": 6}
+REDDIT_LIMIT = 40000      # Reddit self-post body limit (characters)
+SIZE_TARGET = 38500       # leave headroom for hand edits before posting
+
 SKIP_TITLE_RE = re.compile(
     r"(?i)\b(?:class|classes|course|workshop|training|certification|summit|"
     r"conference|webinar|yoga|zoom|exam|prep|figure drawing|infant|toddler|"
     r"storytime|story time|committee|meeting|retirement board|clubhouse|board of health|"
     r"luthier collective|preview session|open house|pose|poses|drawing club|runners|group run|"
-    r"stair climb|happy hour deals|virtual|council on aging)\b"
+    r"stair climb|happy hour deals|virtual|council on aging|pre-show)\b"
 )
 
 
@@ -152,6 +159,7 @@ def build_weekday_roundup(start_monday=None):
     # Filter events to Mon-Fri and target cities
     city_keys = ("boston", "cambridge", "somerville")
     raw_events_by_day = {d: [] for d in weekdays}
+    runs = defaultdict(list)  # highlight id -> listings of a multi-night theater run
     sold_out = set()  # (start time, venue) of sold-out listings; other listings of that show go too
 
     def _room_key(v):
@@ -200,6 +208,9 @@ def build_weekday_roundup(start_monday=None):
             ev["venue"] = e.get("venue") or vname
             ev["_city"] = city
             ev["_highlight"] = _get_event_highlight(ev, highlights)
+            if ev["_highlight"] and ev["_highlight"].get("run"):
+                runs[ev["_highlight"]["id"]].append(ev)  # listed once under "Running all week"
+                continue
             raw_events_by_day[ev_date].append(ev)
 
     def score(e):
@@ -282,10 +293,17 @@ def build_weekday_roundup(start_monday=None):
             seen_heads = day_heads
             seen_venue = Counter()
 
+            cap = CITY_CAPS[c]
+
+            def _room_for(e):
+                return len(day_picked) < BASE_PICKS or (len(day_picked) < cap and e.get("_highlight"))
+
             # First pass: try strictly 1 event per venue and unique headliner
             for e in evs:
-                if len(day_picked) >= 5:
+                if len(day_picked) >= cap:
                     break
+                if not _room_for(e):
+                    continue
                 slug = _head_slug(e["name"])
                 v_clean = _venue_key(e)
                 if slug and slug in seen_heads:
@@ -302,11 +320,13 @@ def build_weekday_roundup(start_monday=None):
                 seen_venue[v_clean] += 1
                 day_picked.append(e)
 
-            # Second pass: if less than 5 events, allow up to 2 per venue if different headliner
-            if len(day_picked) < 5:
+            # Second pass: if slots remain, allow up to 2 per venue if different headliner
+            if len(day_picked) < cap:
                 for e in evs:
-                    if len(day_picked) >= 5:
+                    if len(day_picked) >= cap:
                         break
+                    if not _room_for(e):
+                        continue
                     slug = _head_slug(e["name"])
                     v_clean = _venue_key(e)
                     if e in day_picked:
@@ -324,59 +344,87 @@ def build_weekday_roundup(start_monday=None):
                     seen_venue[v_clean] += 1
                     day_picked.append(e)
 
-            day_picked.sort(key=lambda e: e["_time"])
-            picked_by_day_city[d][c] = day_picked
+            picked_by_day_city[d][c] = day_picked  # pick order ~ rank; trimmed to fit, then time-sorted
 
-    # Format Markdown
-    fri = weekdays[-1]
-    span = f"{mon.strftime('%b %-d')}–{fri.strftime('%-d') if fri.month == mon.month else fri.strftime('%b %-d')}"
-    title = f"Things to do in Boston, Cambridge & Somerville this week ({span}) · Weekday Guide"
+    def _render(caps):
+        # Format Markdown
+        fri = weekdays[-1]
+        span = f"{mon.strftime('%b %-d')}–{fri.strftime('%-d') if fri.month == mon.month else fri.strftime('%b %-d')}"
+        title = f"Things to do in Boston, Cambridge & Somerville this week ({span}) · Weekday Guide"
 
-    city_display = {
-        "boston": "🏙️ BOSTON",
-        "cambridge": "🎓 CAMBRIDGE",
-        "somerville": "🎨 SOMERVILLE",
-    }
+        city_display = {
+            "boston": "🏙️ BOSTON",
+            "cambridge": "🎓 CAMBRIDGE",
+            "somerville": "🎨 SOMERVILLE",
+        }
 
-    out = [
-        f"Hi Boston! Here are ~5 curated things to do each day for **Monday {mon.strftime('%b %-d')} through "
-        f"Friday {fri.strftime('%b %-d')}**, broken down by city (**Boston**, **Cambridge**, and **Somerville**).",
-        "",
-        "Whether you're looking for live music, comedy, 35mm films, pub trivia, or free museum nights after work, "
-        "here are the top picks for the week! Add anything else happening below.",
-        "",
-    ]
+        out = [
+            f"Hi Boston! Here are 5–9 curated things to do each day for **Monday {mon.strftime('%b %-d')} through "
+            f"Friday {fri.strftime('%b %-d')}**, broken down by city (**Boston**, **Cambridge**, and **Somerville**).",
+            "",
+            "Whether you're looking for live music, comedy, 35mm films, pub trivia, or free museum nights after work, "
+            "here are the top picks for the week! Add anything else happening below.",
+            "",
+        ]
 
-    for d in weekdays:
-        day_heading = f"## 📅 {d.strftime('%A, %b %-d').upper()}"
-        out.append(day_heading)
-        out.append("")
-
-        for c in city_keys:
-            picks = picked_by_day_city[d][c]
-            out.append(f"### {city_display[c]}")
-            if picks:
-                for e in picks:
-                    out.append(_line(e))
-            else:
-                out.append("* *Check the calendar for local shows tonight.*")
+        if runs:
+            out += ["## 🎭 RUNNING ALL WEEK", ""]
+            for evs in sorted(runs.values(), key=lambda v: min(e["_time"] for e in v)):
+                evs = sorted(evs, key=lambda e: e["_time"])
+                days = sorted({e["_time"].date() for e in evs})
+                day_lbl = (days[0].strftime("%a") if len(days) == 1 else
+                           f"{days[0].strftime('%a')}–{days[-1].strftime('%a')}")
+                e = evs[0]
+                price = next((_price(x) for x in evs if _price(x)), "")
+                line = "* " + _link(_clean_title(e["name"]), e.get("url")) + f" @ {_venue(e)} · {day_lbl}"
+                line += "".join(f" · {x}" for x in (price, _area(e)) if x)
+                note = e["_highlight"].get("note")
+                out.append(line + (f"  \n  {note}" if note else ""))
             out.append("")
 
-    out += [
-        "---",
-        "",
-        "### 🔗 Explore More Events by City & Neighborhood",
-        f"- **Boston Events**: [{SITE}/boston/]({SITE}/boston/)",
-        f"- **Cambridge Events**: [{SITE}/cambridge/]({SITE}/cambridge/)",
-        f"- **Somerville Events**: [{SITE}/somerville/]({SITE}/somerville/)",
-        f"- **Boston EDM & Nightclubs**: [{SITE}/boston-edm/]({SITE}/boston-edm/)",
-        f"- **Kids & Family**: [{SITE}/kids-family-events-boston/]({SITE}/kids-family-events-boston/)",
-        f"- **Summer Camps Guide**: [{SITE}/summer-camps/]({SITE}/summer-camps/)",
-        "",
-        f"*Curated from 200+ local venue, theatre, museum, and community calendars at **[wickedbostonevents.com]({SITE})** (ad-free & independent).*",
-    ]
+        for d in weekdays:
+            day_heading = f"## 📅 {d.strftime('%A, %b %-d').upper()}"
+            out.append(day_heading)
+            out.append("")
 
-    body = "\n".join(out) + "\n"
+            for c in city_keys:
+                picks = sorted(picked_by_day_city[d][c][:caps[c]], key=lambda e: e["_time"])
+                out.append(f"### {city_display[c]}")
+                if picks:
+                    for e in picks:
+                        out.append(_line(e))
+                else:
+                    out.append("* *Check the calendar for local shows tonight.*")
+                out.append("")
+
+        out += [
+            "---",
+            "",
+            "### 🔗 More on Wicked Boston Events",
+            f"- **Full calendar** (filter by neighborhood & T line): [{SITE}]({SITE})",
+            f"- **Today in Boston**: [{SITE}/boston-events-today/]({SITE}/boston-events-today/)",
+            f"- **This weekend**: [{SITE}/boston-events-this-weekend/]({SITE}/boston-events-this-weekend/) · "
+            f"**Free this weekend**: [{SITE}/free-events-boston-this-weekend/]({SITE}/free-events-boston-this-weekend/)",
+            f"- **By city**: [Boston]({SITE}/boston/) · [Cambridge]({SITE}/cambridge/) · "
+            f"[Cambridge tonight]({SITE}/cambridge-events-tonight/) · [Somerville]({SITE}/somerville/) · "
+            f"[Somerville live music]({SITE}/live-music-somerville/)",
+            f"- **By interest**: [Music]({SITE}/music/) · [Comedy]({SITE}/comedy/) · [Free]({SITE}/free/) · "
+            f"[EDM & nightlife]({SITE}/boston-edm/) · [Board game nights]({SITE}/board-game-nights-boston/) · "
+            f"[Markets & festivals]({SITE}/markets-festivals-boston/) · [Kids & family]({SITE}/kids-family-events-boston/)",
+            "",
+            f"*Curated from 200+ local venue, theatre, museum, and community calendars at **[wickedbostonevents.com]({SITE})** (ad-free & independent).*",
+        ]
+        return title, "\n".join(out) + "\n"
+
+    # Use the extra slots only as far as Reddit's limit allows: trim the lowest-ranked
+    # curated extras (largest city first) until the body fits.
+    caps = dict(CITY_CAPS)
+    title, body = _render(caps)
+    while len(body) > SIZE_TARGET and any(v > BASE_PICKS for v in caps.values()):
+        c = max(caps, key=lambda k: caps[k])
+        caps[c] -= 1
+        title, body = _render(caps)
+    assert len(body) <= REDDIT_LIMIT, f"post is {len(body):,} chars, over Reddit's {REDDIT_LIMIT:,}"
     return title, body
 
 
