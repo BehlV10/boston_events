@@ -15,6 +15,7 @@ import json
 import os
 import re
 import sys
+import unicodedata
 from collections import Counter, defaultdict
 from datetime import date, datetime, timedelta
 from html import unescape
@@ -56,7 +57,7 @@ AGGREGATOR_SOURCES = ("seatgeek", "ticketmaster", "boston shows", "boston calend
 # Picks per city per day. The first BASE_PICKS fill on score; anything past that must carry a
 # highlights.json blurb, so the extra slots go to curated events, never filler.
 BASE_PICKS = 5
-CITY_CAPS = {"boston": 9, "cambridge": 8, "somerville": 6}
+CITY_CAPS = {"boston": 10, "cambridge": 9, "somerville": 7}
 REDDIT_LIMIT = 40000      # Reddit self-post body limit (characters)
 SIZE_TARGET = 38500       # leave headroom for hand edits before posting
 
@@ -167,7 +168,7 @@ def build_weekday_roundup(start_monday=None):
         return re.sub(r"[^a-z]", "", v)[:12]
 
     def _head_slug(name):
-        n = (name or "").lower().strip()
+        n = unicodedata.normalize("NFKD", name or "").encode("ascii", "ignore").decode().lower().strip()
         n = re.sub(r"^(?:the\s+bowery\s+presents:?\s*|an\s+evening\s+with\s+|a\s+conversation\s+with\s+|sold\s+out:?\s*|!\s*)", "", n)
         n = re.sub(r"\s+(?:with|w/|ft\.|feat\.|presents|opened by)\s+.*$", "", n)
         n = re.sub(r"\s+[-–—:]\s+.*$", "", n)
