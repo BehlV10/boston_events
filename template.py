@@ -6,7 +6,7 @@ import os
 import re
 import unicodedata
 from collections import defaultdict
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from html import escape, unescape
 from urllib.parse import quote, quote_plus, urlparse
 
@@ -1150,7 +1150,7 @@ HUBS = {
         "show_details": True,
         "limit": 500,
         "style": "camps",
-        "subtitle": "Accredited day camps, overnight sleepaways, STEM, nature, arts, and sports camps across Boston, MetroWest, and Massachusetts with dates, hours, ages, and weekly pricing.",
+        "subtitle": "Day camps, overnight camps, and STEM, nature, arts and sports camps across Boston, MetroWest and Massachusetts. Prices, dates and sign-up times are checked against each camp's own website.",
         "og_badge": "SUMMER CAMPS GUIDE",
         "og_image": "og-summer-camps.jpg",
         "query": "summer-camps/"
@@ -2349,7 +2349,7 @@ _CAMPS_HERO_ART = """<svg class="camps-hero-art" viewBox="0 0 900 200" aria-hidd
   </g>
   <g transform="translate(450, 26)">
     <rect x="-120" y="-12" width="240" height="24" rx="12" fill="#ffffff" stroke="#15803d" stroke-width="1.5" opacity="0.95"/>
-    <text x="0" y="4" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="800" fill="#15803d" letter-spacing="1.5">🏕️ 2026 SUMMER CAMPS GUIDE</text>
+    <text x="0" y="4" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="800" fill="#15803d" letter-spacing="1.5">🏕️ SUMMER CAMPS GUIDE</text>
   </g>
 </svg>"""
 
@@ -2656,12 +2656,120 @@ _CAMPS_CSS = """
     background: #166534;
     text-decoration: none;
   }
+  .camp-price-badge.unlisted { background: #f3f4f6; color: #4b5563; border: 1px solid #d1d5db; font-weight: 700; }
+  .camp-year-tag {
+    align-self: flex-start;
+    font-size: 11px;
+    font-weight: 700;
+    color: #166534;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    padding: 1px 7px;
+    border-radius: 4px;
+  }
+  .camp-year-tag.old { color: #92400e; background: #fffbeb; border-color: #fde68a; }
+  .camp-price-lines {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 12.5px;
+    color: #374151;
+    line-height: 1.5;
+  }
+  .camp-scale-link, .camp-reg, .camp-checked, .camps-method { margin: 0; font-size: 12.5px; line-height: 1.45; }
+  .camp-scale-link a, .camp-checked a { color: #15803d; }
+  .camp-reg {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #1e3a8a;
+    border-radius: 8px;
+    padding: 7px 10px;
+  }
+  .camp-checked { font-size: 11.5px; color: #6b7280; }
+  .camp-checked.unchecked { font-style: italic; }
+  .camps-method { color: var(--muted); margin: -6px 4px 16px; }
+  .camp-signups, .camp-scale {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 16px 18px;
+    margin: 0 0 18px;
+    color: #111827;
+  }
+  .camp-signups { border-color: #bfdbfe; background: #f8fbff; }
+  .camp-signups h2, .camp-scale h2 { margin: 0 0 6px; font-size: 17px; color: #111827; }
+  .camp-signups p, .camp-scale p { margin: 0 0 10px; font-size: 13px; color: #4b5563; line-height: 1.5; }
+  .camp-signups ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: 13.5px; }
+  .camp-signups a { color: #1d4ed8; font-weight: 600; }
+  .camp-signup-date {
+    display: inline-block;
+    min-width: 92px;
+    font-weight: 800;
+    color: #1e3a8a;
+  }
+  .camp-scale { margin-top: 22px; }
+  .camp-scale-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .camp-scale table { border-collapse: collapse; font-size: 12px; min-width: 640px; width: 100%; }
+  .camp-scale caption { text-align: left; font-size: 12px; color: #6b7280; padding-bottom: 6px; }
+  .camp-scale th, .camp-scale td { border: 1px solid #e5e7eb; padding: 5px 6px; text-align: center; }
+  .camp-scale thead th { background: #f9fafb; font-weight: 700; color: #374151; }
+  .camp-scale tbody th { background: #f9fafb; font-weight: 700; }
+  .camp-scale .tier-1 { background: #dcfce7; }
+  .camp-scale .tier-2 { background: #ecfccb; }
+  .camp-scale .tier-3 { background: #fef9c3; }
+  .camp-scale .tier-4 { background: #ffedd5; }
+  .camp-scale .tier-5 { background: #fee2e2; }
+  .camp-scale-src { font-size: 12px !important; margin: 8px 0 0 !important; }
+  .camp-scale-src a { color: #15803d; }
   @media (max-width: 640px) {
     .camps-hero-art { height: 130px; }
     .camp-filter-label { min-width: 100%; }
     .camps-hub .hub-nav { font-size: 12px; gap: 8px 10px; }
   }
 """
+
+def _camps_signups_html(camps, today, limit=12):
+    """Upcoming registration openings from verified camps, soonest first."""
+    items = []
+    for c in camps:
+        for r in c.get("reg_dates") or []:
+            d = date.fromisoformat(r["date"])
+            if d >= today:
+                items.append((d, c.get("name") or "Camp", r.get("label") or "", c.get("url") or "#"))
+    if not items:
+        return ""
+    items.sort(key=lambda t: (t[0], t[1]))
+    lis = "".join(
+        f'<li><span class="camp-signup-date">{d.strftime("%a, %b %-d")}</span> '
+        f'<a href="{escape(url)}" target="_blank" rel="noopener">{escape(name)}</a>'
+        f'{" · " + escape(label) if label else ""}</li>'
+        for d, name, label, url in items[:limit]
+    )
+    return f"""<section class="camp-signups" aria-label="Camp registration dates coming up">
+    <h2>🗓️ Sign-ups opening soon</h2>
+    <p>Popular camps fill on the first day. These dates are from each camp's own site.</p>
+    <ul>{lis}</ul>
+  </section>"""
+
+
+def _camps_scale_html(scale):
+    head = "".join(f"<th scope=\"col\">{escape(col)}</th>" for col in scale["columns"])
+    body = "".join(
+        f"<tr><th scope=\"row\">{escape(r['family_size'])}</th>"
+        + "".join(f'<td class="tier-{t}">{t}</td>' for t in r["tiers"])
+        + "</tr>"
+        for r in scale["rows"]
+    )
+    return f"""<section class="camp-scale" id="sliding-scale">
+    <h2>{escape(scale['title'])}</h2>
+    <p>{escape(scale['intro'])}</p>
+    <div class="camp-scale-wrap"><table>
+      <caption>Your tier, by family size (rows) and gross household income (columns)</caption>
+      <thead><tr><th scope="col">Family size</th>{head}</tr></thead>
+      <tbody>{body}</tbody>
+    </table></div>
+    <p class="camp-scale-src">Source: <a href="{escape(scale['source'])}" target="_blank" rel="noopener">Mass Audubon sliding scale</a></p>
+  </section>"""
+
 
 _CAMPS_FILTER_JS = """<script>
 (function () {
@@ -2829,7 +2937,7 @@ def render_hub_page(hub_slug, events, site_url=None):
             c_url = c.get("url") or hub_canonical
             c_city = c.get("city") or "Boston"
             c_state = c.get("state") or "MA"
-            c_desc = c.get("price_note") or f"{c_name} in {c_city}, {c_state}"
+            c_desc = f"{c_name} in {c_city}, {c_state}" + (f": {c['price']} ({c['price_year']})" if c.get("verified") and c.get("price") and c.get("price_year") else "")
             hub_event_items.append({
                 "@type": "ListItem",
                 "position": idx + 1,
@@ -3049,6 +3157,10 @@ def render_hub_page(hub_slug, events, site_url=None):
   </div>
 </div>''')
     elif is_camps:
+        from camps_scraper import load_verified
+        camps_verified = load_verified()
+        upcoming_season = camps_verified.get("upcoming_season", datetime.now(EASTERN).year + 1)
+
         def _render_camp_card(c):
             name = escape(c.get("name") or "Camp")
             city = escape(c.get("city") or "Boston")
@@ -3060,23 +3172,55 @@ def render_hub_page(hub_slug, events, site_url=None):
             region = escape(c.get("region") or "boston")
             cat = escape(c.get("category") or "traditional")
             cat_label = escape(c.get("category_label") or "🏕️ Traditional Day Camp")
-            price_tier = escape(c.get("price_tier") or "mid")
-            price_wk = escape(c.get("price_weekly") or "Inquire for rates")
-            ages = escape(c.get("ages") or "All ages")
-            dates = escape(c.get("dates") or "Summer 2026")
-            hours = escape(c.get("hours") or "Full day")
-            note = escape(c.get("price_note") or "")
-            age_groups = " ".join(c.get("age_groups") or ["elementary"])
+            verified = bool(c.get("verified"))
+            price_tier = escape(c.get("price_tier") or "unlisted")
+            if verified:
+                price_badge = escape(c.get("price") or "Price not listed")
+            else:
+                price_badge = "Price not checked"
+            age_groups = " ".join(c.get("age_groups") or [])
 
+            # Say which season the prices are for, and flag when they're last year's.
+            year_html = ""
+            p_year = c.get("price_year")
+            if verified and p_year:
+                if p_year < upcoming_season:
+                    year_html = f'<span class="camp-year-tag old">{p_year} prices · {upcoming_season} not posted yet</span>'
+                else:
+                    year_html = f'<span class="camp-year-tag">{p_year} prices</span>'
+
+            rows = []
+            for label, key in (("Ages", "ages"), ("Season", "season"), ("Hours", "hours")):
+                if c.get(key):
+                    rows.append(f'<div class="camp-detail-item"><span class="camp-detail-label">{label}:</span><span class="camp-detail-val">{escape(c[key])}</span></div>')
+            details_html = f'<div class="camp-grid-details">{"".join(rows)}</div>' if rows else ""
+
+            lines = c.get("price_lines") or []
+            lines_html = ("<ul class=\"camp-price-lines\">" + "".join(f"<li>{escape(l)}</li>" for l in lines) + "</ul>") if lines else ""
+            if c.get("sliding_scale") == "massaudubon":
+                lines_html += '<p class="camp-scale-link"><a href="#sliding-scale">Which tier am I? See the income table ↓</a></p>'
+
+            reg_html = f'<p class="camp-reg">🗓️ <strong>Sign-up:</strong> {escape(c["registration"])}</p>' if c.get("registration") else ""
+
+            if c.get("checked"):
+                src = escape((c.get("sources") or [c.get("url") or "#"])[0])
+                checked_txt = datetime.fromisoformat(c["checked"]).strftime("%b %-d, %Y")
+                if verified:
+                    check_html = f'<p class="camp-checked">Checked against <a href="{src}" target="_blank" rel="noopener">the camp\'s site</a> on {checked_txt}</p>'
+                else:
+                    check_html = f'<p class="camp-checked unchecked">Sign-up info checked on <a href="{src}" target="_blank" rel="noopener">the organization\'s site</a> on {checked_txt}. Prices and dates not checked yet.</p>'
+            else:
+                check_html = '<p class="camp-checked unchecked">We haven\'t checked this camp\'s prices or dates yet. See the camp\'s website.</p>'
+
+            aca_html = '<span class="camp-badge-aca">✓ ACA Accredited</span>' if c.get("accredited") else "<span></span>"
             dist_pill = f'<span class="camp-dist-pill">{dist_str}</span>' if dist_str else ""
-            desc_html = f'<p class="camp-desc">{note}</p>' if note else ""
 
             return f"""<article class="camp-card camp-cat-{cat}" data-region="{region}" data-cat="{cat}" data-age="{age_groups}" data-price="{price_tier}">
   <div class="camp-card-band"></div>
   <div class="camp-card-body">
     <div class="camp-card-top">
       <span class="camp-cat-badge">{cat_label}</span>
-      <span class="camp-price-badge {price_tier}">{price_wk}</span>
+      <span class="camp-price-badge {price_tier}">{price_badge}</span>
     </div>
     <h3 class="camp-card-title"><a href="{url}" target="_blank" rel="noopener">{name}</a></h3>
     <div class="camp-loc-row">
@@ -3084,23 +3228,13 @@ def render_hub_page(hub_slug, events, site_url=None):
       {dist_pill}
       <span class="camp-type-pill">{ctype} Camp</span>
     </div>
-    <div class="camp-grid-details">
-      <div class="camp-detail-item">
-        <span class="camp-detail-label">Ages:</span>
-        <span class="camp-detail-val">{ages}</span>
-      </div>
-      <div class="camp-detail-item">
-        <span class="camp-detail-label">Dates:</span>
-        <span class="camp-detail-val">{dates}</span>
-      </div>
-      <div class="camp-detail-item">
-        <span class="camp-detail-label">Hours:</span>
-        <span class="camp-detail-val">{hours}</span>
-      </div>
-    </div>
-    {desc_html}
+    {year_html}
+    {details_html}
+    {lines_html}
+    {reg_html}
+    {check_html}
     <div class="camp-card-footer">
-      <span class="camp-badge-aca">✓ ACA Accredited</span>
+      {aca_html}
       <a href="{url}" target="_blank" rel="noopener" class="camp-cta-btn">Camp Info &amp; Register →</a>
     </div>
   </div>
@@ -3151,6 +3285,7 @@ def render_hub_page(hub_slug, events, site_url=None):
 </article>""")
 
     city_chips_html, hub_js = "", ""  # the filter script must come after the cards it filters
+    hub_after_grid_html = ""
     if not hub.get("city_filter") and cards_html:
         present = {c for c in ("boston", "cambridge", "somerville", "other") if f'data-city="{c}"' in "".join(cards_html)}
         city_chips_html = '<div class="hub-city-chips" role="group" aria-label="Filter by city">' + "".join(
@@ -3259,11 +3394,16 @@ def render_hub_page(hub_slug, events, site_url=None):
         cost_filter_html = """<button type="button" class="camp-chip active" data-group="price" data-val="all">All Budgets</button>
 <button type="button" class="camp-chip" data-group="price" data-val="free">💚 Free / BCYF</button>
 <button type="button" class="camp-chip" data-group="price" data-val="sliding">💛 Sliding Scale / Financial Aid</button>
-<button type="button" class="camp-chip" data-group="price" data-val="mid">Community &amp; Day ($350–$650/wk)</button>
-<button type="button" class="camp-chip" data-group="price" data-val="premium">Campus &amp; Specialty ($700+/wk)</button>
-<button type="button" class="camp-chip" data-group="price" data-val="overnight">Overnight Sleepaway</button>"""
+<button type="button" class="camp-chip" data-group="price" data-val="mid">Under $600/wk</button>
+<button type="button" class="camp-chip" data-group="price" data-val="premium">$600+/wk</button>
+<button type="button" class="camp-chip" data-group="price" data-val="unlisted">Price not posted / not checked</button>"""
 
-        city_chips_html = f"""<div class="camps-filters" role="group" aria-label="Filter Greater Boston summer camps">
+        n_checked = sum(1 for c in filtered if c.get("verified"))
+        signups_html = _camps_signups_html(filtered, datetime.now(EASTERN).date())
+        scale = camps_verified.get("sliding_scales", {}).get("massaudubon")
+        scale_html = _camps_scale_html(scale) if scale else ""
+
+        city_chips_html = f"""{signups_html}<div class="camps-filters" role="group" aria-label="Filter Greater Boston summer camps">
     <div class="camp-filter-row"><span class="camp-filter-label">Area</span>{area_filter_html}</div>
     <div class="camp-filter-row"><span class="camp-filter-label">Focus</span>{focus_filter_html}</div>
     <div class="camp-filter-row"><span class="camp-filter-label">Ages</span>{ages_filter_html}</div>
@@ -3271,8 +3411,10 @@ def render_hub_page(hub_slug, events, site_url=None):
   </div>
   <div class="camps-count-bar">
     <span>Showing <strong id="camp-results-count">{len(filtered[:card_limit])}</strong> summer camps</span>
-    <span>Summer 2026</span>
-  </div>"""
+    <span>Planning for summer {upcoming_season}</span>
+  </div>
+  <p class="camps-method">Prices, dates and sign-up times come only from each camp's own website, and each card says which year's prices it shows. {n_checked} camps are checked so far. The rest come from the American Camp Association's directory, and we haven't checked their prices yet.</p>"""
+        hub_after_grid_html = scale_html
 
         hub_js = _CAMPS_FILTER_JS
         n_camps = len(filtered[:card_limit])
@@ -3284,8 +3426,9 @@ def render_hub_page(hub_slug, events, site_url=None):
       <h1>{escape(hub.get('h1') or hub['title'])}<small>Boston · Cambridge · Somerville · MetroWest · North &amp; South Shore · Massachusetts</small></h1>
       <p>{hub['subtitle']}</p>
       <div class="camps-stats">
-        <span class="camps-stat">🏕️ {n_camps} accredited camps</span>
-        <span class="camps-stat">💛 {free_or_sliding} free &amp; financial aid options</span>
+        <span class="camps-stat">🏕️ {n_camps} camps</span>
+        <span class="camps-stat">✅ {n_checked} checked against camp websites</span>
+        <span class="camps-stat">💛 {free_or_sliding} free &amp; sliding-scale</span>
         <span class="camps-stat">📍 {n_cities} Massachusetts towns</span>
       </div>
       <a href="../kids-family-events-boston/" class="cta-btn">View year-round kids &amp; family events →</a>
@@ -3565,6 +3708,7 @@ def render_hub_page(hub_slug, events, site_url=None):
     {cards_joined}
   </div>
   <p id="hub-none" class="no-hub-events" hidden>Nothing in this area in the next few weeks. Try another town.</p>
+  {hub_after_grid_html}
   {hub_js}
 </main>
 <footer>

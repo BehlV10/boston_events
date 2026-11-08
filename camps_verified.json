@@ -1,0 +1,536 @@
+{
+  "_about": "Hand-checked against each camp's own website. Every price, date and age here was read off the page listed in `sources` on the `checked` date. Do not add figures from directories or estimates. If a camp hasn't posted something, say so in `price` (and use price_tier 'unlisted') instead of guessing. `price_year` is the season the prices are for; when it's older than the upcoming season the page labels it.",
+  "upcoming_season": 2027,
+  "sliding_scales": {
+    "massaudubon": {
+      "title": "How Mass Audubon's sliding scale works",
+      "source": "https://massaudubon.org/programs-events/nature-camps/sliding-scale",
+      "intro": "Every Mass Audubon camp has five price tiers set by gross household income and family size. Tier 1 pays 20% of the full price; Tier 5 pays the full price. Mass Audubon doesn't publish the Tier 2–4 prices on its camp pages. All campers need a Mass Audubon membership: Tiers 1–3 get one free at registration, and Tiers 4–5 need a family-level membership.",
+      "columns": ["Under $50k", "$50k–$59k", "$60k–$69k", "$70k–$86k", "$87k–$104k", "$105k–$124k", "$125k–$149k", "$150k–$159k", "$160k–$199k", "$200k+"],
+      "rows": [
+        {"family_size": "2", "tiers": [1, 2, 2, 3, 4, 5, 5, 5, 5, 5]},
+        {"family_size": "3", "tiers": [1, 1, 2, 2, 3, 4, 5, 5, 5, 5]},
+        {"family_size": "4", "tiers": [1, 1, 1, 2, 2, 3, 4, 5, 5, 5]},
+        {"family_size": "5", "tiers": [1, 1, 1, 2, 2, 2, 3, 4, 4, 5]},
+        {"family_size": "6+", "tiers": [1, 1, 1, 1, 2, 2, 2, 3, 4, 5]}
+      ]
+    }
+  },
+  "url_notes": [
+    {
+      "url_contains": "ymcaboston.org",
+      "registration": "YMCA of Greater Boston: 2026 registration is closed and 2027 camp information is due in mid-November 2026. Day camp open houses: Sat, Jan 23, 2027, 10am–12pm.",
+      "source": "https://ymcaboston.org/youth-and-family/camps/day-camps/",
+      "checked": "2026-11-08"
+    }
+  ],
+  "camps": [
+    {
+      "aca_id": "camp_3028",
+      "name": "Hill House Summer Camp",
+      "url": "https://www.hillhouseboston.org/Camps.htm",
+      "category": "traditional", "category_label": "🏕️ Traditional Day Camp",
+      "ages": "Ages 3–15", "age_groups": ["preschool", "elementary", "middle", "teens"],
+      "hours": "Day Camp 9:00am–4:00pm (extended day 8:00am–5:30pm)",
+      "season": "2026: weekly sessions, June 15 – August 28",
+      "price": "$575/wk", "price_tier": "mid", "price_year": 2026,
+      "price_lines": [
+        "Day Camp (ages 5–12): $575/wk regular day, $710/wk extended day",
+        "Kiddie Kamp (ages 3–5, mornings): $415/wk",
+        "Leaders in Training (ages 13–15): $325/wk",
+        "5% sibling discount on Day Camp"
+      ],
+      "registration": "2026 registration opened Jan 20 (returning) and Jan 22 (everyone). 2027 dates aren't posted yet.",
+      "sources": ["https://www.hillhouseboston.org/Camps.htm", "https://www.hillhouseboston.org/Assets/Hill+House+Digital+Assets/2026+Hill+House+Camp+Guide.pdf"],
+      "checked": "2026-11-08"
+    },
+    {
+      "id": "camp_v_bcm",
+      "name": "Boston Children's Museum Summer Camp",
+      "url": "https://summercamp.bostonchildrensmuseum.org/",
+      "city": "Boston", "state": "MA", "address": "308 Congress St", "lat": 42.3519, "lng": -71.0498, "type": "Day",
+      "category": "stem", "category_label": "🔬 Museum STEAM Camp",
+      "ages": "Ages 5–7", "age_groups": ["preschool", "elementary"],
+      "hours": "9:00am–4:00pm (free drop-off from 8:30am; extended care to 5pm)",
+      "season": "2026: six weekly sessions, July – mid-August",
+      "price": "$750/wk", "price_tier": "premium", "price_year": 2026,
+      "price_lines": [
+        "$750/wk base fee",
+        "Extended care 4–5pm: +$100/wk",
+        "Up to 3 weeks per camper; pack a nut-free lunch"
+      ],
+      "registration": "2026 registration is closed; 2027 isn't announced yet.",
+      "sources": ["https://summercamp.bostonchildrensmuseum.org/faqs"],
+      "checked": "2026-11-08"
+    },
+    {
+      "id": "camp_v_stevekate_cambridge",
+      "name": "Steve & Kate's Camp — Cambridge",
+      "url": "https://steveandkatescamp.com/cambridge/",
+      "city": "Cambridge", "state": "MA", "address": "Cambridge Friends School, 5 Cadbury Rd", "lat": 42.3876, "lng": -71.1337, "type": "Day",
+      "category": "traditional", "category_label": "🎨 Choose-Your-Own-Day Camp",
+      "ages": "Ages 4–12", "age_groups": ["preschool", "elementary", "middle"],
+      "hours": "8:00am–6:00pm (lunch & snacks included)",
+      "season": "2026: June 15 – August 21",
+      "price": "$134/day", "price_tier": "premium", "price_year": 2026,
+      "price_lines": [
+        "Day Pass: $134/day",
+        "Buy 15+ Day Passes: $119/day",
+        "Summer Pass: $3,570",
+        "Unused passes are refunded automatically after the season"
+      ],
+      "registration": "Summer 2026 has ended. Join the camp's interest list to hear when 2027 opens.",
+      "sources": ["https://steveandkatescamp.com/cambridge/"],
+      "checked": "2026-11-08"
+    },
+    {
+      "id": "camp_v_bcyf",
+      "name": "BCYF Summer Programs (City of Boston)",
+      "url": "https://www.boston.gov/departments/boston-centers-youth-families/summer-programs-and-events-bcyf",
+      "city": "Boston", "state": "MA", "address": "Community centers across Boston", "type": "Day",
+      "category": "traditional", "category_label": "🏙️ City Community Programs",
+      "age_groups": [],
+      "season": "2026 summer guide posted; 2027 not yet",
+      "price": "Varies by center", "price_tier": "unlisted", "price_year": null,
+      "price_lines": [
+        "Programs and prices vary by community center. See the city's summer guide.",
+        "BCYF Camp Joy serves children and young adults with special needs"
+      ],
+      "sources": ["https://www.boston.gov/departments/boston-centers-youth-families/summer-programs-and-events-bcyf"],
+      "checked": "2026-11-08"
+    },
+    {
+      "id": "camp_v_zoocamp",
+      "name": "ZooCamp — Franklin Park Zoo & Stone Zoo",
+      "url": "https://www.zoonewengland.org/discover/camps/zoocamp/",
+      "city": "Boston", "state": "MA", "address": "Franklin Park Zoo (also Stone Zoo, Stoneham)", "lat": 42.3030, "lng": -71.0860, "type": "Day",
+      "category": "nature", "category_label": "🦁 Zoo & Wildlife Camp",
+      "age_groups": [],
+      "price": "Price not listed", "price_tier": "unlisted", "price_year": null,
+      "price_lines": ["The camp page doesn't list prices or 2027 dates yet"],
+      "sources": ["https://www.zoonewengland.org/discover/camps/zoocamp/"],
+      "checked": "2026-11-08"
+    },
+    {
+      "id": "camp_v_nuvu",
+      "name": "NuVu Summer",
+      "url": "https://nuvusummer.org/",
+      "city": "Cambridge", "state": "MA", "address": "450 Massachusetts Ave", "lat": 42.3646, "lng": -71.1028, "type": "Day",
+      "category": "stem", "category_label": "🔬 Design, Engineering & Art Studios",
+      "ages": "Ages 8–18", "age_groups": ["elementary", "middle", "teens"],
+      "season": "2027: sessions July 6 – August 13",
+      "price": "$2,290 per 2 wks", "price_tier": "premium", "price_year": 2027,
+      "price_lines": [
+        "Middle & high school (ages 11–18): $2,290 per 2-week session",
+        "Upper elementary: $830 per 1-week session",
+        "These are 2026 prices, held for bookings through Jan 10, 2027",
+        "High school residential program returns: Session Two, July 18–31, 2027"
+      ],
+      "registration": "2027 booking is open; the early price ends Sun, Jan 10, 2027.",
+      "reg_dates": [{"date": "2027-01-10", "label": "early pricing ends"}],
+      "sources": ["https://nuvusummer.org/"],
+      "checked": "2026-11-08"
+    },
+    {
+      "aca_id": "camp_3972",
+      "name": "Summer@BB&N",
+      "url": "https://bbnsummer.com/dates-registration/",
+      "category": "traditional", "category_label": "🏕️ Classic & Specialty Day Camp",
+      "ages": "PreK – grade 10", "age_groups": ["preschool", "elementary", "middle", "teens"],
+      "hours": "8:15am–3:30pm (early morning & extended day extra)",
+      "season": "2026: weekly, June 22 – August 14",
+      "price": "$750–$850/wk", "price_tier": "premium", "price_year": 2026,
+      "price_lines": [
+        "Kiddie (PreK–K), Junior (gr 1–3) & LIT (gr 8–10): $750/wk",
+        "Senior (gr 4–6): $800/wk · Teen (gr 7–9): $850/wk",
+        "Specialty camps: $900–$950/wk",
+        "July 4th week is discounted ($600–$680)"
+      ],
+      "registration": "2026 registration opened Jan 13. 2027 dates aren't posted yet.",
+      "sources": ["https://bbnsummer.com/dates-registration/"],
+      "checked": "2026-11-08"
+    },
+    {
+      "aca_id": "camp_3202",
+      "name": "Summer at Park (The Park School)",
+      "url": "https://www.summeratpark.org/",
+      "category": "traditional", "category_label": "🎨 Day & Specialty Camp",
+      "ages": "Ages 4–15", "age_groups": ["preschool", "elementary", "middle", "teens"],
+      "hours": "8:15am–3:45pm (2026)",
+      "season": "2027: June 14 – August 13",
+      "price": "$1,480–$1,650 per 2 wks", "price_tier": "premium", "price_year": 2026,
+      "price_lines": [
+        "Middle Camp (gr 3–5): $1,480 for the first session, $1,650 for each later 2-week session",
+        "Deposit: $250 per 2-week session, $150 for 1-week programs"
+      ],
+      "registration": "Returning families: Wed, Dec 2, 2026, 12pm · New families: Fri, Dec 4, 2026, 12pm",
+      "reg_dates": [{"date": "2026-12-02", "label": "returning families, noon"}, {"date": "2026-12-04", "label": "new families, noon"}],
+      "sources": ["https://www.summeratpark.org/", "https://www.summeratpark.org/product-page/junior-explorers", "https://www.summeratpark.org/important-information"],
+      "checked": "2026-11-08"
+    },
+    {
+      "aca_id": "camp_2808",
+      "name": "Dexter Southfield Summer Camps",
+      "url": "https://www.dextersouthfield.org/summer",
+      "category": "sports", "category_label": "⚽ Sports & Day Camp",
+      "age_groups": [],
+      "price": "2027 details not posted", "price_tier": "unlisted", "price_year": null,
+      "price_lines": ["Dexter says 2027 dates, programs and registration are \"coming soon\""],
+      "sources": ["https://www.dextersouthfield.org/summer"],
+      "checked": "2026-11-08"
+    },
+    {
+      "aca_id": "camp_4004",
+      "name": "Camp Harbor View",
+      "url": "https://campharborview.org/summer-camp/how-to-apply/",
+      "category": "nature", "category_label": "⛵ Harbor Island Camp",
+      "ages": "Entering grades 6–9", "age_groups": ["middle", "teens"],
+      "hours": "About 7:30am–5:00pm, including bus and ferry",
+      "price": "Free", "price_tier": "free", "price_year": 2026,
+      "price_lines": [
+        "Free to attend",
+        "Open to City of Boston residents entering grades 6–9",
+        "Round-trip bus to the Seaport and ferry to Long Island included"
+      ],
+      "registration": "2027 applications aren't open yet. Families apply again every year.",
+      "sources": ["https://campharborview.org/summer-camp/how-to-apply/", "https://campharborview.org/summer-camp/summer-program-details/"],
+      "checked": "2026-11-08"
+    },
+    {
+      "aca_id": "camp_2971",
+      "name": "Beaver Summer Camp",
+      "url": "https://bvrcamp.org/",
+      "category": "traditional", "category_label": "🏕️ Classic & Specialty Day Camp",
+      "ages": "Ages 3–15", "age_groups": ["preschool", "elementary", "middle", "teens"],
+      "season": "2027: four 2-week sessions, June 21 – August 13",
+      "price": "$1,440–$1,880 per 2 wks", "price_tier": "premium", "price_year": 2027,
+      "price_lines": [
+        "Lower Camp (PreK–K): $1,440–$1,600 per 2-week session",
+        "Middle, Upper & Senior Camp (gr 1–7): $1,695–$1,880 per 2-week session",
+        "Specialty camps (1–2 weeks): $720–$1,970",
+        "Extended day 7:30–8:30am: $80–$100/wk · 4–6pm: $170–$210/wk",
+        "Bus: $100 each way per week"
+      ],
+      "registration": "Returning families: Thu, Dec 3, 2026, 9am · New families: Tue, Dec 8, 2026, 9am",
+      "reg_dates": [{"date": "2026-12-03", "label": "returning families, 9am"}, {"date": "2026-12-08", "label": "new families, 9am"}],
+      "sources": ["http://bvrcamp.org/", "https://drive.google.com/file/d/1qLP8Asj13Zctz2Oimd4HYaHrcmQUftwh/view"],
+      "checked": "2026-11-08"
+    },
+    {
+      "aca_id": "camp_2973",
+      "name": "Belmont Day Camp",
+      "url": "https://www.belmontday.org/summer/summer-camp-registration/",
+      "category": "traditional", "category_label": "🏕️ Classic Day Camp",
+      "ages": "Preschool – grade 7", "age_groups": ["preschool", "elementary", "middle"],
+      "season": "2027: June 28 – August 20",
+      "price": "2027 rates not posted", "price_tier": "unlisted", "price_year": null,
+      "price_lines": ["2027 tuition is listed as \"TBD\""],
+      "registration": "Returning families: Tue, Jan 5, 2027 · Everyone: Wed, Jan 20, 2027",
+      "reg_dates": [{"date": "2027-01-05", "label": "returning families"}, {"date": "2027-01-20", "label": "open to all"}],
+      "sources": ["https://www.belmontday.org/summer/summer-camp-registration/", "https://www.belmontday.org/summer/belmont-day-camp/dates-rates/"],
+      "checked": "2026-11-08"
+    },
+    {
+      "aca_id": "camp_3022",
+      "name": "Fessenden Day Camp",
+      "url": "https://fessendensummercamps.org/tuition-registration/dates-and-rates/",
+      "category": "traditional", "category_label": "🏕️ Campus Day Camp",
+      "ages": "Age 3.5 – entering grade 8", "age_groups": ["preschool", "elementary", "middle", "teens"],
+      "hours": "Full day 9:00am–4:00pm · half day 9:00am–1:00pm",
+      "season": "2027: weekly, June 14 – August 20",
+      "price": "$915/wk", "price_tier": "premium", "price_year": 2027,
+      "price_lines": [
+        "Full day (entering Pre-K – grade 7): $915/wk",
+        "Half day (age 3.5 – entering Pre-K): $675/wk",
+        "Teen Trippers (entering grade 8): $950/wk",
+        "July 4th week is prorated ($732 full day)",
+        "Sports & specialty camps are priced separately"
+      ],
+      "registration": "Returning families: Wed, Dec 2, 2026, 9am · New families: Mon, Dec 7, 2026, 9am",
+      "reg_dates": [{"date": "2026-12-02", "label": "returning families, 9am"}, {"date": "2026-12-07", "label": "new families, 9am"}],
+      "sources": ["https://fessendensummercamps.org/tuition-registration/dates-and-rates/"],
+      "checked": "2026-11-08"
+    },
+    {
+      "aca_id": "camp_3046",
+      "name": "Nobles Day Camp",
+      "url": "https://www.noblesdaycamp.org/registration/",
+      "category": "traditional", "category_label": "🎭 Classic & Arts Day Camp",
+      "ages": "Age 4 – entering grade 9", "age_groups": ["preschool", "elementary", "middle", "teens"],
+      "hours": "Full day 9am–4pm · half day 9am–2pm",
+      "season": "2027: four 2-week sessions, June 28 – August 20",
+      "price": "$1,600–$1,745 per 2 wks", "price_tier": "premium", "price_year": 2027,
+      "price_lines": [
+        "Full day (age 4 – entering gr 7): $1,600–$1,745 per 2-week session",
+        "Half day (age 4 – entering gr 2): $1,410–$1,535",
+        "Teen Program (entering gr 8–9): $1,820–$1,955",
+        "Lunch $36/wk · bus $95–$105 one way per session",
+        "Sessions can't be split; $200 deposit per session"
+      ],
+      "registration": "Returning families: open since Nov 11, 2026 · New families: Wed, Dec 2, 2026, 12pm",
+      "reg_dates": [{"date": "2026-12-02", "label": "new families, noon"}],
+      "sources": ["https://www.noblesdaycamp.org/registration/"],
+      "checked": "2026-11-08"
+    },
+    {
+      "id": "camp_v_everwood",
+      "name": "Everwood Day Camp",
+      "url": "https://everwooddaycamp.com/dates-enrollment/",
+      "city": "Sharon", "state": "MA", "address": "125 Lakeview St", "lat": 42.1080, "lng": -71.1870, "type": "Day",
+      "category": "traditional", "category_label": "🌊 Lakefront Day Camp",
+      "ages": "About ages 4–15", "age_groups": ["preschool", "elementary", "middle", "teens"],
+      "season": "2027: four 2-week sessions, June 21 – August 13 (optional post week Aug 16–20)",
+      "price": "$1,995 per 2 wks", "price_tier": "premium", "price_year": 2027,
+      "price_lines": [
+        "2 weeks: $1,995 · 4 weeks: $3,945 · 6 weeks: $5,710 · 8 weeks: $7,120",
+        "Includes daily swim lessons; bus and extended day cost extra",
+        "Extended day: mornings $105/wk, afternoons $135/wk, both $215/wk",
+        "$150/week deposit, fully refundable before Feb 1, 2027"
+      ],
+      "registration": "2027 enrollment is open now.",
+      "sources": ["https://everwooddaycamp.com/dates-enrollment/", "https://everwooddaycamp.com/about/faqs/"],
+      "checked": "2026-11-08"
+    },
+    {
+      "id": "camp_v_linx",
+      "name": "LINX Camps",
+      "url": "https://www.linxcamps.com/details/pricing",
+      "city": "Wellesley", "state": "MA", "address": "Dana Hall campus, 45 Dana Rd", "lat": 42.2925, "lng": -71.2895, "type": "Day",
+      "category": "sports", "category_label": "⚽ Sports, Arts & Specialty",
+      "age_groups": [],
+      "hours": "9:00am–4:00pm (early drop-off from 7:50am, late pick-up to 6pm)",
+      "price": "$842–$909/wk", "price_tier": "premium", "price_year": 2027,
+      "price_lines": [
+        "Camp: $909/wk list price, down to $842/wk paying by ACH for 8+ weeks",
+        "Jr. Fun Bunch & CIT: $639/wk",
+        "Bus $106–$109/wk · lunch $67–$69/wk",
+        "Early drop-off $99/wk · extended day $149/wk",
+        "LINX says rates go up as summer gets closer"
+      ],
+      "registration": "2027 registration is open now.",
+      "sources": ["https://www.linxcamps.com/details/pricing"],
+      "checked": "2026-11-08"
+    },
+    {
+      "aca_id": "camp_3010",
+      "name": "Camp Sewataro",
+      "url": "https://sewataro.com/about-us/dates-tuition/dates-tuition",
+      "category": "traditional", "category_label": "🏕️ Woodland & Lake Day Camp",
+      "ages": "Age 3 – grade 8 (plus CIT)", "age_groups": ["preschool", "elementary", "middle", "teens"],
+      "season": "2027: June 28 – August 20",
+      "price": "$2,005–$2,225 per 2 wks", "price_tier": "premium", "price_year": 2027,
+      "price_lines": [
+        "2 weeks: $2,005–$2,225 · 4 weeks: $4,185 · 6 weeks: $6,170 · 8 weeks: $7,380",
+        "Preschool: Sprouts half day (ages 3–4) $545/wk · Saplings full day (age 4) $1,085/wk",
+        "CIT program: $2,090 per 4 weeks",
+        "Deposits of $400–$800 become non-refundable after Dec 15, 2026"
+      ],
+      "registration": "2027 applications are open now.",
+      "sources": ["https://sewataro.com/about-us/dates-tuition/dates-tuition"],
+      "checked": "2026-11-08"
+    },
+    {
+      "aca_id": "camp_2979",
+      "name": "Boston Nature Center Camp (Mass Audubon)",
+      "url": "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/boston-nature-center/camp/programs-pricing",
+      "category": "nature", "category_label": "🌿 Nature & Wildlife",
+      "ages": "Ages 5–15", "age_groups": ["elementary", "middle", "teens"],
+      "hours": "8:30am–5:30pm (before camp from 7:30am)",
+      "season": "2026: June 22 – August 28, mostly 2-week sessions",
+      "price": "Sliding scale $182–$910", "price_tier": "sliding", "price_year": 2026,
+      "sliding_scale": "massaudubon",
+      "price_lines": [
+        "Nature Camp (ages 5–13): $182–$910 in Mattapan, $185–$925 at the Jamaica Plain site. The page doesn't say whether that's per week or per 2-week session.",
+        "Farm Trekkers & specialty weeks (ages 9–11): $100–$500/wk",
+        "Before camp: $30–$150 per session",
+        "Up to 4 weeks per child"
+      ],
+      "registration": "2026: no lottery; early registration for Tiers 1–3 ran Jan 8–20, and it opened to everyone Jan 28 at 6am. 2027 registration is \"coming soon\".",
+      "sources": ["https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/boston-nature-center/camp/programs-pricing"],
+      "checked": "2026-11-08"
+    },
+    {
+      "aca_id": "camp_3018",
+      "name": "Drumlin Farm Camp (Mass Audubon)",
+      "url": "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/drumlin-farm/camp/programs-pricing",
+      "category": "nature", "category_label": "🐄 Farm & Nature Camp",
+      "ages": "Ages 4–17", "age_groups": ["preschool", "elementary", "middle", "teens"],
+      "hours": "8:30am–3:00pm (after camp to 5:30pm)",
+      "season": "2026: June 22 – August 21",
+      "price": "Sliding scale $142–$710/wk", "price_tier": "sliding", "price_year": 2026,
+      "sliding_scale": "massaudubon",
+      "price_lines": [
+        "One-week camps: $142–$710 (Farm Trekkers $100–$500)",
+        "Two-week Farm & Nature Camps: $285–$1,425 per session (ages 4–11), $335–$1,675 (ages 10–13)",
+        "After camp: $56–$275"
+      ],
+      "registration": "Mass Audubon opens 2027 registration on staggered dates in January.",
+      "sources": ["https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/drumlin-farm/camp/programs-pricing", "https://www.massaudubon.org/programs-events/nature-camps/day-camps"],
+      "checked": "2026-11-08"
+    },
+    {
+      "aca_id": "camp_3041",
+      "name": "Moose Hill Nature Camp (Mass Audubon)",
+      "url": "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/moose-hill/camp/programs-pricing",
+      "category": "nature", "category_label": "🌲 Nature & Adventure",
+      "ages": "Ages 5–16", "age_groups": ["elementary", "middle", "teens"],
+      "hours": "8:45am–4:15pm",
+      "season": "2026: weekly, June 22 – August 21",
+      "price": "Sliding scale $102–$512/wk", "price_tier": "sliding", "price_year": 2026,
+      "sliding_scale": "massaudubon",
+      "price_lines": [
+        "Nature, STEAM & adventure camps: $102–$512/wk",
+        "Counselors-in-Training: $54–$270/wk",
+        "Before camp $12–$60/wk · after camp $25–$115/wk"
+      ],
+      "registration": "2026 registration opened Jan 14. Mass Audubon opens 2027 registration on staggered dates in January.",
+      "sources": ["https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/moose-hill/camp/programs-pricing"],
+      "checked": "2026-11-08"
+    },
+    {
+      "aca_id": "camp_2975",
+      "name": "Blue Hills Trailside Nature Camp (Mass Audubon)",
+      "url": "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/blue-hills-trailside-museum/camp/programs-pricing",
+      "category": "nature", "category_label": "🌲 Forest & Trail Ecology",
+      "ages": "Ages 4.5–15", "age_groups": ["preschool", "elementary", "middle", "teens"],
+      "hours": "9:00am–3:00pm",
+      "season": "2026: weekly, June 22 – August 21",
+      "price": "Sliding scale $103–$515/wk", "price_tier": "sliding", "price_year": 2026,
+      "sliding_scale": "massaudubon",
+      "price_lines": [
+        "Nature camp (ages 4.5–13): $103–$515/wk",
+        "Teen Adventurers (ages 12–14): $113–$565",
+        "Before camp $17–$85/wk · after camp $33–$165/wk"
+      ],
+      "registration": "2026 registration opened Jan 21. Mass Audubon opens 2027 registration on staggered dates in January.",
+      "sources": ["https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/blue-hills-trailside-museum/camp/programs-pricing"],
+      "checked": "2026-11-08"
+    },
+    {
+      "aca_id": "camp_3025",
+      "name": "Habitat Nature Camp (Mass Audubon)",
+      "url": "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/habitat/camp/programs-pricing",
+      "category": "nature", "category_label": "🌿 Forest & Pond Ecology",
+      "ages": "Ages 4–16", "age_groups": ["preschool", "elementary", "middle", "teens"],
+      "hours": "9:00am–3:30pm (after camp to 5:30pm)",
+      "season": "2026: June 22 – August 21, mostly 2-week sessions",
+      "price": "Sliding scale $328–$1,639 per 2 wks", "price_tier": "sliding", "price_year": 2026,
+      "sliding_scale": "massaudubon",
+      "price_lines": [
+        "Two-week Nature Camps (ages 4–12): $328–$1,639 per session",
+        "Theme week, June 22–26: $164–$820",
+        "Teen Trekkers (ages 12–14): $358–$1,788 · CIT: $300",
+        "After camp: $11.40–$57/day"
+      ],
+      "registration": "2026 registration opened Jan 21. Mass Audubon opens 2027 registration on staggered dates in January.",
+      "sources": ["https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/habitat/camp/programs-pricing"],
+      "checked": "2026-11-08"
+    },
+    {
+      "aca_id": "camp_2987",
+      "name": "Broadmoor Nature Camp (Mass Audubon)",
+      "url": "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/broadmoor/camp/programs-pricing",
+      "category": "nature", "category_label": "🛶 River & Wetland Ecology",
+      "ages": "Ages 4–17", "age_groups": ["preschool", "elementary", "middle", "teens"],
+      "hours": "9:00am–3:00pm (after camp to 5pm)",
+      "season": "2026: weekly, June 22 – August 14",
+      "price": "Sliding scale $136–$680/wk", "price_tier": "sliding", "price_year": 2026,
+      "sliding_scale": "massaudubon",
+      "price_lines": [
+        "Nature camps (ages 4–13): $136–$680/wk; specialty weeks $150–$750",
+        "CIT two-day training: $230",
+        "After camp: $45–$225/wk"
+      ],
+      "registration": "2026 registration opened Jan 14. Mass Audubon opens 2027 registration on staggered dates in January.",
+      "sources": ["https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/broadmoor/camp/programs-pricing"],
+      "checked": "2026-11-08"
+    },
+    {
+      "aca_id": "camp_3031",
+      "name": "Ipswich River Nature Camp (Mass Audubon)",
+      "url": "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/ipswich-river/camp/programs-pricing",
+      "category": "nature", "category_label": "🛶 River & Forest Nature Camp",
+      "ages": "Ages 5–14", "age_groups": ["elementary", "middle", "teens"],
+      "hours": "8:30am–3:00pm",
+      "season": "2026: weekly, June 22 – August 21",
+      "price": "Sliding scale $114–$570/wk", "price_tier": "sliding", "price_year": 2026,
+      "sliding_scale": "massaudubon",
+      "price_lines": [
+        "One-week nature camps: $114–$570/wk",
+        "Two-week Trekkers program (ages 7–11) also offered"
+      ],
+      "registration": "Mass Audubon opens 2027 registration on staggered dates in January.",
+      "sources": ["https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/ipswich-river/camp/programs-pricing"],
+      "checked": "2026-11-08"
+    },
+    {
+      "aca_id": "camp_3047",
+      "name": "North River Nature Camp (Mass Audubon)",
+      "url": "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/north-river/camp/programs-pricing",
+      "category": "nature", "category_label": "🌿 Nature Camp",
+      "ages": "Ages 4.5–14", "age_groups": ["preschool", "elementary", "middle", "teens"],
+      "hours": "9:00am–3:00pm",
+      "season": "2026: weekly, June 22 – August 14",
+      "price": "Sliding scale $109–$545/wk", "price_tier": "sliding", "price_year": 2026,
+      "sliding_scale": "massaudubon",
+      "price_lines": [
+        "Nature camps: $109–$545/wk",
+        "Specialty sessions (ages 11–14): $87–$579"
+      ],
+      "registration": "Mass Audubon opens 2027 registration on staggered dates in January.",
+      "sources": ["https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/north-river/camp/programs-pricing"],
+      "checked": "2026-11-08"
+    },
+    {
+      "aca_id": "camp_3057",
+      "name": "Stony Brook Nature Camp (Mass Audubon)",
+      "url": "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/stony-brook/camp/programs-pricing",
+      "category": "nature", "category_label": "🌿 Nature Camp",
+      "ages": "Ages 4–15", "age_groups": ["preschool", "elementary", "middle", "teens"],
+      "hours": "9:00am–3:30pm",
+      "season": "2026: weekly, June 22 – August 21",
+      "price": "Sliding scale $101–$505/wk", "price_tier": "sliding", "price_year": 2026,
+      "sliding_scale": "massaudubon",
+      "price_lines": ["Nature camps: $101–$505/wk"],
+      "registration": "Mass Audubon opens 2027 registration on staggered dates in January.",
+      "sources": ["https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/stony-brook/camp/programs-pricing"],
+      "checked": "2026-11-08"
+    },
+    {
+      "aca_id": "camp_2985",
+      "name": "Broad Meadow Brook Nature Camp (Mass Audubon)",
+      "url": "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/broad-meadow-brook/camp/programs-pricing",
+      "category": "nature", "category_label": "🌿 Nature Camp",
+      "ages": "Ages 4.5–16", "age_groups": ["preschool", "elementary", "middle", "teens"],
+      "hours": "9:00am–3:30pm",
+      "season": "2026: weekly, June 22 – August 28",
+      "price": "Sliding scale $94–$470/wk", "price_tier": "sliding", "price_year": 2026,
+      "sliding_scale": "massaudubon",
+      "price_lines": [
+        "Weekly nature camp: $94–$470",
+        "3-day mini camp (ages 4.5–6): $42–$210"
+      ],
+      "registration": "Mass Audubon opens 2027 registration on staggered dates in January.",
+      "sources": ["https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/broad-meadow-brook/camp/programs-pricing"],
+      "checked": "2026-11-08"
+    },
+    {
+      "aca_id": "camp_3065",
+      "name": "Wachusett Meadow Nature Camp (Mass Audubon)",
+      "url": "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/wachusett-meadow/camp/programs-pricing",
+      "category": "nature", "category_label": "🌿 Nature Camp",
+      "ages": "Ages 3.5 and up", "age_groups": ["preschool", "elementary", "middle"],
+      "hours": "9:00am–3:30pm",
+      "season": "2026: weekly, June 22 – August 21",
+      "price": "Sliding scale $94–$470/wk", "price_tier": "sliding", "price_year": 2026,
+      "sliding_scale": "massaudubon",
+      "price_lines": [
+        "Full-day nature camp: $94–$470/wk",
+        "Half-day preschool (ages 3.5–5): $42–$210"
+      ],
+      "registration": "Mass Audubon opens 2027 registration on staggered dates in January.",
+      "sources": ["https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/wachusett-meadow/camp/programs-pricing"],
+      "checked": "2026-11-08"
+    }
+  ]
+}

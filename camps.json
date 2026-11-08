@@ -10,21 +10,74 @@
     "region_label": "Boston Proper",
     "type": "Day",
     "genders": "Coed",
-    "url": "https://www.hillhouseboston.org/camps/summer-camp/",
-    "hours": "9:00 AM – 4:00 PM (Extended day 8:00 AM – 5:30 PM)",
-    "ages": "Ages 5–12",
+    "url": "https://www.hillhouseboston.org/Camps.htm",
+    "hours": "Day Camp 9:00am–4:00pm (extended day 8:00am–5:30pm)",
     "age_groups": [
+      "preschool",
       "elementary",
-      "middle"
+      "middle",
+      "teens"
     ],
-    "dates": "Weekly June 15 – August 28",
-    "price_weekly": "$575–$640",
+    "price": "$575/wk",
     "price_tier": "mid",
-    "price_note": "Sailing on the Charles River, splash pad, athletics, creative arts, field trips.",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
-    "source": "American Camp Association (ACA) New England"
+    "verified": true,
+    "source": "American Camp Association (ACA) New England",
+    "ages": "Ages 3–15",
+    "season": "2026: weekly sessions, June 15 – August 28",
+    "price_year": 2026,
+    "price_lines": [
+      "Day Camp (ages 5–12): $575/wk regular day, $710/wk extended day",
+      "Kiddie Kamp (ages 3–5, mornings): $415/wk",
+      "Leaders in Training (ages 13–15): $325/wk",
+      "5% sibling discount on Day Camp"
+    ],
+    "registration": "2026 registration opened Jan 20 (returning) and Jan 22 (everyone). 2027 dates aren't posted yet.",
+    "sources": [
+      "https://www.hillhouseboston.org/Camps.htm",
+      "https://www.hillhouseboston.org/Assets/Hill+House+Digital+Assets/2026+Hill+House+Camp+Guide.pdf"
+    ],
+    "checked": "2026-11-08"
+  },
+  {
+    "id": "camp_v_bcm",
+    "city": "Boston",
+    "state": "MA",
+    "address": "308 Congress St",
+    "distance_miles": 0.7,
+    "region": "boston",
+    "region_label": "Boston Proper",
+    "type": "Day",
+    "genders": "Coed",
+    "hours": "9:00am–4:00pm (free drop-off from 8:30am; extended care to 5pm)",
+    "age_groups": [
+      "preschool",
+      "elementary"
+    ],
+    "price": "$750/wk",
+    "price_tier": "premium",
+    "accredited": false,
+    "source": "Camp website",
+    "name": "Boston Children's Museum Summer Camp",
+    "url": "https://summercamp.bostonchildrensmuseum.org/",
+    "category": "stem",
+    "category_label": "🔬 Museum STEAM Camp",
+    "ages": "Ages 5–7",
+    "season": "2026: six weekly sessions, July – mid-August",
+    "price_year": 2026,
+    "price_lines": [
+      "$750/wk base fee",
+      "Extended care 4–5pm: +$100/wk",
+      "Up to 3 weeks per camper; pack a nut-free lunch"
+    ],
+    "registration": "2026 registration is closed; 2027 isn't announced yet.",
+    "sources": [
+      "https://summercamp.bostonchildrensmuseum.org/faqs"
+    ],
+    "checked": "2026-11-08",
+    "verified": true
   },
   {
     "id": "camp_3024",
@@ -38,184 +91,66 @@
     "type": "Day",
     "genders": "Coed",
     "url": "http://ymcaboston.org/wangcamps",
-    "hours": "8:30 AM – 5:00 PM",
-    "ages": "Ages 5–13",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly June 29 – August 28",
-    "price_weekly": "$360–$460",
-    "price_tier": "mid",
-    "price_note": "Swimming lessons, STEM enrichment, field trips, gym sports, EEC state vouchers accepted.",
+    "hours": "9:00 AM – 5:00 PM",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
-    "category_label": "🏕️ YMCA Community Camp",
+    "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
-    "source": "American Camp Association (ACA) New England"
-  },
-  {
-    "id": "camp_cur_14879",
-    "name": "Boston Children's Museum Summer Discovery",
-    "city": "Boston",
-    "state": "MA",
-    "address": "Fort Point / Seaport, Boston",
-    "distance_miles": 2.5,
-    "region": "boston",
-    "region_label": "Boston Proper",
-    "type": "Day",
-    "genders": "Coed",
-    "url": "https://bostonchildrensmuseum.org/",
-    "hours": "9:00 AM – 4:00 PM (Aftercare to 5:30 PM)",
-    "ages": "Ages 5–7",
-    "age_groups": [
-      "preschool",
-      "elementary"
+    "verified": false,
+    "source": "American Camp Association (ACA) New England",
+    "registration": "YMCA of Greater Boston: 2026 registration is closed and 2027 camp information is due in mid-November 2026. Day camp open houses: Sat, Jan 23, 2027, 10am–12pm.",
+    "sources": [
+      "https://ymcaboston.org/youth-and-family/camps/day-camps/"
     ],
-    "dates": "Weekly July 6 – August 21",
-    "price_weekly": "$750",
-    "price_tier": "premium",
-    "price_note": "Hands-on museum exhibits, STEAM lab workshops, channel explorations.",
-    "category": "arts",
-    "category_label": "🎨 Arts & Museum Discovery",
-    "accredited": true,
-    "source": "Direct Verified Provider"
+    "checked": "2026-11-08"
   },
   {
-    "id": "camp_cur_67268",
-    "name": "Steve & Kate's Camp — Boston & Cambridge",
-    "city": "Boston",
+    "id": "camp_v_nuvu",
+    "city": "Cambridge",
     "state": "MA",
-    "address": "Boston & Cambridge",
-    "distance_miles": 2.5,
-    "region": "boston",
-    "region_label": "Boston Proper",
+    "address": "450 Massachusetts Ave",
+    "distance_miles": 2.3,
+    "region": "cambridge",
+    "region_label": "Cambridge & Somerville",
     "type": "Day",
     "genders": "Coed",
-    "url": "https://steveandkatescamp.com/boston/",
-    "hours": "8:00 AM – 6:00 PM (Full day included)",
-    "ages": "Ages 4–12",
-    "age_groups": [
-      "preschool",
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly June 15 – August 21",
-    "price_weekly": "$550 (or $119/day)",
-    "price_tier": "mid",
-    "price_note": "Self-directed choice: stop-motion animation, coding, sewing, baking, maker lab. Unused days refunded.",
-    "category": "stem",
-    "category_label": "🤖 Creative Tech & Maker",
-    "accredited": true,
-    "source": "Direct Verified Provider"
-  },
-  {
-    "id": "camp_cur_14963",
-    "name": "BCYF Summer Camps (City of Boston)",
-    "city": "Boston",
-    "state": "MA",
-    "address": "30+ Boston Neighborhoods",
-    "distance_miles": 2.5,
-    "region": "boston",
-    "region_label": "Boston Proper",
-    "type": "Day",
-    "genders": "Coed",
-    "url": "https://www.boston.gov/departments/community-youth-and-families/bcyf-summer-camps",
-    "hours": "9:00 AM – 4:00 PM",
-    "ages": "Ages 6–13",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly July 6 – August 21",
-    "price_weekly": "Free – $50",
-    "price_tier": "free",
-    "price_note": "City of Boston Centers for Youth & Families: swimming, arts, sports, breakfast & lunch included.",
-    "category": "traditional",
-    "category_label": "🏛️ City Community Centers",
-    "accredited": true,
-    "source": "Direct Verified Provider"
-  },
-  {
-    "id": "camp_cur_40991",
-    "name": "Museum of Science Summer Courses",
-    "city": "Boston",
-    "state": "MA",
-    "address": "Science Park, Boston/Cambridge",
-    "distance_miles": 2.5,
-    "region": "boston",
-    "region_label": "Boston Proper",
-    "type": "Day",
-    "genders": "Coed",
-    "url": "https://www.mos.org/summer-courses",
-    "hours": "9:00 AM – 3:00 PM",
-    "ages": "Ages 6–14 (Grades 1–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly July 6 – August 21",
-    "price_weekly": "$485–$550",
-    "price_tier": "mid",
-    "price_note": "Behind-the-scenes museum access, hands-on engineering design, Omni theater screenings.",
-    "category": "stem",
-    "category_label": "🔬 Science & Engineering",
-    "accredited": true,
-    "source": "Direct Verified Provider"
-  },
-  {
-    "id": "camp_cur_67090",
-    "name": "New England Aquarium Harbor Camp",
-    "city": "Boston",
-    "state": "MA",
-    "address": "Central Wharf, Boston",
-    "distance_miles": 2.5,
-    "region": "boston",
-    "region_label": "Boston Proper",
-    "type": "Day",
-    "genders": "Coed",
-    "url": "https://www.neaq.org/learn/camps/",
-    "hours": "8:30 AM – 4:30 PM",
-    "ages": "Ages 8–15",
+    "hours": null,
     "age_groups": [
       "elementary",
       "middle",
       "teens"
     ],
-    "dates": "1 & 2-week sessions July – August",
-    "price_weekly": "$685–$750",
+    "price": "$2,290 per 2 wks",
     "price_tier": "premium",
-    "price_note": "Behind-the-scenes animal care, harbor boat excursions, marine biology fieldwork, tide pool labs.",
-    "category": "nature",
-    "category_label": "🐋 Marine Biology & Ocean Fieldwork",
-    "accredited": true,
-    "source": "Direct Verified Provider"
-  },
-  {
-    "id": "camp_cur_61909",
-    "name": "Zoo New England Summer ZooCamp",
-    "city": "Boston",
-    "state": "MA",
-    "address": "Franklin Park Zoo (Boston) & Stone Zoo (Stoneham)",
-    "distance_miles": 2.5,
-    "region": "boston",
-    "region_label": "Boston Proper",
-    "type": "Day",
-    "genders": "Coed",
-    "url": "https://www.zoonewengland.org/act/education/summer-camps/",
-    "hours": "9:00 AM – 3:30 PM",
-    "ages": "Ages 6–13",
-    "age_groups": [
-      "elementary",
-      "middle"
+    "accredited": false,
+    "source": "Camp website",
+    "name": "NuVu Summer",
+    "url": "https://nuvusummer.org/",
+    "category": "stem",
+    "category_label": "🔬 Design, Engineering & Art Studios",
+    "ages": "Ages 8–18",
+    "season": "2027: sessions July 6 – August 13",
+    "price_year": 2027,
+    "price_lines": [
+      "Middle & high school (ages 11–18): $2,290 per 2-week session",
+      "Upper elementary: $830 per 1-week session",
+      "These are 2026 prices, held for bookings through Jan 10, 2027",
+      "High school residential program returns: Session Two, July 18–31, 2027"
     ],
-    "dates": "Weekly June 29 – August 21",
-    "price_weekly": "$495–$560",
-    "price_tier": "mid",
-    "price_note": "Close-up animal encounters, keeper talks, zookeeper training, wildlife conservation.",
-    "category": "nature",
-    "category_label": "🦁 Zoology & Wildlife Care",
-    "accredited": true,
-    "source": "Direct Verified Provider"
+    "registration": "2027 booking is open; the early price ends Sun, Jan 10, 2027.",
+    "reg_dates": [
+      {
+        "date": "2027-01-10",
+        "label": "early pricing ends"
+      }
+    ],
+    "sources": [
+      "https://nuvusummer.org/"
+    ],
+    "checked": "2026-11-08",
+    "verified": true
   },
   {
     "id": "camp_3054",
@@ -230,19 +165,19 @@
     "genders": "Coed",
     "url": "http://ymcaboston.org/roxburycamps",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $550–$750/wk",
-    "price_tier": "mid",
-    "price_note": "Sibling and early registration discounts",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
-    "source": "American Camp Association (ACA) New England"
+    "verified": false,
+    "source": "American Camp Association (ACA) New England",
+    "registration": "YMCA of Greater Boston: 2026 registration is closed and 2027 camp information is due in mid-November 2026. Day camp open houses: Sat, Jan 23, 2027, 10am–12pm.",
+    "sources": [
+      "https://ymcaboston.org/youth-and-family/camps/day-camps/"
+    ],
+    "checked": "2026-11-08"
   },
   {
     "id": "camp_3020",
@@ -256,51 +191,24 @@
     "type": "Day",
     "genders": "Coed",
     "url": "https://ymcaboston.org/eastbostoncamps",
-    "hours": "8:30 AM – 5:00 PM",
-    "ages": "Ages 5–13",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly June 29 – August 28",
-    "price_weekly": "$360–$460",
-    "price_tier": "mid",
-    "price_note": "Swimming lessons, STEM enrichment, field trips, gym sports, EEC state vouchers accepted.",
+    "hours": "9:00 AM – 5:00 PM",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
-    "category_label": "🏕️ YMCA Community Camp",
+    "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
-    "source": "American Camp Association (ACA) New England"
-  },
-  {
-    "id": "camp_cur_31201",
-    "name": "NuVu Innovation Studios",
-    "city": "Cambridge",
-    "state": "MA",
-    "address": "Central Square, Cambridge",
-    "distance_miles": 3.5,
-    "region": "cambridge",
-    "region_label": "Cambridge & Somerville",
-    "type": "Day",
-    "genders": "Coed",
-    "url": "https://cambridge.nuvustudio.com/summer",
-    "hours": "9:00 AM – 3:00 PM",
-    "ages": "Ages 11–18",
-    "age_groups": [
-      "middle",
-      "teens"
+    "verified": false,
+    "source": "American Camp Association (ACA) New England",
+    "registration": "YMCA of Greater Boston: 2026 registration is closed and 2027 camp information is due in mid-November 2026. Day camp open houses: Sat, Jan 23, 2027, 10am–12pm.",
+    "sources": [
+      "https://ymcaboston.org/youth-and-family/camps/day-camps/"
     ],
-    "dates": "2-week modules July – August",
-    "price_weekly": "$825 ($1,650/2-wk)",
-    "price_tier": "premium",
-    "price_note": "MIT-inspired studio design: architecture, robotics, bio-design, micro-electronics.",
-    "category": "stem",
-    "category_label": "🔬 Innovation & Robotics",
-    "accredited": true,
-    "source": "Direct Verified Provider"
+    "checked": "2026-11-08"
   },
   {
     "id": "camp_3972",
-    "name": "Summer @ BB&N (Buckingham Browne & Nichols)",
+    "name": "Summer@BB&N",
     "city": "Cambridge",
     "state": "MA",
     "address": "80 Gerrys Landing Rd",
@@ -309,23 +217,105 @@
     "region_label": "Cambridge & Somerville",
     "type": "Day",
     "genders": "Coed",
-    "url": "https://www.bbns.org/community/summer-camp",
-    "hours": "8:45 AM – 3:45 PM",
-    "ages": "Ages 4–15",
+    "url": "https://bbnsummer.com/dates-registration/",
+    "hours": "8:15am–3:30pm (early morning & extended day extra)",
     "age_groups": [
       "preschool",
       "elementary",
       "middle",
       "teens"
     ],
-    "dates": "Weekly June 22 – August 14",
-    "price_weekly": "$725–$820",
+    "price": "$750–$850/wk",
     "price_tier": "premium",
-    "price_note": "Riverside campus: instructional swimming, archery, creative arts, theater, rocketry.",
     "category": "traditional",
-    "category_label": "🏕️ Traditional & Specialty",
+    "category_label": "🏕️ Classic & Specialty Day Camp",
     "accredited": true,
-    "source": "American Camp Association (ACA) New England"
+    "verified": true,
+    "source": "American Camp Association (ACA) New England",
+    "ages": "PreK – grade 10",
+    "season": "2026: weekly, June 22 – August 14",
+    "price_year": 2026,
+    "price_lines": [
+      "Kiddie (PreK–K), Junior (gr 1–3) & LIT (gr 8–10): $750/wk",
+      "Senior (gr 4–6): $800/wk · Teen (gr 7–9): $850/wk",
+      "Specialty camps: $900–$950/wk",
+      "July 4th week is discounted ($600–$680)"
+    ],
+    "registration": "2026 registration opened Jan 13. 2027 dates aren't posted yet.",
+    "sources": [
+      "https://bbnsummer.com/dates-registration/"
+    ],
+    "checked": "2026-11-08"
+  },
+  {
+    "id": "camp_v_zoocamp",
+    "city": "Boston",
+    "state": "MA",
+    "address": "Franklin Park Zoo (also Stone Zoo, Stoneham)",
+    "distance_miles": 4.2,
+    "region": "boston",
+    "region_label": "Boston Proper",
+    "type": "Day",
+    "genders": "Coed",
+    "hours": null,
+    "age_groups": [],
+    "price": "Price not listed",
+    "price_tier": "unlisted",
+    "accredited": false,
+    "source": "Camp website",
+    "name": "ZooCamp — Franklin Park Zoo & Stone Zoo",
+    "url": "https://www.zoonewengland.org/discover/camps/zoocamp/",
+    "category": "nature",
+    "category_label": "🦁 Zoo & Wildlife Camp",
+    "price_year": null,
+    "price_lines": [
+      "The camp page doesn't list prices or 2027 dates yet"
+    ],
+    "sources": [
+      "https://www.zoonewengland.org/discover/camps/zoocamp/"
+    ],
+    "checked": "2026-11-08",
+    "verified": true
+  },
+  {
+    "id": "camp_v_stevekate_cambridge",
+    "city": "Cambridge",
+    "state": "MA",
+    "address": "Cambridge Friends School, 5 Cadbury Rd",
+    "distance_miles": 4.3,
+    "region": "cambridge",
+    "region_label": "Cambridge & Somerville",
+    "type": "Day",
+    "genders": "Coed",
+    "hours": "8:00am–6:00pm (lunch & snacks included)",
+    "age_groups": [
+      "preschool",
+      "elementary",
+      "middle"
+    ],
+    "price": "$134/day",
+    "price_tier": "premium",
+    "accredited": false,
+    "source": "Camp website",
+    "name": "Steve & Kate's Camp — Cambridge",
+    "url": "https://steveandkatescamp.com/cambridge/",
+    "category": "traditional",
+    "category_label": "🎨 Choose-Your-Own-Day Camp",
+    "ages": "Ages 4–12",
+    "season": "2026: June 15 – August 21",
+    "price_year": 2026,
+    "price_lines": [
+      "Day Pass: $134/day",
+      "Buy 15+ Day Passes: $119/day",
+      "Summer Pass: $3,570",
+      "Unused passes are refunded automatically after the season"
+    ],
+    "registration": "Summer 2026 has ended. Join the camp's interest list to hear when 2027 opens.",
+    "sources": [
+      "https://steveandkatescamp.com/cambridge/"
+    ],
+    "checked": "2026-11-08",
+    "verified": true
   },
   {
     "id": "camp_3202",
@@ -338,23 +328,45 @@
     "region_label": "Brookline, Newton & Nearby",
     "type": "Day",
     "genders": "Girls",
-    "url": "http://www.summeratpark.org/",
-    "hours": "8:45 AM – 3:45 PM",
-    "ages": "Ages 4–15",
+    "url": "https://www.summeratpark.org/",
+    "hours": "8:15am–3:45pm (2026)",
     "age_groups": [
       "preschool",
       "elementary",
       "middle",
       "teens"
     ],
-    "dates": "Weekly June 22 – August 14",
-    "price_weekly": "$760–$820",
+    "price": "$1,480–$1,650 per 2 wks",
     "price_tier": "premium",
-    "price_note": "Instructional swim, performing arts, outdoor exploration, soccer, robotics.",
     "category": "traditional",
-    "category_label": "🎨 Creative & Day Camp",
+    "category_label": "🎨 Day & Specialty Camp",
     "accredited": true,
-    "source": "American Camp Association (ACA) New England"
+    "verified": true,
+    "source": "American Camp Association (ACA) New England",
+    "ages": "Ages 4–15",
+    "season": "2027: June 14 – August 13",
+    "price_year": 2026,
+    "price_lines": [
+      "Middle Camp (gr 3–5): $1,480 for the first session, $1,650 for each later 2-week session",
+      "Deposit: $250 per 2-week session, $150 for 1-week programs"
+    ],
+    "registration": "Returning families: Wed, Dec 2, 2026, 12pm · New families: Fri, Dec 4, 2026, 12pm",
+    "reg_dates": [
+      {
+        "date": "2026-12-02",
+        "label": "returning families, noon"
+      },
+      {
+        "date": "2026-12-04",
+        "label": "new families, noon"
+      }
+    ],
+    "sources": [
+      "https://www.summeratpark.org/",
+      "https://www.summeratpark.org/product-page/junior-explorers",
+      "https://www.summeratpark.org/important-information"
+    ],
+    "checked": "2026-11-08"
   },
   {
     "id": "camp_3017",
@@ -368,20 +380,20 @@
     "type": "Day",
     "genders": "Coed",
     "url": "https://ymcaboston.org/dorchestercamps",
-    "hours": "8:30 AM – 5:00 PM",
-    "ages": "Ages 5–13",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly June 29 – August 28",
-    "price_weekly": "$360–$460",
-    "price_tier": "mid",
-    "price_note": "Swimming lessons, STEM enrichment, field trips, gym sports, EEC state vouchers accepted.",
+    "hours": "9:00 AM – 5:00 PM",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
-    "category_label": "🏕️ YMCA Community Camp",
+    "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
-    "source": "American Camp Association (ACA) New England"
+    "verified": false,
+    "source": "American Camp Association (ACA) New England",
+    "registration": "YMCA of Greater Boston: 2026 registration is closed and 2027 camp information is due in mid-November 2026. Day camp open houses: Sat, Jan 23, 2027, 10am–12pm.",
+    "sources": [
+      "https://ymcaboston.org/youth-and-family/camps/day-camps/"
+    ],
+    "checked": "2026-11-08"
   },
   {
     "id": "camp_15754",
@@ -396,18 +408,13 @@
     "genders": "Coed",
     "url": "https://www.lesleyellis.org",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $550–$750/wk",
-    "price_tier": "mid",
-    "price_note": "Sibling and early registration discounts",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -421,22 +428,24 @@
     "region_label": "Brookline, Newton & Nearby",
     "type": "Day",
     "genders": "Coed",
-    "url": "https://www.dextersouthfield.org/summer-camps/",
-    "hours": "8:30 AM – 4:00 PM",
-    "ages": "Ages 3–14",
-    "age_groups": [
-      "preschool",
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly June 15 – August 14",
-    "price_weekly": "$775–$825",
-    "price_tier": "premium",
-    "price_note": "36-acre campus, Olympic-size indoor ice arena, indoor pool, STEM maker spaces, grass athletic fields.",
+    "url": "https://www.dextersouthfield.org/summer",
+    "hours": "9:00 AM – 5:00 PM",
+    "age_groups": [],
+    "price": "2027 details not posted",
+    "price_tier": "unlisted",
     "category": "sports",
-    "category_label": "⚽ Sports & Classic Day Camp",
+    "category_label": "⚽ Sports & Day Camp",
     "accredited": true,
-    "source": "American Camp Association (ACA) New England"
+    "verified": true,
+    "source": "American Camp Association (ACA) New England",
+    "price_year": null,
+    "price_lines": [
+      "Dexter says 2027 dates, programs and registration are \"coming soon\""
+    ],
+    "sources": [
+      "https://www.dextersouthfield.org/summer"
+    ],
+    "checked": "2026-11-08"
   },
   {
     "id": "camp_4004",
@@ -449,20 +458,32 @@
     "region_label": "Boston Proper",
     "type": "Day",
     "genders": "Coed",
-    "url": "https://campharborview.org/summer-camp/",
-    "hours": "8:00 AM – 4:30 PM (Ferry pickup)",
-    "ages": "Ages 10–14 (Grades 6–8)",
+    "url": "https://campharborview.org/summer-camp/how-to-apply/",
+    "hours": "About 7:30am–5:00pm, including bus and ferry",
     "age_groups": [
-      "middle"
+      "middle",
+      "teens"
     ],
-    "dates": "Two 4-week sessions July & August",
-    "price_weekly": "Free (100% Covered)",
+    "price": "Free",
     "price_tier": "free",
-    "price_note": "100% Free for Boston youth: sailing, climbing wall, leadership, meals and transport provided.",
     "category": "nature",
-    "category_label": "⛵ Harbor Island Adventure",
+    "category_label": "⛵ Harbor Island Camp",
     "accredited": true,
-    "source": "American Camp Association (ACA) New England"
+    "verified": true,
+    "source": "American Camp Association (ACA) New England",
+    "ages": "Entering grades 6–9",
+    "price_year": 2026,
+    "price_lines": [
+      "Free to attend",
+      "Open to City of Boston residents entering grades 6–9",
+      "Round-trip bus to the Seaport and ferry to Long Island included"
+    ],
+    "registration": "2027 applications aren't open yet. Families apply again every year.",
+    "sources": [
+      "https://campharborview.org/summer-camp/how-to-apply/",
+      "https://campharborview.org/summer-camp/summer-program-details/"
+    ],
+    "checked": "2026-11-08"
   },
   {
     "id": "camp_2827",
@@ -476,20 +497,20 @@
     "type": "Day",
     "genders": "Coed",
     "url": "http://ymcaboston.org/oaksquare",
-    "hours": "8:30 AM – 5:00 PM",
-    "ages": "Ages 5–13",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly June 29 – August 28",
-    "price_weekly": "$360–$460",
-    "price_tier": "mid",
-    "price_note": "Swimming lessons, STEM enrichment, field trips, gym sports, EEC state vouchers accepted.",
+    "hours": "9:00 AM – 5:00 PM",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
-    "category_label": "🏕️ YMCA Community Camp",
+    "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
-    "source": "American Camp Association (ACA) New England"
+    "verified": false,
+    "source": "American Camp Association (ACA) New England",
+    "registration": "YMCA of Greater Boston: 2026 registration is closed and 2027 camp information is due in mid-November 2026. Day camp open houses: Sat, Jan 23, 2027, 10am–12pm.",
+    "sources": [
+      "https://ymcaboston.org/youth-and-family/camps/day-camps/"
+    ],
+    "checked": "2026-11-08"
   },
   {
     "id": "camp_2979",
@@ -502,22 +523,35 @@
     "region_label": "Boston Proper",
     "type": "Day",
     "genders": "Coed",
-    "url": "https://www.massaudubon.org/places-to-explore/nature-centers/boston-nature-center/camp",
-    "hours": "9:00 AM – 3:30 PM (Aftercare to 5:30 PM)",
-    "ages": "Ages 5–15",
+    "url": "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/boston-nature-center/camp/programs-pricing",
+    "hours": "8:30am–5:30pm (before camp from 7:30am)",
     "age_groups": [
       "elementary",
       "middle",
       "teens"
     ],
-    "dates": "Weekly June 22 – August 28",
-    "price_weekly": "Sliding scale ($250–$820)",
+    "price": "Sliding scale $182–$910",
     "price_tier": "sliding",
-    "price_note": "Mass Audubon urban sanctuary: pond dipping, wildlife tracking, organic gardens, 5-tier sliding scale.",
     "category": "nature",
     "category_label": "🌿 Nature & Wildlife",
     "accredited": true,
-    "source": "American Camp Association (ACA) New England"
+    "verified": true,
+    "source": "American Camp Association (ACA) New England",
+    "ages": "Ages 5–15",
+    "season": "2026: June 22 – August 28, mostly 2-week sessions",
+    "price_year": 2026,
+    "price_lines": [
+      "Nature Camp (ages 5–13): $182–$910 in Mattapan, $185–$925 at the Jamaica Plain site. The page doesn't say whether that's per week or per 2-week session.",
+      "Farm Trekkers & specialty weeks (ages 9–11): $100–$500/wk",
+      "Before camp: $30–$150 per session",
+      "Up to 4 weeks per child"
+    ],
+    "registration": "2026: no lottery; early registration for Tiers 1–3 ran Jan 8–20, and it opened to everyone Jan 28 at 6am. 2027 registration is \"coming soon\".",
+    "sliding_scale": "massaudubon",
+    "sources": [
+      "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/boston-nature-center/camp/programs-pricing"
+    ],
+    "checked": "2026-11-08"
   },
   {
     "id": "camp_3063",
@@ -532,18 +566,13 @@
     "genders": "Coed",
     "url": "http://www.tchs.org/summer",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $550–$750/wk",
-    "price_tier": "mid",
-    "price_note": "Sibling and early registration discounts",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -557,23 +586,47 @@
     "region_label": "Brookline, Newton & Nearby",
     "type": "Day",
     "genders": "Coed",
-    "url": "https://www.bvrcamp.org/",
-    "hours": "8:45 AM – 3:45 PM",
-    "ages": "Ages 3–15",
+    "url": "https://bvrcamp.org/",
+    "hours": "9:00 AM – 5:00 PM",
     "age_groups": [
       "preschool",
       "elementary",
       "middle",
       "teens"
     ],
-    "dates": "Weekly & 2-week sessions June 22 – August 14",
-    "price_weekly": "~$1,335–$1,750",
+    "price": "$1,440–$1,880 per 2 wks",
     "price_tier": "premium",
-    "price_note": "Heated pools, ropes course, visual & media arts, tennis, instructional swimming.",
     "category": "traditional",
-    "category_label": "🏕️ Arts, Swim & Classic Camp",
+    "category_label": "🏕️ Classic & Specialty Day Camp",
     "accredited": true,
-    "source": "American Camp Association (ACA) New England"
+    "verified": true,
+    "source": "American Camp Association (ACA) New England",
+    "ages": "Ages 3–15",
+    "season": "2027: four 2-week sessions, June 21 – August 13",
+    "price_year": 2027,
+    "price_lines": [
+      "Lower Camp (PreK–K): $1,440–$1,600 per 2-week session",
+      "Middle, Upper & Senior Camp (gr 1–7): $1,695–$1,880 per 2-week session",
+      "Specialty camps (1–2 weeks): $720–$1,970",
+      "Extended day 7:30–8:30am: $80–$100/wk · 4–6pm: $170–$210/wk",
+      "Bus: $100 each way per week"
+    ],
+    "registration": "Returning families: Thu, Dec 3, 2026, 9am · New families: Tue, Dec 8, 2026, 9am",
+    "reg_dates": [
+      {
+        "date": "2026-12-03",
+        "label": "returning families, 9am"
+      },
+      {
+        "date": "2026-12-08",
+        "label": "new families, 9am"
+      }
+    ],
+    "sources": [
+      "http://bvrcamp.org/",
+      "https://drive.google.com/file/d/1qLP8Asj13Zctz2Oimd4HYaHrcmQUftwh/view"
+    ],
+    "checked": "2026-11-08"
   },
   {
     "id": "camp_2879",
@@ -587,24 +640,19 @@
     "type": "Day",
     "genders": "Coed",
     "url": "https://www.wsymca.org/camps/pikati",
-    "hours": "8:30 AM – 5:00 PM",
-    "ages": "Ages 5–13",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly June 29 – August 28",
-    "price_weekly": "$360–$460",
-    "price_tier": "mid",
-    "price_note": "Swimming lessons, STEM enrichment, field trips, gym sports, EEC state vouchers accepted.",
+    "hours": "9:00 AM – 5:00 PM",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
-    "category_label": "🏕️ YMCA Community Camp",
+    "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
     "id": "camp_2973",
-    "name": "Belmont Day School Summer Camp",
+    "name": "Belmont Day Camp",
     "city": "Belmont",
     "state": "MA",
     "address": "55 Day School Ln",
@@ -613,22 +661,42 @@
     "region_label": "Brookline, Newton & Nearby",
     "type": "Day",
     "genders": "Coed",
-    "url": "https://www.belmontday.org/summer/belmont-day-camp/",
-    "hours": "8:45 AM – 3:45 PM",
-    "ages": "Ages 3–14",
+    "url": "https://www.belmontday.org/summer/summer-camp-registration/",
+    "hours": "9:00 AM – 5:00 PM",
     "age_groups": [
       "preschool",
       "elementary",
       "middle"
     ],
-    "dates": "Weekly June 22 – August 14",
-    "price_weekly": "$790–$850",
-    "price_tier": "premium",
-    "price_note": "Swimming lessons, woodworking, gymnastics, ceramics, archery, outdoor adventures.",
+    "price": "2027 rates not posted",
+    "price_tier": "unlisted",
     "category": "traditional",
-    "category_label": "🏕️ Creative Campus Day Camp",
+    "category_label": "🏕️ Classic Day Camp",
     "accredited": true,
-    "source": "American Camp Association (ACA) New England"
+    "verified": true,
+    "source": "American Camp Association (ACA) New England",
+    "ages": "Preschool – grade 7",
+    "season": "2027: June 28 – August 20",
+    "price_year": null,
+    "price_lines": [
+      "2027 tuition is listed as \"TBD\""
+    ],
+    "registration": "Returning families: Tue, Jan 5, 2027 · Everyone: Wed, Jan 20, 2027",
+    "reg_dates": [
+      {
+        "date": "2027-01-05",
+        "label": "returning families"
+      },
+      {
+        "date": "2027-01-20",
+        "label": "open to all"
+      }
+    ],
+    "sources": [
+      "https://www.belmontday.org/summer/summer-camp-registration/",
+      "https://www.belmontday.org/summer/belmont-day-camp/dates-rates/"
+    ],
+    "checked": "2026-11-08"
   },
   {
     "id": "camp_3025",
@@ -641,21 +709,36 @@
     "region_label": "Brookline, Newton & Nearby",
     "type": "Day",
     "genders": "Coed",
-    "url": "https://www.massaudubon.org/places-to-explore/nature-centers/habitat/camp",
-    "hours": "9:00 AM – 3:00 PM",
-    "ages": "Ages 5–14",
+    "url": "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/habitat/camp/programs-pricing",
+    "hours": "9:00am–3:30pm (after camp to 5:30pm)",
     "age_groups": [
+      "preschool",
       "elementary",
-      "middle"
+      "middle",
+      "teens"
     ],
-    "dates": "Weekly June 22 – August 21",
-    "price_weekly": "Sliding scale ($340–$780)",
+    "price": "Sliding scale $328–$1,639 per 2 wks",
     "price_tier": "sliding",
-    "price_note": "Mass Audubon sanctuary: quiet meadow discovery, amphibian studies, nature arts.",
     "category": "nature",
     "category_label": "🌿 Forest & Pond Ecology",
     "accredited": true,
-    "source": "American Camp Association (ACA) New England"
+    "verified": true,
+    "source": "American Camp Association (ACA) New England",
+    "ages": "Ages 4–16",
+    "season": "2026: June 22 – August 21, mostly 2-week sessions",
+    "price_year": 2026,
+    "price_lines": [
+      "Two-week Nature Camps (ages 4–12): $328–$1,639 per session",
+      "Theme week, June 22–26: $164–$820",
+      "Teen Trekkers (ages 12–14): $358–$1,788 · CIT: $300",
+      "After camp: $11.40–$57/day"
+    ],
+    "registration": "2026 registration opened Jan 21. Mass Audubon opens 2027 registration on staggered dates in January.",
+    "sliding_scale": "massaudubon",
+    "sources": [
+      "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/habitat/camp/programs-pricing"
+    ],
+    "checked": "2026-11-08"
   },
   {
     "id": "camp_3022",
@@ -668,23 +751,46 @@
     "region_label": "Brookline, Newton & Nearby",
     "type": "Day",
     "genders": "Coed",
-    "url": "http://www.fessendensummercamps.org/",
-    "hours": "9:00 AM – 4:00 PM",
-    "ages": "Ages 3.5–15",
+    "url": "https://fessendensummercamps.org/tuition-registration/dates-and-rates/",
+    "hours": "Full day 9:00am–4:00pm · half day 9:00am–1:00pm",
     "age_groups": [
       "preschool",
       "elementary",
       "middle",
       "teens"
     ],
-    "dates": "Weekly June 22 – August 14",
-    "price_weekly": "$915 ($675 half-day)",
+    "price": "$915/wk",
     "price_tier": "premium",
-    "price_note": "41-acre campus: heated outdoor pools, ice rink, indoor turf, theater, daily hot lunch included.",
     "category": "traditional",
     "category_label": "🏕️ Campus Day Camp",
     "accredited": true,
-    "source": "American Camp Association (ACA) New England"
+    "verified": true,
+    "source": "American Camp Association (ACA) New England",
+    "ages": "Age 3.5 – entering grade 8",
+    "season": "2027: weekly, June 14 – August 20",
+    "price_year": 2027,
+    "price_lines": [
+      "Full day (entering Pre-K – grade 7): $915/wk",
+      "Half day (age 3.5 – entering Pre-K): $675/wk",
+      "Teen Trippers (entering grade 8): $950/wk",
+      "July 4th week is prorated ($732 full day)",
+      "Sports & specialty camps are priced separately"
+    ],
+    "registration": "Returning families: Wed, Dec 2, 2026, 9am · New families: Mon, Dec 7, 2026, 9am",
+    "reg_dates": [
+      {
+        "date": "2026-12-02",
+        "label": "returning families, 9am"
+      },
+      {
+        "date": "2026-12-07",
+        "label": "new families, 9am"
+      }
+    ],
+    "sources": [
+      "https://fessendensummercamps.org/tuition-registration/dates-and-rates/"
+    ],
+    "checked": "2026-11-08"
   },
   {
     "id": "camp_15770",
@@ -698,19 +804,14 @@
     "type": "Day",
     "genders": "Coed",
     "url": "https://wsymca.org/camps",
-    "hours": "8:30 AM – 5:00 PM",
-    "ages": "Ages 5–13",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly June 29 – August 28",
-    "price_weekly": "$360–$460",
-    "price_tier": "mid",
-    "price_note": "Swimming lessons, STEM enrichment, field trips, gym sports, EEC state vouchers accepted.",
+    "hours": "9:00 AM – 5:00 PM",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
-    "category_label": "🏕️ YMCA Community Camp",
+    "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -725,20 +826,20 @@
     "type": "Day",
     "genders": "Coed",
     "url": "http://www.ymcaboston.org/waltham",
-    "hours": "8:30 AM – 5:00 PM",
-    "ages": "Ages 5–13",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly June 29 – August 28",
-    "price_weekly": "$360–$460",
-    "price_tier": "mid",
-    "price_note": "Swimming lessons, STEM enrichment, field trips, gym sports, EEC state vouchers accepted.",
+    "hours": "9:00 AM – 5:00 PM",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
-    "category_label": "🏕️ YMCA Community Camp",
+    "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
-    "source": "American Camp Association (ACA) New England"
+    "verified": false,
+    "source": "American Camp Association (ACA) New England",
+    "registration": "YMCA of Greater Boston: 2026 registration is closed and 2027 camp information is due in mid-November 2026. Day camp open houses: Sat, Jan 23, 2027, 10am–12pm.",
+    "sources": [
+      "https://ymcaboston.org/youth-and-family/camps/day-camps/"
+    ],
+    "checked": "2026-11-08"
   },
   {
     "id": "camp_3055",
@@ -753,18 +854,13 @@
     "genders": "Coed",
     "url": "http://runningbrook.org",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $550–$750/wk",
-    "price_tier": "mid",
-    "price_note": "Sibling and early registration discounts",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -780,18 +876,13 @@
     "genders": "Girls",
     "url": "https://www.gsema.org/en/camp/our-camps/cedar-hill.html",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $550–$750/wk",
-    "price_tier": "mid",
-    "price_note": "Sibling and early registration discounts",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -807,18 +898,13 @@
     "genders": "Coed",
     "url": "http://www.newenglandbasecamp.org",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $550–$750/wk",
-    "price_tier": "mid",
-    "price_note": "Sibling and early registration discounts",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -832,23 +918,42 @@
     "region_label": "MetroWest",
     "type": "Day",
     "genders": "Coed",
-    "url": "http://www.noblesdaycamp.org/",
-    "hours": "8:30 AM – 4:00 PM",
-    "ages": "Ages 4–14",
+    "url": "https://www.noblesdaycamp.org/registration/",
+    "hours": "Full day 9am–4pm · half day 9am–2pm",
     "age_groups": [
       "preschool",
       "elementary",
       "middle",
       "teens"
     ],
-    "dates": "2-week sessions June 22 – August 14",
-    "price_weekly": "~$800–$875 ($1,600–$1,750/2-wk)",
+    "price": "$1,600–$1,745 per 2 wks",
     "price_tier": "premium",
-    "price_note": "Noble and Greenough School: collegiate athletics, boat basin on the Charles, pottery, musical theatre.",
     "category": "traditional",
-    "category_label": "🎭 Traditional & Arts Camp",
+    "category_label": "🎭 Classic & Arts Day Camp",
     "accredited": true,
-    "source": "American Camp Association (ACA) New England"
+    "verified": true,
+    "source": "American Camp Association (ACA) New England",
+    "ages": "Age 4 – entering grade 9",
+    "season": "2027: four 2-week sessions, June 28 – August 20",
+    "price_year": 2027,
+    "price_lines": [
+      "Full day (age 4 – entering gr 7): $1,600–$1,745 per 2-week session",
+      "Half day (age 4 – entering gr 2): $1,410–$1,535",
+      "Teen Program (entering gr 8–9): $1,820–$1,955",
+      "Lunch $36/wk · bus $95–$105 one way per session",
+      "Sessions can't be split; $200 deposit per session"
+    ],
+    "registration": "Returning families: open since Nov 11, 2026 · New families: Wed, Dec 2, 2026, 12pm",
+    "reg_dates": [
+      {
+        "date": "2026-12-02",
+        "label": "new families, noon"
+      }
+    ],
+    "sources": [
+      "https://www.noblesdaycamp.org/registration/"
+    ],
+    "checked": "2026-11-08"
   },
   {
     "id": "camp_3048",
@@ -862,20 +967,20 @@
     "type": "Day",
     "genders": "Coed",
     "url": "http://ymcaboston.org/northsuburban",
-    "hours": "8:30 AM – 5:00 PM",
-    "ages": "Ages 5–13",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly June 29 – August 28",
-    "price_weekly": "$360–$460",
-    "price_tier": "mid",
-    "price_note": "Swimming lessons, STEM enrichment, field trips, gym sports, EEC state vouchers accepted.",
+    "hours": "9:00 AM – 5:00 PM",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
-    "category_label": "🏕️ YMCA Community Camp",
+    "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
-    "source": "American Camp Association (ACA) New England"
+    "verified": false,
+    "source": "American Camp Association (ACA) New England",
+    "registration": "YMCA of Greater Boston: 2026 registration is closed and 2027 camp information is due in mid-November 2026. Day camp open houses: Sat, Jan 23, 2027, 10am–12pm.",
+    "sources": [
+      "https://ymcaboston.org/youth-and-family/camps/day-camps/"
+    ],
+    "checked": "2026-11-08"
   },
   {
     "id": "camp_3006",
@@ -890,23 +995,23 @@
     "genders": "Coed",
     "url": "http://www.ymcaboston.org",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $550–$750/wk",
-    "price_tier": "mid",
-    "price_note": "Sibling and early registration discounts",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
-    "source": "American Camp Association (ACA) New England"
+    "verified": false,
+    "source": "American Camp Association (ACA) New England",
+    "registration": "YMCA of Greater Boston: 2026 registration is closed and 2027 camp information is due in mid-November 2026. Day camp open houses: Sat, Jan 23, 2027, 10am–12pm.",
+    "sources": [
+      "https://ymcaboston.org/youth-and-family/camps/day-camps/"
+    ],
+    "checked": "2026-11-08"
   },
   {
     "id": "camp_2975",
-    "name": "Blue Hills Nature Camp (Mass Audubon)",
+    "name": "Blue Hills Trailside Nature Camp (Mass Audubon)",
     "city": "Milton",
     "state": "MA",
     "address": "1904 Canton Ave",
@@ -915,21 +1020,35 @@
     "region_label": "Brookline, Newton & Nearby",
     "type": "Day",
     "genders": "Coed",
-    "url": "https://www.massaudubon.org/places-to-explore/nature-centers/blue-hills/camp",
-    "hours": "9:00 AM – 3:00 PM",
-    "ages": "Ages 5–13",
+    "url": "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/blue-hills-trailside-museum/camp/programs-pricing",
+    "hours": "9:00am–3:00pm",
     "age_groups": [
+      "preschool",
       "elementary",
-      "middle"
+      "middle",
+      "teens"
     ],
-    "dates": "Weekly June 22 – August 21",
-    "price_weekly": "Sliding scale ($340–$780)",
+    "price": "Sliding scale $103–$515/wk",
     "price_tier": "sliding",
-    "price_note": "Mass Audubon sanctuary in the Blue Hills: trail ecology, geology, pond life, 5-tier sliding scale.",
     "category": "nature",
     "category_label": "🌲 Forest & Trail Ecology",
     "accredited": true,
-    "source": "American Camp Association (ACA) New England"
+    "verified": true,
+    "source": "American Camp Association (ACA) New England",
+    "ages": "Ages 4.5–15",
+    "season": "2026: weekly, June 22 – August 21",
+    "price_year": 2026,
+    "price_lines": [
+      "Nature camp (ages 4.5–13): $103–$515/wk",
+      "Teen Adventurers (ages 12–14): $113–$565",
+      "Before camp $17–$85/wk · after camp $33–$165/wk"
+    ],
+    "registration": "2026 registration opened Jan 21. Mass Audubon opens 2027 registration on staggered dates in January.",
+    "sliding_scale": "massaudubon",
+    "sources": [
+      "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/blue-hills-trailside-museum/camp/programs-pricing"
+    ],
+    "checked": "2026-11-08"
   },
   {
     "id": "camp_2990",
@@ -943,20 +1062,20 @@
     "type": "Day",
     "genders": "Coed",
     "url": "http://ymcaboston.org/burbankcamps",
-    "hours": "8:30 AM – 5:00 PM",
-    "ages": "Ages 5–13",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly June 29 – August 28",
-    "price_weekly": "$360–$460",
-    "price_tier": "mid",
-    "price_note": "Swimming lessons, STEM enrichment, field trips, gym sports, EEC state vouchers accepted.",
+    "hours": "9:00 AM – 5:00 PM",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
-    "category_label": "🏕️ YMCA Community Camp",
+    "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
-    "source": "American Camp Association (ACA) New England"
+    "verified": false,
+    "source": "American Camp Association (ACA) New England",
+    "registration": "YMCA of Greater Boston: 2026 registration is closed and 2027 camp information is due in mid-November 2026. Day camp open houses: Sat, Jan 23, 2027, 10am–12pm.",
+    "sources": [
+      "https://ymcaboston.org/youth-and-family/camps/day-camps/"
+    ],
+    "checked": "2026-11-08"
   },
   {
     "id": "camp_3195",
@@ -971,105 +1090,14 @@
     "genders": "Girls",
     "url": "https://www.gsema.org/en/camp/our-camps/rice-moody/rice-day-camp.html",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $550–$750/wk",
-    "price_tier": "mid",
-    "price_note": "Sibling and early registration discounts",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
-  },
-  {
-    "id": "camp_cur_5878",
-    "name": "LINX Camps Wellesley",
-    "city": "Wellesley",
-    "state": "MA",
-    "address": "Wellesley, MA (MetroWest)",
-    "distance_miles": 12.0,
-    "region": "metrowest",
-    "region_label": "MetroWest",
-    "type": "Day",
-    "genders": "Coed",
-    "url": "https://www.linxcamps.com/",
-    "hours": "9:00 AM – 4:00 PM",
-    "ages": "Ages 3–15",
-    "age_groups": [
-      "preschool",
-      "elementary",
-      "middle",
-      "teens"
-    ],
-    "dates": "Weekly June 22 – August 28",
-    "price_weekly": "$745–$845",
-    "price_tier": "premium",
-    "price_note": "40+ specialty tracks across sports clinics, musical theater, coding, and camp games.",
-    "category": "sports",
-    "category_label": "⚽ Sports, Theater & STEM",
-    "accredited": true,
-    "source": "Direct Verified Provider"
-  },
-  {
-    "id": "camp_cur_36410",
-    "name": "Empow Studios STEM Camp",
-    "city": "Lincoln",
-    "state": "MA",
-    "address": "Newton & Lexington, MA",
-    "distance_miles": 12.0,
-    "region": "metrowest",
-    "region_label": "MetroWest",
-    "type": "Day",
-    "genders": "Coed",
-    "url": "https://empow.me/stem-camps/",
-    "hours": "9:00 AM – 4:00 PM (Extended day available)",
-    "ages": "Ages 7–15",
-    "age_groups": [
-      "elementary",
-      "middle",
-      "teens"
-    ],
-    "dates": "Weekly June 22 – August 28",
-    "price_weekly": "$645–$695",
-    "price_tier": "mid",
-    "price_note": "Video game creation, Python coding, Minecraft engineering, 3D animation.",
-    "category": "stem",
-    "category_label": "💻 Coding & Game Design",
-    "accredited": true,
-    "source": "Direct Verified Provider"
-  },
-  {
-    "id": "camp_cur_30218",
-    "name": "Everwood Day Camp",
-    "city": "Lincoln",
-    "state": "MA",
-    "address": "Sharon, MA (Lake Massapoag)",
-    "distance_miles": 12.0,
-    "region": "metrowest",
-    "region_label": "MetroWest",
-    "type": "Day",
-    "genders": "Coed",
-    "url": "https://www.everwooddaycamp.com/",
-    "hours": "8:30 AM – 4:00 PM (Bus transportation included)",
-    "ages": "Ages 4–15",
-    "age_groups": [
-      "preschool",
-      "elementary",
-      "middle",
-      "teens"
-    ],
-    "dates": "2-week minimums June 29 – August 21",
-    "price_weekly": "$795–$875",
-    "price_tier": "premium",
-    "price_note": "70-acre lakefront campus: motorized boating, sailing, paddleboarding, archery, challenge course, bus routes.",
-    "category": "traditional",
-    "category_label": "🌊 Lakefront Outdoor Camp",
-    "accredited": true,
-    "source": "Direct Verified Provider"
   },
   {
     "id": "camp_2831",
@@ -1084,19 +1112,19 @@
     "genders": "Coed",
     "url": "https://ymcaboston.org/meninocamps",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $550–$750/wk",
-    "price_tier": "mid",
-    "price_note": "Sibling and early registration discounts",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "nature",
     "category_label": "🌿 Nature & Outdoors",
     "accredited": true,
-    "source": "American Camp Association (ACA) New England"
+    "verified": false,
+    "source": "American Camp Association (ACA) New England",
+    "registration": "YMCA of Greater Boston: 2026 registration is closed and 2027 camp information is due in mid-November 2026. Day camp open houses: Sat, Jan 23, 2027, 10am–12pm.",
+    "sources": [
+      "https://ymcaboston.org/youth-and-family/camps/day-camps/"
+    ],
+    "checked": "2026-11-08"
   },
   {
     "id": "camp_3059",
@@ -1111,18 +1139,13 @@
     "genders": "Coed",
     "url": "http://www.summersedgedaycamp.com",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $550–$750/wk",
-    "price_tier": "mid",
-    "price_note": "Sibling and early registration discounts",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "sports",
     "category_label": "⚽ Sports & Fitness",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -1138,18 +1161,13 @@
     "genders": "Coed",
     "url": "https://halereservation.org/outside-active/hale-day-camp/",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $550–$750/wk",
-    "price_tier": "mid",
-    "price_note": "Sibling and early registration discounts",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -1165,18 +1183,13 @@
     "genders": "Coed",
     "url": "https://www.massgeneral.org/children/aspire/child/",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $550–$750/wk",
-    "price_tier": "mid",
-    "price_note": "Sibling and early registration discounts",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -1192,19 +1205,49 @@
     "genders": "Coed",
     "url": "http://www.tenacrecds.org/summer",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $550–$750/wk",
-    "price_tier": "mid",
-    "price_note": "Sibling and early registration discounts",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
+  },
+  {
+    "id": "camp_v_linx",
+    "city": "Wellesley",
+    "state": "MA",
+    "address": "Dana Hall campus, 45 Dana Rd",
+    "distance_miles": 12.7,
+    "region": "metrowest",
+    "region_label": "MetroWest",
+    "type": "Day",
+    "genders": "Coed",
+    "hours": "9:00am–4:00pm (early drop-off from 7:50am, late pick-up to 6pm)",
+    "age_groups": [],
+    "price": "$842–$909/wk",
+    "price_tier": "premium",
+    "accredited": false,
+    "source": "Camp website",
+    "name": "LINX Camps",
+    "url": "https://www.linxcamps.com/details/pricing",
+    "category": "sports",
+    "category_label": "⚽ Sports, Arts & Specialty",
+    "price_year": 2027,
+    "price_lines": [
+      "Camp: $909/wk list price, down to $842/wk paying by ACH for 8+ weeks",
+      "Jr. Fun Bunch & CIT: $639/wk",
+      "Bus $106–$109/wk · lunch $67–$69/wk",
+      "Early drop-off $99/wk · extended day $149/wk",
+      "LINX says rates go up as summer gets closer"
+    ],
+    "registration": "2027 registration is open now.",
+    "sources": [
+      "https://www.linxcamps.com/details/pricing"
+    ],
+    "checked": "2026-11-08",
+    "verified": true
   },
   {
     "id": "camp_15764",
@@ -1219,18 +1262,13 @@
     "genders": "Coed",
     "url": "https://www.towerschool.org/summer",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $550–$750/wk",
-    "price_tier": "mid",
-    "price_note": "Sibling and early registration discounts",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -1244,23 +1282,36 @@
     "region_label": "MetroWest",
     "type": "Day",
     "genders": "Coed",
-    "url": "https://www.massaudubon.org/places-to-explore/nature-centers/drumlin-farm/camp",
-    "hours": "9:00 AM – 3:00 PM",
-    "ages": "Ages 4–17",
+    "url": "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/drumlin-farm/camp/programs-pricing",
+    "hours": "8:30am–3:00pm (after camp to 5:30pm)",
     "age_groups": [
       "preschool",
       "elementary",
       "middle",
       "teens"
     ],
-    "dates": "Weekly June 22 – August 28",
-    "price_weekly": "Sliding scale ($350–$810)",
+    "price": "Sliding scale $142–$710/wk",
     "price_tier": "sliding",
-    "price_note": "Mass Audubon working farm: farm animals, crop harvesting, hayrides, forest trails.",
     "category": "nature",
-    "category_label": "🚜 Working Farm & Wildlife",
+    "category_label": "🐄 Farm & Nature Camp",
     "accredited": true,
-    "source": "American Camp Association (ACA) New England"
+    "verified": true,
+    "source": "American Camp Association (ACA) New England",
+    "ages": "Ages 4–17",
+    "season": "2026: June 22 – August 21",
+    "price_year": 2026,
+    "price_lines": [
+      "One-week camps: $142–$710 (Farm Trekkers $100–$500)",
+      "Two-week Farm & Nature Camps: $285–$1,425 per session (ages 4–11), $335–$1,675 (ages 10–13)",
+      "After camp: $56–$275"
+    ],
+    "registration": "Mass Audubon opens 2027 registration on staggered dates in January.",
+    "sliding_scale": "massaudubon",
+    "sources": [
+      "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/drumlin-farm/camp/programs-pricing",
+      "https://www.massaudubon.org/programs-events/nature-camps/day-camps"
+    ],
+    "checked": "2026-11-08"
   },
   {
     "id": "camp_3043",
@@ -1275,18 +1326,13 @@
     "genders": "Coed",
     "url": "http://www.massaudubon.org/visualarts",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $550–$750/wk",
-    "price_tier": "mid",
-    "price_note": "Sibling and early registration discounts",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "nature",
     "category_label": "🌿 Nature & Outdoors",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -1301,19 +1347,14 @@
     "type": "Day",
     "genders": "Coed",
     "url": "https://www.wsymca.org/camps/chickami",
-    "hours": "8:30 AM – 5:00 PM",
-    "ages": "Ages 5–13",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly June 29 – August 28",
-    "price_weekly": "$360–$460",
-    "price_tier": "mid",
-    "price_note": "Swimming lessons, STEM enrichment, field trips, gym sports, EEC state vouchers accepted.",
+    "hours": "9:00 AM – 5:00 PM",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
-    "category_label": "🏕️ YMCA Community Camp",
+    "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -1327,22 +1368,35 @@
     "region_label": "MetroWest",
     "type": "Day",
     "genders": "Coed",
-    "url": "https://www.massaudubon.org/places-to-explore/nature-centers/broadmoor/camp",
-    "hours": "9:00 AM – 3:00 PM",
-    "ages": "Ages 5–15",
+    "url": "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/broadmoor/camp/programs-pricing",
+    "hours": "9:00am–3:00pm (after camp to 5pm)",
     "age_groups": [
+      "preschool",
       "elementary",
       "middle",
       "teens"
     ],
-    "dates": "Weekly June 22 – August 28",
-    "price_weekly": "Sliding scale ($330–$770)",
+    "price": "Sliding scale $136–$680/wk",
     "price_tier": "sliding",
-    "price_note": "Mass Audubon sanctuary along the Charles River: canoe trips, vernal pool dip netting, boardwalk walks.",
     "category": "nature",
-    "category_label": "🛶 River Ecology & Canoeing",
+    "category_label": "🛶 River & Wetland Ecology",
     "accredited": true,
-    "source": "American Camp Association (ACA) New England"
+    "verified": true,
+    "source": "American Camp Association (ACA) New England",
+    "ages": "Ages 4–17",
+    "season": "2026: weekly, June 22 – August 14",
+    "price_year": 2026,
+    "price_lines": [
+      "Nature camps (ages 4–13): $136–$680/wk; specialty weeks $150–$750",
+      "CIT two-day training: $230",
+      "After camp: $45–$225/wk"
+    ],
+    "registration": "2026 registration opened Jan 14. Mass Audubon opens 2027 registration on staggered dates in January.",
+    "sliding_scale": "massaudubon",
+    "sources": [
+      "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/broadmoor/camp/programs-pricing"
+    ],
+    "checked": "2026-11-08"
   },
   {
     "id": "camp_3101",
@@ -1357,18 +1411,13 @@
     "genders": "Coed",
     "url": "https://concordacademy.org/summer-camp/",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $550–$750/wk",
-    "price_tier": "mid",
-    "price_note": "Sibling and early registration discounts",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -1384,18 +1433,13 @@
     "genders": "Coed",
     "url": "http://www.summerfenn.org",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $550–$750/wk",
-    "price_tier": "mid",
-    "price_note": "Sibling and early registration discounts",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -1409,23 +1453,34 @@
     "region_label": "South Shore",
     "type": "Day",
     "genders": "Coed",
-    "url": "https://www.massaudubon.org/places-to-explore/nature-centers/moose-hill/camp",
-    "hours": "9:00 AM – 3:30 PM",
-    "ages": "Ages 4–16",
+    "url": "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/moose-hill/camp/programs-pricing",
+    "hours": "8:45am–4:15pm",
     "age_groups": [
-      "preschool",
       "elementary",
       "middle",
       "teens"
     ],
-    "dates": "Weekly June 22 – August 28",
-    "price_weekly": "Sliding scale ($320–$760)",
+    "price": "Sliding scale $102–$512/wk",
     "price_tier": "sliding",
-    "price_note": "Mass Audubon oldest sanctuary: vernal pools, outdoor survival skills, bogs, firecraft.",
     "category": "nature",
-    "category_label": "🌲 Wilderness & Survival",
+    "category_label": "🌲 Nature & Adventure",
     "accredited": true,
-    "source": "American Camp Association (ACA) New England"
+    "verified": true,
+    "source": "American Camp Association (ACA) New England",
+    "ages": "Ages 5–16",
+    "season": "2026: weekly, June 22 – August 21",
+    "price_year": 2026,
+    "price_lines": [
+      "Nature, STEAM & adventure camps: $102–$512/wk",
+      "Counselors-in-Training: $54–$270/wk",
+      "Before camp $12–$60/wk · after camp $25–$115/wk"
+    ],
+    "registration": "2026 registration opened Jan 14. Mass Audubon opens 2027 registration on staggered dates in January.",
+    "sliding_scale": "massaudubon",
+    "sources": [
+      "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/moose-hill/camp/programs-pricing"
+    ],
+    "checked": "2026-11-08"
   },
   {
     "id": "camp_3010",
@@ -1438,23 +1493,77 @@
     "region_label": "MetroWest",
     "type": "Day",
     "genders": "Coed",
-    "url": "https://www.sewataro.com/",
-    "hours": "8:30 AM – 4:00 PM (Bus routes across Greater Boston)",
-    "ages": "Ages 4–15",
+    "url": "https://sewataro.com/about-us/dates-tuition/dates-tuition",
+    "hours": "9:00 AM – 5:00 PM",
     "age_groups": [
       "preschool",
       "elementary",
       "middle",
       "teens"
     ],
-    "dates": "Multi-week sessions late June – August",
-    "price_weekly": "~$950–$1,050",
+    "price": "$2,005–$2,225 per 2 wks",
     "price_tier": "premium",
-    "price_note": "54-acre wooded campus: swimming pond, boating, zip line, tennis, equestrian, bus transportation included.",
     "category": "traditional",
-    "category_label": "🏕️ Traditional Lakefront Camp",
+    "category_label": "🏕️ Woodland & Lake Day Camp",
     "accredited": true,
-    "source": "American Camp Association (ACA) New England"
+    "verified": true,
+    "source": "American Camp Association (ACA) New England",
+    "ages": "Age 3 – grade 8 (plus CIT)",
+    "season": "2027: June 28 – August 20",
+    "price_year": 2027,
+    "price_lines": [
+      "2 weeks: $2,005–$2,225 · 4 weeks: $4,185 · 6 weeks: $6,170 · 8 weeks: $7,380",
+      "Preschool: Sprouts half day (ages 3–4) $545/wk · Saplings full day (age 4) $1,085/wk",
+      "CIT program: $2,090 per 4 weeks",
+      "Deposits of $400–$800 become non-refundable after Dec 15, 2026"
+    ],
+    "registration": "2027 applications are open now.",
+    "sources": [
+      "https://sewataro.com/about-us/dates-tuition/dates-tuition"
+    ],
+    "checked": "2026-11-08"
+  },
+  {
+    "id": "camp_v_everwood",
+    "city": "Sharon",
+    "state": "MA",
+    "address": "125 Lakeview St",
+    "distance_miles": 18.6,
+    "region": "southshore",
+    "region_label": "South Shore",
+    "type": "Day",
+    "genders": "Coed",
+    "hours": null,
+    "age_groups": [
+      "preschool",
+      "elementary",
+      "middle",
+      "teens"
+    ],
+    "price": "$1,995 per 2 wks",
+    "price_tier": "premium",
+    "accredited": false,
+    "source": "Camp website",
+    "name": "Everwood Day Camp",
+    "url": "https://everwooddaycamp.com/dates-enrollment/",
+    "category": "traditional",
+    "category_label": "🌊 Lakefront Day Camp",
+    "ages": "About ages 4–15",
+    "season": "2027: four 2-week sessions, June 21 – August 13 (optional post week Aug 16–20)",
+    "price_year": 2027,
+    "price_lines": [
+      "2 weeks: $1,995 · 4 weeks: $3,945 · 6 weeks: $5,710 · 8 weeks: $7,120",
+      "Includes daily swim lessons; bus and extended day cost extra",
+      "Extended day: mornings $105/wk, afternoons $135/wk, both $215/wk",
+      "$150/week deposit, fully refundable before Feb 1, 2027"
+    ],
+    "registration": "2027 enrollment is open now.",
+    "sources": [
+      "https://everwooddaycamp.com/dates-enrollment/",
+      "https://everwooddaycamp.com/about/faqs/"
+    ],
+    "checked": "2026-11-08",
+    "verified": true
   },
   {
     "id": "camp_2812",
@@ -1469,18 +1578,13 @@
     "genders": "Coed",
     "url": "http://gus.org",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $550–$750/wk",
-    "price_tier": "mid",
-    "price_note": "Sibling and early registration discounts",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -1496,23 +1600,18 @@
     "genders": "Coed",
     "url": "http://www.use.salvationarmy.org",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $1,200–$1,800/wk",
-    "price_tier": "overnight",
-    "price_note": "Includes room, board & activities",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "sleepaway",
     "category_label": "⛺ Sleepaway / Overnight",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
     "id": "camp_3031",
-    "name": "Ipswich River Nature Camp",
+    "name": "Ipswich River Nature Camp (Mass Audubon)",
     "city": "Topsfield",
     "state": "MA",
     "address": "87 Perkins Row",
@@ -1521,21 +1620,33 @@
     "region_label": "North Shore",
     "type": "Day",
     "genders": "Coed",
-    "url": "http://www.massaudubon.org/ipswichriver",
-    "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
+    "url": "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/ipswich-river/camp/programs-pricing",
+    "hours": "8:30am–3:00pm",
     "age_groups": [
       "elementary",
-      "middle"
+      "middle",
+      "teens"
     ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $550–$750/wk",
-    "price_tier": "mid",
-    "price_note": "Sibling and early registration discounts",
+    "price": "Sliding scale $114–$570/wk",
+    "price_tier": "sliding",
     "category": "nature",
-    "category_label": "🌿 Nature & Outdoors",
+    "category_label": "🛶 River & Forest Nature Camp",
     "accredited": true,
-    "source": "American Camp Association (ACA) New England"
+    "verified": true,
+    "source": "American Camp Association (ACA) New England",
+    "ages": "Ages 5–14",
+    "season": "2026: weekly, June 22 – August 21",
+    "price_year": 2026,
+    "price_lines": [
+      "One-week nature camps: $114–$570/wk",
+      "Two-week Trekkers program (ages 7–11) also offered"
+    ],
+    "registration": "Mass Audubon opens 2027 registration on staggered dates in January.",
+    "sliding_scale": "massaudubon",
+    "sources": [
+      "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/ipswich-river/camp/programs-pricing"
+    ],
+    "checked": "2026-11-08"
   },
   {
     "id": "camp_3200",
@@ -1550,23 +1661,18 @@
     "genders": "Girls",
     "url": "https://www.gsema.org/en/camp/our-camps/maude-eaton.html",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $550–$750/wk",
-    "price_tier": "mid",
-    "price_note": "Sibling and early registration discounts",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
     "id": "camp_3047",
-    "name": "North River Nature Camp",
+    "name": "North River Nature Camp (Mass Audubon)",
     "city": "Marshfield",
     "state": "MA",
     "address": "2000 Main St",
@@ -1575,25 +1681,38 @@
     "region_label": "South Shore",
     "type": "Day",
     "genders": "Coed",
-    "url": "http://www.massaudubon.org/southshore",
-    "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
+    "url": "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/north-river/camp/programs-pricing",
+    "hours": "9:00am–3:00pm",
     "age_groups": [
+      "preschool",
       "elementary",
-      "middle"
+      "middle",
+      "teens"
     ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $550–$750/wk",
-    "price_tier": "mid",
-    "price_note": "Sibling and early registration discounts",
+    "price": "Sliding scale $109–$545/wk",
+    "price_tier": "sliding",
     "category": "nature",
-    "category_label": "🌿 Nature & Outdoors",
+    "category_label": "🌿 Nature Camp",
     "accredited": true,
-    "source": "American Camp Association (ACA) New England"
+    "verified": true,
+    "source": "American Camp Association (ACA) New England",
+    "ages": "Ages 4.5–14",
+    "season": "2026: weekly, June 22 – August 14",
+    "price_year": 2026,
+    "price_lines": [
+      "Nature camps: $109–$545/wk",
+      "Specialty sessions (ages 11–14): $87–$579"
+    ],
+    "registration": "Mass Audubon opens 2027 registration on staggered dates in January.",
+    "sliding_scale": "massaudubon",
+    "sources": [
+      "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/north-river/camp/programs-pricing"
+    ],
+    "checked": "2026-11-08"
   },
   {
     "id": "camp_3057",
-    "name": "Stony Brook Nature Camp",
+    "name": "Stony Brook Nature Camp (Mass Audubon)",
     "city": "Norfolk",
     "state": "MA",
     "address": "108 North St",
@@ -1602,21 +1721,33 @@
     "region_label": "South Shore",
     "type": "Day",
     "genders": "Coed",
-    "url": "http://www.massaudubon.org/stonybrook",
-    "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
+    "url": "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/stony-brook/camp/programs-pricing",
+    "hours": "9:00am–3:30pm",
     "age_groups": [
+      "preschool",
       "elementary",
-      "middle"
+      "middle",
+      "teens"
     ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $550–$750/wk",
-    "price_tier": "mid",
-    "price_note": "Sibling and early registration discounts",
+    "price": "Sliding scale $101–$505/wk",
+    "price_tier": "sliding",
     "category": "nature",
-    "category_label": "🌿 Nature & Outdoors",
+    "category_label": "🌿 Nature Camp",
     "accredited": true,
-    "source": "American Camp Association (ACA) New England"
+    "verified": true,
+    "source": "American Camp Association (ACA) New England",
+    "ages": "Ages 4–15",
+    "season": "2026: weekly, June 22 – August 21",
+    "price_year": 2026,
+    "price_lines": [
+      "Nature camps: $101–$505/wk"
+    ],
+    "registration": "Mass Audubon opens 2027 registration on staggered dates in January.",
+    "sliding_scale": "massaudubon",
+    "sources": [
+      "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/stony-brook/camp/programs-pricing"
+    ],
+    "checked": "2026-11-08"
   },
   {
     "id": "camp_2836",
@@ -1630,20 +1761,20 @@
     "type": "Day",
     "genders": "Coed",
     "url": "https://ymcaboston.org/burbankcamps",
-    "hours": "8:30 AM – 5:00 PM",
-    "ages": "Ages 5–13",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly June 29 – August 28",
-    "price_weekly": "$360–$460",
-    "price_tier": "mid",
-    "price_note": "Swimming lessons, STEM enrichment, field trips, gym sports, EEC state vouchers accepted.",
+    "hours": "9:00 AM – 5:00 PM",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
-    "category_label": "🏕️ YMCA Community Camp",
+    "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
-    "source": "American Camp Association (ACA) New England"
+    "verified": false,
+    "source": "American Camp Association (ACA) New England",
+    "registration": "YMCA of Greater Boston: 2026 registration is closed and 2027 camp information is due in mid-November 2026. Day camp open houses: Sat, Jan 23, 2027, 10am–12pm.",
+    "sources": [
+      "https://ymcaboston.org/youth-and-family/camps/day-camps/"
+    ],
+    "checked": "2026-11-08"
   },
   {
     "id": "camp_3004",
@@ -1658,18 +1789,13 @@
     "genders": "Coed",
     "url": "http://www.campnashobaday.com",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $550–$750/wk",
-    "price_tier": "mid",
-    "price_note": "Sibling and early registration discounts",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -1685,18 +1811,13 @@
     "genders": "Coed",
     "url": "http://www.camprotary.org",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $1,200–$1,800/wk",
-    "price_tier": "overnight",
-    "price_note": "Includes room, board & activities",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "sleepaway",
     "category_label": "⛺ Sleepaway / Overnight",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -1712,18 +1833,13 @@
     "genders": "Coed",
     "url": "http://www.pompositticutfarm.com",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $550–$750/wk",
-    "price_tier": "mid",
-    "price_note": "Sibling and early registration discounts",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "nature",
     "category_label": "🌿 Nature & Outdoors",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -1739,18 +1855,13 @@
     "genders": "Girls",
     "url": "http://www.camppembroke.org",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $1,200–$1,800/wk",
-    "price_tier": "overnight",
-    "price_note": "Includes room, board & activities",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "sleepaway",
     "category_label": "⛺ Sleepaway / Overnight",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -1766,18 +1877,13 @@
     "genders": "Coed",
     "url": "http://www.maplewoodyearround.com",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $550–$750/wk",
-    "price_tier": "mid",
-    "price_note": "Sibling and early registration discounts",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -1793,18 +1899,13 @@
     "genders": "Coed",
     "url": "https://regattapoint.org",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $550–$750/wk",
-    "price_tier": "mid",
-    "price_note": "Sibling and early registration discounts",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -1820,18 +1921,13 @@
     "genders": "Coed",
     "url": "http://www.crossroadsMA.org",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $550–$750/wk",
-    "price_tier": "mid",
-    "price_note": "Sibling and early registration discounts",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -1847,18 +1943,13 @@
     "genders": "Coed",
     "url": "http://6pointsscitech.org",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $1,200–$1,800/wk",
-    "price_tier": "overnight",
-    "price_note": "Includes room, board & activities",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "stem",
     "category_label": "💻 STEM & Coding",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -1874,18 +1965,13 @@
     "genders": "Girls",
     "url": "http://www.gscwm.org/GreenEyrie.shtml",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $450–$650/wk",
-    "price_tier": "mid",
-    "price_note": "Transportation bus routes available",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -1901,18 +1987,13 @@
     "genders": "Girls",
     "url": "https://www.gsema.org/en/camp/our-camps/runels.html",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $450–$650/wk",
-    "price_tier": "mid",
-    "price_note": "Transportation bus routes available",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -1922,24 +2003,19 @@
     "state": "NH",
     "address": "66 Hooker Farm Rd",
     "distance_miles": 30.4,
-    "region": "northshore",
-    "region_label": "North Shore",
+    "region": "regional",
+    "region_label": "Greater MA & Overnight",
     "type": "Day",
     "genders": "Coed",
     "url": "http://camp.mvymca.org/camp-otter/",
-    "hours": "8:30 AM – 5:00 PM",
-    "ages": "Ages 5–13",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly June 29 – August 28",
-    "price_weekly": "$360–$460",
-    "price_tier": "mid",
-    "price_note": "Swimming lessons, STEM enrichment, field trips, gym sports, EEC state vouchers accepted.",
+    "hours": "9:00 AM – 5:00 PM",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
-    "category_label": "🏕️ YMCA Community Camp",
+    "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -1955,18 +2031,13 @@
     "genders": "Boys",
     "url": "http://www.bauercrest.org",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $1,200–$1,800/wk",
-    "price_tier": "overnight",
-    "price_note": "Includes room, board & activities",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "sleepaway",
     "category_label": "⛺ Sleepaway / Overnight",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -1982,18 +2053,13 @@
     "genders": "Coed",
     "url": "http://tnotgroup.com/camp-lovewell/index.php",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $450–$650/wk",
-    "price_tier": "mid",
-    "price_note": "Transportation bus routes available",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -2009,18 +2075,13 @@
     "genders": "Coed",
     "url": "http://www.ywcari.org",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $450–$650/wk",
-    "price_tier": "mid",
-    "price_note": "Transportation bus routes available",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -2036,18 +2097,13 @@
     "genders": "Coed",
     "url": "http://www.bvbgc.com",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $450–$650/wk",
-    "price_tier": "mid",
-    "price_note": "Transportation bus routes available",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -2063,18 +2119,13 @@
     "genders": "Coed",
     "url": "https://bgcpawt.org/summer-programs/",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $450–$650/wk",
-    "price_tier": "mid",
-    "price_note": "Transportation bus routes available",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -2090,18 +2141,13 @@
     "genders": "Coed",
     "url": "https://www.bgcnri.org/",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $450–$650/wk",
-    "price_tier": "mid",
-    "price_note": "Transportation bus routes available",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -2117,18 +2163,13 @@
     "genders": "Boys",
     "url": "http://www.campavoda.org",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $1,200–$1,800/wk",
-    "price_tier": "overnight",
-    "price_note": "Includes room, board & activities",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "sleepaway",
     "category_label": "⛺ Sleepaway / Overnight",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -2144,23 +2185,18 @@
     "genders": "Coed",
     "url": "http://www.camptelnoar.org",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $1,200–$1,800/wk",
-    "price_tier": "overnight",
-    "price_note": "Includes room, board & activities",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "sleepaway",
     "category_label": "⛺ Sleepaway / Overnight",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
     "id": "camp_2985",
-    "name": "Broad Meadow Brook Nature Camp",
+    "name": "Broad Meadow Brook Nature Camp (Mass Audubon)",
     "city": "Worcester",
     "state": "MA",
     "address": "414 Massasoit Rd",
@@ -2169,21 +2205,34 @@
     "region_label": "Greater MA & Overnight",
     "type": "Day",
     "genders": "Coed",
-    "url": "http://www.massaudubon.org/broadmeadow",
-    "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
+    "url": "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/broad-meadow-brook/camp/programs-pricing",
+    "hours": "9:00am–3:30pm",
     "age_groups": [
+      "preschool",
       "elementary",
-      "middle"
+      "middle",
+      "teens"
     ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $450–$650/wk",
-    "price_tier": "mid",
-    "price_note": "Transportation bus routes available",
+    "price": "Sliding scale $94–$470/wk",
+    "price_tier": "sliding",
     "category": "nature",
-    "category_label": "🌿 Nature & Outdoors",
+    "category_label": "🌿 Nature Camp",
     "accredited": true,
-    "source": "American Camp Association (ACA) New England"
+    "verified": true,
+    "source": "American Camp Association (ACA) New England",
+    "ages": "Ages 4.5–16",
+    "season": "2026: weekly, June 22 – August 28",
+    "price_year": 2026,
+    "price_lines": [
+      "Weekly nature camp: $94–$470",
+      "3-day mini camp (ages 4.5–6): $42–$210"
+    ],
+    "registration": "Mass Audubon opens 2027 registration on staggered dates in January.",
+    "sliding_scale": "massaudubon",
+    "sources": [
+      "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/broad-meadow-brook/camp/programs-pricing"
+    ],
+    "checked": "2026-11-08"
   },
   {
     "id": "camp_11103",
@@ -2198,18 +2247,13 @@
     "genders": "Coed",
     "url": "http://wheelersummercamp.com/",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $450–$650/wk",
-    "price_tier": "mid",
-    "price_note": "Transportation bus routes available",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -2219,24 +2263,19 @@
     "state": "RI",
     "address": "32 Breakneck Hill Rd",
     "distance_miles": 37.2,
-    "region": "metrowest",
-    "region_label": "MetroWest",
+    "region": "regional",
+    "region_label": "Greater MA & Overnight",
     "type": "Day",
     "genders": "Coed",
     "url": "http://www.goymca.com/locations/maccoll-field-ymca",
-    "hours": "8:30 AM – 5:00 PM",
-    "ages": "Ages 5–13",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly June 29 – August 28",
-    "price_weekly": "$360–$460",
-    "price_tier": "mid",
-    "price_note": "Swimming lessons, STEM enrichment, field trips, gym sports, EEC state vouchers accepted.",
+    "hours": "9:00 AM – 5:00 PM",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
-    "category_label": "🏕️ YMCA Community Camp",
+    "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -2252,18 +2291,13 @@
     "genders": "Coed",
     "url": "https://peopleincfr.org/services/diabetes-association-inc/camp-jack/",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $450–$650/wk",
-    "price_tier": "mid",
-    "price_note": "Transportation bus routes available",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -2273,24 +2307,19 @@
     "state": "NH",
     "address": "67 Ball Rd",
     "distance_miles": 39.2,
-    "region": "southshore",
-    "region_label": "South Shore",
+    "region": "regional",
+    "region_label": "Greater MA & Overnight",
     "type": "Both",
     "genders": "Coed",
     "url": "http://www.ymcacamplincoln.org",
-    "hours": "8:30 AM – 5:00 PM",
-    "ages": "Ages 5–13",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly June 29 – August 28",
-    "price_weekly": "$360–$460",
-    "price_tier": "mid",
-    "price_note": "Swimming lessons, STEM enrichment, field trips, gym sports, EEC state vouchers accepted.",
+    "hours": "9:00 AM – 5:00 PM",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
-    "category_label": "🏕️ YMCA Community Camp",
+    "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -2305,19 +2334,14 @@
     "type": "Day",
     "genders": "Coed",
     "url": "http://www.ymcagreaterprovidence.org/camps/camp-wamsutta",
-    "hours": "8:30 AM – 5:00 PM",
-    "ages": "Ages 5–13",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly June 29 – August 28",
-    "price_weekly": "$360–$460",
-    "price_tier": "mid",
-    "price_note": "Swimming lessons, STEM enrichment, field trips, gym sports, EEC state vouchers accepted.",
+    "hours": "9:00 AM – 5:00 PM",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
-    "category_label": "🏕️ YMCA Community Camp",
+    "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -2333,18 +2357,13 @@
     "genders": "Coed",
     "url": "http://www.campsargent.org",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $450–$650/wk",
-    "price_tier": "mid",
-    "price_note": "Transportation bus routes available",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -2360,18 +2379,13 @@
     "genders": "Coed",
     "url": "http://www.merrimacknh.gov",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $450–$650/wk",
-    "price_tier": "mid",
-    "price_note": "Transportation bus routes available",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -2387,18 +2401,13 @@
     "genders": "Coed",
     "url": "https://www.camps.mosesbrown.org",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $450–$650/wk",
-    "price_tier": "mid",
-    "price_note": "Transportation bus routes available",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -2408,24 +2417,19 @@
     "state": "NH",
     "address": "1 Mason Rd",
     "distance_miles": 40.6,
-    "region": "innersuburbs",
-    "region_label": "Brookline, Newton & Nearby",
+    "region": "regional",
+    "region_label": "Greater MA & Overnight",
     "type": "Resident",
     "genders": "Coed",
     "url": "http://www.cohencamps.org",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $1,200–$1,800/wk",
-    "price_tier": "overnight",
-    "price_note": "Includes room, board & activities",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "sleepaway",
     "category_label": "⛺ Sleepaway / Overnight",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -2441,18 +2445,13 @@
     "genders": "Coed",
     "url": "http://www.eccri.org",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $450–$650/wk",
-    "price_tier": "mid",
-    "price_note": "Transportation bus routes available",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -2468,18 +2467,13 @@
     "genders": "Girls",
     "url": "https://www.gsema.org/en/camp/our-camps/wind-in-the-pines.html",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $450–$650/wk",
-    "price_tier": "mid",
-    "price_note": "Transportation bus routes available",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -2494,19 +2488,14 @@
     "type": "Day",
     "genders": "Coed",
     "url": "https://www.ymca1.org",
-    "hours": "8:30 AM – 5:00 PM",
-    "ages": "Ages 5–13",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly June 29 – August 28",
-    "price_weekly": "$360–$460",
-    "price_tier": "mid",
-    "price_note": "Swimming lessons, STEM enrichment, field trips, gym sports, EEC state vouchers accepted.",
+    "hours": "9:00 AM – 5:00 PM",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
-    "category_label": "🏕️ YMCA Community Camp",
+    "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -2521,24 +2510,19 @@
     "type": "Day",
     "genders": "Coed",
     "url": "http://www.graniteymca",
-    "hours": "8:30 AM – 5:00 PM",
-    "ages": "Ages 5–13",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly June 29 – August 28",
-    "price_weekly": "$360–$460",
-    "price_tier": "mid",
-    "price_note": "Swimming lessons, STEM enrichment, field trips, gym sports, EEC state vouchers accepted.",
+    "hours": "9:00 AM – 5:00 PM",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
-    "category_label": "🏕️ YMCA Community Camp",
+    "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
     "id": "camp_3065",
-    "name": "Wachusett Meadow Nature Camp",
+    "name": "Wachusett Meadow Nature Camp (Mass Audubon)",
     "city": "Princeton",
     "state": "MA",
     "address": "113 Goodnow Rd",
@@ -2547,21 +2531,33 @@
     "region_label": "Greater MA & Overnight",
     "type": "Day",
     "genders": "Coed",
-    "url": "http://www.massaudubon.org/wachusettmeadow",
-    "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
+    "url": "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/wachusett-meadow/camp/programs-pricing",
+    "hours": "9:00am–3:30pm",
     "age_groups": [
+      "preschool",
       "elementary",
       "middle"
     ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $450–$650/wk",
-    "price_tier": "mid",
-    "price_note": "Transportation bus routes available",
+    "price": "Sliding scale $94–$470/wk",
+    "price_tier": "sliding",
     "category": "nature",
-    "category_label": "🌿 Nature & Outdoors",
+    "category_label": "🌿 Nature Camp",
     "accredited": true,
-    "source": "American Camp Association (ACA) New England"
+    "verified": true,
+    "source": "American Camp Association (ACA) New England",
+    "ages": "Ages 3.5 and up",
+    "season": "2026: weekly, June 22 – August 21",
+    "price_year": 2026,
+    "price_lines": [
+      "Full-day nature camp: $94–$470/wk",
+      "Half-day preschool (ages 3.5–5): $42–$210"
+    ],
+    "registration": "Mass Audubon opens 2027 registration on staggered dates in January.",
+    "sliding_scale": "massaudubon",
+    "sources": [
+      "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/wachusett-meadow/camp/programs-pricing"
+    ],
+    "checked": "2026-11-08"
   },
   {
     "id": "camp_8792",
@@ -2570,24 +2566,19 @@
     "state": "NH",
     "address": "300 Blondin Rd",
     "distance_miles": 44.0,
-    "region": "northshore",
-    "region_label": "North Shore",
+    "region": "regional",
+    "region_label": "Greater MA & Overnight",
     "type": "Both",
     "genders": "Coed",
     "url": "https://www.nhscouting.org",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $450–$650/wk",
-    "price_tier": "mid",
-    "price_note": "Transportation bus routes available",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -2597,24 +2588,19 @@
     "state": "NH",
     "address": "56 Camp Allen Rd",
     "distance_miles": 44.2,
-    "region": "metrowest",
-    "region_label": "MetroWest",
+    "region": "regional",
+    "region_label": "Greater MA & Overnight",
     "type": "Resident",
     "genders": "Coed",
     "url": "http://www.campallennh.org",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $1,200–$1,800/wk",
-    "price_tier": "overnight",
-    "price_note": "Includes room, board & activities",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "sleepaway",
     "category_label": "⛺ Sleepaway / Overnight",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -2630,18 +2616,13 @@
     "genders": "Coed",
     "url": "http://www.campmiddlesex.com",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $450–$650/wk",
-    "price_tier": "mid",
-    "price_note": "Transportation bus routes available",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -2657,18 +2638,13 @@
     "genders": "Coed",
     "url": "https://crossroadsma.org/programs/c5leaders/",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $1,200–$1,800/wk",
-    "price_tier": "overnight",
-    "price_note": "Includes room, board & activities",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "sleepaway",
     "category_label": "⛺ Sleepaway / Overnight",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -2678,24 +2654,19 @@
     "state": "RI",
     "address": "688 Snake Hill Rd",
     "distance_miles": 44.5,
-    "region": "southshore",
-    "region_label": "South Shore",
+    "region": "regional",
+    "region_label": "Greater MA & Overnight",
     "type": "Day",
     "genders": "Coed",
     "url": "http://campruggles.org/Ruggles/Welcome.html",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $450–$650/wk",
-    "price_tier": "mid",
-    "price_note": "Transportation bus routes available",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -2711,18 +2682,13 @@
     "genders": "Coed",
     "url": "http://www.motherofhopecamp.com/",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $450–$650/wk",
-    "price_tier": "mid",
-    "price_note": "Transportation bus routes available",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -2738,18 +2704,13 @@
     "genders": "Coed",
     "url": "http://www.bartoncenter.org/Day-Camps",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $450–$650/wk",
-    "price_tier": "mid",
-    "price_note": "Transportation bus routes available",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "arts",
     "category_label": "🎨 Arts & Performance",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -2765,18 +2726,13 @@
     "genders": "Coed",
     "url": "http://www.bartoncenter.org",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $450–$650/wk",
-    "price_tier": "mid",
-    "price_note": "Transportation bus routes available",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "arts",
     "category_label": "🎨 Arts & Performance",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -2791,19 +2747,14 @@
     "type": "Day",
     "genders": "Coed",
     "url": "https://ymcagreaterprovidence.org/camps/camp-manitoo",
-    "hours": "8:30 AM – 5:00 PM",
-    "ages": "Ages 5–13",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly June 29 – August 28",
-    "price_weekly": "$360–$460",
-    "price_tier": "mid",
-    "price_note": "Swimming lessons, STEM enrichment, field trips, gym sports, EEC state vouchers accepted.",
+    "hours": "9:00 AM – 5:00 PM",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
-    "category_label": "🏕️ YMCA Community Camp",
+    "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -2819,18 +2770,13 @@
     "genders": "Coed",
     "url": "http://www.cyj.org",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $1,200–$1,800/wk",
-    "price_tier": "overnight",
-    "price_note": "Includes room, board & activities",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "sleepaway",
     "category_label": "⛺ Sleepaway / Overnight",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -2840,24 +2786,19 @@
     "state": "RI",
     "address": "1043 Snake Hill Rd",
     "distance_miles": 46.1,
-    "region": "southshore",
-    "region_label": "South Shore",
+    "region": "regional",
+    "region_label": "Greater MA & Overnight",
     "type": "Both",
     "genders": "Coed",
     "url": "http://www.campaldersgate.com",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $450–$650/wk",
-    "price_tier": "mid",
-    "price_note": "Transportation bus routes available",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -2873,18 +2814,13 @@
     "genders": "Coed",
     "url": "http://www.wbgclubs.org/summer-camp",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $450–$650/wk",
-    "price_tier": "mid",
-    "price_note": "Transportation bus routes available",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -2900,18 +2836,13 @@
     "genders": "Boys",
     "url": "http://www.bartoncenter.org",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $1,200–$1,800/wk",
-    "price_tier": "overnight",
-    "price_note": "Includes room, board & activities",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "sleepaway",
     "category_label": "⛺ Sleepaway / Overnight",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -2925,20 +2856,15 @@
     "region_label": "Greater MA & Overnight",
     "type": "Day",
     "genders": "Coed",
-    "url": "https://www.google.com/search?q=YMCA%20Camp%20Gundalow%20Summer%20Camp%20MA",
-    "hours": "8:30 AM – 5:00 PM",
-    "ages": "Ages 5–13",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly June 29 – August 28",
-    "price_weekly": "$360–$460",
-    "price_tier": "mid",
-    "price_note": "Swimming lessons, STEM enrichment, field trips, gym sports, EEC state vouchers accepted.",
+    "url": "",
+    "hours": "9:00 AM – 5:00 PM",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
-    "category_label": "🏕️ YMCA Community Camp",
+    "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -2954,18 +2880,13 @@
     "genders": "Coed",
     "url": "http://www.campwinnekeag.com",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $450–$650/wk",
-    "price_tier": "mid",
-    "price_note": "Transportation bus routes available",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -2981,18 +2902,13 @@
     "genders": "Coed",
     "url": "http://www.campmarshall.net",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $450–$650/wk",
-    "price_tier": "mid",
-    "price_note": "Transportation bus routes available",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -3008,18 +2924,13 @@
     "genders": "Coed",
     "url": "http://www.epbgc.org",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $450–$650/wk",
-    "price_tier": "mid",
-    "price_note": "Transportation bus routes available",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "traditional",
     "category_label": "🏕️ Traditional Day Camp",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
   },
   {
@@ -3035,18 +2946,45 @@
     "genders": "Coed",
     "url": "http://www.campstonewall.org",
     "hours": "9:00 AM – 5:00 PM",
-    "ages": "Ages 5–14 (Grades K–8)",
-    "age_groups": [
-      "elementary",
-      "middle"
-    ],
-    "dates": "Weekly sessions late June – late August",
-    "price_weekly": "Typical $1,200–$1,800/wk",
-    "price_tier": "overnight",
-    "price_note": "Includes room, board & activities",
+    "age_groups": [],
+    "price": null,
+    "price_tier": "unlisted",
     "category": "sleepaway",
     "category_label": "⛺ Sleepaway / Overnight",
     "accredited": true,
+    "verified": false,
     "source": "American Camp Association (ACA) New England"
+  },
+  {
+    "id": "camp_v_bcyf",
+    "city": "Boston",
+    "state": "MA",
+    "address": "Community centers across Boston",
+    "distance_miles": null,
+    "region": "boston",
+    "region_label": "Boston Proper",
+    "type": "Day",
+    "genders": "Coed",
+    "hours": null,
+    "age_groups": [],
+    "price": "Varies by center",
+    "price_tier": "unlisted",
+    "accredited": false,
+    "source": "Camp website",
+    "name": "BCYF Summer Programs (City of Boston)",
+    "url": "https://www.boston.gov/departments/boston-centers-youth-families/summer-programs-and-events-bcyf",
+    "category": "traditional",
+    "category_label": "🏙️ City Community Programs",
+    "season": "2026 summer guide posted; 2027 not yet",
+    "price_year": null,
+    "price_lines": [
+      "Programs and prices vary by community center. See the city's summer guide.",
+      "BCYF Camp Joy serves children and young adults with special needs"
+    ],
+    "sources": [
+      "https://www.boston.gov/departments/boston-centers-youth-families/summer-programs-and-events-bcyf"
+    ],
+    "checked": "2026-11-08",
+    "verified": true
   }
 ]
