@@ -1,0 +1,339 @@
+#!/usr/bin/env python3
+"""Generate a weekday Reddit roundup for r/boston, r/cambridgema, and r/somerville.
+
+Curates ~5 top events per day for Boston, Cambridge, and Somerville from Monday to Friday
+(15 events per day, 75 events total), formatted in Reddit Markdown with venue, time,
+price, neighborhood, and 1-line descriptions.
+
+Usage:
+    python3 scripts/generate_weekday_reddit_roundup.py              # this/next Monday–Friday
+    python3 scripts/generate_weekday_reddit_roundup.py 2026-11-09   # specific week starting Monday
+"""
+
+import copy
+import json
+import os
+import re
+import sys
+from collections import Counter, defaultdict
+from datetime import date, datetime, timedelta
+from html import unescape
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT)
+
+from template import (  # noqa: E402
+    EASTERN, _effective_category, _event_city, _get_event_highlight, _hub_place_label,
+    _is_event_free, _load_highlights, _merge_duplicates, title_word_freq,
+)
+from scrapers import category_bucket  # noqa: E402
+from venues_geo import resolve_event_geo  # noqa: E402
+
+SITE = "https://www.wickedbostonevents.com"
+
+MAJOR_VENUES = (
+    "td garden", "mgm music hall", "house of blues", "big night live", "roadrunner", "royale",
+    "paradise rock", "the sinclair", "brighton music hall", "the wilbur", "orpheum", "agganis",
+    "leader bank pavilion", "fenway park", "chevalier", "shubert", "wang theatre",
+    "boch center", "emerson colonial", "cutler majestic", "emerson paramount", "huntington",
+    "symphony hall", "jordan hall", "berklee performance", "sanders theatre", "laugh boston",
+    "nick's comedy", "comedy studio", "improv asylum", "city winery", "crystal ballroom",
+    "somerville theatre", "arts at the armory", "the middle east", "club passim",
+    "museum of fine arts", "isabella stewart gardner", "ica boston", "institute of contemporary art",
+    "museum of science", "harvard art museums", "wbur cityspace", "coolidge corner", "brattle",
+    "the burren", "aeronaut", "remnant", "portico", "castle island"
+)
+
+SKIP_TITLE_RE = re.compile(
+    r"(?i)\b(?:class|classes|course|workshop|training|certification|summit|"
+    r"conference|webinar|yoga|zoom|exam|prep|figure drawing|infant|toddler|"
+    r"storytime|story time|committee|meeting|retirement board|clubhouse|board of health|"
+    r"luthier collective|preview session|open house)\b"
+)
+
+
+def _week_start(arg=None):
+    if arg:
+        d = date.fromisoformat(arg)
+        return d - timedelta(days=d.weekday())
+    today = datetime.now(EASTERN).date()
+    # If today is Monday-Friday, use this week's Monday; if weekend (Sat/Sun), use upcoming Monday
+    if today.weekday() < 5:
+        return today - timedelta(days=today.weekday())
+    return today + timedelta(days=(7 - today.weekday()))
+
+
+def _clean_title(name):
+    t = re.sub(r"\s+", " ", unescape(name or "")).strip()
+    t = re.sub(r"^(?:The )?Bowery Presents:?\s*", "", t, flags=re.I)
+    t = re.sub(r"\s+presented by .*$", "", t, flags=re.I)
+    t = re.sub(r"\s+[-–]\s+(?:Ages 18\+|21\+|Boston|MA).*$", "", t, flags=re.I)
+    return t if len(t) <= 75 else t[:72].rstrip() + "…"
+
+
+def _link(text, url):
+    text = text.replace("[", "(").replace("]", ")")
+    if not url or not url.startswith("http"):
+        return f"**{text}**"
+    return f"**[{text}]({url.replace(')', '%29').replace(' ', '%20')})**"
+
+
+def _price(e):
+    if _is_event_free(e):
+        return "Free"
+    p = str(e.get("price") or "").strip()
+    if not p or re.fullmatch(r"\$?0(?:\.00)?", p) or len(p) > 20 or not re.search(r"\d", p):
+        return ""
+    return re.sub(r"\.00\b", "", p)
+
+
+def _time(e):
+    t = e.get("_time")
+    if not isinstance(t, datetime):
+        return e.get("time") or ""
+    return "" if (t.hour, t.minute) == (0, 0) else t.strftime("%-I:%M%p").replace(":00", "")
+
+
+def _venue(e):
+    v = re.sub(r"\s+", " ", e.get("venue") or e.get("_source_venue") or "").strip()
+    v = re.sub(r"\s+presented by .*$", "", v, flags=re.I)
+    v = re.sub(r"\s*\((?:Boston|Cambridge|Somerville)\)$", "", v)
+    v = re.sub(r"^Downtown Boston - ", "", v)
+    v = re.sub(r"^Main Stage,\s*", "", v)
+    return v
+
+
+def _area(e):
+    g = resolve_event_geo(e)
+    if g and g.get("neighborhood"):
+        return g["neighborhood"].replace(" Square", " Sq")
+    city = _event_city(e.get("venue"), e.get("_source_venue"), e)
+    lbl = _hub_place_label(city, e).split(",")[0].replace(" Square", " Sq")
+    return "" if lbl in ("Greater Boston",) else lbl
+
+
+def _line(e):
+    parts = [_link(_clean_title(e["name"]), e.get("url")) + f" @ {_venue(e)}"]
+    t = _time(e)
+    if t:
+        parts[0] += f" @ {t}"
+    extra = [x for x in (_price(e), _area(e)) if x]
+    s = "* " + parts[0] + (" · " + " · ".join(extra) if extra else "")
+    note = (e.get("_highlight") or {}).get("note")
+    if note:
+        s += f"  \n  {note}"
+    return s
+
+
+def _norm_key(title):
+    t = re.sub(r"[^a-z0-9]+", "", (title or "").lower())
+    return t[:20]
+
+
+def build_weekday_roundup(start_monday=None):
+    mon = _week_start(start_monday)
+    weekdays = [mon + timedelta(days=i) for i in range(5)]  # Mon, Tue, Wed, Thu, Fri
+    highlights = _load_highlights()
+
+    with open(os.path.join(ROOT, "events.json"), encoding="utf-8") as f:
+        data = json.load(f)
+        venues = data["venues"] if isinstance(data, dict) and "venues" in data else data
+
+    # Filter events to Mon-Fri and target cities
+    city_keys = ("boston", "cambridge", "somerville")
+    raw_events_by_day = {d: [] for d in weekdays}
+
+    for v in venues:
+        vname = v["venue"]
+        vurl = v.get("url", "")
+        for e in v.get("events", []):
+            d_str = e.get("date")
+            if not d_str or d_str == "tba":
+                continue
+            try:
+                ev_time = datetime.fromisoformat(d_str.replace("Z", "+00:00")).astimezone(EASTERN)
+                ev_date = ev_time.date()
+            except Exception:
+                continue
+
+            if ev_date not in raw_events_by_day:
+                continue
+
+            city = _event_city(e.get("venue"), vname, e)
+            if city not in city_keys:
+                continue
+
+            name = e.get("name") or e.get("title") or ""
+            if SKIP_TITLE_RE.search(name) or re.search(r"(?i)\b(?:closed|closure|canceled|cancelled|postponed)\b", name):
+                continue
+
+            ev = dict(e)
+            ev["_time"] = ev_time
+            ev["_source_venue"] = vname
+            ev["venue"] = e.get("venue") or vname
+            ev["_city"] = city
+            ev["_highlight"] = _get_event_highlight(ev, highlights)
+            raw_events_by_day[ev_date].append(ev)
+
+    def _head_slug(name):
+        n = (name or "").lower().strip()
+        n = re.sub(r"^(?:the\s+bowery\s+presents:?\s*|an\s+evening\s+with\s+|a\s+conversation\s+with\s+|sold\s+out:?\s*|!\s*)", "", n)
+        n = re.sub(r"\s+(?:with|w/|ft\.|feat\.|presents|opened by)\s+.*$", "", n)
+        n = re.sub(r"\s+[-–—:]\s+.*$", "", n)
+        n = re.sub(r"\s*\((?:18\+|21\+|ages?\s+\d+\+?|boston|cambridge|somerville)\)$", "", n)
+        n = re.sub(r"[^a-z0-9]+", "", n)
+        return n[:16]
+
+    def score(e):
+        s = 0
+        if e.get("_highlight"):
+            s += 120
+        v_low = f"{e.get('venue')} {e.get('_source_venue')}".lower()
+        if any(mv in v_low for mv in MAJOR_VENUES):
+            s += 40
+        if _is_event_free(e):
+            s += 15
+        if e.get("price"):
+            s += 10
+        if _time(e):
+            s += 10
+        # Deprioritize aggregator duplicates or missing times
+        if not _time(e):
+            s -= 15
+        src = (e.get("_source_venue") or "").lower()
+        if src in ("ticketmaster", "seatgeek", "eventschaser"):
+            s -= 5
+        return s
+
+    picked_by_day_city = {d: {c: [] for c in city_keys} for d in weekdays}
+
+    for d in weekdays:
+        day_events = raw_events_by_day[d]
+        if not day_events:
+            continue
+        w_freq = title_word_freq(day_events)
+        merged_day = _merge_duplicates(day_events, w_freq)
+
+        # Group by city
+        city_pools = {c: [] for c in city_keys}
+        for e in merged_day:
+            c = e.get("_city") or _event_city(e.get("venue"), e.get("_source_venue"), e)
+            if c in city_pools:
+                city_pools[c].append(e)
+
+        for c in city_keys:
+            evs = city_pools[c]
+            evs.sort(key=lambda e: (-score(e), e["_time"]))
+            day_picked = []
+            seen_heads = set()
+            seen_venue = Counter()
+
+            # First pass: try strictly 1 event per venue and unique headliner
+            for e in evs:
+                if len(day_picked) >= 5:
+                    break
+                slug = _head_slug(e["name"])
+                v_clean = _venue(e).lower()
+                if slug and slug in seen_heads:
+                    continue
+                if seen_venue[v_clean] >= 1:
+                    continue
+                if "trivia" in slug and any("trivia" in _head_slug(p["name"]) for p in day_picked if _venue(p).lower() == v_clean):
+                    continue
+
+                if slug:
+                    seen_heads.add(slug)
+                seen_venue[v_clean] += 1
+                day_picked.append(e)
+
+            # Second pass: if less than 5 events, allow up to 2 per venue if different headliner
+            if len(day_picked) < 5:
+                for e in evs:
+                    if len(day_picked) >= 5:
+                        break
+                    slug = _head_slug(e["name"])
+                    v_clean = _venue(e).lower()
+                    if e in day_picked:
+                        continue
+                    if slug and slug in seen_heads:
+                        continue
+                    if seen_venue[v_clean] >= 2:
+                        continue
+                    if slug:
+                        seen_heads.add(slug)
+                    seen_venue[v_clean] += 1
+                    day_picked.append(e)
+
+            day_picked.sort(key=lambda e: e["_time"])
+            picked_by_day_city[d][c] = day_picked
+
+    # Format Markdown
+    fri = weekdays[-1]
+    span = f"{mon.strftime('%b %-d')}–{fri.strftime('%-d') if fri.month == mon.month else fri.strftime('%b %-d')}"
+    title = f"Things to do in Boston, Cambridge & Somerville this week ({span}) · Weekday Guide"
+
+    city_display = {
+        "boston": "🏙️ BOSTON",
+        "cambridge": "🎓 CAMBRIDGE",
+        "somerville": "🎨 SOMERVILLE",
+    }
+
+    out = [
+        f"Hi Boston! Here are ~5 curated things to do each day for **Monday {mon.strftime('%b %-d')} through "
+        f"Friday {fri.strftime('%b %-d')}**, broken down by city (**Boston**, **Cambridge**, and **Somerville**).",
+        "",
+        "Whether you're looking for live music, comedy, 35mm films, pub trivia, or free museum nights after work, "
+        "here are the top picks for the week! Add anything else happening below.",
+        "",
+    ]
+
+    for d in weekdays:
+        day_heading = f"## 📅 {d.strftime('%A, %b %-d').upper()}"
+        out.append(day_heading)
+        out.append("")
+
+        for c in city_keys:
+            picks = picked_by_day_city[d][c]
+            out.append(f"### {city_display[c]}")
+            if picks:
+                for e in picks:
+                    out.append(_line(e))
+            else:
+                out.append("* *Check the calendar for local shows tonight.*")
+            out.append("")
+
+    out += [
+        "---",
+        "",
+        "### 🔗 Explore More Events by City & Neighborhood",
+        f"- **Boston Events**: [{SITE}/boston/]({SITE}/boston/)",
+        f"- **Cambridge Events**: [{SITE}/cambridge/]({SITE}/cambridge/)",
+        f"- **Somerville Events**: [{SITE}/somerville/]({SITE}/somerville/)",
+        f"- **Boston EDM & Nightclubs**: [{SITE}/boston-edm/]({SITE}/boston-edm/)",
+        f"- **Kids & Family**: [{SITE}/kids-family-events-boston/]({SITE}/kids-family-events-boston/)",
+        f"- **Summer Camps Guide**: [{SITE}/summer-camps/]({SITE}/summer-camps/)",
+        "",
+        f"*Curated from 200+ local venue, theatre, museum, and community calendars at **[wickedbostonevents.com]({SITE})** (ad-free & independent).*",
+    ]
+
+    body = "\n".join(out) + "\n"
+    return title, body
+
+
+def main():
+    start_arg = sys.argv[1] if len(sys.argv) > 1 else None
+    title, body = build_weekday_roundup(start_arg)
+    mon = _week_start(start_arg)
+    out_dir = os.path.join(ROOT, "reddit")
+    os.makedirs(out_dir, exist_ok=True)
+    out_file = os.path.join(out_dir, f"weekday-roundup-{mon.isoformat()}.md")
+
+    with open(out_file, "w", encoding="utf-8") as f:
+        f.write(f"<!-- Title: {title} -->\n\n{body}")
+
+    print(f"Title: {title}")
+    print(f"Saved: {out_file} ({len(body):,} characters)")
+
+
+if __name__ == "__main__":
+    main()
