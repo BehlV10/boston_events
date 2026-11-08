@@ -2603,5 +2603,203 @@
     "note": "Food, music and dance on the Common, Sunday 10 AM to 5 PM.",
     "start_date": "2026-11-08",
     "expires": "2026-11-08"
+  },
+  {
+    "id": "2026-11-09-sophiabush",
+    "match": {
+      "name_contains": "Sophia Bush",
+      "venue_contains": "Coop"
+    },
+    "badge": "\ud83d\udcda Author Talk",
+    "note": "The 'One Tree Hill' and 'Chicago P.D.' star talks her new book at the Harvard Coop.",
+    "start_date": "2026-11-09",
+    "expires": "2026-11-09"
+  },
+  {
+    "id": "2026-11-09-brattle-indemnity",
+    "match": {
+      "name_contains": "Double Indemnity",
+      "venue_contains": "Brattle"
+    },
+    "badge": "\ud83c\udfac Film Pick",
+    "note": "Billy Wilder's 1944 noir classic with Barbara Stanwyck and Fred MacMurray, on the big screen.",
+    "start_date": "2026-11-09",
+    "expires": "2026-11-09"
+  },
+  {
+    "id": "2026-11-09-aeronaut-tavern",
+    "match": {
+      "name_contains": "Tavern Talk",
+      "venue_contains": "Aeronaut"
+    },
+    "badge": "\ud83c\udf7a History on Tap",
+    "note": "Somerville Museum talk over pints on the 1791 Native coalition victory known as St. Clair's Defeat.",
+    "start_date": "2026-11-09",
+    "expires": "2026-11-09"
+  },
+  {
+    "id": "2026-11-10-geese-roadrunner",
+    "match": {
+      "name_contains": "GEESE",
+      "venue_contains": "Roadrunner"
+    },
+    "badge": "\ud83c\udfb8 Big Show",
+    "note": "The Brooklyn band behind 'Getting Killed', one of 2025's most acclaimed rock albums, on a two-night run.",
+    "start_date": "2026-11-10",
+    "expires": "2026-11-11"
+  },
+  {
+    "id": "2026-11-10-protomartyr",
+    "match": {
+      "name_contains": "Protomartyr",
+      "venue_contains": "Crystal Ballroom"
+    },
+    "badge": "\ud83c\udfb8 Indie Pick",
+    "note": "Detroit post-punk heavyweights led by Joe Casey's deadpan baritone, in the Crystal Ballroom.",
+    "start_date": "2026-11-10",
+    "expires": "2026-11-10"
+  },
+  {
+    "id": "2026-11-10-davone-tines",
+    "match": {
+      "name_contains": "Dav\u00f3ne Tines",
+      "venue_contains": "Harvard"
+    },
+    "badge": "\ud83c\udfbc Classical Pick",
+    "note": "Star bass-baritone Dav\u00f3ne Tines in a BSO-presented recital at Harvard's Paine Hall.",
+    "start_date": "2026-11-10",
+    "expires": "2026-11-10"
+  },
+  {
+    "id": "2026-11-10-alice-hoffman",
+    "match": {
+      "name_contains": "Alice Hoffman",
+      "venue_contains": "Cambridge Public Library"
+    },
+    "badge": "\ud83d\udcda Author Talk",
+    "note": "'Practical Magic' author Alice Hoffman presents 'The Witches of Cambridge' at the Main Library.",
+    "start_date": "2026-11-10",
+    "expires": "2026-11-10"
+  },
+  {
+    "id": "2026-11-11-leithauser-rostam",
+    "match": {
+      "name_contains": "Hamilton Leithauser",
+      "venue_contains": "Somerville Theatre"
+    },
+    "badge": "\ud83c\udfb8 Big Show",
+    "note": "The Walkmen frontman and ex-Vampire Weekend producer Rostam reunite, a decade after 'I Had a Dream That You Were Mine'.",
+    "start_date": "2026-11-11",
+    "expires": "2026-11-11"
+  },
+  {
+    "id": "2026-11-12-bruins-habs",
+    "match": {
+      "name_contains": "Montreal Canadiens",
+      "venue_contains": "TD Garden"
+    },
+    "badge": "\ud83c\udfd2 Rivalry Night",
+    "note": "Original Six rivalry night as the Bruins host the Canadiens at TD Garden.",
+    "start_date": "2026-11-12",
+    "expires": "2026-11-12"
+  },
+  {
+    "id": "2026-11-12-giant-rooks",
+    "match": {
+      "name_contains": "Giant Rooks",
+      "venue_contains": "House of Blues"
+    },
+    "badge": "\ud83c\udfb8 Indie Pick",
+    "note": "German indie-pop five-piece with big, anthemic hooks.",
+    "start_date": "2026-11-12",
+    "expires": "2026-11-12"
+  },
+  {
+    "id": "2026-11-12-sheila-jordan",
+    "match": {
+      "name_contains": "Sheila Jordan",
+      "venue_contains": "Monkfish"
+    },
+    "badge": "\ud83c\udfb7 Jazz Legend",
+    "note": "NEA Jazz Master Sheila Jordan, a bebop-era vocal legend still singing in her late 90s.",
+    "start_date": "2026-11-12",
+    "expires": "2026-11-12"
+  },
+  {
+    "id": "2026-11-12-mit-after-dark",
+    "match": {
+      "name_contains": "After Dark: Decoding Whales",
+      "venue_contains": "MIT Museum"
+    },
+    "badge": "\ud83d\udd2c Museum Night",
+    "note": "MIT Museum's after-hours night on the science of decoding whale and dolphin communication.",
+    "start_date": "2026-11-12",
+    "expires": "2026-11-12"
+  },
+  {
+    "id": "2026-11-12-weatherday",
+    "match": {
+      "name_contains": "Weatherday",
+      "venue_contains": "Armory"
+    },
+    "badge": "\ud83c\udfb8 Indie Pick",
+    "note": "Cult Swedish lo-fi emo project Weatherday, live at the Armory.",
+    "start_date": "2026-11-12",
+    "expires": "2026-11-12"
+  },
+  {
+    "id": "2026-11-13-victoria-monet",
+    "match": {
+      "name_contains": "Victoria Mon",
+      "venue_contains": "MGM"
+    },
+    "badge": "\ud83c\udfa4 Big Show",
+    "note": "Grammy Best New Artist winner ('On My Mama') brings the Frequency of Love Tour to Fenway.",
+    "start_date": "2026-11-13",
+    "expires": "2026-11-13"
+  },
+  {
+    "id": "2026-11-13-bill-charlap",
+    "match": {
+      "name_contains": "Bill Charlap Trio",
+      "venue_contains": "Regattabar"
+    },
+    "badge": "\ud83c\udfb7 Jazz Pick",
+    "note": "Grammy-winning pianist and American Songbook master Bill Charlap, in Harvard Square.",
+    "start_date": "2026-11-13",
+    "expires": "2026-11-13"
+  },
+  {
+    "id": "2026-11-13-pouvwa",
+    "match": {
+      "name_contains": "Pouvwa",
+      "venue_contains": "Platform"
+    },
+    "badge": "\ud83d\udc83 Dance Pick",
+    "note": "World premiere from Haitian dance company Jean Appolon Expressions in Kendall Square.",
+    "start_date": "2026-11-13",
+    "expires": "2026-11-14"
+  },
+  {
+    "id": "2026-11-13-tracy-bonham",
+    "match": {
+      "name_contains": "Tracy Bonham",
+      "venue_contains": "Sonia"
+    },
+    "badge": "\ud83c\udfb8 90s Pick",
+    "note": "'Mother Mother' singer-songwriter Tracy Bonham, in Central Square.",
+    "start_date": "2026-11-13",
+    "expires": "2026-11-13"
+  },
+  {
+    "id": "2026-11-13-bcf-semis",
+    "match": {
+      "name_contains": "Semifinal Round 1",
+      "venue_contains": "Rockwell"
+    },
+    "badge": "\ud83d\ude02 Comedy Pick",
+    "note": "Boston Comedy Festival's stand-up contest semifinals in Davis Square.",
+    "start_date": "2026-11-13",
+    "expires": "2026-11-13"
   }
 ]
