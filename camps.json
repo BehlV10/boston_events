@@ -1276,9 +1276,9 @@
    "season": 2026,
    "dates": "Weekly, Jun 22–Aug 14, 2026; no camp Jul 3",
    "hours": "9:00 AM–3:00 PM",
-   "price": null,
-   "week_low": null,
-   "week_high": null,
+   "price": "$109–$545/week; specialty sessions (ages 11–14) $87–$579",
+   "week_low": 109,
+   "week_high": 545,
    "sliding": true,
    "aid": "Sliding scale pricing: families choose a tier",
    "residents": null,
@@ -1289,7 +1289,7 @@
    "sources": [
     "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/north-river/camp/programs-pricing"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-08"
   },
   {
    "id": "nobles",
@@ -1448,11 +1448,11 @@
    "age_min": 3,
    "age_max": 15,
    "season": 2027,
-   "dates": null,
+   "dates": "Four 2-week sessions, Jun 21–Aug 13, 2027",
    "hours": null,
-   "price": null,
-   "week_low": null,
-   "week_high": null,
+   "price": "Lower Camp (PreK–K) $1,440–$1,600 per 2 weeks; grades 1–7 $1,695–$1,880; specialty camps $720–$1,970",
+   "week_low": 720,
+   "week_high": 940,
    "sliding": false,
    "aid": null,
    "residents": null,
@@ -1473,12 +1473,12 @@
      "season": 2027
     }
    ],
-   "note": null,
+   "note": "Rates are in the \"Dates + Rates\" document linked from the camp's site. Bus $100 each way per week. Extended day 7:30–8:30 AM $80–$100/week; 4–6 PM $170–$210/week.",
    "url": "https://bvrcamp.org/",
    "sources": [
     "https://bvrcamp.org/"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-08"
   },
   {
    "id": "chestnut-hill-school",
@@ -1531,9 +1531,9 @@
    "season": 2027,
    "dates": "Jun 28–Aug 20, 2027",
    "hours": "Sprouts 8:30 AM–12:45 PM; Saplings to 3:45 PM",
-   "price": "8 weeks $7,380; 6 weeks $6,170; 4 weeks $4,185",
+   "price": "2 weeks $2,005–$2,225; 4 weeks $4,185; 6 weeks $6,170; 8 weeks $7,380",
    "week_low": 922,
-   "week_high": 1046,
+   "week_high": 1113,
    "sliding": false,
    "aid": null,
    "residents": null,
@@ -1563,7 +1563,7 @@
    "sources": [
     "https://sewataro.com/about-us/dates-tuition/dates-tuition"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-08"
   },
   {
    "id": "everwood",
@@ -1853,13 +1853,13 @@
    "kind": "private",
    "focus": "maker",
    "type": "Day",
-   "ages": null,
-   "age_min": null,
-   "age_max": null,
+   "ages": "Ages 4–12",
+   "age_min": 4,
+   "age_max": 12,
    "season": 2026,
-   "dates": "Summer 2026 has ended; 2027 not posted",
+   "dates": "Jun 15–Aug 21, 2026 at Cambridge Friends School; 2027 not posted",
    "hours": "8:00 AM–6:00 PM, lunch included",
-   "price": "$119/day at the 15-day rate; other passes on their site",
+   "price": "Day Pass $134/day; $119/day if you buy 15+; Summer Pass $3,570",
    "week_low": null,
    "week_high": null,
    "sliding": false,
@@ -1873,7 +1873,7 @@
     "https://steveandkatescamp.com/cambridge/",
     "https://steveandkatescamp.com/fees/financial-aid/"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-08"
   },
   {
    "id": "cambridge-ymca",
@@ -2099,6 +2099,100 @@
     "https://bgcpawt.org/summer-programs/"
    ],
    "checked": "2026-11-07"
+  },
+  {
+   "id": "nuvu",
+   "name": "NuVu Summer",
+   "town": "Cambridge",
+   "area": "cam_som",
+   "kind": "private",
+   "focus": "maker",
+   "type": "Day",
+   "ages": "Ages 8–18",
+   "age_min": 8,
+   "age_max": 18,
+   "season": 2027,
+   "dates": "Middle & high school: Jul 6–16, Jul 19–30, Aug 2–13, 2027; upper elementary: weekly Jul 12–30",
+   "hours": null,
+   "price": "Middle & high school $2,290 per 2 weeks; upper elementary $830/week (2026 prices, held through Jan 10, 2027)",
+   "week_low": 830,
+   "week_high": 1145,
+   "sliding": false,
+   "aid": null,
+   "residents": null,
+   "signup": "Book online with a deposit",
+   "events": [
+    {
+     "label": "2026 prices end",
+     "date": "2027-01-10",
+     "kind": "deadline",
+     "season": 2027
+    }
+   ],
+   "note": "High school residential program returns for Session Two, Jul 18–31, 2027.",
+   "url": "https://nuvusummer.org/",
+   "sources": [
+    "https://nuvusummer.org/"
+   ],
+   "checked": "2026-11-08"
+  },
+  {
+   "id": "linx",
+   "name": "LINX Camps",
+   "town": "Wellesley",
+   "area": "west",
+   "kind": "private",
+   "focus": "traditional",
+   "type": "Day",
+   "ages": null,
+   "age_min": null,
+   "age_max": null,
+   "season": 2027,
+   "dates": null,
+   "hours": "9:00 AM–4:00 PM; early drop-off from 7:50 AM, late pick-up to 6:00 PM",
+   "price": "$909/week list price, $842–$894/week for more weeks or ACH payment; Jr. Fun Bunch & CIT $639/week",
+   "week_low": 639,
+   "week_high": 909,
+   "sliding": false,
+   "aid": null,
+   "residents": null,
+   "signup": "2027 registration is open; LINX says rates rise as summer gets closer",
+   "events": [],
+   "note": "Bus $106–$109/week, lunch $67–$69/week, extended day $149/week.",
+   "url": "https://www.linxcamps.com/details/pricing",
+   "sources": [
+    "https://www.linxcamps.com/details/pricing"
+   ],
+   "checked": "2026-11-08"
+  },
+  {
+   "id": "bbn",
+   "name": "Summer@BB&N",
+   "town": "Cambridge",
+   "area": "cam_som",
+   "kind": "private",
+   "focus": "traditional",
+   "type": "Day",
+   "ages": "PreK–grade 10",
+   "age_min": 4,
+   "age_max": 16,
+   "season": 2026,
+   "dates": "Weekly, Jun 22–Aug 14, 2026",
+   "hours": "8:15 AM–3:30 PM",
+   "price": "Classic camps $750–$850/week; specialty camps $900–$950",
+   "week_low": 750,
+   "week_high": 950,
+   "sliding": false,
+   "aid": null,
+   "residents": null,
+   "signup": "2026 registration opened Jan 13; 2027 not posted",
+   "events": [],
+   "note": null,
+   "url": "https://bbnsummer.com/dates-registration/",
+   "sources": [
+    "https://bbnsummer.com/dates-registration/"
+   ],
+   "checked": "2026-11-08"
   }
  ],
  "leads": [
@@ -2183,11 +2277,6 @@
    "url": "https://einc-action.org/science-discovery-camps"
   },
   {
-   "name": "LINX Camps",
-   "town": "Wellesley",
-   "url": "https://www.linxcamps.com/"
-  },
-  {
    "name": "Boston Explorers",
    "town": "Boston",
    "url": "https://www.bostonexplorers.org"
@@ -2221,16 +2310,6 @@
    "name": "YMCA Wells Camp",
    "town": "Newton",
    "url": "https://wsymca.org/camps"
-  },
-  {
-   "name": "BB&N summer programs",
-   "town": "Cambridge",
-   "url": null
-  },
-  {
-   "name": "NuVu Studio summer",
-   "town": "Cambridge",
-   "url": null
   },
   {
    "name": "EMPOW Studios camps",
