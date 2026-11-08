@@ -74,7 +74,8 @@ class MarketFestivalClassifierTest(unittest.TestCase):
             {"name": "Boston Celtic Music Festival", "date": when, "url": "u4", "venue": "Club Passim", "category": "music"},
             {"name": "Boston Comedy Festival Finals", "date": when, "url": "u5", "venue": "Laugh Boston", "category": "comedy"},
         ]
-        out = {e["name"]: e["category"] for e in scrapers._normalize_and_filter_events(raw, v)}
+        with _frozen_clock():  # the sample dates are relative to NOW, so they must not be filtered as past
+            out = {e["name"]: e["category"] for e in scrapers._normalize_and_filter_events(raw, v)}
         self.assertEqual(out["Somerville Flea"], "markets")
         self.assertEqual(out["Inman Square Holiday Market"], "markets")
         self.assertEqual(out["Union Square Farmers Market"], "markets")
