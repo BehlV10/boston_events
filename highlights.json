@@ -1,5 +1,404 @@
 [
   {
+    "id": "2026-11-13-lego-adult",
+    "match": {
+      "name_contains": "Adult Night",
+      "venue_contains": "LEGO"
+    },
+    "badge": "\ud83e\uddf1 Adults Only",
+    "note": "Kid-free adults night at the LEGO Discovery Center at Assembly Row.",
+    "start_date": "2026-11-13",
+    "expires": "2026-11-13"
+  },
+  {
+    "id": "2026-11-13-mit-pomeroy",
+    "match": {
+      "name_contains": "Herb Pomeroy"
+    },
+    "badge": "\ud83c\udfb7 Jazz Pick",
+    "note": "MIT Festival Jazz Ensemble's annual tribute to Boston jazz educator Herb Pomeroy.",
+    "start_date": "2026-11-13",
+    "expires": "2026-11-13"
+  },
+  {
+    "id": "2026-11-13-lilypad-sirintip",
+    "match": {
+      "name_contains": "SIRINTIP",
+      "venue_contains": "Lilypad"
+    },
+    "badge": "\ud83c\udfb7 Jazz Pick",
+    "note": "Singer-composer SIRINTIP with YouTube bassist Adam Neely in the band, late set.",
+    "start_date": "2026-11-13",
+    "expires": "2026-11-13"
+  },
+  {
+    "id": "2026-11-13-sinclair-benet",
+    "match": {
+      "name_contains": "Donny Ben",
+      "venue_contains": "Sinclair"
+    },
+    "badge": "\ud83c\udfb8 Indie Pick",
+    "note": "Australian synth-disco crooner with an '80s lounge-lizard persona.",
+    "start_date": "2026-11-13",
+    "expires": "2026-11-13"
+  },
+  {
+    "id": "2026-11-13-coolidge-rocky",
+    "match": {
+      "name_contains": "Rocky Horror",
+      "venue_contains": "Coolidge"
+    },
+    "badge": "\ud83c\udfac Midnight Movie",
+    "note": "Friday the 13th midnight 'Rocky Horror' at the Coolidge: costumes and callbacks encouraged.",
+    "start_date": "2026-11-13",
+    "expires": "2026-11-13"
+  },
+  {
+    "id": "2026-11-13-laugh-elshieky",
+    "match": {
+      "name_contains": "Mohanad Elshieky",
+      "venue_contains": "Laugh Boston"
+    },
+    "badge": "\ud83d\ude02 Comedy Pick",
+    "note": "Libyan-American stand-up Mohanad Elshieky's 'Green Books' hour.",
+    "start_date": "2026-11-13",
+    "expires": "2026-11-13"
+  },
+  {
+    "id": "2026-11-13-jazzurbane-sweethoney",
+    "match": {
+      "name_contains": "Sweet Honey in the Rock",
+      "venue_contains": "Jazz Urbane"
+    },
+    "badge": "\ud83c\udfa4 Legends",
+    "note": "The Grammy-nominated a cappella ensemble founded in 1973, in an intimate club set.",
+    "start_date": "2026-11-13",
+    "expires": "2026-11-13"
+  },
+  {
+    "id": "2026-11-13-bnl-madeon",
+    "match": {
+      "name_contains": "Madeon",
+      "venue_contains": "Big Night Live"
+    },
+    "badge": "\ud83c\udfa7 EDM Pick",
+    "note": "French producer Madeon brings his live show to Big Night Live.",
+    "start_date": "2026-11-13",
+    "expires": "2026-11-13"
+  },
+  {
+    "id": "2026-11-13-hob-blueoctober",
+    "match": {
+      "name_contains": "Blue October",
+      "venue_contains": "House of Blues"
+    },
+    "badge": "\ud83c\udfb8 Big Show",
+    "note": "Texas alt-rockers mark 20 years of 'Foiled', the album with 'Hate Me' and 'Into the Ocean'.",
+    "start_date": "2026-11-13",
+    "expires": "2026-11-13"
+  },
+  {
+    "id": "2026-11-12-sinclair-sleep",
+    "match": {
+      "name_contains": "Sleep",
+      "venue_contains": "Sinclair"
+    },
+    "badge": "\ud83c\udfb8 Doom Legends",
+    "note": "Stoner-doom legends Sleep, moved here from Roadrunner (Roadrunner tickets are honored).",
+    "start_date": "2026-11-12",
+    "expires": "2026-11-12"
+  },
+  {
+    "id": "2026-11-12-studio-roast",
+    "match": {
+      "name_contains": "Roast Battle",
+      "venue_contains": "Comedy Studio"
+    },
+    "badge": "\ud83d\ude02 Comedy Pick",
+    "note": "Comics trade brutal insults head-to-head at the Comedy Studio.",
+    "start_date": "2026-11-12",
+    "expires": "2026-11-12"
+  },
+  {
+    "id": "2026-11-12-loffler",
+    "match": {
+      "name_contains": "Christian L"
+    },
+    "badge": "\ud83c\udfa7 Electronic Pick",
+    "note": "German producer Christian L\u00f6ffler's melancholy, melodic live electronic set.",
+    "start_date": "2026-11-12",
+    "expires": "2026-11-12"
+  },
+  {
+    "id": "2026-11-12-regattabar-sutton",
+    "match": {
+      "name_contains": "Tierney Sutton",
+      "venue_contains": "Regattabar"
+    },
+    "badge": "\ud83c\udfb7 Jazz Pick",
+    "note": "Grammy-nominated jazz singer Tierney Sutton in a duo set with pianist Tamir Hendelman.",
+    "start_date": "2026-11-12",
+    "expires": "2026-11-12"
+  },
+  {
+    "id": "2026-11-12-mfa-jackson",
+    "match": {
+      "name_contains": "Suzanne Jackson in Conversation",
+      "venue_contains": "Museum of Fine Arts"
+    },
+    "badge": "\ud83d\uddbc\ufe0f Free Talk",
+    "note": "Painter Suzanne Jackson in conversation with National Book Award winner Imani Perry.",
+    "start_date": "2026-11-12",
+    "expires": "2026-11-12"
+  },
+  {
+    "id": "2026-11-12-gardner-free",
+    "match": {
+      "name_contains": "Free Thursdays at the Isabella",
+      "venue_contains": "Gardner"
+    },
+    "badge": "\ud83d\uddbc\ufe0f Free Museum Night",
+    "note": "Free evening admission to the Gardner's galleries and courtyard.",
+    "start_date": "2026-11-12",
+    "expires": "2026-11-12"
+  },
+  {
+    "id": "2026-11-12-gbh-baron",
+    "match": {
+      "name_contains": "Marty Baron",
+      "venue_contains": "GBH"
+    },
+    "badge": "\ud83c\udf99\ufe0f Live Talk",
+    "note": "Former Boston Globe and Washington Post editor of 'Spotlight' fame gives GBH's Ralph Lowell Lecture.",
+    "start_date": "2026-11-12",
+    "expires": "2026-11-12"
+  },
+  {
+    "id": "2026-11-12-wilbur-oconnor",
+    "match": {
+      "name_contains": "Alex O'Connor",
+      "venue_contains": "Wilbur"
+    },
+    "badge": "\ud83c\udf99\ufe0f Live Talk",
+    "note": "The 'Within Reason' philosophy YouTuber and podcaster, live at the Wilbur.",
+    "start_date": "2026-11-12",
+    "expires": "2026-11-12"
+  },
+  {
+    "id": "2026-11-11-goofs-fresh",
+    "match": {
+      "name_contains": "Fresh Goofs",
+      "venue_contains": "Goofs"
+    },
+    "badge": "\ud83d\ude02 Comedy Pick",
+    "note": "New stand-up and $4 drinks at Somerville's Goofs Comedy Club.",
+    "start_date": "2026-11-11",
+    "expires": "2026-11-11"
+  },
+  {
+    "id": "2026-11-11-me-vaultboy",
+    "match": {
+      "name_contains": "Vaultboy",
+      "venue_contains": "Middle East"
+    },
+    "badge": "\ud83c\udfb8 Indie Pick",
+    "note": "Viral bedroom-pop singer-songwriter Vaultboy, downstairs at the Middle East.",
+    "start_date": "2026-11-11",
+    "expires": "2026-11-11"
+  },
+  {
+    "id": "2026-11-11-cantab-slam",
+    "match": {
+      "name_contains": "Boston Poetry Slam",
+      "venue_contains": "Cantab"
+    },
+    "badge": "\ud83c\udfa4 Poetry Slam",
+    "note": "One of the country's longest-running weekly poetry slams, in the Cantab basement.",
+    "start_date": "2026-11-11",
+    "expires": "2026-11-11"
+  },
+  {
+    "id": "2026-11-11-nec-symphony",
+    "match": {
+      "name_contains": "NEC Symphony",
+      "venue_contains": "Jordan Hall"
+    },
+    "badge": "\ud83c\udfbc Free Concert",
+    "note": "Free NEC Symphony night of Higdon, Barber and Tchaikovsky at Jordan Hall.",
+    "start_date": "2026-11-11",
+    "expires": "2026-11-11"
+  },
+  {
+    "id": "2026-11-11-wbur-franklyn",
+    "match": {
+      "name_contains": "Sofia Franklyn",
+      "venue_contains": "WBUR"
+    },
+    "badge": "\ud83c\udf99\ufe0f Live Talk",
+    "note": "The 'Call Her Daddy' co-creator in conversation at WBUR CitySpace.",
+    "start_date": "2026-11-11",
+    "expires": "2026-11-11"
+  },
+  {
+    "id": "2026-11-11-paradise-phillips",
+    "match": {
+      "name_contains": "Phillip Phillips",
+      "venue_contains": "Paradise"
+    },
+    "badge": "\ud83c\udfa4 Pop Pick",
+    "note": "The 'American Idol' winner behind 'Home', at the Paradise.",
+    "start_date": "2026-11-11",
+    "expires": "2026-11-11"
+  },
+  {
+    "id": "2026-11-10-lilypad-werner",
+    "match": {
+      "name_contains": "Kenny Werner",
+      "venue_contains": "Lilypad"
+    },
+    "badge": "\ud83c\udfb7 Jazz Pick",
+    "note": "Pianist Kenny Werner ('Effortless Mastery') joins the Jorge Perez-Albela Trio for a late set.",
+    "start_date": "2026-11-10",
+    "expires": "2026-11-10"
+  },
+  {
+    "id": "2026-11-10-astro-on-tap",
+    "match": {
+      "name_contains": "Astronomy on Tap",
+      "venue_contains": "Lamplighter"
+    },
+    "badge": "\ud83d\udd2d Science & Beer",
+    "note": "Free astronomer talks over pints: this month, neutrino astronomy.",
+    "start_date": "2026-11-10",
+    "expires": "2026-11-10"
+  },
+  {
+    "id": "2026-11-10-mos-voyager",
+    "match": {
+      "name_contains": "Voyager 1",
+      "venue_contains": "Planetarium"
+    },
+    "badge": "\ud83d\udd2d Free Talk",
+    "note": "Free planetarium talk as Voyager 1 nears one light-day from Earth.",
+    "start_date": "2026-11-10",
+    "expires": "2026-11-10"
+  },
+  {
+    "id": "2026-11-10-bu-harvard-hockey",
+    "match": {
+      "name_contains": "Harvard",
+      "venue_contains": "Agganis"
+    },
+    "badge": "\ud83c\udfd2 College Hockey",
+    "note": "Beanpot rivals BU and Harvard face off at Agganis Arena.",
+    "start_date": "2026-11-10",
+    "expires": "2026-11-10"
+  },
+  {
+    "id": "2026-11-10-journey-td",
+    "match": {
+      "name_contains": "Journey",
+      "venue_contains": "TD Garden"
+    },
+    "badge": "\ud83c\udfa4 Arena Show",
+    "note": "The 'Don't Stop Believin'' arena-rock giants bring the Final Frontier Tour to TD Garden.",
+    "start_date": "2026-11-10",
+    "expires": "2026-11-10"
+  },
+  {
+    "id": "2026-11-09-hfa-vertigo",
+    "match": {
+      "name_contains": "Vertigo",
+      "venue_contains": "Harvard Film Archive"
+    },
+    "badge": "\ud83c\udfac Film Pick",
+    "note": "Hitchcock's obsessive masterpiece on the big screen at the Harvard Film Archive.",
+    "start_date": "2026-11-09",
+    "expires": "2026-11-09"
+  },
+  {
+    "id": "2026-11-09-coolidge-devils",
+    "match": {
+      "name_contains": "The Devils",
+      "venue_contains": "Coolidge"
+    },
+    "badge": "\ud83c\udfac Cult Film",
+    "note": "Ken Russell's notorious 1971 shocker with Oliver Reed and Vanessa Redgrave, late show.",
+    "start_date": "2026-11-09",
+    "expires": "2026-11-09"
+  },
+  {
+    "id": "2026-11-09-citywinery-rouse",
+    "match": {
+      "name_contains": "Josh Rouse",
+      "venue_contains": "City Winery"
+    },
+    "badge": "\ud83c\udfb8 Songwriter Pick",
+    "note": "Warm, breezy indie-folk from the songwriter behind '1972'.",
+    "start_date": "2026-11-09",
+    "expires": "2026-11-09"
+  },
+  {
+    "id": "2026-11-09-run-catechism",
+    "match": {
+      "name_contains": "Late Nite Catechism",
+      "venue_contains": "Charles Playhouse"
+    },
+    "badge": "\ud83c\udfad Comedy Pick",
+    "note": "Long-running audience-participation comedy: Sister's catechism class, this time on marriage.",
+    "start_date": "2026-11-09",
+    "expires": "2026-11-15",
+    "run": true
+  },
+  {
+    "id": "2026-11-09-run-charliebrown",
+    "match": {
+      "name_contains": "Charlie Brown",
+      "venue_contains": "Plaza Theatre"
+    },
+    "badge": "\ud83c\udfad Musical",
+    "note": "The Peanuts musical, up close at the BCA Plaza Theatre in the South End.",
+    "start_date": "2026-11-09",
+    "expires": "2026-11-15",
+    "run": true
+  },
+  {
+    "id": "2026-11-09-run-peterpan",
+    "match": {
+      "name_contains": "Peter Pan Goes Wrong",
+      "venue_contains": "Lyric"
+    },
+    "badge": "\ud83c\udfad Comedy Pick",
+    "note": "Slapstick farce from the creators of 'The Play That Goes Wrong', at the Lyric Stage.",
+    "start_date": "2026-11-09",
+    "expires": "2026-11-15",
+    "run": true
+  },
+  {
+    "id": "2026-11-09-run-leenane",
+    "match": {
+      "name_contains": "Beauty Queen of Leenane",
+      "venue_contains": "Calderwood"
+    },
+    "badge": "\ud83c\udfad Theater Pick",
+    "note": "Martin McDonagh's pitch-black comedy-thriller about a mother and daughter in rural Connemara.",
+    "start_date": "2026-11-09",
+    "expires": "2026-11-15",
+    "run": true
+  },
+  {
+    "id": "2026-11-09-run-wicked",
+    "match": {
+      "name_contains": "Wicked",
+      "venue_contains": "Citizens"
+    },
+    "badge": "\ud83c\udfad Broadway Tour",
+    "note": "The Broadway blockbuster's national tour at the Citizens Bank Opera House.",
+    "start_date": "2026-11-09",
+    "expires": "2026-11-15",
+    "run": true
+  },
+  {
     "id": "2026-10-29-passim",
     "match": {
       "name_contains": "Lamplighter Sessions",
@@ -1929,9 +2328,10 @@
       "venue_contains": "Colonial"
     },
     "badge": "\ud83c\udfad Tony-Winning Musical",
-    "note": "Ana\u00efs Mitchell's haunting, genre-defying underworld journey opens at Emerson Colonial Theatre.",
-    "start_date": "2026-11-10",
-    "expires": "2026-11-10"
+    "note": "Ana\u00efs Mitchell's haunting, Tony-winning underworld folk opera opens Tuesday at the Emerson Colonial.",
+    "start_date": "2026-11-09",
+    "expires": "2026-11-15",
+    "run": true
   },
   {
     "id": "2026-11-10-roadrunner-geese",
