@@ -1,14 +1,21 @@
 name: Pull Request CI Tests
 
+# Runs the full suite on every PR into main. scrape.yml runs the same suite
+# before each scheduled scrape; this catches breakage before merge instead.
 on:
   pull_request:
     branches:
       - main
+  workflow_dispatch:
+
+concurrency:
+  group: pr-tests-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
