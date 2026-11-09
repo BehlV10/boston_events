@@ -33,7 +33,7 @@ class ResolveEventGeoTest(unittest.TestCase):
         self.assertTrue(near(G.resolve_event_geo(e), 42.3416, -71.0763, 10))
 
     def test_title_words_do_not_override_source_point(self):
-        e = {"name": "CoComelon: Sing-A-Long LIVE", "venue": "Lynn Auditorium", "_source_venue": "Ticketmaster",
+        e = {"name": "CoComelon: Sing-A-Long LIVE", "venue": "Lynn Arts Annex", "_source_venue": "Ticketmaster",
              "lat": 42.4648, "lng": -70.9512}
         geo = G.resolve_event_geo(e)
         self.assertNotEqual(geo["venue"], "Long Live Roxbury")
