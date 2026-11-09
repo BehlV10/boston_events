@@ -1579,6 +1579,7 @@ _KIDS_CSS = """
     flex-wrap: wrap;
   }
   .kids-hub .kids-nav a {
+    box-sizing: border-box;
     color: var(--muted);
     text-decoration: none;
     padding: 6px 14px;
@@ -2437,6 +2438,7 @@ _CAMPS_CSS = """
     flex-wrap: wrap;
   }
   .camps-hub .camps-nav a {
+    box-sizing: border-box;
     color: var(--muted);
     text-decoration: none;
     padding: 6px 12px;
@@ -2979,6 +2981,19 @@ def _camps_sections(camps):
     return hero, filters, tail
 
 
+_FAMILY_NAV = (("../", "All Events", None),
+               ("../kids-family-events-boston/", "Kids &amp; Family", "kids-family-events-boston"),
+               ("../summer-camps/", "Summer Camps", "summer-camps"))
+
+
+def _family_nav(hub_slug, nav_class):
+    """The short header nav on the parent-facing pages (Kids & Family, Summer Camps)."""
+    ACTIVE = ' class="active"'
+    links = "\n".join(f'    <a href="{href}"{ACTIVE if slug == hub_slug else ""}>{label}</a>'
+                      for href, label, slug in _FAMILY_NAV)
+    return f'  <nav class="hub-nav {nav_class}">\n{links}\n  </nav>'
+
+
 def render_hub_page(hub_slug, events, site_url=None):
     if not site_url:
         site_url = get_site_url()
@@ -3443,18 +3458,8 @@ def render_hub_page(hub_slug, events, site_url=None):
     active_mk = 'active' if hub_slug == 'markets-festivals-boston' else ''
     active_edm = 'active' if hub_slug == 'boston-edm' else ''
 
-    if is_camps:
-        hub_nav_html = """  <nav class="hub-nav camps-nav">
-    <a href="../">All Events</a>
-    <a href="../kids-family-events-boston/">Kids &amp; Family</a>
-    <a href="../summer-camps/" class="active">Summer Camps</a>
-  </nav>"""
-    elif is_kids:
-        hub_nav_html = """  <nav class="hub-nav kids-nav">
-    <a href="../">All Events</a>
-    <a href="../kids-family-events-boston/" class="active">Kids &amp; Family</a>
-    <a href="../summer-camps/">Summer Camps</a>
-  </nav>"""
+    if is_camps or is_kids:
+        hub_nav_html = _family_nav(hub_slug, "camps-nav" if is_camps else "kids-nav")
     else:
         hub_nav_html = f"""  <nav class="hub-nav">
     <a href="../">All Events</a>
