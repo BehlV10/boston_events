@@ -546,6 +546,17 @@ def _eventbrite_start(start, tz_name, online):
     return start.replace(tzinfo=zone).astimezone(timezone.utc).isoformat()
 
 
+def _eventbrite_end(end_date, end_time, tz_name, start_iso):
+    """Eventbrite gives the end as a local date and time in the event's own time zone."""
+    if not (end_date and end_time and start_iso):
+        return None
+    try:
+        tz = ZoneInfo(tz_name) if tz_name else EASTERN
+    except Exception:
+        tz = EASTERN
+    return _event_end(f"{end_date}T{end_time}", datetime.fromisoformat(start_iso), tz=tz)
+
+
 def _eventbrite_org_json_events(html, base_url):
     events = []
     seen = set()
@@ -580,6 +591,7 @@ def _eventbrite_org_json_events(html, base_url):
         events.append({
             "name": name,
             "date": iso,
+            "end": _eventbrite_end(field("end_date"), field("end_time"), field("timezone"), iso),
             "url": href,
             "venue": json.loads(f'"{venue.group(1)}"') if venue else None,
             "price": price,
@@ -704,6 +716,7 @@ def _parse_eventbrite_server_data(html):
         events.append({
             "name": name,
             "date": iso,
+            "end": _eventbrite_end(ev.get("end_date"), ev.get("end_time"), tz_str, iso),
             "url": u,
             "venue": venue_name,
             "price": price,
@@ -753,6 +766,7 @@ def _parse_eventbrite_json_ld(soup):
             events.append({
                 "name": ev.get("name"),
                 "date": iso,
+                "end": _event_end(ev.get("endDate"), datetime.fromisoformat(iso)) if iso else None,
                 "url": ev.get("url"),
                 "venue": venue,
                 "price": None,
@@ -864,6 +878,7 @@ def scrape_bibliocommons(library, ua, weeks=4, max_pages=25):
         ev = {
             "name": d["title"].strip(),
             "date": start.astimezone(timezone.utc).isoformat(),
+            "end": _event_end(d.get("end"), start),
             "url": f"https://{library}.bibliocommons.com/events/{eid}",
             "branch": branch,
             "price": "Free",
@@ -2002,6 +2017,8 @@ def _parse_boston_calendar_time(text):
 
 _BC_GOES_UNTIL_RE = re.compile(r"goes until\s+(\d{1,2})/(\d{1,2})", re.IGNORECASE)
 _BC_EXTERNAL_RE = re.compile(r"event\s*website", re.IGNORECASE)
+# The end of a "When:" range: "5:00p - 10:00p" -> (10, 00, p)
+_BC_TIME_RANGE_RE = re.compile(r"\d{1,2}(?::\d{2})?\s*[ap]\s*[-–]\s*(\d{1,2})(?::(\d{2}))?\s*([ap])\b", re.IGNORECASE)
 
 
 def _parse_bc_admission(text):
@@ -2067,7 +2084,9 @@ def _save_tbc_details_cache(cache_dict):
 
 
 def _bc_detail_info(bc_url, ua):
-    """Fetch detail page for The Boston Calendar event and extract (external_url, admission_price)."""
+    """Fetch detail page for The Boston Calendar event and extract
+    (external_url, admission_price, address, end_clock). end_clock is the "When:" line's end time as
+    "HH:MM" ("Monday, Nov 09, 2026 5:00p - 10:00p" -> "22:00"), or None."""
     soup = None
     for attempt in range(2):
         try:
@@ -2077,9 +2096,9 @@ def _bc_detail_info(bc_url, ua):
             if attempt == 0:
                 time.sleep(0.5)
                 continue
-            return None, None, None
+            return None, None, None, None
     if soup is None:
-        return None, None, None
+        return None, None, None, None
     ext_url = None
     price = None
     where_url = None
@@ -2131,7 +2150,14 @@ def _bc_detail_info(bc_url, ua):
                 ext_url = href
                 break
 
-    return fix_doubled_url(ext_url), price, addr
+    end_clock = None
+    when = re.search(r"(?i)When:?\s*(.{0,120})", soup.get_text(" ", strip=True))
+    rng = _BC_TIME_RANGE_RE.search(when.group(1)) if when else None
+    if rng:
+        hour = int(rng.group(1)) % 12 + (12 if rng.group(3).lower() == "p" else 0)
+        end_clock = f"{hour:02d}:{int(rng.group(2) or 0):02d}"
+
+    return fix_doubled_url(ext_url), price, addr, end_clock
 
 
 _BC_NOISE_PREFIXES = re.compile(
@@ -2262,8 +2288,8 @@ def scrape_boston_calendar(url, ua):
             is_pri = 0 if any(k in v for k in ["ccae", "cambridge center", "museum", "theater", "theatre"]) else 1
             return (is_pri, d if d else "9999")
 
-        # Uncached, or cached before addresses were captured (no "addr_v")
-        uncached = [e for e in events if e.get("_bc_url") and (e["_bc_url"] not in cache or "addr_v" not in cache[e["_bc_url"]])]
+        # Uncached, or cached before end times were captured (no "end_v"); refills ~150 a run
+        uncached = [e for e in events if e.get("_bc_url") and (e["_bc_url"] not in cache or "end_v" not in cache[e["_bc_url"]])]
         sorted_uncached = sorted(uncached, key=_bc_sort_key)
         batch = sorted_uncached[:TBC_DETAILS_PER_RUN]  # the rest fill in on later runs
 
@@ -2273,7 +2299,7 @@ def scrape_boston_calendar(url, ua):
                 details = list(ex.map(lambda u: _bc_detail_info(u, ua), urls_to_fetch))
 
             for e, res in zip(batch, details):
-                ext, p, addr = res if res else (None, None, None)
+                ext, p, addr, end_clock = res if res else (None, None, None, None)
                 if ext is None and p is None and addr is None and e["_bc_url"] in cache:
                     continue  # fetch failed; keep the older cache entry
                 cache[e["_bc_url"]] = {
@@ -2281,6 +2307,8 @@ def scrape_boston_calendar(url, ua):
                     "price": p,
                     "addr": addr,
                     "addr_v": 1,
+                    "end_clock": end_clock,
+                    "end_v": 1,
                     "ts": time.time(),
                 }
                 _bc_apply_details(e, cache[e["_bc_url"]])
@@ -2352,6 +2380,8 @@ def _bc_apply_details(e, info):
     p = info.get("price")
     if p and (not e.get("price") or e.get("_price_from_title")):
         e["price"] = p  # the listed admission beats a "free" guessed from the title
+    if info.get("end_clock") and e.get("date") and not e.get("end"):
+        e["end"] = _event_end(info["end_clock"], datetime.fromisoformat(e["date"]))
     addr = info.get("addr") or {}
     if addr.get("street") or addr.get("locality"):
         e["address"] = ", ".join(x for x in (addr.get("street"), addr.get("locality")) if x)
@@ -2510,6 +2540,7 @@ def _jsonld_event_to_entry(ev, base_url):
     return {
         "name": ev.get("name"),
         "date": iso,
+        "end": _event_end(ev.get("endDate"), datetime.fromisoformat(iso)) if iso else None,
         "url": url,
         "venue": venue,
         "price": price,
@@ -2992,6 +3023,7 @@ def scrape_aeronaut(url, ua):
             # "Boston Social Conversations | Millennial Crisis": organizer suffix, not part of the name
             "name": re.sub(r"\s*\|\s*millennial crisis\s*$", "", row.get("name") or "Event", flags=re.I),
             "date": dt.astimezone(timezone.utc).isoformat(),
+            "end": _event_end(row.get("end"), dt),
             "url": link,
             "venue": "Aeronaut Brewing (Somerville)",
             "price": None,
@@ -3340,6 +3372,42 @@ def scrape_venture_cafe(url, ua):
     return events
 
 
+def _event_end(raw, start, tz=EASTERN):
+    """The source's end for an event starting at `start` (aware datetime), as a UTC ISO string, or None.
+
+    Takes what sources give: ISO datetimes (zoned, "Z", or local), epoch milliseconds, iCal stamps
+    ("20261109T210000Z"), a bare time ("21:30", "9:30 pm") on the start's local day, rolled past
+    midnight when earlier than the start (a 10 PM-2 AM party), or a timedelta. Kept as the source
+    says it, odd or not; the page decides what to trust."""
+    if raw is None or raw == "" or start is None:
+        return None
+    try:
+        if isinstance(raw, timedelta):
+            end = start + raw
+        elif isinstance(raw, (int, float)) and not isinstance(raw, bool):
+            end = datetime.fromtimestamp(raw / 1000 if raw > 1e11 else raw, tz=timezone.utc)
+        else:
+            text = str(raw).strip()
+            m = re.fullmatch(r"(?i)(\d{1,2})(?::(\d{2}))?(?::\d{2})?\s*([ap])?\.?m?\.?", text)
+            if m and (m.group(2) or m.group(3)):
+                hour = int(m.group(1)) % 12 + (12 if (m.group(3) or "").lower() == "p" else 0) if m.group(3) \
+                    else int(m.group(1))
+                local = start.astimezone(tz)
+                end = local.replace(hour=hour, minute=int(m.group(2) or 0), second=0, microsecond=0)
+                if end < local:
+                    end += timedelta(days=1)
+            elif re.fullmatch(r"\d{8}T\d{6}Z?", text):
+                end = datetime.strptime(text.rstrip("Z"), "%Y%m%dT%H%M%S")
+                end = end.replace(tzinfo=timezone.utc if text.endswith("Z") else tz)
+            else:
+                end = datetime.fromisoformat(text.replace("Z", "+00:00").replace(" ", "T", 1))
+                if end.tzinfo is None:
+                    end = end.replace(tzinfo=tz)
+        return end.astimezone(timezone.utc).isoformat()
+    except (ValueError, TypeError, OverflowError):
+        return None
+
+
 def _ical_events(text):
     events = []
     current = None
@@ -3434,6 +3502,17 @@ def scrape_ical(url, ua):
             start = _ical_parse_dt(*ev["DTSTART"][0])
         except ValueError:
             continue
+        length = None
+        try:
+            if "DTEND" in ev:
+                length = _ical_parse_dt(*ev["DTEND"][0]) - start
+            elif "DURATION" in ev:
+                dm = re.fullmatch(r"P(?:(\d+)D)?(?:T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?)?", _ical_text(ev, "DURATION"))
+                if dm:
+                    length = timedelta(days=int(dm.group(1) or 0), hours=int(dm.group(2) or 0),
+                                       minutes=int(dm.group(3) or 0), seconds=int(dm.group(4) or 0))
+        except (ValueError, TypeError):
+            length = None
         starts = [start]
         if "RRULE" in ev and "RECURRENCE-ID" not in ev:
             excluded = set(overridden.get(_ical_text(ev, "UID"), ()))
@@ -3476,6 +3555,7 @@ def scrape_ical(url, ua):
             events.append({
                 "name": summary,
                 "date": dt_utc.isoformat(),
+                "end": _event_end(length, dt) if length is not None else None,
                 "url": event_url,
                 "venue": None,
                 "location": _ical_text(ev, "LOCATION"),
@@ -4106,11 +4186,171 @@ def scrape_wix_events(url, ua, default_venue=None, default_category="clubbing"):
                 events.append({
                     "name": title,
                     "date": dt_utc.isoformat(),
+                    "end": _event_end(sched.get("endDate"), dt_utc),
                     "url": ev_url,
                     "venue": default_venue or "Boston Venue",
                     "price": None,
                     "category": default_category or "clubbing",
                 })
+    return events
+
+
+_COMICAZI_ICS = "https://calendar.google.com/calendar/ical/q4fqj74if3smgobn8au8bh0f5g%40group.calendar.google.com/public/basic.ics"
+_COMICAZI_NOTICE_RE = re.compile(
+    r"(?i)\b(?:closed|closing|early close|delivery|private event|postponed|cancell?ed|sale|holiday hours|staff meeting)\b")
+
+
+def scrape_comicazi(url, ua):
+    """Comicazi, the Davis Square comic & game shop: the public Google Calendar embedded on its
+    /events page. Board game nights, Magic drafts and tournaments, comic and manga book clubs.
+    Store notices (CLOSED, sales, delivery) and all-day entries are dropped."""
+    events = []
+    for e in scrape_ical(_COMICAZI_ICS, ua):
+        name = e["name"].strip()
+        start = datetime.fromisoformat(e["date"]).astimezone(EASTERN)
+        if _COMICAZI_NOTICE_RE.search(name) or (start.hour == 0 and start.minute == 0):
+            continue
+        m = re.search(r"\s*[-–—]\s*(\$\d+(?:\.\d\d)?)\s*$", name)  # "Board Game Night - $3"
+        if m:
+            name = name[:m.start()].strip()
+            e["price"] = e.get("price") or m.group(1)
+        name = re.sub(r"\s*[-–—]\s*(?:Downstairs|Now in person!?)\s*$", "", name)
+        e.pop("location", None)
+        e.update(name=name, venue="Comicazi", url=url,
+                 category="books" if re.search(r"(?i)book club", name) else "gaming")
+        events.append(e)
+    return events
+
+
+def _wix_ticket_price(item):
+    """Price from a Wix Events item, only when Wix itself sells the tickets (registration type 2)."""
+    reg = item.get("registration") or {}
+    t = reg.get("ticketing") or {}
+    lo, hi = t.get("lowestTicketPriceFormatted"), t.get("highestTicketPriceFormatted")
+    if reg.get("type") != 2 or not lo:
+        return None
+    return lo if not hi or hi == lo else f"{lo}–{hi}"
+
+
+def scrape_all_she_wrote(url, ua):
+    """All She Wrote Books (queer & feminist bookstore, 75 Washington St, Somerville): Wix Events
+    data in the page. Some events happen elsewhere (book clubs at Dani's Queer Bar, author talks at
+    the Museum of Science), so each event keeps its own venue, and externally ticketed ones link
+    to the host's page."""
+    resp = _SESSION.get(url, headers={"User-Agent": ua or UA_CHROME}, timeout=15)
+    resp.raise_for_status()
+    m = re.search(r"<script[^>]+id=[\"']wix-warmup-data[\"'][^>]*>(.*?)</script>", resp.text, re.S)
+    if not m:
+        return []
+    data = json.loads(m.group(1))
+    now = datetime.now(timezone.utc)
+    origin = "{0.scheme}://{0.netloc}".format(urlparse(url))
+    events, seen = [], set()
+    for comp_map in (data.get("appsWarmupData") or {}).values():
+        for comp in (comp_map.values() if isinstance(comp_map, dict) else []):
+            box = comp.get("events") if isinstance(comp, dict) else None
+            items = box.get("events", []) if isinstance(box, dict) else (box or [])
+            for it in items:
+                title = (it.get("title") or "").strip()
+                start = ((it.get("scheduling") or {}).get("config") or {}).get("startDate")
+                if not title or not start or it.get("status") == 2:  # 2 = canceled
+                    continue
+                dt = datetime.fromisoformat(start.replace("Z", "+00:00")).astimezone(timezone.utc)
+                if dt < now or (title, dt) in seen:
+                    continue
+                seen.add((title, dt))
+                loc = it.get("location") or {}
+                reg = it.get("registration") or {}
+                ext = (reg.get("external") or {}).get("registration") if reg.get("type") == 3 else None
+                events.append({
+                    "name": title,
+                    "date": dt.isoformat(),
+                    "end": _event_end(((it.get("scheduling") or {}).get("config") or {}).get("endDate"), dt),
+                    "url": ext or (f"{origin}/event-details/{it['slug']}" if it.get("slug") else url),
+                    "venue": (loc.get("name") or "All She Wrote Books").strip(),
+                    "address": loc.get("address"),
+                    "price": _wix_ticket_price(it),
+                    "description": _clean_ical_description(it.get("description")),
+                    "category": "books",
+                })
+    return events
+
+
+_BCA_CATEGORY = {"dance": "dance", "theatre": "theater", "exhibitions": "art", "visual arts": "art",
+                 "boston art book fair": "art", "public programs": "community", "events": "community"}
+_BCA_TIME_RE = re.compile(r"(?i)\b(\d{1,2})(?::(\d\d))?\s*([ap])\.?m\b")
+_BCA_DAY_TIME_RE = re.compile(
+    r"(?i)\b(?:mon|tues?|wed(?:nes)?|thu(?:rs)?|fri|sat(?:ur)?|sun)[a-z]*,?\s+"
+    r"(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+(\d{1,2})(?:st|nd|rd|th)?"
+    r"[^.|\n]{0,25}?\b(\d{1,2})(?::(\d\d))?\s*(?:-\s*\d{1,2}(?::\d\d)?\s*)?([ap])\.?m\b")
+
+
+def _bca_time(day, text):
+    m = _BCA_TIME_RE.search(text or "")
+    if not m:
+        return None
+    hour = int(m.group(1)) % 12 + (12 if m.group(3).lower() == "p" else 0)
+    return datetime(day.year, day.month, day.day, hour, int(m.group(2) or 0), tzinfo=EASTERN)
+
+
+def scrape_boston_center_for_the_arts(url, ua):
+    """Boston Center for the Arts "Experiences" (bostonarts.org/experiences/): talks, launches and
+    parties at the BCA Cyclorama and Mills Gallery, plus short runs at the Calderwood.
+
+    A single-date card with a time is one event. A run of up to two weeks lists no times on the
+    card, so its page is read for "Tuesday, November 10th from 7-9 PM"; days without a stated time
+    (the Art Book Fair's public days) are skipped rather than given a made-up time. Exhibitions
+    lasting months are skipped."""
+    soup = fetch_soup(url, ua)
+    now = datetime.now(EASTERN)
+    events, seen = [], set()
+    for card in soup.select("article.card-event"):
+        a = card.find("a", href=True)
+        title_el, kind_el, p = card.find("h5"), card.find("h4"), card.find("p")
+        if not (a and title_el and p):
+            continue
+        title = re.sub(r"\s+", " ", title_el.get_text(" ", strip=True))
+        kinds = [k.strip().lower() for k in (kind_el.get_text(" ", strip=True) if kind_el else "").split(",")]
+        lines = [ln.strip() for ln in p.get_text("\n", strip=True).split("\n") if ln.strip()]
+        # Lines: [artist,] dates, [time,] room
+        di = next((i for i, ln in enumerate(lines) if re.search(r"\d{2}/\d{2}/\d{4}", ln)), None)
+        if di is None:
+            continue
+        dates = re.findall(r"(\d{2})/(\d{2})/(\d{4})", lines[di])
+        first = date(int(dates[0][2]), int(dates[0][0]), int(dates[0][1]))
+        last = date(int(dates[-1][2]), int(dates[-1][0]), int(dates[-1][1]))
+        after = lines[di + 1:]
+        time_line = next((ln for ln in after if _BCA_TIME_RE.search(ln)), None)
+        venue = next((ln for ln in reversed(after) if ln != time_line), None)
+        category = next((_BCA_CATEGORY[k] for k in kinds if k in _BCA_CATEGORY), "art")
+        starts = []
+        if first == last:
+            t = _bca_time(first, time_line)
+            if t:
+                starts.append(t)
+        elif (last - first).days <= 14:
+            try:
+                page = fetch_soup(a["href"], ua).get_text(" ", strip=True)
+            except Exception:
+                page = ""
+            for m in _BCA_DAY_TIME_RE.finditer(page):
+                month = datetime.strptime(m.group(1)[:3].title(), "%b").month
+                day = date(first.year + (1 if month < first.month else 0), month, int(m.group(2)))
+                if first <= day <= last:
+                    hour = int(m.group(3)) % 12 + (12 if m.group(5).lower() == "p" else 0)
+                    starts.append(datetime(day.year, day.month, day.day, hour, int(m.group(4) or 0), tzinfo=EASTERN))
+        for t in starts:
+            if t < now or (title, t) in seen:
+                continue
+            seen.add((title, t))
+            events.append({
+                "name": title,
+                "date": t.astimezone(timezone.utc).isoformat(),
+                "url": a["href"],
+                "venue": venue or "Boston Center for the Arts",
+                "price": None,
+                "category": category,
+            })
     return events
 
 
@@ -5020,6 +5260,7 @@ def scrape_city_winery(url, ua):
         events.append({
             "name": ev.get("name"),
             "date": when.astimezone(timezone.utc).isoformat(),
+            "end": _event_end(ev.get("end"), when),
             "url": f"https://tickets.citywinery.com/events/{slug}" if slug else None,
             "venue": ev.get("locationName") or "City Winery Boston",
             "price": price_str,
@@ -6203,6 +6444,7 @@ def _luma_entry_to_event(entry, now, default_category="community"):
     ev_dict = {
         "name": name,
         "date": iso_date,
+        "end": _event_end(ev.get("end_at"), dt),
         "url": link,
         "venue": venue,
         "price": price,
@@ -7279,6 +7521,7 @@ def scrape_squarespace_events(url, ua):
         events.append({
             "name": ev.get("title"),
             "date": iso,
+            "end": _event_end(ev.get("endDate"), datetime.fromisoformat(iso)) if iso else None,
             "url": href,
             "venue": None,
             "price": None,
@@ -7646,6 +7889,7 @@ def scrape_tribe_rest(url, ua, default_venue=None, default_category=None, on_ite
         events.append({
             "name": name,
             "date": dt_utc.isoformat(),
+            "end": _event_end(item.get("end_date"), dt_utc),
             "url": event_url,
             "venue": vname,
             "price": price,
@@ -9458,6 +9702,7 @@ def scrape_nec_trumba(url, ua):
         out.append({
             "name": title,
             "date": dt.isoformat(),
+            "end": _event_end(item.get("endDateTime"), dt),
             "url": link,
             "venue": venue_name,
             "price": None,
@@ -12277,6 +12522,9 @@ _ALL_VENUES = [
     {"name": "Salsa Vida Boston", "url": "https://www.salsavida.com/guides/massachusetts/", "ua": UA_CHROME, "scraper": scrape_salsavida, "default_category": "dance"},
     {"name": "Laugh Boston", "url": "https://laughboston.com", "ua": UA_CHROME, "scraper": scrape_laugh_boston, "default_category": "comedy"},
     {"name": "Calderwood Pavilion", "url": "https://www.bostontheatrescene.com/shows-and-events/", "ua": UA_CHROME, "scraper": scrape_calderwood_pavilion, "default_category": "theater"},
+    {"name": "Boston Center for the Arts", "url": "https://bostonarts.org/experiences/", "ua": UA_CHROME, "scraper": scrape_boston_center_for_the_arts, "default_category": "art"},
+    {"name": "Comicazi", "url": "https://www.comicazi.com/events", "ua": UA_CHROME, "scraper": scrape_comicazi, "default_category": "gaming"},
+    {"name": "All She Wrote Books", "url": "https://www.allshewrotebooks.com/events", "ua": UA_CHROME, "scraper": scrape_all_she_wrote, "default_category": "books"},
     {"name": "Central Square Theater", "url": "https://www.centralsquaretheater.org/shows/", "ua": UA_CHROME, "scraper": scrape_central_square_theater, "default_category": "theater"},
     {"name": "Boch Center (Wang & Shubert)", "url": "https://www.bochcenter.org/events", "ua": UA_CHROME, "scraper": scrape_boch_center, "default_category": "theater"},
     {"name": "Museum of Fine Arts (MFA)", "url": "https://www.mfa.org/programs", "ua": UA_SAFARI, "scraper": scrape_mfa_boston, "default_category": "art"},
@@ -13191,41 +13439,56 @@ def fetch_boston_weather():
     return out
 
 
-LUCKYSEAT_FALLBACK_SHOWS = [
+LUCKYSEAT_FALLBACK_SHOWS = [  # as of Nov 9 2026; each drops off at its lottery's close time
     {
-        "name": "Hadestown",
+        "name": "Dirty Dancing: The Musical",
         "venue": "Emerson Colonial Theatre",
         "price": 45.0,
-        "url": "https://www.luckyseat.com/shows/hadestown-boston-2026Oct",
+        "url": "https://www.luckyseat.com/shows/dirtydancingthemusical-boston-2026Nov",
+        "closes": "2026-11-17T00:00:00Z",
     },
     {
         "name": "Late Nite Catechism: Til Death Do Us Part",
         "venue": "Charles Playhouse",
         "price": 35.0,
         "url": "https://www.luckyseat.com/shows/latenitecatechism-boston-2026Oct",
+        "closes": "2026-11-18T00:00:00Z",
     },
     {
-        "name": "Rocky™ in Concert",
-        "venue": "Emerson Colonial Theatre",
-        "price": 30.0,
-        "url": "https://www.luckyseat.com/shows/rockyinconcert-boston-2026Oct",
-    },
-    {
-        "name": "Wicked",
-        "venue": "Citizens Opera House",
-        "price": 40.0,
-        "url": "https://www.luckyseat.com/shows/wicked-boston-2026Sep",
+        "name": "The Sound of Music",
+        "venue": "Boch Center - Wang Theatre",
+        "price": 49.0,
+        "url": "https://www.luckyseat.com/shows/thesoundofmusic-boston-2026Oct",
+        "closes": "2026-11-14T00:00:00Z",
     },
     {
         "name": "The Getaway Driver",
         "venue": "Central Square Theater",
         "price": 49.0,
         "url": "https://www.luckyseat.com/shows/thegetawaydriver-cambridge-2026Sep",
+        "closes": "2026-11-17T00:00:00Z",
     },
 ]
 
 LUCKYSEAT_CACHE_FILE = os.path.join(CACHE_DIR, "luckyseat_shows.json")
 LUCKYSEAT_COMMITTED_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "luckyseat_shows.json")
+
+
+def luckyseat_open(shows, now=None):
+    """Lotteries still taking entries: a close time ("closes", from the API's closeTime) still ahead.
+    A saved or fallback list can't outlive its shows that way (Hadestown stayed listed for weeks
+    after its run, Nov 2026, because GitHub's runners get blocked by the API and the old saved list
+    was reused every day). Entries without a close time are from before it was recorded: dropped."""
+    now = now or datetime.now(timezone.utc)
+    out = []
+    for s in shows if isinstance(shows, list) else []:
+        try:
+            closes = datetime.fromisoformat(str(s.get("closes") or "").replace("Z", "+00:00"))
+        except ValueError:
+            continue
+        if closes.tzinfo and closes > now:
+            out.append(s)
+    return out
 
 
 def fetch_luckyseat_boston():
@@ -13239,8 +13502,8 @@ def fetch_luckyseat_boston():
         if os.path.exists(candidate_path):
             try:
                 with open(candidate_path, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                    if isinstance(data, list) and len(data) > 0:
+                    data = luckyseat_open(json.load(f))
+                    if data:
                         disk_data = data
                         break
             except Exception:
@@ -13278,7 +13541,9 @@ def fetch_luckyseat_boston():
                     "venue": s.get("eventLocation"),
                     "price": s.get("priceAndFeesTotal"),
                     "url": f"https://www.luckyseat.com/shows/{s.get('showAlias')}" if s.get("showAlias") else "https://www.luckyseat.com/",
+                    "closes": s.get("closeTime"),
                 })
+            shows = luckyseat_open(shows)
             if shows:
                 for save_path in (LUCKYSEAT_CACHE_FILE, LUCKYSEAT_COMMITTED_FILE):
                     try:
@@ -13290,22 +13555,24 @@ def fetch_luckyseat_boston():
     except Exception:
         pass
 
-    if not shows and disk_data:
+    if shows:
+        print(f"LuckySeat: {len(shows)} open Boston-area lotteries from the API")
+    elif disk_data:
         shows = disk_data
+        print(f"LuckySeat: API unavailable; using saved list ({len(shows)} still open)")
 
     if not shows:
         try:
             events_json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "events.json")
             if os.path.exists(events_json_path):
                 with open(events_json_path, "r", encoding="utf-8") as f:
-                    candidate = json.load(f).get("luckyseat")
-                    if isinstance(candidate, list) and len(candidate) > 0:
-                        shows = candidate
+                    shows = luckyseat_open(json.load(f).get("luckyseat"))
         except Exception:
             pass
 
     if not shows:
-        shows = list(LUCKYSEAT_FALLBACK_SHOWS)
+        shows = luckyseat_open(LUCKYSEAT_FALLBACK_SHOWS)
+        print(f"LuckySeat: no live or saved list; built-in fallback ({len(shows)} still open)")
 
     _luckyseat_cache["data"] = shows
     _luckyseat_cache["ts"] = time.time()

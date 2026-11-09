@@ -194,5 +194,47 @@
     "_is_community": true,
     "_source_venue": "Community Submission",
     "submitted_at": "2026-11-06T20:00:00+00:00"
+  },
+  {
+    "venue": "The BCA Cyclorama",
+    "category": "art",
+    "city": "boston",
+    "address": "539 Tremont St, Boston, MA 02116",
+    "url": "https://bostonarts.my.salesforce-sites.com/ticket/#/events/a0SPk00000GDGIfMAP",
+    "_is_community": true,
+    "_source_venue": "Community Submission",
+    "submitted_at": "2026-11-09T17:30:00+00:00",
+    "name": "Boston Art Book Fair Preview Party + Sojourn Dance Party",
+    "date": "2026-11-13T19:00:00-05:00",
+    "price": null,
+    "description": "Opening night of the Boston Art Book Fair and launch of Boston Art Review Issue 17: food, drinks, live performances, screen printing, and a late-night dance party with Sojourn. 7 PM–1 AM (exhibitors open 7–10 PM). Ticketed."
+  },
+  {
+    "venue": "The BCA Cyclorama",
+    "category": "art",
+    "city": "boston",
+    "address": "539 Tremont St, Boston, MA 02116",
+    "url": "https://bostonarts.org/event/boston-art-book-fair-2026/",
+    "_is_community": true,
+    "_source_venue": "Community Submission",
+    "submitted_at": "2026-11-09T17:30:00+00:00",
+    "name": "Boston Art Book Fair 2026",
+    "date": "2026-11-14T12:00:00-05:00",
+    "price": "Free",
+    "description": "Artist books, zines, catalogs, comics and printed matter from local, national and international publishers. Open to the public 12–6 PM, free admission."
+  },
+  {
+    "venue": "The BCA Cyclorama",
+    "category": "art",
+    "city": "boston",
+    "address": "539 Tremont St, Boston, MA 02116",
+    "url": "https://bostonarts.org/event/boston-art-book-fair-2026/",
+    "_is_community": true,
+    "_source_venue": "Community Submission",
+    "submitted_at": "2026-11-09T17:30:00+00:00",
+    "name": "Boston Art Book Fair 2026",
+    "date": "2026-11-15T12:00:00-05:00",
+    "price": "Free",
+    "description": "Artist books, zines, catalogs, comics and printed matter from local, national and international publishers. Open to the public 12–5 PM, free admission."
   }
 ]

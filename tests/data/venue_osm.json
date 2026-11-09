@@ -1165,6 +1165,12 @@
   "match": "Trillium Brewing Company, 401, Park Drive, Audubon Circle, Landsdown, Fenway-Kenmore, Boston, Suffolk County, Massachuse",
   "type": "amenity/pub"
  },
+ "407 Highland Ave, Somerville": {
+  "lat": 42.396144,
+  "lng": -71.121186,
+  "match": "Comicazi, 407, Highland Avenue, Davis Square, Ball Square, Somerville, Middlesex County, Massachusetts, 02144, United St",
+  "type": "shop/books"
+ },
  "41 Hampshire St, Cambridge": {
   "lat": 42.3728,
   "lng": -71.099408,
@@ -1242,12 +1248,6 @@
   "lng": -71.101129,
   "match": "Veggie Galaxy, 450, Massachusetts Avenue, Harlow Square, Cambridgeport, Cambridge, Middlesex County, Massachusetts, 0213",
   "type": "amenity/restaurant"
- },
- "459 McGrath Hwy, Somerville": {
-  "lat": 42.384016,
-  "lng": -71.091175,
-  "match": "459, McGrath Highway, Winter Hill, Somerville, Massachusetts, Ball Square, Somerville, Middlesex County, Massachusetts, ",
-  "type": "place/house"
  },
  "46 Joy St, Boston": {
   "lat": 42.359995,
@@ -1440,6 +1440,12 @@
   "lng": -71.12303,
   "match": "Somerville Theater, 55, Davis Square, Ball Square, Somerville, Middlesex County, Massachusetts, 02144, United States",
   "type": "amenity/cinema"
+ },
+ "551 Tremont St, Boston": {
+  "lat": 42.344407,
+  "lng": -71.07164,
+  "match": "549;551, Tremont Street, South End, Boston, Suffolk County, Massachusetts, 02118, United States",
+  "type": "building/yes"
  },
  "559 Washington St, Boston": {
   "lat": 42.349446,
@@ -1635,6 +1641,12 @@
   "match": "73;74;75;76, Union Square, Somerville, Middlesex County, Massachusetts, 02143, United States",
   "type": "building/yes"
  },
+ "75 Washington St, Somerville": {
+  "lat": 42.381628,
+  "lng": -71.084814,
+  "match": "75, Washington Street, East Somerville, Somerville, Middlesex County, Massachusetts, 02143, United States",
+  "type": "place/house"
+ },
  "76 Bishop Allen Dr, Cambridge": {
   "lat": 42.364899,
   "lng": -71.100893,
@@ -1773,12 +1785,6 @@
   "match": "9, Lansdowne Street, Landsdown, Fenway-Kenmore, Boston, Suffolk County, Massachusetts, 02215, United States",
   "type": "building/yes"
  },
- "90 Boylston St, Boston": {
-  "lat": 42.317252,
-  "lng": -71.105006,
-  "match": "90, Boylston Street, Jamaica Plain, Boston, Suffolk County, Massachusetts, 02130, United States",
-  "type": "building/yes"
- },
  "90 Broadway, Cambridge": {
   "lat": 42.363284,
   "lng": -71.08681,
@@ -1790,6 +1796,12 @@
   "lng": -71.083993,
   "match": "Hynes Convention Center, 900, Boylston Street, Back Bay, Boston, Suffolk County, Massachusetts, 02116, United States",
   "type": "amenity/conference_centre"
+ },
+ "909 Boylston St, Boston": {
+  "lat": 42.348385,
+  "lng": -71.084303,
+  "match": "Dani's Queer Bar, 909, Boylston Street, Block G, Back Bay, Boston, Suffolk County, Massachusetts, 02115, United States",
+  "type": "amenity/bar"
  },
  "912 Massachusetts Ave, Cambridge": {
   "lat": 42.368261,

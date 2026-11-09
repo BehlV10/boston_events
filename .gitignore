@@ -7,3 +7,6 @@ __pycache__/
 .DS_Store
 .cache/
 reddit/
+
+# Per-day event files, rebuilt by every render (deployed via the Pages artifact, not committed)
+days/

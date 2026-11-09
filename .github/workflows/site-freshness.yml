@@ -1,0 +1,53 @@
+name: Site freshness check
+
+# The site rebuilds daily (scrape.yml). If that stops (workflow disabled, a run crashing every
+# day, Pages failing), the live site freezes on its last build without anyone noticing. Every 6 h
+# this reads the live page's Last-Modified (set by each Pages deploy) and opens an issue, which
+# emails the repo owner, once it's over 48 h old; it closes that issue when the site is fresh again.
+
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      SITE: https://www.wickedbostonevents.com/
+      MAX_AGE_HOURS: "48"
+      LABEL: site-stale
+    steps:
+      - name: Check live site age
+        run: |
+          set -euo pipefail
+          lm=$(curl -sSI --max-time 30 "$SITE" | tr -d '\r' | awk -F': ' 'tolower($1)=="last-modified"{print $2}')
+          if [ -z "$lm" ]; then
+            age_h=-1; summary="No Last-Modified header from $SITE (site down or not responding)."
+          else
+            age_h=$(( ( $(date -u +%s) - $(date -u -d "$lm" +%s) ) / 3600 ))
+            summary="Live site last rebuilt $lm (${age_h} h ago)."
+          fi
+          echo "$summary"
+
+          gh label create "$LABEL" --color d93f0b --description "Live site hasn't been rebuilt recently" 2>/dev/null || true
+          open_issue=$(gh issue list --label "$LABEL" --state open --json number --jq '.[0].number // empty')
+
+          if [ "$age_h" -lt 0 ] || [ "$age_h" -gt "$MAX_AGE_HOURS" ]; then
+            if [ -z "$open_issue" ]; then
+              runs=$(gh run list --workflow scrape.yml --limit 5 --json createdAt,conclusion,event \
+                     --jq '.[] | "- \(.createdAt) \(.event): \(.conclusion // "in progress")"' || echo "- (couldn't list runs)")
+              gh issue create --label "$LABEL" --title "wickedbostonevents.com hasn't updated in over ${MAX_AGE_HOURS} hours" \
+                --body "$(printf '%s\n\nThe daily build (`scrape.yml`) should redeploy every morning. Recent runs:\n%s\n\nCheck the Actions tab: a failing test stops the deploy, and GitHub disables scheduled workflows after 60 days without repo activity.\n\nThis issue closes itself once the site is fresh again.' "$summary" "$runs")"
+            else
+              echo "Issue #$open_issue already open."
+            fi
+          elif [ -n "$open_issue" ]; then
+            gh issue close "$open_issue" --comment "Fresh again: $summary"
+          fi

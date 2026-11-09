@@ -3,36 +3,28 @@
     "name": "Dirty Dancing: The Musical",
     "venue": "Emerson Colonial Theatre",
     "price": 45.0,
-    "url": "https://www.luckyseat.com/shows/dirtydancingthemusical-boston-2026Nov"
-  },
-  {
-    "name": "Hadestown",
-    "venue": "Emerson Colonial Theatre",
-    "price": 45.0,
-    "url": "https://www.luckyseat.com/shows/hadestown-boston-2026Oct"
+    "url": "https://www.luckyseat.com/shows/dirtydancingthemusical-boston-2026Nov",
+    "closes": "2026-11-17T00:00:00Z"
   },
   {
     "name": "Late Nite Catechism: Til Death Do Us Part",
     "venue": "Charles Playhouse",
     "price": 35.0,
-    "url": "https://www.luckyseat.com/shows/latenitecatechism-boston-2026Oct"
+    "url": "https://www.luckyseat.com/shows/latenitecatechism-boston-2026Oct",
+    "closes": "2026-11-18T00:00:00Z"
   },
   {
     "name": "The Sound of Music",
     "venue": "Boch Center - Wang Theatre",
     "price": 49.0,
-    "url": "https://www.luckyseat.com/shows/thesoundofmusic-boston-2026Oct"
-  },
-  {
-    "name": "Wicked",
-    "venue": "Citizens Opera House",
-    "price": 40.0,
-    "url": "https://www.luckyseat.com/shows/wicked-boston-2026Sep"
+    "url": "https://www.luckyseat.com/shows/thesoundofmusic-boston-2026Oct",
+    "closes": "2026-11-14T00:00:00Z"
   },
   {
     "name": "The Getaway Driver",
     "venue": "Central Square Theater",
     "price": 49.0,
-    "url": "https://www.luckyseat.com/shows/thegetawaydriver-cambridge-2026Sep"
+    "url": "https://www.luckyseat.com/shows/thegetawaydriver-cambridge-2026Sep",
+    "closes": "2026-11-17T00:00:00Z"
   }
 ]
