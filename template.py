@@ -37,6 +37,7 @@ from scrapers import (
 )
 from venues_geo import resolve_event_geo, nearest_curated_venue, flag_shared_source_points
 from lgbtq import is_lgbtq_event
+from college import is_college_event, get_college_info, COLLEGE_SCHOOLS
 from light_theme import LIGHT_THEME_CSS
 
 
@@ -875,6 +876,7 @@ def build_seo_directory_html(all_events_flat, all_venue_names):
           <li><a href="live-music-somerville/">Somerville Live Music</a></li>
           <li><a href="board-game-nights-boston/">Board Game Nights &amp; Trivia</a></li>
           <li><a href="kids-family-events-boston/">Kids &amp; Family Events</a></li>
+          <li><a href="college/">College &amp; Student Events</a></li>
           <li><a href="boston-edm/">Boston EDM &amp; Electronic Shows</a></li>
           <li><a href="markets-festivals-boston/">Markets, Fairs &amp; Festivals</a></li>
         </ul>
@@ -1060,6 +1062,12 @@ def filter_events_for_hub(hub, events):
         from camps import load_camps
         return load_camps()["camps"]
 
+    if hub.get("style") == "college":
+        filtered = [e for e in events if is_college_event(e)]
+        if hub.get("limit"):
+            filtered = filtered[:hub["limit"]]
+        return filtered
+
     city_filter = hub.get("city_filter")
     cat_filter = hub.get("cat_filter")
     free_only = hub.get("free_only", False)
@@ -1173,6 +1181,23 @@ HUBS = {
         "og_badge": "BOSTON EDM & ELECTRONIC",
         "og_image": "og-boston-edm.jpg",
         "query": "#cat=Music+%26+nightlife&genre=electronic"
+    },
+    # Dedicated College & Student Events directory for Greater Boston
+    "college": {
+        "title": "Greater Boston College & Student Events: Sports, Intercollegiate Comps & Campus Life",
+        "h1": "Boston College & Student Events",
+        "city_filter": None,
+        "cat_filter": None,
+        "free_only": False,
+        "time_filter": None,
+        "keyword_filter": None,
+        "show_details": True,
+        "limit": 600,
+        "style": "college",  # Collegiate varsity aesthetic with school, vibe & intercollegiate filters
+        "subtitle": "College sporting games, intercollegiate ballroom dance competitions, hackathons, concerts, lectures, and student-friendly events across BU, BC, Northeastern, Harvard, MIT, Tufts, Berklee, and Greater Boston.",
+        "og_badge": "COLLEGE & STUDENT",
+        "og_image": "og-college.jpg",
+        "query": "#college=1"
     },
     # Flea, night, farmers and holiday markets, craft fairs and festivals
     "markets-festivals-boston": {
@@ -2391,6 +2416,464 @@ _EDM_FILTER_JS = """<script>
 })();
 </script>"""
 
+_COLLEGE_FONTS = """<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">"""
+
+_COLLEGE_HERO_ART = """<svg class="col-hero-art" viewBox="0 0 900 180" aria-hidden="true" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="col-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="60%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#334155"/>
+    </linearGradient>
+    <linearGradient id="col-river" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#0369a1"/>
+    </linearGradient>
+    <linearGradient id="col-gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="180" fill="url(#col-sky)"/>
+  <circle cx="800" cy="50" r="30" fill="url(#col-gold)" opacity="0.9"/>
+  <circle cx="800" cy="50" r="50" fill="#fbbf24" opacity="0.15"/>
+  <path d="M 120,135 L 120,95 Q 150,60 180,95 L 180,135 Z" fill="#475569" opacity="0.6"/>
+  <rect x="142" y="55" width="16" height="12" fill="#475569" opacity="0.6"/>
+  <polygon points="340,135 340,65 355,30 370,65 370,135" fill="#64748b" opacity="0.5"/>
+  <polygon points="350,30 355,10 360,30" fill="#cbd5e1" opacity="0.7"/>
+  <path d="M 450,135 Q 520,100 590,135 Q 660,100 730,135" stroke="#94a3b8" stroke-width="4" fill="none" opacity="0.4"/>
+  <line x1="80" y1="135" x2="65" y2="40" stroke="#64748b" stroke-width="3"/>
+  <polygon points="55,40 75,40 80,48 50,48" fill="#fbbf24" opacity="0.8"/>
+  <rect x="0" y="135" width="900" height="45" fill="url(#col-river)"/>
+  <path d="M0,135 Q225,130 450,135 T900,135 L900,142 L0,142 Z" fill="#38bdf8" opacity="0.4"/>
+  <g transform="translate(480, 142)">
+    <path d="M-80,4 Q0,1 80,4 Q0,7 -80,4 Z" fill="#dc2626"/>
+    <circle cx="-50" cy="0" r="3" fill="#f8fafc"/>
+    <circle cx="-35" cy="0" r="3" fill="#f8fafc"/>
+    <circle cx="-20" cy="0" r="3" fill="#f8fafc"/>
+    <circle cx="-5" cy="0" r="3" fill="#f8fafc"/>
+    <circle cx="10" cy="0" r="3" fill="#f8fafc"/>
+    <circle cx="25" cy="0" r="3" fill="#f8fafc"/>
+    <circle cx="40" cy="0" r="3" fill="#f8fafc"/>
+    <circle cx="55" cy="0" r="3" fill="#f8fafc"/>
+    <line x1="-50" y1="1" x2="-65" y2="-6" stroke="#f8fafc" stroke-width="1.2"/>
+    <line x1="-35" y1="1" x2="-20" y2="8" stroke="#f8fafc" stroke-width="1.2"/>
+    <line x1="-20" y1="1" x2="-35" y2="-6" stroke="#f8fafc" stroke-width="1.2"/>
+    <line x1="-5" y1="1" x2="10" y2="8" stroke="#f8fafc" stroke-width="1.2"/>
+    <line x1="10" y1="1" x2="-5" y2="-6" stroke="#f8fafc" stroke-width="1.2"/>
+    <line x1="25" y1="1" x2="40" y2="8" stroke="#f8fafc" stroke-width="1.2"/>
+    <line x1="40" y1="1" x2="25" y2="-6" stroke="#f8fafc" stroke-width="1.2"/>
+    <line x1="55" y1="1" x2="70" y2="8" stroke="#f8fafc" stroke-width="1.2"/>
+  </g>
+</svg>"""
+
+_COLLEGE_CSS = """
+  body.col-hub {
+    --col-bg: #0b1120;
+    --col-card: #131d31;
+    --col-card-hover: #17243c;
+    --col-border: #1e293b;
+    --col-text: #f8fafc;
+    --col-muted: #94a3b8;
+    --col-gold: #f59e0b;
+    background: #0b1120;
+    color: var(--col-text);
+    font-family: "Source Sans 3", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  .col-hub h1, .col-hub h2, .col-hub h3, .col-hub .col-chip, .col-hub .col-school-pill, .col-hub .col-btn, .col-hub .logo {
+    font-family: "Outfit", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+  .col-hub header {
+    background: #0b1120e6;
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--col-border);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px 24px;
+  }
+  .col-hub .logo { color: #fff; font-size: 18px; font-weight: 800; text-decoration: none; }
+  .col-hub .logo span { color: #38bdf8; }
+  .col-hub .col-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .col-hub .col-nav a {
+    color: var(--col-muted);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid transparent;
+    transition: all 0.15s ease;
+  }
+  .col-hub .col-nav a:hover {
+    color: #fff;
+    background: #1e293b;
+  }
+  .col-hub .col-nav a.active {
+    color: #fff;
+    background: #1e293b;
+    border-color: #38bdf8;
+    box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+  }
+  .col-hero {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    margin: 20px 0;
+    border: 1px solid var(--col-border);
+    background: #0f172a;
+  }
+  .col-hero-art {
+    width: 100%;
+    height: 180px;
+    display: block;
+  }
+  .col-hero-copy {
+    padding: 24px;
+    background: linear-gradient(180deg, rgba(15,23,42,0.85) 0%, rgba(15,23,42,1) 100%);
+  }
+  .col-hero h1 {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin: 0 0 6px;
+    color: #fff;
+  }
+  .col-hero h1 small {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #38bdf8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 4px;
+  }
+  .col-hero p {
+    font-size: 15px;
+    color: var(--col-muted);
+    line-height: 1.5;
+    max-width: 760px;
+    margin: 8px 0 16px;
+  }
+  .col-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    margin-bottom: 16px;
+  }
+  .col-stat {
+    font-size: 13px;
+    font-weight: 600;
+    color: #cbd5e1;
+    background: rgba(255,255,255,0.06);
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .col-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 24px 0;
+    background: #0f172a;
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid var(--col-border);
+  }
+  .col-filter-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+  .col-filter-row::-webkit-scrollbar { display: none; }
+  .col-filter-label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #64748b;
+    min-width: 58px;
+    flex-shrink: 0;
+    letter-spacing: 0.05em;
+  }
+  .col-chip {
+    background: #1e293b;
+    color: #cbd5e1;
+    border: 1px solid #334155;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+    flex-shrink: 0;
+  }
+  .col-chip:hover {
+    background: #334155;
+    color: #fff;
+  }
+  .col-chip.active {
+    background: #0284c7;
+    color: #fff;
+    border-color: #38bdf8;
+    box-shadow: 0 0 10px rgba(2, 132, 199, 0.4);
+  }
+  .col-hub-day {
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
+    margin: 32px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--col-border);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .col-card {
+    background: var(--col-card);
+    border: 1px solid var(--col-border);
+    border-radius: 12px;
+    margin-bottom: 14px;
+    display: flex;
+    overflow: hidden;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+  }
+  .col-card:hover {
+    transform: translateY(-2px);
+    border-color: #475569;
+    background: var(--col-card-hover);
+  }
+  .col-card-stripe {
+    width: 6px;
+    flex-shrink: 0;
+  }
+  .col-card-body {
+    padding: 16px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .col-card-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .col-school-pill {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid;
+  }
+  .col-type-pill {
+    font-size: 12px;
+    font-weight: 600;
+    color: #94a3b8;
+    background: rgba(255,255,255,0.04);
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+  .col-badges {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+  }
+  .col-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+  .col-badge-inter {
+    background: rgba(2, 132, 199, 0.2);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.3);
+  }
+  .col-badge-id {
+    background: rgba(245, 158, 11, 0.2);
+    color: #fbbf24;
+    border: 1px solid rgba(251, 191, 36, 0.3);
+  }
+  .col-badge-free {
+    background: rgba(34, 197, 94, 0.2);
+    color: #4ade80;
+    border: 1px solid rgba(74, 222, 128, 0.3);
+  }
+  .col-badge-price {
+    background: rgba(255,255,255,0.08);
+    color: #e2e8f0;
+  }
+  .col-title {
+    font-size: 17px;
+    font-weight: 700;
+    margin: 0;
+    line-height: 1.35;
+  }
+  .col-title a {
+    color: #fff;
+    text-decoration: none;
+  }
+  .col-title a:hover {
+    color: #38bdf8;
+  }
+  .col-meta {
+    font-size: 13px;
+    color: var(--col-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .col-desc {
+    font-size: 13px;
+    color: #94a3b8;
+    margin: 4px 0 0;
+    line-height: 1.4;
+  }
+  .col-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 6px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .col-time {
+    font-size: 13px;
+    font-weight: 600;
+    color: #cbd5e1;
+  }
+  .col-btn {
+    font-size: 12px;
+    font-weight: 700;
+    color: #38bdf8;
+    text-decoration: none;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: rgba(56, 189, 248, 0.1);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    transition: all 0.15s ease;
+  }
+  .col-btn:hover {
+    background: rgba(56, 189, 248, 0.2);
+    color: #fff;
+  }
+"""
+
+_COLLEGE_FILTER_JS = """<script>
+(function() {
+  const cards = Array.from(document.querySelectorAll('.col-card'));
+  const days = Array.from(document.querySelectorAll('.col-hub-day'));
+  const chips = Array.from(document.querySelectorAll('.col-chip'));
+
+  const state = {
+    school: 'all',
+    type: 'all',
+    access: 'all',
+    when: 'all'
+  };
+
+  chips.forEach(c => {
+    if (c.getAttribute('data-val') === 'all') c.classList.add('active');
+  });
+
+  function getWeekendDates() {
+    const d = new Date();
+    const day = d.getDay();
+    const toFri = (5 - day + 7) % 7;
+    const fri = new Date(d); fri.setDate(d.getDate() + toFri);
+    const sat = new Date(fri); sat.setDate(fri.getDate() + 1);
+    const sun = new Date(fri); sun.setDate(fri.getDate() + 2);
+    const iso = x => x.toISOString().slice(0, 10);
+    return new Set([iso(fri), iso(sat), iso(sun)]);
+  }
+
+  function applyFilters() {
+    const todayIso = new Date().toISOString().slice(0, 10);
+    const weekendDates = getWeekendDates();
+
+    cards.forEach(card => {
+      const s = card.getAttribute('data-school');
+      const t = card.getAttribute('data-type');
+      const a = card.getAttribute('data-access');
+      const d = card.getAttribute('data-day');
+      const inter = card.getAttribute('data-inter') === '1';
+
+      let schoolOk = (state.school === 'all') || (s === state.school);
+      let typeOk = (state.type === 'all') || (t === state.type);
+      let accessOk = true;
+      if (state.access === 'intercollegiate') accessOk = inter || (a === 'intercollegiate');
+      else if (state.access === 'free_id') accessOk = (a === 'free_id');
+      else if (state.access === 'free') accessOk = (a === 'free' || a === 'free_id');
+
+      let whenOk = true;
+      if (state.when === 'tonight') whenOk = (d === todayIso);
+      else if (state.when === 'weekend') whenOk = weekendDates.has(d);
+
+      const visible = schoolOk && typeOk && accessOk && whenOk;
+      card.style.display = visible ? '' : 'none';
+    });
+
+    days.forEach(dayHeading => {
+      let next = dayHeading.nextElementSibling;
+      let hasVisible = false;
+      while (next && !next.classList.contains('col-hub-day')) {
+        if (next.classList.contains('col-card') && next.style.display !== 'none') {
+          hasVisible = true;
+          break;
+        }
+        next = next.nextElementSibling;
+      }
+      dayHeading.style.display = hasVisible ? '' : 'none';
+    });
+  }
+
+  chips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      const group = chip.getAttribute('data-group');
+      const val = chip.getAttribute('data-val');
+      state[group] = val;
+      chips.filter(c => c.getAttribute('data-group') === group).forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      applyFilters();
+    });
+  });
+
+  location.hash.replace(/^#/, '').split('&').forEach(function(p) {
+    var kv = p.split('=');
+    if (kv.length === 2 && state.hasOwnProperty(kv[0])) {
+      var btn = document.querySelector('.col-chip[data-group=\"' + kv[0] + '\"][data-val=\"' + kv[1] + '\"]');
+      if (btn) {
+        state[kv[0]] = kv[1];
+        chips.filter(c => c.getAttribute('data-group') === kv[0]).forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+      }
+    }
+  });
+  applyFilters();
+})();
+</script>"""
+
 _CAMPS_HERO_ART = """<svg class="camps-hero-art" viewBox="0 0 900 200" aria-hidden="true" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="camps-sky" x1="0" y1="0" x2="0" y2="1">
@@ -3139,6 +3622,7 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
     is_kids = hub.get("style") == "kids"
     is_edm = hub.get("style") == "edm"
     is_camps = hub.get("style") == "camps"
+    is_college = hub.get("style") == "college"
     if is_camps:
         for idx, c in enumerate(filtered[:50]):
             hub_event_items.append({
@@ -3165,6 +3649,7 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
 
     kid_age_counts, kid_kind_counts, kid_free, kid_places = {}, {}, 0, set()
     edm_sub_counts, edm_free_count, edm_places = {}, 0, set()
+    college_counts, college_school_counts, college_free_id_count, college_inter_count, college_campuses = {"sports": 0, "dance": 0, "tech": 0, "arts": 0, "talks": 0, "social": 0}, {}, 0, 0, set()
     cards_html = []
 
     if is_kids:
@@ -3372,6 +3857,99 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
 </div>''')
     elif is_camps:
         cards_html = [_camp_card(c) for c in filtered[:card_limit]]
+    elif is_college:
+        def _render_college_card(e):
+            nonlocal college_free_id_count, college_inter_count
+            title = escape(e.get("title") or e.get("name") or "Collegiate Event")
+            venue = escape(e.get("venue") or e.get("_source_venue") or "Campus Venue")
+            url = escape(e.get("url") or e.get("link") or "#")
+            d_str = escape(e.get("date") or "")
+            t_str = escape(e.get("time") or "")
+            t_obj = e.get("_time")
+            if isinstance(t_obj, datetime):
+                d_str = ""
+                t_str = "All day" if (t_obj.hour, t_obj.minute) == (0, 0) else t_obj.strftime("%-I:%M %p")
+
+            desc_html = ""
+            if e.get("description"):
+                d_txt = re.sub(r"\s+", " ", str(e["description"])).strip()
+                if len(d_txt) > 20:
+                    desc_html = f'<p class="col-desc">{escape(d_txt[:180] + ("…" if len(d_txt) > 180 else ""))}</p>'
+
+            info = get_college_info(e)
+            s_key = info["school_key"]
+            s_color = info["school_color"]
+            s_short = info["school_short"]
+            c_type = info["type_key"]
+            c_icon = info["type_icon"]
+            c_label = info["type_label"]
+            a_key = info["access_key"]
+            is_inter = info["is_intercollegiate"]
+
+            college_counts[c_type] = college_counts.get(c_type, 0) + 1
+            college_school_counts[s_key] = college_school_counts.get(s_key, 0) + 1
+            if a_key == "free_id":
+                college_free_id_count += 1
+            if is_inter:
+                college_inter_count += 1
+            if e.get("venue"):
+                college_campuses.add(e["venue"])
+
+            city = _event_city(e.get("venue"), e.get("_source_venue"), e)
+            city_name = escape(_hub_place_label(city, e))
+            day_attr = t_obj.date().isoformat() if isinstance(t_obj, datetime) else ""
+
+            inter_badge = '<span class="col-badge col-badge-inter" title="Intercollegiate: Open to participants/students from any college">🤝 All-Colleges</span>' if is_inter else ""
+            id_badge = '<span class="col-badge col-badge-id">🪪 Free w/ ID</span>' if a_key == "free_id" else ""
+            price_val = e.get("price")
+            price_txt = str(price_val or "").strip()
+            if re.fullmatch(r"\d+(?:\.\d+)?", price_txt):
+                price_txt = "$" + price_txt
+            price_badge = f'<span class="col-badge col-badge-price">{escape(price_txt)}</span>' if price_txt else ""
+            if _is_event_free(e) and a_key != "free_id":
+                price_badge = '<span class="col-badge col-badge-free">💛 Free</span>'
+
+            when_badge = f'<time class="col-time">{" · ".join(x for x in (d_str, t_str) if x)}</time>'
+
+            return f"""<article class="hub-card col-card col-s-{s_key} col-t-{c_type}" data-school="{s_key}" data-type="{c_type}" data-access="{a_key}" data-day="{day_attr}" data-inter="{'1' if is_inter else '0'}">
+  <div class="col-card-stripe" style="background:{s_color};"></div>
+  <div class="col-card-body">
+    <div class="col-card-top">
+      <span class="col-school-pill" style="--col-c:{s_color}; border-color:{s_color}44; color:{s_color}; background:{s_color}14;">{escape(s_short)}</span>
+      <span class="col-type-pill">{c_icon} {escape(c_label)}</span>
+      <div class="col-badges">{inter_badge}{id_badge}{price_badge}</div>
+    </div>
+    <h3 class="col-title"><a href="{url}" target="_blank" rel="noopener">{title}</a></h3>
+    <div class="col-meta">
+      <span class="col-venue">📍 {venue}</span>
+      <span class="col-place">({city_name})</span>
+    </div>
+    {desc_html}
+    <div class="col-footer">
+      {when_badge}
+      <a href="{url}" target="_blank" rel="noopener" class="col-btn">Tickets / Details →</a>
+    </div>
+  </div>
+</article>"""
+
+        by_day = {}
+        for e in filtered[:card_limit]:
+            t_obj = e.get("_time")
+            d_key = t_obj.date() if isinstance(t_obj, datetime) else None
+            by_day.setdefault(d_key, []).append(e)
+
+        for day_obj, day_events in by_day.items():
+            if day_obj:
+                day_iso = day_obj.isoformat()
+                day_heading = day_obj.strftime("%A, %B %-d")
+                cards_html.append(f'<h2 class="hub-day col-hub-day" id="{day_iso}" data-day="{day_iso}">{day_heading}</h2>')
+            else:
+                day_iso = "tba"
+                cards_html.append('<h2 class="hub-day col-hub-day" id="tba" data-day="tba">Date TBA</h2>')
+
+            day_events.sort(key=lambda ev: ev.get("_time") or datetime.max.replace(tzinfo=EASTERN))
+            for e in day_events:
+                cards_html.append(_render_college_card(e))
     else:
         last_day = None
         for e in filtered[:card_limit]:
@@ -3500,6 +4078,62 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
         kids_head, kids_css, body_class = "", _CAMPS_CSS, ' class="camps-hub"'
         hero_html, city_chips_html, camps_tail = _camps_sections(filtered)
         hub_js = camps_tail + _CAMPS_FILTER_JS
+    elif is_college:
+        kids_head, kids_css, body_class = _COLLEGE_FONTS, _COLLEGE_CSS, ' class="col-hub"'
+        def col_chip(group, val, label):
+            return f'<button type="button" class="col-chip" data-group="{group}" data-val="{val}">{label}</button>'
+
+        schools_html = col_chip("school", "all", "All Campuses") + "".join(
+            col_chip("school", k, f"{s['short']}")
+            for k, s in COLLEGE_SCHOOLS.items() if college_school_counts.get(k)
+        )
+        types_html = col_chip("type", "all", "All Events") + "".join(
+            col_chip("type", k, f"{emo} {lbl}")
+            for k, (emo, lbl) in [
+                ("sports", ("🏒", "Sports & Rivalries")),
+                ("dance", ("💃", "Ballroom & Dance")),
+                ("tech", ("💻", "Hackathons & Tech")),
+                ("arts", ("🎭", "Concerts & Arts")),
+                ("talks", ("🎓", "Talks & Expos")),
+                ("social", ("🍻", "Student Life")),
+            ] if college_counts.get(k)
+        )
+        access_html = (
+            col_chip("access", "all", "All Admission") +
+            (col_chip("access", "intercollegiate", "🤝 Open to All Colleges") if college_inter_count else "") +
+            (col_chip("access", "free_id", "🪪 Free w/ Student ID") if college_free_id_count else "") +
+            col_chip("access", "free", "💛 Free")
+        )
+        when_html = (
+            col_chip("when", "all", "All Dates") +
+            col_chip("when", "tonight", "🔥 Tonight") +
+            col_chip("when", "weekend", "🎉 This Weekend")
+        )
+
+        city_chips_html = f"""<div class="col-filters" role="group" aria-label="Filter college and student events">
+    <div class="col-filter-row"><span class="col-filter-label">School</span>{schools_html}</div>
+    <div class="col-filter-row"><span class="col-filter-label">Vibe</span>{types_html}</div>
+    <div class="col-filter-row"><span class="col-filter-label">Access</span>{access_html}</div>
+    <div class="col-filter-row"><span class="col-filter-label">When</span>{when_html}</div>
+  </div>"""
+        hub_js = _COLLEGE_FILTER_JS
+        n_cards = len(filtered[:card_limit])
+        n_days = len(set(re.findall(r'<h2 class="hub-day[^"]*" id="([\d-]+)"', "".join(cards_html)))) or 1
+        n_sports = college_counts.get("sports", 0)
+        hero_html = f"""<div class="hero col-hero">
+    {_COLLEGE_HERO_ART}
+    <div class="col-hero-copy">
+      <h1>{escape(hub.get('h1') or hub['title'])}<small>BU · BC · Northeastern · Harvard · MIT · Tufts · Berklee &amp; Greater Boston</small></h1>
+      <p>{hub['subtitle']}</p>
+      <div class="col-stats">
+        <span class="col-stat">🗓️ {n_cards} events in {n_days} days</span>
+        <span class="col-stat">🏒 {n_sports} varsity games &amp; rivalries</span>
+        <span class="col-stat">🤝 {college_inter_count} open intercollegiate</span>
+        <span class="col-stat">🪪 {college_free_id_count} free w/ student ID</span>
+      </div>
+      <a href="../{hub['query']}" class="cta-btn">View on full calendar →</a>
+    </div>
+  </div>"""
     cards_joined = "\n".join(cards_html) if cards_html else "<p class='no-hub-events'>No scheduled events matching this directory right now. Check the interactive calendar for all upcoming dates.</p>"
 
     active_b = 'active' if hub_slug == 'boston' else ''
@@ -3516,9 +4150,15 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
     active_sc = 'active' if hub_slug == 'summer-camps' else ''
     active_mk = 'active' if hub_slug == 'markets-festivals-boston' else ''
     active_edm = 'active' if hub_slug == 'boston-edm' else ''
+    active_col = 'active' if hub_slug == 'college' else ''
 
     if is_camps or is_kids:
         hub_nav_html = _family_nav(hub_slug, "camps-nav" if is_camps else "kids-nav")
+    elif is_college:
+        hub_nav_html = """  <nav class="hub-nav col-nav">
+    <a href="../">All Events</a>
+    <a href="../college/" class="active">College &amp; Student Events</a>
+  </nav>"""
     else:
         hub_nav_html = f"""  <nav class="hub-nav">
     <a href="../">All Events</a>
@@ -3526,6 +4166,7 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
     <a href="../cambridge-events-tonight/" class="{active_ct}">Cambridge Tonight</a>
     <a href="../live-music-somerville/" class="{active_sm}">Somerville Music</a>
     <a href="../boston-edm/" class="{active_edm}">Boston EDM</a>
+    <a href="../college/" class="{active_col}">College &amp; Student</a>
     <a href="../board-game-nights-boston/" class="{active_bg}">Board Games</a>
     <a href="../kids-family-events-boston/" class="{active_kf}">Kids &amp; Family</a>
     <a href="../summer-camps/" class="{active_sc}">Summer Camps</a>
@@ -5249,6 +5890,16 @@ def render_page(results, weather=None, luckyseat_shows=None):
         desc_html = f'<div class="desc">{escape(desc)}</div>' if desc else ""
         free_flag = "true" if is_free else "false"
         lgbtq_attr = ' data-lgbtq="true"' if is_lgbtq_event(e) else ''
+        is_col = is_college_event(e)
+        college_attr = ' data-college="true"' if is_col else ''
+        college_tag = ""
+        if is_col:
+            col_info = get_college_info(e)
+            col_color = col_info["school_color"]
+            col_short = col_info["school_short"]
+            col_icon = col_info["type_icon"]
+            col_label = col_info["type_label"]
+            college_tag = f' <span class="college-tag" style="--col-c:{col_color}; border-color:{col_color}44; color:{col_color}; background:{col_color}14;">🎓 {escape(col_short)} · {col_icon} {escape(col_label)}</span>'
         epoch_attr = f' data-epoch="{int(t_obj.timestamp())}"' if t_obj else ''
         end_dt = trusted_end(e) if t_obj else None
         if end_dt and end_dt - t_obj <= timedelta(hours=12):
@@ -5268,10 +5919,10 @@ def render_page(results, weather=None, luckyseat_shows=None):
         return (
             f'<li class="event{hl_class}" data-id="{ev_id}" data-cat="{escape(cat)}" data-bucket="{escape(bucket)}"{genre_attr} '
             f'data-venue="{escape(source)}" data-city="{escape(city)}"{sub_attrs}{transit_attr}{tod_attr}{time_attr} '
-            f'data-recur="{recur_flag}" data-free="{free_flag}"{lgbtq_attr}{epoch_attr}{geo_attrs}{hl_attr}>'
+            f'data-recur="{recur_flag}" data-free="{free_flag}"{lgbtq_attr}{college_attr}{epoch_attr}{geo_attrs}{hl_attr}>'
             f'<div class="when">{escape(format_when(e))}</div>'
             f'<div class="what">{star_btn}{link}{price_tag}{recur_badge}{hl_badge}'
-            f'<div class="venue-tag">{cat_tag}{v_prefix}{sub_tag}{extra_html}{cal_html}</div>'
+            f'<div class="venue-tag">{cat_tag}{college_tag}{v_prefix}{sub_tag}{extra_html}{cal_html}</div>'
             f'{desc_html}{note_html}</div></li>'
         )
 
@@ -5440,6 +6091,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
         <div class="useful-inner">
           <h3>Useful links</h3>
           <div class="useful-cat useful-parents" style="margin-bottom:12px"><div class="useful-cat-head" style="color:#f27e9a"><span class="chip-icon">👪 </span>For parents</div><ul><li><a href="kids-family-events-boston/">Kids &amp; family events</a></li><li><a href="summer-camps/">Summer camps near Boston</a></li></ul></div>
+          <div class="useful-cat useful-students" style="margin-bottom:12px"><div class="useful-cat-head" style="color:#38bdf8"><span class="chip-icon">🎓 </span>For college students</div><ul><li><a href="college/">College &amp; student events (games, ballroom, hackathons)</a></li></ul></div>
           <p class="hint">Venues without a scrapable calendar.</p>
           {"".join(parts)}
         </div>'''
@@ -9222,6 +9874,10 @@ def render_page(results, weather=None, luckyseat_shows=None):
           <input type="checkbox" id="lgbtq-only-chk">
           <span><span class="chip-icon">🏳️‍🌈 </span>LGBTQ+ events only</span>
         </label>
+        <label class="college-toggle" for="college-only-chk">
+          <input type="checkbox" id="college-only-chk">
+          <span><span class="chip-icon">🎓 </span>Include college &amp; student events</span>
+        </label>
         <div class="timeframe-toggle-wrap" style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border);">
           <label class="timeframe-toggle" for="timeframe-enable-chk">
             <input type="checkbox" id="timeframe-enable-chk">
@@ -9626,6 +10282,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
     const searchCount = document.getElementById('search-count');
     const freeOnlyChk = document.getElementById('free-only-chk');
     const lgbtqOnlyChk = document.getElementById('lgbtq-only-chk');
+    const collegeOnlyChk = document.getElementById('college-only-chk');
 
     const locChips = document.querySelectorAll('#location-chips .loc-chip');
     const transitChips = document.querySelectorAll('.transit-chip');
@@ -10717,8 +11374,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
       const chkRecurs = Array.from(recurBoxes).filter(b => b.checked).length;
       const isFree = freeOnlyChk && freeOnlyChk.checked;
       const isLgbtq = lgbtqOnlyChk && lgbtqOnlyChk.checked;
+      const isCollege = collegeOnlyChk && collegeOnlyChk.checked;
       const isTimeFiltered = (timeFrom !== null || timeTo !== null);
-      const isFiltered = isCatFiltered || (chkGenres < allGenres) || (activeGenre !== 'all') || (chkVenues < allVenues) || (chkCities < allCities) || (chkRecurs < allRecurs) || isFree || isLgbtq || popularOnly || starredOnly || (activeTransit !== 'all') || isTimeFiltered || (activeSubarea !== 'all') || (searchInput && !!searchInput.value.trim());
+      const isFiltered = isCatFiltered || (chkGenres < allGenres) || (activeGenre !== 'all') || (chkVenues < allVenues) || (chkCities < allCities) || (chkRecurs < allRecurs) || isFree || isLgbtq || isCollege || popularOnly || starredOnly || (activeTransit !== 'all') || isTimeFiltered || (activeSubarea !== 'all') || (searchInput && !!searchInput.value.trim());
 
       if (mobileBadge) {{
         mobileBadge.textContent = isFiltered ? 'Active' : 'All';
@@ -10794,6 +11452,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
 
       if (freeOnlyChk && freeOnlyChk.checked) params.set('free', '1');
       if (lgbtqOnlyChk && lgbtqOnlyChk.checked) params.set('lgbtq', '1');
+      if (collegeOnlyChk && collegeOnlyChk.checked) params.set('college', '1');
       if (popularOnly) params.set('pop', '1');
       if (featuredOnly) params.set('picks', '1');
       if (starredOnly) params.set('saved', '1');
@@ -10833,6 +11492,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
         if (hasParam('q')) searchInput.value = getParam('q');
         if (getParam('free') === '1' && freeOnlyChk) freeOnlyChk.checked = true;
         if (getParam('lgbtq') === '1' && lgbtqOnlyChk) lgbtqOnlyChk.checked = true;
+        if ((getParam('college') === '1' || location.hash.indexOf('college=1') !== -1) && collegeOnlyChk) collegeOnlyChk.checked = true;
         if (getParam('pop') === '1') popularOnly = true;
         if (getParam('picks') === '1') featuredOnly = true;
         if (getParam('saved') === '1') {{
@@ -10970,6 +11630,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
       const searchText = searchInput.value.trim().toLowerCase();
       const freeOnly = freeOnlyChk ? freeOnlyChk.checked : false;
       const lgbtqOnly = lgbtqOnlyChk ? lgbtqOnlyChk.checked : false;
+      const collegeIncluded = collegeOnlyChk ? collegeOnlyChk.checked : false;
       const week = new Set(weekDates());
 
       const todayDate = parseISO(todayISO);
@@ -11087,6 +11748,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
                   timeMins: tm ? parseInt(tm, 10) : -1,
                   free: li.getAttribute('data-free') === 'true',
                   lgbtq: li.getAttribute('data-lgbtq') === 'true',
+                  college: li.getAttribute('data-college') === 'true',
                   votes: vt ? parseInt(vt, 10) : 0,
                   id: li.getAttribute('data-id') || li.getAttribute('data-event-id') || '',
                   genre: li.getAttribute('data-genre') || '',
@@ -11125,6 +11787,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
               }}
               const freeOk = !freeOnly || m.free;
               const lgbtqOk = !lgbtqOnly || m.lgbtq;
+              const collegeOk = !m.college || collegeIncluded;
               const popularOk = !popularOnly || m.votes >= 3;
               const starredOk = !starredOnly || starredEvents.has(m.id);
               const searchOk = !searchText || (m.text || (m.text = li.textContent.toLowerCase())).includes(searchText);
@@ -11155,7 +11818,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
               }}
 
               const featuredOk = !featuredOnly || m.featured;
-              const isVisible = genreOk && venueOk && recurOk && subareaOk && transitOk && todOk && searchOk && freeOk && lgbtqOk && timePastOk && popularOk && starredOk && featuredOk;
+              const isVisible = genreOk && venueOk && recurOk && subareaOk && transitOk && todOk && searchOk && freeOk && lgbtqOk && collegeOk && timePastOk && popularOk && starredOk && featuredOk;
 
               const isHidden = !isVisible;
               if (m.hidden !== isHidden) {{
@@ -11638,6 +12301,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
 
     if (freeOnlyChk) freeOnlyChk.addEventListener('change', apply);
     if (lgbtqOnlyChk) lgbtqOnlyChk.addEventListener('change', apply);
+    if (collegeOnlyChk) collegeOnlyChk.addEventListener('change', apply);
     catBoxes.forEach(b => b.addEventListener('change', () => {{
       if (b.value === 'Music & nightlife') {{
         const musicChecked = b.checked;
@@ -11770,6 +12434,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
       if (searchInput) searchInput.value = '';
       if (freeOnlyChk) freeOnlyChk.checked = false;
       if (lgbtqOnlyChk) lgbtqOnlyChk.checked = false;
+      if (collegeOnlyChk) collegeOnlyChk.checked = false;
       popularOnly = false;
       featuredOnly = false;
       starredOnly = false;

@@ -11107,6 +11107,131 @@ _NEU_TECH_DEPT_RE = re.compile(
     r"Network Science|Data Science|Bioengineering|Mechanical|Electrical)\b", re.I)
 
 
+_COLLEGIATE_HOME_VENUES = [
+    ("Agganis Arena", "BU / Allston"),
+    ("Case Gym", "BU / Allston"),
+    ("Nickerson Field", "BU / Allston"),
+    ("Walter Brown Arena", "BU / Allston"),
+    ("Conte Forum", "Chestnut Hill / Brighton"),
+    ("Alumni Stadium", "Chestnut Hill / Brighton"),
+    ("Kelley Rink", "Chestnut Hill / Brighton"),
+    ("Cabot Center", "Fenway / Northeastern"),
+    ("Matthews Arena", "Fenway / Northeastern"),
+    ("Parsons Field", "Brookline"),
+    ("Cousens Gymnasium", "Medford / Tufts"),
+    ("Ellis Oval", "Medford / Tufts"),
+    ("Gantcher Center", "Medford / Tufts"),
+    ("TD Garden", "Downtown Boston"),
+]
+
+
+def scrape_college_athletics(url, ua):
+    """Scrape and parse college athletic schedules (BU, BC, Northeastern, Tufts Sidearm feeds).
+
+    Keeps home games and games in Greater Boston, filtering out distant away games.
+    """
+    raw_events = scrape_ical(url, ua)
+    kept = []
+    seen = set()
+
+    for e in raw_events:
+        raw_name = e.get("name") or ""
+        clean_name = re.sub(r"^\[[WLTPN]\]\s*", "", raw_name).strip()
+        loc = (e.get("location") or "").replace(r"\,", ",")
+        desc = (e.get("description") or "").replace(r"\,", ",")
+        combined = f"{clean_name} {loc} {desc}".lower()
+
+        # Reject away games in distant cities / other states
+        if any(away in loc.lower() for away in [
+            "conn.", "n.y.", " ny", " nh", "pa.", "penn", "rhode island", " ri",
+            "worcester", "vermont", "maine", "calif", "va.", "virginia", "ohio", "texas", "indiana"
+        ]):
+            continue
+
+        # Keep if home game, vs local rivalry, or in Greater Boston
+        is_home = (
+            " vs " in clean_name or " vs. " in clean_name or
+            any(v[0].lower() in combined for v in _COLLEGIATE_HOME_VENUES) or
+            any(c in loc.lower() for c in ["boston", "chestnut hill", "cambridge", "medford", "newton", "allston", "brighton", "dedham"])
+        )
+        if not is_home:
+            continue
+
+        matched_v = None
+        for vname, _ in _COLLEGIATE_HOME_VENUES:
+            if vname.lower() in combined:
+                matched_v = vname
+                break
+
+        key = (clean_name.lower(), (e.get("date") or "")[:10])
+        if key in seen:
+            continue
+        seen.add(key)
+
+        entry = dict(e)
+        entry["name"] = clean_name
+        if matched_v:
+            entry["venue"] = matched_v
+        entry["category"] = "sports"
+        kept.append(entry)
+
+    return kept
+
+
+def scrape_localist(url, ua):
+    """Generic Localist API scraper (MIT, Boston College, etc.)."""
+    try:
+        r = _SESSION.get(url, headers={"User-Agent": ua or UA_CHROME}, timeout=10)
+        r.raise_for_status()
+        data = r.json()
+    except Exception:
+        return []
+
+    events = []
+    seen = set()
+    for it in data.get("events", []):
+        ev = it.get("event", {})
+        title = ev.get("title")
+        if not title or is_placeholder_or_closed_event(title):
+            continue
+        instances = ev.get("event_instances", [])
+        if not instances:
+            continue
+        inst = instances[0].get("event_instance", {})
+        start_str = inst.get("start")
+        if not start_str:
+            continue
+
+        try:
+            dt = datetime.fromisoformat(start_str).astimezone(timezone.utc)
+            iso_date = dt.isoformat()
+        except Exception:
+            continue
+
+        loc = ev.get("location_name") or "Campus"
+        ev_url = ev.get("localist_url") or url
+        key = (title.lower(), iso_date[:10])
+        if key in seen:
+            continue
+        seen.add(key)
+
+        entry = {
+            "name": html.unescape(title).strip()[:160],
+            "date": iso_date,
+            "url": ev_url,
+            "venue": loc[:80],
+            "price": "Free" if ev.get("free") else None,
+            "description": (ev.get("description_text") or "")[:200],
+        }
+        depts = " ".join(t.get("name") or "" for t in (ev.get("filters") or {}).get("departments") or [])
+        if _NEU_TECH_DEPT_RE.search(depts) or TECH_EVENT_RE.search(entry["name"]) or re.search(r"(?i)\bstem\b|\bdata\b|\bcomputing\b|\brobotics\b", entry["name"]):
+            entry["category"] = "tech"
+        elif re.search(r"(?i)\bconcert\b|\brecital\b|\borchestra\b|\bjazz\b|\bchoir\b", entry["name"]):
+            entry["category"] = "music"
+        events.append(entry)
+    return events
+
+
 PARTIFUL_SOURCES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "partiful_sources.json")
 
 
@@ -12525,10 +12650,14 @@ _ALL_VENUES = [
     {"name": "Make Friends After College (via Eventbrite)", "url": "https://www.eventbrite.com/o/make-friends-after-college-98390790901", "ua": UA_CHROME, "scraper": scrape_eventbrite_org, "default_category": "community"},
     {"name": "The Boston Calendar", "url": "https://www.thebostoncalendar.com/events", "ua": UA_CHROME, "scraper": scrape_boston_calendar, "default_category": None},
     {"name": "City Winery Boston", "url": "https://citywinery.com/pages/locations/boston", "ua": UA_CHROME, "scraper": scrape_city_winery, "default_category": "music"},
-    {"name": "Bowery Presents Boston", "url": "https://www.bowerypresents.com/boston", "ua": UA_CHROME, "scraper": scrape_bowery_boston, "default_category": "music"},
     {"name": "Royale Boston", "url": "https://www.royaleboston.com/events/", "ua": UA_CHROME, "scraper": scrape_royale, "default_category": "clubbing"},
-    {"name": "MIT Events", "url": "https://calendar.mit.edu/", "ua": UA_CHROME, "scraper": scrape_jsonld, "default_category": "community"},
     {"name": "Boston Symphony Orchestra", "url": "https://www.bso.org/events", "ua": UA_CHROME, "scraper": scrape_bso, "default_category": "music"},
+    {"name": "MIT Events", "url": "https://calendar.mit.edu/api/2/events?days=30&pp=50", "ua": UA_CHROME, "scraper": scrape_localist, "default_category": "community"},
+    {"name": "Boston College Events", "url": "https://events.bc.edu/api/2/events?days=30&pp=50", "ua": UA_CHROME, "scraper": scrape_localist, "default_category": "community"},
+    {"name": "BU Terriers Athletics", "url": "https://goterriers.com/calendar.ashx/calendar.ics", "ua": UA_CHROME, "scraper": scrape_college_athletics, "default_category": "sports"},
+    {"name": "Northeastern Huskies Athletics", "url": "https://nuhuskies.com/calendar.ashx/calendar.ics", "ua": UA_CHROME, "scraper": scrape_college_athletics, "default_category": "sports"},
+    {"name": "Boston College Eagles Athletics", "url": "https://bceagles.com/calendar.ashx/calendar.ics", "ua": UA_CHROME, "scraper": scrape_college_athletics, "default_category": "sports"},
+    {"name": "Tufts Jumbos Athletics", "url": "https://gotuftsjumbos.com/calendar.ashx/calendar.ics", "ua": UA_CHROME, "scraper": scrape_college_athletics, "default_category": "sports"},
     {"name": "Venture Café Cambridge", "url": "https://community.venturecafecambridge.org/", "ua": UA_CHROME, "scraper": scrape_venture_cafe, "default_category": "community"},
     {"name": "The Anchor Boston", "url": "https://calendar.google.com/calendar/ical/theanchorbostonma%40gmail.com/public/basic.ics", "ua": UA_CHROME, "scraper": scrape_ical, "default_category": "community"},
     {"name": "Artisans Asylum", "url": "https://www.eventbrite.com/o/artisans-asylum-inc-18841526871", "ua": UA_CHROME, "scraper": scrape_eventbrite_org, "default_category": "community"},
