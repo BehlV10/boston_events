@@ -5439,6 +5439,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
             useful_block = f'''
         <div class="useful-inner">
           <h3>Useful links</h3>
+          <div class="useful-cat useful-parents" style="margin-bottom:12px"><div class="useful-cat-head" style="color:#f27e9a"><span class="chip-icon">👪 </span>For parents</div><ul><li><a href="kids-family-events-boston/">Kids &amp; family events</a></li><li><a href="summer-camps/">Summer camps near Boston</a></li></ul></div>
           <p class="hint">Venues without a scrapable calendar.</p>
           {"".join(parts)}
         </div>'''
@@ -5820,10 +5821,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
   .pill-weather {{ display: inline-flex; align-items: center; gap: 4px; font-weight: 600; color: #fff; }}
   .weather-label {{ font-weight: 400; color: var(--muted); }}
   .pill-dot {{ color: var(--muted); opacity: 0.6; }}
-  .banner-parents-pill {{ margin-top: 6px; }}
-  .banner-parents-pill .parents-label {{ opacity: 0.8; }}
-  .banner-parents-pill a {{ color: inherit; font-weight: 700; text-decoration: none; border-bottom: 1px dotted currentColor; }}
-  .banner-parents-pill a:hover {{ border-bottom-style: solid; }}
   .pill-submit-btn {{
     display: inline-flex;
     align-items: center;
@@ -9189,12 +9186,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle;"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
         </a>
       </div>
-      <nav class="banner-meta-pill banner-parents-pill" aria-label="For parents">
-        <span class="parents-label">👪 For parents:</span>
-        <a href="kids-family-events-boston/">Kids &amp; Family</a>
-        <span class="pill-dot">·</span>
-        <a href="summer-camps/">Summer Camps</a>
-      </nav>
     </div>
   </div>
   {fail_banner}

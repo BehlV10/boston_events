@@ -1,7 +1,7 @@
 """SEO and reach for the parent pages (Nov 2026).
 
 - sitemap.xml is written every build with a real lastmod (Google ignores changefreq/priority).
-- The home page links both parent pages near the top, not only in the footer directory.
+- The home page links both parent pages at the top of Useful links, not only in the footer directory.
 - The Kids page carries two weeks; later days are in later.html, loaded on scroll, the button or
   any filter (checked in Chrome: 686 cards at load, 943 after scroll / Free / a week-3 chip / a
   #when= link, no errors). Page: 92 -> 73 KB gzipped, 948 -> 686 cards.
@@ -72,12 +72,13 @@ class KidsLaterDaysTest(unittest.TestCase):
 
 
 class HomeAndCampsTest(unittest.TestCase):
-    def test_home_links_parent_pages_in_hero(self):
+    def test_home_links_parent_pages_in_useful_links(self):
         with patch("template._load_community_events", return_value=[]):
             html = T.render_page([])
-        nav = re.search(r'<nav class="banner-meta-pill banner-parents-pill".*?</nav>', html, re.S).group(0)
-        self.assertIn('href="kids-family-events-boston/"', nav)
-        self.assertIn('href="summer-camps/"', nav)
+        box = re.search(r'<div class="useful-cat useful-parents"[^>]*>.*?</ul></div>', html, re.S).group(0)
+        self.assertIn('href="kids-family-events-boston/"', box)
+        self.assertIn('href="summer-camps/"', box)
+        self.assertNotIn("banner-parents-pill", html)  # not in the hero
 
     def test_camps_heading_names_the_summer(self):
         self.assertEqual(T._camp_summer_year(date(2026, 11, 9)), 2027)
