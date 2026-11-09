@@ -13439,41 +13439,56 @@ def fetch_boston_weather():
     return out
 
 
-LUCKYSEAT_FALLBACK_SHOWS = [
+LUCKYSEAT_FALLBACK_SHOWS = [  # as of Nov 9 2026; each drops off at its lottery's close time
     {
-        "name": "Hadestown",
+        "name": "Dirty Dancing: The Musical",
         "venue": "Emerson Colonial Theatre",
         "price": 45.0,
-        "url": "https://www.luckyseat.com/shows/hadestown-boston-2026Oct",
+        "url": "https://www.luckyseat.com/shows/dirtydancingthemusical-boston-2026Nov",
+        "closes": "2026-11-17T00:00:00Z",
     },
     {
         "name": "Late Nite Catechism: Til Death Do Us Part",
         "venue": "Charles Playhouse",
         "price": 35.0,
         "url": "https://www.luckyseat.com/shows/latenitecatechism-boston-2026Oct",
+        "closes": "2026-11-18T00:00:00Z",
     },
     {
-        "name": "Rocky™ in Concert",
-        "venue": "Emerson Colonial Theatre",
-        "price": 30.0,
-        "url": "https://www.luckyseat.com/shows/rockyinconcert-boston-2026Oct",
-    },
-    {
-        "name": "Wicked",
-        "venue": "Citizens Opera House",
-        "price": 40.0,
-        "url": "https://www.luckyseat.com/shows/wicked-boston-2026Sep",
+        "name": "The Sound of Music",
+        "venue": "Boch Center - Wang Theatre",
+        "price": 49.0,
+        "url": "https://www.luckyseat.com/shows/thesoundofmusic-boston-2026Oct",
+        "closes": "2026-11-14T00:00:00Z",
     },
     {
         "name": "The Getaway Driver",
         "venue": "Central Square Theater",
         "price": 49.0,
         "url": "https://www.luckyseat.com/shows/thegetawaydriver-cambridge-2026Sep",
+        "closes": "2026-11-17T00:00:00Z",
     },
 ]
 
 LUCKYSEAT_CACHE_FILE = os.path.join(CACHE_DIR, "luckyseat_shows.json")
 LUCKYSEAT_COMMITTED_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "luckyseat_shows.json")
+
+
+def luckyseat_open(shows, now=None):
+    """Lotteries still taking entries: a close time ("closes", from the API's closeTime) still ahead.
+    A saved or fallback list can't outlive its shows that way (Hadestown stayed listed for weeks
+    after its run, Nov 2026, because GitHub's runners get blocked by the API and the old saved list
+    was reused every day). Entries without a close time are from before it was recorded: dropped."""
+    now = now or datetime.now(timezone.utc)
+    out = []
+    for s in shows if isinstance(shows, list) else []:
+        try:
+            closes = datetime.fromisoformat(str(s.get("closes") or "").replace("Z", "+00:00"))
+        except ValueError:
+            continue
+        if closes.tzinfo and closes > now:
+            out.append(s)
+    return out
 
 
 def fetch_luckyseat_boston():
@@ -13487,8 +13502,8 @@ def fetch_luckyseat_boston():
         if os.path.exists(candidate_path):
             try:
                 with open(candidate_path, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                    if isinstance(data, list) and len(data) > 0:
+                    data = luckyseat_open(json.load(f))
+                    if data:
                         disk_data = data
                         break
             except Exception:
@@ -13526,7 +13541,9 @@ def fetch_luckyseat_boston():
                     "venue": s.get("eventLocation"),
                     "price": s.get("priceAndFeesTotal"),
                     "url": f"https://www.luckyseat.com/shows/{s.get('showAlias')}" if s.get("showAlias") else "https://www.luckyseat.com/",
+                    "closes": s.get("closeTime"),
                 })
+            shows = luckyseat_open(shows)
             if shows:
                 for save_path in (LUCKYSEAT_CACHE_FILE, LUCKYSEAT_COMMITTED_FILE):
                     try:
@@ -13538,22 +13555,24 @@ def fetch_luckyseat_boston():
     except Exception:
         pass
 
-    if not shows and disk_data:
+    if shows:
+        print(f"LuckySeat: {len(shows)} open Boston-area lotteries from the API")
+    elif disk_data:
         shows = disk_data
+        print(f"LuckySeat: API unavailable; using saved list ({len(shows)} still open)")
 
     if not shows:
         try:
             events_json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "events.json")
             if os.path.exists(events_json_path):
                 with open(events_json_path, "r", encoding="utf-8") as f:
-                    candidate = json.load(f).get("luckyseat")
-                    if isinstance(candidate, list) and len(candidate) > 0:
-                        shows = candidate
+                    shows = luckyseat_open(json.load(f).get("luckyseat"))
         except Exception:
             pass
 
     if not shows:
-        shows = list(LUCKYSEAT_FALLBACK_SHOWS)
+        shows = luckyseat_open(LUCKYSEAT_FALLBACK_SHOWS)
+        print(f"LuckySeat: no live or saved list; built-in fallback ({len(shows)} still open)")
 
     _luckyseat_cache["data"] = shows
     _luckyseat_cache["ts"] = time.time()

@@ -22,6 +22,7 @@ from scrapers import (
     infer_music_genre,
     fetch_boston_weather,
     fetch_luckyseat_boston,
+    luckyseat_open,
     _load_community_events,
     is_placeholder_or_closed_event,
     is_service_ad,
@@ -5210,7 +5211,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
     useful_sidebar = ""
     if STATIC_LINKS or DEAL_LINKS:
         deals_block = ""
-        lucky_shows = luckyseat_shows if (luckyseat_shows and len(luckyseat_shows) > 0) else fetch_luckyseat_boston()
+        lucky_shows = luckyseat_open(luckyseat_shows) or fetch_luckyseat_boston()
         if DEAL_LINKS or lucky_shows:
             lucky_html = ""
             if lucky_shows:
