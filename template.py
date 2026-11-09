@@ -9953,6 +9953,31 @@ def render_page(results, weather=None, luckyseat_shows=None):
         repositionPastBanner();
         updateDayHeadings();
         apply();
+        refreshIfStale(true);  // a new day: the events below may be from yesterday's build
+      }}
+    }}
+
+    // A tab brought back hours or days later (phone tab switcher, back/forward cache, home-screen app)
+    // still holds the copy it loaded back then. On return, ask the server whether the site has been
+    // redeployed since (its Last-Modified vs this copy's) and reload if so. Filters live in the URL, so
+    // they survive. Offline or no header: keep what's on screen.
+    const PAGE_OPENED_AT = Date.now();
+    let pageHiddenAt = null;
+    let freshCheckBusy = false;
+    async function refreshIfStale(force) {{
+      if (freshCheckBusy || !/^https?:$/.test(location.protocol)) return;
+      const away = pageHiddenAt ? Date.now() - pageHiddenAt : 0;
+      if (!force && Date.now() - PAGE_OPENED_AT < 60 * 60 * 1000 && away < 30 * 60 * 1000) return;
+      freshCheckBusy = true;
+      try {{
+        const res = await fetch(location.pathname, {{ method: 'HEAD', cache: 'no-store' }});
+        const live = Date.parse(res.headers.get('last-modified') || '');
+        const mine = Date.parse(document.lastModified);
+        if (res.ok && live && mine && live - mine > 60 * 1000) location.reload();
+      }} catch (e) {{
+        /* offline */
+      }} finally {{
+        freshCheckBusy = false;
       }}
     }}
 
@@ -12161,6 +12186,18 @@ def render_page(results, weather=None, luckyseat_shows=None):
     document.addEventListener('visibilitychange', () => {{
       if (document.visibilityState === 'visible') {{
         checkDayRollover();
+        refreshIfStale(false);
+        pageHiddenAt = null;
+      }} else {{
+        pageHiddenAt = Date.now();
+      }}
+    }});
+
+    // Restored from the back/forward cache: no load event, and timers were frozen while away.
+    window.addEventListener('pageshow', (ev) => {{
+      if (ev.persisted) {{
+        checkDayRollover();
+        refreshIfStale(true);
       }}
     }});
 
