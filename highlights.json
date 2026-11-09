@@ -1,5 +1,15 @@
 [
   {
+    "id": "weekly-light-game-night-google-cambridge",
+    "match": {
+      "name_contains": "Light Game Night",
+      "venue_contains": "Google Cambridge"
+    },
+    "badge": "\ud83c\udfb2 Weekly Pick",
+    "note": "Free board game night with a huge game library and 30+ players most weeks, in the public lobby of Google's Kendall building. Open to anyone; alternates Mondays and Thursdays.",
+    "start_date": "2026-11-09"
+  },
+  {
     "id": "2026-11-13-lego-adult",
     "match": {
       "name_contains": "Adult Night",
