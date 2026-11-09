@@ -3,6 +3,7 @@
 import hashlib
 import json
 import os
+import shutil
 import re
 import unicodedata
 from collections import defaultdict
@@ -5166,14 +5167,20 @@ def render_page(results, weather=None, luckyseat_shows=None):
           <div class="cities">{"".join(city_blocks)}</div>
         </section>'''
 
+    # The first three days are in the page. Later days load on demand: one small file per day
+    # (days/<date>.html, ~70 KB gzipped) for day and week views, and every later day in one file
+    # (deferred_days.html) for "all", search, date ranges and saved lists.
     initial_sections = []
     deferred_sections = []
+    deferred_by_date = []
     for idx, (date_obj, events) in enumerate(dated):
         sec_html = _render_day_section(escape(format_date_heading(date_obj)), events, date_obj.isoformat())
         if idx < 3:
             initial_sections.append(sec_html)
         else:
             deferred_sections.append(sec_html)
+            deferred_by_date.append((date_obj.isoformat(), sec_html))
+    deferred_dates_json = json.dumps([d for d, _ in deferred_by_date])
     # Museum shows have no day of their own: keep them near the top rather than after every date
     on_view = [e for e in tba if e.get("_exhibition")]
     undated = [e for e in tba if not e.get("_exhibition")]
@@ -5188,6 +5195,13 @@ def render_page(results, weather=None, luckyseat_shows=None):
         base_dir = os.path.dirname(os.path.abspath(__file__))
         with open(os.path.join(base_dir, "deferred_days.html"), "w", encoding="utf-8") as f:
             f.write(deferred_content)
+        # Rewritten from scratch each build, so days that have passed don't pile up
+        days_dir = os.path.join(base_dir, "days")
+        shutil.rmtree(days_dir, ignore_errors=True)
+        os.makedirs(days_dir, exist_ok=True)
+        for iso, sec_html in deferred_by_date:
+            with open(os.path.join(days_dir, f"{iso}.html"), "w", encoding="utf-8") as f:
+                f.write(sec_html)
     except Exception:
         pass
 
@@ -9169,6 +9183,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
       </div>
       {"".join(initial_sections)}
       <template id="deferred-days"></template>
+      <div id="days-loading" class="no-events-msg days-loading" style="display: none;" role="status"><p>Loading events…</p></div>
       <div class="week-nav bottom">
         <button type="button" id="week-prev-b" aria-label="Previous week">← prev</button>
         <span id="week-label-b"></span>
@@ -9782,66 +9797,80 @@ def render_page(results, weather=None, luckyseat_shows=None):
     const ALL_EVENT_DATES = {json.dumps(all_event_dates)};
     const eventDates = new Set(ALL_EVENT_DATES);
 
-    let deferredHydrated = false;
+    // Days after the first three aren't in the page. Day and week views fetch just the days they
+    // show (days/<date>.html); "all", search, date ranges and saved lists fetch every later day at
+    // once (deferred_days.html). DEFERRED_DATES says which days have a file.
+    const DEFERRED_DATES = new Set({deferred_dates_json});
+    const dayLoads = new Map();  // date -> fetch promise
+    let deferredHydrated = DEFERRED_DATES.size === 0;
     let deferredHydrationPromise = null;
+
+    function hasDay(date) {{
+      return !!document.querySelector(`.day[data-date="${{date}}"]`);
+    }}
+
+    // Insert fetched day sections in date order; a day already on the page is skipped.
+    function insertDaySections(html) {{
+      const bottomNav = document.querySelector('.week-nav.bottom');
+      if (!html || !bottomNav || !bottomNav.parentNode) return;
+      const box = document.createElement('div');
+      box.innerHTML = html;
+      Array.from(box.children).forEach(sec => {{
+        const date = sec.dataset ? sec.dataset.date : '';
+        if (date && date !== 'tba' && hasDay(date)) return;
+        let before = bottomNav;
+        if (date && date !== 'tba') {{
+          const later = Array.from(document.querySelectorAll('.day[data-date]'))
+            .find(d => d.dataset.date !== 'tba' && d.dataset.date > date);
+          if (later) before = later;
+        }}
+        before.parentNode.insertBefore(sec, before);
+      }});
+      daySections = Array.from(document.querySelectorAll('.day[data-date]'));
+      updateDayHeadings();
+      if (starredEvents && starredEvents.size > 0) {{
+        loadStarredState();
+      }}
+    }}
+
+    // Fetch the given days (those not on the page or already coming); resolves once they're in.
+    function loadDays(dates) {{
+      const want = dates.filter(d => DEFERRED_DATES.has(d) && !hasDay(d) && !dayLoads.has(d));
+      want.forEach(d => {{
+        dayLoads.set(d, fetch(`days/${{d}}.html`).then(r => (r.ok ? r.text() : '')).catch(() => ''));
+      }});
+      if (!want.length) return Promise.all(dates.map(d => dayLoads.get(d)).filter(Boolean));
+      return Promise.all(want.map(d => dayLoads.get(d))).then(htmls => {{
+        htmls.forEach(insertDaySections);
+        if (htmls.some(h => !h)) ensureDeferredDaysHydrated();  // a day file missing: load them all
+        apply();
+      }});
+    }}
+
     function ensureDeferredDaysHydrated(callback) {{
       if (deferredHydrated) {{
         if (callback) callback();
         return;
       }}
-      const tmpl = document.getElementById('deferred-days');
-      if (tmpl && tmpl.content && tmpl.content.childNodes.length > 0) {{
-        const bottomNav = document.querySelector('.week-nav.bottom');
-        if (bottomNav && bottomNav.parentNode) {{
-          bottomNav.parentNode.insertBefore(tmpl.content, bottomNav);
-        }}
-        tmpl.remove();
-        daySections = Array.from(document.querySelectorAll('.day[data-date]'));
-        updateDayHeadings();
-        if (starredEvents && starredEvents.size > 0) {{
-          loadStarredState();
-        }}
-        deferredHydrated = true;
-        if (callback) callback();
-        return;
-      }}
-
       if (!deferredHydrationPromise) {{
         deferredHydrationPromise = fetch('deferred_days.html')
-          .then(r => r.ok ? r.text() : '')
-          .then(html => {{
-            if (html) {{
-              const div = document.createElement('div');
-              div.innerHTML = html;
-              const bottomNav = document.querySelector('.week-nav.bottom');
-              if (bottomNav && bottomNav.parentNode) {{
-                while (div.firstChild) {{
-                  bottomNav.parentNode.insertBefore(div.firstChild, bottomNav);
-                }}
-              }}
-              daySections = Array.from(document.querySelectorAll('.day[data-date]'));
-              updateDayHeadings();
-              if (starredEvents && starredEvents.size > 0) {{
-                loadStarredState();
-              }}
-            }}
+          .then(r => (r.ok ? r.text() : ''))
+          .then(html => insertDaySections(html))
+          .catch(() => {{}})
+          .then(() => {{
             deferredHydrated = true;
             apply();
-            if (callback) callback();
-          }})
-          .catch(err => {{
-            deferredHydrated = true;
-            if (callback) callback();
           }});
-      }} else {{
-        deferredHydrationPromise.then(() => {{ if (callback) callback(); }});
       }}
+      deferredHydrationPromise.then(() => {{ if (callback) callback(); }});
     }}
 
+    // Once the page is idle, fetch the next week's later days so paging ahead is instant.
+    const prefetchSoon = () => loadDays(Array.from(DEFERRED_DATES).sort().slice(0, 7));
     if ('requestIdleCallback' in window) {{
-      requestIdleCallback(() => ensureDeferredDaysHydrated(), {{ timeout: 1500 }});
+      requestIdleCallback(prefetchSoon, {{ timeout: 2500 }});
     }} else {{
-      setTimeout(() => ensureDeferredDaysHydrated(), 800);
+      setTimeout(prefetchSoon, 1500);
     }}
     function parseISO(s) {{ const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); }}
     function fmtISO(d) {{
@@ -10780,30 +10809,28 @@ def render_page(results, weather=None, luckyseat_shows=None):
       const tomorrowISO = fmtISO(addDays(todayDate, 1));
       const anchorISO = fmtISO(anchor);
 
-      // Hydrate deferred days if needed
-      let needsHydration = (
-        timeFilter === 'all' ||
-        showAll ||
-        searchText.length > 0
-      );
-      if (!needsHydration) {{
-        if (starredOnly) {{
-          needsHydration = Array.from(starredEvents).some(id => !document.querySelector(`.event[data-id="${{id}}"]`));
-        }} else if (timeFilter === 'range' && rangeStart && rangeEnd) {{
-          needsHydration = true;
-        }} else if (timeFilter === 'day') {{
-          needsHydration = !daySections.some(d => d.dataset.date === anchorISO);
-        }} else if (timeFilter === 'week') {{
-          for (const wDate of week) {{
-            if (!daySections.some(d => d.dataset.date === wDate)) {{
-              needsHydration = true;
-              break;
-            }}
-          }}
+      // Load the later days this view needs. Until they arrive, "Loading events…" replaces
+      // "No events found".
+      let viewLoading = false;
+      const needsAllDays = timeFilter === 'all' || showAll || searchText.length > 0 ||
+        (timeFilter === 'range' && rangeStart && rangeEnd) ||
+        (starredOnly && Array.from(starredEvents).some(id => !document.querySelector(`.event[data-id="${{id}}"]`)));
+      if (needsAllDays) {{
+        if (!deferredHydrated) {{
+          ensureDeferredDaysHydrated();
+          viewLoading = true;
         }}
-      }}
-      if (needsHydration) {{
-        ensureDeferredDaysHydrated();
+      }} else if (!deferredHydrated) {{
+        let viewDates = [todayISO];
+        if (timeFilter === 'week') viewDates = Array.from(week);
+        else if (timeFilter === 'day') viewDates = [anchorISO];
+        else if (timeFilter === 'tomorrow') viewDates = [tomorrowISO];
+        else if (timeFilter === 'weekend') viewDates = [satISO, sunISO];
+        const missing = viewDates.filter(d => DEFERRED_DATES.has(d) && !hasDay(d));
+        if (missing.length) {{
+          loadDays(missing);
+          viewLoading = true;
+        }}
       }}
 
       const nowEpoch = Math.floor(Date.now() / 1000);
@@ -11129,7 +11156,11 @@ def render_page(results, weather=None, luckyseat_shows=None):
       const visibleDays = activeDays.filter(d => !d.classList.contains('empty')).length;
       const noEventsEl = document.getElementById('no-events-msg');
       if (noEventsEl) {{
-        noEventsEl.style.display = (visibleDays === 0) ? 'block' : 'none';
+        noEventsEl.style.display = (visibleDays === 0 && !viewLoading) ? 'block' : 'none';
+      }}
+      const daysLoadingEl = document.getElementById('days-loading');
+      if (daysLoadingEl) {{
+        daysLoadingEl.style.display = viewLoading ? 'block' : 'none';
       }}
 
       renderCal();
