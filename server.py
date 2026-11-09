@@ -121,6 +121,11 @@ def deferred_days_html():
     return send_from_directory(os.path.dirname(os.path.abspath(__file__)), "deferred_days.html")
 
 
+@app.get("/days/<path:name>")
+def day_file(name):
+    return send_from_directory(os.path.join(os.path.dirname(os.path.abspath(__file__)), "days"), name)
+
+
 @app.get("/<hub_slug>")
 @app.get("/<hub_slug>/")
 def hub_page(hub_slug):
