@@ -88,6 +88,19 @@ class ListingFixes(unittest.TestCase):
         self.assertEqual(scrapers.datetime.fromisoformat(monday["end"]).astimezone(scrapers.EASTERN).strftime("%a %H:%M"), "Mon 20:00")
         self.assertEqual(scrapers.datetime.fromisoformat(saturday["end"]).astimezone(scrapers.EASTERN).strftime("%a %H:%M"), "Sat 21:00")
 
+    def test_light_game_night_is_free_board_games_at_google(self):
+        # Meetup gives only "325 Main St" and no price; "Game Night" alone read as sports
+        for source in ("Beantown Gamers", "Meetup Boston (by topic)"):
+            e = self.fixed(source, name="Light Game Night (Thursday)", date="2026-11-13T00:00:00+00:00",
+                           venue="325 Main St (Cambridge)", category="sports")
+            self.assertEqual((e["category"], e["venue"], e["price"]),
+                             ("gaming", "Google Cambridge (325 Main St lobby)", "Free"))
+        e["_time"] = scrapers.datetime.fromisoformat(e["date"])
+        import template
+        hl = template._get_event_highlight(e, template._load_highlights())
+        self.assertEqual(hl["id"], "weekly-light-game-night-google-cambridge")
+        self.assertIn("board game", hl["note"])
+
     def test_book_fair_price_follows_the_day(self):
         friday = self.fixed("The Boston Calendar", name="Boston International Antiquarian Book Fair",
                             date="2026-11-06T21:00:00+00:00", venue="Hynes Convention Center", price="$10")

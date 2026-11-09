@@ -14034,6 +14034,10 @@ _LISTING_FIXES = (
     ("magician peter o'malley", "boston public market", None, {"price": "Free"}),
     ("beyond the spectrum kids", "museum of fine arts", None, {"price": "Free"}),
     ("snowport", "do617", None, {"hours": _SNOWPORT_OPENS}),
+    # Beantown Gamers' free board game night, in the public main lobby of Google's Kendall building;
+    # Meetup gives only the street address and no price
+    ("light game night", "325 main st", None, {"venue": "Google Cambridge (325 Main St lobby)", "price": "Free",
+                                               "category": "gaming"}),
     ("sowa first friday", "", None, {"url": "https://www.sowaboston.com/first-fridays"}),
     ("the great pumpkin smash", "english high", "2026-11-07",
      {"hm": (11, 0), "url": "https://www.boston.gov/calendar/pumpkin-smash",
