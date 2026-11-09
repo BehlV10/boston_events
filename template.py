@@ -1715,6 +1715,7 @@ _KIDS_CSS = """
   .kid-k-story { --band: #fff1b8; } .kid-k-music { --band: #e7dcff; } .kid-k-nature { --band: #d4f3e1; }
   .kid-k-make { --band: #ffe0cf; } .kid-k-show { --band: #ffd6e6; } .kid-k-play { --band: #d6eefc; } .kid-k-other { --band: #f1e6d4; }
   .kids-hub .no-hub-events { text-align: center; color: var(--muted); font-size: 16px; padding: 30px 0; }
+  .kids-hub .kids-later { text-align: center; margin: 28px 0 8px; }
   .kids-hub footer { border-top: 2px dashed #e7d8bf; }
   @media (max-width: 640px) {
     .kids-hub header {
@@ -1740,6 +1741,8 @@ _KIDS_CSS = """
 _KIDS_FILTER_JS = """<script>
 (function () {
   var cards = document.querySelectorAll('.hub-card');
+  var laterBox = document.getElementById('kids-later');
+  var laterDays = laterBox ? JSON.parse(laterBox.dataset.days || '[]') : [];
   // The When buttons are made here, not in the page, so "Today" and the week labels stay right
   // on a page built days ago. Weeks run Monday to Sunday and dates are Boston's.
   var ranges = {};
@@ -1758,7 +1761,7 @@ _KIDS_FILTER_JS = """<script>
       if (a === b) return month(a) + ' ' + dayNum(a);
       return month(a) + ' ' + dayNum(a) + '–' + (month(a) === month(b) ? '' : month(b) + ' ') + dayNum(b);
     }
-    var days = [];
+    var days = laterDays.slice();
     cards.forEach(function (c) { if (c.dataset.day) days.push(c.dataset.day); });
     if (!days.length) return;
     var last = days.reduce(function (a, b) { return a > b ? a : b; });
@@ -1792,6 +1795,35 @@ _KIDS_FILTER_JS = """<script>
   if (!chips.length) return;
   var heads = document.querySelectorAll('.hub-day');
   var citySecs = document.querySelectorAll('.kid-city-section');
+  // Later days (past the first two weeks) load once: near the bottom of the list, on the button,
+  // or as soon as a filter is used, so filtered results are complete.
+  var laterLoad = null;
+  function loadLater() {
+    if (!laterBox) return Promise.resolve();
+    if (!laterLoad) {
+      var btn = laterBox.querySelector('button');
+      if (btn) { btn.disabled = true; btn.textContent = 'Loading more dates…'; }
+      laterLoad = fetch(laterBox.dataset.src).then(function (r) { return r.ok ? r.text() : ''; }).then(function (html) {
+        if (!html) { if (btn) { btn.disabled = false; btn.textContent = 'Show more dates →'; } laterLoad = null; return; }
+        laterBox.insertAdjacentHTML('beforebegin', html);
+        laterBox.remove();
+        laterBox = null;
+        cards = document.querySelectorAll('.hub-card');
+        heads = document.querySelectorAll('.hub-day');
+        citySecs = document.querySelectorAll('.kid-city-section');
+        render(false);
+      }).catch(function () { laterLoad = null; });
+    }
+    return laterLoad;
+  }
+  if (laterBox) {
+    laterBox.querySelector('button').addEventListener('click', loadLater);
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (es, obs) {
+        if (es.some(function (e) { return e.isIntersecting; })) { obs.disconnect(); loadLater(); }
+      }, { rootMargin: '1200px 0px' }).observe(laterBox);
+    }
+  }
   var state = { when: 'all', city: 'all', age: 'all', kind: 'all', price: 'all' };
   function matches(c) {
     if (state.when !== 'all') {
@@ -1816,20 +1848,21 @@ _KIDS_FILTER_JS = """<script>
     });
     chips.forEach(function (b) { b.classList.toggle('active', state[b.dataset.group] === b.dataset.val); });
     var none = document.getElementById('hub-none');
-    if (none) none.hidden = n > 0;
+    if (none) none.hidden = n > 0 || !!laterBox;  // still loading the later days
     if (save) {
       var parts = Object.keys(state).filter(function (k) { return state[k] !== 'all'; }).map(function (k) { return k + '=' + state[k]; });
       history.replaceState(null, '', parts.length ? '#' + parts.join('&') : location.pathname);
     }
   }
   chips.forEach(function (b) {
-    b.addEventListener('click', function () { state[b.dataset.group] = b.dataset.val; render(true); });
+    b.addEventListener('click', function () { state[b.dataset.group] = b.dataset.val; render(true); loadLater(); });
   });
   location.hash.replace(/^#/, '').split('&').forEach(function (p) {
     var kv = p.split('=');
     if (kv.length === 2 && state.hasOwnProperty(kv[0]) && document.querySelector('.kid-chip[data-group="' + kv[0] + '"][data-val="' + kv[1] + '"]')) state[kv[0]] = kv[1];
   });
   render(false);
+  if (Object.keys(state).some(function (k) { return state[k] !== 'all'; })) loadLater();
 })();
 </script>"""
 
@@ -2465,6 +2498,7 @@ _CAMPS_CSS = """
   .camps-hero-art { display: block; width: 100%; height: 120px; }
   .camps-hero-copy { padding: 18px 22px 22px; }
   .camps-hub .hero h1 { font-size: clamp(28px, 6vw, 40px); font-weight: 800; margin: 0 0 6px; color: #14532d; letter-spacing: -0.01em; }
+  .camps-hub .hero h1 small { display: block; font-size: 0.45em; font-weight: 700; color: #3f6f52; letter-spacing: 0; margin-top: 4px; }
   .camps-hub .hero p { color: var(--muted); font-size: 17px; margin: 0 0 10px; max-width: 720px; }
   .camps-stats { margin: 0; font-size: 15px; font-weight: 600; color: var(--fg); }
   .camp-panel { background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 18px 20px; margin-bottom: 20px; }
@@ -2912,6 +2946,12 @@ def _camp_date_rows(camps, today_iso):
     return rows, later
 
 
+def _camp_summer_year(today=None):
+    """The summer parents are shopping for: this year until August, next year from September."""
+    today = today or datetime.now(EASTERN).date()
+    return today.year + 1 if today.month >= 9 else today.year
+
+
 def _camps_sections(camps):
     from camps import AREAS, KINDS, load_camps
     data = load_camps()
@@ -2931,7 +2971,7 @@ def _camps_sections(camps):
     hero = f"""<div class="hero">
     {_CAMPS_HERO_ART}
     <div class="camps-hero-copy">
-      <h1>Summer Camps</h1>
+      <h1>Summer Camps Near Boston {_camp_summer_year()}<small>Boston, Cambridge, Somerville &amp; nearby towns</small></h1>
       <p>Prices, ages and sign-up dates for camps around Boston, checked against each camp's own site. Most camps haven't posted everything for 2027, so each one shows which year its details are from.</p>
       <p class="camps-stats">{len(camps)} camps in Boston and nearby towns · {len(rows)} sign-up dates coming up</p>
     </div>
@@ -2994,7 +3034,10 @@ def _family_nav(hub_slug, nav_class):
     return f'  <nav class="hub-nav {nav_class}">\n{links}\n  </nav>'
 
 
-def render_hub_page(hub_slug, events, site_url=None):
+KIDS_INLINE_DAYS = 14  # the Kids page carries two weeks; later days load from later.html
+
+
+def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
     if not site_url:
         site_url = get_site_url()
     hub = HUBS.get(hub_slug)
@@ -3187,7 +3230,14 @@ def render_hub_page(hub_slug, events, site_url=None):
             by_day.setdefault(d_key, []).append(e)
 
         city_order = ["cambridge", "somerville", "boston", "other"]
+        inline_until = datetime.now(EASTERN).date() + timedelta(days=KIDS_INLINE_DAYS - 1)
+        later_html, later_days, inline_html = [], [], cards_html
         for day_obj, day_events in by_day.items():
+            # Days past the first two weeks go to later.html (loaded on scroll or filter), keeping
+            # the page light on phones; they still count in the stats and the When chips.
+            cards_html = later_html if (day_obj and day_obj > inline_until) else inline_html
+            if cards_html is later_html:
+                later_days.append(day_obj.isoformat())
             if day_obj:
                 day_iso = day_obj.isoformat()
                 day_heading = day_obj.strftime("%A, %B %-d")
@@ -3217,6 +3267,15 @@ def render_hub_page(hub_slug, events, site_url=None):
     {"".join(city_cards)}
   </div>
 </div>''')
+        cards_html = inline_html
+        if later_html:
+            if extra_files is not None:
+                extra_files["later.html"] = "\n".join(later_html)
+            first, last = datetime.fromisoformat(later_days[0]), datetime.fromisoformat(later_days[-1])
+            span = f"{first.strftime('%b %-d')}–{last.strftime('%-d') if first.month == last.month else last.strftime('%b %-d')}"
+            cards_html.append(
+                f'<div id="kids-later" class="kids-later" data-src="later.html" data-days="{escape(json.dumps(later_days))}">'
+                f'<button type="button" class="cta-btn">Show {span} →</button></div>')
     elif is_edm:
         def _render_edm_card(e):
             nonlocal edm_free_count
@@ -3392,7 +3451,7 @@ def render_hub_page(hub_slug, events, site_url=None):
   </div>"""
         hub_js = _KIDS_FILTER_JS
         n_cards = sum(kid_kind_counts.values())
-        n_days = len(set(re.findall(r'<h2 class="hub-day" id="([\d-]+)"', "".join(cards_html)))) or 1
+        n_days = len(set(re.findall(r'<h2 class="hub-day" id="([\d-]+)"', "".join(cards_html)))) + len(later_days) or 1
         hero_html = f"""<div class="hero">
     {_KIDS_HERO_ART}
     <div class="kids-hero-copy">
@@ -5761,6 +5820,10 @@ def render_page(results, weather=None, luckyseat_shows=None):
   .pill-weather {{ display: inline-flex; align-items: center; gap: 4px; font-weight: 600; color: #fff; }}
   .weather-label {{ font-weight: 400; color: var(--muted); }}
   .pill-dot {{ color: var(--muted); opacity: 0.6; }}
+  .banner-parents-pill {{ margin-top: 6px; }}
+  .banner-parents-pill .parents-label {{ opacity: 0.8; }}
+  .banner-parents-pill a {{ color: inherit; font-weight: 700; text-decoration: none; border-bottom: 1px dotted currentColor; }}
+  .banner-parents-pill a:hover {{ border-bottom-style: solid; }}
   .pill-submit-btn {{
     display: inline-flex;
     align-items: center;
@@ -9126,6 +9189,12 @@ def render_page(results, weather=None, luckyseat_shows=None):
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:middle;"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
         </a>
       </div>
+      <nav class="banner-meta-pill banner-parents-pill" aria-label="For parents">
+        <span class="parents-label">👪 For parents:</span>
+        <a href="kids-family-events-boston/">Kids &amp; Family</a>
+        <span class="pill-dot">·</span>
+        <a href="summer-camps/">Summer Camps</a>
+      </nav>
     </div>
   </div>
   {fail_banner}
