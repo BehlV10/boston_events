@@ -46,6 +46,11 @@ class DropPinTest(unittest.TestCase):
         self.assertNotIn("haversineMiles(userCoords.lat", js)
         self.assertIn("Sorted by distance from ${fromPin ? 'your pin' : 'your location'}", js)
 
+    def test_distance_list_built_once_per_origin(self):
+        """Filter changes re-show/hide the sorted copy; only a new origin re-measures and re-clones."""
+        self.assertIn("near.key !== originKey", self.html)
+        self.assertIn("day._nearCache = null;", self.html)  # cleared when Near Me turns off
+
     def test_tap_places_pin_only_while_placing(self):
         self.assertIn("if (pinPlacing) placePin(ev.latlng.lat, ev.latlng.lng);", self.html)
         self.assertIn("draggable: true", self.html)

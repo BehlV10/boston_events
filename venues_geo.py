@@ -189,7 +189,7 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
     "dark mode at bow market": (42.3804, -71.0970, "Union Square", "1 Bow Market Way, Somerville", "DARK MODE at Bow Market"),
     "vera's": (42.3797, -71.0962, "Union Square", "70 Union Sq, Somerville", "Vera's"),
     "union square farmers market": (42.3797, -71.0962, "Union Square", "66 Union Sq, Somerville", "Union Square Farmers Market"),
-    "arts at the armory": (42.3912, -71.1086, "Spring Hill", "191 Highland Ave, Somerville", "Arts at the Armory"),
+    "arts at the armory": (42.3897, -71.106, "Spring Hill", "191 Highland Ave, Somerville", "Arts at the Armory"),
     "somerville arts council": (42.3875, -71.0995, "Somerville", "Somerville, MA", "Somerville Arts Council"),
     "somerville community growing center": (42.3828, -71.0980, "Spring Hill", "22 Vinal Ave, Somerville", "Somerville Community Growing Center"),
     "growing center": (42.3828, -71.0980, "Spring Hill", "22 Vinal Ave, Somerville", "Somerville Community Growing Center"),
@@ -226,7 +226,7 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
 
     # Medford, Arlington & Suburbs
     "deep cuts": (42.4178, -71.1070, "Medford Square", "21 Main St, Medford", "Deep Cuts"),
-    "regent theatre": (42.4158, -71.1542, "Arlington", "7 Medford St, Arlington", "Regent Theatre"),
+    "regent theatre": (42.415, -71.1508, "Arlington", "7 Medford St, Arlington", "Regent Theatre"),
     "painted burro waltham": (42.3765, -71.2372, "Waltham", "665 Main St, Waltham", "Painted Burro Waltham"),
     "gillette stadium": (42.0909, -71.2643, "Foxborough", "1 Patriot Pl, Foxborough", "Gillette Stadium"),
 
@@ -244,8 +244,8 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
     "multicultural arts center": (42.3697, -71.0793, "East Cambridge", "41 Second St, Cambridge", "Multicultural Arts Center"),
     "mit green building": (42.3604, -71.0894, "Kendall Square", "21 Ames St, Cambridge", "MIT Green Building"),
     "bu studio one": (42.3505, -71.1142, "Fenway", "855 Commonwealth Ave, Boston", "BU Studio ONE"),
-    "dorchester brewing company": (42.3245, -71.0587, "Dorchester", "1250 Massachusetts Ave, Boston", "Dorchester Brewing Company"),
-    "dorchester brewing": (42.3245, -71.0587, "Dorchester", "1250 Massachusetts Ave, Boston", "Dorchester Brewing Company"),
+    "dorchester brewing company": (42.3219, -71.0626, "Dorchester", "1250 Massachusetts Ave, Boston", "Dorchester Brewing Company"),
+    "dorchester brewing": (42.3219, -71.0626, "Dorchester", "1250 Massachusetts Ave, Boston", "Dorchester Brewing Company"),
     "cambridge center for adult education": (42.3744, -71.1219, "Harvard Square", "42 Brattle St, Cambridge", "CCAE (Cambridge Center for Adult Education)"),
     "boch center wang theatre": (42.3509, -71.0651, "Theater District", "270 Tremont St, Boston", "Boch Center Wang Theatre"),
     "boch center shubert theatre": (42.3513, -71.0651, "Theater District", "265 Tremont St, Boston", "Boch Center Shubert Theatre"),
@@ -296,7 +296,7 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
 
     # Seaport & Fort Point
     "ica boston": (42.3528, -71.0432, "Seaport", "25 Harbor Shore Dr, Boston", "ICA Boston"),
-    "laugh boston": (42.3481, -71.0456, "Seaport", "425 Summer St, Boston", "Laugh Boston"),
+    "laugh boston": (42.3462, -71.0433, "Seaport", "425 Summer St, Boston", "Laugh Boston"),
     "leader bank pavilion": (42.3475, -71.0360, "Seaport", "290 Northern Ave, Boston", "Leader Bank Pavilion"),
     "the grand boston": (42.3524, -71.0475, "Seaport", "58 Seaport Blvd, Boston", "The Grand"),
     "scorpion bar boston": (42.3524, -71.0475, "Seaport", "58 Seaport Blvd, Boston", "Scorpion Bar Boston"),
@@ -382,16 +382,16 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
     "o'brien's pub": (42.3533, -71.1305, "Allston", "3 Harvard Ave, Allston", "O'Brien's Pub"),
     "obriens pub": (42.3533, -71.1305, "Allston", "3 Harvard Ave, Allston", "O'Brien's Pub"),
     "paradise rock club": (42.3519, -71.1201, "Allston", "967 Commonwealth Ave, Boston", "Paradise Rock Club"),
-    "brighton music hall": (42.3533, -71.1373, "Allston", "158 Brighton Ave, Allston", "Brighton Music Hall"),
-    "roadrunner": (42.3582, -71.1492, "Boston Landing", "89 Guest St, Brighton", "Roadrunner"),
+    "brighton music hall": (42.3527, -71.1326, "Allston", "158 Brighton Ave, Allston", "Brighton Music Hall"),
+    "roadrunner": (42.3566, -71.1439, "Boston Landing", "89 Guest St, Brighton", "Roadrunner"),
     "charles river speedway": (42.3585, -71.1396, "Brighton", "525 Western Ave, Boston", "Charles River Speedway"),
     "speedway": (42.3585, -71.1396, "Brighton", "525 Western Ave, Boston", "Charles River Speedway"),
     "silhouette lounge": (42.3533, -71.1332, "Allston", "200 Brighton Ave, Allston", "Silhouette Lounge"),
     "model cafe": (42.3537, -71.1378, "Allston", "7 N Beacon St, Allston", "Model Cafe"),
     "agganis arena": (42.3522, -71.1177, "BU / Allston", "925 Commonwealth Ave, Boston", "Agganis Arena"),
     "artisans asylum": (42.3598, -71.1415, "Allston", "96 Holton St, Boston", "Artisans Asylum"),
-    "scullers jazz club": (42.3592, -71.1235, "Allston", "400 Soldiers Field Rd, Boston", "Scullers Jazz Club"),
-    "scullers": (42.3592, -71.1235, "Allston", "400 Soldiers Field Rd, Boston", "Scullers Jazz Club"),
+    "scullers jazz club": (42.3603, -71.1183, "Allston", "400 Soldiers Field Rd, Boston", "Scullers Jazz Club"),
+    "scullers": (42.3603, -71.1183, "Allston", "400 Soldiers Field Rd, Boston", "Scullers Jazz Club"),
     "broken records": (42.3572, -71.1415, "Brighton", "85 Guest St, Boston", "Broken Records"),
     "harvard stadium": (42.3667, -71.1265, "Allston", "65 N Harvard St, Boston", "Harvard Stadium"),
     "bright-landry hockey center": (42.3667, -71.1265, "Allston", "65 N Harvard St, Boston", "Bright-Landry Hockey Center"),
@@ -491,7 +491,7 @@ VENUE_RULES = [
     ("ccae", (42.3744, -71.1219, "Harvard Square", "42 Brattle St, Cambridge", "CCAE")),
     ("loretta", (42.3475, -71.0963, "Fenway", "1 Lansdowne St, Boston", "Loretta's Last Call")),
     ("harvard book", (42.3729, -71.1166, "Harvard Square", "1256 Massachusetts Ave, Cambridge", "Harvard Book Store")),
-    ("laugh boston", (42.3481, -71.0456, "Seaport", "425 Summer St, Boston", "Laugh Boston")),
+    ("laugh boston", (42.3462, -71.0433, "Seaport", "425 Summer St, Boston", "Laugh Boston")),
     ("toad", (42.3892, -71.1195, "Porter Square", "1920 Massachusetts Ave, Cambridge", "Toad")),
     ("porter square book", (42.3888, -71.1192, "Porter Square", "25 White St, Cambridge", "Porter Square Books")),
     ("brookline booksmith", (42.3422, -71.1218, "Coolidge Corner", "279 Harvard St, Brookline", "Brookline Booksmith")),
@@ -516,9 +516,9 @@ VENUE_RULES = [
     ("opera house", (42.3541, -71.0617, "Downtown Crossing", "539 Washington St, Boston", "Citizens Bank Opera House")),
     ("wang thea", (42.3509, -71.0651, "Theater District", "270 Tremont St, Boston", "Boch Center Wang Theatre")),
     ("shubert thea", (42.3513, -71.0651, "Theater District", "265 Tremont St, Boston", "Boch Center Shubert Theatre")),
-    ("roadrunner", (42.3582, -71.1492, "Boston Landing", "89 Guest St, Brighton", "Roadrunner")),
+    ("roadrunner", (42.3566, -71.1439, "Boston Landing", "89 Guest St, Brighton", "Roadrunner")),
     ("paradise rock", (42.3519, -71.1201, "Allston", "967 Commonwealth Ave, Boston", "Paradise Rock Club")),
-    ("brighton music hall", (42.3533, -71.1373, "Allston", "158 Brighton Ave, Allston", "Brighton Music Hall")),
+    ("brighton music hall", (42.3527, -71.1326, "Allston", "158 Brighton Ave, Allston", "Brighton Music Hall")),
     ("house of blues", (42.3474, -71.0954, "Fenway", "15 Lansdowne St, Boston", "House of Blues Boston")),
     ("mgm music hall", (42.3472, -71.0967, "Fenway", "2 Lansdowne St, Boston", "MGM Music Hall at Fenway")),
     ("leader bank pavilion", (42.3475, -71.0360, "Seaport", "290 Northern Ave, Boston", "Leader Bank Pavilion")),
@@ -527,7 +527,7 @@ VENUE_RULES = [
     ("bow market", (42.3804, -71.0970, "Union Square", "1 Bow Market Way, Somerville", "Bow Market")),
     ("dark mode", (42.3804, -71.0970, "Union Square", "1 Bow Market Way, Somerville", "DARK MODE at Bow Market")),
     ("vera's", (42.3797, -71.0962, "Union Square", "70 Union Sq, Somerville", "Vera's")),
-    ("armory", (42.3912, -71.1086, "Spring Hill", "191 Highland Ave, Somerville", "Arts at the Armory")),
+    ("armory", (42.3897, -71.106, "Spring Hill", "191 Highland Ave, Somerville", "Arts at the Armory")),
     ("sabina", (42.3926, -71.0963, "Winter Hill", "514 Medford St, Somerville", "Sabina Mezcalería")),
     ("bobas", (42.3582, -71.0735, "Esplanade", "47 David G Mugar Way, Boston", "Hatch Shell (Esplanade)")),
     ("esplanade", (42.3582, -71.0735, "Esplanade", "47 David G Mugar Way, Boston", "The Esplanade")),
@@ -560,10 +560,10 @@ VENUE_RULES = [
     ("lansdowne pub", (42.3473, -71.0957, "Fenway", "9 Lansdowne St, Boston", "Lansdowne Pub")),
     ("bill's bar", (42.3474, -71.0960, "Fenway", "5 Lansdowne St, Boston", "Bill's Bar")),
     ("cask 'n flagon", (42.3469, -71.0989, "Fenway", "62 Brookline Ave, Boston", "Cask 'n Flagon")),
-    ("huntington ave", (42.3421, -71.0853, "Symphony", "264 Huntington Ave, Boston", "Huntington Theatre")),
     ("huntington thea", (42.3421, -71.0853, "Symphony", "264 Huntington Ave, Boston", "Huntington Theatre")),
     ("gardner museum", (42.3382, -71.0991, "Museum District", "25 Evans Way, Boston", "Isabella Stewart Gardner Museum")),
     ("isabella stewart", (42.3382, -71.0991, "Museum District", "25 Evans Way, Boston", "Isabella Stewart Gardner Museum")),
+    ("cafe 939", (42.3475, -71.0850, "Back Bay", "939 Boylston St, Boston", "The Red Room at Cafe 939")),
     ("berklee", (42.3479, -71.0886, "Back Bay / Fenway", "136 Massachusetts Ave, Boston", "Berklee Performance Center")),
     ("bebop", (42.3472, -71.0886, "Back Bay / Fenway", "1116 Boylston St, Boston", "The Bebop")),
     ("artisans asylum", (42.3598, -71.1415, "Allston", "96 Holton St, Boston", "Artisans Asylum")),
@@ -575,7 +575,7 @@ VENUE_RULES = [
     ("the haven", (42.3153, -71.1042, "Jamaica Plain", "284 Amory St, Jamaica Plain", "The Haven")),
     ("long live", (42.3278, -71.0763, "Roxbury", "152 Hampden St, Roxbury", "Long Live Roxbury")),
     ("gillette stadium", (42.0909, -71.2643, "Foxborough", "1 Patriot Pl, Foxborough", "Gillette Stadium")),
-    ("regent thea", (42.4158, -71.1542, "Arlington", "7 Medford St, Arlington", "Regent Theatre")),
+    ("regent thea", (42.415, -71.1508, "Arlington", "7 Medford St, Arlington", "Regent Theatre")),
     ("painted burro", (42.3961, -71.1220, "Davis Square", "219 Elm St, Somerville", "Painted Burro")),
     ("blues union", (42.3995, -71.1278, "Teele Square", "160 Holland St, Somerville", "Blues Union")),
     ("foundry", (42.3663, -71.0853, "East Cambridge", "101 Rogers St, Cambridge", "The Foundry")),
@@ -661,7 +661,7 @@ VENUE_RULES = [
     ("winter hill brewing", (42.3927, -71.0933, "Winter Hill", "328 Broadway, Somerville", "Winter Hill Brewing Co.")),
     ("the independent", (42.3799, -71.0946, "Union Square", "75 Union Square, Somerville", "The Independent")),
     ("olde magoun", (42.3982, -71.1065, "Magoun Square", "518 Medford St, Somerville", "Olde Magoun's Saloon")),
-    ("scullers", (42.3592, -71.1235, "Allston", "400 Soldiers Field Rd, Boston", "Scullers Jazz Club")),
+    ("scullers", (42.3603, -71.1183, "Allston", "400 Soldiers Field Rd, Boston", "Scullers Jazz Club")),
     ("bills bar", (42.3474, -71.0960, "Fenway", "5 Lansdowne St, Boston", "Bill's Bar")),
     ("bill's bar", (42.3474, -71.0960, "Fenway", "5 Lansdowne St, Boston", "Bill's Bar")),
     ("sports museum", (42.3662, -71.0621, "West End / TD Garden", "100 Legends Way, Boston", "The Sports Museum")),
@@ -696,7 +696,7 @@ VENUE_RULES = [
     ("phoenix boston", (42.3262, -71.0754, "Roxbury", "54 Shirley St, Boston", "The Phoenix Boston")),
     ("fourth presbyterian", (42.3332, -71.0478, "South Boston", "340 Dorchester St, Boston", "Fourth Presbyterian Church")),
     ("kadampa", (42.3962, -71.1306, "North Cambridge", "2298 Massachusetts Ave, Cambridge", "Kadampa Meditation Center")),
-    ("chevalier", (42.4178, -71.1064, "Medford Square", "30 Forest St, Medford", "Chevalier Theatre")),
+    ("chevalier", (42.4203, -71.1091, "Medford Square", "30 Forest St, Medford", "Chevalier Theatre")),
     ("arrow street arts", (42.3725, -71.1165, "Harvard Square", "2 Arrow St, Cambridge", "Arrow Street Arts")),
     ("brendan behan", (42.3147, -71.1118, "Jamaica Plain", "378 Centre St, Jamaica Plain", "The Brendan Behan Pub")),
     ("emmanuel church", (42.3523, -71.0734, "Back Bay", "15 Newbury St, Boston", "Emmanuel Church")),
@@ -832,13 +832,112 @@ MIN_LAT, MAX_LAT = 41.8, 42.8
 MIN_LNG, MAX_LNG = -71.8, -70.5
 
 
+# Sources whose coordinates are approximate (Ticketmaster often returns an area point, not the
+# building: Royale and the Emerson Colonial share one point ~800 m from both). A curated match
+# on the venue name always beats these.
+LOW_TRUST_COORD_SOURCES = ("ticketmaster",)
+# A trusted source's point this far from a venue-name pattern match means the pattern hit an
+# umbrella name ("Boston Public Library (South End)" matches the Copley library's pattern,
+# "MIT Building E62" matches "MIT Campus").
+UMBRELLA_MISMATCH_METERS = 400
+# Points one source assigns to several different venues are placeholders, not locations.
+_SHARED_SOURCE_POINTS: set = set()
+
+
+def _meters(lat1, lng1, lat2, lng2):
+    import math
+    dy = (lat2 - lat1) * 111_000
+    dx = (lng2 - lng1) * 111_000 * math.cos(math.radians(lat1))
+    return math.hypot(dx, dy)
+
+
+def _geo(entry):
+    lat, lng, neigh, addr, cname = entry
+    return {"lat": lat, "lng": lng, "venue": cname, "neighborhood": neigh, "address": addr}
+
+
+def _exact_venue_match(v_lower):
+    norm_v = re.sub(r"[^\w\s]", "", v_lower).strip()
+    for key in (v_lower, norm_v):
+        if key and key in VENUE_COORDINATES:
+            return VENUE_COORDINATES[key]
+    return None
+
+
+def _rule_match(hay):
+    if hay:
+        for needle, entry in VENUE_RULES:
+            if needle in hay:
+                return entry
+    return None
+
+
+def _point_key(lat, lng):
+    return (round(float(lat), 4), round(float(lng), 4))
+
+
+def _native_point(event):
+    lat = event.get("lat") or event.get("latitude")
+    lng = event.get("lng") or event.get("lon") or event.get("longitude")
+    if lat is None or lng is None:
+        return None
+    try:
+        flat, flng = float(lat), float(lng)
+    except (ValueError, TypeError):
+        return None
+    if not (MIN_LAT <= flat <= MAX_LAT and MIN_LNG <= flng <= MAX_LNG):
+        return None
+    if _point_key(flat, flng) in _SHARED_SOURCE_POINTS:
+        return None
+    return flat, flng
+
+
+def flag_shared_source_points(events_or_venues) -> int:
+    """Find coordinates a source uses for several different venues (placeholder points) so
+    resolve_event_geo ignores them. Accepts scraper results (dicts with "events") or a flat
+    event list. Returns how many points were flagged."""
+    by_point = {}
+    for item in events_or_venues or []:
+        evs = item.get("events") if isinstance(item, dict) and "events" in item else [item]
+        src = item.get("venue", "") if isinstance(item, dict) and "events" in item else ""
+        for e in evs or []:
+            lat = e.get("lat") or e.get("latitude")
+            lng = e.get("lng") or e.get("lon") or e.get("longitude")
+            if lat is None or lng is None:
+                continue
+            try:
+                key = _point_key(lat, lng)
+            except (ValueError, TypeError):
+                continue
+            v_lower = (e.get("venue") or e.get("_source_venue") or src or "").strip().lower()
+            entry = _exact_venue_match(v_lower) or _rule_match(v_lower)
+            by_point.setdefault(key, {})[entry[4] if entry else re.sub(r"[^a-z0-9]", "", v_lower)] = entry
+    _SHARED_SOURCE_POINTS.clear()
+    for key, venues in by_point.items():
+        if len(venues) < 2:
+            continue
+        known = [v for v in venues.values() if v]
+        # A point sitting on one of its venues is that venue's real location (other names for
+        # the same building, e.g. "465 Huntington Ave" for the MFA), not a placeholder.
+        if any(_meters(key[0], key[1], v[0], v[1]) <= 150 for v in known):
+            continue
+        # Rooms of one building (Middle East Upstairs/Downstairs) share a point legitimately.
+        spread = max((_meters(a[0], a[1], b[0], b[1]) for a in known for b in known), default=0)
+        if spread > 150 or len(venues) - len(known) >= 3:
+            _SHARED_SOURCE_POINTS.add(key)
+    return len(_SHARED_SOURCE_POINTS)
+
+
 def resolve_event_geo(event: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     """Resolve latitude, longitude, neighborhood, and venue name for an event.
 
-    Prioritizes:
-    1. Pre-existing valid event coordinates (e.g. from Ticketmaster/SeatGeek/Eventbrite)
-    2. Exact curated venue match
-    3. Pattern/needle match on venue name and source
+    Order:
+    1. Exact curated venue name.
+    2. Venue-name pattern (VENUE_RULES) on the event's own venue field, unless a trusted
+       source's own point is over 1 km away (the pattern matched an umbrella name).
+    3. The source's own coordinates, unless flagged as a shared placeholder point.
+    4. Venue-name pattern on the source/presenter name or title (last resort: "Sing-A-Long
+       LIVE" in a title must not place a Lynn show at Long Live Roxbury).
     """
     venue_raw = (event.get("venue") or "").strip()
     source_raw = (event.get("_source_venue") or "").strip()
@@ -849,41 +948,35 @@ def resolve_event_geo(event: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     if v_lower in ("zoom", "online", "virtual", "online event", "tba", "various") or "(virtual)" in v_lower or "online event" in v_lower:
         return None
 
-    # 1. Check if event has native coordinates
-    lat = event.get("lat") or event.get("latitude")
-    lng = event.get("lng") or event.get("lon") or event.get("longitude")
-    if lat is not None and lng is not None:
-        try:
-            flat, flng = float(lat), float(lng)
-            if MIN_LAT <= flat <= MAX_LAT and MIN_LNG <= flng <= MAX_LNG:
-                return {
-                    "lat": round(flat, 5),
-                    "lng": round(flng, 5),
-                    "venue": venue_raw or source_raw,
-                    "neighborhood": event.get("neighborhood") or "",
-                    "address": event.get("address") or "",
-                }
-        except (ValueError, TypeError):
-            pass
+    native = _native_point(event)
+    trusted_native = native and not any(s in source_raw.lower() for s in LOW_TRUST_COORD_SOURCES)
 
-    # 2. Check exact curated match
-    norm_v = re.sub(r"[^\w\s]", "", v_lower).strip()
-    if v_lower and v_lower in VENUE_COORDINATES:
-        lat, lng, neigh, addr, cname = VENUE_COORDINATES[v_lower]
-        return {"lat": lat, "lng": lng, "venue": cname, "neighborhood": neigh, "address": addr}
-    if norm_v and norm_v in VENUE_COORDINATES:
-        lat, lng, neigh, addr, cname = VENUE_COORDINATES[norm_v]
-        return {"lat": lat, "lng": lng, "venue": cname, "neighborhood": neigh, "address": addr}
+    # 1. Exact curated venue
+    entry = _exact_venue_match(v_lower)
+    if entry:
+        return _geo(entry)
 
-    # 3. Check needle rules — the event's own venue field first, so a source/presenter
-    # name (e.g. "Celebrity Series" -> Symphony Hall) can't override where the show actually is.
-    target = f"{v_lower} {source_raw.lower()} {title_raw.lower()}"
-    for hay in (v_lower, target):
-        if not hay:
-            continue
-        for needle, (lat, lng, neigh, addr, cname) in VENUE_RULES:
-            if needle in hay:
-                return {"lat": lat, "lng": lng, "venue": cname, "neighborhood": neigh, "address": addr}
+    # 2. Pattern on the venue field itself
+    entry = _rule_match(v_lower)
+    if entry and not (trusted_native and (
+            _meters(native[0], native[1], entry[0], entry[1]) > UMBRELLA_MISMATCH_METERS
+            or not re.search(r"\d", entry[3]))):  # area match ("Harvard Square"), not a building
+        return _geo(entry)
+
+    # 3. The source's own coordinates
+    if native:
+        return {
+            "lat": round(native[0], 5),
+            "lng": round(native[1], 5),
+            "venue": venue_raw or source_raw,
+            "neighborhood": event.get("neighborhood") or "",
+            "address": event.get("address") or "",
+        }
+
+    # 4. Pattern on source/presenter name and title
+    entry = _rule_match(f"{v_lower} {source_raw.lower()} {title_raw.lower()}")
+    if entry:
+        return _geo(entry)
 
     return None
 

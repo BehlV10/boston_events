@@ -68,6 +68,9 @@ SOCIAL_URL_RE = re.compile(
     r"(?i)^https?://(?:[\w-]+\.)*(?:facebook\.com|fb\.(?:com|me|watch)|instagram\.com|instagr\.am|"
     r"twitter\.com|x\.com|t\.co|threads\.(?:net|com)|tiktok\.com)(?:/|$)"
 )
+# Ticket-platform links we'd rather not lead with: swapped for another listing's direct link
+# (venue, library, university page) when one exists, kept otherwise.
+SECONDARY_URL_RE = re.compile(r"(?i)^https?://(?:[\w-]+\.)*(?:eventbrite\.[a-z.]+|evbuc\.com)(?:/|$)")
 VENUE_EVENT_PAGES = {
     "aeronaut": "https://www.aeronautbrewing.com/visit/somerville/#events",
 }
@@ -269,20 +272,34 @@ def build_weekday_roundup(start_monday=None):
     def _is_trivia(e):
         return bool(re.search(r"(?i)\btrivia\b", e.get("name") or ""))
 
-    direct_urls = defaultdict(list)  # (start minute, room) -> non-social links for that listing
+    # Other listings of the same event: same start minute and same room, or same start minute
+    # and same title opening (venue names vary across calendars).
+    def _alt_keys(e):
+        t = e["_time"].replace(second=0, microsecond=0)
+        title = re.sub(r"[^a-z0-9]", "", unicodedata.normalize("NFKD", e["name"]).encode("ascii", "ignore").decode().lower())
+        return [(t, "room", _room_key(e["venue"])), (t, "title", title[:12])]
+
+    direct_urls = defaultdict(list)  # alt key -> direct (non-social, non-ticket-platform) links
     all_raw = [e for evs in raw_events_by_day.values() for e in evs] + [e for evs in runs.values() for e in evs]
     for e in all_raw:
         u = e.get("url") or ""
-        if u.startswith("http") and not SOCIAL_URL_RE.match(u):
-            direct_urls[(e["_time"].replace(second=0, microsecond=0), _room_key(e["venue"]))].append(u)
+        if u.startswith("http") and not SOCIAL_URL_RE.match(u) and not SECONDARY_URL_RE.match(u):
+            # the venue's own calendar first (source "Cambridge Public Library" for a CPL talk)
+            own = _room_key(e.get("_source_venue"))[:8] == _room_key(e["venue"])[:8]
+            for k in _alt_keys(e):
+                direct_urls[k].append((0 if own else 1, u))
     for e in all_raw:
         u = e.get("url") or ""
-        if not SOCIAL_URL_RE.match(u):
+        social, secondary = SOCIAL_URL_RE.match(u), SECONDARY_URL_RE.match(u)
+        if not (social or secondary):
             continue
-        alts = direct_urls.get((e["_time"].replace(second=0, microsecond=0), _room_key(e["venue"])))
-        v_low = f"{e.get('venue')} {e.get('_source_venue')}".lower()
-        page = next((pg for k, pg in VENUE_EVENT_PAGES.items() if k in v_low), None)
-        e["url"] = (alts or [page])[0]  # None -> rendered as bold text without a link
+        alt = min((x for k in _alt_keys(e) for x in direct_urls.get(k, [])), default=(None, None))[1]
+        if alt:
+            e["url"] = alt
+        elif social:
+            v_low = f"{e.get('venue')} {e.get('_source_venue')}".lower()
+            # venue's events page, else None -> rendered as bold text without a link
+            e["url"] = next((pg for k, pg in VENUE_EVENT_PAGES.items() if k in v_low), None)
 
     picked_by_day_city = {d: {c: [] for c in city_keys} for d in weekdays}
 

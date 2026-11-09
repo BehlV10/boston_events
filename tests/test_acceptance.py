@@ -79,7 +79,7 @@ class CardRenderingAcceptance(unittest.TestCase):
         unchecked: both must skip events inside collapsed (.empty) sections."""
         html = self._render([])
         self.assertIn("if (li.closest('.empty')) return;", html)          # map markers
-        self.assertIn("filter(ev => !ev.closest('.empty'))", html)         # Near Me
+        self.assertIn("!item.ev.classList.contains('hidden') && !item.ev.closest('.empty')", html)  # Near Me
 
     def test_site_says_daily_not_every_30_minutes(self):
         html = self._render([])
