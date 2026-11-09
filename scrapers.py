@@ -4114,6 +4114,164 @@ def scrape_wix_events(url, ua, default_venue=None, default_category="clubbing"):
     return events
 
 
+_COMICAZI_ICS = "https://calendar.google.com/calendar/ical/q4fqj74if3smgobn8au8bh0f5g%40group.calendar.google.com/public/basic.ics"
+_COMICAZI_NOTICE_RE = re.compile(
+    r"(?i)\b(?:closed|closing|early close|delivery|private event|postponed|cancell?ed|sale|holiday hours|staff meeting)\b")
+
+
+def scrape_comicazi(url, ua):
+    """Comicazi, the Davis Square comic & game shop: the public Google Calendar embedded on its
+    /events page. Board game nights, Magic drafts and tournaments, comic and manga book clubs.
+    Store notices (CLOSED, sales, delivery) and all-day entries are dropped."""
+    events = []
+    for e in scrape_ical(_COMICAZI_ICS, ua):
+        name = e["name"].strip()
+        start = datetime.fromisoformat(e["date"]).astimezone(EASTERN)
+        if _COMICAZI_NOTICE_RE.search(name) or (start.hour == 0 and start.minute == 0):
+            continue
+        m = re.search(r"\s*[-–—]\s*(\$\d+(?:\.\d\d)?)\s*$", name)  # "Board Game Night - $3"
+        if m:
+            name = name[:m.start()].strip()
+            e["price"] = e.get("price") or m.group(1)
+        name = re.sub(r"\s*[-–—]\s*(?:Downstairs|Now in person!?)\s*$", "", name)
+        e.pop("location", None)
+        e.update(name=name, venue="Comicazi", url=url,
+                 category="books" if re.search(r"(?i)book club", name) else "gaming")
+        events.append(e)
+    return events
+
+
+def _wix_ticket_price(item):
+    """Price from a Wix Events item, only when Wix itself sells the tickets (registration type 2)."""
+    reg = item.get("registration") or {}
+    t = reg.get("ticketing") or {}
+    lo, hi = t.get("lowestTicketPriceFormatted"), t.get("highestTicketPriceFormatted")
+    if reg.get("type") != 2 or not lo:
+        return None
+    return lo if not hi or hi == lo else f"{lo}–{hi}"
+
+
+def scrape_all_she_wrote(url, ua):
+    """All She Wrote Books (queer & feminist bookstore, 75 Washington St, Somerville): Wix Events
+    data in the page. Some events happen elsewhere (book clubs at Dani's Queer Bar, author talks at
+    the Museum of Science), so each event keeps its own venue, and externally ticketed ones link
+    to the host's page."""
+    resp = _SESSION.get(url, headers={"User-Agent": ua or UA_CHROME}, timeout=15)
+    resp.raise_for_status()
+    m = re.search(r"<script[^>]+id=[\"']wix-warmup-data[\"'][^>]*>(.*?)</script>", resp.text, re.S)
+    if not m:
+        return []
+    data = json.loads(m.group(1))
+    now = datetime.now(timezone.utc)
+    origin = "{0.scheme}://{0.netloc}".format(urlparse(url))
+    events, seen = [], set()
+    for comp_map in (data.get("appsWarmupData") or {}).values():
+        for comp in (comp_map.values() if isinstance(comp_map, dict) else []):
+            box = comp.get("events") if isinstance(comp, dict) else None
+            items = box.get("events", []) if isinstance(box, dict) else (box or [])
+            for it in items:
+                title = (it.get("title") or "").strip()
+                start = ((it.get("scheduling") or {}).get("config") or {}).get("startDate")
+                if not title or not start or it.get("status") == 2:  # 2 = canceled
+                    continue
+                dt = datetime.fromisoformat(start.replace("Z", "+00:00")).astimezone(timezone.utc)
+                if dt < now or (title, dt) in seen:
+                    continue
+                seen.add((title, dt))
+                loc = it.get("location") or {}
+                reg = it.get("registration") or {}
+                ext = (reg.get("external") or {}).get("registration") if reg.get("type") == 3 else None
+                events.append({
+                    "name": title,
+                    "date": dt.isoformat(),
+                    "url": ext or (f"{origin}/event-details/{it['slug']}" if it.get("slug") else url),
+                    "venue": (loc.get("name") or "All She Wrote Books").strip(),
+                    "address": loc.get("address"),
+                    "price": _wix_ticket_price(it),
+                    "description": _clean_ical_description(it.get("description")),
+                    "category": "books",
+                })
+    return events
+
+
+_BCA_CATEGORY = {"dance": "dance", "theatre": "theater", "exhibitions": "art", "visual arts": "art",
+                 "boston art book fair": "art", "public programs": "community", "events": "community"}
+_BCA_TIME_RE = re.compile(r"(?i)\b(\d{1,2})(?::(\d\d))?\s*([ap])\.?m\b")
+_BCA_DAY_TIME_RE = re.compile(
+    r"(?i)\b(?:mon|tues?|wed(?:nes)?|thu(?:rs)?|fri|sat(?:ur)?|sun)[a-z]*,?\s+"
+    r"(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+(\d{1,2})(?:st|nd|rd|th)?"
+    r"[^.|\n]{0,25}?\b(\d{1,2})(?::(\d\d))?\s*(?:-\s*\d{1,2}(?::\d\d)?\s*)?([ap])\.?m\b")
+
+
+def _bca_time(day, text):
+    m = _BCA_TIME_RE.search(text or "")
+    if not m:
+        return None
+    hour = int(m.group(1)) % 12 + (12 if m.group(3).lower() == "p" else 0)
+    return datetime(day.year, day.month, day.day, hour, int(m.group(2) or 0), tzinfo=EASTERN)
+
+
+def scrape_boston_center_for_the_arts(url, ua):
+    """Boston Center for the Arts "Experiences" (bostonarts.org/experiences/): talks, launches and
+    parties at the BCA Cyclorama and Mills Gallery, plus short runs at the Calderwood.
+
+    A single-date card with a time is one event. A run of up to two weeks lists no times on the
+    card, so its page is read for "Tuesday, November 10th from 7-9 PM"; days without a stated time
+    (the Art Book Fair's public days) are skipped rather than given a made-up time. Exhibitions
+    lasting months are skipped."""
+    soup = fetch_soup(url, ua)
+    now = datetime.now(EASTERN)
+    events, seen = [], set()
+    for card in soup.select("article.card-event"):
+        a = card.find("a", href=True)
+        title_el, kind_el, p = card.find("h5"), card.find("h4"), card.find("p")
+        if not (a and title_el and p):
+            continue
+        title = re.sub(r"\s+", " ", title_el.get_text(" ", strip=True))
+        kinds = [k.strip().lower() for k in (kind_el.get_text(" ", strip=True) if kind_el else "").split(",")]
+        lines = [ln.strip() for ln in p.get_text("\n", strip=True).split("\n") if ln.strip()]
+        # Lines: [artist,] dates, [time,] room
+        di = next((i for i, ln in enumerate(lines) if re.search(r"\d{2}/\d{2}/\d{4}", ln)), None)
+        if di is None:
+            continue
+        dates = re.findall(r"(\d{2})/(\d{2})/(\d{4})", lines[di])
+        first = date(int(dates[0][2]), int(dates[0][0]), int(dates[0][1]))
+        last = date(int(dates[-1][2]), int(dates[-1][0]), int(dates[-1][1]))
+        after = lines[di + 1:]
+        time_line = next((ln for ln in after if _BCA_TIME_RE.search(ln)), None)
+        venue = next((ln for ln in reversed(after) if ln != time_line), None)
+        category = next((_BCA_CATEGORY[k] for k in kinds if k in _BCA_CATEGORY), "art")
+        starts = []
+        if first == last:
+            t = _bca_time(first, time_line)
+            if t:
+                starts.append(t)
+        elif (last - first).days <= 14:
+            try:
+                page = fetch_soup(a["href"], ua).get_text(" ", strip=True)
+            except Exception:
+                page = ""
+            for m in _BCA_DAY_TIME_RE.finditer(page):
+                month = datetime.strptime(m.group(1)[:3].title(), "%b").month
+                day = date(first.year + (1 if month < first.month else 0), month, int(m.group(2)))
+                if first <= day <= last:
+                    hour = int(m.group(3)) % 12 + (12 if m.group(5).lower() == "p" else 0)
+                    starts.append(datetime(day.year, day.month, day.day, hour, int(m.group(4) or 0), tzinfo=EASTERN))
+        for t in starts:
+            if t < now or (title, t) in seen:
+                continue
+            seen.add((title, t))
+            events.append({
+                "name": title,
+                "date": t.astimezone(timezone.utc).isoformat(),
+                "url": a["href"],
+                "venue": venue or "Boston Center for the Arts",
+                "price": None,
+                "category": category,
+            })
+    return events
+
+
 def _do617_ticket_price(event_url, ua):
     """The ticket line on a Do617 event page: "Tickets: $5 + fee" -> "$5 + fee",
     "Tickets: $46-$138+" -> "$46-$138+", "Tickets: Free, 21+" -> "Free"; None when the page
@@ -12277,6 +12435,9 @@ _ALL_VENUES = [
     {"name": "Salsa Vida Boston", "url": "https://www.salsavida.com/guides/massachusetts/", "ua": UA_CHROME, "scraper": scrape_salsavida, "default_category": "dance"},
     {"name": "Laugh Boston", "url": "https://laughboston.com", "ua": UA_CHROME, "scraper": scrape_laugh_boston, "default_category": "comedy"},
     {"name": "Calderwood Pavilion", "url": "https://www.bostontheatrescene.com/shows-and-events/", "ua": UA_CHROME, "scraper": scrape_calderwood_pavilion, "default_category": "theater"},
+    {"name": "Boston Center for the Arts", "url": "https://bostonarts.org/experiences/", "ua": UA_CHROME, "scraper": scrape_boston_center_for_the_arts, "default_category": "art"},
+    {"name": "Comicazi", "url": "https://www.comicazi.com/events", "ua": UA_CHROME, "scraper": scrape_comicazi, "default_category": "gaming"},
+    {"name": "All She Wrote Books", "url": "https://www.allshewrotebooks.com/events", "ua": UA_CHROME, "scraper": scrape_all_she_wrote, "default_category": "books"},
     {"name": "Central Square Theater", "url": "https://www.centralsquaretheater.org/shows/", "ua": UA_CHROME, "scraper": scrape_central_square_theater, "default_category": "theater"},
     {"name": "Boch Center (Wang & Shubert)", "url": "https://www.bochcenter.org/events", "ua": UA_CHROME, "scraper": scrape_boch_center, "default_category": "theater"},
     {"name": "Museum of Fine Arts (MFA)", "url": "https://www.mfa.org/programs", "ua": UA_SAFARI, "scraper": scrape_mfa_boston, "default_category": "art"},
