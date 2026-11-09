@@ -8442,6 +8442,131 @@ def scrape_harvard_square_holiday_fair(url, ua):
     return events
 
 
+_SNOWPORT_URL = "https://www.bostonseaport.xyz/holidaymarket"
+_DAY_NAMES = ("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")
+_SNOWPORT_HOURS_RE = re.compile(
+    r"(?i)^(monday|tuesday|wednesday|thursday|friday|saturday|sunday)(?:\s*[-–]\s*(monday|tuesday|wednesday|"
+    r"thursday|friday|saturday|sunday))?\s+(\d{1,2}(?::\d\d)?\s*[ap]m)\s*[-–]\s*(\d{1,2}(?::\d\d)?\s*[ap]m)$")
+
+
+def _clock_hm(t):
+    """'3:00pm' -> (15, 0); '11am' -> (11, 0)."""
+    m = re.match(r"(?i)(\d{1,2})(?::(\d\d))?\s*([ap])m", t.strip())
+    h = int(m.group(1)) % 12 + (12 if m.group(3).lower() == "p" else 0)
+    return h, int(m.group(2) or 0)
+
+
+def _snowport_date(text, year):
+    m = re.match(r"(?i)\s*([a-z]+)\.?\s+(\d{1,2})", text)
+    month = m and next((n for name, n in _MONTHS.items() if name.startswith(m.group(1).lower()[:3])), None)
+    return date(year, month, int(m.group(2))) if month else None
+
+
+def _next_f_texts(html):
+    """Text and heading strings, in page order, from a Next.js page's streamed data
+    (self.__next_f.push) - where a site built on a headless CMS keeps its copy."""
+    stream = "".join(json.loads(f'"{m.group(1)}"') for m in
+                     re.finditer(r'self\.__next_f\.push\(\[1,"((?:[^"\\]|\\.)*)"\]\)', html))
+    out = []
+    for _, v in re.findall(r'"(text|title)":"((?:[^"\\]|\\.)*)"', stream):
+        v = re.sub(r"\s+", " ", json.loads(f'"{v}"')).strip()
+        if v and (not out or out[-1] != v):
+            out.append(v)
+    return out
+
+
+def scrape_snowport(url, ua, now=None):
+    """Snowport Holiday Market (Seaport, 100 Seaport Blvd), from its own page: the season ("open
+    seven days a week November 6 - December 27, 2026"), hours by weekday, extended hours for a
+    date range, closed days and early closes, and the Mohegan Music Mondays lineup
+    ("November 9: Triinnity Lee"). One market event per open day with its real open and close
+    times, plus one per Monday music night. Do617 lists the market daily without hours."""
+    resp = _SESSION.get(url, headers={"User-Agent": ua or UA_CHROME}, timeout=20)
+    resp.raise_for_status()
+    texts = _next_f_texts(resp.text)
+    joined = " ".join(texts)
+    season = re.search(r"(?i)open seven days a week\s+([a-z]+\.?\s+\d{1,2})\s*[-–]\s*([a-z]+\.?\s+\d{1,2}),?\s*(20\d\d)", joined)
+    if not season:
+        return []
+    year = int(season.group(3))
+    first, last = _snowport_date(season.group(1), year), _snowport_date(season.group(2), year)
+
+    # Hour blocks in page order: the regular week, then e.g. "(December 7 – December 27) ... extended hours"
+    blocks, current = [], None
+    for t in texts:
+        rng = re.search(r"(?i)\(([a-z]+\.?\s+\d{1,2})\s*[-–]\s*([a-z]+\.?\s+\d{1,2})\)", t)
+        if rng and re.search(r"(?i)hours", t):
+            current = {"from": _snowport_date(rng.group(1), year), "to": _snowport_date(rng.group(2), year), "days": {}}
+            blocks.append(current)
+            continue
+        m = _SNOWPORT_HOURS_RE.match(t)
+        if not m:
+            continue
+        if current is None:
+            current = {"from": None, "to": None, "days": {}}
+            blocks.append(current)
+        a = _DAY_NAMES.index(m.group(1).lower())
+        b = _DAY_NAMES.index(m.group(2).lower()) if m.group(2) else a
+        for wd in range(a, b + 1):
+            current["days"][wd] = (_clock_hm(m.group(3)), _clock_hm(m.group(4)))
+
+    def hours_on(d):
+        for blk in reversed(blocks):  # a dated block beats the regular week
+            if (blk["from"] is None or blk["from"] <= d <= blk["to"]) and d.weekday() in blk["days"]:
+                return blk["days"][d.weekday()]
+        return None
+
+    thanksgiving = date(year, 11, 1) + timedelta(days=(3 - date(year, 11, 1).weekday()) % 7 + 21)
+    named = {"thanksgiving": thanksgiving, "christmas day": date(year, 12, 25),
+             "christmas eve": date(year, 12, 24), "new year's eve": date(year, 12, 31)}
+    closed = {d for name, d in named.items()
+              if re.search(rf"(?i)closed[^.]*\b{name}", joined) and not re.search(rf"(?i)close early[^.]*{name}", joined)}
+    early = {}
+    for t, name in re.findall(r"(?i)close early at (\d{1,2}(?::\d\d)?\s*[ap]m) on ([a-z' ]+?eve)", joined):
+        if name.lower() in named:
+            early[named[name.lower()]] = _clock_hm(t)
+
+    now = now or datetime.now(EASTERN)
+    events = []
+    d = first
+    while d and last and d <= last:
+        hrs = hours_on(d)
+        if hrs and d not in closed:
+            (oh, om), (ch, cm) = hrs[0], early.get(d, hrs[1])
+            start = datetime(d.year, d.month, d.day, oh, om, tzinfo=EASTERN)
+            end = datetime(d.year, d.month, d.day, ch, cm, tzinfo=EASTERN)
+            if end > now:
+                events.append({
+                    "name": "Snowport Holiday Market",
+                    "date": start.astimezone(timezone.utc).isoformat(),
+                    "end": end.astimezone(timezone.utc).isoformat(),
+                    "url": url, "venue": "Snowport Holiday Market", "address": "100 Seaport Blvd, Boston, MA",
+                    "price": "Free", "category": "markets",
+                    "description": "Seaport's holiday market: 125+ makers, food, cocktail bars and live music. "
+                                   "Free entry; optional weekend fast pass.",
+                })
+        d += timedelta(days=1)
+
+    music = re.search(r"(?i)mondays (?:starting )?at (\d{1,2}(?::\d\d)?\s*[ap]m)", joined)
+    mh, mm = _clock_hm(music.group(1)) if music else (17, 0)
+    for t in texts:
+        m = re.match(r"(?i)^([a-z]+)\s+(\d{1,2}):\s+(.+)$", t)
+        if not (m and m.group(1).lower() in _MONTHS):
+            continue
+        day = _snowport_date(f"{m.group(1)} {m.group(2)}", year)
+        start = datetime(day.year, day.month, day.day, mh, mm, tzinfo=EASTERN)
+        if day.weekday() != 0 or start < now - timedelta(hours=2):
+            continue
+        events.append({
+            "name": f"Mohegan Music Mondays: {m.group(3).strip()}",
+            "date": start.astimezone(timezone.utc).isoformat(),
+            "url": url, "venue": "Snowport Holiday Market", "address": "100 Seaport Blvd, Boston, MA",
+            "price": "Free", "category": "music",
+            "description": "Free live set by an emerging Boston artist (with Berklee) on The Stage atop the Jingle Bar at Snowport.",
+        })
+    return events
+
+
 # Weekly worship, office hours and permitting clinics in neighborhood business-district calendars
 _DISTRICT_NOISE_RE = re.compile(
     r"(?i)\b(?:prayer|bible study|worship|sunday service|eucharist|mass\b|vespers|compline|meditation hour|"
@@ -12544,6 +12669,7 @@ _ALL_VENUES = [
     {"name": "Bow Market", "url": "https://tickettailor.com/events/bowmarket", "ua": UA_CHROME, "scraper": scrape_bow_market, "default_category": "community"},
     {"name": "Boston Public Market", "url": "https://bostonpublicmarket.org/events/", "ua": UA_CHROME, "scraper": scrape_boston_public_market, "default_category": "food"},
     {"name": "Harvard Square Holiday Fair", "url": "https://www.harvardsquareholidayfair.com/", "ua": UA_CHROME, "scraper": scrape_harvard_square_holiday_fair, "default_category": "markets"},
+    {"name": "Snowport Holiday Market", "url": _SNOWPORT_URL, "ua": UA_CHROME, "scraper": scrape_snowport, "default_category": "markets"},
     {"name": "Harvard Square (HSBA)", "url": "https://www.harvardsquare.com/wp-json/tribe/events/v1/events", "ua": UA_CHROME, "scraper": scrape_harvard_square, "default_category": "community"},
     {"name": "Kendall Square Association", "url": "https://www.kendallsquare.org/wp-json/tribe/events/v1/events", "ua": UA_CHROME, "scraper": scrape_kendall_square, "default_category": "community"},
     {"name": "Brighton Main Streets", "url": "https://www.brightonmainstreets.org/wp-json/tribe/events/v1/events", "ua": UA_CHROME, "scraper": scrape_brighton_main_streets, "default_category": "community"},
@@ -13897,9 +14023,10 @@ _WRONG_LISTINGS = (
 # Details a source has wrong, checked against the organizer: (title, venue or source, local date or
 # None for every date, changes). "hm" sets the start time; "hours" sets (open, close) by weekday
 # (Monday = 0), the close becoming the event's end.
-# Snowport 2026 (boston.com): Mon-Thu 3-8 PM, Fri 11 AM-9 PM, Sat 10 AM-9 PM, Sun 11 AM-8 PM
+# Snowport's regular 2026 hours (its own page; scrape_snowport reads them, with extended hours and
+# closures). This is the fallback for Do617's daily listings if that page can't be read.
 _SNOWPORT_OPENS = {0: ((15, 0), (20, 0)), 1: ((15, 0), (20, 0)), 2: ((15, 0), (20, 0)), 3: ((15, 0), (20, 0)),
-                   4: ((11, 0), (21, 0)), 5: ((10, 0), (21, 0)), 6: ((11, 0), (20, 0))}
+                   4: ((11, 0), (21, 0)), 5: ((10, 0), (21, 0)), 6: ((10, 0), (20, 0))}
 _LISTING_FIXES = (
     # 21+ with IDs checked at the gate, per the zoo
     ("jingle beers", "stone zoo", None, {"category": "food"}),
