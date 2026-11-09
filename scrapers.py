@@ -12989,7 +12989,7 @@ CATEGORY_KEYWORDS = [
                    "in conversation", "conversation with", "storytelling", "novel", "memoir", "acotar", "keynote"]),
     ("gaming",    ["arcade", "mahjong", "chess", "trivia", "board game", "video game", "ttrpg", "d&d", "dungeons",
                    "tabletop", "escape room", "bingo", "pinball", "axe throw", "darts bar",
-                   "one-shot rpg", "rpg night", "cornhole", "ping pong", "puzzle party", "puzzle night", "puzzle hunt", "puzzle swap", "jigsaw", "mah jongg", "mahjongg", "trading card", "pack wars", "pokemon"]),
+                   "one-shot rpg", "rpg night", "game night", "games night", "cornhole", "ping pong", "puzzle party", "puzzle night", "puzzle hunt", "puzzle swap", "jigsaw", "mah jongg", "mahjongg", "trading card", "pack wars", "pokemon"]),
     ("clubbing",  ["dj", "djs", "djz", "edm", "house music", "techno", "rave", "dubstep", "club night",
                    "nightclub", "guestlist", "guest list", "nightlife", "drum and bass", "drum & bass",
                    "industrial night", "goth night", "darkwave", "new wave night",
