@@ -3710,7 +3710,8 @@ def _build_gcal_link(e, title, venue, city):
             dt = dt.replace(tzinfo=EASTERN)
         dt = dt.astimezone(timezone.utc)
         start_str = dt.strftime("%Y%m%dT%H%M%SZ")
-        end_dt = dt + timedelta(hours=2)
+        real_end = trusted_end(e)
+        end_dt = real_end.astimezone(timezone.utc) if real_end and real_end - dt <= timedelta(hours=12) else dt + timedelta(hours=2)
         end_str = end_dt.strftime("%Y%m%dT%H%M%SZ")
     except (ValueError, TypeError, AttributeError):
         return None
@@ -3895,6 +3896,40 @@ def format_time(s):
     return dt.strftime("%-I:%M %p")
 
 
+def trusted_end(e):
+    """The event's end (Eastern) when we believe it, else None.
+
+    Sources' end times were measured in Nov 2026 (2,937 events, 70 sources): most are real, but
+    some are placeholders. Not believed: end at or before the start, an 11:59 PM end, an all-day
+    "midnight to midnight" span, exactly 24 hours, or a single sitting under 15 minutes or over 12 hours. Multi-day
+    runs (over 24 hours, up to 60 days) are returned for "thru" display; 12-24 hours is dropped
+    (an overnight "7 PM to 8 AM" is a bad end, not a two-day event)."""
+    raw_start, raw_end = e.get("date") or "", e.get("end") or ""
+    if not raw_end or ("T" not in raw_start and " " not in raw_start):
+        return None
+    try:
+        start = datetime.fromisoformat(str(raw_start).replace("Z", "+00:00"))
+        end = datetime.fromisoformat(str(raw_end).replace("Z", "+00:00"))
+    except (TypeError, ValueError):
+        return None
+    start = (start if start.tzinfo else start.replace(tzinfo=EASTERN)).astimezone(EASTERN)
+    end = (end if end.tzinfo else end.replace(tzinfo=EASTERN)).astimezone(EASTERN)
+    length = end - start
+    if length < timedelta(minutes=15) or length == timedelta(days=1) or (end.hour, end.minute) == (23, 59):
+        return None
+    if (start.hour, start.minute) == (0, 0) and (end.hour, end.minute) == (0, 0):
+        return None
+    if length <= timedelta(hours=12):
+        return end
+    if timedelta(days=1) < length <= timedelta(days=60):
+        return end
+    return None
+
+
+def _clock(dt, with_ampm=True):
+    return dt.strftime("%-I:%M %p" if with_ampm else "%-I:%M")
+
+
 def format_when(e):
     if not e.get("date") and e.get("ends"):
         try:
@@ -3906,6 +3941,13 @@ def format_when(e):
     if t_obj:
         raw_d = e.get("date") or ""
         if "T" in raw_d or " " in raw_d:
+            end = trusted_end(e)
+            start = t_obj.astimezone(EASTERN) if t_obj.tzinfo else t_obj
+            if end and end - start > timedelta(hours=12):
+                return f"{_clock(start)} · thru {end.strftime('%a %b %-d')}"
+            if end:
+                same_half = start.strftime("%p") == end.strftime("%p") and end.date() == start.date()
+                return f"{_clock(start, not same_half)}–{_clock(end)}"
             return t_obj.strftime("%-I:%M %p")
     return format_time(e.get("date"))
 
@@ -5083,6 +5125,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
         free_flag = "true" if is_free else "false"
         lgbtq_attr = ' data-lgbtq="true"' if is_lgbtq_event(e) else ''
         epoch_attr = f' data-epoch="{int(t_obj.timestamp())}"' if t_obj else ''
+        end_dt = trusted_end(e) if t_obj else None
+        if end_dt and end_dt - t_obj <= timedelta(hours=12):
+            epoch_attr += f' data-end-epoch="{int(end_dt.timestamp())}"'
         genre_attr = f' data-genre="{escape(genre)}"' if genre else ''
         v_prefix = f" · {venue_html}" if venue_html else ""
 
@@ -10920,6 +10965,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
                   id: li.getAttribute('data-id') || li.getAttribute('data-event-id') || '',
                   genre: li.getAttribute('data-genre') || '',
                   epoch: ep ? parseInt(ep, 10) : 0,
+                  endEpoch: parseInt(li.getAttribute('data-end-epoch') || '0', 10),
                   featured: li.classList.contains('highlighted'),
                   text: null,
                   hidden: false,
@@ -10965,7 +11011,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
                 genreOk = checkedGenres.has(m.genre);
               }}
 
-              const isPastTime = isToday && m.epoch > 0 && m.epoch < twoHoursAgoEpoch;
+              // Over once it ends; with no (believable) end time, two hours after it starts.
+              const isPastTime = isToday && m.epoch > 0 &&
+                (m.endEpoch > 0 ? m.endEpoch <= nowEpoch : m.epoch < twoHoursAgoEpoch);
               const isPast = isPastDay || isPastTime;
 
               if (isToday && m.epoch > 0) {{
@@ -12017,7 +12065,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
         const dStr = li.closest('.day')?.dataset.date;
         if (dStr && dStr !== 'tba') dt = new Date(dStr + 'T19:00:00-04:00');
       }}
-      return {{ title, url, venue, city, dt }};
+      const endEp = parseInt(li.dataset.endEpoch || '0', 10);
+      const end = endEp > 0 && dt ? new Date(endEp * 1000) : (dt ? new Date(dt.getTime() + 2 * 3600 * 1000) : null);
+      return {{ title, url, venue, city, dt, end }};
     }}
 
     function toCalUTC(d) {{
@@ -12026,10 +12076,10 @@ def render_page(results, weather=None, luckyseat_shows=None):
              pad(d.getUTCHours()) + pad(d.getUTCMinutes()) + pad(d.getUTCSeconds()) + 'Z';
     }}
 
-    function downloadICS(title, dt, venue, url) {{
+    function downloadICS(title, dt, venue, url, endDt) {{
       if (!dt || isNaN(dt.getTime())) return;
       const start = toCalUTC(dt);
-      const end = toCalUTC(new Date(dt.getTime() + 2 * 3600 * 1000));
+      const end = toCalUTC(endDt || new Date(dt.getTime() + 2 * 3600 * 1000));
       function cleanText(str) {{
         return (str || '').split(String.fromCharCode(10)).join(' ')
                           .split(String.fromCharCode(13)).join('')
@@ -12070,7 +12120,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
         const m = extractEventMetaFromLi(li);
         if (!m.dt) return;
         const start = toCalUTC(m.dt);
-        const end = toCalUTC(new Date(m.dt.getTime() + 2 * 3600 * 1000));
+        const end = toCalUTC(m.end);
         const loc = `${{m.venue}}, ${{m.city.charAt(0).toUpperCase() + m.city.slice(1)}}, MA`;
         const nl = String.fromCharCode(10);
         const details = `Details & Tickets: ${{m.url}}` + nl + nl + `Discovered on Wicked Boston Events`;
@@ -12084,7 +12134,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
       const li = btn.closest('.event');
       if (!li) return;
       const m = extractEventMetaFromLi(li);
-      downloadICS(m.title, m.dt, m.venue, m.url);
+      downloadICS(m.title, m.dt, m.venue, m.url, m.end);
     }});
 
     const btnViewList = document.getElementById('btn-view-list');
