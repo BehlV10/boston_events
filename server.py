@@ -2,6 +2,7 @@
 """Boston Events — scrape a handful of venue sites and serve a simple list at localhost:3000."""
 
 import json
+import re
 import copy
 import os
 import sys
@@ -124,6 +125,11 @@ def deferred_days_html():
 @app.get("/days/<path:name>")
 def day_file(name):
     return send_from_directory(os.path.join(os.path.dirname(os.path.abspath(__file__)), "days"), name)
+
+
+@app.get("/<hub_slug>/later.html")
+def hub_later(hub_slug):
+    return send_from_directory(os.path.join(os.path.dirname(os.path.abspath(__file__)), hub_slug), "later.html")
 
 
 @app.get("/<hub_slug>")
@@ -259,10 +265,18 @@ def export_html(path="index.html", force=False, source_json="events.json"):
         for hub_slug in HUBS:
             hub_dir = os.path.join(base_dir, hub_slug)
             os.makedirs(hub_dir, exist_ok=True)
-            hub_html = render_hub_page(hub_slug, hub_events, site_url=site_url)
+            extra = {}
+            hub_html = render_hub_page(hub_slug, hub_events, site_url=site_url, extra_files=extra)
             hub_path = os.path.join(hub_dir, "index.html")
             with open(hub_path, "w", encoding="utf-8") as f:
                 f.write(hub_html)
+            for name in ("later.html",):  # rewritten or removed every build
+                extra_path = os.path.join(hub_dir, name)
+                if name in extra:
+                    with open(extra_path, "w", encoding="utf-8") as f:
+                        f.write(extra[name])
+                elif os.path.exists(extra_path):
+                    os.remove(extra_path)
             print(f"wrote directory hub {hub_path}: {len(hub_html):,} bytes")
 
         # Hidden Reddit-roundup posting pages (noindex; disallowed in robots.txt)
@@ -277,6 +291,8 @@ def export_html(path="index.html", force=False, source_json="events.json"):
         except Exception as e:
             print(f"Warning: failed to write Reddit roundup pages: {e}")
 
+        write_sitemap(os.path.join(base_dir, "sitemap.xml"), site_url)
+
         # Generate dynamic OpenGraph cards for programmatic landing pages
         generate_all_og_cards(base_dir, flat_events, HUBS)
 
@@ -289,6 +305,33 @@ def export_html(path="index.html", force=False, source_json="events.json"):
             print(f"Warning: failed to export RSS / ICS feeds: {e}")
     except Exception as e:
         print(f"Warning: failed to export directory hubs: {e}")
+
+
+def _camps_checked_date():
+    """The date camps.json was last checked against the camps' sites (its "checked" field)."""
+    try:
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "camps.json"), encoding="utf-8") as f:
+            checked = str(json.load(f).get("checked") or "")
+        return checked if re.fullmatch(r"\d{4}-\d{2}-\d{2}", checked) else None
+    except Exception:
+        return None
+
+
+def write_sitemap(path, site_url=None):
+    """sitemap.xml with a real lastmod for every public page (the home page and each hub in HUBS).
+    Google uses lastmod and ignores changefreq/priority. The hidden roundup/ pages are left out."""
+    from template import HUBS
+    base = (site_url or "https://www.wickedbostonevents.com").rstrip("/")
+    today = datetime.now(timezone.utc).date().isoformat()
+    rows = [(f"{base}/", today)]
+    for slug in HUBS:
+        # Event pages are rebuilt from fresh events daily; the camps guide changes when camps.json is rechecked
+        mod = (_camps_checked_date() if slug == "summer-camps" else None) or today
+        rows.append((f"{base}/{slug}/", mod))
+    body = "".join(f"  <url>\n    <loc>{loc}</loc>\n    <lastmod>{mod}</lastmod>\n  </url>\n" for loc, mod in rows)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write('<?xml version="1.0" encoding="UTF-8"?>\n'
+                '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + body + "</urlset>\n")
 
 
 def _hub_events(venues):
