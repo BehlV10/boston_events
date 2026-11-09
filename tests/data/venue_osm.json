@@ -148,6 +148,12 @@
   "match": "TD Garden, 100, Legends Way, West End, Boston, Suffolk County, Massachusetts, 02114, United States",
   "type": "leisure/stadium"
  },
+ "100 Seaport Blvd, Boston": {
+  "lat": 42.353055,
+  "lng": -71.048117,
+  "match": "Seaport Boulevard, Seaport, Boston, Suffolk County, Massachusetts, 02210, United States",
+  "type": "highway/primary"
+ },
  "100 Warrenton St, Boston": {
   "lat": 42.350661,
   "lng": -71.066211,
