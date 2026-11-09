@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
-"""Generate a weekday Reddit roundup for r/boston, r/cambridgema, and r/somerville.
+"""Generate the weekday (Mon–Fri) or weekend (Fri–Sun) Reddit roundup.
 
-Curates ~5 top events per day for Boston, Cambridge, and Somerville from Monday to Friday
-(15 events per day, 75 events total), formatted in Reddit Markdown with venue, time,
-price, neighborhood, and 1-line descriptions.
+Curates ~5 top events per day for Boston, Cambridge, and Somerville, formatted in Reddit
+Markdown with venue, time, price, neighborhood, and 1-line descriptions (highlights.json notes).
+The daily build also publishes both as hidden pages (roundup/weekday/, roundup/weekend/) with
+copy buttons; see render_roundup_page.
 
 Usage:
-    python3 scripts/generate_weekday_reddit_roundup.py              # this/next Monday–Friday
-    python3 scripts/generate_weekday_reddit_roundup.py 2026-11-09   # specific week starting Monday
+    python3 scripts/generate_weekday_reddit_roundup.py                      # this/next Monday–Friday
+    python3 scripts/generate_weekday_reddit_roundup.py 2026-11-09           # week starting that Monday
+    python3 scripts/generate_weekday_reddit_roundup.py --weekend            # this/next Friday–Sunday
+    python3 scripts/generate_weekday_reddit_roundup.py --weekend 2026-11-13
 """
 
 import copy
@@ -95,6 +98,16 @@ def _week_start(arg=None):
     return today + timedelta(days=(7 - today.weekday()))
 
 
+def _weekend_start(arg=None):
+    """Friday of the weekend to cover: this weekend through Saturday, next weekend from Sunday."""
+    d = date.fromisoformat(arg) if arg else datetime.now(EASTERN).date()
+    if arg:
+        return d + timedelta(days=(4 - d.weekday()) % 7) if d.weekday() < 4 else d - timedelta(days=d.weekday() - 4)
+    if d.weekday() == 6:
+        return d + timedelta(days=5)
+    return d + timedelta(days=4 - d.weekday())
+
+
 def _clean_title(name):
     t = re.sub(r"\s+", " ", unescape(name or "")).strip()
     t = re.sub(r"^(?:The )?Bowery Presents:?\s*", "", t, flags=re.I)
@@ -163,8 +176,22 @@ def _norm_key(title):
 
 
 def build_weekday_roundup(start_monday=None):
-    mon = _week_start(start_monday)
-    weekdays = [mon + timedelta(days=i) for i in range(5)]  # Mon, Tue, Wed, Thu, Fri
+    return build_roundup("weekday", start_monday)
+
+
+def roundup_days(mode, start=None):
+    if mode == "weekend":
+        fri = _weekend_start(start)
+        return [fri + timedelta(days=i) for i in range(3)]  # Fri, Sat, Sun
+    mon = _week_start(start)
+    return [mon + timedelta(days=i) for i in range(5)]  # Mon, Tue, Wed, Thu, Fri
+
+
+def build_roundup(mode="weekday", start=None):
+    """(title, markdown body) for the weekday (Mon–Fri) or weekend (Fri–Sun) post."""
+    weekend = mode == "weekend"
+    weekdays = roundup_days(mode, start)
+    mon = weekdays[0]
     highlights = _load_highlights()
 
     with open(os.path.join(ROOT, "events.json"), encoding="utf-8") as f:
@@ -249,9 +276,12 @@ def build_weekday_roundup(start_monday=None):
         # Deprioritize aggregator duplicates or missing times
         if not _time(e):
             s -= 15
-        # Weekday post is for after work: daytime talks/matinees only fill gaps
-        elif e["_time"].hour < 17:
+        # Weekday post is for after work: daytime talks/matinees only fill gaps.
+        # On weekends daytime is prime time; only very early listings sink.
+        elif not weekend and e["_time"].hour < 17:
             s -= 60
+        elif weekend and e["_time"].hour < 9:
+            s -= 30
         src = (e.get("_source_venue") or "").lower()
         if src in ("ticketmaster", "seatgeek", "eventschaser"):
             s -= 5
@@ -394,7 +424,10 @@ def build_weekday_roundup(start_monday=None):
         # Format Markdown
         fri = weekdays[-1]
         span = f"{mon.strftime('%b %-d')}–{fri.strftime('%-d') if fri.month == mon.month else fri.strftime('%b %-d')}"
-        title = f"Things to do in Boston, Cambridge & Somerville this week ({span}) · Weekday Guide"
+        if weekend:
+            title = f"Things to do in Boston, Cambridge & Somerville this weekend ({span}) · Weekend Guide"
+        else:
+            title = f"Things to do in Boston, Cambridge & Somerville this week ({span}) · Weekday Guide"
 
         city_display = {
             "boston": "🏙️ BOSTON",
@@ -402,17 +435,27 @@ def build_weekday_roundup(start_monday=None):
             "somerville": "🎨 SOMERVILLE",
         }
 
-        out = [
-            f"Hi Boston! Here are 5–9 curated things to do each day for **Monday {mon.strftime('%b %-d')} through "
-            f"Friday {fri.strftime('%b %-d')}**, broken down by city (**Boston**, **Cambridge**, and **Somerville**).",
-            "",
-            "Whether you're looking for live music, comedy, 35mm films, pub trivia, or free museum nights after work, "
-            "here are the top picks for the week! Add anything else happening below.",
-            "",
-        ]
+        if weekend:
+            out = [
+                f"Hi Boston! Here are 5–9 curated things to do each day for **Friday {mon.strftime('%b %-d')} through "
+                f"Sunday {fri.strftime('%b %-d')}**, broken down by city (**Boston**, **Cambridge**, and **Somerville**).",
+                "",
+                "Concerts, comedy, markets, museum days, 35mm films and more for the weekend. "
+                "Add anything else happening below!",
+                "",
+            ]
+        else:
+            out = [
+                f"Hi Boston! Here are 5–9 curated things to do each day for **Monday {mon.strftime('%b %-d')} through "
+                f"Friday {fri.strftime('%b %-d')}**, broken down by city (**Boston**, **Cambridge**, and **Somerville**).",
+                "",
+                "Whether you're looking for live music, comedy, 35mm films, pub trivia, or free museum nights after work, "
+                "here are the top picks for the week! Add anything else happening below.",
+                "",
+            ]
 
         if runs:
-            out += ["## 🎭 RUNNING ALL WEEK", ""]
+            out += ["## 🎭 RUNNING ALL WEEKEND" if weekend else "## 🎭 RUNNING ALL WEEK", ""]
             for evs in sorted(runs.values(), key=lambda v: min(e["_time"] for e in v)):
                 evs = sorted(evs, key=lambda e: e["_time"])
                 days = sorted({e["_time"].date() for e in evs})
@@ -467,12 +510,14 @@ def build_weekday_roundup(start_monday=None):
 
 
 def main():
-    start_arg = sys.argv[1] if len(sys.argv) > 1 else None
-    title, body = build_weekday_roundup(start_arg)
-    mon = _week_start(start_arg)
+    args = [a for a in sys.argv[1:] if not a.startswith("--")]
+    mode = "weekend" if "--weekend" in sys.argv else "weekday"
+    start_arg = args[0] if args else None
+    title, body = build_roundup(mode, start_arg)
+    first = roundup_days(mode, start_arg)[0]
     out_dir = os.path.join(ROOT, "reddit")
     os.makedirs(out_dir, exist_ok=True)
-    out_file = os.path.join(out_dir, f"weekday-roundup-{mon.isoformat()}.md")
+    out_file = os.path.join(out_dir, f"{mode}-roundup-{first.isoformat()}.md")
 
     with open(out_file, "w", encoding="utf-8") as f:
         f.write(f"<!-- Title: {title} -->\n\n{body}")
@@ -483,3 +528,161 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+# ---------------------------------------------------------------------------------------------
+# Hidden posting pages (roundup/weekday/, roundup/weekend/), rebuilt by every daily build.
+# noindex + robots.txt Disallow + not in the sitemap: they're tools for posting, not site pages.
+
+SUBREDDITS = (  # (name, who it's for)
+    ("boston", "the main city sub"),
+    ("CambridgeMA", "Cambridge"),
+    ("Somerville", "Somerville"),
+    ("BostonSocialClub", "people looking for things to do and company"),
+)
+
+
+def _md_inline(text):
+    from html import escape as esc
+    t = esc(text, quote=False)
+    t = re.sub(r"\[([^\]]+)\]\((https?://[^)\s]+)\)",
+               lambda m: f'<a href="{esc(m.group(2))}" target="_blank" rel="noopener">{m.group(1)}</a>', t)
+    t = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", t)
+    t = re.sub(r"(?<![\w*])\*(?!\s)(.+?)(?<!\s)\*(?![\w*])", r"<em>\1</em>", t)
+    return t
+
+
+def markdown_to_html(md):
+    """The small Markdown subset the roundup uses: ##/### headings, * and - bullets with an
+    indented second line, ---, paragraphs, links, bold and italics."""
+    out, in_list = [], False
+    for line in md.split("\n"):
+        if line.startswith("  ") and in_list and line.strip():
+            out[-1] = out[-1][:-5] + "<br>" + _md_inline(line.strip()) + "</li>"
+            continue
+        is_item = line.startswith(("* ", "- "))
+        if in_list and not is_item:
+            out.append("</ul>")
+            in_list = False
+        if is_item:
+            if not in_list:
+                out.append("<ul>")
+                in_list = True
+            out.append(f"<li>{_md_inline(line[2:].rstrip())}</li>")
+        elif line.startswith("### "):
+            out.append(f"<h3>{_md_inline(line[4:])}</h3>")
+        elif line.startswith("## "):
+            out.append(f"<h2>{_md_inline(line[3:])}</h2>")
+        elif line.strip() == "---":
+            out.append("<hr>")
+        elif line.strip():
+            out.append(f"<p>{_md_inline(line.strip())}</p>")
+    if in_list:
+        out.append("</ul>")
+    return "\n".join(out)
+
+
+def render_roundup_page(mode, title, body, built_at=None):
+    from html import escape as esc
+    from urllib.parse import quote
+    other = "weekend" if mode == "weekday" else "weekday"
+    days = roundup_days(mode)
+    span = f"{days[0].strftime('%a %b %-d')} – {days[-1].strftime('%a %b %-d')}"
+    built = (built_at or datetime.now(EASTERN)).strftime("%a %b %-d, %-I:%M %p")
+    subs = "\n".join(
+        f'      <li><a class="sub" href="https://old.reddit.com/r/{n}/submit?selftext=true&amp;title={esc(quote(title))}" '
+        f'target="_blank" rel="noopener">Post to r/{n}</a> <span class="muted">{esc(why)} · '
+        f'<a href="https://www.reddit.com/r/{n}/about/rules" target="_blank" rel="noopener">rules</a></span></li>'
+        for n, why in SUBREDDITS)
+    return f"""<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>{"Weekend" if mode == "weekend" else "Weekday"} Reddit Roundup</title>
+<style>
+:root{{--bg:#f6f7f9;--panel:#fff;--fg:#1c2230;--muted:#5d6676;--line:#dde1e8;--accent:#c2410c;--accent-fg:#fff;--code:#f0f2f5;color-scheme:light}}
+@media (prefers-color-scheme:dark){{:root{{--bg:#12151b;--panel:#1a1e26;--fg:#e6e9ef;--muted:#9aa3b2;--line:#2c323d;--accent:#fb923c;--accent-fg:#1a1006;--code:#151920;color-scheme:dark}}}}
+*{{box-sizing:border-box}}
+body{{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 system-ui,-apple-system,sans-serif}}
+.wrap{{max-width:820px;margin:0 auto;padding:28px 16px 64px;display:grid;gap:18px}}
+.eyebrow{{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}}
+h1{{font:600 clamp(22px,4vw,30px)/1.2 Georgia,serif;margin:6px 0 0}}
+.row{{display:flex;flex-wrap:wrap;gap:10px;align-items:center}}
+.field{{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:grid;gap:8px;min-width:0}}
+.label{{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}}
+.titletext{{font-weight:600;overflow-wrap:anywhere}}
+button{{font:600 14px/1 inherit;font-family:inherit;border-radius:6px;padding:10px 14px;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--fg)}}
+button.primary{{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}}
+.muted,.status{{color:var(--muted);font-size:13px}}
+.subs{{list-style:none;margin:0;padding:0;display:grid;gap:8px}}
+a{{color:var(--accent)}}
+a.sub{{font-weight:600}}
+.tabs{{display:flex;gap:4px;border-bottom:1px solid var(--line)}}
+.tab{{border:0;border-bottom:2px solid transparent;border-radius:0;background:none;color:var(--muted)}}
+.tab[aria-selected="true"]{{color:var(--fg);border-bottom-color:var(--accent)}}
+textarea{{width:100%;min-height:60vh;font:13px/1.5 ui-monospace,Menlo,monospace;background:var(--code);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:12px}}
+.preview{{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:4px 18px 18px;overflow-wrap:anywhere}}
+.preview h2{{font:600 18px/1.3 Georgia,serif;margin:24px 0 6px}}
+.preview h3{{font-size:13px;letter-spacing:.06em;color:var(--muted);margin:14px 0 4px}}
+.preview ul{{padding-left:20px;margin:4px 0}} .preview li{{margin:5px 0}}
+[hidden]{{display:none!important}}
+</style>
+</head><body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">{esc(span)} · rebuilt {esc(built)} · <a href="../{other}/">{other} version →</a></div>
+    <h1>{"Weekend" if mode == "weekend" else "Weekday"} Reddit roundup</h1>
+  </header>
+  <div class="field">
+    <div class="label">Post title</div>
+    <div class="titletext" id="t">{esc(title)}</div>
+    <div class="row"><button id="copyTitle">Copy title</button></div>
+  </div>
+  <div class="row">
+    <button class="primary" id="copyBody">Copy post body (Markdown)</button>
+    <span class="status" id="status" role="status"></span>
+    <span class="status">{len(body):,} of 40,000 characters</span>
+  </div>
+  <div class="field">
+    <div class="label">Where to post</div>
+    <ul class="subs">
+{subs}
+    </ul>
+    <p class="muted" style="margin:0">Each link opens old Reddit's text-post form with the title filled in; paste the body (old Reddit takes Markdown as is). On new Reddit, switch the editor to Markdown mode first. Check each sub's rules on self-promotion, and space posts out rather than cross-posting all at once.</p>
+  </div>
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tabPrev" aria-selected="true">Preview</button>
+    <button class="tab" role="tab" id="tabMd" aria-selected="false">Markdown</button>
+  </div>
+  <div class="preview" id="preview">
+{markdown_to_html(body)}
+  </div>
+  <textarea id="md" spellcheck="false" hidden>{esc(body)}</textarea>
+</div>
+<script>
+const ta = document.getElementById('md'), pv = document.getElementById('preview'), status = document.getElementById('status');
+async function copy(text, label, fallback) {{
+  try {{ await navigator.clipboard.writeText(text); status.textContent = label + ' copied'; }}
+  catch (e) {{ if (fallback) {{ showMd(); ta.focus(); ta.select(); }} status.textContent = 'Copy was blocked: select the text and press Ctrl/Cmd+C.'; }}
+}}
+document.getElementById('copyBody').onclick = () => copy(ta.value, 'Post body', true);
+document.getElementById('copyTitle').onclick = () => copy(document.getElementById('t').textContent, 'Title', false);
+const tp = document.getElementById('tabPrev'), tm = document.getElementById('tabMd');
+function showMd() {{ ta.hidden = false; pv.hidden = true; tm.setAttribute('aria-selected', 'true'); tp.setAttribute('aria-selected', 'false'); }}
+function showPv() {{ ta.hidden = true; pv.hidden = false; tp.setAttribute('aria-selected', 'true'); tm.setAttribute('aria-selected', 'false'); }}
+tm.onclick = showMd; tp.onclick = showPv;
+</script>
+</body></html>
+"""
+
+
+def write_roundup_pages(base_dir):
+    """Write roundup/weekday/index.html and roundup/weekend/index.html under base_dir."""
+    for mode in ("weekday", "weekend"):
+        title, body = build_roundup(mode)
+        d = os.path.join(base_dir, "roundup", mode)
+        os.makedirs(d, exist_ok=True)
+        with open(os.path.join(d, "index.html"), "w", encoding="utf-8") as f:
+            f.write(render_roundup_page(mode, title, body))
+        print(f"wrote roundup/{mode}/: {title} ({len(body):,} chars)")

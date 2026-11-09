@@ -265,6 +265,18 @@ def export_html(path="index.html", force=False, source_json="events.json"):
                 f.write(hub_html)
             print(f"wrote directory hub {hub_path}: {len(hub_html):,} bytes")
 
+        # Hidden Reddit-roundup posting pages (noindex; disallowed in robots.txt)
+        try:
+            import importlib.util
+            spec = importlib.util.spec_from_file_location("generate_weekday_reddit_roundup", os.path.join(
+                os.path.dirname(os.path.abspath(__file__)), "scripts", "generate_weekday_reddit_roundup.py"))
+            roundup = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(roundup)
+            write_roundup_pages = roundup.write_roundup_pages
+            write_roundup_pages(base_dir)
+        except Exception as e:
+            print(f"Warning: failed to write Reddit roundup pages: {e}")
+
         # Generate dynamic OpenGraph cards for programmatic landing pages
         generate_all_og_cards(base_dir, flat_events, HUBS)
 

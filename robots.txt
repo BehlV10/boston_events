@@ -1,35 +1,46 @@
 User-agent: *
 Allow: /
+Disallow: /roundup/
 
 # Priority Search & AI Answer Engine Crawlers
 User-agent: Googlebot
 Allow: /
+Disallow: /roundup/
 
 User-agent: Bingbot
 Allow: /
+Disallow: /roundup/
 
 User-agent: GPTBot
 Allow: /
+Disallow: /roundup/
 
 User-agent: ChatGPT-User
 Allow: /
+Disallow: /roundup/
 
 User-agent: PerplexityBot
 Allow: /
+Disallow: /roundup/
 
 User-agent: ClaudeBot
 Allow: /
+Disallow: /roundup/
 
 User-agent: Applebot
 Allow: /
+Disallow: /roundup/
 
 User-agent: Applebot-Extended
 Allow: /
+Disallow: /roundup/
 
 User-agent: cohere-ai
 Allow: /
+Disallow: /roundup/
 
 User-agent: meta-externalagent
 Allow: /
+Disallow: /roundup/
 
 Sitemap: https://www.wickedbostonevents.com/sitemap.xml
