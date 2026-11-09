@@ -156,6 +156,20 @@ class HubPageAcceptance(unittest.TestCase):
         self.assertIn('id="kid-when"', html)
         self.assertIn('data-group="when" data-val="all"', html)
 
+    def test_kids_hub_nav_is_streamlined_for_parents(self):
+        when = _day_at(2, 10, 30)
+        html = self._hub("kids-family-events-boston", [{
+            "venue": "Kids source", "url": "https://kids.test", "error": None,
+            "events": [{"name": "Story Time", "date": when.isoformat(), "url": "https://kids.test/1", "category": "family", "venue": "Cambridge Public Library"}]}])
+        nav_match = re.search(r'<nav class="[^"]*kids-nav[^"]*">(.*?)</nav>', html, re.S)
+        self.assertIsNotNone(nav_match, "Expected .kids-nav in header")
+        nav_html = nav_match.group(1)
+        self.assertIn('<a href="../">All Events</a>', nav_html)
+        self.assertIn('<a href="../kids-family-events-boston/" class="active">Kids &amp; Family</a>', nav_html)
+        self.assertIn('<a href="../summer-camps/">Summer Camps</a>', nav_html)
+        for unrelated in ("boston-edm", "live-music-somerville", "cambridge-events-tonight", "board-game-nights-boston", "comedy"):
+            self.assertNotIn(unrelated, nav_html)
+
 
 class MergeAcceptance(unittest.TestCase):
     """Duplicates that showed as two cards, and different events that were wrongly one card."""

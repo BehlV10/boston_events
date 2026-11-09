@@ -1553,12 +1553,53 @@ _KIDS_CSS = """
   .kids-hub h1, .kids-hub h2, .kids-hub h3, .kids-hub .logo, .kids-hub .kid-chip, .kids-hub .cta-btn {
     font-family: "Baloo 2", "Avenir Next Rounded", "Trebuchet MS", system-ui, sans-serif;
   }
-  .kids-hub header { background: #ffffffd9; backdrop-filter: blur(8px); border-bottom: 2px dashed #e7d8bf;
-    position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; flex-wrap: wrap; gap: 8px; }
-  .kids-hub .logo { color: var(--fg); font-size: 18px; }
+  .kids-hub header {
+    background: #ffffffd9;
+    backdrop-filter: blur(8px);
+    border-bottom: 2px dashed #e7d8bf;
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    padding: 12px 20px;
+  }
+  .kids-hub .logo { color: var(--fg); font-size: 18px; font-weight: 800; white-space: nowrap; text-decoration: none; }
   .kids-hub .logo span { color: #f27e9a; }
-  .kids-hub .hub-nav a { color: var(--muted); }
-  .kids-hub .hub-nav a.active, .kids-hub .hub-nav a:hover { color: var(--accent); }
+  .kids-hub .kids-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    flex-wrap: wrap;
+  }
+  .kids-hub .kids-nav a {
+    color: var(--muted);
+    text-decoration: none;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-weight: 700;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    border: 2px solid transparent;
+    white-space: nowrap;
+  }
+  .kids-hub .kids-nav a:hover {
+    color: var(--accent);
+    background: #fffaf2;
+    border-color: #efe4d2;
+  }
+  .kids-hub .kids-nav a.active {
+    background: var(--sky);
+    border-color: #6dbbea;
+    color: #1f5d88;
+    box-shadow: 0 3px 0 #9fd3f2;
+    font-weight: 800;
+  }
   .kids-hub main { max-width: 980px; padding-top: 22px; }
   .kids-hub .hero { border: 0; padding: 0; margin-bottom: 18px; background: #fff; border-radius: 28px;
     overflow: hidden; box-shadow: 0 6px 0 #e9dcc6, 0 14px 30px rgba(120, 100, 60, 0.10); }
@@ -1673,9 +1714,23 @@ _KIDS_CSS = """
   .kids-hub .no-hub-events { text-align: center; color: var(--muted); font-size: 16px; padding: 30px 0; }
   .kids-hub footer { border-top: 2px dashed #e7d8bf; }
   @media (max-width: 640px) {
+    .kids-hub header {
+      padding: 10px 14px;
+      gap: 8px 10px;
+    }
+    .kids-hub .logo {
+      font-size: 16px;
+    }
+    .kids-hub .kids-nav {
+      gap: 5px;
+      font-size: 13px;
+    }
+    .kids-hub .kids-nav a {
+      padding: 5px 10px;
+      min-height: 34px;
+    }
     .kids-hero-art { height: 130px; }
     .kid-filter-label { min-width: 100%; }
-    .kids-hub .hub-nav { font-size: 12px; gap: 8px 10px; }
   }
 """
 
@@ -3391,6 +3446,12 @@ def render_hub_page(hub_slug, events, site_url=None):
     <a href="../">All Events</a>
     <a href="../kids-family-events-boston/">Kids &amp; Family</a>
     <a href="../summer-camps/" class="active">Summer Camps</a>
+  </nav>"""
+    elif is_kids:
+        hub_nav_html = """  <nav class="hub-nav kids-nav">
+    <a href="../">All Events</a>
+    <a href="../kids-family-events-boston/" class="active">Kids &amp; Family</a>
+    <a href="../summer-camps/">Summer Camps</a>
   </nav>"""
     else:
         hub_nav_html = f"""  <nav class="hub-nav">
