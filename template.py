@@ -33,7 +33,7 @@ from scrapers import (
     is_market_or_festival,
     _MARKET_OVERRIDABLE,
 )
-from venues_geo import resolve_event_geo, nearest_curated_venue
+from venues_geo import resolve_event_geo, nearest_curated_venue, flag_shared_source_points
 from lgbtq import is_lgbtq_event
 from light_theme import LIGHT_THEME_CSS
 
@@ -2359,16 +2359,53 @@ _CAMPS_CSS = """
     --accent: #166534; --border: #d5dfd6; --amber-bg: #fdf3d7; --amber-fg: #6b4b00;
     background: var(--bg) !important; color: var(--fg) !important;
   }
-  .camps-hub header { background: #f6f8f5 !important; border-bottom: 1px solid var(--border) !important; position: static; }
-  .camps-hub .logo { color: #14532d !important; font-weight: 800; white-space: nowrap; }
+  .camps-hub header {
+    background: #f6f8f5 !important;
+    border-bottom: 1px solid var(--border) !important;
+    position: static;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    padding: 14px 20px;
+  }
+  .camps-hub .logo { color: #14532d !important; font-weight: 800; white-space: nowrap; font-size: 16px; text-decoration: none; }
   .camps-hub .logo span { color: #c2410c !important; }
-  .camps-hub .hub-nav a { color: var(--muted); }
-  .camps-hub .hub-nav a.active, .camps-hub .hub-nav a:hover { color: var(--accent); font-weight: 700; }
+  .camps-hub .camps-nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    flex-wrap: wrap;
+  }
+  .camps-hub .camps-nav a {
+    color: var(--muted);
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-weight: 600;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid transparent;
+    white-space: nowrap;
+  }
+  .camps-hub .camps-nav a:hover {
+    color: var(--accent);
+    background: rgba(22, 101, 52, 0.08);
+    border-color: var(--border);
+  }
+  .camps-hub .camps-nav a.active {
+    color: #fff;
+    background: var(--accent);
+    font-weight: 700;
+  }
   .camps-hub main { max-width: 1000px; padding-top: 20px; font-size: 16px; line-height: 1.5; }
   .camps-hub .hero { border: 1px solid var(--border); background: #fff; border-radius: 16px; overflow: hidden; margin-bottom: 20px; padding: 0; text-align: left; }
   .camps-hero-art { display: block; width: 100%; height: 120px; }
   .camps-hero-copy { padding: 18px 22px 22px; }
-  .camps-hub .hero h1 { font-size: clamp(30px, 6vw, 40px); font-weight: 800; margin: 0 0 6px; color: #14532d; letter-spacing: -0.01em; }
+  .camps-hub .hero h1 { font-size: clamp(28px, 6vw, 40px); font-weight: 800; margin: 0 0 6px; color: #14532d; letter-spacing: -0.01em; }
   .camps-hub .hero p { color: var(--muted); font-size: 17px; margin: 0 0 10px; max-width: 720px; }
   .camps-stats { margin: 0; font-size: 15px; font-weight: 600; color: var(--fg); }
   .camp-panel { background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 18px 20px; margin-bottom: 20px; }
@@ -2390,7 +2427,7 @@ _CAMPS_CSS = """
   .camps-filters { background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 16px 20px 6px; margin-bottom: 14px; }
   .camp-filter-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
   .camp-filter-label { font-weight: 800; color: #14532d; font-size: 15px; min-width: 76px; }
-  .camp-chip, .camp-age-select { font: inherit; font-size: 15px; font-weight: 600; padding: 7px 14px; border-radius: 999px; cursor: pointer; border: 1px solid #b9c6bb; background: #fff; color: var(--fg); }
+  .camp-chip, .camp-age-select { font: inherit; font-size: 15px; font-weight: 600; padding: 7px 14px; border-radius: 999px; cursor: pointer; border: 1px solid #b9c6bb; background: #fff; color: var(--fg); -webkit-tap-highlight-color: transparent; }
   .camp-chip:hover { border-color: var(--accent); }
   .camp-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
   .camps-count-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 16px; font-weight: 700; margin: 0 2px 14px; }
@@ -2408,7 +2445,7 @@ _CAMPS_CSS = """
   .camp-save[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
   .camp-facts { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 6px 10px; margin: 0; font-size: 16px; }
   .camp-facts dt { font-weight: 700; color: var(--muted); }
-  .camp-facts dd { margin: 0; overflow-wrap: anywhere; }
+  .camp-facts dd { margin: 0; overflow-wrap: anywhere; word-break: break-word; }
   .camp-facts ul { margin: 2px 0 0; padding: 0; list-style: none; }
   .camp-facts li.next { font-weight: 700; }
   .camp-facts li.past { color: var(--muted); }
@@ -2427,10 +2464,167 @@ _CAMPS_CSS = """
   .camp-after ul { margin: 8px 0 0; padding-left: 20px; }
   @media (max-width: 640px) {
     .camps-hero-art { display: none; }
-    .camp-panel, .camps-filters { padding-left: 16px; padding-right: 16px; }
-    .camp-filter-label { min-width: 100%; }
-    .camp-date-list li { grid-template-columns: minmax(0, 1fr); }
-    .camp-facts { grid-template-columns: 78px minmax(0, 1fr); }
+    .camps-hub header {
+      padding: 10px 14px;
+      gap: 8px 10px;
+    }
+    .camps-hub .logo {
+      font-size: 15px;
+    }
+    .camps-hub .camps-nav {
+      gap: 5px;
+      font-size: 13px;
+    }
+    .camps-hub .camps-nav a {
+      padding: 5px 9px;
+      min-height: 34px;
+    }
+    .camps-hub main {
+      padding: 14px 12px 48px;
+    }
+    .camps-hub .hero {
+      border-radius: 12px;
+      margin-bottom: 14px;
+    }
+    .camps-hero-copy {
+      padding: 14px 14px 16px;
+    }
+    .camps-hub .hero h1 {
+      font-size: clamp(23px, 6vw, 32px);
+      margin-bottom: 4px;
+    }
+    .camps-hub .hero p {
+      font-size: 15px;
+      margin-bottom: 8px;
+    }
+    .camps-stats {
+      font-size: 13.5px;
+    }
+    .camp-panel {
+      padding: 14px 14px 16px;
+      border-radius: 12px;
+      margin-bottom: 14px;
+    }
+    .camp-panel h2 {
+      font-size: 19px;
+    }
+    .camp-panel > p {
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+    .camp-date-list li {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 3px;
+      padding: 10px 0;
+    }
+    .camp-date-when {
+      font-size: 14px;
+    }
+    .camp-date-what {
+      font-size: 15px;
+    }
+    .camp-date-what span {
+      font-size: 13.5px;
+    }
+    .camp-date-cal {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      margin-top: 5px;
+      font-size: 13.5px;
+    }
+    .camp-date-cal a, .camp-date-cal .camp-linkish {
+      min-height: 34px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .camps-filters {
+      padding: 12px 12px 6px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+    .camp-filter-row {
+      gap: 5px;
+      margin-bottom: 10px;
+    }
+    .camp-filter-label {
+      min-width: 100%;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 2px;
+    }
+    .camp-chip {
+      font-size: 13px;
+      padding: 5px 10px;
+      min-height: 34px;
+      line-height: 1.2;
+    }
+    .camp-age-select {
+      font-size: 13.5px;
+      padding: 6px 12px;
+      min-height: 36px;
+      max-width: 100%;
+    }
+    .camps-count-bar {
+      font-size: 14.5px;
+      margin-bottom: 10px;
+    }
+    .camp-card {
+      padding: 14px 14px 12px;
+      border-radius: 12px;
+      gap: 8px;
+    }
+    .camp-card h3 {
+      font-size: 17.5px;
+    }
+    .camp-where {
+      font-size: 13.5px;
+    }
+    .camp-save {
+      font-size: 13.5px;
+      padding: 5px 10px;
+      min-height: 36px;
+      min-width: 68px;
+    }
+    .camp-facts {
+      grid-template-columns: 66px minmax(0, 1fr);
+      gap: 4px 8px;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    .camp-facts dt {
+      font-size: 12.5px;
+    }
+    .camp-facts dd {
+      font-size: 14px;
+    }
+    .camp-note {
+      font-size: 13.5px;
+    }
+    .camp-foot {
+      padding-top: 8px;
+      gap: 8px;
+    }
+    .camp-season {
+      font-size: 12px;
+      padding: 3px 7px;
+    }
+    .camp-site {
+      font-size: 13.5px;
+      padding: 4px 10px;
+      background: rgba(22, 101, 52, 0.08);
+      border-radius: 6px;
+      text-decoration: none;
+      min-height: 32px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .camp-sources {
+      font-size: 12px;
+    }
   }
 """
 
@@ -2735,6 +2929,7 @@ def render_hub_page(hub_slug, events, site_url=None):
     if not hub:
         return ""
 
+    flag_shared_source_points(events)
     filtered = filter_events_for_hub(hub, events)
     if hub.get("collapse_series"):
         filtered = _collapse_hub_series(filtered)
@@ -3191,6 +3386,31 @@ def render_hub_page(hub_slug, events, site_url=None):
     active_mk = 'active' if hub_slug == 'markets-festivals-boston' else ''
     active_edm = 'active' if hub_slug == 'boston-edm' else ''
 
+    if is_camps:
+        hub_nav_html = """  <nav class="hub-nav camps-nav">
+    <a href="../">All Events</a>
+    <a href="../kids-family-events-boston/">Kids &amp; Family</a>
+    <a href="../summer-camps/" class="active">Summer Camps</a>
+  </nav>"""
+    else:
+        hub_nav_html = f"""  <nav class="hub-nav">
+    <a href="../">All Events</a>
+    <a href="../free-events-boston-this-weekend/" class="{active_fw}">Free Weekend</a>
+    <a href="../cambridge-events-tonight/" class="{active_ct}">Cambridge Tonight</a>
+    <a href="../live-music-somerville/" class="{active_sm}">Somerville Music</a>
+    <a href="../boston-edm/" class="{active_edm}">Boston EDM</a>
+    <a href="../board-game-nights-boston/" class="{active_bg}">Board Games</a>
+    <a href="../kids-family-events-boston/" class="{active_kf}">Kids &amp; Family</a>
+    <a href="../summer-camps/" class="{active_sc}">Summer Camps</a>
+    <a href="../markets-festivals-boston/" class="{active_mk}">Markets &amp; Festivals</a>
+    <a href="../boston/" class="{active_b}">Boston</a>
+    <a href="../cambridge/" class="{active_c}">Cambridge</a>
+    <a href="../somerville/" class="{active_s}">Somerville</a>
+    <a href="../music/" class="{active_m}">Live Music</a>
+    <a href="../comedy/" class="{active_co}">Comedy</a>
+    <a href="../free/" class="{active_f}">Free</a>
+  </nav>"""
+
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -3422,23 +3642,7 @@ def render_hub_page(hub_slug, events, site_url=None):
 <body{body_class}>
 <header>
   <a href="../" class="logo"><span>Wicked</span> Boston Events</a>
-  <nav class="hub-nav">
-    <a href="../">All Events</a>
-    <a href="../free-events-boston-this-weekend/" class="{active_fw}">Free Weekend</a>
-    <a href="../cambridge-events-tonight/" class="{active_ct}">Cambridge Tonight</a>
-    <a href="../live-music-somerville/" class="{active_sm}">Somerville Music</a>
-    <a href="../boston-edm/" class="{active_edm}">Boston EDM</a>
-    <a href="../board-game-nights-boston/" class="{active_bg}">Board Games</a>
-    <a href="../kids-family-events-boston/" class="{active_kf}">Kids &amp; Family</a>
-    <a href="../summer-camps/" class="{active_sc}">Summer Camps</a>
-    <a href="../markets-festivals-boston/" class="{active_mk}">Markets &amp; Festivals</a>
-    <a href="../boston/" class="{active_b}">Boston</a>
-    <a href="../cambridge/" class="{active_c}">Cambridge</a>
-    <a href="../somerville/" class="{active_s}">Somerville</a>
-    <a href="../music/" class="{active_m}">Live Music</a>
-    <a href="../comedy/" class="{active_co}">Comedy</a>
-    <a href="../free/" class="{active_f}">Free</a>
-  </nav>
+{hub_nav_html}
 </header>
 <main>
   {hero_html}
@@ -4689,6 +4893,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
         comm = _load_community_events()
         if comm:
             results = list(results) + comm
+    flag_shared_source_points(results)  # before any resolve_event_geo call below
 
     today = datetime.now(EASTERN).date()
     today_iso = today.isoformat()
@@ -9985,6 +10190,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
           if (nearStream && citiesDiv) {{
             nearStream.style.display = 'none';
             nearStream.innerHTML = '';
+            day._nearCache = null;
             citiesDiv.style.display = 'block';
           }}
         }});
@@ -10769,26 +10975,37 @@ def render_page(results, weather=None, luckyseat_shows=None):
             citiesDiv.style.display = 'none';
             nearStream.style.display = 'block';
 
+            // The distance-sorted copy of this day is built once per origin (Near Me position or
+            // pin); filter changes after that only show/hide its rows instead of re-measuring,
+            // re-sorting and re-cloning every event.
+            const allEvents = citiesDiv.querySelectorAll('.event');
+            const originKey = `${{origin.lat}},${{origin.lng}}`;
+            let near = day._nearCache;
+            if (!near || near.key !== originKey || near.count !== allEvents.length || !nearStream.contains(near.list)) {{
+              const eventDistances = [];
+              allEvents.forEach(ev => {{
+                const lat = parseFloat(ev.dataset.lat);
+                const lng = parseFloat(ev.dataset.lng);
+                let dist = 99999;
+                if (!isNaN(lat) && !isNaN(lng)) {{
+                  dist = haversineMiles(origin.lat, origin.lng, lat, lng);
+                }}
+                const timeMins = parseInt(ev.dataset.timeMins || '9999', 10);
+                eventDistances.push({{ ev: ev, dist: dist, timeMins: timeMins, clone: null }});
+              }});
+              eventDistances.sort((a, b) => {{
+                if (a.dist !== b.dist) return a.dist - b.dist;
+                return a.timeMins - b.timeMins;
+              }});
+              near = day._nearCache = {{ key: originKey, count: allEvents.length, items: eventDistances, list: null }};
+            }}
+
             // Unchecked cities/categories collapse their section (.empty) without hiding each event
-            const visibleEvents = Array.from(citiesDiv.querySelectorAll('.event:not(.hidden)')).filter(ev => !ev.closest('.empty'));
-            const eventDistances = [];
-            visibleEvents.forEach(ev => {{
-              const lat = parseFloat(ev.dataset.lat);
-              const lng = parseFloat(ev.dataset.lng);
-              let dist = 99999;
-              if (!isNaN(lat) && !isNaN(lng)) {{
-                dist = haversineMiles(origin.lat, origin.lng, lat, lng);
-              }}
-              const timeMins = parseInt(ev.dataset.timeMins || '9999', 10);
-              eventDistances.push({{ ev: ev, dist: dist, timeMins: timeMins }});
+            let locatedCount = 0;
+            near.items.forEach(item => {{
+              item.show = !item.ev.classList.contains('hidden') && !item.ev.closest('.empty');
+              if (item.show && item.dist < 9999) locatedCount++;
             }});
-
-            eventDistances.sort((a, b) => {{
-              if (a.dist !== b.dist) return a.dist - b.dist;
-              return a.timeMins - b.timeMins;
-            }});
-
-            const locatedCount = eventDistances.filter(item => item.dist < 9999).length;
             let banner = nearStream.querySelector('.near-stream-banner');
             if (!banner) {{
               banner = document.createElement('div');
@@ -10807,31 +11024,39 @@ def render_page(results, weather=None, luckyseat_shows=None):
               </div>
             `;
 
-            let list = nearStream.querySelector('.near-events-list');
-            if (!list) {{
-              list = document.createElement('ul');
-              list.className = 'near-events-list';
-              nearStream.appendChild(list);
-            }}
-            list.innerHTML = '';
-
-            eventDistances.forEach(item => {{
-              const clone = item.ev.cloneNode(true);
-              clone.classList.remove('hidden');
-              if (item.dist < 9999) {{
-                const away = origin.kind === 'pin' ? 'from pin' : 'away';
-                const dStr = item.dist < 0.1 ? `< 0.1 mi ${{away}}` : `${{item.dist.toFixed(1)}} mi ${{away}}`;
-                let badge = clone.querySelector('.dist-badge');
-                if (!badge) {{
-                  badge = document.createElement('span');
-                  badge.className = 'dist-badge';
-                  const vTag = clone.querySelector('.venue-tag');
-                  if (vTag) vTag.appendChild(badge);
-                }}
-                badge.title = `${{item.dist.toFixed(2)}} miles ${{away}}`;
-                badge.innerHTML = `<span class="chip-icon">📍 </span>${{dStr}}`;
+            if (!near.list) {{
+              let list = nearStream.querySelector('.near-events-list');
+              if (!list) {{
+                list = document.createElement('ul');
+                list.className = 'near-events-list';
+                nearStream.appendChild(list);
               }}
-              list.appendChild(clone);
+              list.innerHTML = '';
+              const frag = document.createDocumentFragment();
+              near.items.forEach(item => {{
+                const clone = item.ev.cloneNode(true);
+                clone.classList.remove('hidden');
+                if (item.dist < 9999) {{
+                  const away = origin.kind === 'pin' ? 'from pin' : 'away';
+                  const dStr = item.dist < 0.1 ? `< 0.1 mi ${{away}}` : `${{item.dist.toFixed(1)}} mi ${{away}}`;
+                  let badge = clone.querySelector('.dist-badge');
+                  if (!badge) {{
+                    badge = document.createElement('span');
+                    badge.className = 'dist-badge';
+                    const vTag = clone.querySelector('.venue-tag');
+                    if (vTag) vTag.appendChild(badge);
+                  }}
+                  badge.title = `${{item.dist.toFixed(2)}} miles ${{away}}`;
+                  badge.innerHTML = `<span class="chip-icon">📍 </span>${{dStr}}`;
+                }}
+                item.clone = clone;
+                frag.appendChild(clone);
+              }});
+              list.appendChild(frag);
+              near.list = list;
+            }}
+            near.items.forEach(item => {{
+              if (item.clone.classList.contains('hidden') === item.show) item.clone.classList.toggle('hidden', !item.show);
             }});
           }}
         }}

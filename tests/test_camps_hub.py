@@ -80,6 +80,16 @@ class CampPageTests(unittest.TestCase):
         for block in blocks:
             json.loads(block)
 
+    def test_camps_nav_is_streamlined_for_parents(self):
+        nav_match = re.search(r'<nav class="[^"]*camps-nav[^"]*">(.*?)</nav>', self.html, re.S)
+        self.assertIsNotNone(nav_match, "Expected .camps-nav in header")
+        nav_html = nav_match.group(1)
+        self.assertIn('<a href="../">All Events</a>', nav_html)
+        self.assertIn('<a href="../kids-family-events-boston/">Kids &amp; Family</a>', nav_html)
+        self.assertIn('<a href="../summer-camps/" class="active">Summer Camps</a>', nav_html)
+        for unrelated in ("boston-edm", "live-music-somerville", "cambridge-events-tonight", "board-game-nights-boston"):
+            self.assertNotIn(unrelated, nav_html)
+
 
 if __name__ == "__main__":
     unittest.main()
