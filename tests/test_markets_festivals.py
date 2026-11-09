@@ -96,6 +96,13 @@ class MarketFestivalClassifierTest(unittest.TestCase):
         self.assertNotEqual(scrapers.infer_category("Space Out Adult Night @ LEGO", "LEGO Discovery Center", "community"), "family")
         self.assertEqual(scrapers.infer_category("LEGO Build Day", "LEGO Discovery Center", "community"), "family")
 
+    def test_game_nights_are_games_not_sports(self):
+        # "game " is a sports keyword (Bruins game); a game night without "board" read as sports
+        for title in ("Retro Game Night", "Game Night at CanalSide by Unplugged Boston", "Light Game Night (Monday)",
+                      "Community Game Night", "NYT Games Night with Wyna Liu"):
+            self.assertEqual(scrapers.infer_category(title, "", None), "gaming", title)
+        self.assertEqual(scrapers.infer_category("Bruins Game Watch", "", None), "sports")
+
 
 class MarketsHubTest(unittest.TestCase):
     def test_hub_lists_market_events_only(self):
