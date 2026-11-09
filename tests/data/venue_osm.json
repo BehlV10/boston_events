@@ -1,0 +1,1848 @@
+{
+ "1 Avenue de Lafayette, Boston, MA 02111": {
+  "lat": 42.353404,
+  "lng": -71.060771,
+  "match": "Hyatt Regency Boston, 1, Avenue De Lafayette, Downtown Crossing, Downtown, Boston, Suffolk County, Massachusetts, 02111,",
+  "type": "tourism/hotel"
+ },
+ "1 Bennett St, Cambridge": {
+  "lat": 42.372305,
+  "lng": -71.122165,
+  "match": "1, Bennett Street, Old Cambridge, West Cambridge, Cambridge, Middlesex County, Massachusetts, 02138, United States",
+  "type": "place/house"
+ },
+ "1 Bow Market Way, Somerville": {
+  "lat": 42.381264,
+  "lng": -71.098212,
+  "match": "Saus, 1, Bow Market Way, Union Square, Somerville, Middlesex County, Massachusetts, 02143, United States",
+  "type": "amenity/fast_food"
+ },
+ "1 Broadway, Cambridge": {
+  "lat": 42.362634,
+  "lng": -71.083658,
+  "match": "Meta, 1, Broadway, East Cambridge, Cambridge, Middlesex County, Massachusetts, 02142, United States",
+  "type": "office/it"
+ },
+ "1 Broadway, Everett": {
+  "lat": 42.396941,
+  "lng": -71.064791,
+  "match": "1, Broadway, Hendersonville, Everett, Middlesex County, Massachusetts, 02149, United States",
+  "type": "place/house"
+ },
+ "1 Broadway, Everett (Encore Boston Harbor)": null,
+ "1 Central Wharf, Boston": null,
+ "1 Central Wharf, Boston, MA 02110": null,
+ "1 City Hall Sq, Boston": {
+  "lat": 42.360371,
+  "lng": -71.057976,
+  "match": "Boston City Hall, 1, Congress Street, Government Center/Faneuil Hall, Downtown, Boston, Suffolk County, Massachusetts, 0",
+  "type": "amenity/townhall"
+ },
+ "1 Education St, Cambridge": {
+  "lat": 42.369985,
+  "lng": -71.07064,
+  "match": "1, Education Street, East Cambridge, Cambridge, Middlesex County, Massachusetts, 02141, United States",
+  "type": "building/college"
+ },
+ "1 Franklin Park Rd, Boston": {
+  "lat": 42.302835,
+  "lng": -71.087628,
+  "match": "Community Resource Center, 1, Franklin Park Road, Roxbury, Boston, Suffolk County, Massachusetts, 02121, United States",
+  "type": "building/office"
+ },
+ "1 Guest St, Brighton": {
+  "lat": 42.35687,
+  "lng": -71.14791,
+  "match": "Carl and Ruth Shapiro Family National Center for Accessible Media, 1, Guest Street, Brighton, Boston, Suffolk County, Ma",
+  "type": "office/ngo"
+ },
+ "1 Hamilton Pl, Boston": {
+  "lat": 42.356234,
+  "lng": -71.060819,
+  "match": "Orpheum Theatre, 1, Hamilton Place, Downtown Crossing, Downtown, Boston, Suffolk County, Massachusetts, 02108, United St",
+  "type": "amenity/theatre"
+ },
+ "1 Lansdowne St, Boston": {
+  "lat": 42.347331,
+  "lng": -71.094534,
+  "match": "Loretta's Last Call, 1, Lansdowne Street, Landsdown, Fenway-Kenmore, Boston, Suffolk County, Massachusetts, 02215, Unite",
+  "type": "amenity/bar"
+ },
+ "1 Oxford St, Cambridge": {
+  "lat": 42.376869,
+  "lng": -71.116141,
+  "match": "Harvard Yard Mail Center, 1, Oxford Street, Baldwin, Cambridge, Middlesex County, Massachusetts, 02138, United States",
+  "type": "amenity/post_office"
+ },
+ "1 Park St, Boston": {
+  "lat": 42.356992,
+  "lng": -71.062187,
+  "match": "1, Park Street, Downtown Crossing, Downtown, Boston, Suffolk County, Massachusetts, 02108, United States",
+  "type": "building/office"
+ },
+ "1 Patriot Pl, Foxborough": {
+  "lat": 42.090888,
+  "lng": -71.264173,
+  "match": "Gillette Stadium, 1, Patriot Place, Foxborough, Norfolk County, Massachusetts, 02035, United States",
+  "type": "leisure/stadium"
+ },
+ "1 Science Park, Boston": {
+  "lat": 42.367411,
+  "lng": -71.071109,
+  "match": "Museum of Science, 1, Science Park, West End, Boston, Suffolk County, Massachusetts, 02214, United States",
+  "type": "tourism/museum"
+ },
+ "1 Shipyard Park, Charlestown": null,
+ "1 Westinghouse Plaza, Suite i107, Hyde Park": null,
+ "1 Westwood Rd, Somerville": {
+  "lat": 42.38697,
+  "lng": -71.104756,
+  "match": "1, Westwood Road, Spring Hill Historic District, Ball Square, Somerville, Middlesex County, Massachusetts, 02143, United",
+  "type": "building/yes"
+ },
+ "10 1/2 Beacon St, Boston": {
+  "lat": 42.357915,
+  "lng": -71.062081,
+  "match": "Boston Athenaeum, 10 1/2, Beacon Street, Downtown Crossing, Downtown, Boston, Suffolk County, Massachusetts, 02133, Unit",
+  "type": "amenity/library"
+ },
+ "10 Brookline St, Cambridge": {
+  "lat": 42.363562,
+  "lng": -71.101637,
+  "match": "Sonia, 10, Brookline Street, Central Square, Cambridgeport, Cambridge, Middlesex County, Massachusetts, 02139, United St",
+  "type": "amenity/nightclub"
+ },
+ "10 Eliot St, Cambridge": {
+  "lat": 42.372407,
+  "lng": -71.12152,
+  "match": "Charlie's Kitchen, 10, Eliot Street, Old Cambridge, West Cambridge, Cambridge, Middlesex County, Massachusetts, 02138, U",
+  "type": "amenity/restaurant"
+ },
+ "10 Holyoke St, Cambridge": {
+  "lat": 42.372695,
+  "lng": -71.118034,
+  "match": "10, Holyoke Street, Riverside, Cambridge, Middlesex County, Massachusetts, 02138, United States",
+  "type": "place/house"
+ },
+ "10 Old Colony Ave, South Boston": {
+  "lat": 42.337806,
+  "lng": -71.056554,
+  "match": "Castle Island, 10, Old Colony Avenue, South Boston, Boston, Suffolk County, Massachusetts, 02127, United States",
+  "type": "amenity/pub"
+ },
+ "10-12 Bow St, Somerville": {
+  "lat": 42.381433,
+  "lng": -71.10014,
+  "match": "Bow Street, Union Square, Somerville, Middlesex County, Massachusetts, 02143, United States",
+  "type": "highway/primary"
+ },
+ "100 CambridgeSide Pl, Cambridge": {
+  "lat": 42.36792,
+  "lng": -71.076361,
+  "match": "TJ Maxx, 100, Cambridgeside Place, East Cambridge, Cambridge, Middlesex County, Massachusetts, 02142, United States",
+  "type": "shop/department_store"
+ },
+ "100 Legends Way, Boston": {
+  "lat": 42.366299,
+  "lng": -71.062162,
+  "match": "TD Garden, 100, Legends Way, West End, Boston, Suffolk County, Massachusetts, 02114, United States",
+  "type": "leisure/stadium"
+ },
+ "100 Warrenton St, Boston": {
+  "lat": 42.350661,
+  "lng": -71.066211,
+  "match": "Rumor, 100, Warrenton Street, Downtown Crossing, Downtown, Boston, Suffolk County, Massachusetts, 02116, United States",
+  "type": "amenity/nightclub"
+ },
+ "100 William T Morrissey Blvd, Boston": {
+  "lat": 42.313411,
+  "lng": -71.035442,
+  "match": "University Hall, 100, William T. Morrissey Boulevard, Dorchester, Boston, Suffolk County, Massachusetts, 02125, United S",
+  "type": "building/university"
+ },
+ "101 Rogers St, Cambridge": {
+  "lat": 42.366615,
+  "lng": -71.082764,
+  "match": "The Foundry, 101, Rogers Street, East Cambridge, Cambridge, Middlesex County, Massachusetts, 02142, United States",
+  "type": "amenity/community_centre"
+ },
+ "101 South St, Somerville": {
+  "lat": 42.374786,
+  "lng": -71.09106,
+  "match": "Mamaleh's Delicatessen, 101, South Street, Brickbottom, Somerville, Middlesex County, Massachusetts, 02143, United State",
+  "type": "amenity/restaurant"
+ },
+ "1031 Commonwealth Ave, Boston": {
+  "lat": 42.352308,
+  "lng": -71.121707,
+  "match": "1027, 1029,1031,1033, Commonwealth Avenue, Packard's Corner, Allston, Boston, Suffolk County, Massachusetts, 02215, Unit",
+  "type": "building/apartments"
+ },
+ "106 Boylston St, Boston": {
+  "lat": 42.352063,
+  "lng": -71.06534,
+  "match": "Colonial Building, 98,100,102,104,106, Boylston Street, Beacon Hill, Boston, Suffolk County, Massachusetts, 02116, Unite",
+  "type": "building/college"
+ },
+ "11 Beacon St, Boston": {
+  "lat": 42.355322,
+  "lng": -71.072681,
+  "match": "11, Beacon Street, Back Bay, Boston, Suffolk County, Massachusetts, 02116, United States",
+  "type": "place/house"
+ },
+ "11 Divinity Ave, Cambridge": {
+  "lat": 42.378214,
+  "lng": -71.114928,
+  "match": "Peabody Museum of Archaeology and Ethnology, 11, Divinity Avenue, Baldwin, Cambridge, Middlesex County, Massachusetts, 0",
+  "type": "tourism/museum"
+ },
+ "11 Marshall St, Boston": {
+  "lat": 42.361438,
+  "lng": -71.056794,
+  "match": "11,12, Marshall Street, Government Center/Faneuil Hall, Downtown, Boston, Suffolk County, Massachusetts, 02108, United S",
+  "type": "building/yes"
+ },
+ "11 Sanborn Ct, Somerville": {
+  "lat": 42.380107,
+  "lng": -71.094471,
+  "match": "Warehouse XI, 11, Sanborn Court, Union Square, Somerville, Middlesex County, Massachusetts, 02143, United States",
+  "type": "amenity/community_centre"
+ },
+ "110 Causeway St, Boston": {
+  "lat": 42.365929,
+  "lng": -71.061447,
+  "match": "Guy Fieri’s Tequila Cocina, 110, Causeway Street, West End, Boston, Suffolk County, Massachusetts, 02114, United States",
+  "type": "amenity/bar"
+ },
+ "111 High St, Medford": {
+  "lat": 42.41973,
+  "lng": -71.113549,
+  "match": "Medford Public Library, 111, High Street, Medford Square, Medford Hillside, West Medford, Medford, Middlesex County, Mas",
+  "type": "office/Medford"
+ },
+ "1116 Boylston St, Boston": {
+  "lat": 42.346773,
+  "lng": -71.088774,
+  "match": "The Bebop, 1116, Boylston Street, Landsdown, Fenway-Kenmore, Boston, Suffolk County, Massachusetts, 02215, United States",
+  "type": "amenity/pub"
+ },
+ "1140 Boylston St, Boston": {
+  "lat": 42.346549,
+  "lng": -71.089522,
+  "match": "1140, Boylston Street, Landsdown, Fenway-Kenmore, Boston, Suffolk County, Massachusetts, 02215, United States",
+  "type": "building/college"
+ },
+ "115 Broadway, Somerville": {
+  "lat": 42.387928,
+  "lng": -71.083558,
+  "match": "115, Broadway, East Somerville, Somerville, Middlesex County, Massachusetts, 02145, United States",
+  "type": "building/yes"
+ },
+ "115 College Ave, Somerville": {
+  "lat": 42.399794,
+  "lng": -71.117915,
+  "match": "115, College Avenue, West Somerville, Ball Square, Somerville, Middlesex County, Massachusetts, 02144, United States",
+  "type": "building/apartments"
+ },
+ "115 Federal St, Boston": {
+  "lat": 42.354884,
+  "lng": -71.056441,
+  "match": "115, Federal Street, Church Green, Downtown, Boston, Suffolk County, Massachusetts, 02110, United States",
+  "type": "place/house"
+ },
+ "1180 Washington St, Boston": {
+  "lat": 42.272424,
+  "lng": -71.068718,
+  "match": "1180, Washington Street, Lower Mills, Mattapan, Boston, Suffolk County, Massachusetts, 02124, United States",
+  "type": "place/house"
+ },
+ "1187 Beacon St, Brookline, MA 02446": {
+  "lat": 42.34357,
+  "lng": -71.114457,
+  "match": "Congregation Ohabei Shalom, 1177;1187, Beacon Street, Coolidge Corner, North Brookline, Brookline, Norfolk County, Massa",
+  "type": "amenity/place_of_worship"
+ },
+ "1193 Cambridge St, Cambridge": {
+  "lat": 42.37338,
+  "lng": -71.097162,
+  "match": "An Sibin, 1193, Cambridge Street, Inman Square, Wellington-Harrington, Cambridge, Middlesex County, Massachusetts, 02139",
+  "type": "amenity/bar"
+ },
+ "1205 Cambridge St, Somerville": null,
+ "123 Main St, Watertown": {
+  "lat": 42.367551,
+  "lng": -71.186744,
+  "match": "Watertown Free Public Library, 123, Main Street, Watertown, Middlesex County, Massachusetts, 02172, United States",
+  "type": "office/Watertown"
+ },
+ "1238 Massachusetts Ave, Cambridge": {
+  "lat": 42.372355,
+  "lng": -71.116016,
+  "match": "Hong Kong, 1238, Massachusetts Avenue, Riverside, Cambridge, Middlesex County, Massachusetts, 02138, United States",
+  "type": "amenity/restaurant"
+ },
+ "1250 Massachusetts Ave, Boston": {
+  "lat": 42.321902,
+  "lng": -71.062586,
+  "match": "1250, Massachusetts Avenue, Uphams Corner, Dorchester, Boston, Suffolk County, Massachusetts, 02125, United States",
+  "type": "place/house"
+ },
+ "1250 Massachusetts Ave, Dorchester": {
+  "lat": 42.321902,
+  "lng": -71.062586,
+  "match": "1250, Massachusetts Avenue, Uphams Corner, Dorchester, Boston, Suffolk County, Massachusetts, 02125, United States",
+  "type": "place/house"
+ },
+ "1256 Massachusetts Ave, Cambridge": {
+  "lat": 42.372541,
+  "lng": -71.116363,
+  "match": "Harvard Book Store, 1256, Massachusetts Avenue, Riverside, Cambridge, Middlesex County, Massachusetts, 02138, United Sta",
+  "type": "shop/books"
+ },
+ "127 Smith Pl, Cambridge": {
+  "lat": 42.394004,
+  "lng": -71.151593,
+  "match": "Olympia Fencing Center, 127, Smith Place, Cambridge Highlands, Cambridge, Middlesex County, Massachusetts, 02138, United",
+  "type": "leisure/sports_centre"
+ },
+ "1301 Boylston St, Boston": {
+  "lat": 42.344745,
+  "lng": -71.098389,
+  "match": "1301, Boylston Street, Landsdown, Fenway-Kenmore, Boston, Suffolk County, Massachusetts, 02215, United States",
+  "type": "building/yes"
+ },
+ "1343 Cambridge St, Cambridge": {
+  "lat": 42.373713,
+  "lng": -71.099962,
+  "match": "Gather Here, 1343, Cambridge Street, Inman Square, Wellington-Harrington, Cambridge, Middlesex County, Massachusetts, 02",
+  "type": "shop/craft"
+ },
+ "1353 Cambridge St, Cambridge": {
+  "lat": 42.373743,
+  "lng": -71.100055,
+  "match": "1353, Cambridge Street, Inman Square, Wellington-Harrington, Cambridge, Middlesex County, Massachusetts, 02139, United S",
+  "type": "place/house"
+ },
+ "1357 Cambridge St, Cambridge": {
+  "lat": 42.373761,
+  "lng": -71.100162,
+  "match": "The Druid, 1357, Cambridge Street, Inman Square, Wellington-Harrington, Cambridge, Middlesex County, Massachusetts, 0213",
+  "type": "amenity/pub"
+ },
+ "136 Magazine St, Cambridge": {
+  "lat": 42.358532,
+  "lng": -71.111091,
+  "match": "134;136, Magazine Street, Cambridgeport, Cambridge, Middlesex County, Massachusetts, 02238, United States",
+  "type": "building/synagogue"
+ },
+ "136 Massachusetts Ave, Boston": {
+  "lat": 42.347045,
+  "lng": -71.087094,
+  "match": "Berklee Performance Center, 136, Massachusetts Avenue, Back Bay, Boston, Suffolk County, Massachusetts, 02115, United St",
+  "type": "amenity/theatre"
+ },
+ "138 Cambridge St, Boston": {
+  "lat": 42.361025,
+  "lng": -71.063968,
+  "match": "Tip Tap Room, 138, Cambridge Street, Beacon Hill, Boston, Suffolk County, Massachusetts, 02114, United States",
+  "type": "amenity/restaurant"
+ },
+ "138 Tremont St, Boston": {
+  "lat": 42.355853,
+  "lng": -71.062546,
+  "match": "138, Tremont Street, Beacon Hill, Boston, Suffolk County, Massachusetts, 02111, United States",
+  "type": "place/house"
+ },
+ "139 Tremont St, Boston": {
+  "lat": 42.355401,
+  "lng": -71.063764,
+  "match": "Start Boston Freedom Trail, 139, Tremont Street, Beacon Hill, Boston, Suffolk County, Massachusetts, 02108, United State",
+  "type": "information/office"
+ },
+ "14 Pi Alley, Boston": {
+  "lat": 42.358109,
+  "lng": -71.058716,
+  "match": "The Alley Bar, 14, Pi Alley, Downtown Crossing, Downtown, Boston, Suffolk County, Massachusetts, 02108, United States",
+  "type": "amenity/pub"
+ },
+ "14 Tyler St, Somerville": {
+  "lat": 42.382134,
+  "lng": -71.106418,
+  "match": "14, Tyler Street, Ames Business Park, Ball Square, Somerville, Middlesex County, Massachusetts, 02143, United States",
+  "type": "building/industrial"
+ },
+ "140 Boylston St, Boston": {
+  "lat": 42.316378,
+  "lng": -71.102851,
+  "match": "140, Boylston Street, Jamaica Plain, Boston, Suffolk County, Massachusetts, 02130, United States",
+  "type": "place/house"
+ },
+ "140 Clarendon St, Boston": {
+  "lat": 42.348585,
+  "lng": -71.074479,
+  "match": "140 Clarendon, 140, Clarendon Street, Back Bay, Boston, Suffolk County, Massachusetts, 02116, United States",
+  "type": "tourism/hotel"
+ },
+ "141 Pearl St, Boston": {
+  "lat": 42.354638,
+  "lng": -71.053738,
+  "match": "141, Pearl Street, Waterfront, Downtown, Boston, Suffolk County, Massachusetts, 02110, United States",
+  "type": "building/yes"
+ },
+ "144 South St, Jamaica Plain": {
+  "lat": 42.305089,
+  "lng": -71.114516,
+  "match": "Jeanie Johnston Pub & Grill, 144, South Street, Jamaica Plain, Boston, Suffolk County, Massachusetts, 02130, United Stat",
+  "type": "amenity/pub"
+ },
+ "149 Dudley St, Roxbury": {
+  "lat": 42.328058,
+  "lng": -71.083603,
+  "match": "Shaw-Roxbury Branch of the Boston Public Library, 149, Dudley Street, Nubian Square, Roxbury, Boston, Suffolk County, Ma",
+  "type": "amenity/library"
+ },
+ "15 Lansdowne St, Boston": {
+  "lat": 42.347407,
+  "lng": -71.095936,
+  "match": "Foundation Room, 15, Lansdowne Street, Landsdown, Fenway-Kenmore, Boston, Suffolk County, Massachusetts, 02215, United S",
+  "type": "amenity/bar"
+ },
+ "15 Newbury St, Boston": {
+  "lat": 42.352612,
+  "lng": -71.072404,
+  "match": "Emmanuel Church, 15, Newbury Street, Back Bay, Boston, Suffolk County, Massachusetts, 02116, United States",
+  "type": "amenity/place_of_worship"
+ },
+ "150 Staniford St, Boston": {
+  "lat": 42.364497,
+  "lng": -71.063987,
+  "match": "West End Place, 150, Staniford Street, West End, Boston, Suffolk County, Massachusetts, 02114, United States",
+  "type": "building/yes"
+ },
+ "152 Hampden St, Boston": {
+  "lat": 42.327753,
+  "lng": -71.074897,
+  "match": "152, Hampden Street, Roxbury, Boston, Suffolk County, Massachusetts, 02118, United States",
+  "type": "building/yes"
+ },
+ "152 Hampden St, Roxbury": {
+  "lat": 42.327753,
+  "lng": -71.074897,
+  "match": "152, Hampden Street, Roxbury, Boston, Suffolk County, Massachusetts, 02118, United States",
+  "type": "building/yes"
+ },
+ "158 Brighton Ave, Allston": {
+  "lat": 42.352657,
+  "lng": -71.132637,
+  "match": "Brighton Music Hall, 158, Brighton Avenue, Allston Village, Allston, Boston, Suffolk County, Massachusetts, 02134, Unite",
+  "type": "amenity/music_venue"
+ },
+ "16 Bow St, Somerville": {
+  "lat": 42.380737,
+  "lng": -71.097254,
+  "match": "16;18, Bow Street, Union Square, Somerville, Middlesex County, Massachusetts, 02143, United States",
+  "type": "building/commercial"
+ },
+ "160 Holland St, Somerville": {
+  "lat": 42.400522,
+  "lng": -71.126063,
+  "match": "160;162, Holland Street, West Somerville, Ball Square, Somerville, Middlesex County, Massachusetts, 02144, United States",
+  "type": "building/apartments"
+ },
+ "160 State St, Boston": {
+  "lat": 42.359377,
+  "lng": -71.053855,
+  "match": "160, State Street, Government Center/Faneuil Hall, Downtown, Boston, Suffolk County, Massachusetts, 02109, United States",
+  "type": "place/house"
+ },
+ "1667 Massachusetts Ave, Cambridge": {
+  "lat": 42.382136,
+  "lng": -71.119485,
+  "match": "Lizard Lounge, 1667, Massachusetts Avenue, Baldwin, Cambridge, Middlesex County, Massachusetts, 02140, United States",
+  "type": "amenity/nightclub"
+ },
+ "170 Beacon St, Boston": {
+  "lat": 42.354632,
+  "lng": -71.076472,
+  "match": "170, Beacon Street, Back Bay, Boston, Suffolk County, Massachusetts, 02116, United States",
+  "type": "building/apartments"
+ },
+ "173 Broadway, Somerville": {
+  "lat": 42.3891,
+  "lng": -71.086326,
+  "match": "171;173;179, Broadway, East Somerville, Somerville, Middlesex County, Massachusetts, 02145, United States",
+  "type": "building/yes"
+ },
+ "175 N Harvard St, Boston": {
+  "lat": 42.364157,
+  "lng": -71.129335,
+  "match": "175 North Harvard, 175, North Harvard Street, Barry's Corner, Allston, Boston, Suffolk County, Massachusetts, 02163, Uni",
+  "type": "building/university"
+ },
+ "184 Dudley St, Roxbury": {
+  "lat": 42.328628,
+  "lng": -71.08212,
+  "match": "184, Dudley Street, Nubian Square, Roxbury, Boston, Suffolk County, Massachusetts, 02119, United States",
+  "type": "place/house"
+ },
+ "1859 Centre St, West Roxbury": {
+  "lat": 42.286327,
+  "lng": -71.155301,
+  "match": "Theodore Parker Unitarian Universalist Church, 1859, Centre Street, Highland, West Roxbury, Boston, Suffolk County, Mass",
+  "type": "amenity/place_of_worship"
+ },
+ "191 Highland Ave, Somerville": {
+  "lat": 42.389661,
+  "lng": -71.105998,
+  "match": "Center for Arts at the Armory, 191, Highland Avenue, Spring Hill, Ball Square, Somerville, Middlesex County, Massachuset",
+  "type": "amenity/arts_centre"
+ },
+ "1920 Massachusetts Ave, Cambridge": {
+  "lat": 42.389061,
+  "lng": -71.119985,
+  "match": "McCarthy's, 1920, Massachusetts Avenue, North Cambridge, Cambridge, Middlesex County, Massachusetts, 02140, United State",
+  "type": "amenity/bar"
+ },
+ "193 Hanover St, Boston": {
+  "lat": 42.362756,
+  "lng": -71.055414,
+  "match": "193, Hanover Street, Government Center/Faneuil Hall, North End, Boston, Suffolk County, Massachusetts, 02113, United Sta",
+  "type": "place/house"
+ },
+ "195 Boston St, Dorchester": {
+  "lat": 42.323274,
+  "lng": -71.06086,
+  "match": "195;195A, Boston Street, Uphams Corner, Dorchester, Boston, Suffolk County, Massachusetts, 02125, United States",
+  "type": "building/yes"
+ },
+ "1950 Massachusetts Ave, Cambridge": {
+  "lat": 42.389482,
+  "lng": -71.120543,
+  "match": "Masonic Temple, 1950, Massachusetts Avenue, North Cambridge, Cambridge, Middlesex County, Massachusetts, 02140, United S",
+  "type": "building/civic"
+ },
+ "2 Arrow St, Cambridge": {
+  "lat": 42.370792,
+  "lng": -71.11459,
+  "match": "Arrow Street Arts, 2, Arrow Street, Riverside, Cambridge, Middlesex County, Massachusetts, 02138, United States",
+  "type": "amenity/events_venue"
+ },
+ "2 Belgrade Ave, Roslindale": {
+  "lat": 42.286908,
+  "lng": -71.13011,
+  "match": "Distraction Brewing Co., 2, Belgrade Avenue, Mount Hope, Roslindale, Boston, Suffolk County, Massachusetts, 02131, Unite",
+  "type": "craft/brewery"
+ },
+ "2 Lansdowne St, Boston": {
+  "lat": 42.346694,
+  "lng": -71.095494,
+  "match": "MGM Music Hall, 2, Lansdowne Street, Landsdown, Fenway-Kenmore, Boston, Suffolk County, Massachusetts, 02115, United Sta",
+  "type": "amenity/theatre"
+ },
+ "20 Talbot Ave, Medford": null,
+ "200 Brighton Ave, Allston": {
+  "lat": 42.353116,
+  "lng": -71.134388,
+  "match": "The Silhouette Lounge, 200, Brighton Avenue, Allston Village, Allston, Boston, Suffolk County, Massachusetts, 02134, Uni",
+  "type": "amenity/bar"
+ },
+ "204 Tremont St, Boston": {
+  "lat": 42.351815,
+  "lng": -71.064586,
+  "match": "204, Tremont Street, Downtown Crossing, Downtown, Boston, Suffolk County, Massachusetts, 02116, United States",
+  "type": "place/house"
+ },
+ "206 Waltham St, Newton": {
+  "lat": 42.35989,
+  "lng": -71.221378,
+  "match": "206, Waltham Street, West Newton, Newton, Middlesex County, Massachusetts, 02465, United States",
+  "type": "building/yes"
+ },
+ "206 Washington St, Boston": {
+  "lat": 42.358692,
+  "lng": -71.057588,
+  "match": "The Bostonian Society Library and Special Collections, 206, Washington Street, Downtown Crossing, Downtown, Boston, Suff",
+  "type": "amenity/library"
+ },
+ "209 Columbus Ave, Boston": {
+  "lat": 42.348466,
+  "lng": -71.072514,
+  "match": "209, Columbus Avenue, Back Bay, Boston, Suffolk County, Massachusetts, 02117, United States",
+  "type": "building/yes"
+ },
+ "21 Ames St, Cambridge": {
+  "lat": 42.360142,
+  "lng": -71.089856,
+  "match": "18 Dreyfus Building, 21, Ames Street, MIT, Cambridge, Middlesex County, Massachusetts, 02142, United States",
+  "type": "building/university"
+ },
+ "21 Main St, Medford": {
+  "lat": 42.417887,
+  "lng": -71.110191,
+  "match": "Deep Cuts, 21, Main Street, Medford Square, West Medford, Medford, Middlesex County, Massachusetts, 02155, United States",
+  "type": "amenity/bar"
+ },
+ "210 Morrissey Blvd, Dorchester": {
+  "lat": 42.315727,
+  "lng": -71.035387,
+  "match": "Edward M. Kennedy Institute for the United States Senate, 210, William T. Morrissey Boulevard, Dorchester, Boston, Suffo",
+  "type": "tourism/museum"
+ },
+ "2120 Dorchester Ave, Dorchester": {
+  "lat": 42.278522,
+  "lng": -71.066208,
+  "match": "2120, Dorchester Avenue, Ashmont, Dorchester, Boston, Suffolk County, Massachusetts, 02124, United States",
+  "type": "place/house"
+ },
+ "215 Charles St, Boston": {
+  "lat": 42.362068,
+  "lng": -71.070158,
+  "match": "The Liberty Hotel, 215, Charles Street, West End, Boston, Suffolk County, Massachusetts, 02114, United States",
+  "type": "tourism/hotel"
+ },
+ "216 Hanover St, Boston": {
+  "lat": 42.362917,
+  "lng": -71.055523,
+  "match": "216, Hanover Street, Government Center/Faneuil Hall, North End, Boston, Suffolk County, Massachusetts, 02113, United Sta",
+  "type": "place/house"
+ },
+ "219 Elm St, Somerville": {
+  "lat": 42.39458,
+  "lng": -71.12118,
+  "match": "The Painted Burro, 219, Elm Street, Davis Square, Ball Square, Somerville, Middlesex County, Massachusetts, 02144, Unite",
+  "type": "amenity/restaurant"
+ },
+ "219 Tremont St, Boston": {
+  "lat": 42.351546,
+  "lng": -71.065118,
+  "match": "Cutler Majestic Theater, 219, Tremont Street, Downtown Crossing, Downtown, Boston, Suffolk County, Massachusetts, 02111,",
+  "type": "amenity/theatre"
+ },
+ "22 Church St, Cambridge": {
+  "lat": 42.374296,
+  "lng": -71.120056,
+  "match": "22, Church Street, West Cambridge, Cambridge, Middlesex County, Massachusetts, 02138, United States",
+  "type": "place/house"
+ },
+ "22 Vinal Ave, Somerville": {
+  "lat": 42.383219,
+  "lng": -71.097872,
+  "match": "22, Vinal Avenue, Prospect Hill, Ball Square, Somerville, Middlesex County, Massachusetts, 02143, United States",
+  "type": "place/house"
+ },
+ "222 Jacobs St, Cambridge": {
+  "lat": 42.372435,
+  "lng": -71.074614,
+  "match": "Bon Me, 222, Jacobs Street, East Cambridge, Cambridge, Middlesex County, Massachusetts, 02214, United States",
+  "type": "amenity/fast_food"
+ },
+ "222 Tremont St, Boston": {
+  "lat": 42.35151,
+  "lng": -71.064532,
+  "match": "220,222, Tremont Street, Downtown Crossing, Downtown, Boston, Suffolk County, Massachusetts, 02116, United States",
+  "type": "building/yes"
+ },
+ "2222 Centre St, West Roxbury": {
+  "lat": 42.273704,
+  "lng": -71.158564,
+  "match": "2222, Centre Street, West Roxbury, Boston, Suffolk County, Massachusetts, 02132, United States",
+  "type": "building/yes"
+ },
+ "2269 Dorchester Ave, Dorchester": {
+  "lat": 42.272997,
+  "lng": -71.068065,
+  "match": "2269;2269A, Dorchester Avenue, Mattapan, Boston, Suffolk County, Massachusetts, 02124, United States",
+  "type": "building/commercial"
+ },
+ "2298 Massachusetts Ave, Cambridge": {
+  "lat": 42.39506,
+  "lng": -71.127873,
+  "match": "Kadampa Meditation Center Boston, 2298, Massachusetts Avenue, North Cambridge, Cambridge, Middlesex County, Massachusett",
+  "type": "amenity/place_of_worship"
+ },
+ "230 Fenway, Boston": {
+  "lat": 42.338801,
+  "lng": -71.096734,
+  "match": "W. Van Alan Clark, Jr. Library, 230, Fenway, Landsdown, Fenway-Kenmore, Boston, Suffolk County, Massachusetts, 02115, Un",
+  "type": "amenity/library"
+ },
+ "2300 Washington St, Roxbury": {
+  "lat": 42.33021,
+  "lng": -71.083643,
+  "match": "Bruce C. Bolling Municipal Building (Boston Public Schools), 2300, Washington Street, Nubian Square, Roxbury, Boston, Su",
+  "type": "building/public"
+ },
+ "2307 Washington St, Roxbury": {
+  "lat": 42.330257,
+  "lng": -71.084285,
+  "match": "2307, Washington Street, Nubian Square, Roxbury, Boston, Suffolk County, Massachusetts, 02119, United States",
+  "type": "place/house"
+ },
+ "24 Quincy St, Cambridge": {
+  "lat": 42.373704,
+  "lng": -71.114276,
+  "match": "Harvard Film Archive, 24, Quincy Street, Mid-Cambridge, Cambridge, Middlesex County, Massachusetts, 02138, United States",
+  "type": "amenity/arts_centre"
+ },
+ "242 E Berkeley St, Boston": {
+  "lat": 42.343411,
+  "lng": -71.063425,
+  "match": "More Than Words, 242, East Berkeley Street, South End, Boston, Suffolk County, Massachusetts, 02118, United States",
+  "type": "office/association"
+ },
+ "245 Concord Ave, Cambridge": {
+  "lat": 42.383374,
+  "lng": -71.132576,
+  "match": "Cambridge Library Boudreau Branch, 245, Concord Avenue, Neighborhood Nine, Cambridge, Middlesex County, Massachusetts, 0",
+  "type": "amenity/library"
+ },
+ "246 Tremont St, Boston": {
+  "lat": 42.350718,
+  "lng": -71.064658,
+  "match": "Wilbur Theatre, 246, Tremont Street, Downtown Crossing, Downtown, Boston, Suffolk County, Massachusetts, 02116, United S",
+  "type": "amenity/theatre"
+ },
+ "247 Elm St, Somerville": {
+  "lat": 42.39539,
+  "lng": -71.121737,
+  "match": "The Burren, 247, Elm Street, Davis Square, Ball Square, Somerville, Middlesex County, Massachusetts, 02144, United State",
+  "type": "amenity/restaurant"
+ },
+ "25 Evans Way, Boston": {
+  "lat": 42.338245,
+  "lng": -71.099154,
+  "match": "Isabella Stewart Gardner Museum, 25, Evans Way, Longwood, Boston, Suffolk County, Massachusetts, 02115, United States",
+  "type": "tourism/museum"
+ },
+ "25 Harbor Shore Dr, Boston": {
+  "lat": 42.352865,
+  "lng": -71.042963,
+  "match": "The Institute of Contemporary Art, 25, Harbor Shore Drive, Seaport, Boston, Suffolk County, Massachusetts, 02210, United",
+  "type": "tourism/museum"
+ },
+ "25 School St, Boston": {
+  "lat": 42.296666,
+  "lng": -71.07451,
+  "match": "25, School Street, Dorchester, Boston, Suffolk County, Massachusetts, 02124, United States",
+  "type": "place/house"
+ },
+ "25 Union St, Boston": {
+  "lat": 42.361006,
+  "lng": -71.056705,
+  "match": "23,25,27, Union Street, Government Center/Faneuil Hall, Downtown, Boston, Suffolk County, Massachusetts, 02109, United S",
+  "type": "building/retail"
+ },
+ "25 White St, Cambridge": {
+  "lat": 42.389849,
+  "lng": -71.1185,
+  "match": "1;5;9;13;15;17;19;23;25;29;37;49;53, White Street, North Cambridge, Cambridge, Middlesex County, Massachusetts, 02144, U",
+  "type": "building/retail"
+ },
+ "255 Elm St, Somerville": {
+  "lat": 42.395568,
+  "lng": -71.121858,
+  "match": "The Goods, 255, Elm Street, Davis Square, Ball Square, Somerville, Middlesex County, Massachusetts, 02144, United States",
+  "type": "shop/cannabis"
+ },
+ "256 Marginal St, East Boston": {
+  "lat": 42.361079,
+  "lng": -71.035158,
+  "match": "Lightship Nantucket (LV-112), 256, Marginal Street, Jeffries Point, East Boston, Boston, Suffolk County, Massachusetts, ",
+  "type": "historic/ship"
+ },
+ "26 New St, Cambridge": {
+  "lat": 42.387884,
+  "lng": -71.140417,
+  "match": "26;48, New Street, Fresh Pond Mall, Neighborhood Nine, Cambridge, Middlesex County, Massachusetts, 02138, United States",
+  "type": "building/yes"
+ },
+ "26 Oxford St, Cambridge": {
+  "lat": 42.378207,
+  "lng": -71.115448,
+  "match": "Harvard Geological and Mineral Museum, 26, Oxford Street, Baldwin, Cambridge, Middlesex County, Massachusetts, 02138, Un",
+  "type": "tourism/museum"
+ },
+ "264 Huntington Ave, Boston": {
+  "lat": 42.34187,
+  "lng": -71.08564,
+  "match": "Huntington Theatre Company, 264, Huntington Avenue, Fenway-Kenmore, Boston, Suffolk County, Massachusetts, 02115, United",
+  "type": "amenity/theatre"
+ },
+ "265 Tremont St, Boston": {
+  "lat": 42.350505,
+  "lng": -71.065672,
+  "match": "Shubert Theatre, 263;265, Tremont Street, Downtown Crossing, Downtown, Boston, Suffolk County, Massachusetts, 02111, Uni",
+  "type": "building/yes"
+ },
+ "27 Garden St, Cambridge": {
+  "lat": 42.378681,
+  "lng": -71.123588,
+  "match": "Edward M. Pickman Concert Hall, 27, Garden Street, Neighborhood Nine, Cambridge, Middlesex County, Massachusetts, 02138,",
+  "type": "amenity/theatre"
+ },
+ "270 Tremont St, Boston": {
+  "lat": 42.350458,
+  "lng": -71.064305,
+  "match": "Wang Theater, 270, Tremont Street, Downtown Crossing, Downtown, Boston, Suffolk County, Massachusetts, 02111, United Sta",
+  "type": "amenity/theatre"
+ },
+ "279 Harvard St, Brookline": {
+  "lat": 42.342657,
+  "lng": -71.121739,
+  "match": "Brookline Booksmith, 279, Harvard Street, Coolidge Corner, North Brookline, Brookline, Norfolk County, Massachusetts, 02",
+  "type": "shop/books"
+ },
+ "279 Tremont St, Boston": {
+  "lat": 42.350082,
+  "lng": -71.065799,
+  "match": "271,279, Tremont Street, Downtown, Boston, Suffolk County, Massachusetts, 02116, United States",
+  "type": "place/house"
+ },
+ "28 Commonwealth Ave, Chestnut Hill": null,
+ "284 Amory St, Boston": {
+  "lat": 42.314737,
+  "lng": -71.103674,
+  "match": "The Brewery, 284, Amory Street, Jamaica Plain, Boston, Suffolk County, Massachusetts, 02130, United States",
+  "type": "building/commercial"
+ },
+ "284 Amory St, Jamaica Plain": {
+  "lat": 42.314737,
+  "lng": -71.103674,
+  "match": "The Brewery, 284, Amory Street, Jamaica Plain, Boston, Suffolk County, Massachusetts, 02130, United States",
+  "type": "building/commercial"
+ },
+ "284 Broadway, Cambridge": {
+  "lat": 42.367774,
+  "lng": -71.09798,
+  "match": "284, Broadway, Harlow Square, The Port, Cambridge, Middlesex County, Massachusetts, 02139, United States",
+  "type": "building/retail"
+ },
+ "285 Washington St, Somerville": {
+  "lat": 42.379723,
+  "lng": -71.098218,
+  "match": "285, Washington Street, Union Square, Somerville, Middlesex County, Massachusetts, 02143, United States",
+  "type": "building/retail"
+ },
+ "288 Green St, Cambridge": {
+  "lat": 42.364607,
+  "lng": -71.104352,
+  "match": "288;296, Green Street, Central Square, Cambridgeport, Cambridge, Middlesex County, Massachusetts, 02139, United States",
+  "type": "building/office"
+ },
+ "290 Harvard St, Brookline": {
+  "lat": 42.342441,
+  "lng": -71.1227,
+  "match": "Coolidge Corner Theatre, 290, Harvard Street, Coolidge Corner, North Brookline, Brookline, Norfolk County, Massachusetts",
+  "type": "amenity/cinema"
+ },
+ "290 Huntington Ave, Boston": {
+  "lat": 42.341162,
+  "lng": -71.086075,
+  "match": "New England Conservatory of Music, 290, Huntington Avenue, Fenway-Kenmore, Boston, Suffolk County, Massachusetts, 02115,",
+  "type": "amenity/college"
+ },
+ "290 Northern Ave, Boston": {
+  "lat": 42.348503,
+  "lng": -71.035935,
+  "match": "Leader Bank Pavilion, 290, Northern Avenue, Seaport, Boston, Suffolk County, Massachusetts, 02210, United States",
+  "type": "amenity/theatre"
+ },
+ "291 3rd St, Cambridge": {
+  "lat": 42.364608,
+  "lng": -71.083171,
+  "match": "Batifol: Brasserie Parisienne, 291, Third Street, East Cambridge, Cambridge, Middlesex County, Massachusetts, 02142, Uni",
+  "type": "amenity/restaurant"
+ },
+ "292 Main St, Cambridge": {
+  "lat": 42.362013,
+  "lng": -71.085831,
+  "match": "E38, 292, Main Street, MIT, Cambridge, Middlesex County, Massachusetts, 02142, United States",
+  "type": "building/university"
+ },
+ "292 Massachusetts Ave, Cambridge": {
+  "lat": 42.362146,
+  "lng": -71.098631,
+  "match": "Roxy’s Grilled Cheese, 292, Massachusetts Avenue, Central Square, Cambridgeport, Cambridge, Middlesex County, Massachuse",
+  "type": "amenity/fast_food"
+ },
+ "3 Church St, Cambridge": {
+  "lat": 42.374595,
+  "lng": -71.119435,
+  "match": "The First Parish in Cambridge, 3, Church Street, West Cambridge, Cambridge, Middlesex County, Massachusetts, 02138, Unit",
+  "type": "amenity/place_of_worship"
+ },
+ "3 City Hall Square, Lynn": {
+  "lat": 42.464724,
+  "lng": -70.951194,
+  "match": "Lynn Memorial City Hall and Auditorium, 3, City Hall Square, Central Square Historic District, Lynn, Essex County, Massa",
+  "type": "building/yes"
+ },
+ "3 Harvard Ave, Allston": {
+  "lat": 42.355242,
+  "lng": -71.132869,
+  "match": "O'Brien's Pub, 3, Harvard Avenue, Allston Village, Allston, Boston, Suffolk County, Massachusetts, 02134, United States",
+  "type": "amenity/bar"
+ },
+ "3 Oxford St, Cambridge": {
+  "lat": 42.376554,
+  "lng": -71.115931,
+  "match": "3, Oxford Street, Baldwin, Cambridge, Middlesex County, Massachusetts, 02138, United States",
+  "type": "place/house"
+ },
+ "30 Brimmer St, Boston": {
+  "lat": 42.35776,
+  "lng": -71.071515,
+  "match": "Church of the Advent, 30, Brimmer Street, Beacon Hill, Boston, Suffolk County, Massachusetts, 02108, United States",
+  "type": "amenity/place_of_worship"
+ },
+ "30 Forest St, Medford": {
+  "lat": 42.420316,
+  "lng": -71.109088,
+  "match": "Chevalier Theatre, 30, Forest Street, Medford Square, West Medford, Medford, Middlesex County, Massachusetts, 02155, Uni",
+  "type": "amenity/theatre"
+ },
+ "30 Gainsborough St, Boston": {
+  "lat": 42.341087,
+  "lng": -71.086205,
+  "match": "Jordan Hall, 30, Gainsborough Street, Fenway-Kenmore, Boston, Suffolk County, Massachusetts, 02115, United States",
+  "type": "amenity/theatre"
+ },
+ "30 Germania St, Boston": {
+  "lat": 42.31457,
+  "lng": -71.102762,
+  "match": "Samuel Adams Brewery, 30, Germania Street, Jamaica Plain, Boston, Suffolk County, Massachusetts, 02130, United States",
+  "type": "craft/brewery"
+ },
+ "30 Harvard Ave, Medford": {
+  "lat": 42.420406,
+  "lng": -71.133629,
+  "match": "Medford Brewing Company, 30, Harvard Avenue, Medford Hillside, West Medford, Medford, Middlesex County, Massachusetts, 0",
+  "type": "craft/brewery"
+ },
+ "300 N Harvard St, Allston": {
+  "lat": 42.360119,
+  "lng": -71.127725,
+  "match": "Honan-Allston Branch Library, 300, North Harvard Street, Barry's Corner, Allston, Boston, Suffolk County, Massachusetts,",
+  "type": "amenity/library"
+ },
+ "301 Massachusetts Ave, Boston": {
+  "lat": 42.342843,
+  "lng": -71.085682,
+  "match": "Symphony Hall, 301, Massachusetts Avenue, Fenway-Kenmore, Boston, Suffolk County, Massachusetts, 02115, United States",
+  "type": "amenity/theatre"
+ },
+ "308 Congress St, Boston": {
+  "lat": 42.351847,
+  "lng": -71.049646,
+  "match": "Boston Children's Museum, 308, Congress Street, Seaport, Boston, Suffolk County, Massachusetts, 02210, United States",
+  "type": "tourism/museum"
+ },
+ "31 Hemenway St, Boston": {
+  "lat": 42.345761,
+  "lng": -71.089661,
+  "match": "31, Hemenway Street, Landsdown, Fenway-Kenmore, Boston, Suffolk County, Massachusetts, 02115, United States",
+  "type": "building/college"
+ },
+ "31 Pleasant St, Brookline": {
+  "lat": 42.343519,
+  "lng": -71.119144,
+  "match": "Coolidge Corner Branch Library, 31, Pleasant Street, Coolidge Corner, North Brookline, Brookline, Norfolk County, Massac",
+  "type": "amenity/library"
+ },
+ "310 Washington St, Boston": {
+  "lat": 42.348944,
+  "lng": -71.151529,
+  "match": "310, Washington Street, Brighton Center, Brighton, Boston, Suffolk County, Massachusetts, 02135, United States",
+  "type": "place/house"
+ },
+ "314 Main St, Cambridge": {
+  "lat": 42.361975,
+  "lng": -71.086415,
+  "match": "MIT Museum, 314, Main Street, MIT, Cambridge, Middlesex County, Massachusetts, 02139, United States",
+  "type": "tourism/museum"
+ },
+ "315 Kendall St, Cambridge, MA 02142": {
+  "lat": 42.363675,
+  "lng": -71.082696,
+  "match": "315, Kendall Street, East Cambridge, Cambridge, Middlesex County, Massachusetts, 02142, United States",
+  "type": "place/house"
+ },
+ "315 Massachusetts Ave, Cambridge": {
+  "lat": 42.362542,
+  "lng": -71.098462,
+  "match": "311;313;315;319;321;323, Massachusetts Avenue, Central Square, The Port, Cambridge, Middlesex County, Massachusetts, 021",
+  "type": "building/retail"
+ },
+ "319 Broadway, Arlington": {
+  "lat": 42.414566,
+  "lng": -71.150585,
+  "match": "Donut Villa Brunch & Bar, 319, Broadway, Arlington, Middlesex County, Massachusetts, 02474, United States",
+  "type": "amenity/restaurant"
+ },
+ "32 Quincy St, Cambridge": {
+  "lat": 42.374218,
+  "lng": -71.114527,
+  "match": "32, Quincy Street, Mid-Cambridge, Cambridge, Middlesex County, Massachusetts, 02138, United States",
+  "type": "place/house"
+ },
+ "32 Station St, Brookline": {
+  "lat": 42.333029,
+  "lng": -71.11691,
+  "match": "30;31;32;33;34, Station Street, Brookline Village, North Brookline, Brookline, Norfolk County, Massachusetts, 02120, Uni",
+  "type": "building/yes"
+ },
+ "325 Main St, Cambridge": {
+  "lat": 42.362805,
+  "lng": -71.086748,
+  "match": "Google, 325, Main Street, MIT, Cambridge, Middlesex County, Massachusetts, 02142, United States",
+  "type": "office/company"
+ },
+ "328 Broadway, Somerville": {
+  "lat": 42.392656,
+  "lng": -71.093978,
+  "match": "Winter Hill Brewery, 328, Broadway, Winter Hill, Somerville, Massachusetts, Ball Square, Somerville, Middlesex County, M",
+  "type": "craft/brewery"
+ },
+ "335 Somerville Ave, Somerville": {
+  "lat": 42.380998,
+  "lng": -71.098017,
+  "match": "Bow Market, 335;337;341, Somerville Avenue, Union Square, Somerville, Middlesex County, Massachusetts, 02143, United Sta",
+  "type": "building/retail"
+ },
+ "336 Concord Ave, Belmont": {
+  "lat": 42.39462,
+  "lng": -71.172222,
+  "match": "Belmont Public Library, 336, Concord Avenue, Belmont, Middlesex County, Massachusetts, 02478, United States",
+  "type": "amenity/library"
+ },
+ "338 Newbury St, Boston": {
+  "lat": 42.348243,
+  "lng": -71.08661,
+  "match": "338, Newbury Street, Back Bay, Boston, Suffolk County, Massachusetts, 02115, United States",
+  "type": "building/yes"
+ },
+ "340 Dorchester St, Boston": {
+  "lat": 42.330668,
+  "lng": -71.054047,
+  "match": "Fourth Presbyterian Church, 340, Dorchester Street, South Boston, Boston, Suffolk County, Massachusetts, 01125, United S",
+  "type": "amenity/place_of_worship"
+ },
+ "3496 Washington St, Jamaica Plain": {
+  "lat": 42.306185,
+  "lng": -71.107538,
+  "match": "Midway Cafe, 3496, Washington Street, Jamaica Plain, Boston, Suffolk County, Massachusetts, 02130, United States",
+  "type": "amenity/bar"
+ },
+ "35 Temple Pl, Boston": {
+  "lat": 42.355039,
+  "lng": -71.062226,
+  "match": "29,35, Temple Place, Downtown Crossing, Downtown, Boston, Suffolk County, Massachusetts, 02111, United States",
+  "type": "building/yes"
+ },
+ "350 Kendall St, Cambridge": {
+  "lat": 42.363449,
+  "lng": -71.081974,
+  "match": "Kendall Square Garage, 350, Kendall Street, East Cambridge, Cambridge, Middlesex County, Massachusetts, 02142, United St",
+  "type": "amenity/parking"
+ },
+ "355 Washington St, Somerville": {
+  "lat": 42.379231,
+  "lng": -71.103173,
+  "match": "355;357;359, Washington Street, Somerville, Middlesex County, Massachusetts, 02143, United States",
+  "type": "building/apartments"
+ },
+ "360 Huntington Ave, Boston": {
+  "lat": 42.340224,
+  "lng": -71.088919,
+  "match": "360 Huntington Ave, Huntington Avenue, Landsdown, Fenway-Kenmore, Boston, Suffolk County, Massachusetts, 02115, United S",
+  "type": "highway/bus_stop"
+ },
+ "361 Washington St, Brookline": {
+  "lat": 42.334638,
+  "lng": -71.121384,
+  "match": "361, Washington Street, Brookline Village, North Brookline, Brookline, Norfolk County, Massachusetts, 02445, United Stat",
+  "type": "building/yes"
+ },
+ "364 Huron Ave, Cambridge": {
+  "lat": 42.381049,
+  "lng": -71.138959,
+  "match": "364, Huron Avenue, Huron Village, West Cambridge, Cambridge, Middlesex County, Massachusetts, 02138, United States",
+  "type": "place/house"
+ },
+ "366 Somerville Ave, Somerville": {
+  "lat": 42.380809,
+  "lng": -71.09938,
+  "match": "The Family Center, 366, Somerville Avenue, Union Square, Somerville, Middlesex County, Massachusetts, 02143, United Stat",
+  "type": "building/yes"
+ },
+ "368 W Broadway, South Boston": {
+  "lat": 42.337937,
+  "lng": -71.048905,
+  "match": "368, West Broadway, Dorchester Heights, South Boston, Boston, Suffolk County, Massachusetts, 02127, United States",
+  "type": "building/yes"
+ },
+ "378 Centre St, Jamaica Plain": {
+  "lat": 42.321975,
+  "lng": -71.1093,
+  "match": "378, Centre Street, Jamaica Plain, Boston, Suffolk County, Massachusetts, 02130, United States",
+  "type": "building/yes"
+ },
+ "384 Harvard St, Brookline": {
+  "lat": 42.344387,
+  "lng": -71.126096,
+  "match": "Congregation Mishkan Tefila, 384, Harvard Street, JFK Crossing, North Brookline, Brookline, Norfolk County, Massachusett",
+  "type": "amenity/place_of_worship"
+ },
+ "386 Washington St, Brookline": {
+  "lat": 42.33443,
+  "lng": -71.122644,
+  "match": "386, Washington Street, Brookline Village, North Brookline, Brookline, Norfolk County, Massachusetts, 02445, United Stat",
+  "type": "place/house"
+ },
+ "396 Harvard St, Cambridge": {
+  "lat": 42.371692,
+  "lng": -71.113734,
+  "match": "396, Harvard Street, Mid-Cambridge, Cambridge, Middlesex County, Massachusetts, 02318, United States",
+  "type": "building/yes"
+ },
+ "4 Charles St, Boston": {
+  "lat": 42.251454,
+  "lng": -71.131461,
+  "match": "4, Charles Street, Hyde Park, Boston, Suffolk County, Massachusetts, 02136, United States",
+  "type": "building/yes"
+ },
+ "4 Jersey St, Boston": {
+  "lat": 42.346461,
+  "lng": -71.0971,
+  "match": "Fenway Park, 4, Jersey Street, Landsdown, Fenway-Kenmore, Boston, Suffolk County, Massachusetts, 02115, United States",
+  "type": "leisure/stadium"
+ },
+ "4 S Market St, Boston": {
+  "lat": 42.359706,
+  "lng": -71.055068,
+  "match": "Pepper Palace, 4, South Market Street, Government Center/Faneuil Hall, Downtown, Boston, Suffolk County, Massachusetts, ",
+  "type": "shop/supermarket"
+ },
+ "40 Academy Hill Rd, Brighton": {
+  "lat": 42.347559,
+  "lng": -71.152626,
+  "match": "Brighton Branch Library, 40, Academy Hill Road, Brighton Center, Brighton, Boston, Suffolk County, Massachusetts, 02135,",
+  "type": "amenity/library"
+ },
+ "40 Brattle St, Cambridge": {
+  "lat": 42.373533,
+  "lng": -71.121476,
+  "match": "Brattle Theatre, 40, Brattle Street, Old Cambridge, West Cambridge, Cambridge, Middlesex County, Massachusetts, 02163, U",
+  "type": "amenity/cinema"
+ },
+ "40 College Ave, Somerville": {
+  "lat": 42.398148,
+  "lng": -71.121714,
+  "match": "Somerville Library West Branch, 40, College Avenue, Davis Square, Ball Square, Somerville, Middlesex County, Massachuset",
+  "type": "amenity/library"
+ },
+ "40 Prospect St, Cambridge": {
+  "lat": 42.366112,
+  "lng": -71.103245,
+  "match": "Manray, 40, Prospect Street, The Port, Cambridge, Middlesex County, Massachusetts, 02139, United States",
+  "type": "amenity/nightclub"
+ },
+ "400 Newbury St, Boston": {
+  "lat": 42.34753,
+  "lng": -71.088533,
+  "match": "Lyrik Back Bay, 400, Newbury Street, Fenway-Kenmore, Boston, Suffolk County, Massachusetts, 02215, United States",
+  "type": "building/retail"
+ },
+ "400 Soldiers Field Rd, Boston": {
+  "lat": 42.36031,
+  "lng": -71.118261,
+  "match": "Over the Charles Rooftop Bar, 400, Soldiers Field Road, Allston, Boston, Suffolk County, Massachusetts, 02163, United St",
+  "type": "amenity/bar"
+ },
+ "401 Park Dr, Boston": {
+  "lat": 42.344093,
+  "lng": -71.103054,
+  "match": "Trillium Brewing Company, 401, Park Drive, Audubon Circle, Landsdown, Fenway-Kenmore, Boston, Suffolk County, Massachuse",
+  "type": "amenity/pub"
+ },
+ "41 Hampshire St, Cambridge": {
+  "lat": 42.3728,
+  "lng": -71.099408,
+  "match": "41, Hampshire Street, Inman Square, Wellington-Harrington, Cambridge, Middlesex County, Massachusetts, 02139, United Sta",
+  "type": "place/house"
+ },
+ "41 Second St, Cambridge": {
+  "lat": 42.369933,
+  "lng": -71.079622,
+  "match": "Middlesex County Courthouse, 41, Second Street, East Cambridge, Cambridge, Middlesex County, Massachusetts, 02141, Unite",
+  "type": "amenity/courthouse"
+ },
+ "42 Brattle St, Cambridge": {
+  "lat": 42.373659,
+  "lng": -71.121668,
+  "match": "42, Brattle Street, Old Cambridge, West Cambridge, Cambridge, Middlesex County, Massachusetts, 02163, United States",
+  "type": "building/retail"
+ },
+ "42 Province St, Boston": {
+  "lat": 42.356864,
+  "lng": -71.059961,
+  "match": "VERSUS, 42, Province Street, Downtown Crossing, Downtown, Boston, Suffolk County, Massachusetts, 02108, United States",
+  "type": "amenity/bar"
+ },
+ "4228 Washington St, Roslindale": {
+  "lat": 42.286179,
+  "lng": -71.128043,
+  "match": "4228;4230, Washington Street, Mount Hope, Roslindale, Boston, Suffolk County, Massachusetts, 02131, United States",
+  "type": "building/retail"
+ },
+ "425 Summer St, Boston": {
+  "lat": 42.346439,
+  "lng": -71.043075,
+  "match": "M.J. O'Connor's, 425, Summer Street, Seaport, Boston, Suffolk County, Massachusetts, 02210, United States",
+  "type": "amenity/restaurant"
+ },
+ "427 Massachusetts Ave, Boston": {
+  "lat": 42.340674,
+  "lng": -71.082289,
+  "match": "Wally's Cafe Jazz Club, 427, Massachusetts Avenue, Roxbury, Boston, Suffolk County, Massachusetts, 02118, United States",
+  "type": "amenity/nightclub"
+ },
+ "439 Tremont St, Boston": {
+  "lat": 42.346837,
+  "lng": -71.06914,
+  "match": "Masa, 439, Tremont Street, South End, Boston, Suffolk County, Massachusetts, 02118, United States",
+  "type": "amenity/restaurant"
+ },
+ "44 Park St, Somerville": {
+  "lat": 42.381292,
+  "lng": -71.106755,
+  "match": "44, Park Street, Spring Hill Historic District, Ball Square, Somerville, Middlesex County, Massachusetts, 02143, United ",
+  "type": "building/industrial"
+ },
+ "449 Broadway, Cambridge": {
+  "lat": 42.373987,
+  "lng": -71.11047,
+  "match": "Cambridge Public Library, 449, Broadway, Mid-Cambridge, Cambridge, Middlesex County, Massachusetts, 02138, United States",
+  "type": "amenity/library"
+ },
+ "45 Pearl St, Cambridge": {
+  "lat": 42.363945,
+  "lng": -71.103825,
+  "match": "Cambridge Library Central Square Branch, 45, Pearl Street, Central Square, Cambridgeport, Cambridge, Middlesex County, M",
+  "type": "amenity/library"
+ },
+ "45 Quincy St, Cambridge": {
+  "lat": 42.376006,
+  "lng": -71.115122,
+  "match": "Memorial Hall, 45, Quincy Street, Mid-Cambridge, Cambridge, Middlesex County, Massachusetts, 02138, United States",
+  "type": "building/university"
+ },
+ "450 Massachusetts Ave, Cambridge": {
+  "lat": 42.363664,
+  "lng": -71.101129,
+  "match": "Veggie Galaxy, 450, Massachusetts Avenue, Harlow Square, Cambridgeport, Cambridge, Middlesex County, Massachusetts, 0213",
+  "type": "amenity/restaurant"
+ },
+ "459 McGrath Hwy, Somerville": {
+  "lat": 42.384016,
+  "lng": -71.091175,
+  "match": "459, McGrath Highway, Winter Hill, Somerville, Massachusetts, Ball Square, Somerville, Middlesex County, Massachusetts, ",
+  "type": "place/house"
+ },
+ "46 Joy St, Boston": {
+  "lat": 42.359995,
+  "lng": -71.06521,
+  "match": "Abiel Smith School, 46, Joy Street, Beacon Hill, Boston, Suffolk County, Massachusetts, 02114, United States",
+  "type": "building/yes"
+ },
+ "465 Huntington Ave, Boston": {
+  "lat": 42.339457,
+  "lng": -71.093897,
+  "match": "Museum of Fine Arts, 465, Huntington Avenue, Landsdown, Fenway-Kenmore, Boston, Suffolk County, Massachusetts, 02115, Un",
+  "type": "tourism/museum"
+ },
+ "47 David G Mugar Way, Boston": {
+  "lat": 42.357299,
+  "lng": -71.073701,
+  "match": "Edward A. Hatch Memorial Shell, 47, David G. Mugar Way, Beacon Hill, Boston, Suffolk County, Massachusetts, 02108, Unite",
+  "type": "leisure/bandstand"
+ },
+ "47 Palmer St, Cambridge": {
+  "lat": 42.374286,
+  "lng": -71.120022,
+  "match": "47, Palmer Street, West Cambridge, Cambridge, Middlesex County, Massachusetts, 02138, United States",
+  "type": "place/house"
+ },
+ "472 Massachusetts Ave, Cambridge": {
+  "lat": 42.363771,
+  "lng": -71.101322,
+  "match": "The Middle East Upstairs, 472, Massachusetts Avenue, Cambridgeport, Cambridge, Middlesex County, Massachusetts, 02139, U",
+  "type": "amenity/restaurant"
+ },
+ "474 Massachusetts Ave, Cambridge": {
+  "lat": 42.3638,
+  "lng": -71.101381,
+  "match": "Zuzu, 474, Massachusetts Avenue, Cambridgeport, Cambridge, Middlesex County, Massachusetts, 02139, United States",
+  "type": "amenity/restaurant"
+ },
+ "48 Sixth St, Cambridge": {
+  "lat": 42.370447,
+  "lng": -71.084824,
+  "match": "48, Sixth Street, East Cambridge, Cambridge, Middlesex County, Massachusetts, 02141, United States",
+  "type": "building/government"
+ },
+ "485 Columbus Ave, Boston": {
+  "lat": 42.343177,
+  "lng": -71.078756,
+  "match": "485, Columbus Avenue, South End, Boston, Suffolk County, Massachusetts, 02118, United States",
+  "type": "place/house"
+ },
+ "487 Somerville Ave, Somerville": {
+  "lat": 42.382931,
+  "lng": -71.104456,
+  "match": "Mass Ave Music, 487, Somerville Avenue, Spring Hill Historic District, Ball Square, Somerville, Middlesex County, Massac",
+  "type": "amenity/school"
+ },
+ "5 John F. Kennedy St, Cambridge": {
+  "lat": 42.373316,
+  "lng": -71.119695,
+  "match": "5, John F. Kennedy Street, West Cambridge, Cambridge, Middlesex County, Massachusetts, 02138, United States",
+  "type": "place/house"
+ },
+ "5 Lansdowne St, Boston": {
+  "lat": 42.347323,
+  "lng": -71.094903,
+  "match": "Bill's Bar, 5, Lansdowne Street, Landsdown, Fenway-Kenmore, Boston, Suffolk County, Massachusetts, 02215, United States",
+  "type": "amenity/bar"
+ },
+ "50 Church St, Cambridge": {
+  "lat": 42.374218,
+  "lng": -71.120629,
+  "match": "50, Church Street, West Cambridge, Cambridge, Middlesex County, Massachusetts, 02138, United States",
+  "type": "place/house"
+ },
+ "50 Dalton St, Boston": {
+  "lat": 42.347213,
+  "lng": -71.08541,
+  "match": "Bukowski Tavern, 50, Dalton Street, Back Bay, Boston, Suffolk County, Massachusetts, 02115, United States",
+  "type": "club/mug"
+ },
+ "50 Pleasant St, Malden": {
+  "lat": 42.426533,
+  "lng": -71.068621,
+  "match": "Faces Brewing Co., 50, Pleasant Street, Malden Gaming District, Malden Centre, Malden, Middlesex County, Massachusetts, ",
+  "type": "craft/brewery"
+ },
+ "50 Thomson Pl, Boston": {
+  "lat": 42.352149,
+  "lng": -71.047488,
+  "match": "Trillium Brewing, 50, Thomson Place, Seaport, Boston, Suffolk County, Massachusetts, 02210, United States",
+  "type": "amenity/restaurant"
+ },
+ "500 Walk Hill St, Boston": {
+  "lat": 42.288122,
+  "lng": -71.101224,
+  "match": "George Robert White Environmental Conservation Center, 500, Walk Hill Street, Mattapan, Boston, Suffolk County, Massachu",
+  "type": "information/visitor_centre"
+ },
+ "512 Massachusetts Ave, Cambridge": {
+  "lat": 42.364091,
+  "lng": -71.101882,
+  "match": "Phoenix Landing, 512, Massachusetts Avenue, Cambridgeport, Cambridge, Middlesex County, Massachusetts, 02139, United Sta",
+  "type": "amenity/pub"
+ },
+ "514 Medford St, Somerville": {
+  "lat": 42.396541,
+  "lng": -71.103913,
+  "match": "514, Medford Street, Magoun Square, Ball Square, Somerville, Middlesex County, Massachusetts, 02145, United States",
+  "type": "place/house"
+ },
+ "518 Medford St, Somerville": {
+  "lat": 42.396572,
+  "lng": -71.104048,
+  "match": "518, Medford Street, Magoun Square, Ball Square, Somerville, Middlesex County, Massachusetts, 02144, United States",
+  "type": "building/retail"
+ },
+ "52 Church St, Cambridge": {
+  "lat": 42.374076,
+  "lng": -71.120629,
+  "match": "The Sinclair, 52, Church Street, West Cambridge, Cambridge, Middlesex County, Massachusetts, 02138, United States",
+  "type": "amenity/events_venue"
+ },
+ "524 Massachusetts Ave, Cambridge": {
+  "lat": 42.364183,
+  "lng": -71.102034,
+  "match": "The Mad Monkfish, 524, Massachusetts Avenue, Cambridgeport, Cambridge, Middlesex County, Massachusetts, 02139, United St",
+  "type": "amenity/restaurant"
+ },
+ "525 Western Ave, Boston": {
+  "lat": 42.361597,
+  "lng": -71.144685,
+  "match": "525, Western Avenue, North Brighton, Brighton, Boston, Suffolk County, Massachusetts, 02135, United States",
+  "type": "place/house"
+ },
+ "525 Western Ave, Brighton": {
+  "lat": 42.361894,
+  "lng": -71.144028,
+  "match": "525, Western Avenue, North Brighton, Brighton, Boston, Suffolk County, Massachusetts, 02135, United States",
+  "type": "place/house"
+ },
+ "527 Tremont St, Boston": {
+  "lat": 42.344705,
+  "lng": -71.070526,
+  "match": "527, Tremont Street, South End, Boston, Suffolk County, Massachusetts, 02116, United States",
+  "type": "place/house"
+ },
+ "530 Harrison Ave, Boston": {
+  "lat": 42.341342,
+  "lng": -71.067247,
+  "match": "530, Harrison Avenue, South End, Boston, Suffolk County, Massachusetts, 02118, United States",
+  "type": "place/house"
+ },
+ "536 Massachusetts Ave, Cambridge": {
+  "lat": 42.364231,
+  "lng": -71.102302,
+  "match": "Odd Fellows Hall, 534;536;538, Massachusetts Avenue, Cambridgeport, Cambridge, Middlesex County, Massachusetts, 02139, U",
+  "type": "building/retail"
+ },
+ "539 Tremont St, Boston": {
+  "lat": 42.34476,
+  "lng": -71.071426,
+  "match": "Cyclorama Building, 539, Tremont Street, South End, Boston, Suffolk County, Massachusetts, 02116, United States",
+  "type": "amenity/events_venue"
+ },
+ "539 Washington St, Boston": {
+  "lat": 42.349409,
+  "lng": -71.163481,
+  "match": "539, Washington Street, Oak Square, Brighton, Boston, Suffolk County, Massachusetts, 02135, United States",
+  "type": "place/house"
+ },
+ "54 Shirley St, Boston": {
+  "lat": 42.323789,
+  "lng": -71.071877,
+  "match": "54, Shirley Street, Roxbury, Boston, Suffolk County, Massachusetts, 02119, United States",
+  "type": "place/house"
+ },
+ "541 Tremont St, Boston": {
+  "lat": 42.344365,
+  "lng": -71.071443,
+  "match": "Beehive, 541, Tremont Street, South End, Boston, Suffolk County, Massachusetts, 02118, United States",
+  "type": "amenity/restaurant"
+ },
+ "55 Chester St, Somerville": {
+  "lat": 42.395192,
+  "lng": -71.122338,
+  "match": "55, Chester Street, Davis Square, Ball Square, Somerville, Middlesex County, Massachusetts, 02144, United States",
+  "type": "building/retail"
+ },
+ "55 Davis Sq, Somerville": {
+  "lat": 42.396649,
+  "lng": -71.12303,
+  "match": "Somerville Theater, 55, Davis Square, Ball Square, Somerville, Middlesex County, Massachusetts, 02144, United States",
+  "type": "amenity/cinema"
+ },
+ "559 Washington St, Boston": {
+  "lat": 42.349446,
+  "lng": -71.1637,
+  "match": "559, Washington Street, Oak Square, Brighton, Boston, Suffolk County, Massachusetts, 02135, United States",
+  "type": "building/yes"
+ },
+ "560 Boylston St, Boston": {
+  "lat": 42.349967,
+  "lng": -71.077022,
+  "match": "BosTix Booth, 560, Boylston Street, Block C, Back Bay, Boston, Suffolk County, Massachusetts, 02116, United States",
+  "type": "shop/kiosk"
+ },
+ "561 Commercial St, Boston": {
+  "lat": 42.368297,
+  "lng": -71.057186,
+  "match": "Steriti Memorial Rink, 561, Commercial Street, North End, Boston, Suffolk County, Massachusetts, 02109, United States",
+  "type": "leisure/ice_rink"
+ },
+ "568 Tremont St, Boston": {
+  "lat": 42.343451,
+  "lng": -71.072418,
+  "match": "568, Tremont Street, South End, Boston, Suffolk County, Massachusetts, 02118, United States",
+  "type": "place/house"
+ },
+ "58 Seaport Blvd, Boston": {
+  "lat": 42.353053,
+  "lng": -71.047511,
+  "match": "Scorpion Bar, 58, Seaport Boulevard, Seaport, Boston, Suffolk County, Massachusetts, 02210, United States",
+  "type": "amenity/restaurant"
+ },
+ "58 Tremont St, Boston": {
+  "lat": 42.358013,
+  "lng": -71.060027,
+  "match": "Kings Chapel, 58, Tremont Street, Downtown Crossing, Downtown, Boston, Suffolk County, Massachusetts, 02108, United Stat",
+  "type": "amenity/place_of_worship"
+ },
+ "6 Beacon St, Boston": {
+  "lat": 42.358032,
+  "lng": -71.061529,
+  "match": "6, Beacon Street, Downtown Crossing, Downtown, Boston, Suffolk County, Massachusetts, 02133, United States",
+  "type": "building/yes"
+ },
+ "6 Eliot St, Jamaica Plain": {
+  "lat": 42.310044,
+  "lng": -71.116284,
+  "match": "First Church in Jamaica Plain Unitarian Universalist, 6, Eliot Street, Jamaica Plain, Boston, Suffolk County, Massachuse",
+  "type": "amenity/place_of_worship"
+ },
+ "6 Harvard Square, Brookline": null,
+ "6 Sanborn Ct, Somerville": {
+  "lat": 42.379944,
+  "lng": -71.094662,
+  "match": "The Jungle Community Music Club, 6, Sanborn Court, Union Square, Somerville, Middlesex County, Massachusetts, 02143, Uni",
+  "type": "amenity/nightclub"
+ },
+ "60 Seaport Blvd, Boston": {
+  "lat": 42.352933,
+  "lng": -71.046981,
+  "match": "Alamo Drafthouse Cinema, 60, Seaport Boulevard, Seaport, Boston, Suffolk County, Massachusetts, 02210, United States",
+  "type": "amenity/cinema"
+ },
+ "604 Columbus Ave, Boston": {
+  "lat": 42.339842,
+  "lng": -71.082491,
+  "match": "Darryl's Corner Bar & Kitchen, 604, Columbus Avenue, Roxbury, Boston, Suffolk County, Massachusetts, 02118, United State",
+  "type": "amenity/restaurant"
+ },
+ "62 Brookline Ave, Boston": {
+  "lat": 42.347452,
+  "lng": -71.097943,
+  "match": "62, Brookline Avenue, Landsdown, Fenway-Kenmore, Boston, Suffolk County, Massachusetts, 02215, United States",
+  "type": "building/commercial"
+ },
+ "621 Huntington Ave, Boston": {
+  "lat": 42.336866,
+  "lng": -71.09843,
+  "match": "MassArt Art Museum, 621, Huntington Avenue, Longwood, Boston, Suffolk County, Massachusetts, 02115, United States",
+  "type": "tourism/museum"
+ },
+ "64 Aberdeen Ave, Cambridge": {
+  "lat": 42.376906,
+  "lng": -71.146884,
+  "match": "Cambridge Library Collins Branch, 64, Aberdeen Avenue, Larchwood, West Cambridge, Cambridge, Middlesex County, Massachus",
+  "type": "amenity/library"
+ },
+ "64 Brattle St, Cambridge": {
+  "lat": 42.37486,
+  "lng": -71.12295,
+  "match": "American Repertory Theater, 64, Brattle Street, Old Cambridge, West Cambridge, Cambridge, Middlesex County, Massachusett",
+  "type": "amenity/theatre"
+ },
+ "645 Boylston St, Boston, MA 02116": {
+  "lat": 42.35023,
+  "lng": -71.078048,
+  "match": "Old South Church, 645, Boylston Street, Back Bay, Boston, Suffolk County, Massachusetts, 02116, United States",
+  "type": "amenity/place_of_worship"
+ },
+ "65 N Harvard St, Boston": {
+  "lat": 42.368366,
+  "lng": -71.127241,
+  "match": "Bright-Landry Hockey Center, 65, North Harvard Street, Barry's Corner, Allston, Boston, Suffolk County, Massachusetts, 0",
+  "type": "leisure/ice_rink"
+ },
+ "66 Union Sq, Somerville": {
+  "lat": 42.379923,
+  "lng": -71.095123,
+  "match": "66;68;70, Union Square, Somerville, Middlesex County, Massachusetts, 02143, United States",
+  "type": "building/public"
+ },
+ "665 Main St, Waltham": {
+  "lat": 42.376232,
+  "lng": -71.249084,
+  "match": "Main Street, Banks Square, Waltham, Middlesex County, Massachusetts, 02453, United States",
+  "type": "highway/primary"
+ },
+ "668 Memorial Dr, Cambridge": {
+  "lat": 42.355814,
+  "lng": -71.115367,
+  "match": "Powder Magazine, 668, Memorial Drive, Cambridgeport, Cambridge, Middlesex County, Massachusetts, 02238, United States",
+  "type": "building/civic"
+ },
+ "67 Newbury St, Boston": {
+  "lat": 42.352171,
+  "lng": -71.073973,
+  "match": "Church of the Covenant, 67, Newbury Street, Back Bay, Boston, Suffolk County, Massachusetts, 02116, United States",
+  "type": "amenity/place_of_worship"
+ },
+ "68 Central Sq, East Boston": {
+  "lat": 42.374603,
+  "lng": -71.039802,
+  "match": "68, Central Square South, Central Square, East Boston, Boston, Suffolk County, Massachusetts, 02128, United States",
+  "type": "place/house"
+ },
+ "7 Medford St, Arlington": {
+  "lat": 42.414969,
+  "lng": -71.150745,
+  "match": "Regent Theatre, 7, Medford Street, Arlington, Middlesex County, Massachusetts, 02174, United States",
+  "type": "amenity/cinema"
+ },
+ "7 N Beacon St, Allston": {
+  "lat": 42.353752,
+  "lng": -71.137691,
+  "match": "Model Cafe, 7, North Beacon Street, Union Square, Allston, Boston, Suffolk County, Massachusetts, 02134, United States",
+  "type": "amenity/bar"
+ },
+ "7 Temple St, Cambridge": {
+  "lat": 42.366811,
+  "lng": -71.104309,
+  "match": "YWCA, 7, Temple Street, Mid-Cambridge, Cambridge, Middlesex County, Massachusetts, 02139, United States",
+  "type": "leisure/sports_centre"
+ },
+ "70 Rindge Ave, Cambridge": {
+  "lat": 42.392196,
+  "lng": -71.128037,
+  "match": "70, Rindge Avenue, North Cambridge, Cambridge, Middlesex County, Massachusetts, 02140, United States",
+  "type": "building/school"
+ },
+ "70 Union Sq, Somerville": {
+  "lat": 42.379923,
+  "lng": -71.095123,
+  "match": "66;68;70, Union Square, Somerville, Middlesex County, Massachusetts, 02143, United States",
+  "type": "building/public"
+ },
+ "700 Boylston St, Boston": {
+  "lat": 42.34933,
+  "lng": -71.078655,
+  "match": "Boston Public Library, 700, Boylston Street, Back Bay, Boston, Suffolk County, Massachusetts, 02116, United States",
+  "type": "amenity/library"
+ },
+ "72 Joy St, Somerville": {
+  "lat": 42.378606,
+  "lng": -71.086586,
+  "match": "Life Drawing Boston, 72, Joy Street, Brickbottom, Somerville, Middlesex County, Massachusetts, 02143, United States",
+  "type": "amenity/arts_centre"
+ },
+ "738 Massachusetts Ave, Cambridge": {
+  "lat": 42.366126,
+  "lng": -71.105291,
+  "match": "Cantab Lounge, 738, Massachusetts Avenue, Riverside, Cambridge, Middlesex County, Massachusetts, 02139, United States",
+  "type": "amenity/bar"
+ },
+ "738 Massachusetts Ave, Cambridge (Downstairs)": null,
+ "74 Warrenton St, Boston": {
+  "lat": 42.349936,
+  "lng": -71.066094,
+  "match": "74, Warrenton Street, Downtown Crossing, Downtown, Boston, Suffolk County, Massachusetts, 02116, United States",
+  "type": "place/house"
+ },
+ "75 Union Square, Somerville": {
+  "lat": 42.379839,
+  "lng": -71.094787,
+  "match": "73;74;75;76, Union Square, Somerville, Middlesex County, Massachusetts, 02143, United States",
+  "type": "building/yes"
+ },
+ "76 Bishop Allen Dr, Cambridge": {
+  "lat": 42.364899,
+  "lng": -71.100893,
+  "match": "76, Bishop Allen Drive, Harlow Square, The Port, Cambridge, Middlesex County, Massachusetts, 02139, United States",
+  "type": "place/house"
+ },
+ "760 Boylston St, Boston": {
+  "lat": 42.348808,
+  "lng": -71.079917,
+  "match": "Dick's House of Sport, 760, Boylston Street, Back Bay, Boston, Suffolk County, Massachusetts, 02116, United States",
+  "type": "shop/sports"
+ },
+ "77 Broad St, Boston": {
+  "lat": 42.357668,
+  "lng": -71.053574,
+  "match": "Mr. Dooley's, 77, Broad Street, Waterfront, Downtown, Boston, Suffolk County, Massachusetts, 02109, United States",
+  "type": "amenity/pub"
+ },
+ "79 Broadway, Boston": {
+  "lat": 42.39493,
+  "lng": -71.066944,
+  "match": "Broadway, Charlestown, Boston, Suffolk County, Massachusetts, 02129, United States",
+  "type": "highway/primary"
+ },
+ "79 Highland Ave, Somerville": {
+  "lat": 42.385788,
+  "lng": -71.094405,
+  "match": "Somerville Central Library, 79, Highland Avenue, Prospect Hill, Ball Square, Somerville, Middlesex County, Massachusetts",
+  "type": "office/Somerville"
+ },
+ "79 Warrenton St, Boston": {
+  "lat": 42.349906,
+  "lng": -71.065845,
+  "match": "Legacy, 79, Warrenton Street, Downtown Crossing, Downtown, Boston, Suffolk County, Massachusetts, 02116, United States",
+  "type": "amenity/nightclub"
+ },
+ "793 Tremont St, Boston": {
+  "lat": 42.338711,
+  "lng": -71.081964,
+  "match": "Piano Craft Gallery, 793, Tremont Street, Roxbury, Boston, Suffolk County, Massachusetts, 02118, United States",
+  "type": "tourism/gallery"
+ },
+ "8 Fenway, Boston": {
+  "lat": 42.346183,
+  "lng": -71.090077,
+  "match": "8, Fenway, Landsdown, Fenway-Kenmore, Boston, Suffolk County, Massachusetts, 02115, United States",
+  "type": "building/yes"
+ },
+ "80 Beverly St, Boston": {
+  "lat": 42.364064,
+  "lng": -71.058667,
+  "match": "City Winery, 80, Beverly Street, West End, Boston, Suffolk County, Massachusetts, 02114, United States",
+  "type": "amenity/bar"
+ },
+ "800 Boylston St, Boston": {
+  "lat": 42.34713,
+  "lng": -71.081081,
+  "match": "Well-B, 800, Boylston Street, Back Bay, Boston, Suffolk County, Massachusetts, 02116, United States",
+  "type": "healthcare/exhibit"
+ },
+ "826 Cambridge St, Cambridge": {
+  "lat": 42.372155,
+  "lng": -71.090247,
+  "match": "Valente Branch Library, 826, Cambridge Street, Wellington-Harrington, Cambridge, Middlesex County, Massachusetts, 02141,",
+  "type": "amenity/library"
+ },
+ "82A Lansdowne St, Boston": {
+  "lat": 42.347044,
+  "lng": -71.096714,
+  "match": "Bleacher Bar, 82A, Lansdowne Street, Landsdown, Fenway-Kenmore, Boston, Suffolk County, Massachusetts, 02215, United Sta",
+  "type": "amenity/bar"
+ },
+ "838 Massachusetts Ave, Cambridge": {
+  "lat": 42.367121,
+  "lng": -71.107004,
+  "match": "Saint Peter's Episcopal Church, 838, Massachusetts Avenue, Riverside, Cambridge, Middlesex County, Massachusetts, 02139,",
+  "type": "amenity/place_of_worship"
+ },
+ "84 Massachusetts Ave, Cambridge": {
+  "lat": 42.358806,
+  "lng": -71.093582,
+  "match": "84 Massachusetts Ave, Massachusetts Avenue, MIT, Cambridge, Middlesex County, Massachusetts, 02142, United States",
+  "type": "highway/bus_stop"
+ },
+ "85 Guest St, Boston": {
+  "lat": 42.356921,
+  "lng": -71.145312,
+  "match": "85, Guest Street, Boston Landing, Brighton, Boston, Suffolk County, Massachusetts, 02135, United States",
+  "type": "place/house"
+ },
+ "855 Commonwealth Ave, Boston": {
+  "lat": 42.351294,
+  "lng": -71.113877,
+  "match": "College of Fine Arts, 855, Commonwealth Avenue, Allston, Boston, Suffolk County, Massachusetts, 02215, United States",
+  "type": "building/university"
+ },
+ "87 Santilli Hwy, Everett": {
+  "lat": 42.406134,
+  "lng": -71.067762,
+  "match": "87, Santilli Highway, Hendersonville, Everett, Middlesex County, Massachusetts, 02149, United States",
+  "type": "building/retail"
+ },
+ "877 Cambridge St, Cambridge": {
+  "lat": 42.372643,
+  "lng": -71.091478,
+  "match": "Remnant Brewing Satellite, 877, Cambridge Street, Wellington-Harrington, Cambridge, Middlesex County, Massachusetts, 021",
+  "type": "amenity/bar"
+ },
+ "88 Tremont St, Boston": {
+  "lat": 42.357508,
+  "lng": -71.060496,
+  "match": "Tremont Temple, 86;88, Tremont Street, Downtown Crossing, Downtown, Boston, Suffolk County, Massachusetts, 02133, United",
+  "type": "amenity/place_of_worship"
+ },
+ "89 Guest St, Brighton": {
+  "lat": 42.35662,
+  "lng": -71.143874,
+  "match": "Roadrunner, 89, Guest Street, Boston Landing, Brighton, Boston, Suffolk County, Massachusetts, 02135, United States",
+  "type": "amenity/events_venue"
+ },
+ "89 Winthrop St, Cambridge": {
+  "lat": 42.372422,
+  "lng": -71.120904,
+  "match": "Grendel's Den, 89, Winthrop Street, Old Cambridge, West Cambridge, Cambridge, Middlesex County, Massachusetts, 02138, Un",
+  "type": "amenity/pub"
+ },
+ "890 Commonwealth Ave, Boston": {
+  "lat": 42.350502,
+  "lng": -71.115617,
+  "match": "890, Commonwealth Avenue, Allston, Boston, Suffolk County, Massachusetts, 02215, United States",
+  "type": "building/commercial"
+ },
+ "9 Lansdowne St, Boston": {
+  "lat": 42.347419,
+  "lng": -71.095169,
+  "match": "9, Lansdowne Street, Landsdown, Fenway-Kenmore, Boston, Suffolk County, Massachusetts, 02215, United States",
+  "type": "building/yes"
+ },
+ "90 Boylston St, Boston": {
+  "lat": 42.317252,
+  "lng": -71.105006,
+  "match": "90, Boylston Street, Jamaica Plain, Boston, Suffolk County, Massachusetts, 02130, United States",
+  "type": "building/yes"
+ },
+ "90 Broadway, Cambridge": {
+  "lat": 42.363284,
+  "lng": -71.08681,
+  "match": "Boston Marriott Cambridge, 90, Broadway, MIT, Cambridge, Middlesex County, Massachusetts, 02142, United States",
+  "type": "tourism/hotel"
+ },
+ "900 Boylston St, Boston": {
+  "lat": 42.347138,
+  "lng": -71.083993,
+  "match": "Hynes Convention Center, 900, Boylston Street, Back Bay, Boston, Suffolk County, Massachusetts, 02116, United States",
+  "type": "amenity/conference_centre"
+ },
+ "912 Massachusetts Ave, Cambridge": {
+  "lat": 42.368261,
+  "lng": -71.108798,
+  "match": "The Plough and Stars, 912, Massachusetts Avenue, Riverside, Cambridge, Middlesex County, Massachusetts, 02139, United St",
+  "type": "amenity/pub"
+ },
+ "916 Commonwealth Ave, Boston": {
+  "lat": 42.350829,
+  "lng": -71.116514,
+  "match": "Boston University Campus Store, 916, Commonwealth Avenue, Allston, Boston, Suffolk County, Massachusetts, 02215, United ",
+  "type": "shop/clothes"
+ },
+ "921 Boylston St, Boston": {
+  "lat": 42.348443,
+  "lng": -71.084617,
+  "match": "Genko Uchida Building, 921, Boylston Street, Block G, Back Bay, Boston, Suffolk County, Massachusetts, 02115, United Sta",
+  "type": "building/university"
+ },
+ "925 Commonwealth Ave, Boston": {
+  "lat": 42.352749,
+  "lng": -71.117343,
+  "match": "925, Commonwealth Avenue, Allston, Boston, Suffolk County, Massachusetts, 02215, United States",
+  "type": "amenity/loading_dock"
+ },
+ "93 Highland Ave, Somerville": {
+  "lat": 42.387194,
+  "lng": -71.098163,
+  "match": "Somerville City Hall, 93, Highland Avenue, Winter Hill, Somerville, Massachusetts, Ball Square, Somerville, Middlesex Co",
+  "type": "amenity/townhall"
+ },
+ "939 Boylston St, Boston": {
+  "lat": 42.348255,
+  "lng": -71.084821,
+  "match": "Tennis & Racquet Club, 939, Boylston Street, Block G, Back Bay, Boston, Suffolk County, Massachusetts, 02115, United Sta",
+  "type": "club/sport"
+ },
+ "959 West Roxbury Pkwy, Brookline": {
+  "lat": 42.302493,
+  "lng": -71.150072,
+  "match": "959, West Roxbury Parkway, Putterham, South Brookline, Brookline, Norfolk County, Massachusetts, 02467, United States",
+  "type": "building/yes"
+ },
+ "96 Holton St, Boston": {
+  "lat": 42.359598,
+  "lng": -71.139462,
+  "match": "Artisans Asylum, 96, Holton Street, North Brighton, Brighton, Boston, Suffolk County, Massachusetts, 02135, United State",
+  "type": "leisure/hackerspace"
+ },
+ "967 Commonwealth Ave, Boston": {
+  "lat": 42.35183,
+  "lng": -71.119499,
+  "match": "Paradise Rock Club, 967, Commonwealth Avenue, Packard's Corner, Allston, Boston, Suffolk County, Massachusetts, 02446, U",
+  "type": "amenity/music_venue"
+ }
+}

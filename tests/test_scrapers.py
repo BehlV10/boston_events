@@ -2325,8 +2325,8 @@ class TestBostonEvents(unittest.TestCase):
             self.assertEqual(ev["category"], "art")
             geo = resolve_event_geo(ev)
             self.assertIsNotNone(geo, f"Failed to resolve geo for Life Drawing Boston: {ev}")
-            self.assertAlmostEqual(geo["lat"], 42.3780, places=3)
-            self.assertAlmostEqual(geo["lng"], -71.0920, places=3)
+            self.assertAlmostEqual(geo["lat"], 42.3786, places=3)
+            self.assertAlmostEqual(geo["lng"], -71.0866, places=3)
             self.assertEqual(geo["neighborhood"], "East Somerville")
 
     def test_bostonfac_scraper(self):
@@ -2344,8 +2344,8 @@ class TestBostonEvents(unittest.TestCase):
             self.assertEqual(ev["category"], "art")
             geo = resolve_event_geo(ev)
             self.assertIsNotNone(geo, f"Failed to resolve geo for BFAC: {ev}")
-            self.assertAlmostEqual(geo["lat"], 42.3813, places=3)
-            self.assertAlmostEqual(geo["lng"], -71.0912, places=3)
+            self.assertAlmostEqual(geo["lat"], 42.3797, places=3)
+            self.assertAlmostEqual(geo["lng"], -71.0982, places=3)
             self.assertEqual(geo["neighborhood"], "Union Square")
 
     def test_sports_museum_tour_deduplication(self):
