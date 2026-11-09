@@ -84,6 +84,9 @@ class ListingFixes(unittest.TestCase):
         saturday = self.fixed("Do617", name="Snowport", date="2026-11-07T15:00:00+00:00", venue="Seaport")
         self.assertEqual(self.local(monday), "Mon 15:00")
         self.assertEqual(self.local(saturday), "Sat 10:00")
+        # and closes by weekday too (the card shows "3:00–8:00 PM" and stays listed until 8)
+        self.assertEqual(scrapers.datetime.fromisoformat(monday["end"]).astimezone(scrapers.EASTERN).strftime("%a %H:%M"), "Mon 20:00")
+        self.assertEqual(scrapers.datetime.fromisoformat(saturday["end"]).astimezone(scrapers.EASTERN).strftime("%a %H:%M"), "Sat 21:00")
 
     def test_book_fair_price_follows_the_day(self):
         friday = self.fixed("The Boston Calendar", name="Boston International Antiquarian Book Fair",

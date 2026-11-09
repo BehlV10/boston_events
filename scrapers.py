@@ -13895,8 +13895,11 @@ _WRONG_LISTINGS = (
 )
 
 # Details a source has wrong, checked against the organizer: (title, venue or source, local date or
-# None for every date, changes). "hm" sets the start time; "hours" sets it by weekday (Monday = 0).
-_SNOWPORT_OPENS = {0: (15, 0), 1: (15, 0), 2: (15, 0), 3: (15, 0), 4: (11, 0), 5: (10, 0), 6: (11, 0)}
+# None for every date, changes). "hm" sets the start time; "hours" sets (open, close) by weekday
+# (Monday = 0), the close becoming the event's end.
+# Snowport 2026 (boston.com): Mon-Thu 3-8 PM, Fri 11 AM-9 PM, Sat 10 AM-9 PM, Sun 11 AM-8 PM
+_SNOWPORT_OPENS = {0: ((15, 0), (20, 0)), 1: ((15, 0), (20, 0)), 2: ((15, 0), (20, 0)), 3: ((15, 0), (20, 0)),
+                   4: ((11, 0), (21, 0)), 5: ((10, 0), (21, 0)), 6: ((11, 0), (20, 0))}
 _LISTING_FIXES = (
     # 21+ with IDs checked at the gate, per the zoo
     ("jingle beers", "stone zoo", None, {"category": "food"}),
@@ -13936,10 +13939,14 @@ def _fix_listings(results):
                     day = None
                 if on and (not day or day.isoformat() != on):
                     continue
-                hm = fix.get("hm") or (fix["hours"][day.weekday()] if day and "hours" in fix else None)
+                hm, close = fix.get("hm"), None
+                if not hm and day and "hours" in fix:
+                    hm, close = fix["hours"][day.weekday()]
                 e.update({k: v for k, v in fix.items() if k not in ("hm", "hours")})
                 if hm and day:
                     e["date"] = _et_iso(day, hm)
+                if close and day:
+                    e["end"] = _et_iso(day, close)
 
 
 def _use_show_times(results):
