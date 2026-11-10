@@ -44,6 +44,17 @@ from light_theme import LIGHT_THEME_CSS
 DEFAULT_UNCHECKED_BUCKETS = {"Classes & Services", "Kids & Family", "Deals & Specials", "Tech & Startups"}
 
 
+_BOOK_TALK_RE = re.compile(
+    r"\b(?:author\s+(?:talk|reading|event|discussion|signing|visit|tour|appearance|series)|"
+    r"book\s+(?:talk|reading|launch|signing|discussion|club|tour)|"
+    r"in\s+conversation\s+with|poetry\s+reading|poet\s+reading|writers?\s+(?:talk|reading)|"
+    r"literary\s+reading|bookstore\s+reading|"
+    r"(?:campus|public)\s+lecture|panel\s+discussion|guest\s+speaker|colloquium|"
+    r"keynote\s+speaker|keynote\s+address|fireside\s+chat)\b",
+    re.I
+)
+
+
 def _effective_category(e):
     name = e.get("name") or ""
     if is_utility_event(name):
@@ -57,6 +68,8 @@ def _effective_category(e):
     # were classified (or kept from a degraded scrape) still fill the Markets & Festivals page
     if cat in _MARKET_OVERRIDABLE and is_market_or_festival(name):
         return "markets"
+    if cat in ("community", "other", "art", "arts") and _BOOK_TALK_RE.search(name):
+        return "books"
     return cat
 
 
@@ -107,9 +120,11 @@ CITY_RULES = [
         "cambridge art association", "loeb drama", "harvard film archive",
         "graduate school of design", "harvard graduate school of education", "sheraton commander",
         "325 binney", "microsoft new england research", "ef education first",
+        "tuck's arcadium", "tucks arcadium", "descent", "the lower level", "lower level",
     )),
     ("boston", (
         "the 88 club", "88 club",
+        "1080 boylston", "don't tell aunty", "dont tell aunty",
         "bsmnt", "kings seaport", "kings - seaport", "kings dining",
         "midway cafe", "o'brien's pub", "obriens pub", "o'brien's", "obriens",
         "jordan hall", "new england conservatory", "nec (", "nec:", "nec ", "nec hall",

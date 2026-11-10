@@ -11298,10 +11298,85 @@ def scrape_harvard_college_events(url, ua):
         elif re.search(r"\b(?:exhibition|gallery|museum|art\b|theatre|theater|play|comedy)\b", combined):
             entry["category"] = "art"
         elif re.search(r"\b(?:lecture|speaker|ambassador|panel|symposium|keynote|study\s+group)\b", combined):
-            entry["category"] = "community"
+            entry["category"] = "talks"
 
         events.append(entry)
 
+    return events
+
+
+def scrape_resident_advisor(url, ua):
+    """Scrape Boston electronic music, DJ, techno, house, and clubbing events from Resident Advisor GraphQL."""
+    today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    query = f"""
+    query GET_UPCOMING_BOSTON_EVENTS {{
+        eventListings(
+            filters: {{
+                areas: {{eq: 530}},
+                listingDate: {{gte: "{today_str}"}}
+            }},
+            pageSize: 100,
+            sort: {{listingDate: {{order: ASCENDING, priority: 1}}}}
+        ) {{
+            data {{
+                id
+                listingDate
+                event {{
+                    title
+                    contentUrl
+                    startTime
+                    endTime
+                    cost
+                    venue {{
+                        name
+                        address
+                    }}
+                }}
+            }}
+        }}
+    }}
+    """
+    headers = {
+        "User-Agent": ua or UA_CHROME,
+        "Content-Type": "application/json",
+    }
+    try:
+        r = _SESSION.post("https://ra.co/graphql", json={"query": query}, headers=headers, timeout=12)
+        r.raise_for_status()
+        data = r.json()
+    except Exception:
+        return []
+
+    events = []
+    seen = set()
+    for it in (data.get("data") or {}).get("eventListings", {}).get("data", []):
+        ev = it.get("event") or {}
+        title = ev.get("title")
+        if not title or is_placeholder_or_closed_event(title):
+            continue
+        start = ev.get("startTime") or it.get("listingDate")
+        c_url = ev.get("contentUrl") or ""
+        full_url = f"https://ra.co{c_url}" if c_url.startswith("/") else c_url or url
+        v_obj = ev.get("venue") or {}
+        v_name = (v_obj.get("name") or "Boston").strip()
+        addr = v_obj.get("address") or ""
+        cost = ev.get("cost")
+
+        key = (title.lower(), (start or "")[:10])
+        if key in seen:
+            continue
+        seen.add(key)
+
+        events.append({
+            "name": title.strip()[:160],
+            "date": start,
+            "url": full_url,
+            "venue": v_name[:80],
+            "category": "clubbing",
+            "genre": "electronic_techno_house",
+            "price": cost,
+            "address": addr,
+        })
     return events
 
 
@@ -12738,6 +12813,7 @@ _ALL_VENUES = [
     {"name": "Brandeis Judges Athletics", "url": "https://brandeisjudges.com/calendar.ashx/calendar.ics", "ua": UA_CHROME, "scraper": scrape_college_athletics, "default_category": "sports"},
     {"name": "UMass Boston Beacons Athletics", "url": "https://beaconsathletics.com/calendar.ashx/calendar.ics", "ua": UA_CHROME, "scraper": scrape_college_athletics, "default_category": "sports"},
     {"name": "Babson Beavers Athletics", "url": "https://babsonathletics.com/calendar.ashx/calendar.ics", "ua": UA_CHROME, "scraper": scrape_college_athletics, "default_category": "sports"},
+    {"name": "Resident Advisor Boston", "url": "https://ra.co/events/us/boston", "ua": UA_CHROME, "scraper": scrape_resident_advisor, "default_category": "clubbing"},
     {"name": "Venture Café Cambridge", "url": "https://community.venturecafecambridge.org/", "ua": UA_CHROME, "scraper": scrape_venture_cafe, "default_category": "community"},
     {"name": "The Anchor Boston", "url": "https://calendar.google.com/calendar/ical/theanchorbostonma%40gmail.com/public/basic.ics", "ua": UA_CHROME, "scraper": scrape_ical, "default_category": "community"},
     {"name": "Artisans Asylum", "url": "https://www.eventbrite.com/o/artisans-asylum-inc-18841526871", "ua": UA_CHROME, "scraper": scrape_eventbrite_org, "default_category": "community"},
@@ -13195,7 +13271,10 @@ CATEGORY_KEYWORDS = [
                    "one woman show", "one man show", "solo show", "puppet", "burlesque show"]),
     ("books",     ["book club", "book launch", "author", "reading", "storytime", "poet", "poetry", "signing", "booksmith",
                    "literary", "literature", "book talk", "book fair", "writing workshop", "creative writing", "writers",
-                   "in conversation", "conversation with", "storytelling", "novel", "memoir", "acotar", "keynote"]),
+                   "in conversation", "conversation with", "storytelling", "novel", "memoir", "acotar", "keynote",
+                   "author talk", "author event", "book signing", "author reading", "book tour", "writers talk",
+                   "fireside chat", "author discussion", "author series"]),
+    ("talks",     ["campus lecture", "public lecture", "panel discussion", "guest speaker", "colloquium", "keynote address", "symposium lecture"]),
     ("gaming",    ["arcade", "mahjong", "chess", "trivia", "board game", "video game", "ttrpg", "d&d", "dungeons",
                    "tabletop", "escape room", "bingo", "pinball", "axe throw", "darts bar",
                    "one-shot rpg", "rpg night", "cornhole", "ping pong", "puzzle party", "puzzle night", "puzzle hunt", "puzzle swap", "jigsaw", "mah jongg", "mahjongg", "trading card", "pack wars", "pokemon"]),
@@ -13441,6 +13520,7 @@ CATEGORY_STYLES = {
     "theater":   ("#f7768e", "🎭"),
     "stage":     ("#f7768e", "🎭"),
     "books":     ("#9ece6a", "📖"),
+    "talks":     ("#9ece6a", "📖"),
     "gaming":    ("#bb9af7", "◆"),
     "clubbing":  ("#e06c75", "◉"),
     "film":      ("#e0af68", "▶"),
@@ -13464,7 +13544,8 @@ CATEGORY_BUCKETS = [
     ("Music & nightlife",  ["music", "clubbing", "classical"]),
     ("Dance",              ["dance"]),
     ("Stage",              ["comedy", "theater", "stage"]),
-    ("Arts & culture",     ["books", "film", "art", "arts"]),
+    ("Books & Talks",      ["books", "talks"]),
+    ("Arts & culture",     ["film", "art", "arts"]),
     ("Play",               ["gaming", "sports", "fitness", "outdoors"]),
     ("Food & drink",       ["food"]),
     ("Markets & Festivals", ["markets"]),

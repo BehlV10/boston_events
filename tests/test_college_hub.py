@@ -235,12 +235,38 @@ class MainCalendarCollegeIntegrationTests(unittest.TestCase):
         ]
         venues = [{"venue": "BU Terriers Athletics", "url": "https://goterriers.com", "events": events}]
         html = template.render_page(venues)
-
         self.assertIn('id="college-only-chk"', html)
         self.assertIn('data-college="true"', html)
         self.assertIn('college-tag', html)
         self.assertIn('useful-students', html)
         self.assertIn('href="college/"', html)
+
+
+class BooksAndTalksCategoryTests(unittest.TestCase):
+    def test_books_and_talks_bucket_separated(self):
+        from scrapers import category_bucket
+        self.assertEqual(category_bucket("books"), "Books & Talks")
+        self.assertEqual(category_bucket("talks"), "Books & Talks")
+        self.assertEqual(category_bucket("art"), "Arts & culture")
+        self.assertEqual(category_bucket("film"), "Arts & culture")
+
+    def test_author_talk_categorized_as_books(self):
+        e = {
+            "name": "Author Talk: Jhumpa Lahiri in conversation with Allegra Goodman",
+            "venue": "Harvard Book Store",
+            "category": "community",
+        }
+        eff_cat = template._effective_category(e)
+        self.assertEqual(eff_cat, "books")
+
+    def test_public_campus_lecture_categorized_as_books(self):
+        e = {
+            "name": "Public Lecture: AI and Society with Keynote Speaker",
+            "venue": "Kresge Auditorium",
+            "category": "community",
+        }
+        eff_cat = template._effective_category(e)
+        self.assertEqual(eff_cat, "books")
 
 
 if __name__ == "__main__":
