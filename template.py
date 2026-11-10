@@ -33,6 +33,7 @@ from scrapers import (
     is_deal_event,
     is_kid_family_event,
     is_market_or_festival,
+    NOT_MARKET_FESTIVAL_RE,
     _MARKET_OVERRIDABLE,
 )
 from venues_geo import resolve_event_geo, nearest_curated_venue, flag_shared_source_points
@@ -876,6 +877,7 @@ def build_seo_directory_html(all_events_flat, all_venue_names):
           <li><a href="board-game-nights-boston/">Board Game Nights &amp; Trivia</a></li>
           <li><a href="kids-family-events-boston/">Kids &amp; Family Events</a></li>
           <li><a href="boston-edm/">Boston EDM &amp; Electronic Shows</a></li>
+          <li><a href="markets-boston/">Holiday, Farmers, Flea &amp; Craft Markets</a></li>
           <li><a href="markets-festivals-boston/">Markets, Fairs &amp; Festivals</a></li>
         </ul>
       </div>
@@ -1056,6 +1058,14 @@ def filter_events_for_hub(hub, events):
             filtered = filtered[:hub["limit"]]
         return filtered
 
+    if hub.get("style") == "markets":
+        # Markets from any category: a "Kids Holiday Market" or a farmers market a source called
+        # food belongs here too; festivals without a market don't.
+        filtered = [e for e in events if is_market(e)]
+        if hub.get("limit"):
+            filtered = filtered[:hub["limit"]]
+        return filtered
+
     if hub.get("style") == "camps":
         from camps import load_camps
         return load_camps()["camps"]
@@ -1173,6 +1183,24 @@ HUBS = {
         "og_badge": "BOSTON EDM & ELECTRONIC",
         "og_image": "og-boston-edm.jpg",
         "query": "#cat=Music+%26+nightlife&genre=electronic"
+    },
+    # Markets only, with chips per kind (holiday & winter, farmers, flea & vintage, craft, night & food)
+    "markets-boston": {
+        "title": "Holiday, Farmers, Flea & Craft Markets in Greater Boston",
+        "h1": "Markets in Greater Boston",
+        "city_filter": None,
+        "cat_filter": None,
+        "style": "markets",
+        "free_only": False,
+        "time_filter": None,
+        "keyword_filter": None,
+        "show_details": True,
+        "limit": 300,
+        "subtitle": "Every market around Boston, Cambridge & Somerville in one place: holiday and winter markets, farmers markets, flea and vintage markets, craft and artisan fairs, and night markets. Filter by kind and town; updated daily.",
+        "collapse_series": True,  # a weekly farmers market or a month of holiday market days is one card
+        "og_badge": "BOSTON MARKETS",
+        "og_image": "og-markets-festivals.jpg",
+        "query": "#cat=Markets+%26+Festivals"
     },
     # Flea, night, farmers and holiday markets, craft fairs and festivals
     "markets-festivals-boston": {
@@ -1367,6 +1395,102 @@ def _hub_place_label(city, e):
     if not sub or sub.startswith("Other ") or sub == city_label:
         return city_label
     return f"{sub}, {city_label}"
+
+
+# ---------------------------------------------------------------------------------------------
+# Markets hub: only markets (no music/food festivals), with a chip row per kind of market.
+# ---------------------------------------------------------------------------------------------
+
+_MARKET_RE = re.compile(
+    r"(?i)\b(?:markets?|marketplace|bazaars?|flea|swap\s+meet|yard\s+sale|craft\s+shows?|makers?\s+mart|"
+    r"winter\s+village|holiday\s+(?:pop[- ]?up|shop(?:ping)?\s+(?:night|stroll|event)|stroll)(?!\s*bar)|"
+    r"(?:artisan|craft|crafts|holiday|christmas|vintage|antiques?|record|maker'?s?|handmade|art|artists'?|street|"
+    r"(?:art\s+|grown[- ]up\s+)?book)\s+fairs?|plant\s+(?:shows?|sales?|swaps?)|small\s+business\s+saturday|shop\s+small|"
+    r"thrift\s+(?:festival|fest|sale|market|pop[- ]?up))\b")
+# Permanent places named "market": an event held there isn't a market ("Boston Public Market
+# Tour", "Language Exchange @ Novo Marketplace"). Removed before matching, so "Holiday Pop-Up
+# Market at Boston Public Market" still counts.
+_MARKET_PLACE_RE = re.compile(
+    r"(?i)\b(?:boston\s+public\s+market|quincy\s+market|faneuil\s+hall\s+marketplace|time\s+out\s+market|"
+    r"novo\s+marketplace|deluca'?’?s\s+market|bow\s+market|select\s+markets|haymarket\s+(?:station|square)|"
+    r"market\s+(?:st|street|square|basket))\b")
+_NOT_MARKET_RE = re.compile(
+    r"(?i)\b(?:market\s+(?:st|street|square|basket|research|analysis|update|outlook)|stock\s+markets?|"
+    r"job\s+markets?|housing\s+markets?|super\s*markets?|marketing|marketplace\s+of\s+ideas|"
+    r"market\s+(?:days?\s+)?(?:volunteer|vendor\s+(?:application|sign))|"
+    r"\btours?\b|tastings?|language\s+exchange|tree\s+(?:arrives|lighting)|"
+    r"flea\s+(?:and\s+tick|treatment)|bazaar\s+magazine|haymarket\s+(?:station|square))\b")
+# First match wins: "Winter Farmers Market" is a farmers market, "Holiday Craft Fair" a holiday one.
+_MARKET_TYPES = (
+    ("farmers", "🥕 Farmers & Produce", re.compile(
+        r"(?i)\b(?:farmers'?|farm\s+stand|farm\s+market|produce|fruit|apples?|orchard|berr(?:y|ies)|"
+        r"harvest|greenmarket|haymarket|csa)\b")),
+    ("holiday", "🎄 Holiday & Winter", re.compile(
+        r"(?i)\b(?:holiday|christmas|xmas|winter|snow|yule|hanukkah|chanukah|kwanzaa|diwali|lunar\s+new\s+year|"
+        r"santa|jingle|festive|gift|merry|noel|advent|solstice|mistletoe|thanksgiving|stocking)\b")),
+    ("flea", "🧺 Flea, Vintage & Thrift", re.compile(
+        r"(?i)\b(?:flea|vintage|antiques?|thrift|swap|yard\s+sale|record|vinyl|secondhand|second-hand|"
+        r"used\s+books?|collectibles?|estate|free\s+market)\b")),
+    ("craft", "🎨 Craft, Art & Makers", re.compile(
+        r"(?i)\b(?:craft|crafts|artisan|makers?|maker's|handmade|art|artists'?|design|zine|jewelry|ceramics|"
+        r"pottery|indie|small\s+business|local\s+business|shop\s+small|book\s+fair|plants?|pop[- ]?up)\b")),
+    ("night", "🌙 Night & Food Markets", re.compile(
+        r"(?i)\b(?:night|food|eats|dumplings?|asian|street\s+food|cultural|bazaar|souk)\b")),
+)
+_MARKET_OTHER = ("other", "🛍️ Other markets")
+
+
+def is_market(e):
+    name = e.get("name") or e.get("title") or ""
+    bare = _MARKET_PLACE_RE.sub(" ", name)
+    return bool(_MARKET_RE.search(bare)) and not _NOT_MARKET_RE.search(name) and not NOT_MARKET_FESTIVAL_RE.search(name)
+
+
+def market_type(e):
+    name = e.get("name") or e.get("title") or ""
+    for key, _label, rx in _MARKET_TYPES:
+        if rx.search(name):
+            return key
+    return _MARKET_OTHER[0]
+
+
+_HUB_MARKET_JS = """<script>
+(function () {
+  var chips = document.querySelectorAll('.hub-city-chip, .hub-type-chip');
+  if (!chips.length) return;
+  var cards = document.querySelectorAll('.hub-card');
+  var heads = document.querySelectorAll('.hub-day');
+  var state = {city: 'all', type: 'all'};
+  function show() {
+    var days = {};
+    cards.forEach(function (c) {
+      var on = (state.city === 'all' || c.dataset.city === state.city) &&
+               (state.type === 'all' || c.dataset.mtype === state.type);
+      c.hidden = !on;
+      if (on) days[c.dataset.day] = 1;
+    });
+    heads.forEach(function (h) { h.hidden = !days[h.dataset.day]; });
+    document.querySelectorAll('.hub-city-chip:not(.hub-type-chip)').forEach(function (b) { b.classList.toggle('active', b.dataset.city === state.city); });
+    document.querySelectorAll('.hub-type-chip').forEach(function (b) { b.classList.toggle('active', b.dataset.mtype === state.type); });
+    var none = document.getElementById('hub-none');
+    if (none) none.hidden = Object.keys(days).length > 0;
+    var h = [];
+    if (state.type !== 'all') h.push('type=' + state.type);
+    if (state.city !== 'all') h.push('city=' + state.city);
+    history.replaceState(null, '', h.length ? '#' + h.join('&') : location.pathname);
+  }
+  chips.forEach(function (b) {
+    b.addEventListener('click', function () {
+      if (b.dataset.mtype) state.type = b.dataset.mtype; else state.city = b.dataset.city;
+      show();
+    });
+  });
+  var t = location.hash.match(/type=(\\w+)/), c = location.hash.match(/city=(\\w+)/);
+  if (t && document.querySelector('.hub-type-chip[data-mtype="' + t[1] + '"]')) state.type = t[1];
+  if (c && document.querySelector('.hub-city-chip[data-city="' + c[1] + '"]')) state.city = c[1];
+  show();
+})();
+</script>"""
 
 
 _HUB_CITY_CHIPS = (("all", "All"), ("boston", "Boston"), ("cambridge", "Cambridge"),
@@ -3139,6 +3263,7 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
     is_kids = hub.get("style") == "kids"
     is_edm = hub.get("style") == "edm"
     is_camps = hub.get("style") == "camps"
+    is_markets = hub.get("style") == "markets"
     if is_camps:
         for idx, c in enumerate(filtered[:50]):
             hub_event_items.append({
@@ -3402,7 +3527,8 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
             city = _event_city(e.get("venue"), e.get("_source_venue"), e)
             city_name = escape(_hub_place_label(city, e))
             day_attr = t_obj.date().isoformat() if isinstance(t_obj, datetime) else ""
-            cards_html.append(f"""<article class="hub-card" data-city="{escape(city)}" data-day="{day_attr}">
+            mtype_attr = f' data-mtype="{market_type(e)}"' if is_markets else ""
+            cards_html.append(f"""<article class="hub-card" data-city="{escape(city)}" data-day="{day_attr}"{mtype_attr}>
   <div class="hub-card-head">
     <time class="hub-date">{' · '.join(x for x in (d_str, t_str) if x)}</time>
     <div class="hub-badges">{price_badge}</div>
@@ -3422,6 +3548,16 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
             f'<button type="button" class="hub-city-chip" data-city="{k}">{lbl}</button>'
             for k, lbl in _HUB_CITY_CHIPS if k == "all" or k in present) + "</div>"
         hub_js = _HUB_CITY_JS
+        if is_markets:
+            joined = "".join(cards_html)
+            kinds = [(k, lbl) for k, lbl, _rx in _MARKET_TYPES] + [_MARKET_OTHER]
+            counts = {k: joined.count(f'data-mtype="{k}"') for k, _ in kinds}
+            city_chips_html = ('<div class="hub-city-chips hub-type-chips" role="group" aria-label="Filter by kind of market">'
+                               '<button type="button" class="hub-city-chip hub-type-chip" data-mtype="all">All markets</button>'
+                               + "".join(f'<button type="button" class="hub-city-chip hub-type-chip" data-mtype="{k}">{lbl} '
+                                         f'<span class="count">{counts[k]}</span></button>' for k, lbl in kinds if counts[k])
+                               + "</div>" + city_chips_html)
+            hub_js = _HUB_MARKET_JS
 
     kids_head, kids_css, body_class = "", "", ""
     hero_html = f"""<div class="hero">
@@ -3515,6 +3651,7 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
     active_kf = 'active' if hub_slug == 'kids-family-events-boston' else ''
     active_sc = 'active' if hub_slug == 'summer-camps' else ''
     active_mk = 'active' if hub_slug == 'markets-festivals-boston' else ''
+    active_mkt = 'active' if hub_slug == 'markets-boston' else ''
     active_edm = 'active' if hub_slug == 'boston-edm' else ''
 
     if is_camps or is_kids:
@@ -3529,6 +3666,7 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
     <a href="../board-game-nights-boston/" class="{active_bg}">Board Games</a>
     <a href="../kids-family-events-boston/" class="{active_kf}">Kids &amp; Family</a>
     <a href="../summer-camps/" class="{active_sc}">Summer Camps</a>
+    <a href="../markets-boston/" class="{active_mkt}">Markets</a>
     <a href="../markets-festivals-boston/" class="{active_mk}">Markets &amp; Festivals</a>
     <a href="../boston/" class="{active_b}">Boston</a>
     <a href="../cambridge/" class="{active_c}">Cambridge</a>
