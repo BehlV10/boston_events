@@ -209,10 +209,10 @@ class CollegeHub(unittest.TestCase):
         areas = re.findall(r'data-group="area" data-val="(\w+)"', self.html)
         self.assertEqual(areas, ["all", "cambridge", "comm_ave"])
 
-    def test_registered_with_nav_and_site_directory(self):
+    def test_registered_and_in_site_directory(self):
+        # Other guide pages' header bar lists only finished pages (template._MAIN_NAV)
         self.assertIn("college", T.HUBS)
-        self.assertIn('<a href="../college/" class="active">College</a>', self.html)
-        self.assertIn('<a href="../college/" class="">College</a>', T.render_hub_page("boston-edm", []))
+        self.assertIn('href="college/"', T.render_page([]))
 
 
 class MainCalendar(unittest.TestCase):
