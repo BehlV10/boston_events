@@ -1246,7 +1246,8 @@ HUBS = {
         "show_details": True,
         "limit": 300,
         "subtitle": "Holiday and winter markets, farmers markets, flea and vintage markets, craft and artisan fairs, night markets, and street, food and cultural festivals with stalls to wander around Greater Boston. Filter by kind and town; updated daily.",
-        "collapse_series": True,  # a weekly farmers market or a month of holiday market days is one card
+        # A market open every day (Snowport) is one card in an "Open every day" strip; others show on
+        # each day they're on, split by town (_markets_split, _render_market_sections)
         "og_badge": "MARKETS & FESTIVALS",
         "og_image": "og-markets-festivals.jpg",
         "query": "#cat=Markets+%26+Festivals"
@@ -1525,6 +1526,7 @@ _HUB_MARKET_JS = """<script>
   if (!chips.length) return;
   var cards = document.querySelectorAll('.hub-card');
   var heads = document.querySelectorAll('.hub-day');
+  var groups = document.querySelectorAll('.mk-city, .mk-daily');
   var state = {city: 'all', type: 'all'};
   function show() {
     var days = {};
@@ -1535,6 +1537,7 @@ _HUB_MARKET_JS = """<script>
       if (on) days[c.dataset.day] = 1;
     });
     heads.forEach(function (h) { h.hidden = !days[h.dataset.day]; });
+    groups.forEach(function (g) { g.hidden = !g.querySelector('.hub-card:not([hidden])'); });
     document.querySelectorAll('.hub-city-chip:not(.hub-type-chip)').forEach(function (b) { b.classList.toggle('active', b.dataset.city === state.city); });
     document.querySelectorAll('.hub-type-chip').forEach(function (b) { b.classList.toggle('active', b.dataset.mtype === state.type); });
     var none = document.getElementById('hub-none');
@@ -1557,6 +1560,259 @@ _HUB_MARKET_JS = """<script>
 })();
 </script>"""
 
+
+
+# ---------------------------------------------------------------------------------------------
+# Markets & Festivals hub: day sections split by town, an "Open every day" strip for markets
+# like Snowport, start-end hours, and a market-stalls header.
+# ---------------------------------------------------------------------------------------------
+
+MARKET_DAILY_MIN_DATES = 5      # a series on at least this many days...
+MARKET_DAILY_MIN_SHARE = 0.7    # ...covering this share of the days between its first and last
+
+
+def _markets_split(events):
+    """(daily, dated): series open (nearly) every day become one entry each in `daily`, with
+    `_daily_dates` (its open days, in order) and `_daily_hours` (date -> event); everything
+    else stays one card per day it's on, in `dated`. Events must be date-sorted."""
+    groups, order = {}, []
+    for e in events:
+        k = _series_key(e)
+        if k not in groups:
+            groups[k] = []
+            order.append(k)
+        groups[k].append(e)
+    daily, dated_keys = [], set()
+    for k in order:
+        by_day = {}
+        for e in groups[k]:
+            t = e.get("_time")
+            if isinstance(t, datetime):
+                by_day.setdefault(t.date(), e)
+        days = sorted(by_day)
+        if len(days) >= MARKET_DAILY_MIN_DATES and \
+                len(days) / ((days[-1] - days[0]).days + 1) >= MARKET_DAILY_MIN_SHARE:
+            daily.append({**by_day[days[0]], "_daily_dates": days, "_daily_hours": by_day})
+        else:
+            dated_keys.add(k)
+    dated, seen = [], set()
+    for e in events:
+        k = _series_key(e)
+        if k not in dated_keys:
+            continue
+        t = e.get("_time")
+        day = t.date() if isinstance(t, datetime) else None
+        if (k, day) in seen:
+            continue  # two sources' copies of one market day
+        seen.add((k, day))
+        dated.append(e)
+    return daily, dated
+
+
+def _short_clock(dt):
+    """10 am, 3:30 pm."""
+    return dt.strftime("%-I %p" if dt.minute == 0 else "%-I:%M %p").lower()
+
+
+def _market_hours(e):
+    """"10 am – 4 pm" when the end is known, "10 am" otherwise, "Time TBA"/"All day" as on other hubs."""
+    t = e.get("_time")
+    if not isinstance(t, datetime):
+        return ""
+    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", e.get("date") or ""):
+        return "Time TBA"
+    start = t.astimezone(EASTERN)
+    end = None
+    try:
+        if e.get("end"):
+            end = datetime.fromisoformat(str(e["end"]).replace("Z", "+00:00"))
+            end = (end if end.tzinfo else end.replace(tzinfo=EASTERN)).astimezone(EASTERN)
+    except ValueError:
+        end = None
+    if (start.hour, start.minute) == (0, 0) and not end:
+        return "All day"
+    if end and timedelta(0) < end - start <= timedelta(hours=16):
+        a, b = _short_clock(start), _short_clock(end)
+        if a[-2:] == b[-2:]:
+            a = a[:-3]  # "10 – 11 am" style when both share am/pm
+        return f"{a} – {b}"
+    return _short_clock(start)
+
+
+def _market_kind_label(kind):
+    for k, lbl, _rx in _MARKET_TYPES:
+        if k == kind:
+            return lbl
+    return dict([_FESTIVAL_TYPE, _MARKET_OTHER]).get(kind, "")
+
+
+def _render_market_card(e, day_attr, today=None):
+    title = escape(e.get("title") or e.get("name") or "Event")
+    venue = escape(e.get("venue") or e.get("_source_venue") or "Venue")
+    url = escape(e.get("url") or e.get("link") or "#")
+    city = _event_city(e.get("venue"), e.get("_source_venue"), e)
+    place = escape(_hub_place_label(city, e))
+    kind = market_type(e)
+    price_txt = str(e.get("price") or "").strip()
+    if re.fullmatch(r"\d+(?:\.\d+)?", price_txt):
+        price_txt = "$" + price_txt
+    if _is_event_free(e):
+        price_badge = '<span class="badge badge-free">Free</span>'
+    else:
+        price_badge = f'<span class="badge badge-price">{escape(price_txt)}</span>' if price_txt else ""
+    kind_label = _market_kind_label(kind)
+    kind_badge = f'<span class="mk-kind mk-k-{kind}">{escape(kind_label)}</span>' if kind_label else ""
+    dates = e.get("_daily_dates")
+    if dates:
+        hours = e["_daily_hours"]
+        through = dates[-1].strftime("%b %-d")
+        closed = [d for d in (dates[0] + timedelta(days=i) for i in range((dates[-1] - dates[0]).days + 1)) if d not in hours]
+        span = f"Daily through {through}" if not closed else f"Most days through {through}"
+        today = today or datetime.now(EASTERN).date()
+        if today in hours:
+            when = f"Today {_market_hours(hours[today])}"
+        else:
+            nxt = next((d for d in dates if d >= today), dates[0])
+            when = f"Opens {nxt.strftime('%a, %b %-d')} · {_market_hours(hours[nxt])}"
+        if closed:
+            when += f" · closed {', '.join(d.strftime('%b %-d') for d in closed[:3])}"
+        time_html = f'<span class="mk-span">{escape(span)}</span><span class="mk-hours">{escape(when)}</span>'
+    else:
+        time_html = f'<span class="mk-hours">{escape(_market_hours(e))}</span>'
+    desc_html = ""
+    if e.get("description"):
+        d_txt = re.sub(r"\s+", " ", str(e["description"])).strip()
+        desc_html = f'<p class="hub-desc">{escape(d_txt[:160] + ("…" if len(d_txt) > 160 else ""))}</p>'
+    return f"""<article class="hub-card mk-card" data-city="{escape(city)}" data-day="{day_attr}" data-mtype="{kind}">
+  <div class="mk-card-top">{kind_badge}<div class="hub-badges">{price_badge}</div></div>
+  <h3 class="hub-title"><a href="{url}" target="_blank" rel="noopener">{title}</a></h3>
+  <div class="mk-when">{time_html}</div>
+  <div class="hub-meta"><span class="hub-venue">📍 {venue}</span> <span class="hub-city">({place})</span></div>
+  {desc_html}
+</article>"""
+
+
+_MARKET_CITY_ORDER = ["boston", "cambridge", "somerville", "other"]
+_MARKET_CITY_LABELS = {"boston": "Boston", "cambridge": "Cambridge", "somerville": "Somerville", "other": "Nearby towns"}
+
+
+def _render_market_sections(daily, dated, card_limit, today=None):
+    """HTML for the "Open every day" strip, then each day, split by town."""
+    out = []
+    if daily:
+        out.append('<section class="mk-daily" data-day="daily">')
+        out.append('<h2 class="hub-day mk-daily-head" id="daily" data-day="daily">✨ Open every day</h2>')
+        out.append('<div class="mk-grid">' + "".join(_render_market_card(e, "daily", today) for e in daily) + "</div>")
+        out.append("</section>")
+    by_day = {}
+    for e in dated[:card_limit]:
+        t = e.get("_time")
+        by_day.setdefault(t.date() if isinstance(t, datetime) else None, []).append(e)
+    for day in sorted((d for d in by_day if d), key=lambda d: d) + ([None] if None in by_day else []):
+        day_iso = day.isoformat() if day else "tba"
+        label = day.strftime("%A, %B %-d") if day else "Date TBA"
+        evs = by_day[day]
+        out.append(f'<h2 class="hub-day" id="{day_iso}" data-day="{day_iso}">{label} <span class="mk-count">{len(evs)}</span></h2>')
+        by_city = {}
+        for e in evs:
+            by_city.setdefault(_event_city(e.get("venue"), e.get("_source_venue"), e), []).append(e)
+        for city in _MARKET_CITY_ORDER:
+            cevs = by_city.get(city)
+            if not cevs:
+                continue
+            cevs.sort(key=lambda ev: ev.get("_time") or datetime.max.replace(tzinfo=EASTERN))
+            out.append(f'<div class="mk-city" data-city="{city}" data-day="{day_iso}">'
+                       f'<h3 class="mk-city-head"><span class="mk-city-pill mk-c-{city}">{_MARKET_CITY_LABELS[city]}</span></h3>'
+                       '<div class="mk-grid">' + "".join(_render_market_card(e, day_iso, today) for e in cevs) + "</div></div>")
+    return out
+
+
+_MARKETS_HERO_ART = """<svg class="mk-hero-art" viewBox="0 0 900 200" aria-hidden="true" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="mk-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2a3560"/><stop offset="55%" stop-color="#a8566e"/><stop offset="100%" stop-color="#f2a65a"/>
+    </linearGradient>
+    <radialGradient id="mk-glow"><stop offset="0%" stop-color="#ffe7a3" stop-opacity="0.9"/><stop offset="100%" stop-color="#ffe7a3" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="900" height="200" fill="url(#mk-sky)"/>
+  <g fill="#3a2f52" opacity="0.55"><rect x="0" y="111" width="32" height="49"/><rect x="35" y="117" width="42" height="43"/><rect x="77" y="86" width="48" height="74"/><rect x="125" y="83" width="33" height="77"/><rect x="158" y="107" width="38" height="53"/><rect x="196" y="93" width="24" height="67"/><rect x="223" y="105" width="24" height="55"/><rect x="247" y="93" width="39" height="67"/><rect x="286" y="84" width="48" height="76"/><rect x="334" y="80" width="29" height="80"/><rect x="368" y="117" width="40" height="43"/><rect x="412" y="95" width="40" height="65"/><rect x="452" y="118" width="29" height="42"/><rect x="485" y="102" width="26" height="58"/><rect x="514" y="86" width="26" height="74"/><rect x="540" y="101" width="40" height="59"/><rect x="584" y="77" width="48" height="83"/><rect x="633" y="83" width="25" height="77"/><rect x="662" y="108" width="42" height="52"/><rect x="706" y="85" width="25" height="75"/><rect x="736" y="84" width="24" height="76"/><rect x="760" y="107" width="41" height="53"/><rect x="804" y="86" width="43" height="74"/><rect x="850" y="100" width="46" height="60"/><rect x="899" y="91" width="40" height="69"/></g>
+  <g fill="#ffd98a" opacity="0.5"><rect x="311" y="95" width="3" height="4"/><rect x="818" y="91" width="3" height="4"/><rect x="720" y="129" width="3" height="4"/><rect x="254" y="85" width="3" height="4"/><rect x="593" y="99" width="3" height="4"/><rect x="542" y="111" width="3" height="4"/><rect x="356" y="126" width="3" height="4"/><rect x="464" y="98" width="3" height="4"/><rect x="628" y="84" width="3" height="4"/><rect x="125" y="112" width="3" height="4"/><rect x="433" y="90" width="3" height="4"/><rect x="780" y="101" width="3" height="4"/><rect x="160" y="139" width="3" height="4"/><rect x="505" y="106" width="3" height="4"/><rect x="45" y="122" width="3" height="4"/><rect x="84" y="128" width="3" height="4"/><rect x="576" y="116" width="3" height="4"/><rect x="813" y="136" width="3" height="4"/><rect x="842" y="100" width="3" height="4"/><rect x="353" y="124" width="3" height="4"/><rect x="363" y="118" width="3" height="4"/><rect x="513" y="117" width="3" height="4"/><rect x="821" y="109" width="3" height="4"/><rect x="75" y="133" width="3" height="4"/><rect x="100" y="140" width="3" height="4"/><rect x="281" y="110" width="3" height="4"/><rect x="718" y="122" width="3" height="4"/><rect x="71" y="83" width="3" height="4"/><rect x="753" y="124" width="3" height="4"/><rect x="322" y="121" width="3" height="4"/><rect x="596" y="123" width="3" height="4"/><rect x="846" y="108" width="3" height="4"/><rect x="296" y="125" width="3" height="4"/><rect x="400" y="136" width="3" height="4"/><rect x="689" y="102" width="3" height="4"/><rect x="28" y="140" width="3" height="4"/><rect x="477" y="102" width="3" height="4"/><rect x="177" y="119" width="3" height="4"/><rect x="124" y="111" width="3" height="4"/><rect x="65" y="93" width="3" height="4"/></g>
+  <rect x="0" y="168" width="900" height="32" fill="#3b2a22"/>
+  <rect x="0" y="168" width="900" height="3" fill="#5a4033"/>
+  <g transform="translate(22,0)"><rect x="6" y="110" width="5" height="60" fill="#5b3a29"/><rect x="109" y="110" width="5" height="60" fill="#5b3a29"/><rect x="0" y="140" width="120" height="28" rx="2" fill="#7a4e33"/><rect x="0" y="140" width="120" height="5" fill="#94613f"/><rect x="8" y="129" width="9" height="11" rx="2" fill="#e4572e"/><circle cx="27" cy="135" r="5.5" fill="#f2c14e"/><circle cx="42" cy="135" r="5.5" fill="#7fb069"/><rect x="53" y="129" width="9" height="11" rx="2" fill="#e4572e"/><circle cx="72" cy="135" r="5.5" fill="#f2a65a"/><circle cx="87" cy="135" r="5.5" fill="#9b5de5"/><rect x="98" y="129" width="9" height="11" rx="2" fill="#e4572e"/><path d="M -6 112 L 126 112 L 116 92 L 4 92 Z" fill="#fbf1e1"/><path d="M -6.0 112 L 10.5 112 L 18.0 92 L 4.0 92 Z" fill="#c8402e"/><path d="M 27.0 112 L 43.5 112 L 46.0 92 L 32.0 92 Z" fill="#c8402e"/><path d="M 60.0 112 L 76.5 112 L 74.0 92 L 60.0 92 Z" fill="#c8402e"/><path d="M 93.0 112 L 109.5 112 L 102.0 92 L 88.0 92 Z" fill="#c8402e"/><path d="M -6.0 112 A 8.2 6.9 0 0 0 10.5 112 Z" fill="#c8402e"/><path d="M 10.5 112 A 8.2 6.9 0 0 0 27.0 112 Z" fill="#fbf1e1"/><path d="M 27.0 112 A 8.2 6.9 0 0 0 43.5 112 Z" fill="#c8402e"/><path d="M 43.5 112 A 8.2 6.9 0 0 0 60.0 112 Z" fill="#fbf1e1"/><path d="M 60.0 112 A 8.2 6.9 0 0 0 76.5 112 Z" fill="#c8402e"/><path d="M 76.5 112 A 8.2 6.9 0 0 0 93.0 112 Z" fill="#fbf1e1"/><path d="M 93.0 112 A 8.2 6.9 0 0 0 109.5 112 Z" fill="#c8402e"/><path d="M 109.5 112 A 8.2 6.9 0 0 0 126.0 112 Z" fill="#fbf1e1"/><rect x="2" y="88" width="116" height="5" rx="2" fill="#5b3a29"/></g>
+  <g transform="translate(168,0)"><rect x="6" y="110" width="5" height="60" fill="#5b3a29"/><rect x="109" y="110" width="5" height="60" fill="#5b3a29"/><rect x="0" y="140" width="120" height="28" rx="2" fill="#7a4e33"/><rect x="0" y="140" width="120" height="5" fill="#94613f"/><circle cx="12" cy="135" r="5.5" fill="#f2c14e"/><circle cx="27" cy="135" r="5.5" fill="#7fb069"/><rect x="38" y="129" width="9" height="11" rx="2" fill="#e4572e"/><circle cx="57" cy="135" r="5.5" fill="#f2a65a"/><circle cx="72" cy="135" r="5.5" fill="#9b5de5"/><rect x="83" y="129" width="9" height="11" rx="2" fill="#e4572e"/><circle cx="102" cy="135" r="5.5" fill="#f2c14e"/><path d="M -6 112 L 126 112 L 116 92 L 4 92 Z" fill="#fbf1e1"/><path d="M -6.0 112 L 10.5 112 L 18.0 92 L 4.0 92 Z" fill="#2f6f4f"/><path d="M 27.0 112 L 43.5 112 L 46.0 92 L 32.0 92 Z" fill="#2f6f4f"/><path d="M 60.0 112 L 76.5 112 L 74.0 92 L 60.0 92 Z" fill="#2f6f4f"/><path d="M 93.0 112 L 109.5 112 L 102.0 92 L 88.0 92 Z" fill="#2f6f4f"/><path d="M -6.0 112 A 8.2 6.9 0 0 0 10.5 112 Z" fill="#2f6f4f"/><path d="M 10.5 112 A 8.2 6.9 0 0 0 27.0 112 Z" fill="#fbf1e1"/><path d="M 27.0 112 A 8.2 6.9 0 0 0 43.5 112 Z" fill="#2f6f4f"/><path d="M 43.5 112 A 8.2 6.9 0 0 0 60.0 112 Z" fill="#fbf1e1"/><path d="M 60.0 112 A 8.2 6.9 0 0 0 76.5 112 Z" fill="#2f6f4f"/><path d="M 76.5 112 A 8.2 6.9 0 0 0 93.0 112 Z" fill="#fbf1e1"/><path d="M 93.0 112 A 8.2 6.9 0 0 0 109.5 112 Z" fill="#2f6f4f"/><path d="M 109.5 112 A 8.2 6.9 0 0 0 126.0 112 Z" fill="#fbf1e1"/><rect x="2" y="88" width="116" height="5" rx="2" fill="#5b3a29"/></g>
+  <g transform="translate(314,0)"><rect x="6" y="110" width="5" height="60" fill="#5b3a29"/><rect x="109" y="110" width="5" height="60" fill="#5b3a29"/><rect x="0" y="140" width="120" height="28" rx="2" fill="#7a4e33"/><rect x="0" y="140" width="120" height="5" fill="#94613f"/><circle cx="12" cy="135" r="5.5" fill="#7fb069"/><rect x="23" y="129" width="9" height="11" rx="2" fill="#e4572e"/><circle cx="42" cy="135" r="5.5" fill="#f2a65a"/><circle cx="57" cy="135" r="5.5" fill="#9b5de5"/><rect x="68" y="129" width="9" height="11" rx="2" fill="#e4572e"/><circle cx="87" cy="135" r="5.5" fill="#f2c14e"/><circle cx="102" cy="135" r="5.5" fill="#7fb069"/><path d="M -6 112 L 126 112 L 116 92 L 4 92 Z" fill="#fbf1e1"/><path d="M -6.0 112 L 10.5 112 L 18.0 92 L 4.0 92 Z" fill="#e0a32a"/><path d="M 27.0 112 L 43.5 112 L 46.0 92 L 32.0 92 Z" fill="#e0a32a"/><path d="M 60.0 112 L 76.5 112 L 74.0 92 L 60.0 92 Z" fill="#e0a32a"/><path d="M 93.0 112 L 109.5 112 L 102.0 92 L 88.0 92 Z" fill="#e0a32a"/><path d="M -6.0 112 A 8.2 6.9 0 0 0 10.5 112 Z" fill="#e0a32a"/><path d="M 10.5 112 A 8.2 6.9 0 0 0 27.0 112 Z" fill="#fbf1e1"/><path d="M 27.0 112 A 8.2 6.9 0 0 0 43.5 112 Z" fill="#e0a32a"/><path d="M 43.5 112 A 8.2 6.9 0 0 0 60.0 112 Z" fill="#fbf1e1"/><path d="M 60.0 112 A 8.2 6.9 0 0 0 76.5 112 Z" fill="#e0a32a"/><path d="M 76.5 112 A 8.2 6.9 0 0 0 93.0 112 Z" fill="#fbf1e1"/><path d="M 93.0 112 A 8.2 6.9 0 0 0 109.5 112 Z" fill="#e0a32a"/><path d="M 109.5 112 A 8.2 6.9 0 0 0 126.0 112 Z" fill="#fbf1e1"/><rect x="2" y="88" width="116" height="5" rx="2" fill="#5b3a29"/></g>
+  <g transform="translate(460,0)"><rect x="6" y="110" width="5" height="60" fill="#5b3a29"/><rect x="109" y="110" width="5" height="60" fill="#5b3a29"/><rect x="0" y="140" width="120" height="28" rx="2" fill="#7a4e33"/><rect x="0" y="140" width="120" height="5" fill="#94613f"/><rect x="8" y="129" width="9" height="11" rx="2" fill="#e4572e"/><circle cx="27" cy="135" r="5.5" fill="#f2a65a"/><circle cx="42" cy="135" r="5.5" fill="#9b5de5"/><rect x="53" y="129" width="9" height="11" rx="2" fill="#e4572e"/><circle cx="72" cy="135" r="5.5" fill="#f2c14e"/><circle cx="87" cy="135" r="5.5" fill="#7fb069"/><rect x="98" y="129" width="9" height="11" rx="2" fill="#e4572e"/><path d="M -6 112 L 126 112 L 116 92 L 4 92 Z" fill="#fbf1e1"/><path d="M -6.0 112 L 10.5 112 L 18.0 92 L 4.0 92 Z" fill="#2d5d8a"/><path d="M 27.0 112 L 43.5 112 L 46.0 92 L 32.0 92 Z" fill="#2d5d8a"/><path d="M 60.0 112 L 76.5 112 L 74.0 92 L 60.0 92 Z" fill="#2d5d8a"/><path d="M 93.0 112 L 109.5 112 L 102.0 92 L 88.0 92 Z" fill="#2d5d8a"/><path d="M -6.0 112 A 8.2 6.9 0 0 0 10.5 112 Z" fill="#2d5d8a"/><path d="M 10.5 112 A 8.2 6.9 0 0 0 27.0 112 Z" fill="#fbf1e1"/><path d="M 27.0 112 A 8.2 6.9 0 0 0 43.5 112 Z" fill="#2d5d8a"/><path d="M 43.5 112 A 8.2 6.9 0 0 0 60.0 112 Z" fill="#fbf1e1"/><path d="M 60.0 112 A 8.2 6.9 0 0 0 76.5 112 Z" fill="#2d5d8a"/><path d="M 76.5 112 A 8.2 6.9 0 0 0 93.0 112 Z" fill="#fbf1e1"/><path d="M 93.0 112 A 8.2 6.9 0 0 0 109.5 112 Z" fill="#2d5d8a"/><path d="M 109.5 112 A 8.2 6.9 0 0 0 126.0 112 Z" fill="#fbf1e1"/><rect x="2" y="88" width="116" height="5" rx="2" fill="#5b3a29"/></g>
+  <g transform="translate(606,0)"><rect x="6" y="110" width="5" height="60" fill="#5b3a29"/><rect x="109" y="110" width="5" height="60" fill="#5b3a29"/><rect x="0" y="140" width="120" height="28" rx="2" fill="#7a4e33"/><rect x="0" y="140" width="120" height="5" fill="#94613f"/><circle cx="12" cy="135" r="5.5" fill="#f2a65a"/><circle cx="27" cy="135" r="5.5" fill="#9b5de5"/><rect x="38" y="129" width="9" height="11" rx="2" fill="#e4572e"/><circle cx="57" cy="135" r="5.5" fill="#f2c14e"/><circle cx="72" cy="135" r="5.5" fill="#7fb069"/><rect x="83" y="129" width="9" height="11" rx="2" fill="#e4572e"/><circle cx="102" cy="135" r="5.5" fill="#f2a65a"/><path d="M -6 112 L 126 112 L 116 92 L 4 92 Z" fill="#fbf1e1"/><path d="M -6.0 112 L 10.5 112 L 18.0 92 L 4.0 92 Z" fill="#b8457a"/><path d="M 27.0 112 L 43.5 112 L 46.0 92 L 32.0 92 Z" fill="#b8457a"/><path d="M 60.0 112 L 76.5 112 L 74.0 92 L 60.0 92 Z" fill="#b8457a"/><path d="M 93.0 112 L 109.5 112 L 102.0 92 L 88.0 92 Z" fill="#b8457a"/><path d="M -6.0 112 A 8.2 6.9 0 0 0 10.5 112 Z" fill="#b8457a"/><path d="M 10.5 112 A 8.2 6.9 0 0 0 27.0 112 Z" fill="#fbf1e1"/><path d="M 27.0 112 A 8.2 6.9 0 0 0 43.5 112 Z" fill="#b8457a"/><path d="M 43.5 112 A 8.2 6.9 0 0 0 60.0 112 Z" fill="#fbf1e1"/><path d="M 60.0 112 A 8.2 6.9 0 0 0 76.5 112 Z" fill="#b8457a"/><path d="M 76.5 112 A 8.2 6.9 0 0 0 93.0 112 Z" fill="#fbf1e1"/><path d="M 93.0 112 A 8.2 6.9 0 0 0 109.5 112 Z" fill="#b8457a"/><path d="M 109.5 112 A 8.2 6.9 0 0 0 126.0 112 Z" fill="#fbf1e1"/><rect x="2" y="88" width="116" height="5" rx="2" fill="#5b3a29"/></g>
+  <g transform="translate(752,0)"><rect x="6" y="110" width="5" height="60" fill="#5b3a29"/><rect x="109" y="110" width="5" height="60" fill="#5b3a29"/><rect x="0" y="140" width="120" height="28" rx="2" fill="#7a4e33"/><rect x="0" y="140" width="120" height="5" fill="#94613f"/><circle cx="12" cy="135" r="5.5" fill="#9b5de5"/><rect x="23" y="129" width="9" height="11" rx="2" fill="#e4572e"/><circle cx="42" cy="135" r="5.5" fill="#f2c14e"/><circle cx="57" cy="135" r="5.5" fill="#7fb069"/><rect x="68" y="129" width="9" height="11" rx="2" fill="#e4572e"/><circle cx="87" cy="135" r="5.5" fill="#f2a65a"/><circle cx="102" cy="135" r="5.5" fill="#9b5de5"/><path d="M -6 112 L 126 112 L 116 92 L 4 92 Z" fill="#fbf1e1"/><path d="M -6.0 112 L 10.5 112 L 18.0 92 L 4.0 92 Z" fill="#c8402e"/><path d="M 27.0 112 L 43.5 112 L 46.0 92 L 32.0 92 Z" fill="#c8402e"/><path d="M 60.0 112 L 76.5 112 L 74.0 92 L 60.0 92 Z" fill="#c8402e"/><path d="M 93.0 112 L 109.5 112 L 102.0 92 L 88.0 92 Z" fill="#c8402e"/><path d="M -6.0 112 A 8.2 6.9 0 0 0 10.5 112 Z" fill="#c8402e"/><path d="M 10.5 112 A 8.2 6.9 0 0 0 27.0 112 Z" fill="#fbf1e1"/><path d="M 27.0 112 A 8.2 6.9 0 0 0 43.5 112 Z" fill="#c8402e"/><path d="M 43.5 112 A 8.2 6.9 0 0 0 60.0 112 Z" fill="#fbf1e1"/><path d="M 60.0 112 A 8.2 6.9 0 0 0 76.5 112 Z" fill="#c8402e"/><path d="M 76.5 112 A 8.2 6.9 0 0 0 93.0 112 Z" fill="#fbf1e1"/><path d="M 93.0 112 A 8.2 6.9 0 0 0 109.5 112 Z" fill="#c8402e"/><path d="M 109.5 112 A 8.2 6.9 0 0 0 126.0 112 Z" fill="#fbf1e1"/><rect x="2" y="88" width="116" height="5" rx="2" fill="#5b3a29"/></g>
+  <path d="M -20.0 40.0 L -8.0 43.3 L 4.0 46.5 L 16.0 49.4 L 28.0 52.2 L 40.0 54.9 L 52.0 57.3 L 64.0 59.6 L 76.0 61.8 L 88.0 63.7 L 100.0 65.5 L 112.0 67.1 L 124.0 68.6 L 136.0 69.8 L 148.0 70.9 L 160.0 71.9 L 172.0 72.6 L 184.0 73.2 L 196.0 73.7 L 208.0 73.9 L 220.0 74.0 L 232.0 73.9 L 244.0 73.7 L 256.0 73.2 L 268.0 72.6 L 280.0 71.9 L 292.0 70.9 L 304.0 69.8 L 316.0 68.6 L 328.0 67.1 L 340.0 65.5 L 352.0 63.7 L 364.0 61.8 L 376.0 59.6 L 388.0 57.3 L 400.0 54.9 L 412.0 52.2 L 424.0 49.4 L 436.0 46.5 L 448.0 43.3 L 460.0 40.0" fill="none" stroke="#2a2233" stroke-width="1.3"/><path d="M 440.0 36.0 L 452.0 38.9 L 464.0 41.7 L 476.0 44.3 L 488.0 46.8 L 500.0 49.1 L 512.0 51.3 L 524.0 53.3 L 536.0 55.2 L 548.0 56.9 L 560.0 58.5 L 572.0 59.9 L 584.0 61.2 L 596.0 62.3 L 608.0 63.3 L 620.0 64.1 L 632.0 64.8 L 644.0 65.3 L 656.0 65.7 L 668.0 65.9 L 680.0 66.0 L 692.0 65.9 L 704.0 65.7 L 716.0 65.3 L 728.0 64.8 L 740.0 64.1 L 752.0 63.3 L 764.0 62.3 L 776.0 61.2 L 788.0 59.9 L 800.0 58.5 L 812.0 56.9 L 824.0 55.2 L 836.0 53.3 L 848.0 51.3 L 860.0 49.1 L 872.0 46.8 L 884.0 44.3 L 896.0 41.7 L 908.0 38.9 L 920.0 36.0" fill="none" stroke="#2a2233" stroke-width="1.3"/>
+  <circle cx="4.0" cy="51.5" r="9" fill="url(#mk-glow)"/><circle cx="4.0" cy="51.5" r="3" fill="#ffe08a"/><circle cx="28.0" cy="57.2" r="9" fill="url(#mk-glow)"/><circle cx="28.0" cy="57.2" r="3" fill="#ffe08a"/><circle cx="52.0" cy="62.3" r="9" fill="url(#mk-glow)"/><circle cx="52.0" cy="62.3" r="3" fill="#ffe08a"/><circle cx="76.0" cy="66.8" r="9" fill="url(#mk-glow)"/><circle cx="76.0" cy="66.8" r="3" fill="#ffe08a"/><circle cx="100.0" cy="70.5" r="9" fill="url(#mk-glow)"/><circle cx="100.0" cy="70.5" r="3" fill="#ffe08a"/><circle cx="124.0" cy="73.6" r="9" fill="url(#mk-glow)"/><circle cx="124.0" cy="73.6" r="3" fill="#ffe08a"/><circle cx="148.0" cy="75.9" r="9" fill="url(#mk-glow)"/><circle cx="148.0" cy="75.9" r="3" fill="#ffe08a"/><circle cx="172.0" cy="77.6" r="9" fill="url(#mk-glow)"/><circle cx="172.0" cy="77.6" r="3" fill="#ffe08a"/><circle cx="196.0" cy="78.7" r="9" fill="url(#mk-glow)"/><circle cx="196.0" cy="78.7" r="3" fill="#ffe08a"/><circle cx="220.0" cy="79.0" r="9" fill="url(#mk-glow)"/><circle cx="220.0" cy="79.0" r="3" fill="#ffe08a"/><circle cx="244.0" cy="78.7" r="9" fill="url(#mk-glow)"/><circle cx="244.0" cy="78.7" r="3" fill="#ffe08a"/><circle cx="268.0" cy="77.6" r="9" fill="url(#mk-glow)"/><circle cx="268.0" cy="77.6" r="3" fill="#ffe08a"/><circle cx="292.0" cy="75.9" r="9" fill="url(#mk-glow)"/><circle cx="292.0" cy="75.9" r="3" fill="#ffe08a"/><circle cx="316.0" cy="73.6" r="9" fill="url(#mk-glow)"/><circle cx="316.0" cy="73.6" r="3" fill="#ffe08a"/><circle cx="340.0" cy="70.5" r="9" fill="url(#mk-glow)"/><circle cx="340.0" cy="70.5" r="3" fill="#ffe08a"/><circle cx="364.0" cy="66.8" r="9" fill="url(#mk-glow)"/><circle cx="364.0" cy="66.8" r="3" fill="#ffe08a"/><circle cx="388.0" cy="62.3" r="9" fill="url(#mk-glow)"/><circle cx="388.0" cy="62.3" r="3" fill="#ffe08a"/><circle cx="412.0" cy="57.2" r="9" fill="url(#mk-glow)"/><circle cx="412.0" cy="57.2" r="3" fill="#ffe08a"/><circle cx="436.0" cy="51.5" r="9" fill="url(#mk-glow)"/><circle cx="436.0" cy="51.5" r="3" fill="#ffe08a"/><circle cx="464.0" cy="46.7" r="9" fill="url(#mk-glow)"/><circle cx="464.0" cy="46.7" r="3" fill="#ffe08a"/><circle cx="488.0" cy="51.8" r="9" fill="url(#mk-glow)"/><circle cx="488.0" cy="51.8" r="3" fill="#ffe08a"/><circle cx="512.0" cy="56.3" r="9" fill="url(#mk-glow)"/><circle cx="512.0" cy="56.3" r="3" fill="#ffe08a"/><circle cx="536.0" cy="60.2" r="9" fill="url(#mk-glow)"/><circle cx="536.0" cy="60.2" r="3" fill="#ffe08a"/><circle cx="560.0" cy="63.5" r="9" fill="url(#mk-glow)"/><circle cx="560.0" cy="63.5" r="3" fill="#ffe08a"/><circle cx="584.0" cy="66.2" r="9" fill="url(#mk-glow)"/><circle cx="584.0" cy="66.2" r="3" fill="#ffe08a"/><circle cx="608.0" cy="68.3" r="9" fill="url(#mk-glow)"/><circle cx="608.0" cy="68.3" r="3" fill="#ffe08a"/><circle cx="632.0" cy="69.8" r="9" fill="url(#mk-glow)"/><circle cx="632.0" cy="69.8" r="3" fill="#ffe08a"/><circle cx="656.0" cy="70.7" r="9" fill="url(#mk-glow)"/><circle cx="656.0" cy="70.7" r="3" fill="#ffe08a"/><circle cx="680.0" cy="71.0" r="9" fill="url(#mk-glow)"/><circle cx="680.0" cy="71.0" r="3" fill="#ffe08a"/><circle cx="704.0" cy="70.7" r="9" fill="url(#mk-glow)"/><circle cx="704.0" cy="70.7" r="3" fill="#ffe08a"/><circle cx="728.0" cy="69.8" r="9" fill="url(#mk-glow)"/><circle cx="728.0" cy="69.8" r="3" fill="#ffe08a"/><circle cx="752.0" cy="68.3" r="9" fill="url(#mk-glow)"/><circle cx="752.0" cy="68.3" r="3" fill="#ffe08a"/><circle cx="776.0" cy="66.2" r="9" fill="url(#mk-glow)"/><circle cx="776.0" cy="66.2" r="3" fill="#ffe08a"/><circle cx="800.0" cy="63.5" r="9" fill="url(#mk-glow)"/><circle cx="800.0" cy="63.5" r="3" fill="#ffe08a"/><circle cx="824.0" cy="60.2" r="9" fill="url(#mk-glow)"/><circle cx="824.0" cy="60.2" r="3" fill="#ffe08a"/><circle cx="848.0" cy="56.3" r="9" fill="url(#mk-glow)"/><circle cx="848.0" cy="56.3" r="3" fill="#ffe08a"/><circle cx="872.0" cy="51.8" r="9" fill="url(#mk-glow)"/><circle cx="872.0" cy="51.8" r="3" fill="#ffe08a"/><circle cx="896.0" cy="46.7" r="9" fill="url(#mk-glow)"/><circle cx="896.0" cy="46.7" r="3" fill="#ffe08a"/>
+  <g transform="translate(450, 22)">
+    <rect x="-112" y="-12" width="224" height="24" rx="12" fill="#fbf1e1" stroke="#c8402e" stroke-width="1.5"/>
+    <text x="0" y="4" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="11" font-weight="800" fill="#a8321f" letter-spacing="1.5">MARKETS &amp; FESTIVALS</text>
+  </g>
+</svg>"""
+
+_MARKETS_CSS = """
+  .markets-hub {
+    --bg: #fbf6ee; --card: #ffffff; --card-hover: #ffffff; --fg: #2a1f1a; --muted: #6b5a4e;
+    --accent: #b23a26; --border: #eadfce;
+    background: var(--bg) !important; color: var(--fg) !important;
+  }
+  .markets-hub header { background: #fbf6ee !important; border-bottom: 1px solid var(--border) !important; }
+  .markets-hub .logo { color: #2a1f1a !important; }
+  .markets-hub .hub-nav a { color: var(--muted); }
+  .markets-hub .hub-nav a.active { color: #fff; background: var(--accent); }
+  .markets-hub .hero { border: 0; padding: 0; margin-bottom: 18px; background: #fff; border-radius: 22px;
+    overflow: hidden; box-shadow: 0 10px 30px rgba(90, 50, 30, 0.12); text-align: left; }
+  .mk-hero-art { display: block; width: 100%; height: 200px; }
+  .mk-hero-copy { padding: 20px 24px 24px; }
+  .markets-hub .hero h1 { font-size: clamp(30px, 6vw, 46px); line-height: 1.05; margin: 0 0 8px; color: #7a2617;
+    letter-spacing: -0.015em; font-weight: 800; }
+  .markets-hub .hero h1 small { display: block; font-size: 0.42em; color: #a8693a; font-weight: 700; margin-top: 6px; letter-spacing: 0; }
+  .markets-hub .hero p { color: var(--muted); font-size: 16px; margin: 0 0 14px; max-width: 760px; }
+  .mk-stats { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }
+  .mk-stat { background: #fdf0e3; color: #7a3a1c; border: 1px solid #f1d9bf; border-radius: 999px;
+    padding: 5px 12px; font-size: 14px; font-weight: 700; }
+  .markets-hub .cta-btn { background: var(--accent); color: #fff; }
+  .markets-hub .hub-city-chip { background: #fff; border: 1px solid var(--border); color: var(--fg); }
+  .markets-hub .hub-city-chip.active { background: #2a1f1a; color: #fff; border-color: #2a1f1a; }
+  .markets-hub .hub-day { display: flex; align-items: baseline; gap: 10px; font-size: 22px; color: #2a1f1a;
+    margin: 30px 0 10px; padding-bottom: 8px; border-bottom: 2px solid #eadfce; }
+  .mk-count { font-size: 13px; font-weight: 700; color: var(--muted); background: #f3e8da; border-radius: 999px; padding: 2px 9px; }
+  .markets-hub .hub-grid { display: block; }
+  .markets-hub .hub-day { text-decoration: none; }
+  .mk-daily { background: linear-gradient(135deg, #2a3560, #7a3f5e); border-radius: 18px; padding: 4px 16px 16px; margin: 8px 0 6px; }
+  .markets-hub .mk-daily .hub-day { color: #ffe7a3; border-bottom-color: rgba(255, 231, 163, 0.25); margin-top: 14px; }
+  .mk-city { margin: 4px 0 12px; }
+  .mk-city-head { margin: 12px 0 8px; font-size: 14px; }
+  .mk-city-pill { display: inline-block; padding: 3px 12px; border-radius: 999px; font-weight: 800; color: #fff;
+    letter-spacing: 0.02em; }
+  .mk-c-boston { background: #2d5d8a; } .mk-c-cambridge { background: #b23a26; }
+  .mk-c-somerville { background: #2f6f4f; } .mk-c-other { background: #8a6a3a; }
+  .mk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+  .markets-hub .mk-card { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 6px; box-shadow: 0 2px 8px rgba(90, 50, 30, 0.05); }
+  .markets-hub .mk-card[hidden], .mk-city[hidden], .mk-daily[hidden] { display: none; }
+  .mk-card-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .mk-kind { font-size: 12px; font-weight: 700; color: #7a3a1c; background: #fdf0e3; border-radius: 999px; padding: 2px 9px; }
+  .mk-k-farmers { background: #e8f3e6; color: #2f6f4f; } .mk-k-holiday { background: #fbe6e2; color: #a8321f; }
+  .mk-k-flea { background: #efe7f6; color: #5d3f8a; } .mk-k-craft { background: #fdf0d8; color: #8a5a10; }
+  .mk-k-festival { background: #e3eef8; color: #2d5d8a; }
+  .markets-hub .mk-card .hub-title { margin: 0; font-size: 17px; line-height: 1.25; }
+  .markets-hub .mk-card .hub-title a { color: #2a1f1a; }
+  .mk-when { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 14px; }
+  .mk-hours { font-weight: 800; color: #b23a26; }
+  .mk-span { font-weight: 800; color: #2f6f4f; }
+  .markets-hub .mk-card .hub-meta { display: block; font-size: 14px; color: var(--muted); }
+  .markets-hub .hub-desc { font-size: 13.5px; color: var(--muted); margin: 0; }
+  @media (max-width: 600px) {
+    .mk-hero-art { height: 140px; }
+    .mk-hero-copy { padding: 16px 16px 20px; }
+    .mk-grid { grid-template-columns: 1fr; }
+    .mk-daily { padding: 2px 12px 12px; }
+  }
+"""
 
 _HUB_CITY_CHIPS = (("all", "All"), ("boston", "Boston"), ("cambridge", "Cambridge"),
                    ("somerville", "Somerville"), ("other", "Nearby towns"))
@@ -4010,6 +4266,9 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
 </div>''')
     elif is_camps:
         cards_html = [_camp_card(c) for c in filtered[:card_limit]]
+    elif is_markets:
+        mk_daily, mk_dated = _markets_split(filtered)
+        cards_html = _render_market_sections(mk_daily, mk_dated, card_limit)
     elif is_college:
         by_day = {}
         for e in filtered[:card_limit]:
@@ -4243,6 +4502,24 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
       <p>{hub['subtitle']}</p>
       <div class="edm-stats"><span class="edm-stat">⚡ {n_cards} shows &amp; club nights</span><span class="edm-stat">💛 {edm_free_count} free / no cover</span><span class="edm-stat">📍 {len(edm_places)} nightlife stages</span></div>
       <a href="../{hub['query']}" class="cta-btn">View on interactive calendar →</a>
+    </div>
+  </div>"""
+    elif is_markets and cards_html:
+        kids_css, body_class = _MARKETS_CSS, ' class="markets-hub"'
+        today = datetime.now(EASTERN).date()
+        week_end = today + timedelta(days=7)
+        open_today = sum(1 for e in mk_daily if today in e["_daily_hours"]) + sum(
+            1 for e in mk_dated if isinstance(e.get("_time"), datetime) and e["_time"].date() == today)
+        this_week = len(mk_daily) + len({_series_key(e) for e in mk_dated
+                                          if isinstance(e.get("_time"), datetime) and e["_time"].date() < week_end})
+        towns = {_hub_place_label(_event_city(e.get("venue"), e.get("_source_venue"), e), e) for e in mk_daily + mk_dated}
+        hero_html = f"""<div class="hero">
+    {_MARKETS_HERO_ART}
+    <div class="mk-hero-copy">
+      <h1>{escape(hub.get('h1') or hub['title'])}<small>Boston · Cambridge · Somerville &amp; nearby</small></h1>
+      <p>{hub['subtitle']}</p>
+      <div class="mk-stats"><span class="mk-stat">🛍️ {this_week} this week</span>{f'<span class="mk-stat">☀️ {open_today} open today</span>' if open_today else ''}<span class="mk-stat">📍 {len(towns)} neighborhoods &amp; towns</span></div>
+      <a href="../{hub['query']}" class="cta-btn">See them on the full calendar →</a>
     </div>
   </div>"""
     elif is_college and cards_html:
