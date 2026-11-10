@@ -11739,6 +11739,61 @@ def scrape_sofar_sounds(url, ua):
     return events
 
 
+_NEXT_FLIGHT_RE = re.compile(r'self\.__next_f\.push\(\[1,"((?:[^"\\]|\\.)*)"\]\)')
+
+
+def _posh_event(html_text, page_url):
+    """The schema.org Event on a posh.vip event page. Posh renders its JSON-LD inside the
+    Next.js payload (self.__next_f.push strings), not a <script type="application/ld+json">."""
+    for raw in _NEXT_FLIGHT_RE.findall(html_text or ""):
+        if "schema.org" not in raw:
+            continue
+        try:
+            text = json.loads('"' + raw + '"')
+            ld = json.loads(text[text.index("{"):]) if '"@type": "Event"' in text or '"@type":"Event"' in text else None
+        except (ValueError, json.JSONDecodeError):
+            continue
+        if isinstance(ld, dict) and ld.get("@type") == "Event" and ld.get("startDate"):
+            return _jsonld_event_to_entry(ld, page_url)
+    return None
+
+
+def scrape_bijou(url, ua, max_events=20):
+    """Bijou Nightclub (51 Stuart St). Its site links each night to Posh; each Posh page has the
+    real start time and price (#65 guessed 10 pm and "$20–$40" for all of them)."""
+    soup = fetch_soup(url, ua)
+    links = []
+    for a in soup.find_all("a", href=True):
+        href = a["href"].strip()
+        if re.match(r"https?://(?:www\.)?posh\.vip/(?:e|f)/", href) and href not in links:
+            links.append(href)
+
+    def one(link):
+        try:
+            r = _SESSION.get(link, headers={"User-Agent": ua or UA_CHROME}, timeout=10)
+            return _posh_event(r.text, r.url) if r.status_code == 200 else None
+        except Exception:
+            return None
+
+    now = datetime.now(timezone.utc)
+    events, seen = [], set()
+    with ThreadPoolExecutor(max_workers=4) as ex:
+        for e in ex.map(one, links[:max_events]):
+            if not e or not e.get("name") or not e.get("date") or is_placeholder_or_closed_event(e["name"]):
+                continue
+            if datetime.fromisoformat(e["date"]) < now - timedelta(hours=6) or e["url"] in seen:
+                continue
+            seen.add(e["url"])
+            e.update(venue="Bijou Nightclub", category="clubbing")
+            events.append(e)
+    return events
+
+
+def scrape_sissy_ks(url, ua):
+    """Sissy K's (Faneuil Hall): a Wix Events site with each dated night and its start time."""
+    return scrape_wix_events(url, ua, default_venue="Sissy K's", default_category="clubbing")
+
+
 PARTIFUL_SOURCES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "partiful_sources.json")
 
 
@@ -13353,6 +13408,10 @@ _ALL_VENUES = [
     {"name": "Lyric Stage Company", "url": "https://lyricstage.com/whats-on/", "ua": UA_CHROME, "scraper": scrape_lyric_stage, "default_category": "theater"},
     {"name": "Celebrity Series of Boston", "url": "https://www.celebrityseries.org/live-performances/performance-event-calendar/", "ua": UA_CHROME, "scraper": scrape_celebrity_series, "default_category": "music"},
     {"name": "LesbianNightLife", "url": "https://www.lesbiannightlife.com", "ua": UA_CHROME, "scraper": scrape_wix_events, "default_category": "clubbing"},
+    {"name": "Bijou Nightclub", "url": "https://www.bijouboston.com", "ua": UA_CHROME, "scraper": scrape_bijou, "default_category": "clubbing"},
+    {"name": "Sissy K's", "url": "https://www.sissykevents.com/", "ua": UA_CHROME, "scraper": scrape_sissy_ks, "default_category": "clubbing"},
+    {"name": "6one7 Productions (Venu & Icon)", "url": "https://www.eventbrite.com/o/6one7-productions-1459894222", "ua": UA_CHROME, "scraper": scrape_eventbrite_org, "default_category": "clubbing"},
+    {"name": "Dope Entertainment (Venu, Icon, Clerys)", "url": "https://www.eventbrite.com/o/dope-entertainment-18760244852", "ua": UA_CHROME, "scraper": scrape_eventbrite_org, "default_category": "clubbing"},
 ]
 
 # Drop venues that require env vars we don't have set — keeps the fail banner clean.
