@@ -18,6 +18,17 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
     "hyatt regency boston": (42.3530, -71.0612, "Downtown", "1 Avenue de Lafayette, Boston, MA 02111", "Hyatt Regency Boston"),
     # Harvard Square & West Cambridge
     "the sinclair": (42.3746, -71.1207, "Harvard Square", "52 Church St, Cambridge", "The Sinclair"),
+    # Club and underground spots listed on Resident Advisor (exact names only, no substring rules)
+    "descent": (42.3725, -71.1193, "Harvard Square", "33 Dunster St, Cambridge", "Descent"),
+    "52 church": (42.3746, -71.1207, "Harvard Square", "52 Church St, Cambridge", "52 Church"),
+    "the chemist": (42.3553, -71.0538, "Financial District", "109 High St, Boston", "The Chemist"),
+    "the smoot standard": (42.3625, -71.0985, "Central Square", "313 Massachusetts Ave, Cambridge", "The Smoot Standard"),
+    "union tavern": (42.3809, -71.0982, "Union Square", "345 Somerville Ave, Somerville", "Union Tavern"),
+    "naicob": (42.3294, -71.1111, "Jamaica Plain", "105 S Huntington Ave, Boston", "NAICOB"),
+    "jadu": (42.3102, -71.1153, "Jamaica Plain", "767 Centre St, Boston", "Jadu"),
+    "288 green st": (42.3649, -71.1026, "Central Square", "288 Green St, Cambridge", "288 Green St"),
+    "city tap fort point": (42.3501, -71.0471, "Fort Point", "10 Boston Wharf Rd, Boston", "City Tap Fort Point"),
+    "westin copley place": (42.3485, -71.0772, "Back Bay", "10 Huntington Ave, Boston", "Westin Copley Place"),
     "lou's": (42.3747, -71.1206, "Harvard Square", "50 Church St, Cambridge", "Lou's (Harvard Square)"),
     "club passim": (42.3741, -71.1204, "Harvard Square", "47 Palmer St, Cambridge", "Club Passim"),
     "the comedy studio": (42.3727, -71.1196, "Harvard Square", "5 John F. Kennedy St, Cambridge", "The Comedy Studio"),
