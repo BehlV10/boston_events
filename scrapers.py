@@ -11146,6 +11146,189 @@ _NEU_TECH_DEPT_RE = re.compile(
     r"Network Science|Data Science|Bioengineering|Mechanical|Electrical)\b", re.I)
 
 
+# ── College athletics (Sidearm Sports calendar.ashx iCal feeds) ──────────────────────────────
+#
+# Sidearm writes every game as "<School> <Sport> vs <Opponent>" (home or neutral site) or
+# "<School> <Sport> at <Host>" (away), with LOCATION as "City, ST[, or /] Facility", or
+# ", Facility" when the city is left blank on home games. Only games played in Greater Boston
+# are kept. A local away game is skipped when the host's own feed is scraped too, since that
+# feed lists the same game as a home game (otherwise "BU at BC" and "BC vs BU" would both show).
+
+_GREATER_BOSTON_TOWNS = {
+    "boston", "cambridge", "chestnut hill", "newton", "brookline", "medford", "somerville", "waltham",
+    "babson park", "wellesley", "malden", "watertown", "allston", "brighton", "dorchester", "everett",
+    "quincy", "dedham", "needham", "milton", "belmont", "revere", "chelsea",
+}
+_MASS_STATES = {"", "ma", "mass", "massachusetts"}
+
+# Home teams whose own Sidearm feed is in _ALL_VENUES (Harvard's site is bot-walled, so local
+# games "at Harvard" are kept from the visiting school's feed).
+_SCRAPED_ATHLETICS_HOSTS_RE = re.compile(
+    r"\b(?:boston\s+college|boston\s+university|northeastern|tufts|mit|massachusetts\s+institute\s+of\s+technology|"
+    r"emerson|brandeis|umass\s+boston|university\s+of\s+massachusetts\s+boston|babson)\b", re.I)
+
+# Feed host -> curated venue key (venues_geo.VENUE_COORDINATES) for home games with no facility
+_ATHLETICS_FEEDS = {
+    "goterriers.com": "case gym",
+    "nuhuskies.com": "cabot center",
+    "bceagles.com": "conte forum",
+    "gotuftsjumbos.com": "tufts athletics",
+    "mitathletics.com": "mit athletics",
+    "emersonlions.com": "plofker gym (emerson)",
+    "brandeisjudges.com": "gosman sports and convocation center",
+    "beaconsathletics.com": "clark athletic center",
+    "babsonathletics.com": "babson athletics",
+}
+
+# Facility or host-school words in a feed -> curated venue key. First match wins.
+_COLLEGIATE_FACILITIES = [(re.compile(p, re.I), key) for p, key in [
+    (r"agganis", "agganis arena"), (r"case\s+gym", "case gym"), (r"walter\s+brown", "walter brown arena"),
+    (r"nickerson", "nickerson field"), (r"fitrec", "fitrec (bu)"),
+    (r"track\s+(?:&|and)\s+tennis", "bu track & tennis center"),
+    (r"conte\s+forum|power\s+gym|kelley\s+rink", "conte forum"), (r"alumni\s+stadium", "alumni stadium (bc)"),
+    (r"margot\s+connell", "margot connell recreation center (bc)"),
+    (r"newton\s+campus|field\s+hockey\s+complex", "bc newton campus fields"),
+    (r"matthews\s+arena", "matthews arena"), (r"cabot|barletta", "cabot center"),
+    (r"cousens", "cousens gymnasium"), (r"ellis\s+oval|zimman", "ellis oval"),
+    (r"bello\s+field|ounjian|kraft\s+field|tufts\s+squash|hamilton\s+pool|gantcher|\btufts\b", "tufts athletics"),
+    (r"rockwell\s+cage", "rockwell cage"), (r"zesiger", "zesiger center"),
+    (r"johnson\s+athletic|roberts\s+field|steinbrenner|briggs\s+field|jack\s+barry|dupont|\bmit\b|"
+     r"massachusetts\s+institute", "mit athletics"),
+    (r"plofker|hank\s+smith|\bemerson\b", "plofker gym (emerson)"), (r"rotch", "rotch playground"),
+    (r"gosman|auerbach|brandeis", "gosman sports and convocation center"),
+    (r"clark\s+athletic|barry\s+ice|umass\s+boston", "clark athletic center"),
+    (r"staake", "staake gymnasium"), (r"babson|macdowell|morse\s+pool", "babson athletics"),
+    (r"warrior\s+ice", "warrior ice arena"), (r"bentley", "bentley arena"), (r"td\s+garden", "td garden"),
+    (r"harvard|gordon\s+(?:indoor\s+)?track|bright[- ]landry|lavietes|blodgett|murr\s+center|jordan\s+field",
+     "harvard athletics"),
+    (r"suffolk|ridgeway", "suffolk athletics (ridgeway gym)"), (r"emmanuel", "emmanuel college"),
+    (r"wentworth", "wentworth institute of technology"), (r"simmons", "simmons university"),
+    (r"lasell", "lasell university"), (r"wellesley\s+college", "wellesley college"), (r"curry\s+college", "curry college"),
+    (r"boston\s+university", "case gym"), (r"boston\s+college", "conte forum"), (r"northeastern", "cabot center"),
+]]
+
+# Town centres, for a local facility with no curated point (e.g. Malden Valley Forum)
+_TOWN_CENTRES = {
+    "cambridge": (42.3736, -71.1097), "medford": (42.4184, -71.1062), "malden": (42.4251, -71.0662),
+    "waltham": (42.3765, -71.2356), "newton": (42.3370, -71.2092), "brookline": (42.3318, -71.1212),
+    "somerville": (42.3876, -71.0995), "wellesley": (42.2968, -71.2924), "watertown": (42.3709, -71.1828),
+    "dedham": (42.2418, -71.1662), "quincy": (42.2529, -71.0023), "milton": (42.2496, -71.0662),
+    "needham": (42.2809, -71.2378), "everett": (42.4084, -71.0537), "revere": (42.4084, -71.0120),
+    "chelsea": (42.3918, -71.0328), "belmont": (42.3959, -71.1787), "allston": (42.3539, -71.1337),
+    "brighton": (42.3484, -71.1530), "dorchester": (42.3016, -71.0676),
+}
+
+
+_PLACE_WORD_RE = re.compile(
+    r"\b(?:arena|cent(?:er|re)|field|gym\w*|rink|pool|stadium|court|forum|track|cage|range|iceplex|garden|"
+    r"oval|pavilion|complex|hall|park|natatorium|college|university|campus|boathouse|forum)\b", re.I)
+
+
+def _sidearm_location(loc):
+    """Split a Sidearm LOCATION into (town, state, facility). Town is '' when left blank."""
+    loc = re.sub(r"\s+", " ", (loc or "").replace("\\,", ",")).strip()
+    loc = re.sub(r"(?i)\bchestnut,\s*hill\b", "Chestnut Hill", loc)
+    if not loc:
+        return None, "", ""
+    if loc.startswith(","):
+        return "", "", loc.lstrip(", ").strip()
+    m = re.match(r"^([^,]+),\s*([A-Za-z.' ]{2,15}?)\s*(?:[,/(]\s*(.*?)\)?)?$", loc)
+    if not m:
+        return loc.lower(), "", ""
+    return m.group(1).strip().lower(), m.group(2).strip().lower().rstrip("."), (m.group(3) or "").strip()
+
+
+def _collegiate_venue(*texts):
+    """Curated (lat, lng, neighborhood, address, name) for the first facility/school named."""
+    from venues_geo import VENUE_COORDINATES
+    for text in texts:
+        if not text:
+            continue
+        for pattern, key in _COLLEGIATE_FACILITIES:
+            if pattern.search(text) and key in VENUE_COORDINATES:
+                return VENUE_COORDINATES[key]
+    return None
+
+
+def scrape_college_athletics(url, ua):
+    """Home and Greater Boston games from a school's Sidearm Sports calendar feed."""
+    from venues_geo import VENUE_COORDINATES
+    resp = _SESSION.get(url, headers={"User-Agent": ua or UA_CHROME, "Accept": "text/calendar,*/*"}, timeout=15)
+    if resp.status_code in (429, 403):
+        return []
+    resp.raise_for_status()
+    text = resp.content.decode("utf-8", "replace")  # served without a charset; requests guesses Latin-1
+    if "BEGIN:VCALENDAR" not in text[:2000]:
+        return []  # bot wall or error page served with a 200
+    home_venue = VENUE_COORDINATES.get(_ATHLETICS_FEEDS.get(urlparse(url).netloc.lower().removeprefix("www."), ""))
+    now = datetime.now(timezone.utc)
+    today = now.astimezone(EASTERN).date()
+    cutoff = now + timedelta(weeks=8)
+
+    events = []
+    seen = set()
+    for ev in _ical_events(text):
+        if "DTSTART" not in ev or _ical_text(ev, "STATUS").upper() == "CANCELLED":
+            continue
+        name = re.sub(r"^\[[A-Z]\]\s*", "", re.sub(r"\s+", " ", _ical_text(ev, "SUMMARY"))).strip()
+        if not name or re.search(r"\b(?:cancel+ed|postponed)\b", name, re.I):
+            continue
+        town, state, facility = _sidearm_location(_ical_text(ev, "LOCATION"))
+        if town is None or town in ("tba", "tbd"):
+            continue  # place not set yet; can't tell whether it's in Boston
+        if not (town == "" or (town in _GREATER_BOSTON_TOWNS and state in _MASS_STATES)):
+            continue
+        m_at = re.search(r"\s+at\s+(.+)$", name)
+        is_away = " vs " not in f" {name} " and m_at is not None
+        if is_away and _SCRAPED_ATHLETICS_HOSTS_RE.search(m_at.group(1)):
+            continue  # the host's own feed lists this game
+
+        head, raw = ev["DTSTART"][0]
+        all_day = "VALUE=DATE" in head.upper() or len(raw.strip()) == 8
+        try:
+            start = _ical_parse_dt(head, raw)
+        except ValueError:
+            continue
+        end = None
+        if all_day:
+            if start.date() < today or start > cutoff:
+                continue
+            date_str = start.date().isoformat()  # no time yet: the page shows "Time TBA"
+        else:
+            if start < now or start > cutoff:
+                continue
+            date_str = start.astimezone(timezone.utc).isoformat()
+            if "DTEND" in ev:
+                try:
+                    end = _event_end(_ical_parse_dt(*ev["DTEND"][0]) - start, start)
+                except (ValueError, TypeError):
+                    end = None
+
+        key = (name.lower(), date_str[:10])
+        if key in seen:
+            continue
+        entry = {"name": name[:160], "date": date_str, "end": end, "price": None, "category": "sports"}
+        if facility and not _PLACE_WORD_RE.search(facility) and not _collegiate_venue(facility):
+            facility = ""  # a tournament name ("Terrier Invitational"), not a place
+        at_home = not is_away and home_venue and (town == "" or town in home_venue[3].lower())
+        place = _collegiate_venue(facility, m_at.group(1) if is_away else "") or (
+            home_venue if at_home and not facility else None)
+        if place:
+            entry.update(venue=place[4], lat=place[0], lng=place[1], neighborhood=place[2], address=place[3])
+        elif town in _TOWN_CENTRES:
+            entry.update(venue=facility[:80] or f"{town.title()}, MA", lat=_TOWN_CENTRES[town][0],
+                         lng=_TOWN_CENTRES[town][1], neighborhood=town.title())
+        else:
+            # No town given with a facility we don't know (MedStar Capitals Iceplex is in
+            # Virginia), or somewhere unnamed in Boston: we can't say where it is, so skip it.
+            continue
+        seen.add(key)
+        event_url = _ical_text(ev, "URL").replace("&amp;", "&").replace("://admin.", "://")
+        entry["url"] = event_url if event_url.startswith("http") else url
+        events.append(entry)
+    return events
+
+
 # ── Sofar Sounds (secret living-room and pop-up shows) ─────────────────────────────────────────
 #
 # sofarsounds.com is a client-side app; its own public GraphQL endpoint lists a city's upcoming
@@ -12650,6 +12833,15 @@ _ALL_VENUES = [
     {"name": "Royale Boston", "url": "https://www.royaleboston.com/events/", "ua": UA_CHROME, "scraper": scrape_royale, "default_category": "clubbing"},
     {"name": "MIT Events", "url": "https://calendar.mit.edu/", "ua": UA_CHROME, "scraper": scrape_jsonld, "default_category": "community"},
     {"name": "Boston Symphony Orchestra", "url": "https://www.bso.org/events", "ua": UA_CHROME, "scraper": scrape_bso, "default_category": "music"},
+    {"name": "BU Terriers Athletics", "url": "https://goterriers.com/calendar.ashx/calendar.ics", "ua": UA_CHROME, "scraper": scrape_college_athletics, "default_category": "sports"},
+    {"name": "Northeastern Huskies Athletics", "url": "https://nuhuskies.com/calendar.ashx/calendar.ics", "ua": UA_CHROME, "scraper": scrape_college_athletics, "default_category": "sports"},
+    {"name": "Boston College Eagles Athletics", "url": "https://bceagles.com/calendar.ashx/calendar.ics", "ua": UA_CHROME, "scraper": scrape_college_athletics, "default_category": "sports"},
+    {"name": "Tufts Jumbos Athletics", "url": "https://gotuftsjumbos.com/calendar.ashx/calendar.ics", "ua": UA_CHROME, "scraper": scrape_college_athletics, "default_category": "sports"},
+    {"name": "MIT Engineers Athletics", "url": "https://mitathletics.com/calendar.ashx/calendar.ics", "ua": UA_CHROME, "scraper": scrape_college_athletics, "default_category": "sports"},
+    {"name": "Emerson Lions Athletics", "url": "https://emersonlions.com/calendar.ashx/calendar.ics", "ua": UA_CHROME, "scraper": scrape_college_athletics, "default_category": "sports"},
+    {"name": "Brandeis Judges Athletics", "url": "https://brandeisjudges.com/calendar.ashx/calendar.ics", "ua": UA_CHROME, "scraper": scrape_college_athletics, "default_category": "sports"},
+    {"name": "UMass Boston Beacons Athletics", "url": "https://beaconsathletics.com/calendar.ashx/calendar.ics", "ua": UA_CHROME, "scraper": scrape_college_athletics, "default_category": "sports"},
+    {"name": "Babson Beavers Athletics", "url": "https://babsonathletics.com/calendar.ashx/calendar.ics", "ua": UA_CHROME, "scraper": scrape_college_athletics, "default_category": "sports"},
     {"name": "Venture Café Cambridge", "url": "https://community.venturecafecambridge.org/", "ua": UA_CHROME, "scraper": scrape_venture_cafe, "default_category": "community"},
     {"name": "The Anchor Boston", "url": "https://calendar.google.com/calendar/ical/theanchorbostonma%40gmail.com/public/basic.ics", "ua": UA_CHROME, "scraper": scrape_ical, "default_category": "community"},
     {"name": "Artisans Asylum", "url": "https://www.eventbrite.com/o/artisans-asylum-inc-18841526871", "ua": UA_CHROME, "scraper": scrape_eventbrite_org, "default_category": "community"},
@@ -13971,11 +14163,16 @@ def _normalize_and_filter_events(raw_events, v):
         d_str = e.get("date")
         if d_str and d_str != "tba":
             try:
-                dt = datetime.fromisoformat(d_str.replace("Z", "+00:00"))
-                if dt.tzinfo is None:
-                    dt = dt.replace(tzinfo=EASTERN)
-                if dt.astimezone(timezone.utc) < cutoff:
-                    continue
+                if re.fullmatch(r"\d{4}-\d{2}-\d{2}", d_str):
+                    # Date known, time not yet ("Time TBA"): keep it through the whole day
+                    if date.fromisoformat(d_str) < datetime.now(EASTERN).date():
+                        continue
+                else:
+                    dt = datetime.fromisoformat(d_str.replace("Z", "+00:00"))
+                    if dt.tzinfo is None:
+                        dt = dt.replace(tzinfo=EASTERN)
+                    if dt.astimezone(timezone.utc) < cutoff:
+                        continue
             except Exception:
                 pass
 
