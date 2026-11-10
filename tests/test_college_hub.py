@@ -12,7 +12,15 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
 import template as T  # noqa: E402
-from college import COLLEGE_SOURCES, college_kind, detect_school, is_college_event  # noqa: E402
+from college import (  # noqa: E402
+    COLLEGE_AREAS,
+    COLLEGE_SOURCES,
+    college_area,
+    college_kind,
+    college_transit_info,
+    detect_school,
+    is_college_event,
+)
 from template import EASTERN  # noqa: E402
 
 
@@ -101,6 +109,31 @@ class WhichSchool(unittest.TestCase):
         self.assertEqual(college_kind(_ev("Lecture", source="MIT Events", category="talks")), "talks")
         self.assertEqual(college_kind(_ev("Open house", source="MIT Events", category="community")), "campus")
 
+    def test_areas(self):
+        self.assertEqual(college_area("bu"), "comm_ave")
+        self.assertEqual(college_area("harvard"), "cambridge")
+        self.assertEqual(college_area("mit"), "cambridge")
+        self.assertEqual(college_area("neu"), "fenway_symphony")
+        self.assertEqual(college_area("berklee"), "fenway_symphony")
+        self.assertEqual(college_area("nec"), "fenway_symphony")
+        self.assertEqual(college_area("emerson"), "downtown")
+        self.assertEqual(college_area("suffolk"), "downtown")
+        self.assertEqual(college_area("bc"), "suburbs")
+        self.assertEqual(college_area("tufts"), "suburbs")
+        self.assertEqual(college_area(None, venue="TD Garden"), "downtown")
+        self.assertEqual(college_area(None, venue="Kendall Square"), "cambridge")
+
+    def test_transit_info(self):
+        neigh, tr = college_transit_info("bu", "Agganis Arena")
+        self.assertIn("Comm Ave", neigh)
+        self.assertEqual(tr, "Green Line B")
+        neigh, tr = college_transit_info("harvard", "Sanders Theatre")
+        self.assertIn("Harvard Square", neigh)
+        self.assertEqual(tr, "Red Line")
+        neigh, tr = college_transit_info("nec", "Jordan Hall")
+        self.assertIn("Symphony", neigh)
+        self.assertIn("Green E", tr)
+
 
 def _venue(source, events):
     return {"venue": source, "url": "https://x.test/" + re.sub(r"\W+", "", source.lower()), "error": None, "events": events}
@@ -150,10 +183,36 @@ class CollegeHub(unittest.TestCase):
         # The filter script must come after the cards it filters
         self.assertLess(self.html.rindex("<article"), self.html.index("querySelectorAll('.col-chip')"))
 
-    def test_registered_with_nav_and_site_directory(self):
-        self.assertIn("college", T.HUBS)
+    def test_hero_and_art_present(self):
+        self.assertIn("col-hero-art", self.html)
+        self.assertIn("GREATER BOSTON CAMPUSES", self.html)
+        self.assertIn("col-stats", self.html)
+        self.assertIn("14 Campuses", self.html)
+
+    def test_top_nav_is_student_focused(self):
+        # Student nav includes: All Events, College (active), Free Events, Boston EDM, Cambridge Tonight, Live Music
         self.assertIn('<a href="../college/" class="active">College</a>', self.html)
-        self.assertIn('<a href="../college/" class="">College</a>', T.render_hub_page("boston-edm", []))
+        self.assertIn('<a href="../boston-edm/"', self.html)
+        self.assertIn('<a href="../cambridge-events-tonight/"', self.html)
+        # Irrelevant hubs for college students are removed from the college top nav
+        self.assertNotIn("kids-family-events-boston", self.html)
+        self.assertNotIn("summer-camps", self.html)
+        self.assertNotIn("board-game-nights-boston", self.html)
+
+    def test_cards_grouped_by_area_with_transit(self):
+        self.assertIn('class="col-area-section" data-area="comm_ave"', self.html)
+        self.assertIn('class="col-area-section" data-area="cambridge"', self.html)
+        self.assertIn("Green Line B", self.html)
+        self.assertIn("Red Line", self.html)
+
+    def test_area_filter_chips_present(self):
+        areas = re.findall(r'data-group="area" data-val="(\w+)"', self.html)
+        self.assertEqual(areas, ["all", "cambridge", "comm_ave"])
+
+    def test_registered_and_in_site_directory(self):
+        # Other guide pages' header bar lists only finished pages (template._MAIN_NAV)
+        self.assertIn("college", T.HUBS)
+        self.assertIn('href="college/"', T.render_page([]))
 
 
 class MainCalendar(unittest.TestCase):

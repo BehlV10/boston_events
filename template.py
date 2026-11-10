@@ -38,7 +38,17 @@ from scrapers import (
 )
 from venues_geo import resolve_event_geo, nearest_curated_venue, flag_shared_source_points
 from lgbtq import is_lgbtq_event
-from college import is_college_event, detect_school, college_kind, school_label, COLLEGE_SCHOOLS, COLLEGE_KINDS
+from college import (
+    is_college_event,
+    detect_school,
+    college_kind,
+    school_label,
+    college_area,
+    college_transit_info,
+    COLLEGE_SCHOOLS,
+    COLLEGE_KINDS,
+    COLLEGE_AREAS,
+)
 from light_theme import LIGHT_THEME_CSS
 
 
@@ -2826,52 +2836,430 @@ _EDM_FILTER_JS = """<script>
 })();
 </script>"""
 
+_COLLEGE_HERO_ART = """<svg class="col-hero-art" viewBox="0 0 900 200" aria-hidden="true" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="col-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#090d16"/>
+      <stop offset="50%" stop-color="#121829"/>
+      <stop offset="100%" stop-color="#1e162d"/>
+    </linearGradient>
+    <linearGradient id="col-arch" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3b1d28"/>
+      <stop offset="100%" stop-color="#1a1c2e"/>
+    </linearGradient>
+    <linearGradient id="col-gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+    <filter id="col-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="900" height="200" fill="url(#col-sky)"/>
+  <g fill="#93c5fd" opacity="0.45">
+    <circle cx="80" cy="35" r="1.5"/>
+    <circle cx="160" cy="50" r="1"/>
+    <circle cx="230" cy="25" r="1.5"/>
+    <circle cx="310" cy="45" r="1"/>
+    <circle cx="580" cy="30" r="1.5"/>
+    <circle cx="670" cy="55" r="1"/>
+    <circle cx="750" cy="35" r="1.5"/>
+    <circle cx="830" cy="20" r="1"/>
+  </g>
+  <path d="M0 160 Q 225 150 450 160 T 900 160 L 900 200 L 0 200 Z" fill="#0d1322" opacity="0.8"/>
+  <path d="M0 175 Q 450 168 900 175 L 900 200 L 0 200 Z" fill="#0a0e1a"/>
+  <g fill="#161b2e" opacity="0.85">
+    <rect x="95" y="90" width="30" height="85"/>
+    <polygon points="110,25 98,90 122,90"/>
+    <rect x="105" y="45" width="10" height="15" fill="#1e263d"/>
+    <circle cx="110" cy="115" r="5" fill="#fbbf24" opacity="0.75" filter="url(#col-glow)"/>
+    <rect x="50" y="125" width="45" height="50"/>
+    <polygon points="72,105 45,125 100,125"/>
+    <line x1="58" y1="125" x2="58" y2="175" stroke="#0f1320" stroke-width="2"/>
+    <line x1="72" y1="125" x2="72" y2="175" stroke="#0f1320" stroke-width="2"/>
+    <line x1="86" y1="125" x2="86" y2="175" stroke="#0f1320" stroke-width="2"/>
+  </g>
+  <g fill="#1a2035" opacity="0.9">
+    <rect x="220" y="70" width="36" height="105"/>
+    <polygon points="238,20 220,70 256,70"/>
+    <path d="M232 95 Q 238 88 244 95 L 244 125 L 232 125 Z" fill="#fbbf24" opacity="0.4"/>
+    <path d="M160 175 Q 190 145 220 175" stroke="#252d47" stroke-width="3" fill="none"/>
+    <path d="M256 175 Q 286 145 316 175" stroke="#252d47" stroke-width="3" fill="none"/>
+  </g>
+  <g fill="#21273f">
+    <path d="M400 100 Q 450 48 500 100 Z" fill="#2d3553"/>
+    <rect x="442" y="44" width="16" height="6" fill="#fbbf24" opacity="0.8"/>
+    <rect x="390" y="100" width="120" height="15" fill="#1e2338"/>
+    <rect x="405" y="115" width="90" height="60" fill="#181d2e"/>
+    <line x1="418" y1="115" x2="418" y2="175" stroke="#3b4468" stroke-width="3"/>
+    <line x1="434" y1="115" x2="434" y2="175" stroke="#3b4468" stroke-width="3"/>
+    <line x1="450" y1="115" x2="450" y2="175" stroke="#3b4468" stroke-width="3"/>
+    <line x1="466" y1="115" x2="466" y2="175" stroke="#3b4468" stroke-width="3"/>
+    <line x1="482" y1="115" x2="482" y2="175" stroke="#3b4468" stroke-width="3"/>
+    <polygon points="450,85 390,115 510,115" fill="#2d3553"/>
+  </g>
+  <g fill="#1a2035" opacity="0.9">
+    <rect x="630" y="65" width="46" height="110"/>
+    <polygon points="630,65 635,50 640,65" fill="#2d3553"/>
+    <polygon points="648,65 653,30 658,65" fill="#2d3553"/>
+    <polygon points="666,65 671,50 676,65" fill="#2d3553"/>
+    <circle cx="653" cy="90" r="7" fill="#fbbf24" opacity="0.75" filter="url(#col-glow)"/>
+    <path d="M645 115 Q 653 108 661 115 L 661 145 L 645 145 Z" fill="#fbbf24" opacity="0.3"/>
+  </g>
+  <g fill="#161b2e" opacity="0.85">
+    <rect x="760" y="80" width="35" height="95"/>
+    <polygon points="777,35 760,80 795,80"/>
+    <rect x="805" y="105" width="55" height="70"/>
+    <polygon points="832,90 805,105 860,105"/>
+  </g>
+  <path d="M0 195 L 0 50 Q 0 0 50 0 L 120 0 Q 70 40 70 90 L 70 195 Z" fill="url(#col-arch)" opacity="0.95"/>
+  <path d="M900 195 L 900 50 Q 900 0 850 0 L 780 0 Q 830 40 830 90 L 830 195 Z" fill="url(#col-arch)" opacity="0.95"/>
+  <g filter="url(#col-glow)">
+    <line x1="140" y1="180" x2="140" y2="125" stroke="#334155" stroke-width="2.5"/>
+    <circle cx="140" cy="122" r="5" fill="#fbbf24"/>
+    <circle cx="140" cy="122" r="14" fill="#fbbf24" opacity="0.25"/>
+    <line x1="760" y1="180" x2="760" y2="125" stroke="#334155" stroke-width="2.5"/>
+    <circle cx="760" cy="122" r="5" fill="#fbbf24"/>
+    <circle cx="760" cy="122" r="14" fill="#fbbf24" opacity="0.25"/>
+  </g>
+  <g transform="translate(450, 24)">
+    <rect x="-115" y="-12" width="230" height="24" rx="12" fill="#0f172a" stroke="#fbbf24" stroke-width="1.2" opacity="0.95"/>
+    <text x="0" y="4" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" font-weight="700" fill="#fbbf24" letter-spacing="1.2">GREATER BOSTON CAMPUSES</text>
+  </g>
+</svg>"""
+
 _COLLEGE_CSS = """
-  .college-hub .col-filters { display: flex; flex-direction: column; gap: 8px; margin: 0 0 16px; }
-  .college-hub .col-row { display: flex; flex-wrap: wrap; gap: 8px; }
-  .college-hub .col-stats { font-size: 13px; margin-top: -8px; }
-  .college-hub .hub-badges { display: flex; gap: 6px; }
-  .badge-school { background: rgba(93, 155, 255, 0.16); color: var(--accent); }
+  .college-hub .hero.col-hero {
+    position: relative;
+    padding: 0 0 28px;
+    background: transparent;
+    overflow: hidden;
+  }
+  .col-hero-art {
+    width: 100%;
+    height: 190px;
+    display: block;
+    border-radius: 16px;
+    margin-bottom: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .col-hero-copy {
+    text-align: center;
+    max-width: 820px;
+    margin: 0 auto;
+  }
+  .col-hero-copy h1 {
+    font-size: 32px;
+    font-weight: 800;
+    margin: 0 0 10px;
+    letter-spacing: -0.02em;
+    color: #fff;
+  }
+  .col-hero-copy h1 small {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-top: 6px;
+  }
+  .col-hero-copy p {
+    font-size: 15px;
+    line-height: 1.55;
+    color: #cbd5e1;
+    margin: 0 0 16px;
+  }
+  .college-hub .col-stats {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin: 0 0 20px;
+    font-size: 13px;
+  }
+  .college-hub .col-stat {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #e2e8f0;
+    background: rgba(255, 255, 255, 0.06);
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .college-hub .col-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0 0 24px;
+    background: rgba(21, 24, 34, 0.7);
+    padding: 16px 18px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    backdrop-filter: blur(8px);
+  }
+  .college-hub .col-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+  .college-hub .col-filter-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    min-width: 52px;
+  }
+  .college-hub .col-chip {
+    font-size: 12.5px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.04);
+    color: #cbd5e1;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .college-hub .col-chip:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+  .college-hub .col-chip.active {
+    background: #2563eb;
+    color: #fff;
+    border-color: #3b82f6;
+    box-shadow: 0 2px 10px rgba(37, 99, 235, 0.4);
+    font-weight: 600;
+  }
+  .college-hub .col-area-section {
+    margin: 20px 0 28px;
+    background: rgba(18, 22, 34, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 14px;
+    padding: 16px 18px;
+  }
+  .college-hub .col-area-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-bottom: 12px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .college-hub .col-area-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .college-hub .col-area-pill {
+    font-size: 13px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.02em;
+  }
+  .college-hub .col-area-cambridge { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.35); }
+  .college-hub .col-area-fenway_symphony { background: rgba(34, 197, 94, 0.15); color: #86efac; border: 1px solid rgba(34, 197, 94, 0.35); }
+  .college-hub .col-area-comm_ave { background: rgba(248, 113, 113, 0.15); color: #fecaca; border: 1px solid rgba(248, 113, 113, 0.35); }
+  .college-hub .col-area-downtown { background: rgba(249, 115, 22, 0.15); color: #fdba74; border: 1px solid rgba(249, 115, 22, 0.35); }
+  .college-hub .col-area-suburbs { background: rgba(168, 85, 247, 0.15); color: #d8b4fe; border: 1px solid rgba(168, 85, 247, 0.35); }
+  .college-hub .col-area-sub {
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .college-hub .col-area-meta-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .college-hub .col-area-transit {
+    font-size: 11.5px;
+    color: #94a3b8;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+  .college-hub .col-area-count {
+    font-size: 11px;
+    font-weight: 700;
+    background: rgba(255, 255, 255, 0.09);
+    color: var(--fg);
+    padding: 2px 7px;
+    border-radius: 10px;
+  }
+  .college-hub .col-area-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 14px;
+  }
+  .college-hub .col-card {
+    background: var(--card);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .college-hub .col-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(93, 155, 255, 0.35);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+  }
+  .college-hub .hub-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+  }
+  .college-hub .badge-school {
+    background: rgba(93, 155, 255, 0.16);
+    color: var(--accent);
+    font-weight: 700;
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 6px;
+    letter-spacing: 0.02em;
+    border: 1px solid rgba(93, 155, 255, 0.25);
+  }
+  .college-hub .badge-kind {
+    background: rgba(255, 255, 255, 0.06);
+    color: #e2e8f0;
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 6px;
+  }
+  .college-hub .badge-free {
+    background: rgba(234, 179, 8, 0.16);
+    color: #facc15;
+    font-weight: 600;
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 6px;
+    border: 1px solid rgba(250, 204, 21, 0.25);
+  }
+  .college-hub .badge-price {
+    background: rgba(255, 255, 255, 0.06);
+    color: #94a3b8;
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 6px;
+  }
+  .college-hub .col-location-tag {
+    color: #94a3b8;
+    font-size: 12px;
+  }
+  .college-hub .col-transit-tag {
+    font-size: 11px;
+    color: #64748b;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+  .college-hub .col-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 16px;
+    margin: 0 0 16px;
+    background: rgba(18, 22, 34, 0.6);
+    border-bottom: 1px solid var(--border);
+  }
+  @media (max-width: 640px) {
+    .col-hero-art { height: 140px; margin-bottom: 14px; }
+    .col-hero-copy h1 { font-size: 24px; }
+    .college-hub .col-area-cards { grid-template-columns: 1fr; }
+    .college-hub .col-filters { padding: 12px; }
+  }
 """
 
-# School / kind / free chips on /college/; the choice is kept in the URL hash (#school=mit&kind=sports)
+# School / kind / area / free chips on /college/; choice is kept in URL hash (#school=mit&area=cambridge)
 _COLLEGE_FILTER_JS = """<script>
 (function () {
   var chips = document.querySelectorAll('.col-chip');
   if (!chips.length) return;
   var cards = document.querySelectorAll('.hub-card');
   var heads = document.querySelectorAll('.hub-day');
-  var state = { school: 'all', kind: 'all', free: 'all' };
+  var areaSecs = document.querySelectorAll('.col-area-section');
+  var state = { area: 'all', school: 'all', kind: 'all', free: 'all' };
+
   function render(save) {
-    var days = {};
+    var days = {}, areaDays = {};
     cards.forEach(function (c) {
-      var on = (state.school === 'all' || c.dataset.school === state.school) &&
+      var on = (state.area === 'all' || c.dataset.area === state.area) &&
+               (state.school === 'all' || c.dataset.school === state.school) &&
                (state.kind === 'all' || c.dataset.kind === state.kind) &&
                (state.free === 'all' || c.dataset.free === '1');
       c.hidden = !on;
-      if (on) days[c.dataset.day] = 1;
+      if (on) {
+        days[c.dataset.day] = 1;
+        areaDays[c.dataset.area + '_' + c.dataset.day] = 1;
+      }
     });
-    heads.forEach(function (h) { h.hidden = !days[h.dataset.day]; });
-    chips.forEach(function (b) { b.classList.toggle('active', state[b.dataset.group] === b.dataset.val); });
+
+    areaSecs.forEach(function (sec) {
+      var key = sec.dataset.area + '_' + sec.dataset.day;
+      var hasVisible = !!areaDays[key];
+      sec.hidden = !hasVisible;
+      if (hasVisible) {
+        var countEl = sec.querySelector('.count');
+        if (countEl) {
+          var n = sec.querySelectorAll('.hub-card:not([hidden])').length;
+          countEl.textContent = n;
+        }
+      }
+    });
+
+    heads.forEach(function (h) {
+      h.hidden = !days[h.dataset.day];
+    });
+
+    chips.forEach(function (b) {
+      var g = b.dataset.group, v = b.dataset.val;
+      b.classList.toggle('active', state[g] === v);
+    });
+
     var none = document.getElementById('hub-none');
     if (none) none.hidden = Object.keys(days).length > 0;
+
     if (save) {
       var parts = Object.keys(state).filter(function (k) { return state[k] !== 'all'; }).map(function (k) { return k + '=' + state[k]; });
       history.replaceState(null, '', parts.length ? '#' + parts.join('&') : location.pathname);
     }
   }
+
   chips.forEach(function (b) {
     b.addEventListener('click', function () {
-      var g = b.dataset.group;
-      state[g] = (g === 'free' && state.free === '1') ? 'all' : b.dataset.val;
+      var g = b.dataset.group, v = b.dataset.val;
+      if (g === 'free' && state.free === '1' && v === '1') {
+        state.free = 'all';
+      } else {
+        state[g] = v;
+      }
       render(true);
     });
   });
+
   location.hash.replace(/^#/, '').split('&').forEach(function (p) {
     var kv = p.split('=');
     if (kv.length === 2 && state.hasOwnProperty(kv[0]) &&
-        document.querySelector('.col-chip[data-group="' + kv[0] + '"][data-val="' + kv[1] + '"]')) state[kv[0]] = kv[1];
+        document.querySelector('.col-chip[data-group="' + kv[0] + '"][data-val="' + kv[1] + '"]')) {
+      state[kv[0]] = kv[1];
+    }
   });
+
   render(false);
 })();
 </script>"""
@@ -3511,12 +3899,46 @@ _FAMILY_NAV = (("../", "All Events", None),
                ("../summer-camps/", "Summer Camps", "summer-camps"))
 
 
+# The header bar on guide pages links only to the finished guide pages. The rest (Boston,
+# Cambridge, Free, Comedy, EDM, College...) stay reachable from the homepage directory; add
+# a page here once it's ready.
+_MAIN_NAV = (("../", "All Events", None),
+             ("../kids-family-events-boston/", "Kids &amp; Family", "kids-family-events-boston"),
+             ("../summer-camps/", "Summer Camps", "summer-camps"),
+             ("../markets-festivals-boston/", "Markets &amp; Festivals", "markets-festivals-boston"))
+
+
+def _main_hub_nav(hub_slug):
+    ACTIVE = ' class="active"'
+    links = "\n".join(f'    <a href="{href}"{ACTIVE if slug == hub_slug else ""}>{label}</a>'
+                      for href, label, slug in _MAIN_NAV)
+    return f'  <nav class="hub-nav">\n{links}\n  </nav>'
+
+
 def _family_nav(hub_slug, nav_class):
     """The short header nav on the parent-facing pages (Kids & Family, Summer Camps)."""
     ACTIVE = ' class="active"'
     links = "\n".join(f'    <a href="{href}"{ACTIVE if slug == hub_slug else ""}>{label}</a>'
                       for href, label, slug in _FAMILY_NAV)
     return f'  <nav class="hub-nav {nav_class}">\n{links}\n  </nav>'
+
+
+_COLLEGE_NAV = (
+    ("../", "All Events", None),
+    ("../college/", "College", "college"),
+    ("../free/", "Free Events", "free"),
+    ("../boston-edm/", "Boston EDM", "boston-edm"),
+    ("../cambridge-events-tonight/", "Cambridge Tonight", "cambridge-events-tonight"),
+    ("../music/", "Live Music", "music"),
+)
+
+
+def _college_nav(hub_slug):
+    """The short student-focused nav for the college hub."""
+    ACTIVE = ' class="active"'
+    links = "\n".join(f'    <a href="{href}"{ACTIVE if slug == hub_slug else ""}>{label}</a>'
+                      for href, label, slug in _COLLEGE_NAV)
+    return f'  <nav class="hub-nav col-nav">\n{links}\n  </nav>'
 
 
 KIDS_INLINE_DAYS = 14  # the Kids page carries two weeks; later days load from later.html
@@ -3652,7 +4074,7 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
 
     kid_age_counts, kid_kind_counts, kid_free, kid_places = {}, {}, 0, set()
     edm_sub_counts, edm_free_count, edm_places = {}, 0, set()
-    college_schools, college_kinds, college_free = {}, {}, 0
+    college_schools, college_kinds, college_areas_count, college_free = {}, {}, {}, 0
     cards_html = []
 
     if is_kids:
@@ -3863,6 +4285,105 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
     elif is_markets:
         mk_daily, mk_dated = _markets_split(filtered)
         cards_html = _render_market_sections(mk_daily, mk_dated, card_limit)
+    elif is_college:
+        by_day = {}
+        for e in filtered[:card_limit]:
+            t_obj = e.get("_time")
+            d_key = t_obj.date() if isinstance(t_obj, datetime) else None
+            by_day.setdefault(d_key, []).append(e)
+
+        area_meta = {k: (lbl, sub, emo, tr) for k, lbl, sub, emo, tr in COLLEGE_AREAS}
+        area_order = [k for k, _lbl, _sub, _emo, _tr in COLLEGE_AREAS]
+
+        for day_obj, day_events in by_day.items():
+            if day_obj:
+                day_iso = day_obj.isoformat()
+                day_heading = day_obj.strftime("%A, %B %-d")
+                cards_html.append(f'<h2 class="hub-day" id="{day_iso}" data-day="{day_iso}">{day_heading}</h2>')
+            else:
+                day_iso = "tba"
+                cards_html.append('<h2 class="hub-day" id="tba" data-day="tba">Date TBA</h2>')
+
+            by_area = {a: [] for a in area_order}
+            for e in day_events:
+                s_key = detect_school(e)
+                v_name = e.get("venue") or e.get("_source_venue") or ""
+                a_key = college_area(s_key, v_name)
+                by_area.setdefault(a_key, []).append(e)
+
+            for a_key in area_order:
+                a_events = by_area.get(a_key) or []
+                if not a_events:
+                    continue
+                a_events.sort(key=lambda ev: ev.get("_time") or datetime.max.replace(tzinfo=EASTERN))
+                area_cards = []
+                for e in a_events:
+                    title = escape(e.get("title") or e.get("name") or "Event")
+                    venue = escape(e.get("venue") or e.get("_source_venue") or "Venue")
+                    url = escape(e.get("url") or e.get("link") or "#")
+                    t_obj = e.get("_time")
+                    t_str = _hub_time_label(e, t_obj) if isinstance(t_obj, datetime) else escape(e.get("time") or "")
+                    desc_html = ""
+                    if hub.get("show_details") and e.get("description"):
+                        d_txt = re.sub(r"\s+", " ", str(e["description"])).strip()
+                        desc_html = f'<p class="hub-desc">{escape(d_txt[:160] + ("…" if len(d_txt) > 160 else ""))}</p>'
+                    price_val = e.get("price")
+                    price_txt = str(price_val or "").strip()
+                    if re.fullmatch(r"\d+(?:\.\d+)?", price_txt):
+                        price_txt = "$" + price_txt
+                    price_badge = f'<span class="badge badge-price">{escape(price_txt)}</span>' if price_txt else ""
+                    is_free = _is_event_free(e)
+                    if is_free:
+                        price_badge = '<span class="badge badge-free">Free</span>'
+
+                    school = detect_school(e) or "other"
+                    kind = college_kind(e, _effective_category(e))
+                    college_schools[school] = college_schools.get(school, 0) + 1
+                    college_kinds[kind] = college_kinds.get(kind, 0) + 1
+                    college_areas_count[a_key] = college_areas_count.get(a_key, 0) + 1
+                    college_free += is_free
+
+                    kind_emojis = {"sports": "🏒", "performances": "🎻", "talks": "🎓", "campus": "🏛️"}
+                    kind_labels = {"sports": "Game", "performances": "Concert", "talks": "Lecture", "campus": "Campus"}
+                    kind_badge = f'<span class="badge badge-kind">{kind_emojis.get(kind, "🎓")} {kind_labels.get(kind, kind.title())}</span>'
+                    school_badge = f'<span class="badge badge-school">{escape(school_label(detect_school(e)))}</span>'
+                    badges_html = f"{school_badge}{kind_badge}{price_badge}"
+
+                    neigh, transit = college_transit_info(detect_school(e), e.get("venue") or "")
+                    transit_html = f'<span class="col-transit-tag">🚇 {escape(transit)}</span>' if transit else ""
+                    neigh_html = f'<span class="col-location-tag">· {escape(neigh)}</span>' if neigh else ""
+
+                    card_attrs = f'data-school="{school}" data-kind="{kind}" data-free="{int(is_free)}" data-area="{a_key}" data-day="{day_iso}"'
+                    area_cards.append(f"""<article class="hub-card col-card" {card_attrs}>
+  <div class="hub-card-head">
+    <time class="hub-date">{t_str}</time>
+    <div class="hub-badges">{badges_html}</div>
+  </div>
+  <h3 class="hub-title"><a href="{url}" target="_blank" rel="noopener">{title}</a></h3>
+  <div class="hub-meta">
+    <span class="hub-venue">📍 {venue}</span>
+    {neigh_html}
+    {transit_html}
+  </div>
+  {desc_html}
+</article>""")
+
+                lbl, sub, emo, tr = area_meta.get(a_key, (a_key.title(), "", "🏛️", "MBTA"))
+                cards_html.append(f"""<div class="col-area-section" data-area="{a_key}" data-day="{day_iso}">
+  <div class="col-area-head">
+    <div class="col-area-title-wrap">
+      <span class="col-area-pill col-area-{a_key}">{emo} {escape(lbl)}</span>
+      <span class="col-area-sub">{escape(sub)}</span>
+    </div>
+    <div class="col-area-meta-wrap">
+      <span class="col-area-transit">🚇 {escape(tr)}</span>
+      <span class="col-area-count count">{len(area_cards)}</span>
+    </div>
+  </div>
+  <div class="col-area-cards">
+    {"".join(area_cards)}
+  </div>
+</div>""")
     else:
         last_day = None
         for e in filtered[:card_limit]:
@@ -3895,16 +4416,7 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
             city_name = escape(_hub_place_label(city, e))
             day_attr = t_obj.date().isoformat() if isinstance(t_obj, datetime) else ""
             mtype_attr = f' data-mtype="{market_type(e)}"' if is_markets else ""
-            college_attrs = ""
-            if is_college:
-                school = detect_school(e) or "other"
-                kind = college_kind(e, _effective_category(e))
-                college_schools[school] = college_schools.get(school, 0) + 1
-                college_kinds[kind] = college_kinds.get(kind, 0) + 1
-                college_free += is_free
-                college_attrs = f' data-school="{school}" data-kind="{kind}" data-free="{int(is_free)}"'
-                price_badge = f'<span class="badge badge-school">{escape(school_label(detect_school(e)))}</span>{price_badge}'
-            cards_html.append(f"""<article class="hub-card" data-city="{escape(city)}" data-day="{day_attr}"{mtype_attr}{college_attrs}>
+            cards_html.append(f"""<article class="hub-card" data-city="{escape(city)}" data-day="{day_attr}"{mtype_attr}>
   <div class="hub-card-head">
     <time class="hub-date">{' · '.join(x for x in (d_str, t_str) if x)}</time>
     <div class="hub-badges">{price_badge}</div>
@@ -4029,24 +4541,42 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
     elif is_college and cards_html:
         kids_css, body_class = _COLLEGE_CSS, ' class="college-hub"'
 
-        def chip(group, val, label):
-            return f'<button type="button" class="hub-city-chip col-chip" data-group="{group}" data-val="{val}">{label}</button>'
-        schools = chip("school", "all", "All schools") + "".join(
+        def chip(group, val, label, is_active=False):
+            active_cls = " active" if is_active else ""
+            return f'<button type="button" class="hub-city-chip col-chip{active_cls}" data-group="{group}" data-val="{val}">{label}</button>'
+
+        areas = chip("area", "all", "All Campuses", is_active=True) + "".join(
+            chip("area", k, f"{emo} {escape(lbl)}") for k, lbl, _sub, emo, _tr in COLLEGE_AREAS if college_areas_count.get(k))
+        schools = chip("school", "all", "All schools", is_active=True) + "".join(
             chip("school", k, escape(short)) for k, (short, _full) in COLLEGE_SCHOOLS.items() if college_schools.get(k)) + (
             chip("school", "other", "Cross-campus") if college_schools.get("other") else "")
-        kinds = chip("kind", "all", "Everything") + "".join(
+        kinds = chip("kind", "all", "Everything", is_active=True) + "".join(
             chip("kind", k, f"{emo} {lbl}") for k, emo, lbl in COLLEGE_KINDS if college_kinds.get(k))
+        cost_chips = chip("free", "all", "All prices", is_active=True) + (chip("free", "1", "💛 Free") if college_free else "")
+
         city_chips_html = f"""<div class="col-filters" role="group" aria-label="Filter college events">
-    <div class="col-row">{schools}</div>
-    <div class="col-row">{kinds}{chip("free", "1", "💛 Free") if college_free else ""}</div>
+    <div class="col-row"><span class="col-filter-label">Area</span>{areas}</div>
+    <div class="col-row"><span class="col-filter-label">School</span>{schools}</div>
+    <div class="col-row"><span class="col-filter-label">What</span>{kinds}</div>
+    <div class="col-row"><span class="col-filter-label">Cost</span>{cost_chips}</div>
   </div>"""
         hub_js = _COLLEGE_FILTER_JS
         n_cards = len(filtered[:card_limit])
-        hero_html = f"""<div class="hero">
-    <h1>{escape(hub['h1'])}</h1>
-    <p>{hub['subtitle']}</p>
-    <p class="col-stats">{n_cards} events in the next {hub['window_days']} days · {college_kinds.get("sports", 0)} games · {college_free} free</p>
-    <a href="../" class="cta-btn">See everything on the full calendar →</a>
+        n_days = len(set(re.findall(r'<h2 class="hub-day" id="([\d-]+)"', "".join(cards_html)))) or 1
+        hero_html = f"""<div class="hero col-hero">
+    {_COLLEGE_HERO_ART}
+    <div class="col-hero-copy">
+      <h1>{escape(hub['h1'])}<small>Boston · Cambridge · Chestnut Hill · Medford · Waltham</small></h1>
+      <p>{hub['subtitle']}</p>
+      <div class="col-stats">
+        <span class="col-stat">🎓 14 Campuses</span>
+        <span class="col-stat">🗓️ {n_cards} events in {n_days} days</span>
+        <span class="col-stat">🏒 {college_kinds.get("sports", 0)} games</span>
+        <span class="col-stat">🎻 {college_kinds.get("performances", 0)} concerts</span>
+        <span class="col-stat">💛 {college_free} free admission</span>
+      </div>
+      <a href="../" class="cta-btn">See everything on the full calendar →</a>
+    </div>
   </div>"""
     elif is_camps:
         kids_head, kids_css, body_class = "", _CAMPS_CSS, ' class="camps-hub"'
@@ -4054,42 +4584,12 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
         hub_js = camps_tail + _CAMPS_FILTER_JS
     cards_joined = "\n".join(cards_html) if cards_html else "<p class='no-hub-events'>No scheduled events matching this directory right now. Check the interactive calendar for all upcoming dates.</p>"
 
-    active_b = 'active' if hub_slug == 'boston' else ''
-    active_c = 'active' if hub_slug == 'cambridge' else ''
-    active_s = 'active' if hub_slug == 'somerville' else ''
-    active_m = 'active' if hub_slug == 'music' else ''
-    active_co = 'active' if hub_slug == 'comedy' else ''
-    active_f = 'active' if hub_slug == 'free' else ''
-    active_fw = 'active' if hub_slug == 'free-events-boston-this-weekend' else ''
-    active_ct = 'active' if hub_slug == 'cambridge-events-tonight' else ''
-    active_sm = 'active' if hub_slug == 'live-music-somerville' else ''
-    active_bg = 'active' if hub_slug == 'board-game-nights-boston' else ''
-    active_kf = 'active' if hub_slug == 'kids-family-events-boston' else ''
-    active_sc = 'active' if hub_slug == 'summer-camps' else ''
-    active_mk = 'active' if hub_slug == 'markets-festivals-boston' else ''
-    active_edm = 'active' if hub_slug == 'boston-edm' else ''
-
     if is_camps or is_kids:
         hub_nav_html = _family_nav(hub_slug, "camps-nav" if is_camps else "kids-nav")
+    elif is_college:
+        hub_nav_html = _college_nav(hub_slug)
     else:
-        hub_nav_html = f"""  <nav class="hub-nav">
-    <a href="../">All Events</a>
-    <a href="../free-events-boston-this-weekend/" class="{active_fw}">Free Weekend</a>
-    <a href="../cambridge-events-tonight/" class="{active_ct}">Cambridge Tonight</a>
-    <a href="../live-music-somerville/" class="{active_sm}">Somerville Music</a>
-    <a href="../boston-edm/" class="{active_edm}">Boston EDM</a>
-    <a href="../college/" class="{'active' if hub_slug == 'college' else ''}">College</a>
-    <a href="../board-game-nights-boston/" class="{active_bg}">Board Games</a>
-    <a href="../kids-family-events-boston/" class="{active_kf}">Kids &amp; Family</a>
-    <a href="../summer-camps/" class="{active_sc}">Summer Camps</a>
-    <a href="../markets-festivals-boston/" class="{active_mk}">Markets &amp; Festivals</a>
-    <a href="../boston/" class="{active_b}">Boston</a>
-    <a href="../cambridge/" class="{active_c}">Cambridge</a>
-    <a href="../somerville/" class="{active_s}">Somerville</a>
-    <a href="../music/" class="{active_m}">Live Music</a>
-    <a href="../comedy/" class="{active_co}">Comedy</a>
-    <a href="../free/" class="{active_f}">Free</a>
-  </nav>"""
+        hub_nav_html = _main_hub_nav(hub_slug)
 
     return f"""<!doctype html>
 <html lang="en">
