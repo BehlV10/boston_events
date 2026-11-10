@@ -69,8 +69,14 @@ class MarketsPage(unittest.TestCase):
         self.assertNotIn("Jazz Festival", self.html)
         self.assertNotIn("Boston Public Market Tour", self.html)
 
-    def test_series_collapse_to_one_card(self):
-        self.assertEqual(self.html.count(">Copley Square Farmers Market<"), 1)
+    def test_weekly_market_shows_on_each_of_its_days(self):
+        self.assertEqual(self.html.count(">Copley Square Farmers Market<"), 2)
+        self.assertNotIn('class="mk-daily"', self.html)  # nothing here is open every day
+
+    def test_days_are_split_by_town(self):
+        self.assertIn('class="mk-city" data-city=', self.html)
+        self.assertIn('class="mk-city-pill', self.html)
+        self.assertIn("mk-hero-art", self.html)
 
     def test_kind_chips_only_for_kinds_present(self):
         self.assertIn('data-mtype="farmers"', self.html)
@@ -79,6 +85,43 @@ class MarketsPage(unittest.TestCase):
         self.assertIn('class="hub-city-chip hub-type-chip" data-mtype="festival"', self.html)
         self.assertNotIn('class="hub-city-chip hub-type-chip" data-mtype="night"', self.html)
         self.assertIn("state.type", self.html)
+
+
+class DailyAndHours(unittest.TestCase):
+    def _day(self, d, h=15, end_h=20):
+        t = (datetime.now(EASTERN) + timedelta(days=d)).replace(hour=h, minute=0, second=0, microsecond=0)
+        e = _ev("Snowport Holiday Market", d, venue="Snowport Holiday Market", category="markets")
+        e.update(_time=t, date=t.isoformat(), end=t.replace(hour=end_h).isoformat())
+        return e
+
+    def test_a_market_open_every_day_is_one_card_up_top(self):
+        snow = [self._day(d) for d in range(1, 15) if d != 6]  # closed one day
+        weekly = [_ev("Copley Square Farmers Market", d) for d in (2, 9)]
+        events = sorted(snow + weekly, key=lambda e: e["_time"])
+        daily, dated = template._markets_split(events)
+        self.assertEqual([e["name"] for e in daily], ["Snowport Holiday Market"])
+        self.assertEqual([e["name"] for e in dated], ["Copley Square Farmers Market"] * 2)
+        html = template.render_hub_page("markets-festivals-boston", events, site_url="https://example.com")
+        self.assertEqual(html.count(">Snowport Holiday Market<"), 1)
+        self.assertLess(html.index('class="mk-daily"'), html.index(">Copley Square Farmers Market<"))
+        closed = (datetime.now(EASTERN) + timedelta(days=6)).strftime("%b %-d")
+        self.assertIn("Most days through", html)
+        self.assertIn(f"closed {closed}", html)
+        self.assertIn("3 – 8 pm", html)
+
+    def test_weekends_only_is_not_daily(self):
+        events = [self._day(d) for d in range(1, 29) if d % 7 in (5, 6)]
+        daily, dated = template._markets_split(events)
+        self.assertEqual((len(daily), len(dated)), (0, len(events)))
+
+    def test_hours(self):
+        t = datetime(2026, 11, 14, 10, 0, tzinfo=EASTERN)
+        h = lambda **kw: template._market_hours({"_time": t, "date": t.isoformat(), **kw})
+        self.assertEqual(h(end=t.replace(hour=16).isoformat()), "10 am – 4 pm")
+        self.assertEqual(h(end=t.replace(hour=11, minute=30).isoformat()), "10 – 11:30 am")
+        self.assertEqual(h(), "10 am")
+        self.assertEqual(h(end=(t - timedelta(hours=1)).isoformat()), "10 am")  # end before start: ignored
+        self.assertEqual(template._market_hours({"_time": t, "date": "2026-11-14"}), "Time TBA")
 
 
 class HeaderBar(unittest.TestCase):
