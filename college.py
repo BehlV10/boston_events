@@ -210,3 +210,83 @@ COLLEGE_KINDS = [
 
 def school_label(key):
     return (COLLEGE_SCHOOLS.get(key) or GENERIC_SCHOOL)[0]
+
+
+COLLEGE_AREAS = [
+    ("cambridge", "Cambridge", "Harvard · MIT · Longy", "🔴", "Red Line"),
+    ("fenway_symphony", "Fenway & Symphony", "Northeastern · Berklee · NEC", "🟢", "Green E · Orange"),
+    ("comm_ave", "Comm Ave & Allston", "Boston University", "⚪", "Green Line B"),
+    ("downtown", "Downtown", "Emerson · Suffolk", "🟠", "Park St · Boylston"),
+    ("suburbs", "Chestnut Hill & Suburbs", "BC · Tufts · Brandeis · Babson · UMB", "🟣", "Green B/D · Commuter Rail"),
+]
+
+SCHOOL_TO_AREA = {
+    "harvard": "cambridge",
+    "mit": "cambridge",
+    "longy": "cambridge",
+    "neu": "fenway_symphony",
+    "berklee": "fenway_symphony",
+    "nec": "fenway_symphony",
+    "bu": "comm_ave",
+    "emerson": "downtown",
+    "suffolk": "downtown",
+    "bc": "suburbs",
+    "tufts": "suburbs",
+    "brandeis": "suburbs",
+    "babson": "suburbs",
+    "umb": "suburbs",
+}
+
+SCHOOL_TRANSIT = {
+    "bu": ("Comm Ave / Fenway", "Green Line B"),
+    "bc": ("Chestnut Hill", "Green Line B"),
+    "neu": ("Fenway / Symphony", "Orange / Green E"),
+    "harvard": ("Harvard Square", "Red Line"),
+    "mit": ("Kendall / MIT", "Red Line"),
+    "tufts": ("Medford / Somerville", "Green Line (Tufts)"),
+    "berklee": ("Fenway / Back Bay", "Green Line (Hynes/Symphony)"),
+    "nec": ("Symphony", "Green E / Orange Line"),
+    "longy": ("Harvard Square", "Red Line"),
+    "emerson": ("Theater District", "Green Line (Boylston)"),
+    "suffolk": ("Downtown / Beacon Hill", "Park St / Gov Center"),
+    "brandeis": ("Waltham", "Fitchburg Commuter Rail"),
+    "babson": ("Wellesley", "Framingham/Worcester Line"),
+    "umb": ("Columbia Point", "Red Line (JFK/UMass)"),
+}
+
+
+def college_area(school_key, venue=""):
+    """Maps a school key and/or venue to one of the 5 collegiate campus areas."""
+    if school_key in SCHOOL_TO_AREA:
+        return SCHOOL_TO_AREA[school_key]
+    v_lower = (venue or "").lower()
+    if any(k in v_lower for k in ("garden", "paramount", "colonial", "downtown", "boston common", "park st", "theater", "underscore")):
+        return "downtown"
+    if any(k in v_lower for k in ("cambridge", "kendall", "harvard", "central", "mit", "longy")):
+        return "cambridge"
+    if any(k in v_lower for k in ("fenway", "symphony", "huntington", "hynes", "wally", "northeastern", "berklee")):
+        return "fenway_symphony"
+    if any(k in v_lower for k in ("comm ave", "commonwealth", "allston", "brighton", "bu ", "agganis")):
+        return "comm_ave"
+    return "suburbs"
+
+
+def college_transit_info(school_key, venue=""):
+    """Returns (neighborhood, transit_line) for an event's school and venue."""
+    if school_key in SCHOOL_TRANSIT:
+        return SCHOOL_TRANSIT[school_key]
+    v_lower = (venue or "").lower()
+    if "garden" in v_lower:
+        return ("North Station", "Orange / Green Line")
+    if "wally" in v_lower:
+        return ("South End / Symphony", "Orange Line (Mass Ave)")
+    if any(k in v_lower for k in ("cambridge", "kendall", "harvard")):
+        return ("Cambridge", "Red Line")
+    if any(k in v_lower for k in ("fenway", "symphony")):
+        return ("Fenway", "Green E / Orange Line")
+    if any(k in v_lower for k in ("allston", "brighton")):
+        return ("Allston", "Green Line B")
+    if "downtown" in v_lower:
+        return ("Downtown", "MBTA Subway")
+    return ("Greater Boston", "MBTA")
+
