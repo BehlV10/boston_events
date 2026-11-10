@@ -3179,7 +3179,7 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
             t_obj = e.get("_time")
             if isinstance(t_obj, datetime):
                 d_str = ""
-                t_str = "All day" if (t_obj.hour, t_obj.minute) == (0, 0) else t_obj.strftime("%-I:%M %p")
+                t_str = _hub_time_label(e, t_obj)
             desc_html = ""
             if hub.get("show_details") and e.get("description"):
                 d_txt = re.sub(r"\s+", " ", str(e["description"])).strip()
@@ -3288,7 +3288,7 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
             t_obj = e.get("_time")
             if isinstance(t_obj, datetime):
                 d_str = ""
-                t_str = "All day" if (t_obj.hour, t_obj.minute) == (0, 0) else t_obj.strftime("%-I:%M %p")
+                t_str = _hub_time_label(e, t_obj)
             desc_html = ""
             if e.get("description"):
                 d_txt = re.sub(r"\s+", " ", str(e["description"])).strip()
@@ -3388,7 +3388,7 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
                     last_day = t_obj.date()
                     cards_html.append(f'<h2 class="hub-day" id="{last_day.isoformat()}" data-day="{last_day.isoformat()}">{t_obj.strftime("%A, %B %-d")}</h2>')
                 d_str = ""
-                t_str = "All day" if (t_obj.hour, t_obj.minute) == (0, 0) else t_obj.strftime("%-I:%M %p")
+                t_str = _hub_time_label(e, t_obj)
             desc_html = ""
             if hub.get("show_details") and e.get("description"):
                 d_txt = re.sub(r"\s+", " ", str(e["description"])).strip()
@@ -4056,6 +4056,13 @@ def _clock(dt, with_ampm=True):
     return dt.strftime("%-I:%M %p" if with_ampm else "%-I:%M")
 
 
+def _hub_time_label(e, t_obj):
+    """Hub card time: "Time TBA" for a date-only listing, "All day" for a midnight one."""
+    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", e.get("date") or ""):
+        return "Time TBA"
+    return "All day" if (t_obj.hour, t_obj.minute) == (0, 0) else t_obj.strftime("%-I:%M %p")
+
+
 def format_when(e):
     if not e.get("date") and e.get("ends"):
         try:
@@ -4066,6 +4073,8 @@ def format_when(e):
     t_obj = e.get("_time")
     if t_obj:
         raw_d = e.get("date") or ""
+        if re.fullmatch(r"\d{4}-\d{2}-\d{2}", raw_d):
+            return "Time TBA"  # the source gives the day but not the time yet
         if "T" in raw_d or " " in raw_d:
             end = trusted_end(e)
             start = t_obj.astimezone(EASTERN) if t_obj.tzinfo else t_obj
@@ -4291,7 +4300,7 @@ def _source_priority(s):
 # "book?perfcode=931" (Somerville Theatre), "?eventid=206566108" (Trumba). Without them every
 # event on such a site has the same URL and they'd all merge.
 _EVENT_ID_PARAMS = {"evt", "eid", "eventid", "event_id", "event", "id", "perfcode", "performance", "showid",
-                    "show_id", "occurrence", "e"}
+                    "show_id", "occurrence", "e", "game_id"}  # game_id: Sidearm athletics game pages
 
 
 def _clean_event_url(u):
@@ -4367,7 +4376,25 @@ _VENUE_GENERIC_WORDS = {
     # neighborhood / building-type words shared by unrelated places ("Central Square Branch" vs
     # "Copley Square", "Bentley Arena" vs "Warrior Ice Arena")
     "square", "sq", "arena", "stadium", "gymnasium", "gym", "ice", "rink", "field", "park",
+    # sports-facility words ("Conte Forum" vs "Malden Valley Forum", "Clark Athletic Center" vs
+    # "Babson Athletics")
+    "forum", "pool", "court", "athletic", "athletics", "recreation", "sports", "track", "complex",
 }
+
+_MENS_RE = re.compile(r"\bm[ae]n'?s?\b", re.I)
+_WOMENS_RE = re.compile(r"\bwom[ae]n'?s?\b", re.I)
+
+
+def _gender_conflict(e1, e2):
+    """Two sports listings for different teams of one school: "Men's Squash vs Cornell" and
+    "Women's Squash vs Cornell" share a venue, time and almost every title word."""
+    if (e1.get("category") or "") != "sports" or (e2.get("category") or "") != "sports":
+        return False
+    def side(t):
+        t = t or ""
+        return "w" if _WOMENS_RE.search(t) else ("m" if _MENS_RE.search(t) else None)
+    s1, s2 = side(e1.get("name")), side(e2.get("name"))
+    return bool(s1 and s2 and s1 != s2)
 
 
 def _same_physical_venue(e1, e2):
@@ -4506,8 +4533,8 @@ def _same_event_retitled(e1, e2, freq):
     vw1, vw2 = _venue_words(e1.get("venue")), _venue_words(e2.get("venue"))
     if not (vw1 & vw2):
         return False
-    if _numbers_conflict(e1.get("name"), e2.get("name")):
-        return False  # "Round 3" vs "Round 5"
+    if _numbers_conflict(e1.get("name"), e2.get("name")) or _gender_conflict(e1, e2):
+        return False  # "Round 3" vs "Round 5"; "Men's Squash" vs "Women's Squash"
     vw = vw1 | vw2 | {w.rstrip("s") for w in vw1 | vw2}
     shared = _distinctive_words(e1.get("name"), vw) & _distinctive_words(e2.get("name"), vw)
     if len(shared) >= 3:
@@ -4544,6 +4571,8 @@ def _merge_duplicates(events, word_freq=None):
         return False
 
     def _is_different_show(e1, e2):
+        if _gender_conflict(e1, e2):
+            return True
         t1 = e1.get("_time")
         t2 = e2.get("_time")
         if not t1 and e1.get("date"):
@@ -4638,6 +4667,9 @@ def _merge_duplicates(events, word_freq=None):
             "brewing", "cafe", "café", "center", "hall", "club", "studio", "house", "room",
             # every library shares these; branches are told apart by their own names
             "public", "library", "branch", "main", "central", "square", "sq", "arena", "stadium",
+            # sports facilities: "Conte Forum" is not "Malden Valley Forum", "Case Gym" not "Plofker Gym"
+            "gymnasium", "gym", "forum", "field", "rink", "ice", "pool", "court", "athletic", "athletics",
+            "recreation", "sports", "track", "complex", "park",
         }
         # len >= 2: the "s" of "Dani's" / "Lou's" is not a shared venue word
         w1 = {re.sub(r"s$", "", w) for w in re.findall(r"\w+", v1_low) if len(w) >= 2} - generic_vwords
