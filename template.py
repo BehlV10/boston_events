@@ -3255,6 +3255,22 @@ _FAMILY_NAV = (("../", "All Events", None),
                ("../summer-camps/", "Summer Camps", "summer-camps"))
 
 
+# The header bar on guide pages links only to the finished guide pages. The rest (Boston,
+# Cambridge, Free, Comedy, EDM, College...) stay reachable from the homepage directory; add
+# a page here once it's ready.
+_MAIN_NAV = (("../", "All Events", None),
+             ("../kids-family-events-boston/", "Kids &amp; Family", "kids-family-events-boston"),
+             ("../summer-camps/", "Summer Camps", "summer-camps"),
+             ("../markets-festivals-boston/", "Markets &amp; Festivals", "markets-festivals-boston"))
+
+
+def _main_hub_nav(hub_slug):
+    ACTIVE = ' class="active"'
+    links = "\n".join(f'    <a href="{href}"{ACTIVE if slug == hub_slug else ""}>{label}</a>'
+                      for href, label, slug in _MAIN_NAV)
+    return f'  <nav class="hub-nav">\n{links}\n  </nav>'
+
+
 def _family_nav(hub_slug, nav_class):
     """The short header nav on the parent-facing pages (Kids & Family, Summer Camps)."""
     ACTIVE = ' class="active"'
@@ -3777,42 +3793,10 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
         hub_js = camps_tail + _CAMPS_FILTER_JS
     cards_joined = "\n".join(cards_html) if cards_html else "<p class='no-hub-events'>No scheduled events matching this directory right now. Check the interactive calendar for all upcoming dates.</p>"
 
-    active_b = 'active' if hub_slug == 'boston' else ''
-    active_c = 'active' if hub_slug == 'cambridge' else ''
-    active_s = 'active' if hub_slug == 'somerville' else ''
-    active_m = 'active' if hub_slug == 'music' else ''
-    active_co = 'active' if hub_slug == 'comedy' else ''
-    active_f = 'active' if hub_slug == 'free' else ''
-    active_fw = 'active' if hub_slug == 'free-events-boston-this-weekend' else ''
-    active_ct = 'active' if hub_slug == 'cambridge-events-tonight' else ''
-    active_sm = 'active' if hub_slug == 'live-music-somerville' else ''
-    active_bg = 'active' if hub_slug == 'board-game-nights-boston' else ''
-    active_kf = 'active' if hub_slug == 'kids-family-events-boston' else ''
-    active_sc = 'active' if hub_slug == 'summer-camps' else ''
-    active_mk = 'active' if hub_slug == 'markets-festivals-boston' else ''
-    active_edm = 'active' if hub_slug == 'boston-edm' else ''
-
     if is_camps or is_kids:
         hub_nav_html = _family_nav(hub_slug, "camps-nav" if is_camps else "kids-nav")
     else:
-        hub_nav_html = f"""  <nav class="hub-nav">
-    <a href="../">All Events</a>
-    <a href="../free-events-boston-this-weekend/" class="{active_fw}">Free Weekend</a>
-    <a href="../cambridge-events-tonight/" class="{active_ct}">Cambridge Tonight</a>
-    <a href="../live-music-somerville/" class="{active_sm}">Somerville Music</a>
-    <a href="../boston-edm/" class="{active_edm}">Boston EDM</a>
-    <a href="../college/" class="{'active' if hub_slug == 'college' else ''}">College</a>
-    <a href="../board-game-nights-boston/" class="{active_bg}">Board Games</a>
-    <a href="../kids-family-events-boston/" class="{active_kf}">Kids &amp; Family</a>
-    <a href="../summer-camps/" class="{active_sc}">Summer Camps</a>
-    <a href="../markets-festivals-boston/" class="{active_mk}">Markets &amp; Festivals</a>
-    <a href="../boston/" class="{active_b}">Boston</a>
-    <a href="../cambridge/" class="{active_c}">Cambridge</a>
-    <a href="../somerville/" class="{active_s}">Somerville</a>
-    <a href="../music/" class="{active_m}">Live Music</a>
-    <a href="../comedy/" class="{active_co}">Comedy</a>
-    <a href="../free/" class="{active_f}">Free</a>
-  </nav>"""
+        hub_nav_html = _main_hub_nav(hub_slug)
 
     return f"""<!doctype html>
 <html lang="en">

@@ -81,5 +81,16 @@ class MarketsPage(unittest.TestCase):
         self.assertIn("state.type", self.html)
 
 
+class HeaderBar(unittest.TestCase):
+    def test_guide_pages_link_only_finished_pages(self):
+        nav = template._main_hub_nav("boston")
+        self.assertEqual(nav.count("<a "), 4)
+        for href in ("../", "../kids-family-events-boston/", "../summer-camps/", "../markets-festivals-boston/"):
+            self.assertIn(f'href="{href}"', nav)
+        html = template.render_hub_page("markets-festivals-boston", [], site_url="https://example.com")
+        self.assertIn('<a href="../markets-festivals-boston/" class="active">Markets &amp; Festivals</a>', html)
+        self.assertNotIn('href="../comedy/"', html)
+
+
 if __name__ == "__main__":
     unittest.main()

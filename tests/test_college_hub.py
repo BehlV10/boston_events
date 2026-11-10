@@ -150,10 +150,10 @@ class CollegeHub(unittest.TestCase):
         # The filter script must come after the cards it filters
         self.assertLess(self.html.rindex("<article"), self.html.index("querySelectorAll('.col-chip')"))
 
-    def test_registered_with_nav_and_site_directory(self):
+    def test_registered_and_in_site_directory(self):
+        # Not in the guide pages' header bar until it's finished (template._MAIN_NAV)
         self.assertIn("college", T.HUBS)
-        self.assertIn('<a href="../college/" class="active">College</a>', self.html)
-        self.assertIn('<a href="../college/" class="">College</a>', T.render_hub_page("boston-edm", []))
+        self.assertIn('href="college/"', T.render_page([]))
 
 
 class MainCalendar(unittest.TestCase):
