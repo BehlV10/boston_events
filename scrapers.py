@@ -11789,6 +11789,61 @@ def scrape_bijou(url, ua, max_events=20):
     return events
 
 
+def scrape_posh_group(url, ua, venue=None):
+    """A venue's Posh group feed (posh.vip/api/web/v2/util/group_url/<group>), the JSON the
+    venue's own site loads (bsmntboston.com builds its show grid from it).
+
+    Posh's "start" is the local wall time with a "Z" on it; "startUtc" is the real instant.
+    Only live, public listings the organizer allows on other sites are kept. The feed carries
+    no prices, and bsmnt's Posh pages all say $0 (guest list before 11 pm, cover after), so
+    price is left unknown rather than fetched per night or shown as free."""
+    r = _SESSION.get(url, headers={"User-Agent": ua or UA_CHROME, "Accept": "application/json"}, timeout=15)
+    r.raise_for_status()
+    now = datetime.now(timezone.utc)
+    events = []
+    for ev in r.json().get("events") or []:
+        name = re.sub(r"\s+", " ", ev.get("name") or "").strip()
+        if (not name or ev.get("status") != "live" or ev.get("passwordProtected") or ev.get("isPersonalEvent")
+                or ev.get("displayOnThirdPartySites") is False or is_placeholder_or_closed_event(name)):
+            continue
+        try:
+            start = datetime.fromisoformat((ev.get("startUtc") or "").replace("Z", "+00:00"))
+        except ValueError:
+            continue
+        if start < now - timedelta(hours=6):
+            continue
+        end = None
+        try:
+            end = datetime.fromisoformat((ev.get("endUtc") or "").replace("Z", "+00:00")).isoformat()
+        except ValueError:
+            pass
+        v = ev.get("venue") or {}
+        events.append({
+            "name": name,
+            "date": start.isoformat(),
+            "end": end,
+            "url": f"https://posh.vip/e/{ev['url']}" if ev.get("url") else None,
+            "venue": venue or v.get("name"),
+            "address": v.get("address"),
+            "price": None,
+        })
+    events.sort(key=lambda e: e["date"])
+    return events
+
+
+def scrape_bsmnt(url, ua):
+    """bsmnt (W Boston basement, 100 Stuart St): house and techno, Thu–Sat. Found through Resident
+    Advisor's Boston listings; read from the Posh feed bsmntboston.com itself uses."""
+    return scrape_posh_group(url, ua, venue="bsmnt")
+
+
+def scrape_spy_bar(url, ua):
+    """Spy Bar (Revolution Hotel, 40 Berkeley St): hi-fi listening bar with DJ nights. Its own
+    Wix Events calendar at spybar.com. (spybarboston.com is a parked domain; the Revolution
+    Hotel's site answers 403.)"""
+    return scrape_wix_events(url, ua, default_venue="Spy Bar", default_category="clubbing")
+
+
 def scrape_sissy_ks(url, ua):
     """Sissy K's (Faneuil Hall): a Wix Events site with each dated night and its start time."""
     return scrape_wix_events(url, ua, default_venue="Sissy K's", default_category="clubbing")
@@ -13410,6 +13465,8 @@ _ALL_VENUES = [
     {"name": "LesbianNightLife", "url": "https://www.lesbiannightlife.com", "ua": UA_CHROME, "scraper": scrape_wix_events, "default_category": "clubbing"},
     {"name": "Bijou Nightclub", "url": "https://www.bijouboston.com", "ua": UA_CHROME, "scraper": scrape_bijou, "default_category": "clubbing"},
     {"name": "Sissy K's", "url": "https://www.sissykevents.com/", "ua": UA_CHROME, "scraper": scrape_sissy_ks, "default_category": "clubbing"},
+    {"name": "bsmnt", "url": "https://posh.vip/api/web/v2/util/group_url/bsmntboston", "ua": UA_CHROME, "scraper": scrape_bsmnt, "default_category": "clubbing"},
+    {"name": "Spy Bar", "url": "https://www.spybar.com/event-list", "ua": UA_CHROME, "scraper": scrape_spy_bar, "default_category": "clubbing"},
     {"name": "6one7 Productions (Venu & Icon)", "url": "https://www.eventbrite.com/o/6one7-productions-1459894222", "ua": UA_CHROME, "scraper": scrape_eventbrite_org, "default_category": "clubbing"},
     {"name": "Dope Entertainment (Venu, Icon, Clerys)", "url": "https://www.eventbrite.com/o/dope-entertainment-18760244852", "ua": UA_CHROME, "scraper": scrape_eventbrite_org, "default_category": "clubbing"},
 ]
