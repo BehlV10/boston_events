@@ -2000,6 +2000,40 @@ class TestBostonEvents(unittest.TestCase):
         self.assertEqual(geo_waltham["neighborhood"], "Waltham")
         self.assertEqual(_event_city("Mighty Squirrel Waltham", "Mighty Squirrel Waltham", {}), "other")
 
+    def test_white_bull_and_ghost_light_tavern(self):
+        """White Bull Tavern and Ghost Light Tavern recurring nightlife & comedy and geo resolution."""
+        from scrapers import _expand_manual_recurring
+        from venues_geo import resolve_event_geo
+        from template import _event_city
+
+        all_manual = _expand_manual_recurring(weeks=1)
+        manual_venues = {m["venue"]: m["events"] for m in all_manual}
+
+        # 1. White Bull Tavern
+        self.assertIn("White Bull Tavern", manual_venues)
+        wb_events = manual_venues["White Bull Tavern"]
+        wb_titles = [e["name"] for e in wb_events]
+        self.assertTrue(any("Karaoke" in t for t in wb_titles))
+        self.assertTrue(any("Hideout Comedy" in t for t in wb_titles))
+        comedy_ev = next(e for e in wb_events if "Comedy" in e["name"])
+        self.assertEqual(comedy_ev["category"], "comedy")
+
+        geo_wb = resolve_event_geo({"venue": "White Bull Tavern"})
+        self.assertIsNotNone(geo_wb)
+        self.assertEqual(geo_wb["neighborhood"], "Faneuil Hall / Downtown")
+        self.assertEqual(_event_city("White Bull Tavern", "White Bull Tavern", {}), "boston")
+
+        # 2. Ghost Light Tavern
+        self.assertIn("Ghost Light Tavern", manual_venues)
+        gl_events = manual_venues["Ghost Light Tavern"]
+        gl_titles = [e["name"] for e in gl_events]
+        self.assertTrue(any("Clubroom & DJ" in t for t in gl_titles))
+
+        geo_gl = resolve_event_geo({"venue": "Ghost Light Tavern"})
+        self.assertIsNotNone(geo_gl)
+        self.assertEqual(geo_gl["neighborhood"], "Theater District")
+        self.assertEqual(_event_city("Ghost Light Tavern", "Ghost Light Tavern", {}), "boston")
+
     def test_celebrity_series(self):
         """Celebrity Series of Boston scraper and geo verification."""
         from scrapers import _ALL_VENUES, scrape_celebrity_series

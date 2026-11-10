@@ -13343,6 +13343,20 @@ MANUAL_RECURRING_EVENTS = [
         ("Friday Night DJ Dance Party", "https://www.coogansboston.com/", 4, 22, 0, "Free"),
         ("Saturday Night DJ Dance Party", "https://www.coogansboston.com/", 5, 22, 0, "Free"),
     ]),
+    ("White Bull Tavern", "https://thewhitebulltavern.com/events", "clubbing", [
+        ("Tuesday Night Karaoke", "https://thewhitebulltavern.com/events", 1, 21, 0, "Free"),
+        ("Wednesday Night Karaoke", "https://thewhitebulltavern.com/events", 2, 21, 0, "Free"),
+        ("Thursday Night Karaoke", "https://thewhitebulltavern.com/events", 3, 21, 0, "Free"),
+        ("Hideout Comedy: Stand Up Showcase", "https://thewhitebulltavern.com/events", 4, 19, 0, "$15"),
+        ("Friday Night Live DJs & Dance Party (2 Floors)", "https://thewhitebulltavern.com/events", 4, 21, 30),
+        ("Saturday Night Live DJs & Dance Party (2 Floors)", "https://thewhitebulltavern.com/events", 5, 21, 30),
+    ]),
+    ("Ghost Light Tavern", "https://ghostlighttavern.com/", "clubbing", [
+        ("Thursday Night Clubroom & DJ @ Ghost Light", "https://ghostlighttavern.com/", 3, 21, 0, "Free"),
+        ("Friday Night Clubroom & DJ @ Ghost Light", "https://ghostlighttavern.com/", 4, 21, 0),
+        ("Saturday Night Clubroom & DJ @ Ghost Light", "https://ghostlighttavern.com/", 5, 21, 0),
+        ("Sunday Night Party @ Ghost Light Clubroom", "https://ghostlighttavern.com/", 6, 21, 0, "Free"),
+    ]),
 ]
 
 
@@ -13388,14 +13402,16 @@ def _expand_manual_recurring(weeks=8):
                 if not _in_season(venue, d):
                     continue
                 dt = datetime(d.year, d.month, d.day, hour, minute, tzinfo=EASTERN)
-                genre = infer_music_genre(name, venue, category=default_cat) if default_cat in ("music", "clubbing") else None
+                cat = "comedy" if "comedy" in name.lower() else default_cat
+                genre = infer_music_genre(name, venue, category=cat) if cat in ("music", "clubbing") else None
                 events.append({
                     "name": name,
+                    "title": name,
                     "date": dt.astimezone(timezone.utc).isoformat(),
                     "url": url,
                     "venue": venue,
                     "price": price,
-                    "category": default_cat,
+                    "category": cat,
                     "genre": genre,
                 })
         results.append({"venue": venue, "url": venue_url, "events": events, "error": None})

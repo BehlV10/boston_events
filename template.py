@@ -163,7 +163,7 @@ CITY_RULES = [
         "petula's", "old south", "oak long bar", "massachusetts historical society",
         "loco taqueria", "high street place", "gray's hall", "flight club", "empire",
         "arnold arboretum", "franklin park", "224 boston", "yellow door taqueria", "wyndham boston beacon hill",
-        "white bull tavern", "west end johnnie", "view boston", "the superette",
+        "white bull tavern", "white bull", "ghost light tavern", "ghost light", "west end johnnie", "view boston", "the superette",
         "the substation", "the rocks at harbor way", "the harp", "the alley bar",
         "telegraph hill", "simmons university", "rocco's cucina", "reggie lewis",
         "red cross of greater boston", "rebel's guild", "raffles boston", "pkl boston",
