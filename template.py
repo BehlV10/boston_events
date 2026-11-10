@@ -2357,22 +2357,48 @@ _EDM_FONTS = ""
 _EDM_HERO_ART = """<svg class="edm-hero-art" viewBox="0 0 900 200" aria-hidden="true" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="edm-sky" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#04050a"/>
-      <stop offset="60%" stop-color="#0a0d1c"/>
-      <stop offset="100%" stop-color="#12182e"/>
+      <stop offset="0%" stop-color="#02040a"/>
+      <stop offset="40%" stop-color="#070b1f"/>
+      <stop offset="80%" stop-color="#111638"/>
+      <stop offset="100%" stop-color="#1b1033"/>
     </linearGradient>
-    <linearGradient id="edm-neon" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#00f0ff"/>
-      <stop offset="50%" stop-color="#a855f7"/>
-      <stop offset="100%" stop-color="#ff007f"/>
+    <linearGradient id="beam-cyan" x1="0" y1="1" x2="0.5" y2="0">
+      <stop offset="0%" stop-color="#00f0ff" stop-opacity="0.75"/>
+      <stop offset="60%" stop-color="#00f0ff" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#00f0ff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="beam-pink" x1="1" y1="1" x2="0.3" y2="0">
+      <stop offset="0%" stop-color="#ff007f" stop-opacity="0.7"/>
+      <stop offset="60%" stop-color="#ff007f" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#ff007f" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="beam-lime" x1="0" y1="1" x2="0.7" y2="0">
+      <stop offset="0%" stop-color="#00ff88" stop-opacity="0.55"/>
+      <stop offset="60%" stop-color="#00ff88" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#00ff88" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="beam-purple" x1="0.5" y1="1" x2="0.5" y2="0">
+      <stop offset="0%" stop-color="#b026ff" stop-opacity="0.65"/>
+      <stop offset="60%" stop-color="#b026ff" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#b026ff" stop-opacity="0"/>
     </linearGradient>
     <linearGradient id="bar-grad" x1="0" y1="1" x2="0" y2="0">
-      <stop offset="0%" stop-color="#00f0ff" stop-opacity="0.2"/>
-      <stop offset="60%" stop-color="#00f0ff" stop-opacity="0.8"/>
+      <stop offset="0%" stop-color="#00f0ff" stop-opacity="0.25"/>
+      <stop offset="40%" stop-color="#00f0ff" stop-opacity="0.8"/>
+      <stop offset="75%" stop-color="#b026ff"/>
       <stop offset="100%" stop-color="#ff007f"/>
     </linearGradient>
-    <filter id="neon-glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="5" result="blur"/>
+    <radialGradient id="nebula-center" cx="50%" cy="60%" r="45%">
+      <stop offset="0%" stop-color="#b026ff" stop-opacity="0.35"/>
+      <stop offset="50%" stop-color="#00f0ff" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#02040a" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="water-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#060815" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#030409"/>
+    </linearGradient>
+    <filter id="glow-neon" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
       <feMerge>
         <feMergeNode in="blur"/>
         <feMergeNode in="SourceGraphic"/>
@@ -2380,60 +2406,176 @@ _EDM_HERO_ART = """<svg class="edm-hero-art" viewBox="0 0 900 200" aria-hidden="
     </filter>
   </defs>
   <rect width="900" height="200" fill="url(#edm-sky)"/>
-  <g opacity="0.35" stroke="#00f0ff" stroke-width="1">
-    <line x1="450" y1="40" x2="0" y2="200"/>
-    <line x1="450" y1="40" x2="120" y2="200"/>
-    <line x1="450" y1="40" x2="240" y2="200"/>
-    <line x1="450" y1="40" x2="350" y2="200"/>
-    <line x1="450" y1="40" x2="450" y2="200"/>
-    <line x1="450" y1="40" x2="550" y2="200"/>
-    <line x1="450" y1="40" x2="660" y2="200"/>
-    <line x1="450" y1="40" x2="780" y2="200"/>
-    <line x1="450" y1="40" x2="900" y2="200"/>
-    <line x1="200" y1="130" x2="700" y2="130" opacity="0.5"/>
-    <line x1="120" y1="160" x2="780" y2="160" opacity="0.7"/>
-    <line x1="0" y1="200" x2="900" y2="200" stroke-width="2" opacity="0.9"/>
+  <rect width="900" height="200" fill="url(#nebula-center)"/>
+
+  <!-- Sweeping Lasers -->
+  <g opacity="0.85">
+    <polygon points="450,165 40,0 85,0" fill="url(#beam-cyan)"/>
+    <polygon points="450,165 815,0 860,0" fill="url(#beam-pink)"/>
+    <polygon points="450,165 240,0 275,0" fill="url(#beam-lime)"/>
+    <polygon points="450,165 625,0 660,0" fill="url(#beam-purple)"/>
+    <polygon points="450,165 435,0 465,0" fill="url(#beam-cyan)" opacity="0.6"/>
+    <polygon points="180,165 370,0 395,0" fill="url(#beam-pink)" opacity="0.45"/>
+    <polygon points="720,165 505,0 530,0" fill="url(#beam-cyan)" opacity="0.45"/>
   </g>
+
+  <!-- Sharp Neon Laser Lines -->
+  <g stroke-linecap="round" opacity="0.75" filter="url(#glow-neon)">
+    <line x1="450" y1="165" x2="60" y2="0" stroke="#00f0ff" stroke-width="1.5"/>
+    <line x1="450" y1="165" x2="840" y2="0" stroke="#ff007f" stroke-width="1.5"/>
+    <line x1="450" y1="165" x2="255" y2="0" stroke="#00ff88" stroke-width="1"/>
+    <line x1="450" y1="165" x2="645" y2="0" stroke="#b026ff" stroke-width="1"/>
+    <line x1="180" y1="165" x2="380" y2="0" stroke="#ff007f" stroke-width="1"/>
+    <line x1="720" y1="165" x2="520" y2="0" stroke="#00f0ff" stroke-width="1"/>
+  </g>
+
+  <!-- Equalizer Spectrum Bars (Left) -->
   <g fill="url(#bar-grad)">
-    <rect x="40" y="110" width="8" height="70" rx="3"/>
-    <rect x="54" y="90" width="8" height="90" rx="3"/>
-    <rect x="68" y="130" width="8" height="50" rx="3"/>
-    <rect x="82" y="75" width="8" height="105" rx="3"/>
-    <rect x="96" y="105" width="8" height="75" rx="3"/>
-    <rect x="110" y="60" width="8" height="120" rx="3"/>
-    <rect x="124" y="95" width="8" height="85" rx="3"/>
-    <rect x="138" y="125" width="8" height="55" rx="3"/>
-    <rect x="152" y="80" width="8" height="100" rx="3"/>
-    <rect x="166" y="115" width="8" height="65" rx="3"/>
-    <rect x="180" y="70" width="8" height="110" rx="3"/>
-    <rect x="194" y="135" width="8" height="45" rx="3"/>
+    <rect x="30" y="118" width="6" height="36" rx="2"/>
+    <rect x="40" y="98" width="6" height="56" rx="2"/>
+    <rect x="50" y="128" width="6" height="26" rx="2"/>
+    <rect x="60" y="78" width="6" height="76" rx="2"/>
+    <rect x="70" y="106" width="6" height="48" rx="2"/>
+    <rect x="80" y="62" width="6" height="92" rx="2"/>
+    <rect x="90" y="88" width="6" height="66" rx="2"/>
+    <rect x="100" y="116" width="6" height="38" rx="2"/>
+    <rect x="110" y="74" width="6" height="80" rx="2"/>
+    <rect x="120" y="102" width="6" height="52" rx="2"/>
+    <rect x="130" y="58" width="6" height="96" rx="2"/>
+    <rect x="140" y="92" width="6" height="62" rx="2"/>
+    <rect x="150" y="124" width="6" height="30" rx="2"/>
+    <rect x="160" y="82" width="6" height="72" rx="2"/>
   </g>
+
+  <!-- Equalizer Spectrum Bars (Right) -->
   <g fill="url(#bar-grad)">
-    <rect x="698" y="135" width="8" height="45" rx="3"/>
-    <rect x="712" y="70" width="8" height="110" rx="3"/>
-    <rect x="726" y="115" width="8" height="65" rx="3"/>
-    <rect x="740" y="80" width="8" height="100" rx="3"/>
-    <rect x="754" y="125" width="8" height="55" rx="3"/>
-    <rect x="768" y="95" width="8" height="85" rx="3"/>
-    <rect x="782" y="60" width="8" height="120" rx="3"/>
-    <rect x="796" y="105" width="8" height="75" rx="3"/>
-    <rect x="810" y="75" width="8" height="105" rx="3"/>
-    <rect x="824" y="130" width="8" height="50" rx="3"/>
-    <rect x="838" y="90" width="8" height="90" rx="3"/>
-    <rect x="852" y="110" width="8" height="70" rx="3"/>
+    <rect x="734" y="82" width="6" height="72" rx="2"/>
+    <rect x="744" y="124" width="6" height="30" rx="2"/>
+    <rect x="754" y="92" width="6" height="62" rx="2"/>
+    <rect x="764" y="58" width="6" height="96" rx="2"/>
+    <rect x="774" y="102" width="6" height="52" rx="2"/>
+    <rect x="784" y="74" width="6" height="80" rx="2"/>
+    <rect x="794" y="116" width="6" height="38" rx="2"/>
+    <rect x="804" y="88" width="6" height="66" rx="2"/>
+    <rect x="814" y="62" width="6" height="92" rx="2"/>
+    <rect x="824" y="106" width="6" height="48" rx="2"/>
+    <rect x="834" y="78" width="6" height="76" rx="2"/>
+    <rect x="844" y="128" width="6" height="26" rx="2"/>
+    <rect x="854" y="98" width="6" height="56" rx="2"/>
+    <rect x="864" y="118" width="6" height="36" rx="2"/>
   </g>
-  <g transform="translate(450, 95)" filter="url(#neon-glow)">
-    <ellipse rx="130" ry="42" fill="none" stroke="#00f0ff" stroke-width="2.5" opacity="0.8"/>
-    <ellipse rx="100" ry="32" fill="none" stroke="#a855f7" stroke-width="2" opacity="0.9"/>
-    <ellipse rx="70" ry="22" fill="none" stroke="#ff007f" stroke-width="2" opacity="0.85"/>
-    <ellipse rx="35" ry="11" fill="none" stroke="#00f0ff" stroke-width="3" opacity="0.95"/>
-    <circle r="6" fill="#00f0ff"/>
-    <line x1="-120" y1="0" x2="-260" y2="-60" stroke="#ff007f" stroke-width="2" opacity="0.6"/>
-    <line x1="120" y1="0" x2="260" y2="-60" stroke="#00f0ff" stroke-width="2" opacity="0.6"/>
+
+  <!-- Boston Skyline Silhouette Across Water (Center Horizon) -->
+  <g fill="#080d22" opacity="0.95">
+    <!-- Zakim Bridge Pylon (Left of center) -->
+    <polygon points="220,154 225,92 227,92 232,154"/>
+    <polygon points="225,92 227,92 236,154 233,154"/>
+    <!-- Zakim Bridge Cables -->
+    <path d="M226,96 L195,154 M226,102 L202,154 M226,108 L210,154 M226,96 L255,154 M226,102 L248,154 M226,108 L240,154" stroke="#00f0ff" stroke-width="0.6" opacity="0.55" fill="none"/>
+    <!-- Custom House Tower -->
+    <rect x="285" y="96" width="22" height="58"/>
+    <polygon points="296,72 285,96 307,96"/>
+    <rect x="294" y="68" width="4" height="5" fill="#fcee0a" opacity="0.7"/>
+    <!-- Midrises -->
+    <rect x="310" y="114" width="28" height="40"/>
+    <rect x="342" y="104" width="34" height="50"/>
+    <rect x="380" y="120" width="24" height="34"/>
+    <!-- Hancock / 200 Clarendon (Tall angled monolithic skyscraper) -->
+    <polygon points="410,64 434,58 434,154 410,154" fill="#0c132f"/>
+    <!-- Prudential Tower (Center-Right with antenna spire) -->
+    <rect x="448" y="74" width="36" height="80" fill="#0c132f"/>
+    <rect x="456" y="62" width="20" height="12" fill="#0c132f"/>
+    <line x1="466" y1="62" x2="466" y2="38" stroke="#a855f7" stroke-width="1.8"/>
+    <circle cx="466" cy="37" r="2" fill="#ff007f" filter="url(#glow-neon)"/>
+    <!-- Financial District Towers -->
+    <rect x="490" y="92" width="26" height="62"/>
+    <polygon points="503,80 490,92 516,92"/>
+    <rect x="520" y="108" width="32" height="46"/>
+    <rect x="556" y="100" width="28" height="54"/>
+    <polygon points="570,86 556,100 584,100"/>
+    <rect x="588" y="116" width="30" height="38"/>
+    <rect x="622" y="124" width="36" height="30"/>
+    <rect x="662" y="132" width="40" height="22"/>
   </g>
-  <g transform="translate(450, 26)">
-    <rect x="-95" y="-12" width="190" height="24" rx="12" fill="#000" stroke="#00f0ff" stroke-width="1.5" opacity="0.85"/>
-    <text x="0" y="4" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" font-weight="700" fill="#00f0ff" letter-spacing="1">BOSTON RAVE FREQ</text>
+
+  <!-- Skyline Window Lights / Neon Dots -->
+  <g fill="#00f0ff" opacity="0.8">
+    <circle cx="418" cy="82" r="1"/>
+    <circle cx="426" cy="96" r="1"/>
+    <circle cx="418" cy="112" r="1"/>
+    <circle cx="456" cy="86" r="1" fill="#fcee0a"/>
+    <circle cx="472" cy="86" r="1" fill="#fcee0a"/>
+    <circle cx="464" cy="102" r="1" fill="#00ff88"/>
+    <circle cx="472" cy="118" r="1" fill="#00ff88"/>
+    <circle cx="354" cy="120" r="1"/>
+    <circle cx="500" cy="110" r="1" fill="#ff007f"/>
+    <circle cx="568" cy="116" r="1"/>
+  </g>
+
+  <!-- Water Surface & Waterfront Reflections -->
+  <rect x="0" y="154" width="900" height="46" fill="url(#water-grad)"/>
+  <g opacity="0.55" stroke-linecap="round">
+    <line x1="210" y1="158" x2="250" y2="158" stroke="#00f0ff" stroke-width="1.5"/>
+    <line x1="285" y1="160" x2="325" y2="160" stroke="#fcee0a" stroke-width="1.2"/>
+    <line x1="410" y1="158" x2="485" y2="158" stroke="#b026ff" stroke-width="2"/>
+    <line x1="420" y1="163" x2="475" y2="163" stroke="#00f0ff" stroke-width="1.5"/>
+    <line x1="440" y1="168" x2="468" y2="168" stroke="#ff007f" stroke-width="1.2"/>
+    <line x1="500" y1="160" x2="545" y2="160" stroke="#00ff88" stroke-width="1.2"/>
+    <line x1="550" y1="164" x2="585" y2="164" stroke="#ff007f" stroke-width="1.2"/>
+    <line x1="80" y1="162" x2="130" y2="162" stroke="#00f0ff" stroke-width="1" opacity="0.4"/>
+    <line x1="760" y1="162" x2="820" y2="162" stroke="#ff007f" stroke-width="1" opacity="0.4"/>
+  </g>
+
+  <!-- Dancing Crowd Silhouette (Foreground) -->
+  <g fill="#030409">
+    <path d="M0,200 L0,180
+      C15,180 20,172 26,172 C32,172 35,182 44,182
+      C52,182 56,168 62,168 C68,168 72,180 82,180
+      C90,180 94,175 100,175 C108,175 112,183 124,183
+      C135,183 140,170 148,166 C154,163 158,174 168,176
+      C178,178 184,168 192,164 C198,161 204,172 216,174
+      C228,176 235,165 244,162 C252,159 258,170 270,173
+      C282,176 290,166 300,166 C310,166 318,177 330,177
+      C342,177 350,168 360,165 C370,162 376,174 390,174
+      C404,174 412,160 422,158 C430,156 438,168 450,168
+      C462,168 470,158 480,158 C490,158 498,172 512,172
+      C525,172 532,163 542,163 C552,163 560,175 572,175
+      C584,175 592,166 602,164 C612,162 620,174 632,174
+      C645,174 652,162 662,162 C672,162 680,175 694,175
+      C706,175 714,167 724,167 C734,167 742,178 756,178
+      C768,178 776,166 786,166 C796,166 804,177 818,177
+      C830,177 838,169 848,169 C858,169 868,181 882,181
+      L900,181 L900,200 Z"/>
+    <path d="M146,166 L144,150 L149,150 L150,165 Z"/>
+    <path d="M194,164 L198,146 L203,147 L200,165 Z"/>
+    <path d="M245,162 L242,142 L247,141 L249,162 Z"/>
+    <path d="M421,158 L417,138 L422,137 L425,158 Z"/>
+    <path d="M480,158 L484,136 L489,137 L486,158 Z"/>
+    <path d="M542,163 L547,144 L552,145 L549,164 Z"/>
+    <path d="M662,162 L658,140 L663,139 L666,162 Z"/>
+    <path d="M724,167 L728,148 L733,149 L730,168 Z"/>
+    <path d="M786,166 L783,144 L788,143 L790,166 Z"/>
+  </g>
+
+  <!-- Glowing Glowsticks / Wristbands in Crowd -->
+  <g filter="url(#glow-neon)">
+    <circle cx="144" cy="149" r="2.5" fill="#00f0ff"/>
+    <circle cx="199" cy="145" r="2.5" fill="#ff007f"/>
+    <circle cx="243" cy="140" r="2.5" fill="#00ff88"/>
+    <circle cx="417" cy="136" r="3" fill="#00f0ff"/>
+    <circle cx="485" cy="134" r="3" fill="#fcee0a"/>
+    <circle cx="548" cy="143" r="2.5" fill="#ff007f"/>
+    <circle cx="658" cy="138" r="2.5" fill="#00ff88"/>
+    <circle cx="729" cy="147" r="2.5" fill="#00f0ff"/>
+    <circle cx="783" cy="142" r="2.5" fill="#b026ff"/>
+  </g>
+
+  <!-- Glowing DJ / Club Title Badge (Center Top) -->
+  <g transform="translate(450, 24)">
+    <rect x="-135" y="-12" width="270" height="24" rx="12" fill="#04060e" stroke="#00f0ff" stroke-width="1.4" opacity="0.95"/>
+    <circle cx="-118" cy="0" r="4" fill="#00f0ff" filter="url(#glow-neon)"/>
+    <circle cx="118" cy="0" r="4" fill="#ff007f" filter="url(#glow-neon)"/>
+    <text x="0" y="4" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="800" fill="#00f0ff" letter-spacing="1.4">⚡ BOSTON UNDERGROUND &amp; CLUBS</text>
   </g>
 </svg>"""
 
@@ -2466,8 +2608,35 @@ _EDM_CSS = """
     color: var(--cyan) !important;
     text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
   }
-  .edm-hub .hub-nav a { color: var(--muted); }
-  .edm-hub .hub-nav a.active, .edm-hub .hub-nav a:hover { color: var(--cyan); text-shadow: 0 0 8px rgba(0,240,255,0.4); }
+  .edm-hub .edm-nav {
+    display: flex;
+    gap: 8px;
+    font-size: 13.5px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .edm-hub .edm-nav a {
+    color: var(--muted);
+    padding: 5px 12px;
+    border-radius: 999px;
+    transition: all 0.15s ease;
+    text-decoration: none;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    font-weight: 600;
+  }
+  .edm-hub .edm-nav a:hover {
+    color: var(--cyan);
+    background: rgba(0, 240, 255, 0.08);
+    border-color: rgba(0, 240, 255, 0.25);
+  }
+  .edm-hub .edm-nav a.active {
+    color: #04060f;
+    background: var(--cyan);
+    border-color: var(--cyan);
+    box-shadow: 0 0 14px rgba(0, 240, 255, 0.5);
+    font-weight: 800;
+  }
   .edm-hub main { max-width: 980px; padding-top: 22px; }
   .edm-hub .hero {
     border: 1px solid var(--border);
@@ -2570,6 +2739,7 @@ _EDM_CSS = """
     box-shadow: 0 0 14px rgba(0, 240, 255, 0.45);
   }
   .edm-hub .hub-day {
+    grid-column: 1 / -1;
     margin: 32px 0 14px;
     font-size: 19px;
     font-weight: 700;
@@ -2581,6 +2751,9 @@ _EDM_CSS = """
     border: 0;
     padding: 0;
   }
+  .edm-hub .hub-day:first-child {
+    margin-top: 8px;
+  }
   .edm-hub .hub-day::before {
     content: "⚡";
     font-size: 16px;
@@ -2591,66 +2764,6 @@ _EDM_CSS = """
     flex: 1;
     height: 1px;
     background: linear-gradient(90deg, var(--cyan), rgba(168, 85, 247, 0.3) 60%, transparent);
-  }
-  .edm-city-section {
-    background: rgba(13, 16, 29, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    border-radius: 16px;
-    padding: 14px;
-    margin-bottom: 16px;
-  }
-  .edm-city-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-    padding: 0 4px;
-  }
-  .edm-city-pill {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-    padding: 3px 10px;
-    border-radius: 999px;
-  }
-  .edm-city-pill.city-boston {
-    background: rgba(0, 240, 255, 0.15);
-    color: var(--cyan);
-    border: 1px solid rgba(0, 240, 255, 0.35);
-  }
-  .edm-city-pill.city-cambridge {
-    background: rgba(255, 0, 127, 0.15);
-    color: var(--pink);
-    border: 1px solid rgba(255, 0, 127, 0.35);
-  }
-  .edm-city-pill.city-somerville {
-    background: rgba(168, 85, 247, 0.15);
-    color: var(--purple);
-    border: 1px solid rgba(168, 85, 247, 0.35);
-  }
-  .edm-city-pill.city-other {
-    background: rgba(255, 214, 0, 0.15);
-    color: var(--yellow);
-    border: 1px solid rgba(255, 214, 0, 0.35);
-  }
-  .edm-city-head .count {
-    font-size: 11.5px;
-    font-weight: 700;
-    color: var(--muted);
-    background: rgba(255, 255, 255, 0.06);
-    padding: 2px 8px;
-    border-radius: 999px;
-  }
-  .edm-city-cards {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 14px;
-  }
-  @media (min-width: 640px) {
-    .edm-city-cards {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
   }
   .hub-card.edm-card {
     background: #0d1020;
@@ -2727,8 +2840,9 @@ _EDM_CSS = """
     font-size: 11px;
     color: var(--muted);
     background: rgba(255,255,255,0.06);
-    padding: 1px 6px;
+    padding: 2px 7px;
     border-radius: 4px;
+    font-weight: 600;
   }
   .edm-card-desc {
     font-size: 12.5px;
@@ -2765,7 +2879,7 @@ _EDM_CSS = """
   @media (max-width: 640px) {
     .edm-hero-art { height: 130px; }
     .edm-filter-label { min-width: 100%; }
-    .edm-hub .hub-nav { font-size: 12px; gap: 8px 10px; }
+    .edm-hub .edm-nav { font-size: 12px; gap: 6px 8px; }
   }
 """
 
@@ -2775,7 +2889,6 @@ _EDM_FILTER_JS = """<script>
   if (!chips.length) return;
   var cards = document.querySelectorAll('.hub-card.edm-card');
   var heads = document.querySelectorAll('.hub-day');
-  var citySecs = document.querySelectorAll('.edm-city-section');
   var state = { genre: 'all', area: 'all', when: 'all', cost: 'all' };
 
   function matches(c) {
@@ -2795,12 +2908,6 @@ _EDM_FILTER_JS = """<script>
       if (on) { days[c.dataset.day] = 1; n++; }
     });
     heads.forEach(function (h) { h.hidden = !days[h.dataset.day]; });
-    citySecs.forEach(function (sec) {
-      var visible = sec.querySelectorAll('.hub-card.edm-card:not([hidden])').length;
-      sec.hidden = (visible === 0);
-      var cCount = sec.querySelector('.edm-city-head .count');
-      if (cCount) cCount.textContent = visible;
-    });
     chips.forEach(function (b) {
       var g = b.dataset.group, v = b.dataset.val;
       b.classList.toggle('active', state[g] === v);
@@ -3941,6 +4048,23 @@ def _college_nav(hub_slug):
     return f'  <nav class="hub-nav col-nav">\n{links}\n  </nav>'
 
 
+_EDM_NAV = (
+    ("../", "All Events", None),
+    ("../boston-edm/", "Boston EDM", "boston-edm"),
+    ("../cambridge-events-tonight/", "Cambridge Tonight", "cambridge-events-tonight"),
+    ("../music/", "Live Music", "music"),
+    ("../college/", "College", "college"),
+)
+
+
+def _edm_nav(hub_slug):
+    """The nightlife/music-focused nav for the EDM hub."""
+    ACTIVE = ' class="active"'
+    links = "\n".join(f'    <a href="{href}"{ACTIVE if slug == hub_slug else ""}>{label}</a>'
+                      for href, label, slug in _EDM_NAV)
+    return f'  <nav class="hub-nav edm-nav">\n{links}\n  </nav>'
+
+
 KIDS_INLINE_DAYS = 14  # the Kids page carries two weeks; later days load from later.html
 
 
@@ -4195,9 +4319,22 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
             d_str = escape(e.get("date") or "")
             t_str = escape(e.get("time") or "")
             t_obj = e.get("_time")
+            d_key = None
             if isinstance(t_obj, datetime):
+                d_key = t_obj.date()
                 d_str = ""
                 t_str = _hub_time_label(e, t_obj)
+            elif e.get("date"):
+                try:
+                    dt = datetime.fromisoformat(str(e["date"]).replace("Z", "+00:00"))
+                    d_key = dt.date()
+                    d_str = ""
+                    t_str = _hub_time_label(e, dt)
+                except Exception:
+                    try:
+                        d_key = datetime.strptime(str(e["date"])[:10], "%Y-%m-%d").date()
+                    except Exception:
+                        d_key = None
             desc_html = ""
             if e.get("description"):
                 d_txt = re.sub(r"\s+", " ", str(e["description"])).strip()
@@ -4217,7 +4354,7 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
             edm_sub_counts[sub] = edm_sub_counts.get(sub, 0) + 1
             edm_places.add(e.get("venue") or "")
 
-            day_attr = t_obj.date().isoformat() if isinstance(t_obj, datetime) else ""
+            day_attr = d_key.isoformat() if d_key else ""
             free_attr = "1" if is_free else "0"
             area_attr = city if city in ("boston", "cambridge", "somerville") else "other"
             time_badge = f'<time class="hub-date">{" · ".join(x for x in (d_str, t_str) if x)}</time>'
@@ -4245,11 +4382,26 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
         by_day = {}
         for e in filtered[:card_limit]:
             t_obj = e.get("_time")
-            d_key = t_obj.date() if isinstance(t_obj, datetime) else None
+            if isinstance(t_obj, datetime):
+                d_key = t_obj.date()
+            elif e.get("date"):
+                try:
+                    d_key = datetime.fromisoformat(str(e["date"]).replace("Z", "+00:00")).date()
+                except Exception:
+                    try:
+                        d_key = datetime.strptime(str(e["date"])[:10], "%Y-%m-%d").date()
+                    except Exception:
+                        d_key = None
+            else:
+                d_key = None
             by_day.setdefault(d_key, []).append(e)
 
-        city_order = ["cambridge", "somerville", "boston", "other"]
-        for day_obj, day_events in by_day.items():
+        day_keys = sorted((k for k in by_day if k is not None))
+        if None in by_day:
+            day_keys.append(None)
+
+        for day_obj in day_keys:
+            day_events = by_day[day_obj]
             if day_obj:
                 day_iso = day_obj.isoformat()
                 day_heading = day_obj.strftime("%A, %B %-d")
@@ -4258,28 +4410,9 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
                 day_iso = "tba"
                 cards_html.append('<h2 class="hub-day" id="tba" data-day="tba">Date TBA</h2>')
 
-            by_city = {c: [] for c in city_order}
+            day_events.sort(key=lambda ev: ev.get("_time") or datetime.max.replace(tzinfo=EASTERN))
             for e in day_events:
-                c = _event_city(e.get("venue"), e.get("_source_venue"), e)
-                by_city.setdefault(c, []).append(e)
-
-            for cname in city_order:
-                cevents = by_city.get(cname) or []
-                if not cevents:
-                    continue
-                cevents.sort(key=lambda ev: ev.get("_time") or datetime.max.replace(tzinfo=EASTERN))
-                city_cards = [_render_edm_card(e) for e in cevents]
-                city_label = CITY_LABELS.get(cname, cname.title())
-                pill_cls = f"city-{cname}"
-                cards_html.append(f'''<div class="edm-city-section" data-city="{escape(cname)}" data-day="{day_iso}">
-  <div class="edm-city-head">
-    <span class="edm-city-pill {pill_cls}">{escape(city_label)}</span>
-    <span class="count">{len(cevents)}</span>
-  </div>
-  <div class="edm-city-cards">
-    {"".join(city_cards)}
-  </div>
-</div>''')
+                cards_html.append(_render_edm_card(e))
     elif is_camps:
         cards_html = [_camp_card(c) for c in filtered[:card_limit]]
     elif is_markets:
@@ -4588,6 +4721,8 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
         hub_nav_html = _family_nav(hub_slug, "camps-nav" if is_camps else "kids-nav")
     elif is_college:
         hub_nav_html = _college_nav(hub_slug)
+    elif is_edm:
+        hub_nav_html = _edm_nav(hub_slug)
     else:
         hub_nav_html = _main_hub_nav(hub_slug)
 

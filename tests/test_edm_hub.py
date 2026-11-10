@@ -78,6 +78,47 @@ class EdmHubTests(unittest.TestCase):
         self.assertIn("All Prices", html)
         self.assertIn("💛 Free / No Cover", html)
         self.assertIn('data-free="1"', html)
+        # Verify streamlined nightlife nav
+        self.assertIn('class="hub-nav edm-nav"', html)
+        self.assertIn('href="../boston-edm/" class="active">Boston EDM</a>', html)
+        self.assertIn('href="../music/">Live Music</a>', html)
+        self.assertIn('href="../college/">College</a>', html)
+        self.assertNotIn("kids-family-events-boston", html)
+        self.assertNotIn("summer-camps", html)
+        # Verify sleek hero art badge
+        self.assertIn("BOSTON UNDERGROUND &amp; CLUBS", html)
+        # Verify removal of nested edm-city-section "giant tabs"
+        self.assertNotIn("edm-city-section", html)
+        self.assertNotIn("edm-city-head", html)
+        self.assertNotIn("edm-city-pill", html)
+
+    def test_edm_list_structure_multiple_cities(self):
+        now = _dt.datetime.now(_EST)
+        events = [
+            {
+                "name": "Infra Techno Night",
+                "venue": "The Phoenix Landing",
+                "date": now.isoformat(),
+                "_time": now,
+                "category": "clubbing",
+                "url": "https://example.com/infra",
+            },
+            {
+                "name": "House Anthems Boston",
+                "venue": "Royale",
+                "date": now.isoformat(),
+                "_time": now + _dt.timedelta(hours=2),
+                "category": "clubbing",
+                "url": "https://example.com/royale",
+            },
+        ]
+        html = template.render_hub_page("boston-edm", events)
+        # Cards render directly under the day heading without nested city wrappers
+        self.assertIn('<h2 class="hub-day"', html)
+        self.assertIn("Infra Techno Night", html)
+        self.assertIn("House Anthems Boston", html)
+        self.assertNotIn("edm-city-section", html)
+        self.assertNotIn("edm-city-cards", html)
 
 
 if __name__ == "__main__":
