@@ -43,6 +43,19 @@ from light_theme import LIGHT_THEME_CSS
 DEFAULT_UNCHECKED_BUCKETS = {"Classes & Services", "Kids & Family", "Deals & Specials", "Tech & Startups"}
 
 
+# Render-time recategorisation, so listings already in events.json (and sources that set their
+# own category) move too. Only from the catch-all categories: a "Book Club Night" a venue calls
+# music stays music.
+_BOOK_EVENT_RE = re.compile(
+    r"\b(?:author\s+(?:talk|reading|event|discussion|signing|visit|tour|appearance|series)|"
+    r"book\s+(?:talk|reading|launch|signing|discussion|club|tour)|in\s+conversation\s+with|"
+    r"poetry\s+reading|writers?\s+(?:talk|reading)|literary\s+reading)\b", re.I)
+_TALK_EVENT_RE = re.compile(
+    r"\b(?:lectures?|panel\s+discussion|guest\s+speaker|keynote|colloquium|symposium|fireside\s+chat|"
+    r"speaker\s+series|talk\s+(?:by|with)|public\s+talk)\b", re.I)
+_TALK_OVERRIDABLE = {"community", "other", "art", "arts"}
+
+
 def _effective_category(e):
     name = e.get("name") or ""
     if is_utility_event(name):
@@ -56,6 +69,11 @@ def _effective_category(e):
     # were classified (or kept from a degraded scrape) still fill the Markets & Festivals page
     if cat in _MARKET_OVERRIDABLE and is_market_or_festival(name):
         return "markets"
+    if cat in _TALK_OVERRIDABLE:
+        if _BOOK_EVENT_RE.search(name):
+            return "books"
+        if _TALK_EVENT_RE.search(name):
+            return "talks"
     return cat
 
 
@@ -6464,7 +6482,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
   .bucket[data-bucket="Music & nightlife"] {{ --accent: #7aa2f7; }}
   .bucket[data-bucket="Dance"]             {{ --accent: #ff7ab2; }}
   .bucket[data-bucket="Stage"]             {{ --accent: #f0a07a; }}
-  .bucket[data-bucket="Arts & culture"]    {{ --accent: #9ece6a; }}
+  .bucket[data-bucket="Books & Talks"]     {{ --accent: #9ece6a; }}
+  .bucket[data-bucket="Arts & culture"]    {{ --accent: #e0af68; }}
   .bucket[data-bucket="Play"]              {{ --accent: #bb9af7; }}
   .bucket[data-bucket="Food & drink"]      {{ --accent: #c678dd; }}
   .bucket[data-bucket="Community"]         {{ --accent: #8fa1b3; }}
@@ -10898,6 +10917,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
             catBoxes.forEach(b => {{ b.checked = false; }});
           }} else {{
             const vals = new Set(catVal.split(','));
+            // Links shared before Books & Talks split from Arts & culture
+            if (vals.has('Arts & culture')) vals.add('Books & Talks');
             catBoxes.forEach(b => {{ b.checked = vals.has(b.value); }});
           }}
         }}
