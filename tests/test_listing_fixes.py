@@ -22,8 +22,9 @@ class MarketSeasons(unittest.TestCase):
 
 class TicketmasterPrices(unittest.TestCase):
     def response(self, low, high):
+        future_date = (scrapers.datetime.now(scrapers.EASTERN) + scrapers.timedelta(days=7)).date().isoformat()
         event = {"name": "Boston Manor", "url": "https://www.ticketmaster.com/event/x",
-                 "dates": {"start": {"dateTime": "2026-11-09T00:30:00Z", "localDate": "2026-11-08"}},
+                 "dates": {"start": {"dateTime": f"{future_date}T00:30:00Z", "localDate": future_date}},
                  "priceRanges": [{"min": low, "max": high, "currency": "USD"}],
                  "_embedded": {"venues": [{"name": "The Sinclair", "city": {"name": "Cambridge"}}]}}
         reply = mock.Mock(status_code=200)
