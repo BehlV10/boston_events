@@ -11146,6 +11146,281 @@ _NEU_TECH_DEPT_RE = re.compile(
     r"Network Science|Data Science|Bioengineering|Mechanical|Electrical)\b", re.I)
 
 
+# ── Campus event calendars (Localist API: MIT, Boston College, Suffolk) ───────────────────────
+#
+# These calendars mix public events with ones only for students or staff, plus virtual ones.
+# Keep in-person events tagged for the public; when a school doesn't tag the audience, keep only
+# clearly public kinds (performances, exhibits, lectures). Games come from the athletics feeds.
+
+_LOCALIST_CAMPUS = {
+    "calendar.mit.edu": "MIT",
+    "events.bc.edu": "Boston College",
+    "events.suffolk.edu": "Suffolk University",
+}
+_LOCALIST_PUBLIC_TYPES_RE = re.compile(
+    r"\b(?:performing\s+arts|performances?|music|arts|visual\s+arts|exhibits?|exhibitions?|film|"
+    r"lectures?|speaker|conferences/seminars/lectures|community\s+event)\b", re.I)
+# Talks for specialists, internal sessions and games (the athletics feeds list games)
+_CAMPUS_NOISE_TITLE_RE = re.compile(
+    r"\b(?:seminar|colloquium|info(?:rmation)?\s+sessions?|coffee\s+chats?|webinar|office\s+hours?|"
+    r"thesis|dissertation|defen[cs]e|orientation|training|deadline|registration|reunion|alumni\s+(?:gathering|reception)|"
+    r"mass\b|liturgy|rosary|prayer|worship)\b", re.I)
+_CAMPUS_GAME_RE = re.compile(
+    r"\b(?:hockey|basketball|football|soccer|lacrosse|volleyball|baseball|softball|swimming|diving|fencing|"
+    r"squash|tennis|track|rowing|sailing|field\s+hockey|wrestling|skiing|cross\s+country|golf|rugby|"
+    r"men'?s|women'?s)\b.*\b(?:vs\.?|at|v\.)\s", re.I)
+# A venue already naming an institution ("Boston College", "Berklee Performance Center") isn't
+# given a campus suffix; bare building names ("Kresge Auditorium") are.
+_INSTITUTION_WORD_RE = re.compile(
+    r"\b(?:college|university|institute|school|campus|academy|conservatory|berklee|harvard|mit|museum|church)\b", re.I)
+_LOCALIST_SKIP_TYPES_RE = re.compile(
+    r"\b(?:athletic|athletics|admissions?|information\s+sessions?|holidays?|thesis|career|"
+    r"professional\s+development|meetings?|webinar|reception|training|deadline)\b", re.I)
+
+
+_CAMPUS_GENERIC_TITLE_WORDS = {
+    "lecture", "lectures", "series", "concert", "music", "performance", "student", "students", "annual",
+    "fall", "winter", "spring", "show", "with", "presents", "event", "night", "from", "about", "talk",
+}
+
+
+def _campus_title_words(title):
+    return {w for w in re.findall(r"[a-z]{4,}", title.lower())} - _CAMPUS_GENERIC_TITLE_WORDS
+
+
+def _same_campus_listing(title, other):
+    """A school listing one event twice at one start time under two titles ("ASTAZA!" and
+    "ASTAZA in Concert - THE DOOR in Arabic Music"). The template keeps a source's own
+    listings apart, so this is caught here."""
+    a, b = _campus_title_words(title), _campus_title_words(other)
+    return bool(a and b) and len(a & b) >= min(2, len(a), len(b))
+
+
+def _localist_names(ev, *keys):
+    filters = ev.get("filters") or {}
+    out = []
+    for k in keys:
+        out += [html.unescape(t.get("name") or "") for t in (filters.get(k) or [])]
+    return out
+
+
+def scrape_localist(url, ua):
+    """Public in-person events from a university Localist calendar (all pages of the API)."""
+    host = urlparse(url).netloc.lower()
+    campus = _LOCALIST_CAMPUS.get(host, "Campus")
+    now = datetime.now(timezone.utc)
+    today = now.astimezone(EASTERN).date()
+    sep = "&" if "?" in url else "?"
+    events = []
+    seen = set()
+    by_start = {}  # start -> titles already kept
+    for page in range(1, 11):
+        try:
+            r = _SESSION.get(f"{url}{sep}page={page}", headers={"User-Agent": ua or UA_CHROME}, timeout=12)
+            r.raise_for_status()
+            data = r.json()
+        except Exception:
+            break
+        for it in data.get("events", []):
+            ev = it.get("event") or {}
+            title = html.unescape(ev.get("title") or "").strip()
+            if not title or is_placeholder_or_closed_event(title):
+                continue
+            if _CAMPUS_NOISE_TITLE_RE.search(title) or _CAMPUS_GAME_RE.search(title):
+                continue
+            if ev.get("private") or (ev.get("status") or "live") != "live" or ev.get("experience") == "virtual":
+                continue
+            audience = _localist_names(ev, "event_audience", "event_target_audience")
+            types = " | ".join(_localist_names(ev, "event_types"))
+            if _LOCALIST_SKIP_TYPES_RE.search(types):
+                continue
+            if audience:
+                if not any("public" in a.lower() for a in audience):
+                    continue
+            elif not _LOCALIST_PUBLIC_TYPES_RE.search(types):
+                continue
+
+            inst = None
+            for wrap in ev.get("event_instances") or []:
+                cand = wrap.get("event_instance") or {}
+                try:
+                    st = datetime.fromisoformat(cand.get("start") or "")
+                except ValueError:
+                    continue
+                if (cand.get("all_day") and st.date() >= today) or st.astimezone(timezone.utc) >= now:
+                    inst, start = cand, st
+                    break
+            if inst is None:
+                continue
+            if inst.get("all_day"):
+                date_str = start.date().isoformat()
+                end = None
+            else:
+                date_str = start.astimezone(timezone.utc).isoformat()
+                try:
+                    end = datetime.fromisoformat(inst["end"]).astimezone(timezone.utc).isoformat() if inst.get("end") else None
+                except ValueError:
+                    end = None
+            # Localist returns a row per day: an all-day item or exhibition running for weeks
+            # ("ART CUT BOSTON", "Week of Dance") is listed once, on its next date.
+            repeating = inst.get("all_day") or re.search(r"(?i)\bexhibit", f"{title} {types}")
+            key = (title.lower(), "" if repeating else date_str[:10])
+            if key in seen or (not repeating and any(_same_campus_listing(title, t) for t in by_start.get(date_str, ()))):
+                continue
+            seen.add(key)
+            by_start.setdefault(date_str, []).append(title)
+
+            venue = html.unescape(ev.get("location_name") or "").strip() or campus
+            if campus != "Campus" and not _INSTITUTION_WORD_RE.search(venue):
+                venue = f"{venue} ({campus})"
+            entry = {
+                "name": title[:160],
+                "date": date_str,
+                "end": end,
+                "url": ev.get("localist_url") or url,
+                "venue": venue[:80],
+                "address": (ev.get("address") or "").strip() or None,
+                "price": "Free" if ev.get("free") else None,
+                "description": (ev.get("description_text") or "")[:200],
+            }
+            geo = ev.get("geo") or {}
+            try:
+                if geo.get("latitude") and geo.get("longitude"):
+                    entry["lat"], entry["lng"] = float(geo["latitude"]), float(geo["longitude"])
+            except (TypeError, ValueError):
+                pass
+            depts = " ".join(_localist_names(ev, "departments")) + " " + " ".join(
+                d.get("name") or "" for d in ev.get("departments") or [] if isinstance(d, dict))
+            if _NEU_TECH_DEPT_RE.search(depts) or TECH_EVENT_RE.search(title) or re.search(r"(?i)\b(?:stem|data|computing|robotics)\b", title):
+                entry["category"] = "tech"
+            elif re.search(r"(?i)\b(?:concert|recital|orchestra|jazz|choir|chorus|ensemble)\b", title):
+                entry["category"] = "music"
+            elif re.search(r"(?i)\bexhibit", types):
+                entry["category"] = "art"
+            elif re.search(r"(?i)\bfilm\b", types):
+                entry["category"] = "film"
+            elif re.search(r"(?i)\b(?:lecture|seminar|speaker)", types):
+                entry["category"] = "talks"
+            events.append(entry)
+        page_info = data.get("page") or {}
+        if not page_info.get("next_page") or page >= (page_info.get("total") or 0):
+            break
+    return events
+
+
+# ── Harvard College calendar (LiveWhale JSON) ─────────────────────────────────────────────────
+#
+# events.college.harvard.edu is mostly for enrolled students (house dinners, office hours,
+# support groups, deadlines). Keep the arts and performance events open to visitors (Office for
+# the Arts shows, student showcases, visiting-artist talks). LiveWhale returns at most 100 events
+# per request, so busy date ranges are split in half until each fits.
+
+_HARVARD_KEEP_TYPES = {"arts & culture", "performances", "yard events"}
+_HARVARD_SHOW_RE = re.compile(
+    r"\b(?:show(?:case)?|concert|recital|performance|exhibition|festival|screening|production|"
+    r"premiere|gala|open\s+mic|a\s*cappella|dance\s+(?:show|concert)|play)\b", re.I)
+_HARVARD_NOISE_RE = re.compile(
+    r"\b(?:office\s+hours?|info(?:rmation)?\s+session|support\s+group|register\s+for|registration|"
+    r"apply\b|applications?\s+(?:due|open)|deadline|last\s+day|lottery|drop[- ]in|training|"
+    r"orientation|auditions?|courses?|class\s+of\s+20\d\d|petitions?|tuition|exam\s+period|"
+    r"reading\s+period|degrees?\s+conferred|withdraw)\b", re.I)
+_HARVARD_API = "https://events.college.harvard.edu/live/json/events/start_date/{start}/end_date/{end}/max/100/response_fields/location,location_latitude,location_longitude,event_types,event_types_audience,summary,cost"
+
+
+def _harvard_window(start, end, ua, depth=0):
+    try:
+        r = _SESSION.get(_HARVARD_API.format(start=start.isoformat(), end=end.isoformat()),
+                         headers={"User-Agent": ua or UA_CHROME}, timeout=12)
+        r.raise_for_status()
+        data = r.json()
+    except Exception:
+        return []
+    rows = data.get("data", []) if isinstance(data, dict) else (data or [])
+    if len(rows) >= 100 and (end - start).days > 1 and depth < 6:
+        mid = start + (end - start) // 2
+        return _harvard_window(start, mid, ua, depth + 1) + _harvard_window(mid, end, ua, depth + 1)
+    return rows
+
+
+def scrape_harvard_college_events(url, ua):
+    """Public arts and performance events from Harvard College's LiveWhale calendar."""
+    now = datetime.now(timezone.utc)
+    today = now.astimezone(EASTERN).date()
+    rows = sorted(_harvard_window(today, today + timedelta(weeks=8), ua), key=lambda r: r.get("date_iso") or "")
+    events = []
+    seen = set()
+    for row in rows:
+        title = html.unescape(row.get("title") or "").strip()
+        if not title or row.get("is_canceled") or is_placeholder_or_closed_event(title):
+            continue
+        if (row.get("online_type") or "").lower().startswith("online") or row.get("event_types_audience"):
+            continue  # online only, or limited to enrolled class years
+        if _HARVARD_NOISE_RE.search(title) or _CAMPUS_NOISE_TITLE_RE.search(title) or _CAMPUS_GAME_RE.search(title):
+            continue
+        types = {html.unescape(t).lower() for t in row.get("event_types") or []}
+        if not (types & _HARVARD_KEEP_TYPES) and not _HARVARD_SHOW_RE.search(title):
+            continue
+        if "athletics & recreation" in types and not (types & _HARVARD_KEEP_TYPES):
+            continue
+        try:
+            start = datetime.fromisoformat(row.get("date_iso") or "")
+        except ValueError:
+            continue
+        if row.get("is_all_day"):
+            if start.date() < today:
+                continue
+            date_str = start.date().isoformat()
+            end = None
+        else:
+            if start.astimezone(timezone.utc) < now:
+                continue
+            date_str = start.astimezone(timezone.utc).isoformat()
+            try:
+                end = datetime.fromisoformat(row["date2_iso"]).astimezone(timezone.utc).isoformat() if row.get("date2_iso") else None
+            except ValueError:
+                end = None
+        # A daily all-day item or a running exhibition ("Dance in Public", every day for a month)
+        # is listed once, on its next date, not as 30 identical cards.
+        repeating = row.get("is_all_day") or "exhibition" in title.lower() or "exhibitions" in types
+        key = (title.lower(), "" if repeating else date_str[:10])
+        if key in seen:
+            continue
+        seen.add(key)
+        summary = BeautifulSoup(row.get("summary") or "", "html.parser").get_text(" ", strip=True)
+        cost = BeautifulSoup(row.get("cost") or "", "html.parser").get_text(" ", strip=True)
+        venue = html.unescape(row.get("location_title") or row.get("location") or "").strip()
+        entry = {
+            "name": title[:160],
+            "date": date_str,
+            "end": end,
+            "url": row.get("url") or url,
+            "venue": ((f"{venue} (Harvard)" if venue and not _INSTITUTION_WORD_RE.search(venue) else venue)
+                      or "Harvard University")[:80],
+            "price": "Free" if mentions_free(f"{cost} {summary}") else (cost[:40] or None),
+            "description": summary[:200],
+        }
+        try:
+            lat, lng = float(row.get("location_latitude")), float(row.get("location_longitude"))
+            if 42.2 < lat < 42.5 and -71.3 < lng < -70.9:
+                entry["lat"], entry["lng"] = lat, lng
+        except (TypeError, ValueError):
+            pass
+        combined = f"{title} {summary}".lower()
+        if re.search(r"\b(?:dance|ballroom|ballet|hip-hop|choreograph)\w*\b", combined):
+            entry["category"] = "dance"
+        elif re.search(r"\b(?:concert|recital|orchestra|choir|chor(?:us|uses|ale)|pianist|singers?|jazz|opera|"
+                       r"a\s*cappella|ensemble)\b", combined):
+            entry["category"] = "music"
+        elif re.search(r"\b(?:theatre|theater|play|musical)\b", combined):
+            entry["category"] = "theater"
+        elif re.search(r"\b(?:exhibition|gallery|ceramics|art\s+show)\b", combined):
+            entry["category"] = "art"
+        elif re.search(r"\b(?:lecture|artist\s+talk|panel|symposium|keynote)\b", combined):
+            entry["category"] = "talks"
+        events.append(entry)
+    return events
+
+
 # ── College athletics (Sidearm Sports calendar.ashx iCal feeds) ──────────────────────────────
 #
 # Sidearm writes every game as "<School> <Sport> vs <Opponent>" (home or neutral site) or
@@ -12831,7 +13106,10 @@ _ALL_VENUES = [
     {"name": "City Winery Boston", "url": "https://citywinery.com/pages/locations/boston", "ua": UA_CHROME, "scraper": scrape_city_winery, "default_category": "music"},
     {"name": "Bowery Presents Boston", "url": "https://www.bowerypresents.com/boston", "ua": UA_CHROME, "scraper": scrape_bowery_boston, "default_category": "music"},
     {"name": "Royale Boston", "url": "https://www.royaleboston.com/events/", "ua": UA_CHROME, "scraper": scrape_royale, "default_category": "clubbing"},
-    {"name": "MIT Events", "url": "https://calendar.mit.edu/", "ua": UA_CHROME, "scraper": scrape_jsonld, "default_category": "community"},
+    {"name": "MIT Events", "url": "https://calendar.mit.edu/api/2/events?days=56&pp=100", "ua": UA_CHROME, "scraper": scrape_localist, "default_category": "community"},
+    {"name": "Boston College Events", "url": "https://events.bc.edu/api/2/events?days=56&pp=100", "ua": UA_CHROME, "scraper": scrape_localist, "default_category": "community"},
+    {"name": "Suffolk University Events", "url": "https://events.suffolk.edu/api/2/events?days=56&pp=100", "ua": UA_CHROME, "scraper": scrape_localist, "default_category": "community"},
+    {"name": "Harvard College Events", "url": "https://events.college.harvard.edu/", "ua": UA_CHROME, "scraper": scrape_harvard_college_events, "default_category": "community"},
     {"name": "Boston Symphony Orchestra", "url": "https://www.bso.org/events", "ua": UA_CHROME, "scraper": scrape_bso, "default_category": "music"},
     {"name": "BU Terriers Athletics", "url": "https://goterriers.com/calendar.ashx/calendar.ics", "ua": UA_CHROME, "scraper": scrape_college_athletics, "default_category": "sports"},
     {"name": "Northeastern Huskies Athletics", "url": "https://nuhuskies.com/calendar.ashx/calendar.ics", "ua": UA_CHROME, "scraper": scrape_college_athletics, "default_category": "sports"},

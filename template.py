@@ -127,6 +127,7 @@ CITY_RULES = [
         "325 binney", "microsoft new england research", "ef education first",
     )),
     ("boston", (
+        "(suffolk university)",
         "the 88 club", "88 club",
         "modern theatre",
         "bsmnt", "kings seaport", "kings - seaport", "kings dining",

@@ -939,6 +939,12 @@ VENUE_RULES = [
     ("goel center", (42.3640, -71.1282, "Allston", "175 N Harvard St, Boston", "Goel Center for Creativity & Performance (A.R.T.)")),
     ("harvard film archive", (42.3734, -71.1140, "Harvard Square", "24 Quincy St, Cambridge", "Harvard Film Archive")),
     ("scandinavian cultural center", (42.3599, -71.2214, "West Newton", "206 Waltham St, Newton", "Scandinavian Cultural Center")),
+    # Campus-calendar fallbacks (scrapers.scrape_localist / scrape_harvard_college_events add the
+    # school to bare building names). Area addresses, so a calendar's own point for the
+    # building wins (resolve_event_geo step 2); used when the calendar gives none.
+    ("(boston college)", (42.3355, -71.1685, "Chestnut Hill", "Boston College, Chestnut Hill", "Boston College")),
+    ("(harvard)", (42.3744, -71.1169, "Harvard Square", "Harvard Yard, Cambridge", "Harvard University")),
+    ("(mit)", (42.3590, -71.0940, "Kendall Square / MIT", "MIT, Cambridge", "MIT Campus")),
 ]
 
 # Coordinate bounding box for valid Greater Boston / Eastern MA events
