@@ -199,6 +199,35 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
     "somerville city hall": (42.3871, -71.0963, "Spring Hill", "93 Highland Ave, Somerville", "Somerville City Hall"),
     "city of somerville": (42.3871, -71.0963, "Spring Hill", "93 Highland Ave, Somerville", "Somerville City Hall"),
     "cisco brewers fenway": (42.3444, -71.0991, "Fenway", "1301 Boylston St, Boston", "Cisco Brewers Fenway"),
+    # Nightlife and taproom venues (addresses from each venue's own site, Nov 2026). Exact names
+    # only for the short ones: "Hong Kong" alone is the Faneuil Hall club, while "Hong Kong
+    # Restaurant (Harvard Square)" is a different place; a bare "Mighty Squirrel" could be any of
+    # its three taprooms, so it stays unplaced.
+    "mighty squirrel fenway": (42.3477, -71.0991, "Fenway", "1 David Ortiz Dr, Boston", "Mighty Squirrel Fenway"),
+    "mighty squirrel arsenal yards": (42.3614, -71.1584, "Arsenal Yards", "102 Arsenal Yards Blvd, Watertown", "Mighty Squirrel Arsenal Yards"),
+    "mighty squirrel watertown": (42.3614, -71.1584, "Arsenal Yards", "102 Arsenal Yards Blvd, Watertown", "Mighty Squirrel Arsenal Yards"),
+    "mighty squirrel waltham": (42.3843, -71.2160, "Waltham", "411 Waverley Oaks Rd, Waltham", "Mighty Squirrel Waltham"),
+    "luckys lounge": (42.3505, -71.0484, "Fort Point", "355 Congress St, Boston", "Lucky's Lounge"),
+    "city tap house": (42.3509, -71.0470, "Seaport", "10 Boston Wharf Rd, Boston", "City Tap House"),
+    "white bull tavern": (42.3607, -71.0571, "Faneuil Hall", "1 Union St, Boston", "White Bull Tavern"),
+    "caveau": (42.3594, -71.0599, "Government Center", "1 Center Plaza, Boston", "Caveau"),
+    "caveau boston": (42.3594, -71.0599, "Government Center", "1 Center Plaza, Boston", "Caveau"),
+    "ned devines": (42.3600, -71.0548, "Faneuil Hall", "1 Faneuil Hall Marketplace, Boston", "Ned Devine's"),
+    "hong kong": (42.3592, -71.0548, "Faneuil Hall", "65 Chatham St, Boston", "Hong Kong"),
+    "hong kong boston": (42.3592, -71.0548, "Faneuil Hall", "65 Chatham St, Boston", "Hong Kong"),
+    "urban wild": (42.3810, -71.0745, "Charlestown", "100 Hood Park Dr, Boston", "Urban Wild"),
+    "cactus club cafe": (42.3505, -71.0727, "Back Bay", "500 Boylston St, Boston", "Cactus Club Cafe"),
+    # Clubs from Bijou's Posh pages, Sissy K's site and the 6one7 / Dope Eventbrite events (Nov 2026).
+    "bijou nightclub": (42.3512, -71.0642, "Theater District", "51 Stuart St, Boston", "Bijou Nightclub"),
+    "bijou nightclub & lounge": (42.3512, -71.0642, "Theater District", "51 Stuart St, Boston", "Bijou Nightclub"),
+    "bijou boston": (42.3512, -71.0642, "Theater District", "51 Stuart St, Boston", "Bijou Nightclub"),
+    "sissy ks": (42.3612, -71.0527, "Faneuil Hall", "6 Commercial St, Boston", "Sissy K's"),
+    "icon nightclub": (42.3507, -71.0662, "Theater District", "100 Warrenton St, Boston", "Icon Nightclub"),
+    "venu nightclub": (42.3507, -71.0662, "Theater District", "100 Warrenton St, Boston", "Venu Nightclub"),
+    "clerys": (42.3462, -71.0752, "South End", "113 Dartmouth St, Boston", "Clerys"),
+    "scorpion boston": (42.3524, -71.0475, "Seaport", "58 Seaport Blvd, Boston", "Scorpion Bar"),
+    "w boston": (42.3508, -71.0657, "Theater District", "100 Stuart St, Boston", "W Boston"),
+    "tucks arcadium": (42.3722, -71.1203, "Harvard Square", "36 John F. Kennedy St, Cambridge", "Tuck's Arcadium"),
     "cisco brewers": (42.3444, -71.0991, "Fenway", "1301 Boylston St, Boston", "Cisco Brewers Fenway"),
     "northeastern university": (42.3398, -71.0891, "Fenway", "360 Huntington Ave, Boston", "Northeastern University"),
     "blackman auditorium": (42.3398, -71.0891, "Fenway", "360 Huntington Ave, Boston", "Blackman Auditorium"),
@@ -653,6 +682,26 @@ VENUE_RULES = [
     ("sowa", (42.3413, -71.0672, "South End", "530 Harrison Ave, Boston", "SoWa Open Market")),
     ("reunion bbq", (42.3468, -71.0688, "South End", "439 Tremont St, Boston", "Reunion BBQ")),
     ("posto", (42.3450, -71.0680, "South End", "Washington St, Boston", "Posto South End")),
+    # Location-qualified Mighty Squirrel names from event sources ("Mighty Squirrel Taproom &
+    # Kitchen (Fenway)", "Mighty Squirrel Brewing Co. – Fenway (Boston)", "..., Watertown").
+    ("mighty squirrel taproom & kitchen (fenway)", (42.3477, -71.0991, "Fenway", "1 David Ortiz Dr, Boston", "Mighty Squirrel Fenway")),
+    ("mighty squirrel brewing co. – fenway", (42.3477, -71.0991, "Fenway", "1 David Ortiz Dr, Boston", "Mighty Squirrel Fenway")),
+    ("mighty squirrel fenway", (42.3477, -71.0991, "Fenway", "1 David Ortiz Dr, Boston", "Mighty Squirrel Fenway")),
+    ("mighty squirrel taproom & kitchen, watertown", (42.3614, -71.1584, "Arsenal Yards", "102 Arsenal Yards Blvd, Watertown", "Mighty Squirrel Arsenal Yards")),
+    ("mighty squirrel at arsenal yards", (42.3614, -71.1584, "Arsenal Yards", "102 Arsenal Yards Blvd, Watertown", "Mighty Squirrel Arsenal Yards")),
+    ("mighty squirrel arsenal yards", (42.3614, -71.1584, "Arsenal Yards", "102 Arsenal Yards Blvd, Watertown", "Mighty Squirrel Arsenal Yards")),
+    ("mighty squirrel watertown", (42.3614, -71.1584, "Arsenal Yards", "102 Arsenal Yards Blvd, Watertown", "Mighty Squirrel Arsenal Yards")),
+    ("mighty squirrel waltham", (42.3843, -71.2160, "Waltham", "411 Waverley Oaks Rd, Waltham", "Mighty Squirrel Waltham")),
+    ("lucky's lounge", (42.3505, -71.0484, "Fort Point", "355 Congress St, Boston", "Lucky's Lounge")),
+    ("city tap house", (42.3509, -71.0470, "Seaport", "10 Boston Wharf Rd, Boston", "City Tap House")),
+    ("white bull tavern", (42.3607, -71.0571, "Faneuil Hall", "1 Union St, Boston", "White Bull Tavern")),
+    ("ned devine's", (42.3600, -71.0548, "Faneuil Hall", "1 Faneuil Hall Marketplace, Boston", "Ned Devine's")),
+    ("cactus club cafe", (42.3505, -71.0727, "Back Bay", "500 Boylston St, Boston", "Cactus Club Cafe")),
+    ("bijou nightclub", (42.3512, -71.0642, "Theater District", "51 Stuart St, Boston", "Bijou Nightclub")),
+    ("sissy k's", (42.3612, -71.0527, "Faneuil Hall", "6 Commercial St, Boston", "Sissy K's")),
+    ("icon nightclub", (42.3507, -71.0662, "Theater District", "100 Warrenton St, Boston", "Icon Nightclub")),
+    ("venu nightclub", (42.3507, -71.0662, "Theater District", "100 Warrenton St, Boston", "Venu Nightclub")),
+    ("tuck's arcadium", (42.3722, -71.1203, "Harvard Square", "36 John F. Kennedy St, Cambridge", "Tuck's Arcadium")),
     ("club café", (42.3486, -71.0718, "South End", "209 Columbus Ave, Boston", "Club Café")),
     ("club cafe", (42.3486, -71.0718, "South End", "209 Columbus Ave, Boston", "Club Café")),
     ("dani's", (42.3485, -71.0843, "Back Bay", "909 Boylston St, Boston", "Dani's Queer Bar")),
@@ -939,6 +988,12 @@ VENUE_RULES = [
     ("goel center", (42.3640, -71.1282, "Allston", "175 N Harvard St, Boston", "Goel Center for Creativity & Performance (A.R.T.)")),
     ("harvard film archive", (42.3734, -71.1140, "Harvard Square", "24 Quincy St, Cambridge", "Harvard Film Archive")),
     ("scandinavian cultural center", (42.3599, -71.2214, "West Newton", "206 Waltham St, Newton", "Scandinavian Cultural Center")),
+    # Campus-calendar fallbacks (scrapers.scrape_localist / scrape_harvard_college_events add the
+    # school to bare building names). Area addresses, so a calendar's own point for the
+    # building wins (resolve_event_geo step 2); used when the calendar gives none.
+    ("(boston college)", (42.3355, -71.1685, "Chestnut Hill", "Boston College, Chestnut Hill", "Boston College")),
+    ("(harvard)", (42.3744, -71.1169, "Harvard Square", "Harvard Yard, Cambridge", "Harvard University")),
+    ("(mit)", (42.3590, -71.0940, "Kendall Square / MIT", "MIT, Cambridge", "MIT Campus")),
 ]
 
 # Coordinate bounding box for valid Greater Boston / Eastern MA events

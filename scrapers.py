@@ -286,6 +286,11 @@ def is_placeholder_or_closed_event(title: str) -> bool:
     if re.match(r"^\s*[\[\(]?\s*(moved|relocated)\s+to\b", t, re.I):
         return True
 
+    # 2c. Season-ticket sign-ups listed as events: "2027 PREMIUM SEASON TICKETS WAITLIST" (Fenway Park,
+    # dated Dec 31). Only season tickets: a sold-out show with a waitlist is still a show.
+    if re.search(r"\bseason\s+(tickets?|seats?|passes?|memberships?)\b.*\b(wait\s*-?list|deposits?)\b", t, re.I):
+        return True
+
     # 3. Check calendar placeholder
     if re.search(r"\bcheck\s+(our\s+)?calendar\b", t, re.I):
         return True
@@ -305,7 +310,7 @@ def is_placeholder_or_closed_event(title: str) -> bool:
         return True
 
     # 6. Generic single-word / short placeholder
-    if t.lower() in ("tba", "tbd", "to be announced", "placeholder", "no title", "closed", "dark"):
+    if t.strip("*[]() !").lower() in ("tba", "tbd", "to be announced", "placeholder", "no title", "closed", "dark"):
         return True
 
     # 7. Misleading commercial promo / fake free gym passes
@@ -4386,14 +4391,110 @@ def _do617_ticket_price(event_url, ua):
 
 
 def _do617_fill_prices(events, ua):
-    """Do617's day lists carry no prices; each event's own page does."""
+    """Do617's day lists carry no prices; each event's own page does. A weekly night (Taproom
+    Trivia every Tuesday) has one page per date with the same price, so it's looked up once."""
     todo = [e for e in events if not e.get("price") and "do617.com/events/" in (e.get("url") or "")]
-    if todo:
+    by_slug = {}
+    for e in todo:
+        by_slug.setdefault(re.sub(r"/events/(?:\d{4}/\d{1,2}/\d{1,2}|weekly/\w+)/", "/events/", e["url"]), e["url"])
+    if by_slug:
         with ThreadPoolExecutor(max_workers=4) as ex:
-            for e, price in zip(todo, ex.map(lambda e: _do617_ticket_price(e["url"], ua), todo)):
-                if price:
-                    e["price"] = price
+            prices = dict(zip(by_slug, ex.map(lambda u: _do617_ticket_price(u, ua), by_slug.values())))
+        for e in todo:
+            price = prices.get(re.sub(r"/events/(?:\d{4}/\d{1,2}/\d{1,2}|weekly/\w+)/", "/events/", e["url"]))
+            if price:
+                e["price"] = price
     return events
+
+
+def _do617_local_iso(day, time_text):
+    """UTC ISO time for a Do617 card: the date plus the card's "7:30 pm", in Boston time.
+    Do617 shows local times with no offset; the old code pinned -04:00, an hour off all winter."""
+    hr, mn = 20, 0
+    m = re.search(r"(\d{1,2})(?::(\d{2}))?\s*(am|pm)", time_text or "", re.I)
+    if m:
+        hr, mn = int(m.group(1)) % 12, int(m.group(2) or 0)
+        if m.group(3).lower() == "pm":
+            hr += 12
+    return datetime(day.year, day.month, day.day, hr, mn, tzinfo=EASTERN).astimezone(timezone.utc).isoformat()
+
+
+_DO617_WEEKDAYS = {"mon": 0, "tue": 1, "wed": 2, "thu": 3, "fri": 4, "sat": 5, "sun": 6}
+
+
+def _do617_venue_cards(soup, page_venue):
+    """(name, href, card text, card venue) for the event cards on a Do617 venue page."""
+    for card in soup.find_all("div", attrs={"data-card-kind": "event"}):
+        a_link = card.find("a", href=True)
+        h3 = card.find("h3")
+        name = h3.get_text(strip=True) if h3 else ""
+        if not a_link or not name:
+            continue
+        ps = [p.get_text(" ", strip=True) for p in card.find_all("p")]
+        date_el = card.find(class_=lambda c: c and "date" in c)
+        when = date_el.get_text(" ", strip=True) if date_el else (ps[0] if ps else "")
+        card_venue = next((p for p in ps if p != when), "")
+        yield name, a_link["href"], when, card_venue
+
+
+def scrape_do617_venue(url, ua, venue_name=None, days=90, max_pages=5):
+    """One venue's page on Do617 (/venues/deep-cuts), following its ?page=2.. links.
+
+    Page 1 holds the next 10 listings only (Deep Cuts: 10 days of shows, while the venue books
+    into April). Weekly cards ("Musical Bingo · Every Tuesday | 7:30 pm") become one listing per
+    week for the next 4 weeks. Cards for other venues are skipped. The venue is the page's own
+    name unless venue_name says otherwise (to tell apart venues with several locations)."""
+    today = datetime.now(EASTERN).date()
+    horizon = today + timedelta(days=days)
+    events, seen = [], set()
+    page_venue = None
+    for page in range(1, max_pages + 1):
+        page_url = url if page == 1 else f"{url}{'&' if '?' in url else '?'}page={page}"
+        try:
+            resp = _SESSION.get(page_url, headers={"User-Agent": ua or UA_CHROME}, timeout=10)
+        except Exception:
+            break
+        if resp.status_code != 200:
+            break
+        soup = BeautifulSoup(resp.content, "html.parser")
+        if page_venue is None:
+            h1 = soup.find("h1")
+            page_venue = h1.get_text(strip=True) if h1 else ""
+        last_day, n_cards = None, 0
+        for name, href, when, card_venue in _do617_venue_cards(soup, page_venue):
+            if page_venue and card_venue and card_venue.lower() != page_venue.lower():
+                continue
+            n_cards += 1
+            full_url = urljoin("https://do617.com/", re.sub(r"^(\.\./|\./)+", "", href))
+            days_for = []
+            m_date = re.search(r"/events/(\d{4})/(\d{1,2})/(\d{1,2})/", href)
+            m_weekly = re.search(r"/events/weekly/(mon|tue|wed|thu|fri|sat|sun)\w*/", href, re.I)
+            if m_date:
+                try:
+                    d = datetime(int(m_date.group(1)), int(m_date.group(2)), int(m_date.group(3))).date()
+                except ValueError:
+                    continue
+                last_day = d
+                days_for = [d]
+            elif m_weekly:
+                wd = _DO617_WEEKDAYS[m_weekly.group(1).lower()]
+                first = today + timedelta(days=(wd - today.weekday()) % 7)
+                days_for = [first + timedelta(weeks=i) for i in range(4)]
+            for d in days_for:
+                if d < today or d > horizon or (name.lower(), d) in seen:
+                    continue
+                seen.add((name.lower(), d))
+                events.append({
+                    "name": name,
+                    "date": _do617_local_iso(d, when),
+                    "url": full_url,
+                    "venue": venue_name or page_venue or None,
+                    "price": None,
+                })
+        nxt = soup.find("a", href=re.compile(r"[?&]page=%d\b" % (page + 1)))
+        if not n_cards or not nxt or (last_day and last_day > horizon):
+            break
+    return _do617_fill_prices(events, ua)
 
 
 def scrape_do617(url, ua):
@@ -4403,56 +4504,8 @@ def scrape_do617(url, ua):
     seen = set()
     start_date = datetime.now(EASTERN).date()
 
-    # 0. Single venue page support (e.g. /venues/deep-cuts)
     if "/venues/" in (url or ""):
-        try:
-            resp = _SESSION.get(url, headers={"User-Agent": ua or UA_CHROME}, timeout=10)
-            if resp.status_code == 200:
-                soup = BeautifulSoup(resp.content, "html.parser")
-                cards = soup.find_all("div", attrs={"data-card-kind": "event"})
-                for card in cards:
-                    a_link = card.find("a", href=True)
-                    if not a_link:
-                        continue
-                    rel_href = a_link.get("href", "")
-                    full_url = urljoin("https://do617.com", rel_href.lstrip("./"))
-                    h3 = card.find("h3")
-                    name = h3.get_text(strip=True) if h3 else ""
-                    if not name:
-                        continue
-                    m_date = re.search(r"/events/(\d{4})/(\d{1,2})/(\d{1,2})/", rel_href)
-                    if not m_date:
-                        continue
-                    y, m_val, day_val = m_date.groups()
-                    date_part = f"{int(y):04d}-{int(m_val):02d}-{int(day_val):02d}"
-                    date_el = card.find(class_=lambda c: c and "date" in c)
-                    raw_date_text = date_el.get_text(" ", strip=True) if date_el else ""
-                    time_str = "20:00:00"
-                    m_time = re.search(r"(\d{1,2})(?::(\d{2}))?\s*(am|pm)", raw_date_text, re.I)
-                    if m_time:
-                        hr = int(m_time.group(1))
-                        mn = int(m_time.group(2) or 0)
-                        merid = m_time.group(3).lower()
-                        if merid == "pm" and hr < 12:
-                            hr += 12
-                        elif merid == "am" and hr == 12:
-                            hr = 0
-                        time_str = f"{hr:02d}:{mn:02d}:00"
-                    try:
-                        iso_str = f"{date_part}T{time_str}-04:00"
-                        iso = datetime.fromisoformat(iso_str).astimezone(timezone.utc).isoformat()
-                    except Exception:
-                        iso = None
-                    events.append({
-                        "name": name,
-                        "date": iso,
-                        "url": full_url,
-                        "venue": "Deep Cuts",
-                        "price": None,
-                    })
-        except Exception:
-            pass
-        return _do617_fill_prices(events, ua)
+        return scrape_do617_venue(url, ua)
 
     # 1. Scrape today + next 4 days from Do617 date feeds
     for i in range(5):
@@ -4476,33 +4529,13 @@ def scrape_do617(url, ua):
                 if not name:
                     continue
 
-                m_date = re.search(r"/events/(\d{4})/(\d{2})/(\d{2})/", rel_href)
-                date_part = f"{d.year:04d}-{d.month:02d}-{d.day:02d}"
-                if m_date:
-                    y, m_val, day_val = m_date.groups()
-                    date_part = f"{y}-{m_val}-{day_val}"
+                # The day this feed is for. A card's URL holds the date a run started
+                # (/events/2026/9/12/ for an exhibition still on today), not this showing.
+                day = d
+                date_part = day.isoformat()
 
                 date_el = card.find(class_=lambda c: c and "date" in c)
-                raw_date_text = date_el.get_text(" ", strip=True) if date_el else ""
-
-                time_str = "20:00:00"
-                m_time = re.search(r"(\d{1,2})(?::(\d{2}))?\s*(am|pm)", raw_date_text, re.I)
-                if m_time:
-                    hr = int(m_time.group(1))
-                    mn = int(m_time.group(2) or 0)
-                    merid = m_time.group(3).lower()
-                    if merid == "pm" and hr < 12:
-                        hr += 12
-                    elif merid == "am" and hr == 12:
-                        hr = 0
-                    time_str = f"{hr:02d}:{mn:02d}:00"
-
-                iso = None
-                try:
-                    iso_str = f"{date_part}T{time_str}-04:00"
-                    iso = datetime.fromisoformat(iso_str).astimezone(timezone.utc).isoformat()
-                except Exception:
-                    iso = None
+                iso = _do617_local_iso(day, date_el.get_text(" ", strip=True) if date_el else "")
 
                 p_tags = [
                     p.get_text(strip=True)
@@ -10662,13 +10695,16 @@ def scrape_ticketmaster_discovery(url, ua):
     except Exception:
         return []
 
-    raw_events = data.get("_embedded", {}).get("events", [])
+    # "Slipknot: (sic)est Stadium Tour - Platinum Tickets" is the dynamic-price copy of the same
+    # show: drop the suffix and take it only when there's no regular listing that day.
+    raw_events = sorted(data.get("_embedded", {}).get("events", []),
+                        key=lambda ev: bool(_TM_PLATINUM_RE.search(ev.get("name") or "")))
     now = datetime.now(EASTERN)
     events = []
     seen = set()
 
     for ev in raw_events:
-        name = (ev.get("name") or "").strip()
+        name = _TM_PLATINUM_RE.sub("", (ev.get("name") or "")).strip()
         if not name or is_placeholder_or_closed_event(name):
             continue
 
@@ -10729,6 +10765,24 @@ def scrape_ticketmaster_discovery(url, ua):
         })
 
     return events
+
+
+_TM_PLATINUM_RE = re.compile(r"\s*[-–|:]\s*(?:official\s+)?platinum(?:\s+tickets?)?\s*$", re.I)
+
+
+def scrape_fenway_park(url, ua):
+    """Fenway Park's non-baseball events from Ticketmaster: stadium concerts, Harvard-Yale, hockey.
+    Red Sox home games come from the ESPN schedule (Boston Sports), which has first-pitch times;
+    Ticketmaster lists them months out with no time at all."""
+    return [e for e in scrape_ticketmaster_discovery(url, ua)
+            if not re.match(r"\s*boston red sox\b", e["name"], re.I)]
+
+
+def scrape_mighty_squirrel_fenway(url, ua):
+    """Mighty Squirrel's Fenway taproom via its Do617 venue page. The brewery's own calendars
+    (mightysquirrel.com/fenway-calendar etc.) are an Events Calendar widget with no public feed.
+    Named for the location: Mighty Squirrel also has taprooms in Waltham and at Arsenal Yards."""
+    return scrape_do617_venue(url, ua, venue_name="Mighty Squirrel Fenway")
 
 
 def ticketmaster_category(segment, genre, sub_genre):
@@ -11146,6 +11200,281 @@ _NEU_TECH_DEPT_RE = re.compile(
     r"Network Science|Data Science|Bioengineering|Mechanical|Electrical)\b", re.I)
 
 
+# ── Campus event calendars (Localist API: MIT, Boston College, Suffolk) ───────────────────────
+#
+# These calendars mix public events with ones only for students or staff, plus virtual ones.
+# Keep in-person events tagged for the public; when a school doesn't tag the audience, keep only
+# clearly public kinds (performances, exhibits, lectures). Games come from the athletics feeds.
+
+_LOCALIST_CAMPUS = {
+    "calendar.mit.edu": "MIT",
+    "events.bc.edu": "Boston College",
+    "events.suffolk.edu": "Suffolk University",
+}
+_LOCALIST_PUBLIC_TYPES_RE = re.compile(
+    r"\b(?:performing\s+arts|performances?|music|arts|visual\s+arts|exhibits?|exhibitions?|film|"
+    r"lectures?|speaker|conferences/seminars/lectures|community\s+event)\b", re.I)
+# Talks for specialists, internal sessions and games (the athletics feeds list games)
+_CAMPUS_NOISE_TITLE_RE = re.compile(
+    r"\b(?:seminar|colloquium|info(?:rmation)?\s+sessions?|coffee\s+chats?|webinar|office\s+hours?|"
+    r"thesis|dissertation|defen[cs]e|orientation|training|deadline|registration|reunion|alumni\s+(?:gathering|reception)|"
+    r"mass\b|liturgy|rosary|prayer|worship)\b", re.I)
+_CAMPUS_GAME_RE = re.compile(
+    r"\b(?:hockey|basketball|football|soccer|lacrosse|volleyball|baseball|softball|swimming|diving|fencing|"
+    r"squash|tennis|track|rowing|sailing|field\s+hockey|wrestling|skiing|cross\s+country|golf|rugby|"
+    r"men'?s|women'?s)\b.*\b(?:vs\.?|at|v\.)\s", re.I)
+# A venue already naming an institution ("Boston College", "Berklee Performance Center") isn't
+# given a campus suffix; bare building names ("Kresge Auditorium") are.
+_INSTITUTION_WORD_RE = re.compile(
+    r"\b(?:college|university|institute|school|campus|academy|conservatory|berklee|harvard|mit|museum|church)\b", re.I)
+_LOCALIST_SKIP_TYPES_RE = re.compile(
+    r"\b(?:athletic|athletics|admissions?|information\s+sessions?|holidays?|thesis|career|"
+    r"professional\s+development|meetings?|webinar|reception|training|deadline)\b", re.I)
+
+
+_CAMPUS_GENERIC_TITLE_WORDS = {
+    "lecture", "lectures", "series", "concert", "music", "performance", "student", "students", "annual",
+    "fall", "winter", "spring", "show", "with", "presents", "event", "night", "from", "about", "talk",
+}
+
+
+def _campus_title_words(title):
+    return {w for w in re.findall(r"[a-z]{4,}", title.lower())} - _CAMPUS_GENERIC_TITLE_WORDS
+
+
+def _same_campus_listing(title, other):
+    """A school listing one event twice at one start time under two titles ("ASTAZA!" and
+    "ASTAZA in Concert - THE DOOR in Arabic Music"). The template keeps a source's own
+    listings apart, so this is caught here."""
+    a, b = _campus_title_words(title), _campus_title_words(other)
+    return bool(a and b) and len(a & b) >= min(2, len(a), len(b))
+
+
+def _localist_names(ev, *keys):
+    filters = ev.get("filters") or {}
+    out = []
+    for k in keys:
+        out += [html.unescape(t.get("name") or "") for t in (filters.get(k) or [])]
+    return out
+
+
+def scrape_localist(url, ua):
+    """Public in-person events from a university Localist calendar (all pages of the API)."""
+    host = urlparse(url).netloc.lower()
+    campus = _LOCALIST_CAMPUS.get(host, "Campus")
+    now = datetime.now(timezone.utc)
+    today = now.astimezone(EASTERN).date()
+    sep = "&" if "?" in url else "?"
+    events = []
+    seen = set()
+    by_start = {}  # start -> titles already kept
+    for page in range(1, 11):
+        try:
+            r = _SESSION.get(f"{url}{sep}page={page}", headers={"User-Agent": ua or UA_CHROME}, timeout=12)
+            r.raise_for_status()
+            data = r.json()
+        except Exception:
+            break
+        for it in data.get("events", []):
+            ev = it.get("event") or {}
+            title = html.unescape(ev.get("title") or "").strip()
+            if not title or is_placeholder_or_closed_event(title):
+                continue
+            if _CAMPUS_NOISE_TITLE_RE.search(title) or _CAMPUS_GAME_RE.search(title):
+                continue
+            if ev.get("private") or (ev.get("status") or "live") != "live" or ev.get("experience") == "virtual":
+                continue
+            audience = _localist_names(ev, "event_audience", "event_target_audience")
+            types = " | ".join(_localist_names(ev, "event_types"))
+            if _LOCALIST_SKIP_TYPES_RE.search(types):
+                continue
+            if audience:
+                if not any("public" in a.lower() for a in audience):
+                    continue
+            elif not _LOCALIST_PUBLIC_TYPES_RE.search(types):
+                continue
+
+            inst = None
+            for wrap in ev.get("event_instances") or []:
+                cand = wrap.get("event_instance") or {}
+                try:
+                    st = datetime.fromisoformat(cand.get("start") or "")
+                except ValueError:
+                    continue
+                if (cand.get("all_day") and st.date() >= today) or st.astimezone(timezone.utc) >= now:
+                    inst, start = cand, st
+                    break
+            if inst is None:
+                continue
+            if inst.get("all_day"):
+                date_str = start.date().isoformat()
+                end = None
+            else:
+                date_str = start.astimezone(timezone.utc).isoformat()
+                try:
+                    end = datetime.fromisoformat(inst["end"]).astimezone(timezone.utc).isoformat() if inst.get("end") else None
+                except ValueError:
+                    end = None
+            # Localist returns a row per day: an all-day item or exhibition running for weeks
+            # ("ART CUT BOSTON", "Week of Dance") is listed once, on its next date.
+            repeating = inst.get("all_day") or re.search(r"(?i)\bexhibit", f"{title} {types}")
+            key = (title.lower(), "" if repeating else date_str[:10])
+            if key in seen or (not repeating and any(_same_campus_listing(title, t) for t in by_start.get(date_str, ()))):
+                continue
+            seen.add(key)
+            by_start.setdefault(date_str, []).append(title)
+
+            venue = html.unescape(ev.get("location_name") or "").strip() or campus
+            if campus != "Campus" and not _INSTITUTION_WORD_RE.search(venue):
+                venue = f"{venue} ({campus})"
+            entry = {
+                "name": title[:160],
+                "date": date_str,
+                "end": end,
+                "url": ev.get("localist_url") or url,
+                "venue": venue[:80],
+                "address": (ev.get("address") or "").strip() or None,
+                "price": "Free" if ev.get("free") else None,
+                "description": (ev.get("description_text") or "")[:200],
+            }
+            geo = ev.get("geo") or {}
+            try:
+                if geo.get("latitude") and geo.get("longitude"):
+                    entry["lat"], entry["lng"] = float(geo["latitude"]), float(geo["longitude"])
+            except (TypeError, ValueError):
+                pass
+            depts = " ".join(_localist_names(ev, "departments")) + " " + " ".join(
+                d.get("name") or "" for d in ev.get("departments") or [] if isinstance(d, dict))
+            if _NEU_TECH_DEPT_RE.search(depts) or TECH_EVENT_RE.search(title) or re.search(r"(?i)\b(?:stem|data|computing|robotics)\b", title):
+                entry["category"] = "tech"
+            elif re.search(r"(?i)\b(?:concert|recital|orchestra|jazz|choir|chorus|ensemble)\b", title):
+                entry["category"] = "music"
+            elif re.search(r"(?i)\bexhibit", types):
+                entry["category"] = "art"
+            elif re.search(r"(?i)\bfilm\b", types):
+                entry["category"] = "film"
+            elif re.search(r"(?i)\b(?:lecture|seminar|speaker)", types):
+                entry["category"] = "talks"
+            events.append(entry)
+        page_info = data.get("page") or {}
+        if not page_info.get("next_page") or page >= (page_info.get("total") or 0):
+            break
+    return events
+
+
+# ── Harvard College calendar (LiveWhale JSON) ─────────────────────────────────────────────────
+#
+# events.college.harvard.edu is mostly for enrolled students (house dinners, office hours,
+# support groups, deadlines). Keep the arts and performance events open to visitors (Office for
+# the Arts shows, student showcases, visiting-artist talks). LiveWhale returns at most 100 events
+# per request, so busy date ranges are split in half until each fits.
+
+_HARVARD_KEEP_TYPES = {"arts & culture", "performances", "yard events"}
+_HARVARD_SHOW_RE = re.compile(
+    r"\b(?:show(?:case)?|concert|recital|performance|exhibition|festival|screening|production|"
+    r"premiere|gala|open\s+mic|a\s*cappella|dance\s+(?:show|concert)|play)\b", re.I)
+_HARVARD_NOISE_RE = re.compile(
+    r"\b(?:office\s+hours?|info(?:rmation)?\s+session|support\s+group|register\s+for|registration|"
+    r"apply\b|applications?\s+(?:due|open)|deadline|last\s+day|lottery|drop[- ]in|training|"
+    r"orientation|auditions?|courses?|class\s+of\s+20\d\d|petitions?|tuition|exam\s+period|"
+    r"reading\s+period|degrees?\s+conferred|withdraw)\b", re.I)
+_HARVARD_API = "https://events.college.harvard.edu/live/json/events/start_date/{start}/end_date/{end}/max/100/response_fields/location,location_latitude,location_longitude,event_types,event_types_audience,summary,cost"
+
+
+def _harvard_window(start, end, ua, depth=0):
+    try:
+        r = _SESSION.get(_HARVARD_API.format(start=start.isoformat(), end=end.isoformat()),
+                         headers={"User-Agent": ua or UA_CHROME}, timeout=12)
+        r.raise_for_status()
+        data = r.json()
+    except Exception:
+        return []
+    rows = data.get("data", []) if isinstance(data, dict) else (data or [])
+    if len(rows) >= 100 and (end - start).days > 1 and depth < 6:
+        mid = start + (end - start) // 2
+        return _harvard_window(start, mid, ua, depth + 1) + _harvard_window(mid, end, ua, depth + 1)
+    return rows
+
+
+def scrape_harvard_college_events(url, ua):
+    """Public arts and performance events from Harvard College's LiveWhale calendar."""
+    now = datetime.now(timezone.utc)
+    today = now.astimezone(EASTERN).date()
+    rows = sorted(_harvard_window(today, today + timedelta(weeks=8), ua), key=lambda r: r.get("date_iso") or "")
+    events = []
+    seen = set()
+    for row in rows:
+        title = html.unescape(row.get("title") or "").strip()
+        if not title or row.get("is_canceled") or is_placeholder_or_closed_event(title):
+            continue
+        if (row.get("online_type") or "").lower().startswith("online") or row.get("event_types_audience"):
+            continue  # online only, or limited to enrolled class years
+        if _HARVARD_NOISE_RE.search(title) or _CAMPUS_NOISE_TITLE_RE.search(title) or _CAMPUS_GAME_RE.search(title):
+            continue
+        types = {html.unescape(t).lower() for t in row.get("event_types") or []}
+        if not (types & _HARVARD_KEEP_TYPES) and not _HARVARD_SHOW_RE.search(title):
+            continue
+        if "athletics & recreation" in types and not (types & _HARVARD_KEEP_TYPES):
+            continue
+        try:
+            start = datetime.fromisoformat(row.get("date_iso") or "")
+        except ValueError:
+            continue
+        if row.get("is_all_day"):
+            if start.date() < today:
+                continue
+            date_str = start.date().isoformat()
+            end = None
+        else:
+            if start.astimezone(timezone.utc) < now:
+                continue
+            date_str = start.astimezone(timezone.utc).isoformat()
+            try:
+                end = datetime.fromisoformat(row["date2_iso"]).astimezone(timezone.utc).isoformat() if row.get("date2_iso") else None
+            except ValueError:
+                end = None
+        # A daily all-day item or a running exhibition ("Dance in Public", every day for a month)
+        # is listed once, on its next date, not as 30 identical cards.
+        repeating = row.get("is_all_day") or "exhibition" in title.lower() or "exhibitions" in types
+        key = (title.lower(), "" if repeating else date_str[:10])
+        if key in seen:
+            continue
+        seen.add(key)
+        summary = BeautifulSoup(row.get("summary") or "", "html.parser").get_text(" ", strip=True)
+        cost = BeautifulSoup(row.get("cost") or "", "html.parser").get_text(" ", strip=True)
+        venue = html.unescape(row.get("location_title") or row.get("location") or "").strip()
+        entry = {
+            "name": title[:160],
+            "date": date_str,
+            "end": end,
+            "url": row.get("url") or url,
+            "venue": ((f"{venue} (Harvard)" if venue and not _INSTITUTION_WORD_RE.search(venue) else venue)
+                      or "Harvard University")[:80],
+            "price": "Free" if mentions_free(f"{cost} {summary}") else (cost[:40] or None),
+            "description": summary[:200],
+        }
+        try:
+            lat, lng = float(row.get("location_latitude")), float(row.get("location_longitude"))
+            if 42.2 < lat < 42.5 and -71.3 < lng < -70.9:
+                entry["lat"], entry["lng"] = lat, lng
+        except (TypeError, ValueError):
+            pass
+        combined = f"{title} {summary}".lower()
+        if re.search(r"\b(?:dance|ballroom|ballet|hip-hop|choreograph)\w*\b", combined):
+            entry["category"] = "dance"
+        elif re.search(r"\b(?:concert|recital|orchestra|choir|chor(?:us|uses|ale)|pianist|singers?|jazz|opera|"
+                       r"a\s*cappella|ensemble)\b", combined):
+            entry["category"] = "music"
+        elif re.search(r"\b(?:theatre|theater|play|musical)\b", combined):
+            entry["category"] = "theater"
+        elif re.search(r"\b(?:exhibition|gallery|ceramics|art\s+show)\b", combined):
+            entry["category"] = "art"
+        elif re.search(r"\b(?:lecture|artist\s+talk|panel|symposium|keynote)\b", combined):
+            entry["category"] = "talks"
+        events.append(entry)
+    return events
+
+
 # ── College athletics (Sidearm Sports calendar.ashx iCal feeds) ──────────────────────────────
 #
 # Sidearm writes every game as "<School> <Sport> vs <Opponent>" (home or neutral site) or
@@ -11408,6 +11737,61 @@ def scrape_sofar_sounds(url, ua):
             break
         page += 1
     return events
+
+
+_NEXT_FLIGHT_RE = re.compile(r'self\.__next_f\.push\(\[1,"((?:[^"\\]|\\.)*)"\]\)')
+
+
+def _posh_event(html_text, page_url):
+    """The schema.org Event on a posh.vip event page. Posh renders its JSON-LD inside the
+    Next.js payload (self.__next_f.push strings), not a <script type="application/ld+json">."""
+    for raw in _NEXT_FLIGHT_RE.findall(html_text or ""):
+        if "schema.org" not in raw:
+            continue
+        try:
+            text = json.loads('"' + raw + '"')
+            ld = json.loads(text[text.index("{"):]) if '"@type": "Event"' in text or '"@type":"Event"' in text else None
+        except (ValueError, json.JSONDecodeError):
+            continue
+        if isinstance(ld, dict) and ld.get("@type") == "Event" and ld.get("startDate"):
+            return _jsonld_event_to_entry(ld, page_url)
+    return None
+
+
+def scrape_bijou(url, ua, max_events=20):
+    """Bijou Nightclub (51 Stuart St). Its site links each night to Posh; each Posh page has the
+    real start time and price (#65 guessed 10 pm and "$20–$40" for all of them)."""
+    soup = fetch_soup(url, ua)
+    links = []
+    for a in soup.find_all("a", href=True):
+        href = a["href"].strip()
+        if re.match(r"https?://(?:www\.)?posh\.vip/(?:e|f)/", href) and href not in links:
+            links.append(href)
+
+    def one(link):
+        try:
+            r = _SESSION.get(link, headers={"User-Agent": ua or UA_CHROME}, timeout=10)
+            return _posh_event(r.text, r.url) if r.status_code == 200 else None
+        except Exception:
+            return None
+
+    now = datetime.now(timezone.utc)
+    events, seen = [], set()
+    with ThreadPoolExecutor(max_workers=4) as ex:
+        for e in ex.map(one, links[:max_events]):
+            if not e or not e.get("name") or not e.get("date") or is_placeholder_or_closed_event(e["name"]):
+                continue
+            if datetime.fromisoformat(e["date"]) < now - timedelta(hours=6) or e["url"] in seen:
+                continue
+            seen.add(e["url"])
+            e.update(venue="Bijou Nightclub", category="clubbing")
+            events.append(e)
+    return events
+
+
+def scrape_sissy_ks(url, ua):
+    """Sissy K's (Faneuil Hall): a Wix Events site with each dated night and its start time."""
+    return scrape_wix_events(url, ua, default_venue="Sissy K's", default_category="clubbing")
 
 
 PARTIFUL_SOURCES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "partiful_sources.json")
@@ -12786,6 +13170,7 @@ _ALL_VENUES = [
     {"name": "Paradise Rock Club", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZpZA11JtA&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
     {"name": "Brighton Music Hall", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZpapwne&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
     {"name": "MGM Music Hall at Fenway", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZ917AEJz&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
+    {"name": "Fenway Park", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZpZAaaI7A&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_fenway_park, "default_category": "music"},
     {"name": "Citizens House of Blues Boston", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZpZAEA7eA&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
     {"name": "Orpheum Theatre", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZpZA1J7JA&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
     {"name": "Leader Bank Pavilion", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZ917AxdQ&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
@@ -12831,7 +13216,10 @@ _ALL_VENUES = [
     {"name": "City Winery Boston", "url": "https://citywinery.com/pages/locations/boston", "ua": UA_CHROME, "scraper": scrape_city_winery, "default_category": "music"},
     {"name": "Bowery Presents Boston", "url": "https://www.bowerypresents.com/boston", "ua": UA_CHROME, "scraper": scrape_bowery_boston, "default_category": "music"},
     {"name": "Royale Boston", "url": "https://www.royaleboston.com/events/", "ua": UA_CHROME, "scraper": scrape_royale, "default_category": "clubbing"},
-    {"name": "MIT Events", "url": "https://calendar.mit.edu/", "ua": UA_CHROME, "scraper": scrape_jsonld, "default_category": "community"},
+    {"name": "MIT Events", "url": "https://calendar.mit.edu/api/2/events?days=56&pp=100", "ua": UA_CHROME, "scraper": scrape_localist, "default_category": "community"},
+    {"name": "Boston College Events", "url": "https://events.bc.edu/api/2/events?days=56&pp=100", "ua": UA_CHROME, "scraper": scrape_localist, "default_category": "community"},
+    {"name": "Suffolk University Events", "url": "https://events.suffolk.edu/api/2/events?days=56&pp=100", "ua": UA_CHROME, "scraper": scrape_localist, "default_category": "community"},
+    {"name": "Harvard College Events", "url": "https://events.college.harvard.edu/", "ua": UA_CHROME, "scraper": scrape_harvard_college_events, "default_category": "community"},
     {"name": "Boston Symphony Orchestra", "url": "https://www.bso.org/events", "ua": UA_CHROME, "scraper": scrape_bso, "default_category": "music"},
     {"name": "BU Terriers Athletics", "url": "https://goterriers.com/calendar.ashx/calendar.ics", "ua": UA_CHROME, "scraper": scrape_college_athletics, "default_category": "sports"},
     {"name": "Northeastern Huskies Athletics", "url": "https://nuhuskies.com/calendar.ashx/calendar.ics", "ua": UA_CHROME, "scraper": scrape_college_athletics, "default_category": "sports"},
@@ -12972,6 +13360,7 @@ _ALL_VENUES = [
     {"name": "Scorpion Bar Boston", "url": "https://buy.tablelist.com/v/scorpion-bar", "ua": UA_CHROME, "scraper": scrape_tablelist, "default_category": "clubbing"},
     {"name": "Mémoire Boston", "url": "https://www.ticketmaster.com/memoire-tickets-everett/venue/9388", "ua": UA_CHROME, "scraper": scrape_ticketmaster_venue, "default_category": "clubbing"},
     {"name": "Deep Cuts Medford", "url": "https://do617.com/venues/deep-cuts", "ua": UA_CHROME, "scraper": scrape_do617, "default_category": "music"},
+    {"name": "Mighty Squirrel Fenway", "url": "https://do617.com/venues/mighty-squirrel-brewing-co", "ua": UA_CHROME, "scraper": scrape_mighty_squirrel_fenway, "default_category": None},
     {"name": "Lou's Harvard Square", "url": "https://www.wearelous.com/lous-live", "ua": UA_CHROME, "scraper": scrape_lous, "default_category": "music"},
     {"name": "Boston Salsa & Bachata", "url": "https://bostonsalsa.org/", "ua": UA_CHROME, "scraper": scrape_bostonsalsa, "default_category": "dance"},
     {"name": "Charles River Speedway", "url": "https://charlesriverspeedway.com", "ua": UA_CHROME, "scraper": scrape_speedway, "default_category": "food"},
@@ -13019,6 +13408,10 @@ _ALL_VENUES = [
     {"name": "Lyric Stage Company", "url": "https://lyricstage.com/whats-on/", "ua": UA_CHROME, "scraper": scrape_lyric_stage, "default_category": "theater"},
     {"name": "Celebrity Series of Boston", "url": "https://www.celebrityseries.org/live-performances/performance-event-calendar/", "ua": UA_CHROME, "scraper": scrape_celebrity_series, "default_category": "music"},
     {"name": "LesbianNightLife", "url": "https://www.lesbiannightlife.com", "ua": UA_CHROME, "scraper": scrape_wix_events, "default_category": "clubbing"},
+    {"name": "Bijou Nightclub", "url": "https://www.bijouboston.com", "ua": UA_CHROME, "scraper": scrape_bijou, "default_category": "clubbing"},
+    {"name": "Sissy K's", "url": "https://www.sissykevents.com/", "ua": UA_CHROME, "scraper": scrape_sissy_ks, "default_category": "clubbing"},
+    {"name": "6one7 Productions (Venu & Icon)", "url": "https://www.eventbrite.com/o/6one7-productions-1459894222", "ua": UA_CHROME, "scraper": scrape_eventbrite_org, "default_category": "clubbing"},
+    {"name": "Dope Entertainment (Venu, Icon, Clerys)", "url": "https://www.eventbrite.com/o/dope-entertainment-18760244852", "ua": UA_CHROME, "scraper": scrape_eventbrite_org, "default_category": "clubbing"},
 ]
 
 # Drop venues that require env vars we don't have set — keeps the fail banner clean.
