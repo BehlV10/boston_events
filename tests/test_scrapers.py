@@ -1753,6 +1753,56 @@ class TestBostonEvents(unittest.TestCase):
         city = _event_city(first["venue"], first.get("_source_venue") or first["venue"], first)
         self.assertEqual(city, "boston")
 
+    def test_downtown_boston_bid(self):
+        """Downtown Boston BID (downtownboston.org) scraper, clean venues, and geo resolution."""
+        from scrapers import _ALL_VENUES, scrape_downtown_boston
+        from venues_geo import resolve_event_geo
+        from template import _event_city
+
+        names = [v["name"] for v in _ALL_VENUES]
+        self.assertIn("Downtown Boston BID", names)
+
+        mock_data = {
+            "events": [
+                {
+                    "title": "Wicked",
+                    "start_date": "2026-11-20 19:30:00",
+                    "url": "https://www.downtownboston.org/event/wicked",
+                    "venue": {"venue": "Citizens Opera House"},
+                    "cost": "$49",
+                },
+                {
+                    "title": "SWIVE by ELLA HICKSON",
+                    "start_date": "2026-11-21 20:00:00",
+                    "url": "https://www.downtownboston.org/event/swive",
+                    "venue": {"venue": "Modern Theatre &#8211; Suffolk University"},
+                    "cost": "$15",
+                },
+            ]
+        }
+        from unittest import mock
+        with mock.patch("scrapers._SESSION.get") as mock_get:
+            mock_resp = mock.MagicMock()
+            mock_resp.status_code = 200
+            mock_resp.json.return_value = mock_data
+            mock_resp.raise_for_status = lambda: None
+            mock_get.return_value = mock_resp
+
+            events = scrape_downtown_boston("https://www.downtownboston.org/events/", UA_CHROME)
+
+        self.assertEqual(len(events), 2)
+        wicked = events[0]
+        self.assertEqual(wicked["venue"], "Citizens Opera House")
+        self.assertEqual(wicked["category"], "theater")
+        self.assertEqual(_event_city(wicked["venue"], "Downtown Boston BID", wicked), "boston")
+
+        swive = events[1]
+        self.assertEqual(swive["venue"], "Modern Theatre – Suffolk University")
+        geo = resolve_event_geo(swive)
+        self.assertIsNotNone(geo)
+        self.assertEqual(geo["venue"], "Modern Theatre")
+        self.assertEqual(geo["neighborhood"], "Downtown Crossing")
+
     def test_celebrity_series(self):
         """Celebrity Series of Boston scraper and geo verification."""
         from scrapers import _ALL_VENUES, scrape_celebrity_series

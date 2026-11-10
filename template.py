@@ -125,6 +125,7 @@ CITY_RULES = [
     ("boston", (
         "the 88 club", "88 club",
         "1080 boylston", "don't tell aunty", "dont tell aunty",
+        "modern theatre", "high street place",
         "bsmnt", "kings seaport", "kings - seaport", "kings dining",
         "midway cafe", "o'brien's pub", "obriens pub", "o'brien's", "obriens",
         "jordan hall", "new england conservatory", "nec (", "nec:", "nec ", "nec hall",
