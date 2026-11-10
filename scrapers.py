@@ -10405,46 +10405,57 @@ def scrape_downtown_boston(url, ua):
     Financial District, and Theater District happenings.
     """
     events = []
-    today = datetime.now(EASTERN).date().isoformat()
-    api_url = f"https://www.downtownboston.org/wp-json/tribe/events/v1/events?start_date={today}&per_page=50"
-    headers = {"User-Agent": ua}
+    today = datetime.now(EASTERN).date()
+    until = today + timedelta(weeks=8)  # the page's horizon; the feed itself runs two years out
+    headers = {"User-Agent": ua or UA_CHROME}
 
-    try:
-        resp = _SESSION.get(api_url, headers=headers, timeout=12)
-        resp.raise_for_status()
-        data = resp.json()
-        for ev in data.get("events", []):
-            raw_title = ev.get("title", "")
-            title = BeautifulSoup(raw_title, "html.parser").get_text(strip=True)
-            if not title:
-                continue
+    total_pages = 1
+    page = 0
+    while page < min(total_pages, 10):
+        page += 1
+        api_url = (f"https://www.downtownboston.org/wp-json/tribe/events/v1/events?start_date={today.isoformat()}"
+                   f"&end_date={until.isoformat()}&per_page=50&page={page}")
+        try:
+            resp = _SESSION.get(api_url, headers=headers, timeout=12)
+            resp.raise_for_status()
+            data = resp.json()
+            total_pages = int(data.get("total_pages") or 1)
+            raw_evs = data.get("events", [])
+            if not raw_evs:
+                break
+            for ev in raw_evs:
+                raw_title = ev.get("title", "")
+                title = BeautifulSoup(raw_title, "html.parser").get_text(strip=True)
+                if not title:
+                    continue
 
-            start_str = ev.get("start_date")
-            if not start_str:
-                continue
-            try:
-                dt = datetime.strptime(start_str, "%Y-%m-%d %H:%M:%S").replace(tzinfo=EASTERN)
-                iso = dt.astimezone(timezone.utc).isoformat()
-            except Exception:
-                continue
+                start_str = ev.get("start_date")
+                if not start_str:
+                    continue
+                try:
+                    dt = datetime.strptime(start_str, "%Y-%m-%d %H:%M:%S").replace(tzinfo=EASTERN)
+                    iso = dt.astimezone(timezone.utc).isoformat()
+                except Exception:
+                    continue
 
-            event_url = ev.get("website") or ev.get("url") or url
-            venue_obj = ev.get("venue") or {}
-            venue_name = venue_obj.get("venue") or "Downtown Boston"
+                event_url = ev.get("website") or ev.get("url") or url
+                venue_obj = ev.get("venue") or {}
+                raw_venue = venue_obj.get("venue") or ""
+                venue_name = BeautifulSoup(raw_venue, "html.parser").get_text(strip=True) if raw_venue else "Downtown Boston"
 
-            cost = ev.get("cost")
-            price = cost.strip() if cost else None
+                cost = ev.get("cost")
+                price = cost.strip() if cost else None
 
-            events.append({
-                "name": title,
-                "date": iso,
-                "url": event_url,
-                "venue": f"Downtown Boston - {venue_name}" if "downtown" not in venue_name.lower() else venue_name,
-                "price": price,
-                "category": infer_category(title, venue_name, default="community"),
-            })
-    except Exception:
-        pass
+                events.append({
+                    "name": title,
+                    "date": iso,
+                    "url": event_url,
+                    "venue": venue_name,
+                    "price": price,
+                    "category": infer_category(title, venue_name, default="community"),
+                })
+        except Exception:
+            break
 
     return events
 
@@ -10691,13 +10702,16 @@ def scrape_ticketmaster_discovery(url, ua):
                 price = f"From ${int(p_min)}"
 
         classifications = ev.get("classifications") or []
+        seg_name = ""
         g_name = ""
         sg_name = ""
         if classifications:
-            g_name = classifications[0].get("genre", {}).get("name") or ""
-            sg_name = classifications[0].get("subGenre", {}).get("name") or ""
+            seg_name = (classifications[0].get("segment") or {}).get("name") or ""
+            g_name = (classifications[0].get("genre") or {}).get("name") or ""
+            sg_name = (classifications[0].get("subGenre") or {}).get("name") or ""
+        category = ticketmaster_category(seg_name, g_name, sg_name)
         native_g = map_native_genre(g_name) or map_native_genre(sg_name)
-        genre = infer_music_genre(name, vname, native_genre=native_g)
+        genre = infer_music_genre(name, vname, native_genre=native_g) if category == "music" else None
 
         key = (name.lower(), dt.strftime("%Y-%m-%d"))
         if key in seen:
@@ -10710,11 +10724,36 @@ def scrape_ticketmaster_discovery(url, ua):
             "url": link,
             "venue": vname,
             "price": price,
-            "category": "music",
+            "category": category,
             "genre": genre,
         })
 
     return events
+
+
+def ticketmaster_category(segment, genre, sub_genre):
+    """Our category from Ticketmaster's classification, or None to let infer_category decide.
+
+    Comedy is checked first: Ticketmaster files stand-up under "Arts & Theatre" (genre Comedy),
+    and these used to be listed as music (68 of them across our 8 Ticketmaster venues, Nov 2026).
+    "Miscellaneous" / "Undefined" (lectures, psychics, card shows) are left to the name-based
+    inference, which also applies the venue's default category."""
+    seg, g, sg = (segment or "").lower(), (genre or "").lower(), (sub_genre or "").lower()
+    if "comedy" in (g, sg):
+        return "comedy"
+    if seg == "sports":
+        return "sports"
+    if seg == "music":
+        return "music"
+    if seg == "film":
+        return "film"
+    if seg == "arts & theatre":
+        if g == "dance":
+            return "dance"
+        if g in ("theatre", "miscellaneous theatre", "performance art", "musical", "opera", "magic & illusion", "variety"):
+            return "music" if g == "opera" else "theater"
+        return None
+    return None
 
 
 def scrape_ticketweb(url, ua):
@@ -11105,6 +11144,87 @@ def scrape_northeastern(url, ua):
 _NEU_TECH_DEPT_RE = re.compile(
     r"\b(?:COE|College of Engineering|Khoury|Computer Science|Experiential AI|NUlab|Roux Institute|"
     r"Network Science|Data Science|Bioengineering|Mechanical|Electrical)\b", re.I)
+
+
+# ── Sofar Sounds (secret living-room and pop-up shows) ─────────────────────────────────────────
+#
+# sofarsounds.com is a client-side app; its own public GraphQL endpoint lists a city's upcoming
+# shows. The lineup and address stay secret until shortly before each show, so a listing has
+# only the neighborhood, which places it (venues_geo.SOFAR_NEIGHBORHOODS).
+
+_SOFAR_QUERY = """query GetEventsForEventGrid($city: String, $upcoming: Boolean, $published: Boolean, $page: Int, $perPage: Int) {
+  events(city: $city, upcoming: $upcoming, published: $published, page: $page, perPage: $perPage) {
+    events { id startsAt guestsArriveAt ticketPrice isSoldOut cancelled
+      city { cachedSlug currencyCode } neighborhood { title } venue { neighborhood { title } } eventThemes { title } }
+    metadata { totalRecords }
+  }
+}"""
+# Themes that describe the show rather than the ticket ("Drink Included", "New Venue! 👀")
+_SOFAR_TICKET_THEME_RE = re.compile(r"(?i)\b(?:drink|byob|new\s+venue|partnership|presale|vip|ticket)\b")
+
+
+def scrape_sofar_sounds(url, ua):
+    """Upcoming Sofar Sounds shows in Boston, each placed in its (announced) neighborhood."""
+    from venues_geo import SOFAR_NEIGHBORHOODS
+    city = url.rstrip("/").rsplit("/", 1)[-1] or "boston"
+    now = datetime.now(timezone.utc)
+    cutoff = now + timedelta(weeks=10)
+    events, page, total = [], 1, None
+    while page <= 5:
+        try:
+            r = _SESSION.post(
+                "https://www.sofarsounds.com/api/v2/graphql?on=GetEventsForEventGrid",
+                json={"operationName": "GetEventsForEventGrid", "query": _SOFAR_QUERY,
+                      "variables": {"city": city, "upcoming": True, "published": True, "page": page, "perPage": 50}},
+                headers={"User-Agent": ua or UA_CHROME, "Content-Type": "application/json"}, timeout=15)
+            r.raise_for_status()
+            block = (r.json().get("data") or {}).get("events") or {}
+        except Exception:
+            break
+        rows = block.get("events") or []
+        total = (block.get("metadata") or {}).get("totalRecords") or 0
+        for ev in rows:
+            if ev.get("cancelled") or ((ev.get("city") or {}).get("cachedSlug") or city) != city:
+                continue
+            try:
+                start = datetime.fromisoformat((ev.get("startsAt") or "").replace("Z", "+00:00"))
+            except ValueError:
+                continue
+            if start < now or start > cutoff:
+                continue
+            hood = ((ev.get("neighborhood") or {}).get("title")
+                    or (((ev.get("venue") or {}).get("neighborhood")) or {}).get("title") or "").strip()
+            spot = SOFAR_NEIGHBORHOODS.get(hood.lower())
+            if not spot:
+                continue  # a neighborhood we can't place (new to Sofar's list): skip rather than guess
+            themes = [t.get("title", "").strip() for t in ev.get("eventThemes") or [] if (t.get("title") or "").strip()]
+            vibe = next((t for t in themes if not _SOFAR_TICKET_THEME_RE.search(t)), "")
+            price = None
+            if ev.get("isSoldOut"):
+                price = "Sold out"
+            elif isinstance(ev.get("ticketPrice"), (int, float)) and ev["ticketPrice"] > 0:
+                price = f"${ev['ticketPrice'] / 100:.0f}"
+            doors = ""
+            try:
+                arrive = datetime.fromisoformat((ev.get("guestsArriveAt") or "").replace("Z", "+00:00"))
+                doors = f"Doors {arrive.astimezone(EASTERN).strftime('%-I:%M %p')}. "
+            except ValueError:
+                pass
+            events.append({
+                "name": f"Sofar Sounds: Secret Show in {hood}" + (f" ({vibe})" if vibe else ""),
+                "date": start.astimezone(timezone.utc).isoformat(),
+                "url": f"https://www.sofarsounds.com/events/{ev.get('id')}",
+                "venue": f"Sofar Sounds ({hood})",  # the exact key of its venues_geo entry
+                "lat": spot[0], "lng": spot[1], "neighborhood": spot[2], "address": spot[3],
+                "price": price,
+                "category": "music",
+                "description": (f"{doors}Three surprise acts in an intimate space; the address is shared "
+                                f"with ticket holders before the show. " + " · ".join(themes))[:200],
+            })
+        if not rows or page * 50 >= total:
+            break
+        page += 1
+    return events
 
 
 PARTIFUL_SOURCES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "partiful_sources.json")
@@ -12516,6 +12636,7 @@ _ALL_VENUES = [
     {"name": "Jordan Hall (NEC)", "url": "https://www.trumba.com/calendars/nec.json", "ua": UA_CHROME, "scraper": scrape_nec_trumba, "default_category": "classical"},
     {"name": "The Mad Monkfish", "url": "https://www.themadmonkfish.com/jazz-schedule/", "ua": UA_CHROME, "scraper": scrape_mad_monkfish, "default_category": "music"},
     {"name": "Club Passim", "url": "https://www.passim.org/live-music/", "ua": UA_CHROME, "scraper": scrape_club_passim, "default_category": "music"},
+    {"name": "Sofar Sounds", "url": "https://www.sofarsounds.com/cities/boston", "ua": UA_CHROME, "scraper": scrape_sofar_sounds, "default_category": "music"},
     {"name": "Ticketmaster", "url": "https://www.ticketmaster.com/", "ua": UA_CHROME, "scraper": scrape_ticketmaster, "default_category": "music"},
     {"name": "SeatGeek", "url": "https://seatgeek.com/cities/boston", "ua": UA_CHROME, "scraper": scrape_seatgeek, "default_category": "music"},
     {"name": "Eventbrite Boston", "url": "https://www.eventbrite.com/d/ma--boston/events/", "ua": UA_CHROME, "scraper": scrape_eventbrite_search, "default_category": None},
@@ -12982,7 +13103,7 @@ CATEGORY_KEYWORDS = [
                    "capoeira", "folk danc", "dancehall", "kizkonpa", "kizonpa", "konpa", "floorwork"]),
     ("comedy",    ["comedy", "stand-up", "stand up", "improv", "open mic", "open-mic",
                    "roast", "sketch", "satirical", "variety show"]),
-    ("theater",   ["theatre", "theater", "musical", "shakespeare", "broadway musical", "broadway show", "repertory", "play by", "play:",
+    ("theater",   ["theatre", "theater", "musical", "opera house", "shakespeare", "broadway musical", "broadway show", "repertory", "play by", "play:",
                    "one woman show", "one man show", "solo show", "puppet", "burlesque show"]),
     ("books",     ["book club", "book launch", "author", "reading", "storytime", "poet", "poetry", "signing", "booksmith",
                    "literary", "literature", "book talk", "book fair", "writing workshop", "creative writing", "writers",
@@ -13005,7 +13126,7 @@ CATEGORY_KEYWORDS = [
                    "ukulele", "drumming", "cabaret", "blues feat", "live blues", "recital", "vocal", "instrumental",
                    "choral", "choir", "chorus", "ensemble", "chamber music", "singing", "bands", "brass", "a cappella", "countertenor", "a far cry"]),
     ("film",      ["screening", "film ", "cinema", "movie night", "movie", "movies", "brattle", "coolidge", "documentary", "baaff", "reel rock", "warren miller", "film fest", "in 35mm", "in 70mm"]),
-    ("sports",    ["bruins", "celtics", "red sox", "revolution", "patriots watch", "marathon", "vs.", "match", "game ",
+    ("sports",    ["bruins", "celtics", "red sox", "new england revolution", "revolution vs", "ne revolution", "patriots watch", "marathon", "vs.", "match", "game ",
                    " 5k", "fun run", "road race", "10k", "half marathon", "cycling event",
                    "bike race", "rowing", "regatta", "hocr", "pickleball", "tennis", "volleyball",
                    "dodgeball", "archery", "parkour", "crossfit", "rock climbing", "kickboxing",

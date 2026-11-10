@@ -243,6 +243,9 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
     "the wilbur": (42.3516, -71.0648, "Theater District", "246 Tremont St, Boston", "The Wilbur"),
     "wilbur theatre": (42.3516, -71.0648, "Theater District", "246 Tremont St, Boston", "The Wilbur"),
     "wilbur theater": (42.3516, -71.0648, "Theater District", "246 Tremont St, Boston", "The Wilbur"),
+    "modern theatre": (42.3533, -71.0622, "Downtown Crossing", "525 Washington St, Boston", "Modern Theatre"),
+    "modern theatre - suffolk university": (42.3533, -71.0622, "Downtown Crossing", "525 Washington St, Boston", "Modern Theatre"),
+    "high street place": (42.3537, -71.0543, "Downtown / Financial District", "100 High St, Boston", "High Street Place"),
     "the huntington theatre": (42.3421, -71.0858, "Back Bay", "264 Huntington Ave, Boston", "The Huntington Theatre"),
     "the substation (roslindale)": (42.2868, -71.1287, "Roslindale", "4228 Washington St, Roslindale", "The Substation (Roslindale)"),
     "music on centre": (42.2863, -71.1538, "West Roxbury", "1859 Centre St, West Roxbury", "Music on Centre"),
@@ -429,6 +432,62 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
 }
 
 # Substring needle rules for matching variations in scraped venue titles
+# Sofar Sounds keeps each show's address secret until shortly before the show; its API gives
+# only a neighborhood. Each neighborhood gets a pin at its centre. The labels carry the words
+# template.resolve_subarea keys on ("Theater District", "Downtown", "Allston"), and the area
+# addresses (no street number) give the city.
+SOFAR_NEIGHBORHOODS: Dict[str, Tuple[float, float, str, str]] = {
+    "allston": (42.3539, -71.1337, "Allston", "Allston, Boston"),
+    "lower allston": (42.3627, -71.1263, "Lower Allston", "Allston, Boston"),
+    "brighton": (42.3484, -71.1530, "Brighton", "Brighton, Boston"),
+    "back bay": (42.3503, -71.0810, "Back Bay", "Back Bay, Boston"),
+    "beacon hill": (42.3588, -71.0707, "Beacon Hill (Downtown)", "Beacon Hill, Boston"),
+    "beacon hill / back bay": (42.3560, -71.0750, "Back Bay / Beacon Hill", "Back Bay, Boston"),
+    "bay village": (42.3487, -71.0688, "Bay Village (Theater District)", "Bay Village, Boston"),
+    "theater district": (42.3519, -71.0645, "Theater District", "Theater District, Boston"),
+    "chinatown": (42.3493, -71.0621, "Chinatown", "Chinatown, Boston"),
+    "leather district": (42.3507, -71.0582, "Leather District (Downtown)", "Leather District, Boston"),
+    "downtown": (42.3555, -71.0605, "Downtown", "Downtown, Boston"),
+    "financial district": (42.3559, -71.0550, "Financial District (Downtown)", "Financial District, Boston"),
+    "north end": (42.3647, -71.0542, "North End", "North End, Boston"),
+    "fenway": (42.3429, -71.1003, "Fenway", "Fenway, Boston"),
+    "south end": (42.3388, -71.0765, "South End", "South End, Boston"),
+    "sowa": (42.3420, -71.0660, "SoWa (South End)", "South End, Boston"),
+    "seaport district": (42.3497, -71.0420, "Seaport", "Seaport, Boston"),
+    "fort point": (42.3505, -71.0500, "Fort Point (Seaport)", "Fort Point, Boston"),
+    "south boston": (42.3334, -71.0495, "South Boston", "South Boston, Boston"),
+    "southie": (42.3334, -71.0495, "South Boston", "South Boston, Boston"),
+    "jamaica plain": (42.3097, -71.1151, "Jamaica Plain", "Jamaica Plain, Boston"),
+    "roslindale": (42.2912, -71.1245, "Roslindale", "Roslindale, Boston"),
+    "roxbury": (42.3152, -71.0890, "Roxbury", "Roxbury, Boston"),
+    "dorchester": (42.3016, -71.0676, "Dorchester", "Dorchester, Boston"),
+    "dorchester/roxbury": (42.3100, -71.0780, "Dorchester / Roxbury", "Dorchester, Boston"),
+    "mattapan": (42.2771, -71.0914, "Mattapan", "Mattapan, Boston"),
+    "brookline": (42.3318, -71.1212, "Brookline", "Brookline, MA"),
+    "cambridge": (42.3736, -71.1097, "Cambridge", "Cambridge, MA"),
+    "cambridgeport": (42.3601, -71.1070, "Cambridgeport", "Cambridgeport, Cambridge"),
+    "cambridge crossing": (42.3720, -71.0760, "Cambridge Crossing (Kendall)", "Cambridge Crossing, Cambridge"),
+    "central square": (42.3651, -71.1037, "Central Square", "Central Square, Cambridge"),
+    "east cambridge": (42.3696, -71.0790, "East Cambridge", "East Cambridge, Cambridge"),
+    "harvard square": (42.3736, -71.1190, "Harvard Square", "Harvard Square, Cambridge"),
+    "inman square": (42.3741, -71.1012, "Inman Square", "Inman Square, Cambridge"),
+    "kendall square": (42.3629, -71.0901, "Kendall Square", "Kendall Square, Cambridge"),
+    "porter square": (42.3884, -71.1191, "Porter Square", "Porter Square, Cambridge"),
+    "somerville": (42.3876, -71.0995, "Somerville", "Somerville, MA"),
+    "assembly square": (42.3925, -71.0775, "Assembly Square", "Assembly Square, Somerville"),
+    "ball square": (42.3995, -71.1110, "Ball Square (Davis)", "Ball Square, Somerville"),
+    "bow market": (42.3810, -71.0965, "Union Square (Bow Market)", "Union Square, Somerville"),
+    "davis square": (42.3967, -71.1225, "Davis Square", "Davis Square, Somerville"),
+    "east somerville": (42.3880, -71.0840, "East Somerville", "East Somerville, Somerville"),
+    "union square": (42.3796, -71.0937, "Union Square", "Union Square, Somerville"),
+    "arlington": (42.4154, -71.1565, "Arlington", "Arlington, MA"),
+    "braintree": (42.2079, -71.0040, "Braintree", "Braintree, MA"),
+    "everett": (42.4084, -71.0537, "Everett", "Everett, MA"),
+}
+for _hood, (_lat, _lng, _label, _addr) in SOFAR_NEIGHBORHOODS.items():
+    VENUE_COORDINATES[f"sofar sounds ({_hood})"] = (_lat, _lng, _label, _addr, f"Sofar Sounds ({_label})")
+
+
 VENUE_RULES = [
     # Music venues added from the Boston Shows coverage check (addresses from the venues' own sites)
     ("square root", (42.2869, -71.1301, "Roslindale", "2 Belgrade Ave, Roslindale", "Square Root")),
@@ -487,6 +546,8 @@ VENUE_RULES = [
     ("peabody museum", (42.3785, -71.1152, "Harvard Square", "11 Divinity Ave, Cambridge", "Peabody Museum")),
     ("lou's", (42.3747, -71.1206, "Harvard Square", "50 Church St, Cambridge", "Lou's (Harvard Square)")),
     ("wearelous", (42.3747, -71.1206, "Harvard Square", "50 Church St, Cambridge", "Lou's (Harvard Square)")),
+    ("modern theatre", (42.3533, -71.0622, "Downtown Crossing", "525 Washington St, Boston", "Modern Theatre")),
+    ("high street place", (42.3537, -71.0543, "Downtown / Financial District", "100 High St, Boston", "High Street Place")),
     ("havana club", (42.3649, -71.1026, "Central Square", "288 Green St, Cambridge", "Havana Club")),
     ("big night live", (42.3656, -71.0617, "West End / TD Garden", "110 Causeway St, Boston", "Big Night Live")),
     ("symphony hall", (42.3428, -71.0858, "Fenway / Symphony", "301 Massachusetts Ave, Boston", "Symphony Hall")),
