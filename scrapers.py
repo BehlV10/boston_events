@@ -11146,6 +11146,87 @@ _NEU_TECH_DEPT_RE = re.compile(
     r"Network Science|Data Science|Bioengineering|Mechanical|Electrical)\b", re.I)
 
 
+# ── Sofar Sounds (secret living-room and pop-up shows) ─────────────────────────────────────────
+#
+# sofarsounds.com is a client-side app; its own public GraphQL endpoint lists a city's upcoming
+# shows. The lineup and address stay secret until shortly before each show, so a listing has
+# only the neighborhood, which places it (venues_geo.SOFAR_NEIGHBORHOODS).
+
+_SOFAR_QUERY = """query GetEventsForEventGrid($city: String, $upcoming: Boolean, $published: Boolean, $page: Int, $perPage: Int) {
+  events(city: $city, upcoming: $upcoming, published: $published, page: $page, perPage: $perPage) {
+    events { id startsAt guestsArriveAt ticketPrice isSoldOut cancelled
+      city { cachedSlug currencyCode } neighborhood { title } venue { neighborhood { title } } eventThemes { title } }
+    metadata { totalRecords }
+  }
+}"""
+# Themes that describe the show rather than the ticket ("Drink Included", "New Venue! 👀")
+_SOFAR_TICKET_THEME_RE = re.compile(r"(?i)\b(?:drink|byob|new\s+venue|partnership|presale|vip|ticket)\b")
+
+
+def scrape_sofar_sounds(url, ua):
+    """Upcoming Sofar Sounds shows in Boston, each placed in its (announced) neighborhood."""
+    from venues_geo import SOFAR_NEIGHBORHOODS
+    city = url.rstrip("/").rsplit("/", 1)[-1] or "boston"
+    now = datetime.now(timezone.utc)
+    cutoff = now + timedelta(weeks=10)
+    events, page, total = [], 1, None
+    while page <= 5:
+        try:
+            r = _SESSION.post(
+                "https://www.sofarsounds.com/api/v2/graphql?on=GetEventsForEventGrid",
+                json={"operationName": "GetEventsForEventGrid", "query": _SOFAR_QUERY,
+                      "variables": {"city": city, "upcoming": True, "published": True, "page": page, "perPage": 50}},
+                headers={"User-Agent": ua or UA_CHROME, "Content-Type": "application/json"}, timeout=15)
+            r.raise_for_status()
+            block = (r.json().get("data") or {}).get("events") or {}
+        except Exception:
+            break
+        rows = block.get("events") or []
+        total = (block.get("metadata") or {}).get("totalRecords") or 0
+        for ev in rows:
+            if ev.get("cancelled") or ((ev.get("city") or {}).get("cachedSlug") or city) != city:
+                continue
+            try:
+                start = datetime.fromisoformat((ev.get("startsAt") or "").replace("Z", "+00:00"))
+            except ValueError:
+                continue
+            if start < now or start > cutoff:
+                continue
+            hood = ((ev.get("neighborhood") or {}).get("title")
+                    or (((ev.get("venue") or {}).get("neighborhood")) or {}).get("title") or "").strip()
+            spot = SOFAR_NEIGHBORHOODS.get(hood.lower())
+            if not spot:
+                continue  # a neighborhood we can't place (new to Sofar's list): skip rather than guess
+            themes = [t.get("title", "").strip() for t in ev.get("eventThemes") or [] if (t.get("title") or "").strip()]
+            vibe = next((t for t in themes if not _SOFAR_TICKET_THEME_RE.search(t)), "")
+            price = None
+            if ev.get("isSoldOut"):
+                price = "Sold out"
+            elif isinstance(ev.get("ticketPrice"), (int, float)) and ev["ticketPrice"] > 0:
+                price = f"${ev['ticketPrice'] / 100:.0f}"
+            doors = ""
+            try:
+                arrive = datetime.fromisoformat((ev.get("guestsArriveAt") or "").replace("Z", "+00:00"))
+                doors = f"Doors {arrive.astimezone(EASTERN).strftime('%-I:%M %p')}. "
+            except ValueError:
+                pass
+            events.append({
+                "name": f"Sofar Sounds: Secret Show in {hood}" + (f" ({vibe})" if vibe else ""),
+                "date": start.astimezone(timezone.utc).isoformat(),
+                "url": f"https://www.sofarsounds.com/events/{ev.get('id')}",
+                "venue": f"Sofar Sounds ({hood})",  # the exact key of its venues_geo entry
+                "lat": spot[0], "lng": spot[1], "neighborhood": spot[2], "address": spot[3],
+                "price": price,
+                "category": "music",
+                "description": (f"{doors}Three surprise acts in an intimate space; the address is shared "
+                                f"with ticket holders before the show. " + " · ".join(themes))[:200],
+            })
+        if not rows or page * 50 >= total:
+            break
+        page += 1
+    return events
+
+
 PARTIFUL_SOURCES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "partiful_sources.json")
 
 
@@ -12555,6 +12636,7 @@ _ALL_VENUES = [
     {"name": "Jordan Hall (NEC)", "url": "https://www.trumba.com/calendars/nec.json", "ua": UA_CHROME, "scraper": scrape_nec_trumba, "default_category": "classical"},
     {"name": "The Mad Monkfish", "url": "https://www.themadmonkfish.com/jazz-schedule/", "ua": UA_CHROME, "scraper": scrape_mad_monkfish, "default_category": "music"},
     {"name": "Club Passim", "url": "https://www.passim.org/live-music/", "ua": UA_CHROME, "scraper": scrape_club_passim, "default_category": "music"},
+    {"name": "Sofar Sounds", "url": "https://www.sofarsounds.com/cities/boston", "ua": UA_CHROME, "scraper": scrape_sofar_sounds, "default_category": "music"},
     {"name": "Ticketmaster", "url": "https://www.ticketmaster.com/", "ua": UA_CHROME, "scraper": scrape_ticketmaster, "default_category": "music"},
     {"name": "SeatGeek", "url": "https://seatgeek.com/cities/boston", "ua": UA_CHROME, "scraper": scrape_seatgeek, "default_category": "music"},
     {"name": "Eventbrite Boston", "url": "https://www.eventbrite.com/d/ma--boston/events/", "ua": UA_CHROME, "scraper": scrape_eventbrite_search, "default_category": None},
