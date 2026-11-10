@@ -10405,46 +10405,57 @@ def scrape_downtown_boston(url, ua):
     Financial District, and Theater District happenings.
     """
     events = []
-    today = datetime.now(EASTERN).date().isoformat()
-    api_url = f"https://www.downtownboston.org/wp-json/tribe/events/v1/events?start_date={today}&per_page=50"
-    headers = {"User-Agent": ua}
+    today = datetime.now(EASTERN).date()
+    until = today + timedelta(weeks=8)  # the page's horizon; the feed itself runs two years out
+    headers = {"User-Agent": ua or UA_CHROME}
 
-    try:
-        resp = _SESSION.get(api_url, headers=headers, timeout=12)
-        resp.raise_for_status()
-        data = resp.json()
-        for ev in data.get("events", []):
-            raw_title = ev.get("title", "")
-            title = BeautifulSoup(raw_title, "html.parser").get_text(strip=True)
-            if not title:
-                continue
+    total_pages = 1
+    page = 0
+    while page < min(total_pages, 10):
+        page += 1
+        api_url = (f"https://www.downtownboston.org/wp-json/tribe/events/v1/events?start_date={today.isoformat()}"
+                   f"&end_date={until.isoformat()}&per_page=50&page={page}")
+        try:
+            resp = _SESSION.get(api_url, headers=headers, timeout=12)
+            resp.raise_for_status()
+            data = resp.json()
+            total_pages = int(data.get("total_pages") or 1)
+            raw_evs = data.get("events", [])
+            if not raw_evs:
+                break
+            for ev in raw_evs:
+                raw_title = ev.get("title", "")
+                title = BeautifulSoup(raw_title, "html.parser").get_text(strip=True)
+                if not title:
+                    continue
 
-            start_str = ev.get("start_date")
-            if not start_str:
-                continue
-            try:
-                dt = datetime.strptime(start_str, "%Y-%m-%d %H:%M:%S").replace(tzinfo=EASTERN)
-                iso = dt.astimezone(timezone.utc).isoformat()
-            except Exception:
-                continue
+                start_str = ev.get("start_date")
+                if not start_str:
+                    continue
+                try:
+                    dt = datetime.strptime(start_str, "%Y-%m-%d %H:%M:%S").replace(tzinfo=EASTERN)
+                    iso = dt.astimezone(timezone.utc).isoformat()
+                except Exception:
+                    continue
 
-            event_url = ev.get("website") or ev.get("url") or url
-            venue_obj = ev.get("venue") or {}
-            venue_name = venue_obj.get("venue") or "Downtown Boston"
+                event_url = ev.get("website") or ev.get("url") or url
+                venue_obj = ev.get("venue") or {}
+                raw_venue = venue_obj.get("venue") or ""
+                venue_name = BeautifulSoup(raw_venue, "html.parser").get_text(strip=True) if raw_venue else "Downtown Boston"
 
-            cost = ev.get("cost")
-            price = cost.strip() if cost else None
+                cost = ev.get("cost")
+                price = cost.strip() if cost else None
 
-            events.append({
-                "name": title,
-                "date": iso,
-                "url": event_url,
-                "venue": f"Downtown Boston - {venue_name}" if "downtown" not in venue_name.lower() else venue_name,
-                "price": price,
-                "category": infer_category(title, venue_name, default="community"),
-            })
-    except Exception:
-        pass
+                events.append({
+                    "name": title,
+                    "date": iso,
+                    "url": event_url,
+                    "venue": venue_name,
+                    "price": price,
+                    "category": infer_category(title, venue_name, default="community"),
+                })
+        except Exception:
+            break
 
     return events
 
@@ -13092,7 +13103,7 @@ CATEGORY_KEYWORDS = [
                    "capoeira", "folk danc", "dancehall", "kizkonpa", "kizonpa", "konpa", "floorwork"]),
     ("comedy",    ["comedy", "stand-up", "stand up", "improv", "open mic", "open-mic",
                    "roast", "sketch", "satirical", "variety show"]),
-    ("theater",   ["theatre", "theater", "musical", "shakespeare", "broadway musical", "broadway show", "repertory", "play by", "play:",
+    ("theater",   ["theatre", "theater", "musical", "opera house", "shakespeare", "broadway musical", "broadway show", "repertory", "play by", "play:",
                    "one woman show", "one man show", "solo show", "puppet", "burlesque show"]),
     ("books",     ["book club", "book launch", "author", "reading", "storytime", "poet", "poetry", "signing", "booksmith",
                    "literary", "literature", "book talk", "book fair", "writing workshop", "creative writing", "writers",
@@ -13115,7 +13126,7 @@ CATEGORY_KEYWORDS = [
                    "ukulele", "drumming", "cabaret", "blues feat", "live blues", "recital", "vocal", "instrumental",
                    "choral", "choir", "chorus", "ensemble", "chamber music", "singing", "bands", "brass", "a cappella", "countertenor", "a far cry"]),
     ("film",      ["screening", "film ", "cinema", "movie night", "movie", "movies", "brattle", "coolidge", "documentary", "baaff", "reel rock", "warren miller", "film fest", "in 35mm", "in 70mm"]),
-    ("sports",    ["bruins", "celtics", "red sox", "revolution", "patriots watch", "marathon", "vs.", "match", "game ",
+    ("sports",    ["bruins", "celtics", "red sox", "new england revolution", "revolution vs", "ne revolution", "patriots watch", "marathon", "vs.", "match", "game ",
                    " 5k", "fun run", "road race", "10k", "half marathon", "cycling event",
                    "bike race", "rowing", "regatta", "hocr", "pickleball", "tennis", "volleyball",
                    "dodgeball", "archery", "parkour", "crossfit", "rock climbing", "kickboxing",
