@@ -4672,10 +4672,30 @@ def _gender_conflict(e1, e2):
     return bool(s1 and s2 and s1 != s2)
 
 
+def _located_far_apart(e1, e2, miles=0.5):
+    """Both events geocode, to points over half a mile apart."""
+    try:
+        g1, g2 = resolve_event_geo(e1), resolve_event_geo(e2)
+    except Exception:
+        return False
+    if not (g1 and g2) or g1.get("lat") is None or g2.get("lat") is None:
+        return False
+    dlat = (g1["lat"] - g2["lat"]) * 69.0
+    dlng = (g1["lng"] - g2["lng"]) * 51.3  # miles per degree of longitude at Boston's latitude
+    return (dlat * dlat + dlng * dlng) ** 0.5 > miles
+
+
+def _unknown_venue_could_match(e1, e2):
+    """An event whose venue is only its source's name ("Castle Island Brewing" for every
+    Castle Island listing) matches any venue, unless both still place far apart: Castle Island's
+    and Mighty Squirrel Fenway's Tuesday "Musical Bingo" are 2.3 miles apart."""
+    return bool(e1.get("_venue_unknown") or e2.get("_venue_unknown")) and not _located_far_apart(e1, e2)
+
+
 def _same_physical_venue(e1, e2):
     """Stricter venue check than _merge_duplicates' _venue_match: same geo pin, or a shared
     distinctive word ("Sinclair", "Royale") — not just "Public Library" or "Music Hall"."""
-    if e1.get("_venue_unknown") or e2.get("_venue_unknown"):
+    if _unknown_venue_could_match(e1, e2):
         return True
     w = lambda v: {re.sub(r"s$", "", x) for x in re.findall(r"\w+", (v or "").lower()) if len(x) >= 2} - _VENUE_GENERIC_WORDS
     if w(e1.get("venue")) & w(e2.get("venue")):
@@ -4915,20 +4935,12 @@ def _merge_duplicates(events, word_freq=None):
     def _far_apart(e1, e2):
         """Same title at two places we can locate, over half a mile apart: separate events,
         e.g. citywide "Boston Family Days" at the ICA and at the Aquarium on the same Sunday."""
-        try:
-            g1, g2 = resolve_event_geo(e1), resolve_event_geo(e2)
-        except Exception:
-            return False
-        if not (g1 and g2) or g1.get("lat") is None or g2.get("lat") is None:
-            return False
-        dlat = (g1["lat"] - g2["lat"]) * 69.0
-        dlng = (g1["lng"] - g2["lng"]) * 51.3  # miles per degree of longitude at Boston's latitude
-        return (dlat * dlat + dlng * dlng) ** 0.5 > 0.5
+        return _located_far_apart(e1, e2)
 
     def _venue_match(v1, v2, e1, e2):
         if not v1 or not v2:
             return True
-        if (e1 and e1.get("_venue_unknown")) or (e2 and e2.get("_venue_unknown")):
+        if e1 and e2 and _unknown_venue_could_match(e1, e2):
             return True
         v1_low = v1.lower()
         v2_low = v2.lower()
