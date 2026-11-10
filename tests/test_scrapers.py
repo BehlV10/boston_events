@@ -1884,6 +1884,122 @@ class TestBostonEvents(unittest.TestCase):
             self.assertIsNotNone(geo, f"Failed geo for {v}")
             self.assertEqual(_event_city(v, v, {"venue": v}), "boston", f"Failed city for {v}")
 
+    def test_fenway_park_concerts_scraper(self):
+        """Fenway Park concerts & events scraper: Fall Out Boy July 30th ingested, waitlists filtered."""
+        from scrapers import _ALL_VENUES, scrape_ticketmaster_discovery
+        from venues_geo import resolve_event_geo
+        from template import _event_city
+
+        names = [v["name"] for v in _ALL_VENUES]
+        self.assertIn("Fenway Park (Concerts & Events)", names)
+
+        mock_tm_payload = {
+            "_embedded": {
+                "events": [
+                    {
+                        "name": "Fall Out Boy: Twilight Of The Punks",
+                        "url": "https://www.ticketmaster.com/event/fob1",
+                        "dates": {"start": {"localDate": "2027-07-30", "localTime": "19:30:00"}},
+                        "classifications": [{"segment": {"name": "Music"}, "genre": {"name": "Rock"}}],
+                        "_embedded": {"venues": [{"name": "Fenway Park"}]},
+                    },
+                    {
+                        "name": "Fall Out Boy: Twilight Of The Punks - Platinum Tickets",
+                        "url": "https://www.ticketmaster.com/event/fob-plat",
+                        "dates": {"start": {"localDate": "2027-07-30", "localTime": "19:00:00"}},
+                        "classifications": [{"segment": {"name": "Music"}}],
+                        "_embedded": {"venues": [{"name": "Fenway Park"}]},
+                    },
+                    {
+                        "name": "2027 PREMIUM SEASON TICKETS WAITLIST",
+                        "url": "https://www.ticketmaster.com/event/waitlist",
+                        "dates": {"start": {"localDate": "2027-04-01", "localTime": "19:00:00"}},
+                        "classifications": [{"segment": {"name": "Sports"}}],
+                        "_embedded": {"venues": [{"name": "Fenway Park"}]},
+                    },
+                    {
+                        "name": "The Game: Harvard-Yale 2026",
+                        "url": "https://www.ticketmaster.com/event/the-game",
+                        "dates": {"start": {"localDate": "2026-11-21", "localTime": "12:00:00"}},
+                        "classifications": [{"segment": {"name": "Sports"}}],
+                        "_embedded": {"venues": [{"name": "Fenway Park"}]},
+                    },
+                ]
+            }
+        }
+
+        from unittest import mock
+        with mock.patch("scrapers._SESSION.get") as mock_get:
+            r = mock.MagicMock(status_code=200)
+            r.json.return_value = mock_tm_payload
+            r.raise_for_status = lambda: None
+            mock_get.return_value = r
+
+            evs = scrape_ticketmaster_discovery("https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZpZAaaI7A", UA_CHROME)
+
+        self.assertEqual(len(evs), 2)
+        fob = next(e for e in evs if "Fall Out Boy" in e["title"])
+        self.assertEqual(fob["category"], "music")
+        self.assertEqual(fob["venue"], "Fenway Park")
+        self.assertTrue(fob["date"].startswith("2027-07-30"))
+
+        game = next(e for e in evs if "Harvard-Yale" in e["title"])
+        self.assertEqual(game["category"], "sports")
+
+        geo = resolve_event_geo({"venue": "Fenway Park"})
+        self.assertIsNotNone(geo)
+        self.assertEqual(geo["neighborhood"], "Fenway")
+        self.assertEqual(_event_city("Fenway Park", "Fenway Park", {"venue": "Fenway Park"}), "boston")
+
+    def test_mighty_squirrel_scraper_and_geo(self):
+        """Mighty Squirrel Taproom scraper via Do617 and geo resolution for Fenway & Waltham."""
+        from scrapers import _ALL_VENUES, scrape_do617
+        from venues_geo import resolve_event_geo
+        from template import _event_city
+
+        names = [v["name"] for v in _ALL_VENUES]
+        self.assertIn("Mighty Squirrel Brewing Co.", names)
+
+        mock_html = """
+        <html><body>
+          <h1>Mighty Squirrel Brewing Co.</h1>
+          <div data-card-kind="event">
+            <h3>Taproom Trivia!</h3>
+            <a href="../events/2026/11/17/taproom-trivia-tickets">Tickets</a>
+            <div class="event-card-date">Tue, Nov 17 | 7:30 pm</div>
+          </div>
+          <div data-card-kind="event">
+            <h3>Musical Bingo</h3>
+            <a href="../events/weekly/tue/musical-bingo-tickets">Tickets</a>
+            <div class="event-card-date">Every Tuesday | 7:30 pm</div>
+          </div>
+        </body></html>
+        """
+        from unittest import mock
+        with mock.patch("scrapers._SESSION.get") as mock_get:
+            r = mock.MagicMock(status_code=200, content=mock_html.encode("utf-8"))
+            r.raise_for_status = lambda: None
+            mock_get.return_value = r
+
+            evs = scrape_do617("https://do617.com/venues/mighty-squirrel-brewing-co", UA_CHROME)
+
+        self.assertGreaterEqual(len(evs), 2)
+        trivia = next(e for e in evs if "Taproom Trivia" in e["title"])
+        self.assertEqual(trivia["venue"], "Mighty Squirrel Brewing Co.")
+        self.assertTrue(trivia["date"].startswith("2026-11-18"))
+        self.assertIn("2026/11/17", trivia["url"])
+
+        # Geo & City checks
+        geo_fenway = resolve_event_geo({"venue": "Mighty Squirrel Brewing Co."})
+        self.assertIsNotNone(geo_fenway)
+        self.assertEqual(geo_fenway["neighborhood"], "Fenway")
+        self.assertEqual(_event_city("Mighty Squirrel Brewing Co.", "Mighty Squirrel Brewing Co.", {}), "boston")
+
+        geo_waltham = resolve_event_geo({"venue": "Mighty Squirrel Waltham"})
+        self.assertIsNotNone(geo_waltham)
+        self.assertEqual(geo_waltham["neighborhood"], "Waltham")
+        self.assertEqual(_event_city("Mighty Squirrel Waltham", "Mighty Squirrel Waltham", {}), "other")
+
     def test_celebrity_series(self):
         """Celebrity Series of Boston scraper and geo verification."""
         from scrapers import _ALL_VENUES, scrape_celebrity_series

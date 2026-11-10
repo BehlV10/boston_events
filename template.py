@@ -182,6 +182,7 @@ CITY_RULES = [
         "common craft southie", "northeastern university", "cabot center", "icon nightclub",
         "venu nightclub", "bijou", "icon", "venu", "caveau", "howl at the moon", "down nightclub",
         "down boston", "ned devine", "hennessey", "hong kong", "sissy k", "coogan", "legacy nightclub", "hava",
+        "mighty squirrel", "mighty squirrel brewing", "mighty squirrel taproom",
         "elephant & castle", "fogo de chão", "fogo de chao", "artesani park",
         "399 boylston", "william e mullins way", "hynes", "off the rails", "lavietes", "31 hemenway", "bully boy",
     )),
@@ -5801,7 +5802,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
             venue = "The 88 Club"
             e = dict(e)
             e["venue"] = venue
-        if source == "Deep Cuts Medford" and "do617.com" in (e.get("url") or "") and venue.lower() != "deep cuts":
+        if source in ("Deep Cuts Medford", "Mighty Squirrel Brewing Co.") and "do617.com" in (e.get("url") or "") and venue.lower() not in (source.lower(), "mighty squirrel", "mighty squirrel brewing co.", "deep cuts"):
             source = "Do617"
             e = dict(e)
             e["_source_venue"] = source

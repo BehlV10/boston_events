@@ -286,6 +286,12 @@ def is_placeholder_or_closed_event(title: str) -> bool:
     if re.match(r"^\s*[\[\(]?\s*(moved|relocated)\s+to\b", t, re.I):
         return True
 
+    # 2c. Ticket waitlists, season deposits, or VIP/Platinum duplicates
+    if re.search(r"\b(season\s+tickets?\s+(waitlist|deposit)|tickets?\s+waitlist|waitlist)\b", t, re.I):
+        return True
+    if re.search(r"-\s*(Official\s+)?Platinum\s+Tickets?\b", t, re.I):
+        return True
+
     # 3. Check calendar placeholder
     if re.search(r"\bcheck\s+(our\s+)?calendar\b", t, re.I):
         return True
@@ -4403,12 +4409,15 @@ def scrape_do617(url, ua):
     seen = set()
     start_date = datetime.now(EASTERN).date()
 
-    # 0. Single venue page support (e.g. /venues/deep-cuts)
+    # 0. Single venue page support (e.g. /venues/deep-cuts, /venues/mighty-squirrel-brewing-co)
     if "/venues/" in (url or ""):
         try:
             resp = _SESSION.get(url, headers={"User-Agent": ua or UA_CHROME}, timeout=10)
             if resp.status_code == 200:
                 soup = BeautifulSoup(resp.content, "html.parser")
+                h1 = soup.find("h1")
+                v_title = h1.get_text(strip=True) if h1 else ""
+                default_vname = v_title or "Deep Cuts"
                 cards = soup.find_all("div", attrs={"data-card-kind": "event"})
                 for card in cards:
                     a_link = card.find("a", href=True)
@@ -4421,10 +4430,7 @@ def scrape_do617(url, ua):
                     if not name:
                         continue
                     m_date = re.search(r"/events/(\d{4})/(\d{1,2})/(\d{1,2})/", rel_href)
-                    if not m_date:
-                        continue
-                    y, m_val, day_val = m_date.groups()
-                    date_part = f"{int(y):04d}-{int(m_val):02d}-{int(day_val):02d}"
+                    m_weekly = re.search(r"/events/weekly/(mon|tue|wed|thu|fri|sat|sun)/", rel_href, re.I)
                     date_el = card.find(class_=lambda c: c and "date" in c)
                     raw_date_text = date_el.get_text(" ", strip=True) if date_el else ""
                     time_str = "20:00:00"
@@ -4438,18 +4444,41 @@ def scrape_do617(url, ua):
                         elif merid == "am" and hr == 12:
                             hr = 0
                         time_str = f"{hr:02d}:{mn:02d}:00"
-                    try:
-                        iso_str = f"{date_part}T{time_str}-04:00"
-                        iso = datetime.fromisoformat(iso_str).astimezone(timezone.utc).isoformat()
-                    except Exception:
-                        iso = None
-                    events.append({
-                        "name": name,
-                        "date": iso,
-                        "url": full_url,
-                        "venue": "Deep Cuts",
-                        "price": None,
-                    })
+
+                    date_list = []
+                    if m_date:
+                        y, m_val, day_val = m_date.groups()
+                        date_part = f"{int(y):04d}-{int(m_val):02d}-{int(day_val):02d}"
+                        try:
+                            iso_str = f"{date_part}T{time_str}-05:00"
+                            iso = datetime.fromisoformat(iso_str).astimezone(timezone.utc).isoformat()
+                            date_list.append(iso)
+                        except Exception:
+                            pass
+                    elif m_weekly:
+                        dow_map = {"mon": 0, "tue": 1, "wed": 2, "thu": 3, "fri": 4, "sat": 5, "sun": 6}
+                        target_dow = dow_map.get(m_weekly.group(1).lower()[:3])
+                        if target_dow is not None:
+                            curr = start_date
+                            for _ in range(28):
+                                if curr.weekday() == target_dow:
+                                    try:
+                                        iso_str = f"{curr.isoformat()}T{time_str}-05:00"
+                                        iso = datetime.fromisoformat(iso_str).astimezone(timezone.utc).isoformat()
+                                        date_list.append(iso)
+                                    except Exception:
+                                        pass
+                                curr += timedelta(days=1)
+
+                    for iso in date_list:
+                        events.append({
+                            "title": name,
+                            "name": name,
+                            "date": iso,
+                            "url": full_url,
+                            "venue": default_vname,
+                            "price": None,
+                        })
         except Exception:
             pass
         return _do617_fill_prices(events, ua)
@@ -10700,13 +10729,26 @@ def scrape_ticketmaster_discovery(url, ua):
                 price = f"From ${int(p_min)}"
 
         classifications = ev.get("classifications") or []
+        segment_name = ""
         g_name = ""
         sg_name = ""
         if classifications:
+            segment_name = (classifications[0].get("segment", {}).get("name") or "").lower()
             g_name = classifications[0].get("genre", {}).get("name") or ""
             sg_name = classifications[0].get("subGenre", {}).get("name") or ""
         native_g = map_native_genre(g_name) or map_native_genre(sg_name)
         genre = infer_music_genre(name, vname, native_genre=native_g)
+
+        if "sport" in segment_name:
+            cat = "sports"
+        elif any(k in segment_name for k in ["theatre", "theater", "arts"]):
+            cat = "theater"
+        elif "comedy" in g_name.lower() or "comedy" in sg_name.lower():
+            cat = "comedy"
+        elif "music" in segment_name:
+            cat = "music"
+        else:
+            cat = "music"
 
         key = (name.lower(), dt.strftime("%Y-%m-%d"))
         if key in seen:
@@ -10715,11 +10757,12 @@ def scrape_ticketmaster_discovery(url, ua):
 
         events.append({
             "name": name,
+            "title": name,
             "date": dt.astimezone(timezone.utc).isoformat(),
             "url": link,
             "venue": vname,
             "price": price,
-            "category": "music",
+            "category": cat,
             "genre": genre,
         })
 
@@ -12859,6 +12902,7 @@ _ALL_VENUES = [
     {"name": "Paradise Rock Club", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZpZA11JtA&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
     {"name": "Brighton Music Hall", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZpapwne&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
     {"name": "MGM Music Hall at Fenway", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZ917AEJz&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
+    {"name": "Fenway Park (Concerts & Events)", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZpZAaaI7A&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
     {"name": "Citizens House of Blues Boston", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZpZAEA7eA&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
     {"name": "Orpheum Theatre", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZpZA1J7JA&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
     {"name": "Leader Bank Pavilion", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZ917AxdQ&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
@@ -13047,6 +13091,7 @@ _ALL_VENUES = [
     {"name": "Scorpion Bar Boston", "url": "https://buy.tablelist.com/v/scorpion-bar", "ua": UA_CHROME, "scraper": scrape_tablelist, "default_category": "clubbing"},
     {"name": "Mémoire Boston", "url": "https://www.ticketmaster.com/memoire-tickets-everett/venue/9388", "ua": UA_CHROME, "scraper": scrape_ticketmaster_venue, "default_category": "clubbing"},
     {"name": "Deep Cuts Medford", "url": "https://do617.com/venues/deep-cuts", "ua": UA_CHROME, "scraper": scrape_do617, "default_category": "music"},
+    {"name": "Mighty Squirrel Brewing Co.", "url": "https://do617.com/venues/mighty-squirrel-brewing-co", "ua": UA_CHROME, "scraper": scrape_do617, "default_category": "community"},
     {"name": "Lou's Harvard Square", "url": "https://www.wearelous.com/lous-live", "ua": UA_CHROME, "scraper": scrape_lous, "default_category": "music"},
     {"name": "Boston Salsa & Bachata", "url": "https://bostonsalsa.org/", "ua": UA_CHROME, "scraper": scrape_bostonsalsa, "default_category": "dance"},
     {"name": "Charles River Speedway", "url": "https://charlesriverspeedway.com", "ua": UA_CHROME, "scraper": scrape_speedway, "default_category": "food"},
