@@ -38,6 +38,7 @@ from scrapers import (
 )
 from venues_geo import resolve_event_geo, nearest_curated_venue, flag_shared_source_points
 from lgbtq import is_lgbtq_event
+from college import is_college_event, detect_school, college_kind, school_label, COLLEGE_SCHOOLS, COLLEGE_KINDS
 from light_theme import LIGHT_THEME_CSS
 
 
@@ -127,6 +128,7 @@ CITY_RULES = [
         "325 binney", "microsoft new england research", "ef education first",
     )),
     ("boston", (
+        "(suffolk university)",
         "the 88 club", "88 club",
         "modern theatre",
         "bsmnt", "kings seaport", "kings - seaport", "kings dining",
@@ -896,6 +898,7 @@ def build_seo_directory_html(all_events_flat, all_venue_names):
           <li><a href="board-game-nights-boston/">Board Game Nights &amp; Trivia</a></li>
           <li><a href="kids-family-events-boston/">Kids &amp; Family Events</a></li>
           <li><a href="boston-edm/">Boston EDM &amp; Electronic Shows</a></li>
+          <li><a href="college/">College Games, Concerts &amp; Talks</a></li>
           <li><a href="markets-festivals-boston/">Markets, Fairs &amp; Festivals</a></li>
         </ul>
       </div>
@@ -1076,6 +1079,11 @@ def filter_events_for_hub(hub, events):
             filtered = filtered[:hub["limit"]]
         return filtered
 
+    if hub.get("style") == "college":
+        last_day = datetime.now(EASTERN).date() + timedelta(days=hub["window_days"])
+        filtered = [e for e in events if is_college_event(e) and (_parse_event_eastern_date(e) or last_day) <= last_day]
+        return filtered[:hub["limit"]]
+
     if hub.get("style") == "markets":
         # Markets from any category (a "Kids Holiday Market", a farmers market a source called
         # food), plus festivals and fairs you wander around: stalls, food, art, produce.
@@ -1201,6 +1209,19 @@ HUBS = {
         "og_badge": "BOSTON EDM & ELECTRONIC",
         "og_image": "og-boston-edm.jpg",
         "query": "#cat=Music+%26+nightlife&genre=electronic"
+    },
+    # Games, concerts, talks and campus events from the schools' own calendars (see college.py)
+    "college": {
+        "title": "College Events in Boston: Games, Concerts & Talks",
+        "h1": "College Games, Concerts & Talks",
+        "show_details": True,
+        "limit": 500,
+        "window_days": 28,
+        "style": "college",
+        "subtitle": "Home games, student recitals, lectures and campus events open to the public at BU, BC, Northeastern, Harvard, MIT, Tufts, Berklee, NEC, Emerson, Suffolk and more, from each school's own calendars.",
+        "og_badge": "COLLEGE EVENTS",
+        "og_image": "og-college.jpg",
+        "query": ""
     },
     # Flea, night, farmers and holiday markets, craft fairs and festivals
     "markets-festivals-boston": {
@@ -2549,6 +2570,56 @@ _EDM_FILTER_JS = """<script>
 })();
 </script>"""
 
+_COLLEGE_CSS = """
+  .college-hub .col-filters { display: flex; flex-direction: column; gap: 8px; margin: 0 0 16px; }
+  .college-hub .col-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .college-hub .col-stats { font-size: 13px; margin-top: -8px; }
+  .college-hub .hub-badges { display: flex; gap: 6px; }
+  .badge-school { background: rgba(93, 155, 255, 0.16); color: var(--accent); }
+"""
+
+# School / kind / free chips on /college/; the choice is kept in the URL hash (#school=mit&kind=sports)
+_COLLEGE_FILTER_JS = """<script>
+(function () {
+  var chips = document.querySelectorAll('.col-chip');
+  if (!chips.length) return;
+  var cards = document.querySelectorAll('.hub-card');
+  var heads = document.querySelectorAll('.hub-day');
+  var state = { school: 'all', kind: 'all', free: 'all' };
+  function render(save) {
+    var days = {};
+    cards.forEach(function (c) {
+      var on = (state.school === 'all' || c.dataset.school === state.school) &&
+               (state.kind === 'all' || c.dataset.kind === state.kind) &&
+               (state.free === 'all' || c.dataset.free === '1');
+      c.hidden = !on;
+      if (on) days[c.dataset.day] = 1;
+    });
+    heads.forEach(function (h) { h.hidden = !days[h.dataset.day]; });
+    chips.forEach(function (b) { b.classList.toggle('active', state[b.dataset.group] === b.dataset.val); });
+    var none = document.getElementById('hub-none');
+    if (none) none.hidden = Object.keys(days).length > 0;
+    if (save) {
+      var parts = Object.keys(state).filter(function (k) { return state[k] !== 'all'; }).map(function (k) { return k + '=' + state[k]; });
+      history.replaceState(null, '', parts.length ? '#' + parts.join('&') : location.pathname);
+    }
+  }
+  chips.forEach(function (b) {
+    b.addEventListener('click', function () {
+      var g = b.dataset.group;
+      state[g] = (g === 'free' && state.free === '1') ? 'all' : b.dataset.val;
+      render(true);
+    });
+  });
+  location.hash.replace(/^#/, '').split('&').forEach(function (p) {
+    var kv = p.split('=');
+    if (kv.length === 2 && state.hasOwnProperty(kv[0]) &&
+        document.querySelector('.col-chip[data-group="' + kv[0] + '"][data-val="' + kv[1] + '"]')) state[kv[0]] = kv[1];
+  });
+  render(false);
+})();
+</script>"""
+
 _CAMPS_HERO_ART = """<svg class="camps-hero-art" viewBox="0 0 900 200" aria-hidden="true" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="camps-sky" x1="0" y1="0" x2="0" y2="1">
@@ -3297,6 +3368,7 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
     is_kids = hub.get("style") == "kids"
     is_edm = hub.get("style") == "edm"
     is_camps = hub.get("style") == "camps"
+    is_college = hub.get("style") == "college"
     is_markets = hub.get("style") == "markets"
     if is_camps:
         for idx, c in enumerate(filtered[:50]):
@@ -3324,6 +3396,7 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
 
     kid_age_counts, kid_kind_counts, kid_free, kid_places = {}, {}, 0, set()
     edm_sub_counts, edm_free_count, edm_places = {}, 0, set()
+    college_schools, college_kinds, college_free = {}, {}, 0
     cards_html = []
 
     if is_kids:
@@ -3556,13 +3629,23 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
             if re.fullmatch(r"\d+(?:\.\d+)?", price_txt):
                 price_txt = "$" + price_txt  # bare numbers only; most prices already carry "$"
             price_badge = f'<span class="badge badge-price">{escape(price_txt)}</span>' if price_txt else ""
-            if _is_event_free(e):
+            is_free = _is_event_free(e)
+            if is_free:
                 price_badge = '<span class="badge badge-free">Free</span>'
             city = _event_city(e.get("venue"), e.get("_source_venue"), e)
             city_name = escape(_hub_place_label(city, e))
             day_attr = t_obj.date().isoformat() if isinstance(t_obj, datetime) else ""
             mtype_attr = f' data-mtype="{market_type(e)}"' if is_markets else ""
-            cards_html.append(f"""<article class="hub-card" data-city="{escape(city)}" data-day="{day_attr}"{mtype_attr}>
+            college_attrs = ""
+            if is_college:
+                school = detect_school(e) or "other"
+                kind = college_kind(e, _effective_category(e))
+                college_schools[school] = college_schools.get(school, 0) + 1
+                college_kinds[kind] = college_kinds.get(kind, 0) + 1
+                college_free += is_free
+                college_attrs = f' data-school="{school}" data-kind="{kind}" data-free="{int(is_free)}"'
+                price_badge = f'<span class="badge badge-school">{escape(school_label(detect_school(e)))}</span>{price_badge}'
+            cards_html.append(f"""<article class="hub-card" data-city="{escape(city)}" data-day="{day_attr}"{mtype_attr}{college_attrs}>
   <div class="hub-card-head">
     <time class="hub-date">{' · '.join(x for x in (d_str, t_str) if x)}</time>
     <div class="hub-badges">{price_badge}</div>
@@ -3666,6 +3749,28 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
       <a href="../{hub['query']}" class="cta-btn">View on interactive calendar →</a>
     </div>
   </div>"""
+    elif is_college and cards_html:
+        kids_css, body_class = _COLLEGE_CSS, ' class="college-hub"'
+
+        def chip(group, val, label):
+            return f'<button type="button" class="hub-city-chip col-chip" data-group="{group}" data-val="{val}">{label}</button>'
+        schools = chip("school", "all", "All schools") + "".join(
+            chip("school", k, escape(short)) for k, (short, _full) in COLLEGE_SCHOOLS.items() if college_schools.get(k)) + (
+            chip("school", "other", "Cross-campus") if college_schools.get("other") else "")
+        kinds = chip("kind", "all", "Everything") + "".join(
+            chip("kind", k, f"{emo} {lbl}") for k, emo, lbl in COLLEGE_KINDS if college_kinds.get(k))
+        city_chips_html = f"""<div class="col-filters" role="group" aria-label="Filter college events">
+    <div class="col-row">{schools}</div>
+    <div class="col-row">{kinds}{chip("free", "1", "💛 Free") if college_free else ""}</div>
+  </div>"""
+        hub_js = _COLLEGE_FILTER_JS
+        n_cards = len(filtered[:card_limit])
+        hero_html = f"""<div class="hero">
+    <h1>{escape(hub['h1'])}</h1>
+    <p>{hub['subtitle']}</p>
+    <p class="col-stats">{n_cards} events in the next {hub['window_days']} days · {college_kinds.get("sports", 0)} games · {college_free} free</p>
+    <a href="../" class="cta-btn">See everything on the full calendar →</a>
+  </div>"""
     elif is_camps:
         kids_head, kids_css, body_class = "", _CAMPS_CSS, ' class="camps-hub"'
         hero_html, city_chips_html, camps_tail = _camps_sections(filtered)
@@ -3696,6 +3801,7 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
     <a href="../cambridge-events-tonight/" class="{active_ct}">Cambridge Tonight</a>
     <a href="../live-music-somerville/" class="{active_sm}">Somerville Music</a>
     <a href="../boston-edm/" class="{active_edm}">Boston EDM</a>
+    <a href="../college/" class="{'active' if hub_slug == 'college' else ''}">College</a>
     <a href="../board-game-nights-boston/" class="{active_bg}">Board Games</a>
     <a href="../kids-family-events-boston/" class="{active_kf}">Kids &amp; Family</a>
     <a href="../summer-camps/" class="{active_sc}">Summer Camps</a>
@@ -3947,7 +4053,7 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
   <div class="hub-grid">
     {cards_joined}
   </div>
-  <p id="hub-none" class="no-hub-events" hidden>{'No camps match those filters. Try removing one.' if is_camps else 'Nothing in this area in the next few weeks. Try another town.'}</p>
+  <p id="hub-none" class="no-hub-events" hidden>{'No camps match those filters. Try removing one.' if is_camps else 'No college events match those filters. Try another school.' if is_college else 'Nothing in this area in the next few weeks. Try another town.'}</p>
   {hub_js}
 </main>
 <footer>
@@ -4566,10 +4672,30 @@ def _gender_conflict(e1, e2):
     return bool(s1 and s2 and s1 != s2)
 
 
+def _located_far_apart(e1, e2, miles=0.5):
+    """Both events geocode, to points over half a mile apart."""
+    try:
+        g1, g2 = resolve_event_geo(e1), resolve_event_geo(e2)
+    except Exception:
+        return False
+    if not (g1 and g2) or g1.get("lat") is None or g2.get("lat") is None:
+        return False
+    dlat = (g1["lat"] - g2["lat"]) * 69.0
+    dlng = (g1["lng"] - g2["lng"]) * 51.3  # miles per degree of longitude at Boston's latitude
+    return (dlat * dlat + dlng * dlng) ** 0.5 > miles
+
+
+def _unknown_venue_could_match(e1, e2):
+    """An event whose venue is only its source's name ("Castle Island Brewing" for every
+    Castle Island listing) matches any venue, unless both still place far apart: Castle Island's
+    and Mighty Squirrel Fenway's Tuesday "Musical Bingo" are 2.3 miles apart."""
+    return bool(e1.get("_venue_unknown") or e2.get("_venue_unknown")) and not _located_far_apart(e1, e2)
+
+
 def _same_physical_venue(e1, e2):
     """Stricter venue check than _merge_duplicates' _venue_match: same geo pin, or a shared
     distinctive word ("Sinclair", "Royale") — not just "Public Library" or "Music Hall"."""
-    if e1.get("_venue_unknown") or e2.get("_venue_unknown"):
+    if _unknown_venue_could_match(e1, e2):
         return True
     w = lambda v: {re.sub(r"s$", "", x) for x in re.findall(r"\w+", (v or "").lower()) if len(x) >= 2} - _VENUE_GENERIC_WORDS
     if w(e1.get("venue")) & w(e2.get("venue")):
@@ -4809,20 +4935,12 @@ def _merge_duplicates(events, word_freq=None):
     def _far_apart(e1, e2):
         """Same title at two places we can locate, over half a mile apart: separate events,
         e.g. citywide "Boston Family Days" at the ICA and at the Aquarium on the same Sunday."""
-        try:
-            g1, g2 = resolve_event_geo(e1), resolve_event_geo(e2)
-        except Exception:
-            return False
-        if not (g1 and g2) or g1.get("lat") is None or g2.get("lat") is None:
-            return False
-        dlat = (g1["lat"] - g2["lat"]) * 69.0
-        dlng = (g1["lng"] - g2["lng"]) * 51.3  # miles per degree of longitude at Boston's latitude
-        return (dlat * dlat + dlng * dlng) ** 0.5 > 0.5
+        return _located_far_apart(e1, e2)
 
     def _venue_match(v1, v2, e1, e2):
         if not v1 or not v2:
             return True
-        if (e1 and e1.get("_venue_unknown")) or (e2 and e2.get("_venue_unknown")):
+        if e1 and e2 and _unknown_venue_could_match(e1, e2):
             return True
         v1_low = v1.lower()
         v2_low = v2.lower()
@@ -5451,6 +5569,14 @@ def render_page(results, weather=None, luckyseat_shows=None):
         desc_html = f'<div class="desc">{escape(desc)}</div>' if desc else ""
         free_flag = "true" if is_free else "false"
         lgbtq_attr = ' data-lgbtq="true"' if is_lgbtq_event(e) else ''
+        college_tag = ""
+        if is_college_event(e):
+            school = detect_school(e)
+            # A link only when the title is one: scripts take the first ".what a" as the event's own link
+            tag = "a" if ev_url else "span"
+            href = f' href="college/#school={school or "other"}" title="More college events"' if ev_url else ""
+            college_tag = (f'<{tag} class="college-tag"{href}><span class="chip-icon">🎓 </span>'
+                           f'{escape(school_label(school))}</{tag}>')
         epoch_attr = f' data-epoch="{int(t_obj.timestamp())}"' if t_obj else ''
         end_dt = trusted_end(e) if t_obj else None
         if end_dt and end_dt - t_obj <= timedelta(hours=12):
@@ -5473,7 +5599,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
             f'data-recur="{recur_flag}" data-free="{free_flag}"{lgbtq_attr}{epoch_attr}{geo_attrs}{hl_attr}>'
             f'<div class="when">{escape(format_when(e))}</div>'
             f'<div class="what">{star_btn}{link}{price_tag}{recur_badge}{hl_badge}'
-            f'<div class="venue-tag">{cat_tag}{v_prefix}{sub_tag}{extra_html}{cal_html}</div>'
+            f'<div class="venue-tag">{cat_tag}{college_tag}{v_prefix}{sub_tag}{extra_html}{cal_html}</div>'
             f'{desc_html}{note_html}</div></li>'
         )
 
@@ -5642,6 +5768,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
         <div class="useful-inner">
           <h3>Useful links</h3>
           <div class="useful-cat useful-parents" style="margin-bottom:12px"><div class="useful-cat-head" style="color:#f27e9a"><span class="chip-icon">👪 </span>For parents</div><ul><li><a href="kids-family-events-boston/">Kids &amp; family events</a></li><li><a href="summer-camps/">Summer camps near Boston</a></li></ul></div>
+          <div class="useful-cat useful-students" style="margin-bottom:12px"><div class="useful-cat-head" style="color:#5d9bff"><span class="chip-icon">🎓 </span>For students</div><ul><li><a href="college/">College games, concerts &amp; talks</a></li></ul></div>
           <p class="hint">Venues without a scrapable calendar.</p>
           {"".join(parts)}
         </div>'''
@@ -6805,6 +6932,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
   .venue-via {{ color: var(--muted); font-size: 11px; opacity: 0.85; font-style: italic; }}
   .venue-online {{ color: var(--muted); font-size: 11px; }}
   .cat-pill {{ display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 5px; font-size: 11px; font-weight: 600; line-height: 1.3; border: 1px solid; }}
+  .venue-tag .college-tag {{ display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; border-radius: 5px; font-size: 11px; font-weight: 600; line-height: 1.3; border: 1px solid var(--border); color: var(--muted); text-decoration: none; }}
+  .venue-tag a.college-tag:hover {{ color: var(--fg); text-decoration: none; }}
   .price {{ display:inline-block; margin-left: 8px; background: rgba(255,255,255,0.06); color: var(--muted); font-size: 11px; padding: 2px 7px; border-radius: 5px; font-weight: 500; vertical-align: middle; }}
   .price.free {{ background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); font-weight: 700; }}
   .price.ticketed {{ background: rgba(139, 178, 255, 0.12); color: #8bb2ff; border: 1px solid rgba(139, 178, 255, 0.3); font-weight: 600; font-size: 10px; }}
