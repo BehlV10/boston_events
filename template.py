@@ -5082,7 +5082,7 @@ def _source_priority(s):
     s = (s or "").lower()
     if s in ("ticketmaster", "seatgeek") or s.startswith("eventbrite"):
         return 1
-    if s in ("the boston calendar", "do617", "boston shows", "little muse"):
+    if s in ("the boston calendar", "do617", "boston shows", "little muse", "resident advisor boston"):
         return 5
     return 10
 

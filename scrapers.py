@@ -11789,6 +11789,113 @@ def scrape_bijou(url, ua, max_events=20):
     return events
 
 
+# ── Resident Advisor (ra.co GraphQL) ─────────────────────────────────────────────────────────
+#
+# ra.co's web pages sit behind DataDome, but the GraphQL endpoint its own pages call answers
+# plain requests. Boston is area 530. It's the only listing for underground and promoter-run
+# nights with no site of their own (Infra, Sojourn, Arcane, NAICOB, Descent). It's an internal
+# API, so it may close without notice: on any failure this returns [] and the run keeps the
+# last good list. Venues' own feeds outrank it on duplicates (template._source_priority).
+
+_RA_GRAPHQL = "https://ra.co/graphql"
+_RA_QUERY = """query BostonListings($filters: FilterInputDtoInput, $page: Int) {
+  eventListings(filters: $filters, pageSize: 100, page: $page, sort: {listingDate: {order: ASCENDING}}) {
+    totalResults
+    data { event { id title contentUrl startTime endTime cost venue { name address } } }
+  }
+}"""
+_RA_SECRET_RE = re.compile(r"(?i)^(?:tba|tbc|location\s+tba|secret\s+location|call\s+infoline.*|.*secret\s+location.*)$")
+# RA venue name -> the name venues_geo knows it by
+_RA_VENUE_NAMES = {"dx": "Descent", "phoenix landing": "The Phoenix Landing", "bsmnt": "bsmnt",
+                   "caveau boston": "Caveau", "middlesex": "Middlesex Lounge", "the grand boston": "The Grand",
+                   "legacy nightclub": "Legacy Boston", "the corner bar @ middle east": "The Middle East",
+                   "westin copley": "Westin Copley Place", "zuzu": "ZuZu"}
+
+
+def _ra_venue(name, address):
+    """(venue, address) from RA's venue. Unlisted spots come as "TBA - NAICOB - 105 S. Huntington
+    Ave..." or "TBA - Jadu 767 Centre St, ..."; secret ones as "TBA - Secret Location"."""
+    name = re.sub(r"\s+", " ", name or "").strip()
+    address = re.sub(r"\s*;\s*", ", ", (address or "").strip()).removesuffix(", United States").strip(", ")
+    m = re.match(r"(?i)^tba\b\s*-?\s*(.*)$", name)
+    if m:
+        rest = m.group(1).strip()
+        if not rest or _RA_SECRET_RE.match(rest):
+            return "Location TBA", ""
+        a = re.search(r"\d+\s+[A-Za-z]", rest)
+        if a:
+            label = rest[:a.start()].strip(" -,")
+            address = rest[a.start():].strip()
+            name = label or re.split(r",|\s+(?:Cambridge|Boston|Somerville)\b", address)[0].rstrip(". ")
+        else:
+            name = rest
+    return _RA_VENUE_NAMES.get(name.lower(), name), address
+
+
+def _ra_price(cost):
+    """RA's free-text cost ("10", "$5 - $20", "20+", "0") as the site's price string."""
+    nums = [float(n) for n in re.findall(r"\d+(?:\.\d+)?", cost or "")]
+    if not nums:
+        return None
+    if max(nums) == 0:
+        return "Free"
+    if "+" in cost and len(nums) == 1:
+        return f"${nums[0]:.0f}+"
+    return _format_price_range(min(nums), max(nums))
+
+
+def scrape_resident_advisor(url, ua):
+    """Boston club nights and electronic shows from Resident Advisor's GraphQL API."""
+    today = datetime.now(EASTERN).date()
+    filters = {"areas": {"eq": 530}, "listingDate": {"gte": today.isoformat(),
+                                                     "lte": (today + timedelta(days=90)).isoformat()}}
+    headers = {"User-Agent": ua or UA_CHROME, "Content-Type": "application/json",
+               "Referer": "https://ra.co/events/us/boston"}
+    listings = []
+    for page in range(1, 4):
+        resp = _SESSION.post(_RA_GRAPHQL, json={"query": _RA_QUERY, "variables": {"filters": filters, "page": page}},
+                             headers=headers, timeout=15)
+        if resp.status_code in (403, 429):
+            return []  # blocked: the run keeps the last good list
+        resp.raise_for_status()
+        block = ((resp.json().get("data") or {}).get("eventListings") or {})
+        rows = block.get("data") or []
+        listings += rows
+        if not rows or len(listings) >= (block.get("totalResults") or 0):
+            break
+
+    now = datetime.now(timezone.utc)
+    events, seen = [], set()
+    for row in listings:
+        ev = row.get("event") or {}
+        title = re.sub(r"\s+", " ", ev.get("title") or "").strip()
+        if not title or ev.get("id") in seen or is_placeholder_or_closed_event(title):
+            continue
+        try:
+            start = datetime.fromisoformat((ev.get("startTime") or "")[:19]).replace(tzinfo=EASTERN)
+        except ValueError:
+            continue
+        if start < now - timedelta(hours=3):
+            continue
+        end = None
+        try:
+            end_dt = datetime.fromisoformat((ev.get("endTime") or "")[:19]).replace(tzinfo=EASTERN)
+            if timedelta(0) < end_dt - start <= timedelta(hours=14):
+                end = end_dt.astimezone(timezone.utc).isoformat()
+        except ValueError:
+            pass
+        seen.add(ev.get("id"))
+        venue, address = _ra_venue((ev.get("venue") or {}).get("name"), (ev.get("venue") or {}).get("address"))
+        link = ev.get("contentUrl") or ""
+        entry = {"name": title[:160], "date": start.astimezone(timezone.utc).isoformat(), "end": end,
+                 "url": f"https://ra.co{link}" if link.startswith("/") else url,
+                 "venue": venue[:80], "price": _ra_price(ev.get("cost")), "category": "clubbing"}
+        if address:
+            entry["address"] = address[:120]
+        events.append(entry)
+    return events
+
+
 def scrape_posh_group(url, ua, venue=None):
     """A venue's Posh group feed (posh.vip/api/web/v2/util/group_url/<group>), the JSON the
     venue's own site loads (bsmntboston.com builds its show grid from it).
@@ -13417,6 +13524,7 @@ _ALL_VENUES = [
     {"name": "Deep Cuts Medford", "url": "https://do617.com/venues/deep-cuts", "ua": UA_CHROME, "scraper": scrape_do617, "default_category": "music"},
     {"name": "Hava Nightclub", "url": "https://do617.com/venues/hava-nightclub", "ua": UA_CHROME, "scraper": scrape_do617, "default_category": "clubbing"},
     {"name": "Urban Wild", "url": "https://do617.com/venues/urban-wild", "ua": UA_CHROME, "scraper": scrape_do617, "default_category": "clubbing"},
+    {"name": "Resident Advisor Boston", "url": "https://ra.co/events/us/boston", "ua": UA_CHROME, "scraper": scrape_resident_advisor, "default_category": "clubbing"},
     {"name": "Mighty Squirrel Fenway", "url": "https://do617.com/venues/mighty-squirrel-brewing-co", "ua": UA_CHROME, "scraper": scrape_mighty_squirrel_fenway, "default_category": None},
     {"name": "Lou's Harvard Square", "url": "https://www.wearelous.com/lous-live", "ua": UA_CHROME, "scraper": scrape_lous, "default_category": "music"},
     {"name": "Boston Salsa & Bachata", "url": "https://bostonsalsa.org/", "ua": UA_CHROME, "scraper": scrape_bostonsalsa, "default_category": "dance"},
