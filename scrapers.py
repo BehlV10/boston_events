@@ -13415,6 +13415,8 @@ _ALL_VENUES = [
     {"name": "Scorpion Bar Boston", "url": "https://buy.tablelist.com/v/scorpion-bar", "ua": UA_CHROME, "scraper": scrape_tablelist, "default_category": "clubbing"},
     {"name": "Mémoire Boston", "url": "https://www.ticketmaster.com/memoire-tickets-everett/venue/9388", "ua": UA_CHROME, "scraper": scrape_ticketmaster_venue, "default_category": "clubbing"},
     {"name": "Deep Cuts Medford", "url": "https://do617.com/venues/deep-cuts", "ua": UA_CHROME, "scraper": scrape_do617, "default_category": "music"},
+    {"name": "Hava Nightclub", "url": "https://do617.com/venues/hava-nightclub", "ua": UA_CHROME, "scraper": scrape_do617, "default_category": "clubbing"},
+    {"name": "Urban Wild", "url": "https://do617.com/venues/urban-wild", "ua": UA_CHROME, "scraper": scrape_do617, "default_category": "clubbing"},
     {"name": "Mighty Squirrel Fenway", "url": "https://do617.com/venues/mighty-squirrel-brewing-co", "ua": UA_CHROME, "scraper": scrape_mighty_squirrel_fenway, "default_category": None},
     {"name": "Lou's Harvard Square", "url": "https://www.wearelous.com/lous-live", "ua": UA_CHROME, "scraper": scrape_lous, "default_category": "music"},
     {"name": "Boston Salsa & Bachata", "url": "https://bostonsalsa.org/", "ua": UA_CHROME, "scraper": scrape_bostonsalsa, "default_category": "dance"},
