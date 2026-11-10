@@ -10691,13 +10691,16 @@ def scrape_ticketmaster_discovery(url, ua):
                 price = f"From ${int(p_min)}"
 
         classifications = ev.get("classifications") or []
+        seg_name = ""
         g_name = ""
         sg_name = ""
         if classifications:
-            g_name = classifications[0].get("genre", {}).get("name") or ""
-            sg_name = classifications[0].get("subGenre", {}).get("name") or ""
+            seg_name = (classifications[0].get("segment") or {}).get("name") or ""
+            g_name = (classifications[0].get("genre") or {}).get("name") or ""
+            sg_name = (classifications[0].get("subGenre") or {}).get("name") or ""
+        category = ticketmaster_category(seg_name, g_name, sg_name)
         native_g = map_native_genre(g_name) or map_native_genre(sg_name)
-        genre = infer_music_genre(name, vname, native_genre=native_g)
+        genre = infer_music_genre(name, vname, native_genre=native_g) if category == "music" else None
 
         key = (name.lower(), dt.strftime("%Y-%m-%d"))
         if key in seen:
@@ -10710,11 +10713,36 @@ def scrape_ticketmaster_discovery(url, ua):
             "url": link,
             "venue": vname,
             "price": price,
-            "category": "music",
+            "category": category,
             "genre": genre,
         })
 
     return events
+
+
+def ticketmaster_category(segment, genre, sub_genre):
+    """Our category from Ticketmaster's classification, or None to let infer_category decide.
+
+    Comedy is checked first: Ticketmaster files stand-up under "Arts & Theatre" (genre Comedy),
+    and these used to be listed as music (68 of them across our 8 Ticketmaster venues, Nov 2026).
+    "Miscellaneous" / "Undefined" (lectures, psychics, card shows) are left to the name-based
+    inference, which also applies the venue's default category."""
+    seg, g, sg = (segment or "").lower(), (genre or "").lower(), (sub_genre or "").lower()
+    if "comedy" in (g, sg):
+        return "comedy"
+    if seg == "sports":
+        return "sports"
+    if seg == "music":
+        return "music"
+    if seg == "film":
+        return "film"
+    if seg == "arts & theatre":
+        if g == "dance":
+            return "dance"
+        if g in ("theatre", "miscellaneous theatre", "performance art", "musical", "opera", "magic & illusion", "variety"):
+            return "music" if g == "opera" else "theater"
+        return None
+    return None
 
 
 def scrape_ticketweb(url, ua):
