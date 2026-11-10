@@ -2034,6 +2034,23 @@ class TestBostonEvents(unittest.TestCase):
         self.assertEqual(geo_gl["neighborhood"], "Theater District")
         self.assertEqual(_event_city("Ghost Light Tavern", "Ghost Light Tavern", {}), "boston")
 
+        # 3. Additional Nightlife & Social Venues
+        for vname, nbh, city in [
+            ("Hava Nightclub", "Theater District", "boston"),
+            ("City Tap Fort Point", "Seaport / Fort Point", "boston"),
+            ("Urban Wild", "Charlestown", "boston"),
+            ("Uptown Social Boston", "South End", "boston"),
+            ("The Kartal", "South End", "boston"),
+            ("Desnuda Cocina", "South End", "boston"),
+            ("Cloud & Spirits", "Central Square", "cambridge"),
+        ]:
+            self.assertIn(vname, manual_venues, f"Missing recurring events for {vname}")
+            self.assertGreaterEqual(len(manual_venues[vname]), 1)
+            g = resolve_event_geo({"venue": vname})
+            self.assertIsNotNone(g, f"Missing geo for {vname}")
+            self.assertEqual(g["neighborhood"], nbh)
+            self.assertEqual(_event_city(vname, vname, {}), city)
+
     def test_resident_advisor_tba_normalization_and_geo(self):
         """Resident Advisor TBA address cleaning, secret venue contextualization, and geo resolution."""
         from scrapers import scrape_resident_advisor
@@ -2168,9 +2185,9 @@ class TestBostonEvents(unittest.TestCase):
             ("Play Boston", "Theater District", "boston"),
             ("District 288", "Central Square", "cambridge"),
             ("Cloud & Spirits", "Central Square", "cambridge"),
-            ("The Kartal", "Fenway / Back Bay", "boston"),
-            ("Desnuda Cocina", "West End / TD Garden", "boston"),
-            ("Uptown Social Boston", "West End / North Station", "boston"),
+            ("The Kartal", "South End", "boston"),
+            ("Desnuda Cocina", "South End", "boston"),
+            ("Uptown Social Boston", "South End", "boston"),
             ("American Legion Marsh Post #442", "West Cambridge", "cambridge"),
             ("Glitch Gallery", "Beacon Hill", "boston"),
             ("Mémoire Boston", "Everett", "boston"),

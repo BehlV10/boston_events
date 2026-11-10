@@ -13128,6 +13128,8 @@ _ALL_VENUES = [
     {"name": "Mémoire Boston", "url": "https://www.ticketmaster.com/memoire-tickets-everett/venue/9388", "ua": UA_CHROME, "scraper": scrape_ticketmaster_venue, "default_category": "clubbing"},
     {"name": "Deep Cuts Medford", "url": "https://do617.com/venues/deep-cuts", "ua": UA_CHROME, "scraper": scrape_do617, "default_category": "music"},
     {"name": "Mighty Squirrel Brewing Co.", "url": "https://do617.com/venues/mighty-squirrel-brewing-co", "ua": UA_CHROME, "scraper": scrape_do617, "default_category": "community"},
+    {"name": "Hava Nightclub", "url": "https://do617.com/venues/hava-nightclub", "ua": UA_CHROME, "scraper": scrape_do617, "default_category": "clubbing"},
+    {"name": "Urban Wild", "url": "https://do617.com/venues/urban-wild", "ua": UA_CHROME, "scraper": scrape_do617, "default_category": "clubbing"},
     {"name": "Lou's Harvard Square", "url": "https://www.wearelous.com/lous-live", "ua": UA_CHROME, "scraper": scrape_lous, "default_category": "music"},
     {"name": "Boston Salsa & Bachata", "url": "https://bostonsalsa.org/", "ua": UA_CHROME, "scraper": scrape_bostonsalsa, "default_category": "dance"},
     {"name": "Charles River Speedway", "url": "https://charlesriverspeedway.com", "ua": UA_CHROME, "scraper": scrape_speedway, "default_category": "food"},
@@ -13392,6 +13394,36 @@ MANUAL_RECURRING_EVENTS = [
         ("Friday Night Clubroom & DJ @ Ghost Light", "https://ghostlighttavern.com/", 4, 21, 0),
         ("Saturday Night Clubroom & DJ @ Ghost Light", "https://ghostlighttavern.com/", 5, 21, 0),
         ("Sunday Night Party @ Ghost Light Clubroom", "https://ghostlighttavern.com/", 6, 21, 0, "Free"),
+    ]),
+    ("Hava Nightclub", "https://havaboston.com/", "clubbing", [
+        ("Link Up Thursdays @ Hava", "https://havaboston.com/", 3, 22, 30),
+        ("Friday Nightclub & DJs @ Hava", "https://havaboston.com/", 4, 22, 30),
+        ("Saturday Nightclub & DJs @ Hava", "https://havaboston.com/", 5, 22, 30),
+    ]),
+    ("City Tap Fort Point", "https://www.citytap.com/locations/fort-point-bos/", "food", [
+        ("Weekly Trivia Night @ City Tap", "https://www.citytap.com/locations/fort-point-bos/", 2, 18, 0, "Free"),
+        ("Weekend Brunch & Music Bingo @ City Tap", "https://www.citytap.com/locations/fort-point-bos/", 6, 12, 0, "Free"),
+    ]),
+    ("Urban Wild", "https://www.urbanwildboston.com/", "clubbing", [
+        ("X-Factor Networking & Social @ Urban Wild", "https://www.urbanwildboston.com/", 2, 18, 0, "Free"),
+        ("Friday Night DJ & SPARK Bowling @ Urban Wild", "https://www.urbanwildboston.com/", 4, 21, 0),
+        ("Saturday Night Live Music & DJ @ Urban Wild", "https://www.urbanwildboston.com/", 5, 21, 0),
+    ]),
+    ("Uptown Social Boston", "https://uptownsocialboston.com/", "clubbing", [
+        ("Live Music Dinner & Ladies Night @ Uptown Social", "https://uptownsocialboston.com/", 3, 19, 0, "Free"),
+        ("Uptown Social After Dark: Latin & Afrobeats", "https://uptownsocialboston.com/", 4, 22, 0),
+        ("Uptown Social After Dark: Hip-Hop & R&B", "https://uptownsocialboston.com/", 5, 22, 0),
+    ]),
+    ("The Kartal", "https://thekartalboston.com/", "music", [
+        ("Weekend Vinyl & House Sessions @ The Kartal", "https://thekartalboston.com/", 4, 21, 0, "Free"),
+        ("Weekend Vinyl & House Sessions @ The Kartal", "https://thekartalboston.com/", 5, 21, 0, "Free"),
+    ]),
+    ("Desnuda Cocina", "https://desnudacocina.com/", "music", [
+        ("Downstairs Sound Room: Hi-Fi Vinyl Sessions", "https://desnudacocina.com/", 4, 22, 0, "Free"),
+        ("Downstairs Sound Room: Hi-Fi Vinyl Sessions", "https://desnudacocina.com/", 5, 22, 0, "Free"),
+    ]),
+    ("Cloud & Spirits", "https://www.cloudandspirits.com/", "comedy", [
+        ("Above the Clouds Stand-Up Comedy Series", "https://www.cloudandspirits.com/", 3, 19, 30, "$15"),
     ]),
 ]
 
