@@ -11419,7 +11419,7 @@ def scrape_resident_advisor(url, ua):
         if "naicob" in v_low or "105 s. huntington" in v_low:
             v_name = "NAICOB"
             addr = addr or "105 S Huntington Ave, Jamaica Plain, MA"
-        elif "288 green" in v_low:
+        elif "288 green" in v_low or "district 288" in v_low:
             v_name = "288 Green St"
             addr = addr or "288 Green St, Cambridge, MA"
         elif v_low in ("dx", "descent"):
@@ -11428,6 +11428,15 @@ def scrape_resident_advisor(url, ua):
         elif "52 church" in v_low:
             v_name = "52 Church"
             addr = addr or "52 Church St, Cambridge, MA"
+        elif "marsh post" in v_low:
+            v_name = "American Legion Marsh Post #442"
+            addr = addr or "5 Greenough Blvd, Cambridge, MA"
+        elif "midway cafe" in v_low:
+            v_name = "Midway Cafe"
+            addr = addr or "3496 Washington St, Jamaica Plain, MA"
+        elif "reunion bbq" in v_low:
+            v_name = "Reunion BBQ"
+            addr = addr or "439 Tremont St, Boston, MA"
         elif re.search(r"\b(tba|secret\s+location)\b", v_name, re.I):
             if "infra" in title.lower():
                 v_name = "Secret Warehouse (Infra)"

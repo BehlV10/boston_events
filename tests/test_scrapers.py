@@ -2155,11 +2155,25 @@ class TestBostonEvents(unittest.TestCase):
         infra = next(e for e in evs if "Infra:" in e["title"])
         self.assertEqual(infra["venue"], "Secret Warehouse (Infra)")
 
-        # 6. Additional underground venues in venues_geo
+        # 6. Additional underground & nightlife venues in venues_geo
         for vname, nbh, city in [
             ("Spy Bar", "South End", "boston"),
             ("The Chemist", "Downtown / Financial District", "boston"),
             ("The Smoot Standard", "Central Square", "cambridge"),
+            ("City Tap Fort Point", "Seaport / Fort Point", "boston"),
+            ("Urban Wild", "Charlestown", "boston"),
+            ("The Westin Copley Place", "Back Bay / Copley", "boston"),
+            ("Hava Nightclub", "Theater District", "boston"),
+            ("51 Nightclub", "Theater District", "boston"),
+            ("Play Boston", "Theater District", "boston"),
+            ("District 288", "Central Square", "cambridge"),
+            ("Cloud & Spirits", "Central Square", "cambridge"),
+            ("The Kartal", "Fenway / Back Bay", "boston"),
+            ("Desnuda Cocina", "West End / TD Garden", "boston"),
+            ("Uptown Social Boston", "West End / North Station", "boston"),
+            ("American Legion Marsh Post #442", "West Cambridge", "cambridge"),
+            ("Glitch Gallery", "Beacon Hill", "boston"),
+            ("Mémoire Boston", "Everett", "boston"),
         ]:
             g = resolve_event_geo({"venue": vname})
             self.assertIsNotNone(g, f"Failed geo for {vname}")

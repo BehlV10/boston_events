@@ -122,6 +122,7 @@ CITY_RULES = [
         "325 binney", "microsoft new england research", "ef education first",
         "tuck's arcadium", "tucks arcadium", "descent", "the lower level", "lower level",
         "smoot standard", "the smoot standard", "dx", "52 church", "288 green st",
+        "district 288", "cloud & spirits", "cloud and spirits", "marsh post", "american legion marsh post",
     )),
     ("boston", (
         "the 88 club", "88 club",
@@ -164,7 +165,9 @@ CITY_RULES = [
         "petula's", "old south", "oak long bar", "massachusetts historical society",
         "loco taqueria", "high street place", "gray's hall", "flight club", "empire",
         "arnold arboretum", "franklin park", "224 boston", "yellow door taqueria", "wyndham boston beacon hill",
-        "white bull tavern", "white bull", "ghost light tavern", "ghost light", "spy bar", "the chemist", "naicob", "west end johnnie", "view boston", "the superette",
+        "white bull tavern", "white bull", "ghost light tavern", "ghost light", "spy bar", "the chemist", "naicob",
+        "city tap", "urban wild", "westin copley", "the westin copley place", "hava nightclub", "hava", "51 nightclub",
+        "the kartal", "kartal", "desnuda", "uptown social", "glitch gallery", "west end johnnie", "view boston", "the superette",
         "the substation", "the rocks at harbor way", "the harp", "the alley bar",
         "telegraph hill", "simmons university", "rocco's cucina", "reggie lewis",
         "red cross of greater boston", "rebel's guild", "raffles boston", "pkl boston",
