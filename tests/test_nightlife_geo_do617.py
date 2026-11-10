@@ -198,7 +198,8 @@ class Places(unittest.TestCase):
         for v, place in (("Lucky's Lounge", "Lucky's Lounge"), ("Luckys Lounge", "Lucky's Lounge"),
                          ("City Tap House", "City Tap House"), ("White Bull Tavern", "White Bull Tavern"),
                          ("Caveau Boston", "Caveau"), ("Ned Devine's", "Ned Devine's"), ("Hong Kong", "Hong Kong"),
-                         ("Urban Wild", "Urban Wild")):
+                         ("Urban Wild", "Urban Wild"), ("Hava Nightclub", "Hava Nightclub"),
+                         ("Havana Club", "Havana Club")):
             self.assertEqual(self._where(v)[0], place, v)
 
     def test_no_short_needles(self):
@@ -236,6 +237,9 @@ class Sources(unittest.TestCase):
         by_name = {v["name"]: v for v in S._ALL_VENUES}
         self.assertIs(by_name["Fenway Park"]["scraper"], S.scrape_fenway_park)
         self.assertIs(by_name["Mighty Squirrel Fenway"]["scraper"], S.scrape_mighty_squirrel_fenway)
+        for name, slug in (("Hava Nightclub", "hava-nightclub"), ("Urban Wild", "urban-wild")):
+            self.assertIs(by_name[name]["scraper"], S.scrape_do617, name)
+            self.assertEqual(by_name[name]["url"], f"https://do617.com/venues/{slug}")
 
 
 if __name__ == "__main__":
