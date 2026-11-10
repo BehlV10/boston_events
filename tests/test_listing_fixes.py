@@ -46,6 +46,38 @@ class TicketmasterPrices(unittest.TestCase):
         self.assertEqual(self.discovery_price(32, 32), "$32")
 
 
+class TicketmasterCategories(unittest.TestCase):
+    """Ticketmaster's segment/genre decides the category; it used to be "music" for everything."""
+
+    def test_stand_up_is_comedy_not_music(self):
+        self.assertEqual(scrapers.ticketmaster_category("Arts & Theatre", "Comedy", "Comedy"), "comedy")
+        self.assertEqual(scrapers.ticketmaster_category("Arts & Theatre", "Theatre", "Comedy"), "comedy")
+
+    def test_other_segments(self):
+        self.assertEqual(scrapers.ticketmaster_category("Music", "Rock", "Pop"), "music")
+        self.assertEqual(scrapers.ticketmaster_category("Sports", "Boxing", "Boxing"), "sports")
+        self.assertEqual(scrapers.ticketmaster_category("Arts & Theatre", "Performance Art", "Performance Art"), "theater")
+        self.assertEqual(scrapers.ticketmaster_category("Film", "Drama", ""), "film")
+
+    def test_unclear_segments_are_left_to_inference(self):
+        self.assertIsNone(scrapers.ticketmaster_category("Miscellaneous", "Community/Civic", "Community/Civic"))
+        self.assertIsNone(scrapers.ticketmaster_category("Undefined", "", ""))
+        self.assertIsNone(scrapers.ticketmaster_category("", "", ""))
+
+    def test_scraped_comedy_show_has_no_music_genre(self):
+        reply = TicketmasterPrices().response(30, 30)
+        ev = reply.json.return_value["_embedded"]["events"][0]
+        ev["name"] = "Nikki Glaser: The Stunning Tour"
+        ev["classifications"] = [{"segment": {"name": "Arts & Theatre"}, "genre": {"name": "Comedy"},
+                                  "subGenre": {"name": "Comedy"}}]
+        with mock.patch.object(scrapers, "_SESSION") as session:
+            session.get.return_value = reply
+            events = scrapers.scrape_ticketmaster_discovery(
+                "https://app.ticketmaster.com/discovery/v2/events.json?venueId=x", "ua")
+        self.assertEqual(events[0]["category"], "comedy")
+        self.assertIsNone(events[0]["genre"])
+
+
 class BigNightLiveTimes(unittest.TestCase):
     def test_ticketmaster_time_replaces_the_assumed_seven_pm(self):
         own = {"venue": "Big Night Live", "events": [
