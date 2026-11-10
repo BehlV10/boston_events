@@ -877,7 +877,6 @@ def build_seo_directory_html(all_events_flat, all_venue_names):
           <li><a href="board-game-nights-boston/">Board Game Nights &amp; Trivia</a></li>
           <li><a href="kids-family-events-boston/">Kids &amp; Family Events</a></li>
           <li><a href="boston-edm/">Boston EDM &amp; Electronic Shows</a></li>
-          <li><a href="markets-boston/">Holiday, Farmers, Flea &amp; Craft Markets</a></li>
           <li><a href="markets-festivals-boston/">Markets, Fairs &amp; Festivals</a></li>
         </ul>
       </div>
@@ -1059,9 +1058,9 @@ def filter_events_for_hub(hub, events):
         return filtered
 
     if hub.get("style") == "markets":
-        # Markets from any category: a "Kids Holiday Market" or a farmers market a source called
-        # food belongs here too; festivals without a market don't.
-        filtered = [e for e in events if is_market(e)]
+        # Markets from any category (a "Kids Holiday Market", a farmers market a source called
+        # food), plus festivals and fairs you wander around: stalls, food, art, produce.
+        filtered = [e for e in events if is_market(e) or is_vendor_festival(e)]
         if hub.get("limit"):
             filtered = filtered[:hub["limit"]]
         return filtered
@@ -1184,37 +1183,20 @@ HUBS = {
         "og_image": "og-boston-edm.jpg",
         "query": "#cat=Music+%26+nightlife&genre=electronic"
     },
-    # Markets only, with chips per kind (holiday & winter, farmers, flea & vintage, craft, night & food)
-    "markets-boston": {
-        "title": "Holiday, Farmers, Flea & Craft Markets in Greater Boston",
-        "h1": "Markets in Greater Boston",
-        "city_filter": None,
-        "cat_filter": None,
-        "style": "markets",
-        "free_only": False,
-        "time_filter": None,
-        "keyword_filter": None,
-        "show_details": True,
-        "limit": 300,
-        "subtitle": "Every market around Boston, Cambridge & Somerville in one place: holiday and winter markets, farmers markets, flea and vintage markets, craft and artisan fairs, and night markets. Filter by kind and town; updated daily.",
-        "collapse_series": True,  # a weekly farmers market or a month of holiday market days is one card
-        "og_badge": "BOSTON MARKETS",
-        "og_image": "og-markets-festivals.jpg",
-        "query": "#cat=Markets+%26+Festivals"
-    },
     # Flea, night, farmers and holiday markets, craft fairs and festivals
     "markets-festivals-boston": {
         "title": "Markets, Fairs & Festivals in Boston, Cambridge & Somerville",
         "h1": "Markets, Fairs & Festivals",
         "city_filter": None,
-        "cat_filter": "Markets & Festivals",
+        "cat_filter": None,
+        "style": "markets",  # markets from any category + vendor festivals, chips per kind
         "free_only": False,
         "time_filter": None,
         "keyword_filter": None,
         "show_details": True,
-        "limit": 250,
-        "subtitle": "Flea markets, night markets, farmers markets, holiday markets and bazaars, craft and vintage fairs, food fests and street festivals around Greater Boston, updated daily.",
-        "collapse_series": True,  # a month of Holiday Pop-Up Market days is one card
+        "limit": 300,
+        "subtitle": "Holiday and winter markets, farmers markets, flea and vintage markets, craft and artisan fairs, night markets, and street, food and cultural festivals with stalls to wander around Greater Boston. Filter by kind and town; updated daily.",
+        "collapse_series": True,  # a weekly farmers market or a month of holiday market days is one card
         "og_badge": "MARKETS & FESTIVALS",
         "og_image": "og-markets-festivals.jpg",
         "query": "#cat=Markets+%26+Festivals"
@@ -1398,7 +1380,9 @@ def _hub_place_label(city, e):
 
 
 # ---------------------------------------------------------------------------------------------
-# Markets hub: only markets (no music/food festivals), with a chip row per kind of market.
+# Markets & festivals hub: markets, plus festivals and fairs with stalls to wander (street fairs,
+# food, harvest and cultural festivals), with a chip row per kind. Shows aren't: a music, film or
+# dance festival is a lineup, a beer or wine festival a tasting, a tree lighting a ceremony.
 # ---------------------------------------------------------------------------------------------
 
 _MARKET_RE = re.compile(
@@ -1418,7 +1402,7 @@ _NOT_MARKET_RE = re.compile(
     r"(?i)\b(?:market\s+(?:st|street|square|basket|research|analysis|update|outlook)|stock\s+markets?|"
     r"job\s+markets?|housing\s+markets?|super\s*markets?|marketing|marketplace\s+of\s+ideas|"
     r"market\s+(?:days?\s+)?(?:volunteer|vendor\s+(?:application|sign))|"
-    r"\btours?\b|tastings?|language\s+exchange|tree\s+(?:arrives|lighting)|"
+    r"\btours?\b|tastings?|language\s+exchange|market\s+visit|tree\s+(?:arrives|lighting)|"
     r"flea\s+(?:and\s+tick|treatment)|bazaar\s+magazine|haymarket\s+(?:station|square))\b")
 # First match wins: "Winter Farmers Market" is a farmers market, "Holiday Craft Fair" a holiday one.
 _MARKET_TYPES = (
@@ -1437,6 +1421,7 @@ _MARKET_TYPES = (
     ("night", "🌙 Night & Food Markets", re.compile(
         r"(?i)\b(?:night|food|eats|dumplings?|asian|street\s+food|cultural|bazaar|souk)\b")),
 )
+_FESTIVAL_TYPE = ("festival", "🎪 Festivals & Fairs")
 _MARKET_OTHER = ("other", "🛍️ Other markets")
 
 
@@ -1446,8 +1431,38 @@ def is_market(e):
     return bool(_MARKET_RE.search(bare)) and not _NOT_MARKET_RE.search(name) and not NOT_MARKET_FESTIVAL_RE.search(name)
 
 
+# A festival or fair, by title (MARKET_FESTIVAL_RE without the market words is_market covers).
+_FESTIVAL_RE = re.compile(
+    r"(?i)\b(?:festival|fest|fair|faire|street\s+party|block\s+party|snowport|winter\s+village|oktoberfest)\b")
+# Festivals that are a show, a tasting or a ceremony rather than stalls to wander
+_NOT_VENDOR_FESTIVAL_RE = re.compile(
+    r"(?i)\b(?:music|jazz|blues|folk|fiddle|bluegrass|rock|punk|metal|hip[- ]?hop|edm|dj|techno|house\s+music|"
+    r"orchestra|symphony|choir|chamber|piano|guitar|song|songwriters?|opera|concerts?|film|films|movie|cinema|"
+    r"shorts|documentary|comedy|improv|dance|ballet|theat(?:er|re)|play|plays|fringe|poetry|storytelling|"
+    r"beer|beers|lagers?|ales?|brew(?:s|fest)?|wine|cider|spirits|whiske?y|cocktails?|tequila|bourbon|"
+    r"tree\s+lighting|tree\s+arrives|pass|passes|ticket\s+package|lineup|presents|tour|science|stem|"
+    r"fair\s+(?:trade|housing|share|game)|state\s+fair|social|meet(?:up)?|let'?s\s+meet|speed\s+dating|"
+    r"5k|10k|run|race|walk|marathon|tournament|hackathon|conference|summit|book|books|authors?|lecture|"
+    r"potluck|ages\s+\d+)\b")
+# Categories a festival listing may be filed under and still be a day out with stalls. Not
+# family or outdoors: festivals filed there are library programs and nature walks ("Slug Fest").
+_VENDOR_FESTIVAL_CATEGORIES = {"markets", "community", "other", "food", "art", "arts", ""}
+
+
+def is_vendor_festival(e):
+    name = e.get("name") or e.get("title") or ""
+    if not _FESTIVAL_RE.search(name) or _NOT_VENDOR_FESTIVAL_RE.search(name):
+        return False
+    if NOT_MARKET_FESTIVAL_RE.search(name):  # job, college, resource fairs
+        return False
+    return (e.get("category") or "").lower() in _VENDOR_FESTIVAL_CATEGORIES
+
+
 def market_type(e):
     name = e.get("name") or e.get("title") or ""
+    if not is_market(e) and is_vendor_festival(e):
+        # Festivals get their own chip, except the holiday and winter ones shoppers look for there
+        return "holiday" if _MARKET_TYPES[1][2].search(name) else _FESTIVAL_TYPE[0]
     for key, _label, rx in _MARKET_TYPES:
         if rx.search(name):
             return key
@@ -3550,10 +3565,10 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
         hub_js = _HUB_CITY_JS
         if is_markets:
             joined = "".join(cards_html)
-            kinds = [(k, lbl) for k, lbl, _rx in _MARKET_TYPES] + [_MARKET_OTHER]
+            kinds = [(k, lbl) for k, lbl, _rx in _MARKET_TYPES] + [_FESTIVAL_TYPE, _MARKET_OTHER]
             counts = {k: joined.count(f'data-mtype="{k}"') for k, _ in kinds}
-            city_chips_html = ('<div class="hub-city-chips hub-type-chips" role="group" aria-label="Filter by kind of market">'
-                               '<button type="button" class="hub-city-chip hub-type-chip" data-mtype="all">All markets</button>'
+            city_chips_html = ('<div class="hub-city-chips hub-type-chips" role="group" aria-label="Filter by kind of market or festival">'
+                               '<button type="button" class="hub-city-chip hub-type-chip" data-mtype="all">All</button>'
                                + "".join(f'<button type="button" class="hub-city-chip hub-type-chip" data-mtype="{k}">{lbl} '
                                          f'<span class="count">{counts[k]}</span></button>' for k, lbl in kinds if counts[k])
                                + "</div>" + city_chips_html)
@@ -3651,7 +3666,6 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
     active_kf = 'active' if hub_slug == 'kids-family-events-boston' else ''
     active_sc = 'active' if hub_slug == 'summer-camps' else ''
     active_mk = 'active' if hub_slug == 'markets-festivals-boston' else ''
-    active_mkt = 'active' if hub_slug == 'markets-boston' else ''
     active_edm = 'active' if hub_slug == 'boston-edm' else ''
 
     if is_camps or is_kids:
@@ -3666,7 +3680,6 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
     <a href="../board-game-nights-boston/" class="{active_bg}">Board Games</a>
     <a href="../kids-family-events-boston/" class="{active_kf}">Kids &amp; Family</a>
     <a href="../summer-camps/" class="{active_sc}">Summer Camps</a>
-    <a href="../markets-boston/" class="{active_mkt}">Markets</a>
     <a href="../markets-festivals-boston/" class="{active_mk}">Markets &amp; Festivals</a>
     <a href="../boston/" class="{active_b}">Boston</a>
     <a href="../cambridge/" class="{active_c}">Cambridge</a>
