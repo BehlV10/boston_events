@@ -73,6 +73,30 @@ COLLEGE_SCHOOLS = {
         "accent": "rgba(88, 28, 135, 0.12)",
         "mascot": "Downtown",
     },
+    "brandeis": {
+        "slug": "brandeis",
+        "name": "Brandeis University",
+        "short": "Brandeis",
+        "color": "#003478",
+        "accent": "rgba(0, 52, 120, 0.12)",
+        "mascot": "Judges",
+    },
+    "babson": {
+        "slug": "babson",
+        "name": "Babson College",
+        "short": "Babson",
+        "color": "#006644",
+        "accent": "rgba(0, 102, 68, 0.12)",
+        "mascot": "Beavers",
+    },
+    "umass_boston": {
+        "slug": "umass_boston",
+        "name": "UMass Boston",
+        "short": "UMass Boston",
+        "color": "#005A9C",
+        "accent": "rgba(0, 90, 156, 0.12)",
+        "mascot": "Beacons",
+    },
     "intercollegiate": {
         "slug": "intercollegiate",
         "name": "Cross-Campus / All Colleges",
@@ -102,11 +126,24 @@ COLLEGE_SOURCES = {
     "mit events",
     "mit open space",
     "mit strategic games society",
+    "mit engineers athletics",
+    "harvard college events",
     "harvard film archive",
     "harvard art museums",
     "new england conservatory",
     "jordan hall (nec)",
+    "berklee events & recitals",
+    "berklee events",
     "berklee performance center",
+    "suffolk university events",
+    "suffolk university",
+    "emerson lions athletics",
+    "brandeis judges athletics",
+    "brandeis athletics",
+    "umass boston beacons athletics",
+    "umass boston athletics",
+    "babson beavers athletics",
+    "babson athletics",
 }
 
 # Collegiate venues in Greater Boston
@@ -114,11 +151,14 @@ _COLLEGE_VENUE_PATTERNS = [
     (re.compile(r"\b(?:agganis\s+arena|case\s+gym|nickerson\s+field|walter\s+brown\s+arena|fitrec|tsai\s+performance\s+center|bu\s+beach)\b", re.I), "bu"),
     (re.compile(r"\b(?:conte\s+forum|alumni\s+stadium|kelley\s+rink|gasson\s+hall|mcmullen\s+museum)\b", re.I), "bc"),
     (re.compile(r"\b(?:matthews\s+arena|cabot\s+center|parsons\s+field|blackman\s+auditorium|curry\s+student\s+center)\b", re.I), "neu"),
-    (re.compile(r"\b(?:malkin\s+athletic\s+center|\bmac\b|lavietes\s+pavilion|harvard\s+stadium|blodgett\s+pool|sanders\s+theatre|memorial\s+church|harvard\s+film\s+archive|harvard\s+art\s+museums?|fong\s+auditorium|boylston\s+hall)\b", re.I), "harvard"),
-    (re.compile(r"\b(?:kresge\s+auditorium|rockwell\s+cage|johnson\s+athletics|walker\s+memorial|mit\s+open\s+space|mit\s+student\s+center|met\s+warehouse|building\s+(?:10|w41|e51|4|14))\b", re.I), "mit"),
+    (re.compile(r"\b(?:malkin\s+athletic\s+center|\bmac\b|lavietes\s+pavilion|harvard\s+stadium|bright-landry|blodgett\s+pool|sanders\s+theatre|smith\s+campus\s+center|richard\s+a\.\s+and\s+susan\s+f\.\s+smith|memorial\s+church|harvard\s+film\s+archive|harvard\s+art\s+museums?|fong\s+auditorium|boylston\s+hall|farkas\s+hall|loeb\s+drama)\b", re.I), "harvard"),
+    (re.compile(r"\b(?:kresge\s+auditorium|rockwell\s+cage|zesiger|steinbrenner\s+stadium|briggs\s+field|johnson\s+athletics|walker\s+memorial|mit\s+open\s+space|mit\s+student\s+center|met\s+warehouse|building\s+(?:10|w41|e51|4|14))\b", re.I), "mit"),
     (re.compile(r"\b(?:cousens\s+gymnasium|ellis\s+oval|granoff\s+music\s+center|distler\s+performance\s+hall)\b", re.I), "tufts"),
-    (re.compile(r"\b(?:jordan\s+hall|berklee\s+performance\s+center|red\s+room\s+at\s+cafe\s+939|boston\s+conservatory)\b", re.I), "berklee"),
-    (re.compile(r"\b(?:cutler\s+majestic\s+theatre|paramount\s+center|emerson\s+colonial)\b", re.I), "emerson"),
+    (re.compile(r"\b(?:jordan\s+hall|berklee\s+performance\s+center|david\s+friend\s+recital|boston\s+conservatory\s+theater|red\s+room\s+at\s+cafe\s+939|boston\s+conservatory)\b", re.I), "berklee"),
+    (re.compile(r"\b(?:cutler\s+majestic\s+theatre|paramount\s+center|emerson\s+colonial|rotch\s+playground)\b", re.I), "emerson"),
+    (re.compile(r"\b(?:gosman\s+sports|gordon\s+field|spingold\s+theater)\b", re.I), "brandeis"),
+    (re.compile(r"\b(?:staake\s+gymnasium|hartwell-rogers|macdowell\s+field)\b", re.I), "babson"),
+    (re.compile(r"\b(?:clark\s+athletic\s+center|monan\s+park)\b", re.I), "umass_boston"),
 ]
 
 # Intercollegiate / cross-campus competitions & events
@@ -175,12 +215,39 @@ def detect_school(e):
     venue = (e.get("venue") or "").strip().lower()
     name = (e.get("name") or e.get("title") or "").strip()
     loc = (e.get("location") or "").strip()
-    full_text = f"{source} {venue} {name} {loc}".lower()
+    url = (e.get("url") or "").lower()
+    full_text = f"{source} {venue} {name} {loc} {url}".lower()
 
     if _INTERCOLLEGIATE_RE.search(name) or "beanpot" in full_text or "hackbeanpot" in full_text:
         return "intercollegiate"
 
-    # Match source first
+    # Match URL domains
+    if "events.college.harvard.edu" in url or "harvard.edu" in url or "gocrimson.com" in url:
+        return "harvard"
+    if "berklee.edu" in url:
+        return "berklee"
+    if "events.suffolk.edu" in url or "suffolk.edu" in url:
+        return "emerson"
+    if "brandeisjudges.com" in url or "brandeis.edu" in url:
+        return "brandeis"
+    if "babsonathletics.com" in url or "babson.edu" in url:
+        return "babson"
+    if "beaconsathletics.com" in url or "umb.edu" in url:
+        return "umass_boston"
+    if "mitathletics.com" in url or "mit.edu" in url:
+        return "mit"
+    if "goterriers.com" in url or "bu.edu" in url:
+        return "bu"
+    if "bceagles.com" in url or "bc.edu" in url:
+        return "bc"
+    if "nuhuskies.com" in url or "northeastern.edu" in url:
+        return "neu"
+    if "gotuftsjumbos.com" in url or "tufts.edu" in url:
+        return "tufts"
+    if "emersonlions.com" in url or "emerson.edu" in url:
+        return "emerson"
+
+    # Match source
     if "bu" in source or "boston university" in source:
         return "bu"
     if "bc" in source or "boston college" in source:
@@ -195,6 +262,14 @@ def detect_school(e):
         return "tufts"
     if "berklee" in source or "conservatory" in source or "jordan hall" in source or "nec" in source:
         return "berklee"
+    if "suffolk" in source or "emerson" in source:
+        return "emerson"
+    if "brandeis" in source:
+        return "brandeis"
+    if "babson" in source:
+        return "babson"
+    if "umass boston" in source:
+        return "umass_boston"
 
     # Match venues
     for pattern, slug in _COLLEGE_VENUE_PATTERNS:
@@ -218,6 +293,12 @@ def detect_school(e):
         return "berklee"
     if re.search(r"\bemerson\b|\bsuffolk\b", name, re.I):
         return "emerson"
+    if re.search(r"\bbrandeis\b|\bjudges?\b", name, re.I):
+        return "brandeis"
+    if re.search(r"\bbabson\b|\bbeavers?\b", name, re.I):
+        return "babson"
+    if re.search(r"\bumass\s+boston\b|\bbeacons?\b", name, re.I):
+        return "umass_boston"
 
     return "intercollegiate"
 
@@ -262,6 +343,15 @@ def is_college_event(e):
     """Determine if an event is a college or student-targeted event."""
     source = (e.get("_source_venue") or "").strip().lower()
     if source in COLLEGE_SOURCES or "athletics" in source:
+        return True
+
+    url = (e.get("url") or "").lower()
+    if any(d in url for d in [
+        "events.college.harvard.edu", "berklee.edu/events", "events.suffolk.edu",
+        "mitathletics.com", "emersonlions.com", "brandeisjudges.com",
+        "beaconsathletics.com", "babsonathletics.com", "goterriers.com",
+        "bceagles.com", "nuhuskies.com", "gotuftsjumbos.com",
+    ]):
         return True
 
     venue = (e.get("venue") or "").strip().lower()

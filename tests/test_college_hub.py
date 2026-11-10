@@ -104,6 +104,61 @@ class CollegeEventDetectionTests(unittest.TestCase):
         }
         self.assertFalse(college.is_college_event(e))
 
+    def test_harvard_college_ofa_detected(self):
+        e = {
+            "name": "Office for the Arts Presents Arts for Life's Sake: Yo-Yo Ma & Stephen Colbert",
+            "venue": "Richard A. and Susan F. Smith Campus Center",
+            "_source_venue": "Harvard College Events",
+            "url": "https://events.college.harvard.edu/ofa/event/225033-office-for-the-arts-at-harvard-presents-arts-for",
+            "date": "2026-11-12T18:00:00+00:00",
+        }
+        self.assertTrue(college.is_college_event(e))
+        info = college.get_college_info(e)
+        self.assertEqual(info["school_key"], "harvard")
+        self.assertEqual(info["school_short"], "Harvard")
+
+    def test_berklee_and_suffolk_detected(self):
+        e_berklee = {
+            "name": "Jazz Composers Alliance Orchestra in Concert",
+            "venue": "Berklee Performance Center",
+            "_source_venue": "Berklee College of Music",
+            "url": "https://www.berklee.edu/events/jazz-composers-alliance",
+            "date": "2026-11-15T20:00:00+00:00",
+        }
+        self.assertTrue(college.is_college_event(e_berklee))
+        self.assertEqual(college.detect_school(e_berklee), "berklee")
+
+        e_suffolk = {
+            "name": "International Student Career Lab",
+            "venue": "David J. Sargent Hall",
+            "_source_venue": "Suffolk University Events",
+            "url": "https://events.suffolk.edu/event/123",
+            "date": "2026-11-12T14:00:00+00:00",
+        }
+        self.assertTrue(college.is_college_event(e_suffolk))
+        self.assertEqual(college.detect_school(e_suffolk), "emerson")
+
+    def test_mit_and_emerson_athletics_detected(self):
+        e_mit = {
+            "name": "MIT Men's Basketball vs Gordon",
+            "venue": "Rockwell Cage",
+            "_source_venue": "MIT Engineers Athletics",
+            "url": "https://mitathletics.com/calendar.ashx/calendar.ics",
+            "date": "2026-11-15T13:00:00+00:00",
+        }
+        self.assertTrue(college.is_college_event(e_mit))
+        self.assertEqual(college.detect_school(e_mit), "mit")
+
+        e_emerson = {
+            "name": "Emerson Men's Soccer vs Clark",
+            "venue": "Rotch Playground",
+            "_source_venue": "Emerson Lions Athletics",
+            "url": "https://emersonlions.com/calendar.ashx/calendar.ics",
+            "date": "2026-11-12T18:00:00+00:00",
+        }
+        self.assertTrue(college.is_college_event(e_emerson))
+        self.assertEqual(college.detect_school(e_emerson), "emerson")
+
 
 class CollegeHubRenderingTests(unittest.TestCase):
     def setUp(self):

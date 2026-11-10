@@ -11121,6 +11121,20 @@ _COLLEGIATE_HOME_VENUES = [
     ("Cousens Gymnasium", "Medford / Tufts"),
     ("Ellis Oval", "Medford / Tufts"),
     ("Gantcher Center", "Medford / Tufts"),
+    ("Rockwell Cage", "Cambridge / MIT"),
+    ("Zesiger Center", "Cambridge / MIT"),
+    ("Steinbrenner Stadium", "Cambridge / MIT"),
+    ("Johnson Athletic Center", "Cambridge / MIT"),
+    ("Briggs Field", "Cambridge / MIT"),
+    ("Harvard Stadium", "Allston / Harvard"),
+    ("Bright-Landry Hockey Center", "Allston / Harvard"),
+    ("Lavietes Pavilion", "Allston / Harvard"),
+    ("Malkin Athletic Center", "Harvard Square"),
+    ("Jordan Field", "Allston / Harvard"),
+    ("Gosman Sports Center", "Waltham / Brandeis"),
+    ("Clark Athletic Center", "Dorchester / UMass Boston"),
+    ("Rotch Playground", "South End / Emerson"),
+    ("Staake Gymnasium", "Wellesley / Babson"),
     ("TD Garden", "Downtown Boston"),
 ]
 
@@ -11229,6 +11243,65 @@ def scrape_localist(url, ua):
         elif re.search(r"(?i)\bconcert\b|\brecital\b|\borchestra\b|\bjazz\b|\bchoir\b", entry["name"]):
             entry["category"] = "music"
         events.append(entry)
+    return events
+
+
+_HARVARD_ADMIN_NOISE_RE = re.compile(
+    r"\b(?:last\s+day\s+to\s+drop|withdraw\s+deadline|petitions\s+due|lottery\s+run|tuition\s+due|"
+    r"conferral\s+of|degrees\s+conferred|course\s+withdraw|half\s+term\s+courses|exam\s+period|"
+    r"reading\s+period|cross-registration\s+deadline|registration\s+lottery\s+open)\b",
+    re.I
+)
+
+
+def scrape_harvard_college_events(url, ua):
+    """Scrape Harvard College & Office for the Arts (OFA) events from LiveWhale iCal.
+
+    Captures student arts, performances, dances, talks, and campus life while filtering
+    out administrative registrar deadlines.
+    """
+    raw_events = scrape_ical(url, ua)
+    events = []
+    seen = set()
+
+    for e in raw_events:
+        name = e.get("name") or ""
+        if not name or _HARVARD_ADMIN_NOISE_RE.search(name) or is_placeholder_or_closed_event(name):
+            continue
+
+        loc = (e.get("location") or "").replace(r"\,", ",").strip()
+        desc = (e.get("description") or "").replace(r"\,", ",").strip()
+        ev_url = e.get("url") or url
+        iso_date = e.get("date")
+
+        key = (name.lower(), (iso_date or "")[:10])
+        if key in seen:
+            continue
+        seen.add(key)
+
+        entry = {
+            "name": name.strip()[:160],
+            "date": iso_date,
+            "url": ev_url,
+            "venue": (loc or "Harvard University")[:80],
+            "price": "Free" if mentions_free(name + " " + desc) or "free" in desc.lower() else None,
+            "description": desc[:200],
+        }
+
+        combined = f"{name} {desc}".lower()
+        if re.search(r"\b(?:dance|ballroom|movement|ballet|hip-hop|choreograph)\b", combined):
+            entry["category"] = "dance"
+        elif re.search(r"\b(?:hackathon|innovation|pitch|incubator|startup|coding|tech|ai\b)\b", combined):
+            entry["category"] = "tech"
+        elif re.search(r"\b(?:concert|recital|orchestra|choir|singing|jazz|opera|a\s*cappella)\b", combined):
+            entry["category"] = "music"
+        elif re.search(r"\b(?:exhibition|gallery|museum|art\b|theatre|theater|play|comedy)\b", combined):
+            entry["category"] = "art"
+        elif re.search(r"\b(?:lecture|speaker|ambassador|panel|symposium|keynote|study\s+group)\b", combined):
+            entry["category"] = "community"
+
+        events.append(entry)
+
     return events
 
 
@@ -12652,12 +12725,19 @@ _ALL_VENUES = [
     {"name": "City Winery Boston", "url": "https://citywinery.com/pages/locations/boston", "ua": UA_CHROME, "scraper": scrape_city_winery, "default_category": "music"},
     {"name": "Royale Boston", "url": "https://www.royaleboston.com/events/", "ua": UA_CHROME, "scraper": scrape_royale, "default_category": "clubbing"},
     {"name": "Boston Symphony Orchestra", "url": "https://www.bso.org/events", "ua": UA_CHROME, "scraper": scrape_bso, "default_category": "music"},
+    {"name": "Harvard College Events", "url": "https://events.college.harvard.edu/live/ical/events", "ua": UA_CHROME, "scraper": scrape_harvard_college_events, "default_category": "arts"},
     {"name": "MIT Events", "url": "https://calendar.mit.edu/api/2/events?days=30&pp=50", "ua": UA_CHROME, "scraper": scrape_localist, "default_category": "community"},
     {"name": "Boston College Events", "url": "https://events.bc.edu/api/2/events?days=30&pp=50", "ua": UA_CHROME, "scraper": scrape_localist, "default_category": "community"},
+    {"name": "Suffolk University Events", "url": "https://events.suffolk.edu/api/2/events?days=30&pp=50", "ua": UA_CHROME, "scraper": scrape_localist, "default_category": "community"},
     {"name": "BU Terriers Athletics", "url": "https://goterriers.com/calendar.ashx/calendar.ics", "ua": UA_CHROME, "scraper": scrape_college_athletics, "default_category": "sports"},
     {"name": "Northeastern Huskies Athletics", "url": "https://nuhuskies.com/calendar.ashx/calendar.ics", "ua": UA_CHROME, "scraper": scrape_college_athletics, "default_category": "sports"},
     {"name": "Boston College Eagles Athletics", "url": "https://bceagles.com/calendar.ashx/calendar.ics", "ua": UA_CHROME, "scraper": scrape_college_athletics, "default_category": "sports"},
     {"name": "Tufts Jumbos Athletics", "url": "https://gotuftsjumbos.com/calendar.ashx/calendar.ics", "ua": UA_CHROME, "scraper": scrape_college_athletics, "default_category": "sports"},
+    {"name": "MIT Engineers Athletics", "url": "https://mitathletics.com/calendar.ashx/calendar.ics", "ua": UA_CHROME, "scraper": scrape_college_athletics, "default_category": "sports"},
+    {"name": "Emerson Lions Athletics", "url": "https://emersonlions.com/calendar.ashx/calendar.ics", "ua": UA_CHROME, "scraper": scrape_college_athletics, "default_category": "sports"},
+    {"name": "Brandeis Judges Athletics", "url": "https://brandeisjudges.com/calendar.ashx/calendar.ics", "ua": UA_CHROME, "scraper": scrape_college_athletics, "default_category": "sports"},
+    {"name": "UMass Boston Beacons Athletics", "url": "https://beaconsathletics.com/calendar.ashx/calendar.ics", "ua": UA_CHROME, "scraper": scrape_college_athletics, "default_category": "sports"},
+    {"name": "Babson Beavers Athletics", "url": "https://babsonathletics.com/calendar.ashx/calendar.ics", "ua": UA_CHROME, "scraper": scrape_college_athletics, "default_category": "sports"},
     {"name": "Venture Café Cambridge", "url": "https://community.venturecafecambridge.org/", "ua": UA_CHROME, "scraper": scrape_venture_cafe, "default_category": "community"},
     {"name": "The Anchor Boston", "url": "https://calendar.google.com/calendar/ical/theanchorbostonma%40gmail.com/public/basic.ics", "ua": UA_CHROME, "scraper": scrape_ical, "default_category": "community"},
     {"name": "Artisans Asylum", "url": "https://www.eventbrite.com/o/artisans-asylum-inc-18841526871", "ua": UA_CHROME, "scraper": scrape_eventbrite_org, "default_category": "community"},
