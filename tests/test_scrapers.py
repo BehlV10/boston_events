@@ -2034,6 +2034,140 @@ class TestBostonEvents(unittest.TestCase):
         self.assertEqual(geo_gl["neighborhood"], "Theater District")
         self.assertEqual(_event_city("Ghost Light Tavern", "Ghost Light Tavern", {}), "boston")
 
+    def test_resident_advisor_tba_normalization_and_geo(self):
+        """Resident Advisor TBA address cleaning, secret venue contextualization, and geo resolution."""
+        from scrapers import scrape_resident_advisor
+        from venues_geo import resolve_event_geo
+        from template import _event_city
+
+        mock_ra_data = {
+            "data": {
+                "eventListings": {
+                    "data": [
+                        {
+                            "event": {
+                                "title": "Duran Duran Duran Live",
+                                "startTime": "2026-11-14T21:00:00.000",
+                                "contentUrl": "/events/2578101",
+                                "venue": {"name": "TBA - NAICOB - 105 S. Huntington Ave. Jamaica Plain, 02130", "address": None},
+                                "cost": "$20",
+                            }
+                        },
+                        {
+                            "event": {
+                                "title": "Basement Sessions",
+                                "startTime": "2026-11-15T22:00:00.000",
+                                "contentUrl": "/events/2578102",
+                                "venue": {"name": "TBA - 288 Green St. Cambridge", "address": None},
+                                "cost": "$15",
+                            }
+                        },
+                        {
+                            "event": {
+                                "title": "After Brunch presents: Rafa Barrios",
+                                "startTime": "2026-11-15T15:00:00.000",
+                                "contentUrl": "/events/2560766",
+                                "venue": {"name": "Dx", "address": None},
+                                "cost": "$25",
+                            }
+                        },
+                        {
+                            "event": {
+                                "title": "fruitstand's 3rd birthday: queer pop party",
+                                "startTime": "2026-11-20T21:00:00.000",
+                                "contentUrl": "/events/2566200",
+                                "venue": {"name": "52 church", "address": None},
+                                "cost": "$15",
+                            }
+                        },
+                        {
+                            "event": {
+                                "title": "Infra: Underground Techno Session",
+                                "startTime": "2026-11-21T23:00:00.000",
+                                "contentUrl": "/events/2579899",
+                                "venue": {"name": "TBA", "address": None},
+                                "cost": "$30",
+                            }
+                        },
+                        {
+                            "event": {
+                                "title": "Sojourn: Boston Art Book Fair After Party",
+                                "startTime": "2026-11-13T21:00:00.000",
+                                "contentUrl": "/events/2579866",
+                                "venue": {"name": "BCA Cyclorama", "address": "539 Tremont St"},
+                                "cost": "$20",
+                            }
+                        },
+                    ]
+                }
+            }
+        }
+
+        from unittest import mock
+        with mock.patch("scrapers._SESSION.post") as mock_post:
+            r = mock.MagicMock(status_code=200)
+            r.json.return_value = mock_ra_data
+            r.raise_for_status = lambda: None
+            mock_post.return_value = r
+
+            evs = scrape_resident_advisor("https://ra.co/events/us/boston", UA_CHROME)
+
+        self.assertEqual(len(evs), 6)
+
+        # 1. NAICOB
+        naicob = next(e for e in evs if "Duran Duran Duran" in e["title"])
+        self.assertEqual(naicob["venue"], "NAICOB")
+        self.assertEqual(naicob["address"], "105 S Huntington Ave, Jamaica Plain, MA")
+        self.assertEqual(naicob["url"], "https://ra.co/events/2578101")
+        geo_naicob = resolve_event_geo(naicob)
+        self.assertIsNotNone(geo_naicob)
+        self.assertEqual(geo_naicob["neighborhood"], "Jamaica Plain")
+        self.assertEqual(_event_city(naicob["venue"], "Resident Advisor", naicob), "boston")
+
+        # 2. 288 Green St
+        green = next(e for e in evs if "Basement Sessions" in e["title"])
+        self.assertEqual(green["venue"], "288 Green St")
+        self.assertEqual(green["address"], "288 Green St, Cambridge, MA")
+        geo_green = resolve_event_geo(green)
+        self.assertIsNotNone(geo_green)
+        self.assertEqual(geo_green["neighborhood"], "Central Square")
+        self.assertEqual(_event_city(green["venue"], "Resident Advisor", green), "cambridge")
+
+        # 3. Descent (Dx)
+        descent = next(e for e in evs if "Rafa Barrios" in e["title"])
+        self.assertEqual(descent["venue"], "Descent")
+        self.assertEqual(descent["address"], "33 Dunster St, Cambridge, MA")
+        geo_descent = resolve_event_geo(descent)
+        self.assertIsNotNone(geo_descent)
+        self.assertEqual(geo_descent["neighborhood"], "Harvard Square")
+        self.assertEqual(_event_city(descent["venue"], "Resident Advisor", descent), "cambridge")
+
+        # 4. 52 Church
+        church = next(e for e in evs if "fruitstand" in e["title"])
+        self.assertEqual(church["venue"], "52 Church")
+        self.assertEqual(church["address"], "52 Church St, Cambridge, MA")
+        geo_church = resolve_event_geo(church)
+        self.assertIsNotNone(geo_church)
+        self.assertEqual(geo_church["neighborhood"], "Harvard Square")
+        self.assertEqual(_event_city(church["venue"], "Resident Advisor", church), "cambridge")
+
+        # 5. Secret Warehouse (Infra)
+        infra = next(e for e in evs if "Infra:" in e["title"])
+        self.assertEqual(infra["venue"], "Secret Warehouse (Infra)")
+
+        # 6. Additional underground venues in venues_geo
+        for vname, nbh, city in [
+            ("Spy Bar", "South End", "boston"),
+            ("The Chemist", "Downtown / Financial District", "boston"),
+            ("The Smoot Standard", "Central Square", "cambridge"),
+        ]:
+            g = resolve_event_geo({"venue": vname})
+            self.assertIsNotNone(g, f"Failed geo for {vname}")
+            self.assertEqual(g["neighborhood"], nbh)
+            self.assertEqual(_event_city(vname, "Resident Advisor", {"venue": vname}), city)
+
+
+
     def test_celebrity_series(self):
         """Celebrity Series of Boston scraper and geo verification."""
         from scrapers import _ALL_VENUES, scrape_celebrity_series

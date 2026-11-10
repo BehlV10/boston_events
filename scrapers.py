@@ -11414,6 +11414,32 @@ def scrape_resident_advisor(url, ua):
         addr = v_obj.get("address") or ""
         cost = ev.get("cost")
 
+        # Clean up embedded addresses in TBA venues or specific underground tags:
+        v_low = v_name.lower()
+        if "naicob" in v_low or "105 s. huntington" in v_low:
+            v_name = "NAICOB"
+            addr = addr or "105 S Huntington Ave, Jamaica Plain, MA"
+        elif "288 green" in v_low:
+            v_name = "288 Green St"
+            addr = addr or "288 Green St, Cambridge, MA"
+        elif v_low in ("dx", "descent"):
+            v_name = "Descent"
+            addr = addr or "33 Dunster St, Cambridge, MA"
+        elif "52 church" in v_low:
+            v_name = "52 Church"
+            addr = addr or "52 Church St, Cambridge, MA"
+        elif re.search(r"\b(tba|secret\s+location)\b", v_name, re.I):
+            if "infra" in title.lower():
+                v_name = "Secret Warehouse (Infra)"
+            elif "sojourn" in title.lower():
+                v_name = "Secret Location (Sojourn)"
+            elif "experience" in title.lower():
+                v_name = "Secret Location (Cambridge)"
+            elif "arcane" in title.lower():
+                v_name = "Secret Location (Arcane)"
+            else:
+                v_name = "Secret Location (TBA)"
+
         key = (title.lower(), (start or "")[:10])
         if key in seen:
             continue
@@ -11421,6 +11447,7 @@ def scrape_resident_advisor(url, ua):
 
         events.append({
             "name": title.strip()[:160],
+            "title": title.strip()[:160],
             "date": start,
             "url": full_url,
             "venue": v_name[:80],
