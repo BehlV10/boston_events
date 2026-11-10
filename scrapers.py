@@ -286,6 +286,11 @@ def is_placeholder_or_closed_event(title: str) -> bool:
     if re.match(r"^\s*[\[\(]?\s*(moved|relocated)\s+to\b", t, re.I):
         return True
 
+    # 2c. Season-ticket sign-ups listed as events: "2027 PREMIUM SEASON TICKETS WAITLIST" (Fenway Park,
+    # dated Dec 31). Only season tickets: a sold-out show with a waitlist is still a show.
+    if re.search(r"\bseason\s+(tickets?|seats?|passes?|memberships?)\b.*\b(wait\s*-?list|deposits?)\b", t, re.I):
+        return True
+
     # 3. Check calendar placeholder
     if re.search(r"\bcheck\s+(our\s+)?calendar\b", t, re.I):
         return True
@@ -305,7 +310,7 @@ def is_placeholder_or_closed_event(title: str) -> bool:
         return True
 
     # 6. Generic single-word / short placeholder
-    if t.lower() in ("tba", "tbd", "to be announced", "placeholder", "no title", "closed", "dark"):
+    if t.strip("*[]() !").lower() in ("tba", "tbd", "to be announced", "placeholder", "no title", "closed", "dark"):
         return True
 
     # 7. Misleading commercial promo / fake free gym passes
@@ -4386,14 +4391,110 @@ def _do617_ticket_price(event_url, ua):
 
 
 def _do617_fill_prices(events, ua):
-    """Do617's day lists carry no prices; each event's own page does."""
+    """Do617's day lists carry no prices; each event's own page does. A weekly night (Taproom
+    Trivia every Tuesday) has one page per date with the same price, so it's looked up once."""
     todo = [e for e in events if not e.get("price") and "do617.com/events/" in (e.get("url") or "")]
-    if todo:
+    by_slug = {}
+    for e in todo:
+        by_slug.setdefault(re.sub(r"/events/(?:\d{4}/\d{1,2}/\d{1,2}|weekly/\w+)/", "/events/", e["url"]), e["url"])
+    if by_slug:
         with ThreadPoolExecutor(max_workers=4) as ex:
-            for e, price in zip(todo, ex.map(lambda e: _do617_ticket_price(e["url"], ua), todo)):
-                if price:
-                    e["price"] = price
+            prices = dict(zip(by_slug, ex.map(lambda u: _do617_ticket_price(u, ua), by_slug.values())))
+        for e in todo:
+            price = prices.get(re.sub(r"/events/(?:\d{4}/\d{1,2}/\d{1,2}|weekly/\w+)/", "/events/", e["url"]))
+            if price:
+                e["price"] = price
     return events
+
+
+def _do617_local_iso(day, time_text):
+    """UTC ISO time for a Do617 card: the date plus the card's "7:30 pm", in Boston time.
+    Do617 shows local times with no offset; the old code pinned -04:00, an hour off all winter."""
+    hr, mn = 20, 0
+    m = re.search(r"(\d{1,2})(?::(\d{2}))?\s*(am|pm)", time_text or "", re.I)
+    if m:
+        hr, mn = int(m.group(1)) % 12, int(m.group(2) or 0)
+        if m.group(3).lower() == "pm":
+            hr += 12
+    return datetime(day.year, day.month, day.day, hr, mn, tzinfo=EASTERN).astimezone(timezone.utc).isoformat()
+
+
+_DO617_WEEKDAYS = {"mon": 0, "tue": 1, "wed": 2, "thu": 3, "fri": 4, "sat": 5, "sun": 6}
+
+
+def _do617_venue_cards(soup, page_venue):
+    """(name, href, card text, card venue) for the event cards on a Do617 venue page."""
+    for card in soup.find_all("div", attrs={"data-card-kind": "event"}):
+        a_link = card.find("a", href=True)
+        h3 = card.find("h3")
+        name = h3.get_text(strip=True) if h3 else ""
+        if not a_link or not name:
+            continue
+        ps = [p.get_text(" ", strip=True) for p in card.find_all("p")]
+        date_el = card.find(class_=lambda c: c and "date" in c)
+        when = date_el.get_text(" ", strip=True) if date_el else (ps[0] if ps else "")
+        card_venue = next((p for p in ps if p != when), "")
+        yield name, a_link["href"], when, card_venue
+
+
+def scrape_do617_venue(url, ua, venue_name=None, days=90, max_pages=5):
+    """One venue's page on Do617 (/venues/deep-cuts), following its ?page=2.. links.
+
+    Page 1 holds the next 10 listings only (Deep Cuts: 10 days of shows, while the venue books
+    into April). Weekly cards ("Musical Bingo · Every Tuesday | 7:30 pm") become one listing per
+    week for the next 4 weeks. Cards for other venues are skipped. The venue is the page's own
+    name unless venue_name says otherwise (to tell apart venues with several locations)."""
+    today = datetime.now(EASTERN).date()
+    horizon = today + timedelta(days=days)
+    events, seen = [], set()
+    page_venue = None
+    for page in range(1, max_pages + 1):
+        page_url = url if page == 1 else f"{url}{'&' if '?' in url else '?'}page={page}"
+        try:
+            resp = _SESSION.get(page_url, headers={"User-Agent": ua or UA_CHROME}, timeout=10)
+        except Exception:
+            break
+        if resp.status_code != 200:
+            break
+        soup = BeautifulSoup(resp.content, "html.parser")
+        if page_venue is None:
+            h1 = soup.find("h1")
+            page_venue = h1.get_text(strip=True) if h1 else ""
+        last_day, n_cards = None, 0
+        for name, href, when, card_venue in _do617_venue_cards(soup, page_venue):
+            if page_venue and card_venue and card_venue.lower() != page_venue.lower():
+                continue
+            n_cards += 1
+            full_url = urljoin("https://do617.com/", re.sub(r"^(\.\./|\./)+", "", href))
+            days_for = []
+            m_date = re.search(r"/events/(\d{4})/(\d{1,2})/(\d{1,2})/", href)
+            m_weekly = re.search(r"/events/weekly/(mon|tue|wed|thu|fri|sat|sun)\w*/", href, re.I)
+            if m_date:
+                try:
+                    d = datetime(int(m_date.group(1)), int(m_date.group(2)), int(m_date.group(3))).date()
+                except ValueError:
+                    continue
+                last_day = d
+                days_for = [d]
+            elif m_weekly:
+                wd = _DO617_WEEKDAYS[m_weekly.group(1).lower()]
+                first = today + timedelta(days=(wd - today.weekday()) % 7)
+                days_for = [first + timedelta(weeks=i) for i in range(4)]
+            for d in days_for:
+                if d < today or d > horizon or (name.lower(), d) in seen:
+                    continue
+                seen.add((name.lower(), d))
+                events.append({
+                    "name": name,
+                    "date": _do617_local_iso(d, when),
+                    "url": full_url,
+                    "venue": venue_name or page_venue or None,
+                    "price": None,
+                })
+        nxt = soup.find("a", href=re.compile(r"[?&]page=%d\b" % (page + 1)))
+        if not n_cards or not nxt or (last_day and last_day > horizon):
+            break
+    return _do617_fill_prices(events, ua)
 
 
 def scrape_do617(url, ua):
@@ -4403,56 +4504,8 @@ def scrape_do617(url, ua):
     seen = set()
     start_date = datetime.now(EASTERN).date()
 
-    # 0. Single venue page support (e.g. /venues/deep-cuts)
     if "/venues/" in (url or ""):
-        try:
-            resp = _SESSION.get(url, headers={"User-Agent": ua or UA_CHROME}, timeout=10)
-            if resp.status_code == 200:
-                soup = BeautifulSoup(resp.content, "html.parser")
-                cards = soup.find_all("div", attrs={"data-card-kind": "event"})
-                for card in cards:
-                    a_link = card.find("a", href=True)
-                    if not a_link:
-                        continue
-                    rel_href = a_link.get("href", "")
-                    full_url = urljoin("https://do617.com", rel_href.lstrip("./"))
-                    h3 = card.find("h3")
-                    name = h3.get_text(strip=True) if h3 else ""
-                    if not name:
-                        continue
-                    m_date = re.search(r"/events/(\d{4})/(\d{1,2})/(\d{1,2})/", rel_href)
-                    if not m_date:
-                        continue
-                    y, m_val, day_val = m_date.groups()
-                    date_part = f"{int(y):04d}-{int(m_val):02d}-{int(day_val):02d}"
-                    date_el = card.find(class_=lambda c: c and "date" in c)
-                    raw_date_text = date_el.get_text(" ", strip=True) if date_el else ""
-                    time_str = "20:00:00"
-                    m_time = re.search(r"(\d{1,2})(?::(\d{2}))?\s*(am|pm)", raw_date_text, re.I)
-                    if m_time:
-                        hr = int(m_time.group(1))
-                        mn = int(m_time.group(2) or 0)
-                        merid = m_time.group(3).lower()
-                        if merid == "pm" and hr < 12:
-                            hr += 12
-                        elif merid == "am" and hr == 12:
-                            hr = 0
-                        time_str = f"{hr:02d}:{mn:02d}:00"
-                    try:
-                        iso_str = f"{date_part}T{time_str}-04:00"
-                        iso = datetime.fromisoformat(iso_str).astimezone(timezone.utc).isoformat()
-                    except Exception:
-                        iso = None
-                    events.append({
-                        "name": name,
-                        "date": iso,
-                        "url": full_url,
-                        "venue": "Deep Cuts",
-                        "price": None,
-                    })
-        except Exception:
-            pass
-        return _do617_fill_prices(events, ua)
+        return scrape_do617_venue(url, ua)
 
     # 1. Scrape today + next 4 days from Do617 date feeds
     for i in range(5):
@@ -4476,33 +4529,13 @@ def scrape_do617(url, ua):
                 if not name:
                     continue
 
-                m_date = re.search(r"/events/(\d{4})/(\d{2})/(\d{2})/", rel_href)
-                date_part = f"{d.year:04d}-{d.month:02d}-{d.day:02d}"
-                if m_date:
-                    y, m_val, day_val = m_date.groups()
-                    date_part = f"{y}-{m_val}-{day_val}"
+                # The day this feed is for. A card's URL holds the date a run started
+                # (/events/2026/9/12/ for an exhibition still on today), not this showing.
+                day = d
+                date_part = day.isoformat()
 
                 date_el = card.find(class_=lambda c: c and "date" in c)
-                raw_date_text = date_el.get_text(" ", strip=True) if date_el else ""
-
-                time_str = "20:00:00"
-                m_time = re.search(r"(\d{1,2})(?::(\d{2}))?\s*(am|pm)", raw_date_text, re.I)
-                if m_time:
-                    hr = int(m_time.group(1))
-                    mn = int(m_time.group(2) or 0)
-                    merid = m_time.group(3).lower()
-                    if merid == "pm" and hr < 12:
-                        hr += 12
-                    elif merid == "am" and hr == 12:
-                        hr = 0
-                    time_str = f"{hr:02d}:{mn:02d}:00"
-
-                iso = None
-                try:
-                    iso_str = f"{date_part}T{time_str}-04:00"
-                    iso = datetime.fromisoformat(iso_str).astimezone(timezone.utc).isoformat()
-                except Exception:
-                    iso = None
+                iso = _do617_local_iso(day, date_el.get_text(" ", strip=True) if date_el else "")
 
                 p_tags = [
                     p.get_text(strip=True)
@@ -10662,13 +10695,16 @@ def scrape_ticketmaster_discovery(url, ua):
     except Exception:
         return []
 
-    raw_events = data.get("_embedded", {}).get("events", [])
+    # "Slipknot: (sic)est Stadium Tour - Platinum Tickets" is the dynamic-price copy of the same
+    # show: drop the suffix and take it only when there's no regular listing that day.
+    raw_events = sorted(data.get("_embedded", {}).get("events", []),
+                        key=lambda ev: bool(_TM_PLATINUM_RE.search(ev.get("name") or "")))
     now = datetime.now(EASTERN)
     events = []
     seen = set()
 
     for ev in raw_events:
-        name = (ev.get("name") or "").strip()
+        name = _TM_PLATINUM_RE.sub("", (ev.get("name") or "")).strip()
         if not name or is_placeholder_or_closed_event(name):
             continue
 
@@ -10729,6 +10765,24 @@ def scrape_ticketmaster_discovery(url, ua):
         })
 
     return events
+
+
+_TM_PLATINUM_RE = re.compile(r"\s*[-–|:]\s*(?:official\s+)?platinum(?:\s+tickets?)?\s*$", re.I)
+
+
+def scrape_fenway_park(url, ua):
+    """Fenway Park's non-baseball events from Ticketmaster: stadium concerts, Harvard-Yale, hockey.
+    Red Sox home games come from the ESPN schedule (Boston Sports), which has first-pitch times;
+    Ticketmaster lists them months out with no time at all."""
+    return [e for e in scrape_ticketmaster_discovery(url, ua)
+            if not re.match(r"\s*boston red sox\b", e["name"], re.I)]
+
+
+def scrape_mighty_squirrel_fenway(url, ua):
+    """Mighty Squirrel's Fenway taproom via its Do617 venue page. The brewery's own calendars
+    (mightysquirrel.com/fenway-calendar etc.) are an Events Calendar widget with no public feed.
+    Named for the location: Mighty Squirrel also has taprooms in Waltham and at Arsenal Yards."""
+    return scrape_do617_venue(url, ua, venue_name="Mighty Squirrel Fenway")
 
 
 def ticketmaster_category(segment, genre, sub_genre):
@@ -13061,6 +13115,7 @@ _ALL_VENUES = [
     {"name": "Paradise Rock Club", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZpZA11JtA&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
     {"name": "Brighton Music Hall", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZpapwne&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
     {"name": "MGM Music Hall at Fenway", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZ917AEJz&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
+    {"name": "Fenway Park", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZpZAaaI7A&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_fenway_park, "default_category": "music"},
     {"name": "Citizens House of Blues Boston", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZpZAEA7eA&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
     {"name": "Orpheum Theatre", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZpZA1J7JA&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
     {"name": "Leader Bank Pavilion", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZ917AxdQ&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
@@ -13250,6 +13305,7 @@ _ALL_VENUES = [
     {"name": "Scorpion Bar Boston", "url": "https://buy.tablelist.com/v/scorpion-bar", "ua": UA_CHROME, "scraper": scrape_tablelist, "default_category": "clubbing"},
     {"name": "Mémoire Boston", "url": "https://www.ticketmaster.com/memoire-tickets-everett/venue/9388", "ua": UA_CHROME, "scraper": scrape_ticketmaster_venue, "default_category": "clubbing"},
     {"name": "Deep Cuts Medford", "url": "https://do617.com/venues/deep-cuts", "ua": UA_CHROME, "scraper": scrape_do617, "default_category": "music"},
+    {"name": "Mighty Squirrel Fenway", "url": "https://do617.com/venues/mighty-squirrel-brewing-co", "ua": UA_CHROME, "scraper": scrape_mighty_squirrel_fenway, "default_category": None},
     {"name": "Lou's Harvard Square", "url": "https://www.wearelous.com/lous-live", "ua": UA_CHROME, "scraper": scrape_lous, "default_category": "music"},
     {"name": "Boston Salsa & Bachata", "url": "https://bostonsalsa.org/", "ua": UA_CHROME, "scraper": scrape_bostonsalsa, "default_category": "dance"},
     {"name": "Charles River Speedway", "url": "https://charlesriverspeedway.com", "ua": UA_CHROME, "scraper": scrape_speedway, "default_category": "food"},
