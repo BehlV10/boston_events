@@ -72,7 +72,11 @@ class Registered(unittest.TestCase):
         self.assertIs(by_name["bsmnt"]["scraper"], S.scrape_bsmnt)
         self.assertIn("posh.vip/api/web/v2/util/group_url/bsmntboston", by_name["bsmnt"]["url"])
         self.assertIs(by_name["Spy Bar"]["scraper"], S.scrape_spy_bar)
-        self.assertNotIn("ra.co", " ".join(v["url"] for v in S._ALL_VENUES))
+        # The only ra.co source is the GraphQL one (test_resident_advisor); clubs with their own
+        # feeds are read from those, not from RA.
+        ra = [v["name"] for v in S._ALL_VENUES if "ra.co" in v["url"]]
+        self.assertEqual(ra, ["Resident Advisor Boston"])
+        self.assertIs(by_name["Resident Advisor Boston"]["scraper"], S.scrape_resident_advisor)
 
     def test_places(self):
         for venue, place, addr in (("bsmnt", "bsmnt", "100 Stuart St, Boston"),
