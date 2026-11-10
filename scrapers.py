@@ -11389,6 +11389,100 @@ def scrape_resident_advisor(url, ua):
     return events
 
 
+def scrape_bijou(url, ua):
+    """Bijou Nightclub (51 Stuart St, Boston).
+
+    Extracts headline touring DJ events from Bijou's website linking to Posh ticketing.
+    """
+    events = []
+    headers = {"User-Agent": ua or UA_CHROME}
+    try:
+        r = _SESSION.get("https://www.bijouboston.com", headers=headers, timeout=10)
+        r.raise_for_status()
+        soup = BeautifulSoup(r.text, "html.parser")
+        links = []
+        for a in soup.find_all("a", href=True):
+            href = a["href"]
+            if "posh.vip" in href and href not in links:
+                links.append(href)
+
+        for link in links:
+            try:
+                ev_r = _SESSION.get(link, headers=headers, timeout=8)
+                ev_soup = BeautifulSoup(ev_r.text, "html.parser")
+                og_t = ev_soup.find("meta", property="og:title")
+                if not og_t or not og_t.get("content"):
+                    continue
+                content = og_t["content"]
+                # Format: Artist | Bijou Boston | Day, Mon DD, YYYY | Bijou Nightclub & Lounge
+                parts = [p.strip() for p in content.split("|")]
+                title = parts[0]
+                date_str = None
+                for p in parts[1:]:
+                    m = re.search(r"(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s*([A-Za-z]+)\s*(\d{1,2}),\s*(\d{4})", p)
+                    if m:
+                        date_str = f"{m.group(1)} {m.group(2)} {m.group(3)} 22:00:00"
+                        break
+                if not date_str:
+                    continue
+                dt = datetime.strptime(date_str, "%b %d %Y %H:%M:%S").replace(tzinfo=EASTERN)
+                events.append({
+                    "name": title,
+                    "date": dt.astimezone(timezone.utc).isoformat(),
+                    "url": link,
+                    "venue": "Bijou Nightclub",
+                    "price": "$20–$40",
+                    "category": "clubbing",
+                    "genre": "electronic",
+                })
+            except Exception:
+                continue
+    except Exception:
+        pass
+    return events
+
+
+def scrape_sissy_ks(url, ua):
+    """Sissy K's (4 Commercial St, Boston).
+
+    Fetches upcoming nightlife events (Turn It Up Thursdays, Freaky Fridays, Sissy's Legendary Saturdays)
+    from sissykevents.com.
+    """
+    events = []
+    headers = {"User-Agent": ua or UA_CHROME}
+    try:
+        r = _SESSION.get(url or "https://www.sissykevents.com/", headers=headers, timeout=10)
+        r.raise_for_status()
+        soup = BeautifulSoup(r.text, "html.parser")
+        seen = set()
+        for a in soup.find_all("a", href=True):
+            href = a["href"]
+            m = re.search(r"/event-details/([^/]+)-(\d{4}-\d{2}-\d{2})-(\d{2})-(\d{2})", href)
+            if m and href not in seen:
+                seen.add(href)
+                slug_title = m.group(1).replace("-", " ").title()
+                date_str = f"{m.group(2)}T{m.group(3)}:{m.group(4)}:00"
+                try:
+                    dt = datetime.fromisoformat(date_str).replace(tzinfo=EASTERN)
+                    iso = dt.astimezone(timezone.utc).isoformat()
+                except Exception:
+                    continue
+                title = a.get_text(strip=True)
+                if not title or title.upper() == "TICKETS":
+                    title = slug_title
+                events.append({
+                    "name": title,
+                    "date": iso,
+                    "url": href,
+                    "venue": "Sissy K's",
+                    "price": "$10",
+                    "category": "clubbing",
+                })
+    except Exception:
+        pass
+    return events
+
+
 PARTIFUL_SOURCES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "partiful_sources.json")
 
 
@@ -13000,6 +13094,10 @@ _ALL_VENUES = [
     {"name": "Lyric Stage Company", "url": "https://lyricstage.com/whats-on/", "ua": UA_CHROME, "scraper": scrape_lyric_stage, "default_category": "theater"},
     {"name": "Celebrity Series of Boston", "url": "https://www.celebrityseries.org/live-performances/performance-event-calendar/", "ua": UA_CHROME, "scraper": scrape_celebrity_series, "default_category": "music"},
     {"name": "LesbianNightLife", "url": "https://www.lesbiannightlife.com", "ua": UA_CHROME, "scraper": scrape_wix_events, "default_category": "clubbing"},
+    {"name": "6one7 Productions (Venu & Icon)", "url": "https://www.eventbrite.com/o/6one7-productions-1459894222", "ua": UA_CHROME, "scraper": scrape_eventbrite_org, "default_category": "clubbing"},
+    {"name": "Dope Entertainment (Venu, Icon, Clerys)", "url": "https://www.eventbrite.com/o/dope-entertainment-18760244852", "ua": UA_CHROME, "scraper": scrape_eventbrite_org, "default_category": "clubbing"},
+    {"name": "Bijou Nightclub", "url": "https://www.bijouboston.com", "ua": UA_CHROME, "scraper": scrape_bijou, "default_category": "clubbing"},
+    {"name": "Sissy K's", "url": "https://www.sissykevents.com/", "ua": UA_CHROME, "scraper": scrape_sissy_ks, "default_category": "clubbing"},
 ]
 
 # Drop venues that require env vars we don't have set — keeps the fail banner clean.
@@ -13165,6 +13263,40 @@ MANUAL_RECURRING_EVENTS = [
         ("Live Music & Showcase @ Underbones", "https://redbones.com/", 5, 21, 0, "Free"),
         ("ONCE Upon A Time: Indie Music Series @ Underbones", "https://redbones.com/", 6, 16, 0, "$15"),
         ("Bluegrass & Roots Night @ Underbones", "https://redbones.com/", 3, 20, 0, "Free"),
+    ]),
+    ("Howl at the Moon", "https://www.howlatthemoon.com/boston-ma/", "music", [
+        ("Dueling Pianos & Live Music @ Howl at the Moon", "https://www.howlatthemoon.com/boston-ma/", 3, 20, 0),
+        ("Friday Night Dueling Pianos & Live Show", "https://www.howlatthemoon.com/boston-ma/", 4, 19, 0),
+        ("Saturday Night Dueling Pianos & Live Show", "https://www.howlatthemoon.com/boston-ma/", 5, 19, 0),
+    ]),
+    ("Down Nightclub", "https://downboston.com/", "clubbing", [
+        ("Friday Nightclub & DJ @ Down Boston", "https://downboston.com/", 4, 22, 0),
+        ("Saturday Nightclub & DJ @ Down Boston", "https://downboston.com/", 5, 22, 0),
+    ]),
+    ("Ned Devine's", "https://www.neddevinesboston.com/calendar/", "music", [
+        ("Friday Night Live Music & Cover Band", "https://www.neddevinesboston.com/calendar/", 4, 22, 0),
+        ("Saturday Night Live Music & Cover Band", "https://www.neddevinesboston.com/calendar/", 5, 22, 0),
+    ]),
+    ("Hong Kong Boston", "https://hongkongboston.com/happenings", "clubbing", [
+        ("Tuesday Night Karaoke", "https://hongkongboston.com/happenings", 1, 20, 0, "Free"),
+        ("Wednesday Night Karaoke", "https://hongkongboston.com/happenings", 2, 20, 0, "Free"),
+        ("HK Dating Game & Karaoke Thursdays", "https://hongkongboston.com/happenings", 3, 20, 0, "Free"),
+        ("Friday Night Karaoke & Upstairs Dance Club", "https://hongkongboston.com/happenings", 4, 21, 0),
+        ("Saturday Night Karaoke & Upstairs Dance Club", "https://hongkongboston.com/happenings", 5, 21, 0),
+        ("Sunday Night Karaoke", "https://hongkongboston.com/happenings", 6, 20, 0, "Free"),
+    ]),
+    ("Hennessey's", "https://hennessysboston.com/", "music", [
+        ("Sunday Karaoke with DJ Todd", "https://hennessysboston.com/", 6, 21, 0, "Free"),
+        ("Live Acoustic: Joe Carson", "https://hennessysboston.com/", 0, 20, 0, "Free"),
+        ("Live Acoustic: Gina Garda", "https://hennessysboston.com/", 1, 20, 0, "Free"),
+        ("Thursday Live Acoustic Sessions", "https://hennessysboston.com/", 3, 20, 0, "Free"),
+        ("Friday Weekend Live Band & DJ", "https://hennessysboston.com/", 4, 21, 0, "Free"),
+        ("Saturday Weekend Live Band & DJ", "https://hennessysboston.com/", 5, 21, 0, "Free"),
+    ]),
+    ("Coogan's", "https://www.coogansboston.com/", "clubbing", [
+        ("Thursday Night DJ Dance Party", "https://www.coogansboston.com/", 3, 22, 0, "Free"),
+        ("Friday Night DJ Dance Party", "https://www.coogansboston.com/", 4, 22, 0, "Free"),
+        ("Saturday Night DJ Dance Party", "https://www.coogansboston.com/", 5, 22, 0, "Free"),
     ]),
 ]
 

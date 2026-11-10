@@ -1803,6 +1803,87 @@ class TestBostonEvents(unittest.TestCase):
         self.assertEqual(geo["venue"], "Modern Theatre")
         self.assertEqual(geo["neighborhood"], "Downtown Crossing")
 
+    def test_bijou_nightclub_scraper(self):
+        """Bijou Nightclub scraper and geo resolution."""
+        from scrapers import _ALL_VENUES, scrape_bijou
+        from venues_geo import resolve_event_geo
+        from template import _event_city
+
+        names = [v["name"] for v in _ALL_VENUES]
+        self.assertIn("Bijou Nightclub", names)
+
+        html_home = '<html><body><a href="https://posh.vip/f/test1">Event 1</a></body></html>'
+        html_event = '<html><head><meta property="og:title" content="Robbie Doherty | Bijou Boston | Fri, Nov 13, 2026 | Bijou Nightclub & Lounge"></head></html>'
+
+        from unittest import mock
+        with mock.patch("scrapers._SESSION.get") as mock_get:
+            r1 = mock.MagicMock(status_code=200, text=html_home)
+            r1.raise_for_status = lambda: None
+            r2 = mock.MagicMock(status_code=200, text=html_event)
+            r2.raise_for_status = lambda: None
+            mock_get.side_effect = [r1, r2]
+
+            events = scrape_bijou("https://www.bijouboston.com", UA_CHROME)
+
+        self.assertEqual(len(events), 1)
+        ev = events[0]
+        self.assertEqual(ev["name"], "Robbie Doherty")
+        self.assertEqual(ev["venue"], "Bijou Nightclub")
+        self.assertEqual(ev["category"], "clubbing")
+        geo = resolve_event_geo(ev)
+        self.assertIsNotNone(geo)
+        self.assertEqual(geo["venue"], "Bijou Nightclub")
+        self.assertEqual(geo["neighborhood"], "Theater District")
+        self.assertEqual(_event_city(ev["venue"], "Bijou Nightclub", ev), "boston")
+
+    def test_sissy_ks_scraper(self):
+        """Sissy K's scraper and geo resolution."""
+        from scrapers import _ALL_VENUES, scrape_sissy_ks
+        from venues_geo import resolve_event_geo
+        from template import _event_city
+
+        names = [v["name"] for v in _ALL_VENUES]
+        self.assertIn("Sissy K's", names)
+
+        html = """
+        <html><body>
+          <a href="https://www.sissykevents.com/event-details/turn-it-up-thursdays-w-dj-wordless-2026-11-12-20-00">Turn It Up Thursdays w/DJ WORDLESS</a>
+          <a href="https://www.sissykevents.com/event-details/freaky-fridays-2026-11-13-20-00">Freaky Fridays</a>
+        </body></html>
+        """
+        from unittest import mock
+        with mock.patch("scrapers._SESSION.get") as mock_get:
+            r = mock.MagicMock(status_code=200, text=html)
+            r.raise_for_status = lambda: None
+            mock_get.return_value = r
+
+            events = scrape_sissy_ks("https://www.sissykevents.com/", UA_CHROME)
+
+        self.assertEqual(len(events), 2)
+        ev = events[0]
+        self.assertEqual(ev["name"], "Turn It Up Thursdays w/DJ WORDLESS")
+        self.assertEqual(ev["venue"], "Sissy K's")
+        geo = resolve_event_geo(ev)
+        self.assertIsNotNone(geo)
+        self.assertEqual(geo["venue"], "Sissy K's")
+        self.assertEqual(geo["neighborhood"], "Faneuil Hall / Downtown")
+        self.assertEqual(_event_city(ev["venue"], "Sissy K's", ev), "boston")
+
+    def test_boston_nightlife_venues_geo_and_city(self):
+        """All requested Boston nightlife and club venues resolve to Boston and proper coordinates."""
+        from venues_geo import resolve_event_geo
+        from template import _event_city
+
+        venues = [
+            "Venu Nightclub", "Icon Nightclub", "Bijou", "Legacy", "BSMNT", "Caveau",
+            "Howl at the Moon", "Down Nightclub", "Ned Devine's", "Hennessey's",
+            "Hong Kong Boston", "Sissy K's", "Coogan's", "Royale"
+        ]
+        for v in venues:
+            geo = resolve_event_geo({"venue": v})
+            self.assertIsNotNone(geo, f"Failed geo for {v}")
+            self.assertEqual(_event_city(v, v, {"venue": v}), "boston", f"Failed city for {v}")
+
     def test_celebrity_series(self):
         """Celebrity Series of Boston scraper and geo verification."""
         from scrapers import _ALL_VENUES, scrape_celebrity_series

@@ -180,7 +180,9 @@ CITY_RULES = [
         "rubenstein treehouse", "umass boston", "state house", "faneuil hall", "boston public market",
         "egleston", "massart", "massachusetts college of art", "artists for humanity", "lenox hotel",
         "common craft southie", "northeastern university", "cabot center", "icon nightclub",
-        "venu nightclub", "bijou", "elephant & castle", "fogo de chão", "fogo de chao", "artesani park",
+        "venu nightclub", "bijou", "icon", "venu", "caveau", "howl at the moon", "down nightclub",
+        "down boston", "ned devine", "hennessey", "hong kong", "sissy k", "coogan", "legacy nightclub", "hava",
+        "elephant & castle", "fogo de chão", "fogo de chao", "artesani park",
         "399 boylston", "william e mullins way", "hynes", "off the rails", "lavietes", "31 hemenway", "bully boy",
     )),
 ]
