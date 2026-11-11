@@ -174,6 +174,7 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
 
     # Davis Square & Teele Square
     "the burren": (42.3963, -71.1224, "Davis Square", "247 Elm St, Somerville", "The Burren"),
+    "westie 617": (42.3937, -71.1194, "Davis Square", "351 Summer St, Somerville", "Westie 617"),
     "somerville theatre": (42.3968, -71.1228, "Davis Square", "55 Davis Sq, Somerville", "Somerville Theatre"),
     "crystal ballroom": (42.3968, -71.1228, "Davis Square", "55 Davis Sq, Somerville", "Crystal Ballroom"),
     "the rockwell": (42.3963, -71.1224, "Davis Square", "255 Elm St, Somerville", "The Rockwell"),

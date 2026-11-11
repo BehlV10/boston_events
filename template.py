@@ -1579,11 +1579,207 @@ def market_type(e):
 _HUB_MARKET_JS = """<script>
 (function () {
   var chips = document.querySelectorAll('.hub-city-chip, .hub-type-chip');
-  if (!chips.length) return;
+  if (!chips.length && !document.querySelector('.mk-select')) return;
   var cards = document.querySelectorAll('.hub-card');
   var heads = document.querySelectorAll('.hub-day');
   var groups = document.querySelectorAll('.mk-city, .mk-daily');
   var state = {city: 'all', type: 'all'};
+  var sorting_dist = false;
+  var lastCoords = null;
+  var leafletMap = null;
+  var markersLayer = null;
+
+  var kindSelect = document.getElementById('mk-kind-select');
+  var citySelect = document.getElementById('mk-city-select');
+  var nearBtn = document.getElementById('mk-near-btn');
+  var originSelect = document.getElementById('mk-origin-select');
+  var nearInfo = document.getElementById('mk-near-info');
+  var resetBtn = document.getElementById('mk-reset-btn');
+  var viewListBtn = document.getElementById('mk-view-list');
+  var viewMapBtn = document.getElementById('mk-view-map');
+  var mapWrap = document.getElementById('mk-map-wrap');
+  var mapCloseBtn = document.getElementById('mk-map-close');
+  var mapStatus = document.getElementById('mk-map-status');
+
+  var grid = document.querySelector('.hub-grid');
+  var initialNodes = grid ? Array.prototype.slice.call(grid.children) : [];
+
+  function haversineMiles(lat1, lon1, lat2, lon2) {
+    var R = 3958.8;
+    var dLat = (lat2 - lat1) * Math.PI / 180;
+    var dLon = (lon2 - lon1) * Math.PI / 180;
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  function formatDist(m) {
+    if (m < 10) return m.toFixed(1) + ' mi';
+    return Math.round(m) + ' mi';
+  }
+
+  function loadLeaflet(callback) {
+    if (window.L && window.L.map) {
+      callback();
+      return;
+    }
+    if (!document.querySelector('link[href*="leaflet"]')) {
+      var css = document.createElement('link');
+      css.rel = 'stylesheet';
+      css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      document.head.appendChild(css);
+    }
+    if (window._leafletLoading) {
+      var interval = setInterval(function () {
+        if (window.L && window.L.map) {
+          clearInterval(interval);
+          callback();
+        }
+      }, 50);
+      return;
+    }
+    window._leafletLoading = true;
+    var script = document.createElement('script');
+    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    script.onload = function () {
+      window._leafletLoading = false;
+      callback();
+    };
+    document.head.appendChild(script);
+  }
+
+  function updateMapMarkers() {
+    if (!leafletMap || !markersLayer) return;
+    markersLayer.clearLayers();
+    var bounds = [];
+    var count = 0;
+    cards.forEach(function (c) {
+      if (c.hidden) return;
+      var lat = parseFloat(c.dataset.lat), lng = parseFloat(c.dataset.lng);
+      if (isNaN(lat) || isNaN(lng)) return;
+      var title = c.dataset.title || (c.querySelector('.hub-title a') ? c.querySelector('.hub-title a').textContent : 'Market');
+      var venue = c.dataset.venue || '';
+      var url = c.dataset.url || '#';
+      var timeText = c.querySelector('.mk-when') ? c.querySelector('.mk-when').textContent.trim() : '';
+
+      var marker = L.marker([lat, lng]);
+      var popupHtml = '<div style="font-family:sans-serif;font-size:13px;line-height:1.4;">' +
+                      '<strong style="font-size:14px;"><a href="' + url + '" target="_blank" rel="noopener" style="color:#b23a26;text-decoration:none;">' + title + '</a></strong><br>' +
+                      (venue ? '<span style="color:#6b5a4e;">📍 ' + venue + '</span><br>' : '') +
+                      (timeText ? '<span style="color:#2f6f4f;font-weight:700;">' + timeText + '</span><br>' : '') +
+                      '<a href="' + url + '" target="_blank" rel="noopener" style="display:inline-block;margin-top:4px;color:#b23a26;font-size:12px;font-weight:600;">Event Info →</a>' +
+                      '</div>';
+      marker.bindPopup(popupHtml);
+      markersLayer.addLayer(marker);
+      bounds.push([lat, lng]);
+      count++;
+    });
+    if (mapStatus) mapStatus.textContent = '📍 Showing ' + count + ' markets & festivals on map';
+    if (bounds.length) {
+      leafletMap.fitBounds(bounds, { padding: [30, 30], maxZoom: 15 });
+    }
+  }
+
+  function initMap() {
+    if (leafletMap) {
+      updateMapMarkers();
+      leafletMap.invalidateSize();
+      return;
+    }
+    var mapEl = document.getElementById('mk-leaflet-map');
+    if (!mapEl) return;
+    leafletMap = L.map(mapEl, { center: [42.3601, -71.0589], zoom: 12 });
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
+      maxZoom: 19
+    }).addTo(leafletMap);
+    markersLayer = L.layerGroup().addTo(leafletMap);
+    updateMapMarkers();
+  }
+
+  function sortByDistance(userLat, userLng, originLabel) {
+    cards.forEach(function (c) {
+      var lat = parseFloat(c.dataset.lat), lng = parseFloat(c.dataset.lng);
+      var badge = c.querySelector('.mk-dist-badge');
+      if (!isNaN(lat) && !isNaN(lng)) {
+        var d = haversineMiles(userLat, userLng, lat, lng);
+        c._dist = d;
+        if (badge) {
+          badge.textContent = '📍 ' + formatDist(d);
+          badge.hidden = false;
+        }
+      } else {
+        c._dist = 999999;
+        if (badge) badge.hidden = true;
+      }
+    });
+
+    var cardArr = Array.prototype.slice.call(cards);
+    cardArr.sort(function (a, b) { return (a._dist || 0) - (b._dist || 0); });
+    if (grid) {
+      cardArr.forEach(function (c) { grid.appendChild(c); });
+    }
+    heads.forEach(function (h) { h.hidden = true; });
+    document.querySelectorAll('.mk-city-head').forEach(function (h) { h.hidden = true; });
+    if (nearInfo) {
+      nearInfo.textContent = '📍 Sorted by distance from ' + originLabel;
+      nearInfo.hidden = false;
+    }
+  }
+
+  function restoreInitialOrder() {
+    if (grid && initialNodes.length) {
+      initialNodes.forEach(function (node) { grid.appendChild(node); });
+    }
+    cards.forEach(function (c) {
+      var badge = c.querySelector('.mk-dist-badge');
+      if (badge) badge.hidden = true;
+    });
+    if (nearInfo) {
+      nearInfo.textContent = '';
+      nearInfo.hidden = true;
+    }
+  }
+
+  function activateNear(val) {
+    if (originSelect) originSelect.hidden = false;
+    if (val === 'here') {
+      if (navigator.geolocation) {
+        if (nearInfo) { nearInfo.textContent = '📍 Getting your location...'; nearInfo.hidden = false; }
+        navigator.geolocation.getCurrentPosition(
+          function (pos) {
+            lastCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+            sorting_dist = true;
+            if (originSelect) originSelect.value = 'here';
+            sortByDistance(lastCoords.lat, lastCoords.lng, 'Your Location');
+            show();
+          },
+          function () {
+            lastCoords = { lat: 42.3601, lng: -71.0589 };
+            sorting_dist = true;
+            if (originSelect) originSelect.value = '42.3601,-71.0589';
+            sortByDistance(lastCoords.lat, lastCoords.lng, 'Boston (Downtown)');
+            show();
+          },
+          { timeout: 7000 }
+        );
+        return;
+      }
+      val = '42.3601,-71.0589';
+    }
+    var parts = val.split(',');
+    var lat = parseFloat(parts[0]), lng = parseFloat(parts[1]);
+    var label = 'Boston';
+    if (originSelect && originSelect.selectedIndex >= 0) {
+      label = originSelect.options[originSelect.selectedIndex].text;
+    }
+    sorting_dist = true;
+    lastCoords = { lat: lat, lng: lng };
+    sortByDistance(lat, lng, label);
+    show();
+  }
+
   function show() {
     var days = {};
     cards.forEach(function (c) {
@@ -1592,23 +1788,113 @@ _HUB_MARKET_JS = """<script>
       c.hidden = !on;
       if (on) days[c.dataset.day] = 1;
     });
-    heads.forEach(function (h) { h.hidden = !days[h.dataset.day]; });
+
+    if (sorting_dist) {
+      heads.forEach(function (h) { h.hidden = true; });
+      document.querySelectorAll('.mk-city-head').forEach(function (h) { h.hidden = true; });
+    } else {
+      heads.forEach(function (h) { h.hidden = !days[h.dataset.day]; });
+      document.querySelectorAll('.mk-city-head').forEach(function (h) { h.hidden = false; });
+    }
     groups.forEach(function (g) { g.hidden = !g.querySelector('.hub-card:not([hidden])'); });
+
+    if (kindSelect) kindSelect.value = state.type;
+    if (citySelect) citySelect.value = state.city;
     document.querySelectorAll('.hub-city-chip:not(.hub-type-chip)').forEach(function (b) { b.classList.toggle('active', b.dataset.city === state.city); });
     document.querySelectorAll('.hub-type-chip').forEach(function (b) { b.classList.toggle('active', b.dataset.mtype === state.type); });
+
+    var isFiltered = state.city !== 'all' || state.type !== 'all' || sorting_dist;
+    if (resetBtn) resetBtn.hidden = !isFiltered;
+
     var none = document.getElementById('hub-none');
     if (none) none.hidden = Object.keys(days).length > 0;
+
     var h = [];
     if (state.type !== 'all') h.push('type=' + state.type);
     if (state.city !== 'all') h.push('city=' + state.city);
     history.replaceState(null, '', h.length ? '#' + h.join('&') : location.pathname);
+
+    if (leafletMap && mapWrap && mapWrap.style.display !== 'none') {
+      updateMapMarkers();
+    }
   }
+
   chips.forEach(function (b) {
     b.addEventListener('click', function () {
       if (b.dataset.mtype) state.type = b.dataset.mtype; else state.city = b.dataset.city;
       show();
     });
   });
+
+  if (kindSelect) {
+    kindSelect.addEventListener('change', function () {
+      state.type = kindSelect.value;
+      show();
+    });
+  }
+
+  if (citySelect) {
+    citySelect.addEventListener('change', function () {
+      state.city = citySelect.value;
+      show();
+    });
+  }
+
+  if (nearBtn) {
+    nearBtn.addEventListener('click', function () {
+      activateNear('here');
+    });
+  }
+
+  if (originSelect) {
+    originSelect.addEventListener('change', function () {
+      activateNear(originSelect.value);
+    });
+  }
+
+  if (resetBtn) {
+    resetBtn.addEventListener('click', function () {
+      state = {city: 'all', type: 'all'};
+      sorting_dist = false;
+      if (originSelect) {
+        originSelect.hidden = true;
+        originSelect.selectedIndex = 0;
+      }
+      restoreInitialOrder();
+      show();
+    });
+  }
+
+  if (viewMapBtn) {
+    viewMapBtn.addEventListener('click', function () {
+      if (mapWrap) mapWrap.style.display = 'block';
+      viewMapBtn.classList.add('active');
+      viewMapBtn.setAttribute('aria-pressed', 'true');
+      if (viewListBtn) {
+        viewListBtn.classList.remove('active');
+        viewListBtn.setAttribute('aria-pressed', 'false');
+      }
+      loadLeaflet(function () {
+        initMap();
+      });
+    });
+  }
+
+  function hideMap() {
+    if (mapWrap) mapWrap.style.display = 'none';
+    if (viewListBtn) {
+      viewListBtn.classList.add('active');
+      viewListBtn.setAttribute('aria-pressed', 'true');
+    }
+    if (viewMapBtn) {
+      viewMapBtn.classList.remove('active');
+      viewMapBtn.setAttribute('aria-pressed', 'false');
+    }
+  }
+
+  if (viewListBtn) viewListBtn.addEventListener('click', hideMap);
+  if (mapCloseBtn) mapCloseBtn.addEventListener('click', hideMap);
+
   var t = location.hash.match(/type=(\\w+)/), c = location.hash.match(/city=(\\w+)/);
   if (t && document.querySelector('.hub-type-chip[data-mtype="' + t[1] + '"]')) state.type = t[1];
   if (c && document.querySelector('.hub-city-chip[data-city="' + c[1] + '"]')) state.city = c[1];
@@ -1718,6 +2004,19 @@ def _render_market_card(e, day_attr, today=None):
         price_badge = f'<span class="badge badge-price">{escape(price_txt)}</span>' if price_txt else ""
     kind_label = _market_kind_label(kind)
     kind_badge = f'<span class="mk-kind mk-k-{kind}">{escape(kind_label)}</span>' if kind_label else ""
+
+    from venues_geo import resolve_event_geo
+    geo = resolve_event_geo(e)
+    city_defaults = {
+        "boston": ("42.3601", "-71.0589"),
+        "cambridge": ("42.3736", "-71.1190"),
+        "somerville": ("42.3876", "-71.0995"),
+        "other": ("42.3550", "-71.1000")
+    }
+    def_lat, def_lng = city_defaults.get(city, ("42.3601", "-71.0589"))
+    lat = str(geo["lat"]) if geo and "lat" in geo else str(e.get("lat") or def_lat)
+    lng = str(geo["lng"]) if geo and "lng" in geo else str(e.get("lng") or def_lng)
+
     dates = e.get("_daily_dates")
     if dates:
         hours = e["_daily_hours"]
@@ -1732,19 +2031,32 @@ def _render_market_card(e, day_attr, today=None):
             when = f"Opens {nxt.strftime('%a, %b %-d')} · {_market_hours(hours[nxt])}"
         if closed:
             when += f" · closed {', '.join(d.strftime('%b %-d') for d in closed[:3])}"
-        time_html = f'<span class="mk-span">{escape(span)}</span><span class="mk-hours">{escape(when)}</span>'
+        time_html = f'<span class="mk-hours">{escape(when)}</span><span class="mk-span">{escape(span)}</span>'
+        raw_when = f"{span} · {when}"
     else:
-        time_html = f'<span class="mk-hours">{escape(_market_hours(e))}</span>'
+        hrs = _market_hours(e)
+        time_html = f'<span class="mk-hours">{escape(hrs)}</span>'
+        raw_when = hrs
     desc_html = ""
     if e.get("description"):
         d_txt = re.sub(r"\s+", " ", str(e["description"])).strip()
         desc_html = f'<p class="hub-desc">{escape(d_txt[:160] + ("…" if len(d_txt) > 160 else ""))}</p>'
-    return f"""<article class="hub-card mk-card" data-city="{escape(city)}" data-day="{day_attr}" data-mtype="{kind}">
-  <div class="mk-card-top">{kind_badge}<div class="hub-badges">{price_badge}</div></div>
-  <h3 class="hub-title"><a href="{url}" target="_blank" rel="noopener">{title}</a></h3>
-  <div class="mk-when">{time_html}</div>
-  <div class="hub-meta"><span class="hub-venue">📍 {venue}</span> <span class="hub-city">({place})</span></div>
-  {desc_html}
+    return f"""<article class="hub-card mk-card mk-k-{kind}" data-city="{escape(city)}" data-day="{day_attr}" data-mtype="{kind}" data-lat="{lat}" data-lng="{lng}" data-title="{escape(title)}" data-venue="{escape(venue)}" data-url="{escape(url)}" data-when="{escape(raw_when)}">
+  <div class="mk-time-col">
+    <div class="mk-when">{time_html}</div>
+  </div>
+  <div class="mk-content-col">
+    <div class="mk-card-top">
+      <h3 class="hub-title"><a href="{url}" target="_blank" rel="noopener">{title}</a></h3>
+      <div class="mk-badges">
+        {kind_badge}
+        <div class="hub-badges">{price_badge}</div>
+        <span class="mk-dist-badge" hidden></span>
+      </div>
+    </div>
+    <div class="hub-meta"><span class="hub-venue">📍 {venue}</span> <span class="hub-city">({place})</span></div>
+    {desc_html}
+  </div>
 </article>"""
 
 
@@ -1831,41 +2143,177 @@ _MARKETS_CSS = """
   .mk-stat { background: #fdf0e3; color: #7a3a1c; border: 1px solid #f1d9bf; border-radius: 999px;
     padding: 5px 12px; font-size: 14px; font-weight: 700; }
   .markets-hub .cta-btn { background: var(--accent); color: #fff; }
-  .markets-hub .hub-city-chip { background: #fff; border: 1px solid var(--border); color: var(--fg); }
-  .markets-hub .hub-city-chip.active { background: #2a1f1a; color: #fff; border-color: #2a1f1a; }
-  .markets-hub .hub-day { display: flex; align-items: baseline; gap: 10px; font-size: 22px; color: #2a1f1a;
-    margin: 30px 0 10px; padding-bottom: 8px; border-bottom: 2px solid #eadfce; }
-  .mk-count { font-size: 13px; font-weight: 700; color: var(--muted); background: #f3e8da; border-radius: 999px; padding: 2px 9px; }
-  .markets-hub .hub-grid { display: block; }
+
+  /* Controls & Filter Bar */
+  .mk-controls-bar { margin: 0 0 20px; }
+  .mk-filters-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  .mk-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background: #ffffff url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236b5a4e' d='M1.4 1.4L6 6l4.6-4.6' stroke='%236b5a4e' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") no-repeat right 10px center;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px 30px 6px 12px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fg);
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(90, 50, 30, 0.05);
+    transition: all 0.15s ease;
+  }
+  .mk-select:hover { border-color: var(--accent); }
+  .mk-select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(178, 58, 38, 0.15); }
+  .mk-near-btn {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px 12px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fg);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .mk-near-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .mk-view-toggle {
+    display: inline-flex;
+    align-items: center;
+    background: #f1e5d5;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 2px;
+    gap: 2px;
+    margin-left: auto;
+  }
+  .mk-view-btn {
+    background: transparent;
+    border: none;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .mk-view-btn.active {
+    background: var(--accent);
+    color: #ffffff;
+    font-weight: 700;
+  }
+  .mk-reset-btn {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font: inherit;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+    padding: 4px 6px;
+  }
+  .mk-near-info {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #2f6f4f;
+    font-weight: 600;
+  }
+
+  /* Map View */
+  .mk-map-wrap {
+    margin: 0 0 22px;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 18px rgba(90, 50, 30, 0.08);
+  }
+  .mk-map-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    background: #fdfaf5;
+    border-bottom: 1px solid var(--border);
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--fg);
+  }
+  .mk-map-close-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 2px 8px;
+    font: inherit;
+    font-size: 11px;
+    cursor: pointer;
+    color: var(--muted);
+  }
+  .mk-map-close-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .markets-hub .leaflet-map { width: 100%; height: 420px; }
+
+  /* Day headers */
+  .markets-hub .hub-day { display: flex; align-items: baseline; gap: 10px; font-size: 20px; color: #2a1f1a;
+    margin: 24px 0 8px; padding-bottom: 6px; border-bottom: 2px solid #eadfce; }
+  .mk-count { font-size: 12px; font-weight: 700; color: var(--muted); background: #f3e8da; border-radius: 999px; padding: 2px 8px; }
+  .markets-hub .hub-grid { display: flex; flex-direction: column; gap: 12px; }
   .markets-hub .hub-day { text-decoration: none; }
-  .mk-daily { background: linear-gradient(135deg, #2a3560, #7a3f5e); border-radius: 18px; padding: 4px 16px 16px; margin: 8px 0 6px; }
-  .markets-hub .mk-daily .hub-day { color: #ffe7a3; border-bottom-color: rgba(255, 231, 163, 0.25); margin-top: 14px; }
-  .mk-city { margin: 4px 0 12px; }
-  .mk-city-head { margin: 12px 0 8px; font-size: 14px; }
-  .mk-city-pill { display: inline-block; padding: 3px 12px; border-radius: 999px; font-weight: 800; color: #fff;
-    letter-spacing: 0.02em; }
+  .mk-daily { background: linear-gradient(135deg, #2a3560, #7a3f5e); border-radius: 14px; padding: 4px 14px 14px; margin: 4px 0 10px; }
+  .markets-hub .mk-daily .hub-day { color: #ffe7a3; border-bottom-color: rgba(255, 231, 163, 0.25); margin-top: 10px; }
+  .mk-city { margin: 2px 0 10px; }
+  .mk-city-head { margin: 10px 0 6px; font-size: 13px; }
+  .mk-city-pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-weight: 800; color: #fff;
+    letter-spacing: 0.02em; font-size: 12px; }
   .mk-c-boston { background: #2d5d8a; } .mk-c-cambridge { background: #b23a26; }
   .mk-c-somerville { background: #2f6f4f; } .mk-c-other { background: #8a6a3a; }
-  .mk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
-  .markets-hub .mk-card { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px;
-    display: flex; flex-direction: column; gap: 6px; box-shadow: 0 2px 8px rgba(90, 50, 30, 0.05); }
-  .markets-hub .mk-card[hidden], .mk-city[hidden], .mk-daily[hidden] { display: none; }
-  .mk-card-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-  .mk-kind { font-size: 12px; font-weight: 700; color: #7a3a1c; background: #fdf0e3; border-radius: 999px; padding: 2px 9px; }
+
+  /* Streamlined List Layout (moving away from rectangular boxes) */
+  .mk-grid { display: flex; flex-direction: column; gap: 6px; }
+  .markets-hub .mk-card {
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    display: grid;
+    grid-template-columns: 140px minmax(0, 1fr);
+    align-items: center;
+    gap: 14px;
+    box-shadow: 0 1px 3px rgba(90, 50, 30, 0.03);
+    transition: all 0.15s ease;
+  }
+  .markets-hub .mk-card:hover {
+    border-color: #d1bfa9;
+    box-shadow: 0 3px 10px rgba(90, 50, 30, 0.07);
+    transform: translateY(-1px);
+  }
+  .markets-hub .mk-card[hidden], .mk-city[hidden], .mk-daily[hidden] { display: none !important; }
+  .mk-time-col { display: flex; flex-direction: column; gap: 2px; }
+  .mk-when { display: flex; flex-direction: column; gap: 2px; font-size: 13px; }
+  .mk-hours { font-weight: 800; color: #b23a26; font-variant-numeric: tabular-nums; font-size: 13px; line-height: 1.25; }
+  .mk-span { font-weight: 700; color: #2f6f4f; font-size: 11.5px; line-height: 1.25; }
+  .mk-content-col { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+  .mk-card-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .markets-hub .mk-card .hub-title { margin: 0; font-size: 15.5px; font-weight: 700; line-height: 1.3; }
+  .markets-hub .mk-card .hub-title a { color: #2a1f1a; text-decoration: none; }
+  .markets-hub .mk-card .hub-title a:hover { color: var(--accent); text-decoration: underline; }
+  .mk-badges { display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .mk-kind { font-size: 11.5px; font-weight: 700; color: #7a3a1c; background: #fdf0e3; border-radius: 999px; padding: 2px 8px; }
   .mk-k-farmers { background: #e8f3e6; color: #2f6f4f; } .mk-k-holiday { background: #fbe6e2; color: #a8321f; }
   .mk-k-flea { background: #efe7f6; color: #5d3f8a; } .mk-k-craft { background: #fdf0d8; color: #8a5a10; }
   .mk-k-festival { background: #e3eef8; color: #2d5d8a; }
-  .markets-hub .mk-card .hub-title { margin: 0; font-size: 17px; line-height: 1.25; }
-  .markets-hub .mk-card .hub-title a { color: #2a1f1a; }
-  .mk-when { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 14px; }
-  .mk-hours { font-weight: 800; color: #b23a26; }
-  .mk-span { font-weight: 800; color: #2f6f4f; }
-  .markets-hub .mk-card .hub-meta { display: block; font-size: 14px; color: var(--muted); }
-  .markets-hub .hub-desc { font-size: 13.5px; color: var(--muted); margin: 0; }
-  @media (max-width: 600px) {
+  .mk-dist-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: 999px; background: #e8f3e6; color: #2f6f4f; border: 1px solid #c2e2be; }
+  .markets-hub .mk-card .hub-meta { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); flex-wrap: wrap; }
+  .markets-hub .hub-desc { font-size: 13px; color: var(--muted); margin: 2px 0 0; line-height: 1.4; }
+
+  @media (max-width: 680px) {
     .mk-hero-art { height: 140px; }
     .mk-hero-copy { padding: 16px 16px 20px; }
-    .mk-grid { grid-template-columns: 1fr; }
+    .mk-view-toggle { margin-left: 0; }
+    .markets-hub .mk-card { grid-template-columns: 1fr; gap: 6px; padding: 10px 12px; }
+    .mk-time-col { border-bottom: 1px dashed #eddac8; padding-bottom: 5px; margin-bottom: 2px; }
     .mk-daily { padding: 2px 12px 12px; }
   }
 """
@@ -4071,6 +4519,63 @@ _CAMPS_CSS = """
   }
   .camp-saved-bar { background: #e2f3e6; border-radius: 10px; padding: 8px 12px; margin-top: 12px; font-weight: 600; font-size: 13px; display: flex; flex-direction: column; gap: 6px; }
   .camp-saved-bar[hidden] { display: none; }
+  .camp-view-toggle {
+    display: inline-flex;
+    align-items: center;
+    background: #e2ece3;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 2px;
+    gap: 2px;
+  }
+  .camp-view-btn {
+    background: transparent;
+    border: none;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .camp-view-btn.active {
+    background: var(--accent);
+    color: #ffffff;
+    font-weight: 700;
+  }
+  .camp-map-wrap {
+    margin: 0 0 16px;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 18px rgba(20, 83, 45, 0.08);
+  }
+  .camp-map-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    background: #f6faf6;
+    border-bottom: 1px solid var(--border);
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--fg);
+  }
+  .camp-map-close-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 2px 8px;
+    font: inherit;
+    font-size: 11px;
+    cursor: pointer;
+    color: var(--muted);
+  }
+  .camp-map-close-btn:hover { color: var(--accent); border-color: var(--accent); }
+  .camps-hub .leaflet-map, .camps-hub .camp-leaflet-map { width: 100%; height: 440px; }
   .camp-after { margin-top: 24px; }
   .camp-after ul { margin: 8px 0 0; padding-left: 20px; }
   @media (max-width: 860px) {
@@ -4219,6 +4724,14 @@ _CAMPS_FILTER_JS = """<script>
   var grid = document.querySelector('.hub-grid');
   var initialNodes = grid ? Array.prototype.slice.call(grid.children) : [];
 
+  var viewListBtn = document.getElementById('camp-view-list');
+  var viewMapBtn = document.getElementById('camp-view-map');
+  var mapWrap = document.getElementById('camp-map-wrap');
+  var mapCloseBtn = document.getElementById('camp-map-close');
+  var mapStatus = document.getElementById('camp-map-status');
+  var leafletMap = null;
+  var markersLayer = null;
+
   var state = { area: 'all', camp_type: 'all', kind: 'all', cost: 'all', info: 'all', age: 'all' };
   var sorting_dist = false;
   var lastCoords = null;
@@ -4266,6 +4779,85 @@ _CAMPS_FILTER_JS = """<script>
       if ((lo !== null && a < lo) || (hi !== null && a > hi)) return false;
     }
     return true;
+  }
+
+  function loadLeaflet(callback) {
+    if (window.L && window.L.map) {
+      callback();
+      return;
+    }
+    if (!document.querySelector('link[href*="leaflet"]')) {
+      var css = document.createElement('link');
+      css.rel = 'stylesheet';
+      css.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      document.head.appendChild(css);
+    }
+    if (window._leafletLoading) {
+      var interval = setInterval(function () {
+        if (window.L && window.L.map) {
+          clearInterval(interval);
+          callback();
+        }
+      }, 50);
+      return;
+    }
+    window._leafletLoading = true;
+    var script = document.createElement('script');
+    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    script.onload = function () {
+      window._leafletLoading = false;
+      callback();
+    };
+    document.head.appendChild(script);
+  }
+
+  function updateCampMapMarkers() {
+    if (!leafletMap || !markersLayer) return;
+    markersLayer.clearLayers();
+    var bounds = [];
+    var count = 0;
+    cards.forEach(function (c) {
+      if (c.hidden) return;
+      var lat = parseFloat(c.dataset.lat), lng = parseFloat(c.dataset.lng);
+      if (isNaN(lat) || isNaN(lng)) return;
+      var title = c.querySelector('h3 a') ? c.querySelector('h3 a').textContent : 'Camp';
+      var url = c.querySelector('h3 a') ? c.querySelector('h3 a').href : '#';
+      var where = c.querySelector('.camp-where') ? c.querySelector('.camp-where').textContent : '';
+      var price = c.querySelector('.camp-facts dd') ? c.querySelector('.camp-facts dd').textContent : '';
+
+      var marker = L.marker([lat, lng]);
+      var popupHtml = '<div style="font-family:sans-serif;font-size:13px;line-height:1.4;">' +
+                      '<strong style="font-size:14px;"><a href="' + url + '" target="_blank" rel="noopener" style="color:#2b6e3f;text-decoration:none;">' + title + '</a></strong><br>' +
+                      (where ? '<span style="color:#526456;">' + where + '</span><br>' : '') +
+                      (price ? '<span style="color:#1e4d2b;font-weight:600;">' + price + '</span><br>' : '') +
+                      '<a href="' + url + '" target="_blank" rel="noopener" style="display:inline-block;margin-top:4px;color:#2b6e3f;font-size:12px;font-weight:700;">Camp Website →</a>' +
+                      '</div>';
+      marker.bindPopup(popupHtml);
+      markersLayer.addLayer(marker);
+      bounds.push([lat, lng]);
+      count++;
+    });
+    if (mapStatus) mapStatus.textContent = '📍 Showing ' + count + ' camps on map';
+    if (bounds.length) {
+      leafletMap.fitBounds(bounds, { padding: [30, 30], maxZoom: 14 });
+    }
+  }
+
+  function initCampMap() {
+    if (leafletMap) {
+      updateCampMapMarkers();
+      leafletMap.invalidateSize();
+      return;
+    }
+    var mapEl = document.getElementById('camp-leaflet-map');
+    if (!mapEl) return;
+    leafletMap = L.map(mapEl, { center: [42.3601, -71.0589], zoom: 11 });
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors',
+      maxZoom: 19
+    }).addTo(leafletMap);
+    markersLayer = L.layerGroup().addTo(leafletMap);
+    updateCampMapMarkers();
   }
 
   function sortByDistance(userLat, userLng, originLabel) {
@@ -4389,6 +4981,10 @@ _CAMPS_FILTER_JS = """<script>
       var parts = Object.keys(state).filter(function (k) { return state[k] !== 'all'; }).map(function (k) { return k + '=' + state[k]; });
       history.replaceState(null, '', parts.length ? '#' + parts.join('&') : location.pathname);
     }
+
+    if (leafletMap && mapWrap && mapWrap.style.display !== 'none') {
+      updateCampMapMarkers();
+    }
   }
 
   if (nearBtn) {
@@ -4401,6 +4997,40 @@ _CAMPS_FILTER_JS = """<script>
     originSelect.addEventListener('change', function () {
       activateNear(originSelect.value);
     });
+  }
+
+  if (viewMapBtn) {
+    viewMapBtn.addEventListener('click', function () {
+      if (mapWrap) mapWrap.style.display = 'block';
+      viewMapBtn.classList.add('active');
+      viewMapBtn.setAttribute('aria-pressed', 'true');
+      if (viewListBtn) {
+        viewListBtn.classList.remove('active');
+        viewListBtn.setAttribute('aria-pressed', 'false');
+      }
+      loadLeaflet(function () {
+        initCampMap();
+      });
+    });
+  }
+
+  function hideCampMap() {
+    if (mapWrap) mapWrap.style.display = 'none';
+    if (viewListBtn) {
+      viewListBtn.classList.add('active');
+      viewListBtn.setAttribute('aria-pressed', 'true');
+    }
+    if (viewMapBtn) {
+      viewMapBtn.classList.remove('active');
+      viewMapBtn.setAttribute('aria-pressed', 'false');
+    }
+  }
+
+  if (viewListBtn) {
+    viewListBtn.addEventListener('click', hideCampMap);
+  }
+  if (mapCloseBtn) {
+    mapCloseBtn.addEventListener('click', hideCampMap);
   }
 
   if (resetBtn) {
@@ -4710,7 +5340,20 @@ def _camps_sections(camps):
   {sidebar}
   <div class="camps-main-col">
     {dates}
-    <div class="camps-count-bar"><span><span id="camp-results-count">{len(camps)}</span> camps</span></div>"""
+    <div class="camps-count-bar">
+      <span><span id="camp-results-count">{len(camps)}</span> camps</span>
+      <div class="camp-view-toggle" role="group" aria-label="View mode">
+        <button type="button" id="camp-view-list" class="camp-view-btn active" aria-pressed="true">📋 List</button>
+        <button type="button" id="camp-view-map" class="camp-view-btn" aria-pressed="false">🗺️ Map</button>
+      </div>
+    </div>
+    <div id="camp-map-wrap" class="camp-map-wrap" style="display:none;">
+      <div class="camp-map-toolbar">
+        <span id="camp-map-status" class="camp-map-status">📍 Loading summer camps map...</span>
+        <button type="button" id="camp-map-close" class="camp-map-close-btn" aria-label="Close Map">✕ Close Map</button>
+      </div>
+      <div id="camp-leaflet-map" class="camp-leaflet-map" style="height:440px; width:100%;"></div>
+    </div>"""
 
     def link(name, url):
         return f'<a href="{escape(url)}" target="_blank" rel="noopener">{escape(name)}</a>' if url else escape(name)
@@ -5316,11 +5959,52 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
             joined = "".join(cards_html)
             kinds = [(k, lbl) for k, lbl, _rx in _MARKET_TYPES] + [_FESTIVAL_TYPE, _MARKET_OTHER]
             counts = {k: joined.count(f'data-mtype="{k}"') for k, _ in kinds}
-            city_chips_html = ('<div class="hub-city-chips hub-type-chips" role="group" aria-label="Filter by kind of market or festival">'
-                               '<button type="button" class="hub-city-chip hub-type-chip" data-mtype="all">All</button>'
-                               + "".join(f'<button type="button" class="hub-city-chip hub-type-chip" data-mtype="{k}">{lbl} '
-                                         f'<span class="count">{counts[k]}</span></button>' for k, lbl in kinds if counts[k])
-                               + "</div>" + city_chips_html)
+            kind_options = (
+                '<option class="hub-city-chip hub-type-chip active" data-mtype="all" value="all">🛍️ All Types</option>'
+                + "".join(
+                    f'<option class="hub-city-chip hub-type-chip" data-mtype="{k}" value="{k}">{lbl} ({counts[k]})</option>'
+                    for k, lbl in kinds if counts[k]
+                )
+            )
+            city_options = (
+                '<option class="hub-city-chip active" data-city="all" value="all">📍 All Areas</option>'
+                + "".join(
+                    f'<option class="hub-city-chip" data-city="{k}" value="{k}">{lbl}</option>'
+                    for k, lbl in _HUB_CITY_CHIPS if k != "all" and k in present
+                )
+            )
+            city_chips_html = f"""<div class="mk-controls-bar" role="group" aria-label="Filter markets and festivals">
+  <div class="mk-filters-row">
+    <select id="mk-kind-select" class="mk-select" aria-label="Filter by kind of market or festival">
+      {kind_options}
+    </select>
+    <select id="mk-city-select" class="mk-select" aria-label="Filter by city">
+      {city_options}
+    </select>
+    <button type="button" id="mk-near-btn" class="mk-near-btn" title="Sort by distance from your location">📍 Near Me</button>
+    <select id="mk-origin-select" class="mk-select mk-origin-select" aria-label="Choose starting point" hidden>
+      <option value="here">📍 My Current Location</option>
+      <option value="42.3601,-71.0589">Boston (Downtown / Common)</option>
+      <option value="42.3519,-71.0469">Seaport</option>
+      <option value="42.3736,-71.1097">Cambridge (Harvard / Central)</option>
+      <option value="42.3957,-71.1224">Somerville (Davis Sq)</option>
+      <option value="42.3370,-71.1060">Brookline / Longwood</option>
+    </select>
+    <div class="mk-view-toggle" role="group" aria-label="View mode">
+      <button type="button" id="mk-view-list" class="mk-view-btn active" aria-pressed="true">📋 List</button>
+      <button type="button" id="mk-view-map" class="mk-view-btn" aria-pressed="false">🗺️ Map</button>
+    </div>
+    <button type="button" id="mk-reset-btn" class="mk-reset-btn" hidden>✕ Reset</button>
+  </div>
+  <div id="mk-near-info" class="mk-near-info" hidden></div>
+  <div id="mk-map-wrap" class="mk-map-wrap" style="display:none;">
+    <div class="mk-map-toolbar">
+      <span id="mk-map-status" class="mk-map-status">📍 Loading markets map...</span>
+      <button type="button" id="mk-map-close" class="mk-map-close-btn" aria-label="Close Map">✕ Close Map</button>
+    </div>
+    <div id="mk-leaflet-map" class="mk-leaflet-map" style="height:440px; width:100%;"></div>
+  </div>
+</div>"""
             hub_js = _HUB_MARKET_JS
 
     kids_head, kids_css, body_class = "", "", ""
