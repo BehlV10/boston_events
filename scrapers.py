@@ -11848,7 +11848,7 @@ def scrape_resident_advisor(url, ua):
     """Boston club nights and electronic shows from Resident Advisor's GraphQL API."""
     today = datetime.now(EASTERN).date()
     filters = {"areas": {"eq": 530}, "listingDate": {"gte": today.isoformat(),
-                                                     "lte": (today + timedelta(days=90)).isoformat()}}
+                                                     "lte": (today + timedelta(days=365)).isoformat()}}
     headers = {"User-Agent": ua or UA_CHROME, "Content-Type": "application/json",
                "Referer": "https://ra.co/events/us/boston"}
     listings = []
