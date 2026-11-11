@@ -5324,6 +5324,49 @@ def scrape_balance_patch(url, ua):
     return events
 
 
+def scrape_westie617(url, ua):
+    """Westie 617 (West Coast Swing, 351 Summer St, Somerville): weekly Wednesday drop-in class + social
+    dance. Each week is a dated Squarespace store product ("11/11/26 Drop-In Class & Dance"), so a week
+    with no product for sale isn't happening. The class and the social dance are listed as one event at
+    the class time from the product text (8:15pm), falling back to 8:15pm."""
+    r = _SESSION.get(url, params={"format": "json-pretty"}, timeout=15,
+                     headers={"User-Agent": ua, "Accept": "application/json"})
+    r.raise_for_status()
+    today = datetime.now(EASTERN).date()
+    events = []
+    for item in (r.json() or {}).get("items", []) or []:
+        title = (item.get("title") or "").strip()
+        m = re.match(r"(\d{1,2})/(\d{1,2})/(\d{2,4})\s+(.*)", title)
+        if not m:
+            continue
+        mo, d, y, label = int(m.group(1)), int(m.group(2)), int(m.group(3)), m.group(4).strip()
+        y += 2000 if y < 100 else 0
+        text = BeautifulSoup(item.get("excerpt") or "", "html.parser").get_text(" ", strip=True)
+        tm = re.search(r"\b(\d{1,2})(?::(\d{2}))?\s*([ap])\.?m\b", text, re.I)
+        hour, minute = (int(tm.group(1)) % 12 + (12 if tm.group(3).lower() == "p" else 0), int(tm.group(2) or 0)) if tm else (20, 15)
+        try:
+            dt = datetime(y, mo, d, hour, minute, tzinfo=EASTERN)
+        except ValueError:
+            continue
+        if dt.date() < today:
+            continue
+        variants = (item.get("structuredContent") or {}).get("variants") or []
+        if variants and all(not v.get("unlimited") and (v.get("stock") or {}).get("quantity", 1) <= 0 for v in variants):
+            continue
+        prices = sorted({int(p) for v in variants for p in re.findall(r"\$(\d+)", json.dumps(v.get("attributes") or {}))})
+        events.append({
+            "name": f"West Coast Swing {label} — Westie 617",
+            "date": dt.astimezone(timezone.utc).isoformat(),
+            "url": urljoin(url, item.get("fullUrl") or ""),
+            "venue": "Westie 617",
+            "address": "351 Summer St, Somerville, MA",
+            "price": (f"${prices[0]}" if len(prices) == 1 else f"${prices[0]} - ${prices[-1]}") if prices else None,
+            "description": "8:15pm drop-in class (Basic, West Coast Swing, or Beyond) followed by social dancing from ~9:15pm.",
+            "category": "dance",
+        })
+    return events
+
+
 def scrape_24hour_music(url, ua):
     """24 Hour Music — accesso ShoWare ticketing platform.
     Hits internal JSON endpoint that powers the homepage performance list."""
@@ -13498,6 +13541,7 @@ _ALL_VENUES = [
     {"name": "Harvard Book Store", "url": "https://www.harvard.com/events", "ua": UA_CURL, "scraper": scrape_event_list, "default_category": "books"},
     {"name": "Porter Square Books", "url": "https://portersquarebooks.com/events/calendar", "ua": UA_SAFARI, "scraper": scrape_porter_square_books, "default_category": "books"},
     {"name": "Have To Dance", "url": "http://www.havetodance.com/calendar.html", "ua": UA_CHROME, "scraper": scrape_havetodance, "default_category": "dance"},
+    {"name": "Westie 617", "url": "https://www.westie617.com/store", "ua": UA_CHROME, "scraper": scrape_westie617, "default_category": "dance"},
     {"name": "Boston Adventure Club", "url": "https://bostonadventureclub.com/events", "ua": UA_CHROME, "scraper": scrape_boston_adventure_club, "default_category": "outdoors"},
     {"name": "Somerville Theatre", "url": "https://www.somervilletheatre.com/events/", "ua": UA_CHROME, "scraper": scrape_somerville_theatre, "default_category": "film"},
     {"name": "The Sinclair", "url": "https://www.sinclaircambridge.com/events", "ua": UA_CHROME, "scraper": scrape_sinclair, "default_category": "music"},
