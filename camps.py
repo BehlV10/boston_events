@@ -55,6 +55,12 @@ def validate(data):
             problems.append(f"{who}: bad weekly price range")
         if low is not None and not c.get("price"):
             problems.append(f"{who}: weekly range with no published price")
+        lat, lng = c.get("lat"), c.get("lng")
+        if (lat is None) != (lng is None):
+            problems.append(f"{who}: camp has lat without lng or vice-versa")
+        elif lat is not None:
+            if not (-90 <= lat <= 90 and -180 <= lng <= 180):
+                problems.append(f"{who}: invalid lat/lng coordinates ({lat}, {lng})")
         for e in c.get("events") or []:
             if e.get("date"):
                 try:

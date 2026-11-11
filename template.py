@@ -3816,7 +3816,7 @@ _CAMPS_CSS = """
     background: var(--accent);
     font-weight: 700;
   }
-  .camps-hub main { max-width: 1000px; padding-top: 20px; font-size: 16px; line-height: 1.5; }
+  .camps-hub main { max-width: 1120px; padding-top: 20px; font-size: 16px; line-height: 1.5; }
   .camps-hub .hero { border: 1px solid var(--border); background: #fff; border-radius: 16px; overflow: hidden; margin-bottom: 20px; padding: 0; text-align: left; }
   .camps-hero-art { display: block; width: 100%; height: 120px; }
   .camps-hero-copy { padding: 18px 22px 22px; }
@@ -3824,6 +3824,106 @@ _CAMPS_CSS = """
   .camps-hub .hero h1 small { display: block; font-size: 0.45em; font-weight: 700; color: #3f6f52; letter-spacing: 0; margin-top: 4px; }
   .camps-hub .hero p { color: var(--muted); font-size: 17px; margin: 0 0 10px; max-width: 720px; }
   .camps-stats { margin: 0; font-size: 15px; font-weight: 600; color: var(--fg); }
+  .camps-layout {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 26px;
+    align-items: start;
+    margin-bottom: 24px;
+  }
+  .camps-sidebar {
+    position: sticky;
+    top: 16px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  }
+  .camps-filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .camps-sidebar-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: #14532d;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 0;
+  }
+  .camp-reset-btn {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #c2410c;
+  }
+  .camps-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .camp-filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .camp-filter-label {
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--muted);
+  }
+  .camps-sidebar .camp-select {
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .camp-near-btn {
+    appearance: none;
+    background: #eaf5ed;
+    border: 1px solid #86efac;
+    color: #14532d;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 7px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+    width: 100%;
+  }
+  .camp-near-btn:hover {
+    background: #166534;
+    color: #fff;
+    border-color: #166534;
+  }
+  .camp-near-btn.active {
+    background: #14532d;
+    color: #fff;
+    border-color: #14532d;
+  }
+  .camp-near-info {
+    font-size: 11.5px;
+    color: #15803d;
+    font-weight: 600;
+    margin-top: 4px;
+    line-height: 1.3;
+  }
+  .camp-origin-select {
+    margin-top: 4px;
+    font-size: 12px;
+  }
+  .camps-main-col {
+    min-width: 0;
+  }
   .camp-panel { background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 18px 20px; margin-bottom: 20px; }
   .camp-panel h2 { font-size: 22px; margin: 0 0 4px; color: #14532d; }
   .camp-panel > p { margin: 0 0 12px; color: var(--muted); }
@@ -3840,22 +3940,6 @@ _CAMPS_CSS = """
   .camp-panel details { margin-top: 12px; border-top: 1px solid #e7ede7; padding-top: 12px; }
   .camp-panel summary { font-weight: 700; cursor: pointer; color: var(--accent); }
   .camp-panel details ul { margin: 8px 0 0; padding-left: 20px; }
-  .camps-filters {
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    margin-bottom: 16px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    white-space: nowrap;
-    scrollbar-width: none;
-  }
-  .camps-filters::-webkit-scrollbar { display: none; }
   .camp-select, .camp-age-select {
     appearance: none;
     -webkit-appearance: none;
@@ -3929,11 +4013,81 @@ _CAMPS_CSS = """
   .camp-season.y2026 { background: var(--amber-bg); color: var(--amber-fg); }
   .camp-site { font-weight: 700; color: var(--accent); font-size: 13px; }
   .camp-sources { font-size: 12px; color: var(--muted); width: 100%; }
-  .camp-sources a { color: var(--muted); }
-  .camp-saved-bar { background: #e2f3e6; border-radius: 10px; padding: 8px 14px; margin-bottom: 12px; font-weight: 600; font-size: 13.5px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .camp-top-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .camp-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .camp-badge-day {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+  }
+  .camp-badge-overnight {
+    background: #ede9fe;
+    color: #5b21b6;
+    border: 1px solid #ddd6fe;
+  }
+  .camp-dist-badge {
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+    white-space: nowrap;
+  }
+  .camp-loc-header {
+    margin: 24px 0 6px;
+    font-size: 16.5px;
+    font-weight: 800;
+    color: #14532d;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 4px;
+    border-bottom: 2px solid #e2ece3;
+  }
+  .camp-loc-header:first-of-type {
+    margin-top: 0;
+  }
+  .camp-loc-header .count {
+    font-size: 12px;
+    font-weight: 700;
+    color: #4a5a4f;
+    background: #e2ece3;
+    padding: 1px 7px;
+    border-radius: 999px;
+  }
+  .camp-saved-bar { background: #e2f3e6; border-radius: 10px; padding: 8px 12px; margin-top: 12px; font-weight: 600; font-size: 13px; display: flex; flex-direction: column; gap: 6px; }
   .camp-saved-bar[hidden] { display: none; }
   .camp-after { margin-top: 24px; }
   .camp-after ul { margin: 8px 0 0; padding-left: 20px; }
+  @media (max-width: 860px) {
+    .camps-layout {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    .camps-sidebar {
+      position: static;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    .camps-filters {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+      gap: 8px;
+    }
+  }
   @media (max-width: 640px) {
     .camps-hero-art { display: none; }
     .camps-hub header {
@@ -4057,11 +4211,36 @@ _CAMPS_FILTER_JS = """<script>
   if (!selects.length && !chips.length) return;
   var cards = document.querySelectorAll('.camp-card');
   var countEl = document.getElementById('camp-results-count');
-  var state = { area: 'all', kind: 'all', cost: 'all', info: 'all', age: 'all' };
+  var resetBtn = document.getElementById('camp-reset-btn');
+  var nearBtn = document.getElementById('camp-near-btn');
+  var originSelect = document.getElementById('camp-origin');
+  var nearInfo = document.getElementById('camp-near-info');
+  var grid = document.querySelector('.hub-grid');
+  var initialNodes = grid ? Array.prototype.slice.call(grid.children) : [];
+
+  var state = { area: 'all', camp_type: 'all', kind: 'all', cost: 'all', info: 'all', age: 'all' };
+  var sorting_dist = false;
+  var lastCoords = null;
   var KEY = 'wbe-saved-camps', saved = {};
   try { (JSON.parse(localStorage.getItem(KEY)) || []).forEach(function (i) { saved[i] = 1; }); } catch (e) {}
   function keep() { try { localStorage.setItem(KEY, JSON.stringify(Object.keys(saved))); } catch (e) {} }
   function num(v) { return v === '' || v === undefined ? null : Number(v); }
+
+  function haversineMiles(lat1, lon1, lat2, lon2) {
+    var R = 3958.8;
+    var dLat = (lat2 - lat1) * Math.PI / 180;
+    var dLon = (lon2 - lon1) * Math.PI / 180;
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  function formatDist(m) {
+    if (m < 10) return m.toFixed(1) + ' mi';
+    return Math.round(m) + ' mi';
+  }
+
   function costOk(d) {
     var lo = num(d.lo);
     if (state.cost === 'free') return lo === 0;
@@ -4070,8 +4249,11 @@ _CAMPS_FILTER_JS = """<script>
     if (state.cost === 'help') return d.help === '1';
     return true;
   }
+
   function matches(c) {
     var d = c.dataset;
+    if (state.camp_type === 'day' && d.type === 'Overnight') return false;
+    if (state.camp_type === 'overnight' && d.type !== 'Overnight') return false;
     if (state.area !== 'all' && d.area !== state.area) return false;
     if (state.kind === 'overnight') { if (d.type !== 'Overnight') return false; }
     else if (state.kind !== 'all' && d.kind !== state.kind) return false;
@@ -4084,6 +4266,88 @@ _CAMPS_FILTER_JS = """<script>
     }
     return true;
   }
+
+  function sortByDistance(userLat, userLng, originLabel) {
+    cards.forEach(function (c) {
+      var lat = parseFloat(c.dataset.lat);
+      var lng = parseFloat(c.dataset.lng);
+      var badge = c.querySelector('.camp-dist-badge');
+      if (!isNaN(lat) && !isNaN(lng)) {
+        var d = haversineMiles(userLat, userLng, lat, lng);
+        c._dist = d;
+        if (badge) {
+          badge.textContent = '📍 ' + formatDist(d);
+          badge.hidden = false;
+        }
+      } else {
+        c._dist = 999999;
+        if (badge) badge.hidden = true;
+      }
+    });
+
+    var cardArr = Array.prototype.slice.call(cards);
+    cardArr.sort(function (a, b) { return (a._dist || 0) - (b._dist || 0); });
+    if (grid) {
+      cardArr.forEach(function (c) { grid.appendChild(c); });
+    }
+    if (nearInfo) {
+      nearInfo.textContent = '📍 Sorted from ' + originLabel;
+      nearInfo.hidden = false;
+    }
+  }
+
+  function restoreInitialOrder() {
+    if (grid && initialNodes.length) {
+      initialNodes.forEach(function (node) { grid.appendChild(node); });
+    }
+    cards.forEach(function (c) {
+      var badge = c.querySelector('.camp-dist-badge');
+      if (badge) badge.hidden = true;
+    });
+    if (nearInfo) {
+      nearInfo.textContent = '';
+      nearInfo.hidden = true;
+    }
+  }
+
+  function activateNear(val) {
+    if (originSelect) originSelect.hidden = false;
+    if (val === 'here') {
+      if (navigator.geolocation) {
+        if (nearInfo) { nearInfo.textContent = '📍 Getting location...'; nearInfo.hidden = false; }
+        navigator.geolocation.getCurrentPosition(
+          function (pos) {
+            lastCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+            sorting_dist = true;
+            if (originSelect) originSelect.value = 'here';
+            sortByDistance(lastCoords.lat, lastCoords.lng, 'Your Location');
+            render(false);
+          },
+          function () {
+            lastCoords = { lat: 42.3601, lng: -71.0589 };
+            sorting_dist = true;
+            if (originSelect) originSelect.value = '42.3601,-71.0589';
+            sortByDistance(lastCoords.lat, lastCoords.lng, 'Boston (Downtown)');
+            render(false);
+          },
+          { timeout: 7000 }
+        );
+        return;
+      }
+      val = '42.3601,-71.0589';
+    }
+    var parts = val.split(',');
+    var lat = parseFloat(parts[0]), lng = parseFloat(parts[1]);
+    var label = 'Boston';
+    if (originSelect && originSelect.selectedIndex >= 0) {
+      label = originSelect.options[originSelect.selectedIndex].text;
+    }
+    sorting_dist = true;
+    lastCoords = { lat: lat, lng: lng };
+    sortByDistance(lat, lng, label);
+    render(false);
+  }
+
   function render(write) {
     var n = 0;
     cards.forEach(function (c) { var on = matches(c); c.hidden = !on; if (on) n++; });
@@ -4096,6 +4360,22 @@ _CAMPS_FILTER_JS = """<script>
     if (countEl) countEl.textContent = n;
     var none = document.getElementById('hub-none');
     if (none) none.hidden = n > 0;
+
+    var locHeaders = document.querySelectorAll('.camp-loc-header');
+    if (sorting_dist) {
+      locHeaders.forEach(function (h) { h.hidden = true; });
+    } else {
+      locHeaders.forEach(function (h) {
+        var a = h.dataset.area;
+        var hasVisible = false;
+        cards.forEach(function (c) { if (c.dataset.area === a && !c.hidden) hasVisible = true; });
+        h.hidden = !hasVisible;
+      });
+    }
+
+    var isFiltered = Object.keys(state).some(function (k) { return state[k] !== 'all'; }) || sorting_dist;
+    if (resetBtn) resetBtn.hidden = !isFiltered;
+
     var ids = Object.keys(saved).filter(function (i) { return document.querySelector('.camp-card[data-id="' + i + '"]'); });
     document.querySelectorAll('.camp-save').forEach(function (b) {
       var on = !!saved[b.dataset.id];
@@ -4109,6 +4389,32 @@ _CAMPS_FILTER_JS = """<script>
       history.replaceState(null, '', parts.length ? '#' + parts.join('&') : location.pathname);
     }
   }
+
+  if (nearBtn) {
+    nearBtn.addEventListener('click', function () {
+      activateNear('here');
+    });
+  }
+
+  if (originSelect) {
+    originSelect.addEventListener('change', function () {
+      activateNear(originSelect.value);
+    });
+  }
+
+  if (resetBtn) {
+    resetBtn.addEventListener('click', function () {
+      state = { area: 'all', camp_type: 'all', kind: 'all', cost: 'all', info: 'all', age: 'all' };
+      sorting_dist = false;
+      if (originSelect) {
+        originSelect.hidden = true;
+        originSelect.selectedIndex = 0;
+      }
+      restoreInitialOrder();
+      render(true);
+    });
+  }
+
   function stamp(ev) {
     var d = ev.date.replace(/-/g, '');
     return ev.time ? ';TZID=America/New_York:' + d + 'T' + ev.time.replace(':', '') + '00' : ';VALUE=DATE:' + d;
@@ -4228,7 +4534,10 @@ def _camp_signup(c, today_iso):
 def _camp_card(c):
     today_iso = datetime.now(EASTERN).date().isoformat()
     name, url = escape(c["name"]), escape(c["url"])
-    where = " · ".join([c["town"], "Overnight" if c["type"] == "Overnight" else "Day camp", _CAMP_TYPE_WORDS[c["kind"]]])
+    is_overnight = (c.get("type") == "Overnight")
+    type_badge = ('<span class="camp-badge camp-badge-overnight">⛺ Overnight Camp</span>'
+                  if is_overnight else '<span class="camp-badge camp-badge-day">☀️ Day Camp</span>')
+    where = " · ".join([c["town"], "Overnight" if is_overnight else "Day camp", _CAMP_TYPE_WORDS[c["kind"]]])
     upcoming = [{"title": f"{c['name']}: {e['label']}", "date": e["date"], "time": e.get("time"), "url": c["url"]}
                 for e in c.get("events") or [] if e.get("date") and e["date"] >= today_iso]
     facts = [_camp_fact("Ages", c.get("ages")), _camp_fact("Cost", c.get("price")), _camp_fact("Dates", c.get("dates")),
@@ -4243,13 +4552,31 @@ def _camp_card(c):
     checked = datetime.strptime(c["checked"], "%Y-%m-%d")
     sources = " · ".join(f'<a href="{escape(u)}" target="_blank" rel="noopener">source {i + 1}</a>'
                          for i, u in enumerate(c["sources"]))
-    attrs = {"id": c["id"], "area": c["area"], "kind": c["kind"], "type": c["type"], "season": c["season"],
-             "min": "" if c.get("age_min") is None else c["age_min"], "max": "" if c.get("age_max") is None else c["age_max"],
-             "lo": "" if c.get("week_low") is None else c["week_low"], "help": 1 if c.get("sliding") or c.get("aid") else 0}
+    attrs = {
+        "id": c["id"],
+        "area": c["area"],
+        "kind": c["kind"],
+        "type": c["type"],
+        "season": c["season"],
+        "min": "" if c.get("age_min") is None else c["age_min"],
+        "max": "" if c.get("age_max") is None else c["age_max"],
+        "lo": "" if c.get("week_low") is None else c["week_low"],
+        "help": 1 if c.get("sliding") or c.get("aid") else 0,
+        "lat": c.get("lat", ""),
+        "lng": c.get("lng", ""),
+        "town": c.get("town", "")
+    }
     data = " ".join(f'data-{k}="{escape(str(v))}"' for k, v in attrs.items())
     return f"""<article class="camp-card" {data} data-events="{escape(json.dumps(upcoming))}">
   <div class="camp-head">
-    <div><h3><a href="{url}" target="_blank" rel="noopener">{name}</a></h3><p class="camp-where">{escape(where)}</p></div>
+    <div>
+      <div class="camp-top-row">
+        <h3><a href="{url}" target="_blank" rel="noopener">{name}</a></h3>
+        {type_badge}
+        <span class="camp-dist-badge" hidden></span>
+      </div>
+      <p class="camp-where">{escape(where)}</p>
+    </div>
     <button type="button" class="camp-save" data-id="{escape(c['id'])}" aria-pressed="false" aria-label="Save {name}">☆ Save</button>
   </div>
   <dl class="camp-facts">{''.join(facts)}</dl>
@@ -4322,25 +4649,75 @@ def _camps_sections(camps):
     <button type="button" id="camp-dates-more" class="camp-linkish camp-more" hidden>Show all</button>
     {later_html}
   </section>"""
-    filters = f"""{dates}
-  <div class="camps-filters" role="group" aria-label="Filter summer camps">
-    <select id="camp-age" class="camp-select camp-age-select" data-group="age" aria-label="Child's age">{ages}</select>
-    <select id="camp-area" class="camp-select" data-group="area" aria-label="Camp Area">{areas}</select>
-    <select id="camp-kind" class="camp-select" data-group="kind" aria-label="Camp Type">{types}</select>
-    <select id="camp-cost" class="camp-select" data-group="cost" aria-label="Camp Cost">{costs}</select>
-    <select id="camp-info" class="camp-select" data-group="info" aria-label="Camp Info">{info}</select>
-  </div>
-  <div id="camp-saved-bar" class="camp-saved-bar" hidden><span><span id="camp-saved-n">0</span> saved on this device</span>
-    <button type="button" id="camp-saved-show" class="camp-linkish">Show saved</button>
-    <button type="button" id="camp-saved-ics" class="camp-linkish">Add their dates to my calendar</button></div>
-  <div class="camps-count-bar"><span><span id="camp-results-count">{len(camps)}</span> camps</span></div>"""
+    sidebar = f"""<aside class="camps-sidebar" aria-label="Camp filters">
+    <div class="camps-filter-header">
+      <h2 class="camps-sidebar-title">Filters</h2>
+      <button type="button" id="camp-reset-btn" class="camp-linkish camp-reset-btn" hidden>Reset</button>
+    </div>
+    <div class="camps-filters" role="group" aria-label="Filter summer camps">
+      <div class="camp-filter-group camp-near-group">
+        <label class="camp-filter-label" for="camp-near-btn">Distance</label>
+        <button type="button" id="camp-near-btn" class="camp-near-btn">📍 Sort by Distance</button>
+        <select id="camp-origin" class="camp-select camp-origin-select" aria-label="Starting location" hidden>
+          <option value="here">📍 Current Location</option>
+          <option value="42.3601,-71.0589">Boston (Downtown)</option>
+          <option value="42.3736,-71.1190">Cambridge (Harvard Sq)</option>
+          <option value="42.3967,-71.1223">Somerville (Davis Sq)</option>
+          <option value="42.3584,-71.2091">Newton / West</option>
+          <option value="42.4217,-71.1685">Arlington / North</option>
+          <option value="42.2476,-71.0002">Quincy / South</option>
+        </select>
+        <div id="camp-near-info" class="camp-near-info" hidden></div>
+      </div>
+      <div class="camp-filter-group">
+        <label class="camp-filter-label" for="camp-type">Camp Format</label>
+        <select id="camp-type" class="camp-select" data-group="camp_type" aria-label="Day or Overnight camp">
+          <option class="camp-chip" data-group="camp_type" data-val="all" value="all">☀️ &amp; ⛺ All Formats</option>
+          <option class="camp-chip" data-group="camp_type" data-val="day" value="day">☀️ Day Camps Only</option>
+          <option class="camp-chip" data-group="camp_type" data-val="overnight" value="overnight">⛺ Overnight Camps Only</option>
+        </select>
+      </div>
+      <div class="camp-filter-group">
+        <label class="camp-filter-label" for="camp-area">Area</label>
+        <select id="camp-area" class="camp-select" data-group="area" aria-label="Camp Area">{areas}</select>
+      </div>
+      <div class="camp-filter-group">
+        <label class="camp-filter-label" for="camp-age">Child's age</label>
+        <select id="camp-age" class="camp-select camp-age-select" data-group="age" aria-label="Child's age">{ages}</select>
+      </div>
+      <div class="camp-filter-group">
+        <label class="camp-filter-label" for="camp-kind">Type of Camp</label>
+        <select id="camp-kind" class="camp-select" data-group="kind" aria-label="Camp Type">{types}</select>
+      </div>
+      <div class="camp-filter-group">
+        <label class="camp-filter-label" for="camp-cost">Cost</label>
+        <select id="camp-cost" class="camp-select" data-group="cost" aria-label="Camp Cost">{costs}</select>
+      </div>
+      <div class="camp-filter-group">
+        <label class="camp-filter-label" for="camp-info">Status</label>
+        <select id="camp-info" class="camp-select" data-group="info" aria-label="Camp Info">{info}</select>
+      </div>
+    </div>
+    <div id="camp-saved-bar" class="camp-saved-bar" hidden>
+      <span><span id="camp-saved-n">0</span> saved</span>
+      <button type="button" id="camp-saved-show" class="camp-linkish">Show saved</button>
+      <button type="button" id="camp-saved-ics" class="camp-linkish">Add dates to calendar</button>
+    </div>
+  </aside>"""
+
+    filters = f"""<div class="camps-layout">
+  {sidebar}
+  <div class="camps-main-col">
+    {dates}
+    <div class="camps-count-bar"><span><span id="camp-results-count">{len(camps)}</span> camps</span></div>"""
 
     def link(name, url):
         return f'<a href="{escape(url)}" target="_blank" rel="noopener">{escape(name)}</a>' if url else escape(name)
     leads = "".join(f"<li>{link(l['name'], l['url'])} ({escape(l['town'])})</li>" for l in data["leads"])
     towns_html = "".join(f"<li>{link(t['town'], t.get('url'))}: {escape(t['note'])}</li>" for t in data["towns"])
     not_camps = "".join(f"<li>{link(n['name'], n['url'])}: {escape(n['note'])}</li>" for n in data["not_camps"])
-    tail = f"""<div class="camp-after">
+    tail = f"""</div></div>
+<div class="camp-after">
   <section class="camp-panel"><h2>Still being checked</h2>
     <p>These may be good options, but we couldn't confirm their prices or dates yet, so check with them directly.</p>
     <details open><summary>Camps nearby</summary><ul>{leads}</ul></details>
@@ -4749,7 +5126,33 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
             for e in day_events:
                 cards_html.append(_render_edm_card(e))
     elif is_camps:
-        cards_html = [_camp_card(c) for c in filtered[:card_limit]]
+        cards_html = []
+        area_labels = {
+            "boston": "📍 Boston & Neighborhoods",
+            "cam_som": "📍 Cambridge & Somerville",
+            "west": "📍 Brookline, Newton & West Suburbs",
+            "north": "📍 North Suburbs (Arlington, Medford, Lexington)",
+            "south": "📍 South Shore & South Suburbs",
+            "north_shore": "📍 North Shore",
+            "away": "⛺ Overnight & Regional Camps"
+        }
+        area_order = ["boston", "cam_som", "west", "north", "south", "north_shore", "away"]
+        by_area = {}
+        for c in filtered[:card_limit]:
+            by_area.setdefault(c["area"], []).append(c)
+
+        for a_key in area_order:
+            if a_key in by_area:
+                c_list = by_area[a_key]
+                lbl = area_labels.get(a_key, a_key.title())
+                cards_html.append(
+                    f'<div class="camp-loc-header" data-area="{a_key}">'
+                    f'<span>{lbl}</span>'
+                    f'<span class="count">{len(c_list)}</span>'
+                    f'</div>'
+                )
+                for c in c_list:
+                    cards_html.append(_camp_card(c))
     elif is_markets:
         mk_daily, mk_dated = _markets_split(filtered)
         cards_html = _render_market_sections(mk_daily, mk_dated, card_limit)
