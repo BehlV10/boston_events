@@ -850,6 +850,70 @@
     color: var(--accent);
     font-weight: 600;
   }
+  .hub-more-guides {
+    margin: 44px 0 20px;
+    padding: 22px 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
+  }
+  .hub-more-guides h2 {
+    font-size: 17px;
+    font-weight: 800;
+    margin: 0 0 14px;
+    color: var(--fg);
+    letter-spacing: -0.01em;
+  }
+  .hub-more-guides-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+  }
+  .hub-guide-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    text-decoration: none;
+    color: var(--fg);
+    transition: all 0.15s ease;
+  }
+  .hub-guide-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+  .hub-guide-card.active {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1.5px var(--accent);
+  }
+  .hub-guide-card-icon {
+    font-size: 24px;
+    line-height: 1;
+    flex: none;
+  }
+  .hub-guide-card-info strong {
+    display: block;
+    font-size: 13.5px;
+    font-weight: 700;
+    margin-bottom: 2px;
+    color: var(--fg);
+  }
+  .hub-guide-card-info p {
+    margin: 0;
+    font-size: 11.5px;
+    color: var(--muted);
+    line-height: 1.35;
+  }
+  @media (max-width: 600px) {
+    .hub-more-guides-grid {
+      grid-template-columns: 1fr;
+    }
+  }
   main {
     max-width: 900px;
     margin: 0 auto;
@@ -1510,6 +1574,8 @@
   <a href="../" class="logo"><span>Wicked</span> Boston Events</a>
   <nav class="hub-nav camps-nav">
     <a href="../">All Events</a>
+    <a href="../markets-festivals-boston/">Markets &amp; Festivals</a>
+    <a href="../college/">College</a>
     <a href="../kids-family-events-boston/">Kids &amp; Family</a>
     <a href="../summer-camps/" class="active">Summer Camps</a>
   </nav>
@@ -1571,7 +1637,7 @@
     <div class="camps-hero-copy">
       <h1>Summer Camps Near Boston 2027<small>Boston, Cambridge, Somerville &amp; nearby towns</small></h1>
       <p>Prices, ages and sign-up dates for camps around Boston, checked against each camp's own site. Most camps haven't posted everything for 2027, so each one shows which year its details are from.</p>
-      <p class="camps-stats">59 camps in Boston and nearby towns · 21 sign-up dates coming up</p>
+      <p class="camps-stats">59 camps in Boston and nearby towns · 26 sign-up dates coming up</p>
     </div>
   </div>
   <div class="camps-layout">
@@ -1652,21 +1718,31 @@
     <div class="camp-date-what"><a href="https://wsymca.org/camps/chickami" target="_blank" rel="noopener">West Suburban YMCA day camps</a><span>Returning campers register</span></div>
     <div class="camp-date-cal"><a href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=West%20Suburban%20YMCA%20day%20camps%3A%20Returning%20campers%20register&amp;dates=20261203T100000/20261203T103000&amp;ctz=America/New_York&amp;details=Check%20the%20camp%20site%20to%20confirm%3A%20https%3A//wsymca.org/camps/chickami" target="_blank" rel="noopener">Google Calendar</a><button type="button" class="camp-linkish camp-ics" data-ev="{&quot;title&quot;: &quot;West Suburban YMCA day camps: Returning campers register&quot;, &quot;date&quot;: &quot;2026-12-03&quot;, &quot;time&quot;: &quot;10:00&quot;, &quot;url&quot;: &quot;https://wsymca.org/camps/chickami&quot;}">Other calendar</button></div></li><li data-date="2026-12-04"><div class="camp-date-when">Fri, Dec 4 at 12 PM</div>
     <div class="camp-date-what"><a href="https://www.summeratpark.org/" target="_blank" rel="noopener">Summer at Park</a><span>New families</span></div>
-    <div class="camp-date-cal"><a href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Summer%20at%20Park%3A%20New%20families&amp;dates=20261204T120000/20261204T123000&amp;ctz=America/New_York&amp;details=Check%20the%20camp%20site%20to%20confirm%3A%20https%3A//www.summeratpark.org/" target="_blank" rel="noopener">Google Calendar</a><button type="button" class="camp-linkish camp-ics" data-ev="{&quot;title&quot;: &quot;Summer at Park: New families&quot;, &quot;date&quot;: &quot;2026-12-04&quot;, &quot;time&quot;: &quot;12:00&quot;, &quot;url&quot;: &quot;https://www.summeratpark.org/&quot;}">Other calendar</button></div></li><li data-date="2026-12-07"><div class="camp-date-when">Mon, Dec 7 at 9 AM</div>
+    <div class="camp-date-cal"><a href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Summer%20at%20Park%3A%20New%20families&amp;dates=20261204T120000/20261204T123000&amp;ctz=America/New_York&amp;details=Check%20the%20camp%20site%20to%20confirm%3A%20https%3A//www.summeratpark.org/" target="_blank" rel="noopener">Google Calendar</a><button type="button" class="camp-linkish camp-ics" data-ev="{&quot;title&quot;: &quot;Summer at Park: New families&quot;, &quot;date&quot;: &quot;2026-12-04&quot;, &quot;time&quot;: &quot;12:00&quot;, &quot;url&quot;: &quot;https://www.summeratpark.org/&quot;}">Other calendar</button></div></li><li data-date="2026-12-07"><div class="camp-date-when">Mon, Dec 7 at 6 AM</div>
+    <div class="camp-date-what"><a href="https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/broadmoor/camp/programs-pricing" target="_blank" rel="noopener">Broadmoor Nature Camp</a><span>Early bird for returning families opens</span></div>
+    <div class="camp-date-cal"><a href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Broadmoor%20Nature%20Camp%3A%20Early%20bird%20for%20returning%20families%20opens&amp;dates=20261207T060000/20261207T063000&amp;ctz=America/New_York&amp;details=Check%20the%20camp%20site%20to%20confirm%3A%20https%3A//www.massaudubon.org/places-to-explore/wildlife-sanctuaries/broadmoor/camp/programs-pricing" target="_blank" rel="noopener">Google Calendar</a><button type="button" class="camp-linkish camp-ics" data-ev="{&quot;title&quot;: &quot;Broadmoor Nature Camp: Early bird for returning families opens&quot;, &quot;date&quot;: &quot;2026-12-07&quot;, &quot;time&quot;: &quot;06:00&quot;, &quot;url&quot;: &quot;https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/broadmoor/camp/programs-pricing&quot;}">Other calendar</button></div></li><li data-date="2026-12-07"><div class="camp-date-when">Mon, Dec 7 at 9 AM</div>
     <div class="camp-date-what"><a href="https://fessendensummercamps.org/tuition-registration/dates-and-rates/" target="_blank" rel="noopener">Fessenden Day Camp</a><span>New families</span></div>
     <div class="camp-date-cal"><a href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Fessenden%20Day%20Camp%3A%20New%20families&amp;dates=20261207T090000/20261207T093000&amp;ctz=America/New_York&amp;details=Check%20the%20camp%20site%20to%20confirm%3A%20https%3A//fessendensummercamps.org/tuition-registration/dates-and-rates/" target="_blank" rel="noopener">Google Calendar</a><button type="button" class="camp-linkish camp-ics" data-ev="{&quot;title&quot;: &quot;Fessenden Day Camp: New families&quot;, &quot;date&quot;: &quot;2026-12-07&quot;, &quot;time&quot;: &quot;09:00&quot;, &quot;url&quot;: &quot;https://fessendensummercamps.org/tuition-registration/dates-and-rates/&quot;}">Other calendar</button></div></li><li data-date="2026-12-08"><div class="camp-date-when">Tue, Dec 8 at 9 AM</div>
     <div class="camp-date-what"><a href="https://bvrcamp.org/" target="_blank" rel="noopener">Beaver Summer Camp</a><span>New families</span></div>
-    <div class="camp-date-cal"><a href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Beaver%20Summer%20Camp%3A%20New%20families&amp;dates=20261208T090000/20261208T093000&amp;ctz=America/New_York&amp;details=Check%20the%20camp%20site%20to%20confirm%3A%20https%3A//bvrcamp.org/" target="_blank" rel="noopener">Google Calendar</a><button type="button" class="camp-linkish camp-ics" data-ev="{&quot;title&quot;: &quot;Beaver Summer Camp: New families&quot;, &quot;date&quot;: &quot;2026-12-08&quot;, &quot;time&quot;: &quot;09:00&quot;, &quot;url&quot;: &quot;https://bvrcamp.org/&quot;}">Other calendar</button></div></li><li data-date="2026-12-10"><div class="camp-date-when">Thu, Dec 10 at 10 AM</div>
+    <div class="camp-date-cal"><a href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Beaver%20Summer%20Camp%3A%20New%20families&amp;dates=20261208T090000/20261208T093000&amp;ctz=America/New_York&amp;details=Check%20the%20camp%20site%20to%20confirm%3A%20https%3A//bvrcamp.org/" target="_blank" rel="noopener">Google Calendar</a><button type="button" class="camp-linkish camp-ics" data-ev="{&quot;title&quot;: &quot;Beaver Summer Camp: New families&quot;, &quot;date&quot;: &quot;2026-12-08&quot;, &quot;time&quot;: &quot;09:00&quot;, &quot;url&quot;: &quot;https://bvrcamp.org/&quot;}">Other calendar</button></div></li><li data-date="2026-12-10"><div class="camp-date-when">Thu, Dec 10 at 6 AM</div>
+    <div class="camp-date-what"><a href="https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/drumlin-farm/camp/programs-pricing" target="_blank" rel="noopener">Drumlin Farm Camp</a><span>Early bird for returning families opens</span></div>
+    <div class="camp-date-cal"><a href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Drumlin%20Farm%20Camp%3A%20Early%20bird%20for%20returning%20families%20opens&amp;dates=20261210T060000/20261210T063000&amp;ctz=America/New_York&amp;details=Check%20the%20camp%20site%20to%20confirm%3A%20https%3A//www.massaudubon.org/places-to-explore/wildlife-sanctuaries/drumlin-farm/camp/programs-pricing" target="_blank" rel="noopener">Google Calendar</a><button type="button" class="camp-linkish camp-ics" data-ev="{&quot;title&quot;: &quot;Drumlin Farm Camp: Early bird for returning families opens&quot;, &quot;date&quot;: &quot;2026-12-10&quot;, &quot;time&quot;: &quot;06:00&quot;, &quot;url&quot;: &quot;https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/drumlin-farm/camp/programs-pricing&quot;}">Other calendar</button></div></li><li data-date="2026-12-10"><div class="camp-date-when">Thu, Dec 10 at 10 AM</div>
     <div class="camp-date-what"><a href="https://wsymca.org/camps/chickami" target="_blank" rel="noopener">West Suburban YMCA day camps</a><span>Open registration</span></div>
     <div class="camp-date-cal"><a href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=West%20Suburban%20YMCA%20day%20camps%3A%20Open%20registration&amp;dates=20261210T100000/20261210T103000&amp;ctz=America/New_York&amp;details=Check%20the%20camp%20site%20to%20confirm%3A%20https%3A//wsymca.org/camps/chickami" target="_blank" rel="noopener">Google Calendar</a><button type="button" class="camp-linkish camp-ics" data-ev="{&quot;title&quot;: &quot;West Suburban YMCA day camps: Open registration&quot;, &quot;date&quot;: &quot;2026-12-10&quot;, &quot;time&quot;: &quot;10:00&quot;, &quot;url&quot;: &quot;https://wsymca.org/camps/chickami&quot;}">Other calendar</button></div></li><li data-date="2026-12-15"><div class="camp-date-when">Tue, Dec 15</div>
     <div class="camp-date-what"><a href="https://sewataro.com/about-us/dates-tuition/dates-tuition" target="_blank" rel="noopener">Camp Sewataro</a><span>Deposits stop being refundable</span></div>
-    <div class="camp-date-cal"><a href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Camp%20Sewataro%3A%20Deposits%20stop%20being%20refundable&amp;dates=20261215/20261216&amp;ctz=America/New_York&amp;details=Check%20the%20camp%20site%20to%20confirm%3A%20https%3A//sewataro.com/about-us/dates-tuition/dates-tuition" target="_blank" rel="noopener">Google Calendar</a><button type="button" class="camp-linkish camp-ics" data-ev="{&quot;title&quot;: &quot;Camp Sewataro: Deposits stop being refundable&quot;, &quot;date&quot;: &quot;2026-12-15&quot;, &quot;time&quot;: null, &quot;url&quot;: &quot;https://sewataro.com/about-us/dates-tuition/dates-tuition&quot;}">Other calendar</button></div></li><li data-date="2027-01-10"><div class="camp-date-when">Sun, Jan 10</div>
+    <div class="camp-date-cal"><a href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Camp%20Sewataro%3A%20Deposits%20stop%20being%20refundable&amp;dates=20261215/20261216&amp;ctz=America/New_York&amp;details=Check%20the%20camp%20site%20to%20confirm%3A%20https%3A//sewataro.com/about-us/dates-tuition/dates-tuition" target="_blank" rel="noopener">Google Calendar</a><button type="button" class="camp-linkish camp-ics" data-ev="{&quot;title&quot;: &quot;Camp Sewataro: Deposits stop being refundable&quot;, &quot;date&quot;: &quot;2026-12-15&quot;, &quot;time&quot;: null, &quot;url&quot;: &quot;https://sewataro.com/about-us/dates-tuition/dates-tuition&quot;}">Other calendar</button></div></li><li data-date="2026-12-18"><div class="camp-date-when">Fri, Dec 18 at 11:59 PM</div>
+    <div class="camp-date-what"><a href="https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/broadmoor/camp/programs-pricing" target="_blank" rel="noopener">Broadmoor Nature Camp</a><span>Early bird closes</span></div>
+    <div class="camp-date-cal"><a href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Broadmoor%20Nature%20Camp%3A%20Early%20bird%20closes&amp;dates=20261218T235900/20261219T002900&amp;ctz=America/New_York&amp;details=Check%20the%20camp%20site%20to%20confirm%3A%20https%3A//www.massaudubon.org/places-to-explore/wildlife-sanctuaries/broadmoor/camp/programs-pricing" target="_blank" rel="noopener">Google Calendar</a><button type="button" class="camp-linkish camp-ics" data-ev="{&quot;title&quot;: &quot;Broadmoor Nature Camp: Early bird closes&quot;, &quot;date&quot;: &quot;2026-12-18&quot;, &quot;time&quot;: &quot;23:59&quot;, &quot;url&quot;: &quot;https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/broadmoor/camp/programs-pricing&quot;}">Other calendar</button></div></li><li data-date="2026-12-21"><div class="camp-date-when">Mon, Dec 21 at 11:59 PM</div>
+    <div class="camp-date-what"><a href="https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/drumlin-farm/camp/programs-pricing" target="_blank" rel="noopener">Drumlin Farm Camp</a><span>Early bird closes</span></div>
+    <div class="camp-date-cal"><a href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Drumlin%20Farm%20Camp%3A%20Early%20bird%20closes&amp;dates=20261221T235900/20261222T002900&amp;ctz=America/New_York&amp;details=Check%20the%20camp%20site%20to%20confirm%3A%20https%3A//www.massaudubon.org/places-to-explore/wildlife-sanctuaries/drumlin-farm/camp/programs-pricing" target="_blank" rel="noopener">Google Calendar</a><button type="button" class="camp-linkish camp-ics" data-ev="{&quot;title&quot;: &quot;Drumlin Farm Camp: Early bird closes&quot;, &quot;date&quot;: &quot;2026-12-21&quot;, &quot;time&quot;: &quot;23:59&quot;, &quot;url&quot;: &quot;https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/drumlin-farm/camp/programs-pricing&quot;}">Other calendar</button></div></li><li data-date="2027-01-10"><div class="camp-date-when">Sun, Jan 10</div>
     <div class="camp-date-what"><a href="https://nuvusummer.org/" target="_blank" rel="noopener">NuVu Summer</a><span>2026 prices end</span></div>
     <div class="camp-date-cal"><a href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=NuVu%20Summer%3A%202026%20prices%20end&amp;dates=20270110/20270111&amp;ctz=America/New_York&amp;details=Check%20the%20camp%20site%20to%20confirm%3A%20https%3A//nuvusummer.org/" target="_blank" rel="noopener">Google Calendar</a><button type="button" class="camp-linkish camp-ics" data-ev="{&quot;title&quot;: &quot;NuVu Summer: 2026 prices end&quot;, &quot;date&quot;: &quot;2027-01-10&quot;, &quot;time&quot;: null, &quot;url&quot;: &quot;https://nuvusummer.org/&quot;}">Other calendar</button></div></li><li data-date="2027-01-23"><div class="camp-date-when">Sat, Jan 23 at 10 AM</div>
     <div class="camp-date-what"><a href="https://ymcaboston.org/youth-and-family/camps/day-camps/huntington-camp-guide/" target="_blank" rel="noopener">YMCA of Greater Boston day camps</a><span>Open house at participating YMCAs</span></div>
     <div class="camp-date-cal"><a href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=YMCA%20of%20Greater%20Boston%20day%20camps%3A%20Open%20house%20at%20participating%20YMCAs&amp;dates=20270123T100000/20270123T103000&amp;ctz=America/New_York&amp;details=Check%20the%20camp%20site%20to%20confirm%3A%20https%3A//ymcaboston.org/youth-and-family/camps/day-camps/huntington-camp-guide/" target="_blank" rel="noopener">Google Calendar</a><button type="button" class="camp-linkish camp-ics" data-ev="{&quot;title&quot;: &quot;YMCA of Greater Boston day camps: Open house at participating YMCAs&quot;, &quot;date&quot;: &quot;2027-01-23&quot;, &quot;time&quot;: &quot;10:00&quot;, &quot;url&quot;: &quot;https://ymcaboston.org/youth-and-family/camps/day-camps/huntington-camp-guide/&quot;}">Other calendar</button></div></li><li data-date="2027-01-27"><div class="camp-date-when">Wed, Jan 27</div>
     <div class="camp-date-what"><a href="https://www.noblesdaycamp.org/registration/" target="_blank" rel="noopener">Nobles Day Camp</a><span>First tuition installment</span></div>
-    <div class="camp-date-cal"><a href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Nobles%20Day%20Camp%3A%20First%20tuition%20installment&amp;dates=20270127/20270128&amp;ctz=America/New_York&amp;details=Check%20the%20camp%20site%20to%20confirm%3A%20https%3A//www.noblesdaycamp.org/registration/" target="_blank" rel="noopener">Google Calendar</a><button type="button" class="camp-linkish camp-ics" data-ev="{&quot;title&quot;: &quot;Nobles Day Camp: First tuition installment&quot;, &quot;date&quot;: &quot;2027-01-27&quot;, &quot;time&quot;: null, &quot;url&quot;: &quot;https://www.noblesdaycamp.org/registration/&quot;}">Other calendar</button></div></li><li data-date="2027-02-01"><div class="camp-date-when">Mon, Feb 1</div>
+    <div class="camp-date-cal"><a href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Nobles%20Day%20Camp%3A%20First%20tuition%20installment&amp;dates=20270127/20270128&amp;ctz=America/New_York&amp;details=Check%20the%20camp%20site%20to%20confirm%3A%20https%3A//www.noblesdaycamp.org/registration/" target="_blank" rel="noopener">Google Calendar</a><button type="button" class="camp-linkish camp-ics" data-ev="{&quot;title&quot;: &quot;Nobles Day Camp: First tuition installment&quot;, &quot;date&quot;: &quot;2027-01-27&quot;, &quot;time&quot;: null, &quot;url&quot;: &quot;https://www.noblesdaycamp.org/registration/&quot;}">Other calendar</button></div></li><li data-date="2027-01-27"><div class="camp-date-when">Wed, Jan 27 at 6 AM</div>
+    <div class="camp-date-what"><a href="https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/drumlin-farm/camp/programs-pricing" target="_blank" rel="noopener">Drumlin Farm Camp</a><span>Online registration opens</span></div>
+    <div class="camp-date-cal"><a href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Drumlin%20Farm%20Camp%3A%20Online%20registration%20opens&amp;dates=20270127T060000/20270127T063000&amp;ctz=America/New_York&amp;details=Check%20the%20camp%20site%20to%20confirm%3A%20https%3A//www.massaudubon.org/places-to-explore/wildlife-sanctuaries/drumlin-farm/camp/programs-pricing" target="_blank" rel="noopener">Google Calendar</a><button type="button" class="camp-linkish camp-ics" data-ev="{&quot;title&quot;: &quot;Drumlin Farm Camp: Online registration opens&quot;, &quot;date&quot;: &quot;2027-01-27&quot;, &quot;time&quot;: &quot;06:00&quot;, &quot;url&quot;: &quot;https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/drumlin-farm/camp/programs-pricing&quot;}">Other calendar</button></div></li><li data-date="2027-02-01"><div class="camp-date-when">Mon, Feb 1</div>
     <div class="camp-date-what"><a href="https://sewataro.com/about-us/dates-tuition/dates-tuition" target="_blank" rel="noopener">Camp Sewataro</a><span>Half of balance due</span></div>
     <div class="camp-date-cal"><a href="https://calendar.google.com/calendar/render?action=TEMPLATE&amp;text=Camp%20Sewataro%3A%20Half%20of%20balance%20due&amp;dates=20270201/20270202&amp;ctz=America/New_York&amp;details=Check%20the%20camp%20site%20to%20confirm%3A%20https%3A//sewataro.com/about-us/dates-tuition/dates-tuition" target="_blank" rel="noopener">Google Calendar</a><button type="button" class="camp-linkish camp-ics" data-ev="{&quot;title&quot;: &quot;Camp Sewataro: Half of balance due&quot;, &quot;date&quot;: &quot;2027-02-01&quot;, &quot;time&quot;: null, &quot;url&quot;: &quot;https://sewataro.com/about-us/dates-tuition/dates-tuition&quot;}">Other calendar</button></div></li><li data-date="2027-02-01"><div class="camp-date-when">Mon, Feb 1</div>
     <div class="camp-date-what"><a href="https://everwooddaycamp.com/dates-enrollment/" target="_blank" rel="noopener">Everwood Day Camp</a><span>Full refunds end</span></div>
@@ -1711,7 +1787,7 @@
   <dl class="camp-facts"><dt>Ages</dt><dd>Entering grades 6–9</dd><dt>Cost</dt><dd>Free</dd><dt>Dates</dt><dd>Summer 2026 has ended; 2027 dates not posted</dd><dt>Hours</dt><dd><span class="camp-unknown">Not published</span></dd><dt>Sign-up</dt><dd><div>Application during one open enrollment period each year</div><ul><li>2027 application details</li></ul></dd><dt>Who</dt><dd>City of Boston residents</dd></dl>
   <p class="camp-note">Newsletter is the first place they announce applications.</p>
   <div class="camp-foot"><span class="camp-season y2026">2026 info, 2027 not posted</span><a class="camp-site" href="https://campharborview.org/summer-camp/how-to-apply/" target="_blank" rel="noopener">Camp site →</a>
-    <span class="camp-sources">Checked Nov 7, 2026: <a href="https://campharborview.org/summer-camp/how-to-apply/" target="_blank" rel="noopener">source 1</a></span></div>
+    <span class="camp-sources">Checked Nov 11, 2026: <a href="https://campharborview.org/summer-camp/how-to-apply/" target="_blank" rel="noopener">source 1</a></span></div>
 </article>
 <article class="camp-card" data-id="bcyf-camp-joy" data-area="boston" data-kind="city" data-type="Day" data-season="2026" data-min="3" data-max="15" data-lo="" data-help="0" data-lat="42.3324" data-lng="-71.1002" data-town="Boston" data-events="[]">
   <div class="camp-head">
@@ -1745,7 +1821,7 @@
   <dl class="camp-facts"><dt>Ages</dt><dd>Ages 5–13</dd><dt>Cost</dt><dd>$285/week members, $350 non-members</dd><dt>Dates</dt><dd>Weekly, Jun 22–Aug 28, 2026</dd><dt>Hours</dt><dd>7:30 AM–5:30 PM</dd><dt>Sign-up</dt><dd><div>First come; closed until 2027 details post</div><ul><li>Mid-November 2026: 2027 camp details posted</li><li class="next">Sat, Jan 23 at 10 AM: Open house at participating YMCAs</li></ul></dd><dt>Help</dt><dd>Financial assistance, EEC vouchers and contract slots</dd></dl>
   
   <div class="camp-foot"><span class="camp-season y2026">2026 info, 2027 not posted</span><a class="camp-site" href="https://ymcaboston.org/youth-and-family/camps/day-camps/huntington-camp-guide/" target="_blank" rel="noopener">Camp site →</a>
-    <span class="camp-sources">Checked Nov 7, 2026: <a href="https://ymcaboston.org/youth-and-family/camps/day-camps/huntington-camp-guide/" target="_blank" rel="noopener">source 1</a> · <a href="https://ymcaboston.org/youth-and-family/camps/day-camps/" target="_blank" rel="noopener">source 2</a></span></div>
+    <span class="camp-sources">Checked Nov 11, 2026: <a href="https://ymcaboston.org/youth-and-family/camps/day-camps/huntington-camp-guide/" target="_blank" rel="noopener">source 1</a> · <a href="https://ymcaboston.org/youth-and-family/camps/day-camps/" target="_blank" rel="noopener">source 2</a></span></div>
 </article>
 <article class="camp-card" data-id="ymca-dorchester" data-area="boston" data-kind="ymca" data-type="Day" data-season="2026" data-min="5" data-max="13" data-lo="285" data-help="1" data-lat="42.2882" data-lng="-71.0734" data-town="Dorchester" data-events="[{&quot;title&quot;: &quot;Dorchester YMCA Day Camp: Open house at participating YMCAs&quot;, &quot;date&quot;: &quot;2027-01-23&quot;, &quot;time&quot;: &quot;10:00&quot;, &quot;url&quot;: &quot;https://ymcaboston.org/youth-and-family/camps/day-camps/dorchester-camp-guide/&quot;}]">
   <div class="camp-head">
@@ -1762,7 +1838,7 @@
   <dl class="camp-facts"><dt>Ages</dt><dd>Ages 5–13</dd><dt>Cost</dt><dd>$285/week members, $350 non-members</dd><dt>Dates</dt><dd>Weekly, Jun 22–Aug 28, 2026</dd><dt>Hours</dt><dd>7:30 AM–5:30 PM</dd><dt>Sign-up</dt><dd><div>First come; closed until 2027 details post</div><ul><li>Mid-November 2026: 2027 camp details posted</li><li class="next">Sat, Jan 23 at 10 AM: Open house at participating YMCAs</li></ul></dd><dt>Help</dt><dd>Financial assistance, EEC vouchers and contract slots</dd></dl>
   <p class="camp-note">Ponkapoag Day Camp in Canton is an option for ages 7–13, with $45/week transport.</p>
   <div class="camp-foot"><span class="camp-season y2026">2026 info, 2027 not posted</span><a class="camp-site" href="https://ymcaboston.org/youth-and-family/camps/day-camps/dorchester-camp-guide/" target="_blank" rel="noopener">Camp site →</a>
-    <span class="camp-sources">Checked Nov 7, 2026: <a href="https://ymcaboston.org/youth-and-family/camps/day-camps/dorchester-camp-guide/" target="_blank" rel="noopener">source 1</a> · <a href="https://ymcaboston.org/youth-and-family/camps/day-camps/" target="_blank" rel="noopener">source 2</a></span></div>
+    <span class="camp-sources">Checked Nov 11, 2026: <a href="https://ymcaboston.org/youth-and-family/camps/day-camps/dorchester-camp-guide/" target="_blank" rel="noopener">source 1</a> · <a href="https://ymcaboston.org/youth-and-family/camps/day-camps/" target="_blank" rel="noopener">source 2</a></span></div>
 </article>
 <article class="camp-card" data-id="ymca-roxbury" data-area="boston" data-kind="ymca" data-type="Day" data-season="2026" data-min="5" data-max="13" data-lo="285" data-help="1" data-lat="42.3168" data-lng="-71.0858" data-town="Roxbury" data-events="[{&quot;title&quot;: &quot;Roxbury YMCA Day Camp: Open house at participating YMCAs&quot;, &quot;date&quot;: &quot;2027-01-23&quot;, &quot;time&quot;: &quot;10:00&quot;, &quot;url&quot;: &quot;https://ymcaboston.org/youth-and-family/camps/day-camps/roxbury-camp-guide/&quot;}]">
   <div class="camp-head">
@@ -1779,7 +1855,7 @@
   <dl class="camp-facts"><dt>Ages</dt><dd>Ages 5–13</dd><dt>Cost</dt><dd>$285/week members, $350 non-members</dd><dt>Dates</dt><dd>Weekly, Jun 22–Aug 28, 2026</dd><dt>Hours</dt><dd>7:30 AM–5:30 PM</dd><dt>Sign-up</dt><dd><div>First come; closed until 2027 details post</div><ul><li>Mid-November 2026: 2027 camp details posted</li><li class="next">Sat, Jan 23 at 10 AM: Open house at participating YMCAs</li></ul></dd><dt>Help</dt><dd>Financial assistance, EEC vouchers and contract slots</dd></dl>
   <p class="camp-note">Ponkapoag Day Camp in Canton is an option for ages 7–13, with $45/week transport.</p>
   <div class="camp-foot"><span class="camp-season y2026">2026 info, 2027 not posted</span><a class="camp-site" href="https://ymcaboston.org/youth-and-family/camps/day-camps/roxbury-camp-guide/" target="_blank" rel="noopener">Camp site →</a>
-    <span class="camp-sources">Checked Nov 7, 2026: <a href="https://ymcaboston.org/youth-and-family/camps/day-camps/roxbury-camp-guide/" target="_blank" rel="noopener">source 1</a> · <a href="https://ymcaboston.org/youth-and-family/camps/day-camps/" target="_blank" rel="noopener">source 2</a></span></div>
+    <span class="camp-sources">Checked Nov 11, 2026: <a href="https://ymcaboston.org/youth-and-family/camps/day-camps/roxbury-camp-guide/" target="_blank" rel="noopener">source 1</a> · <a href="https://ymcaboston.org/youth-and-family/camps/day-camps/" target="_blank" rel="noopener">source 2</a></span></div>
 </article>
 <article class="camp-card" data-id="ymca-wang" data-area="boston" data-kind="ymca" data-type="Day" data-season="2026" data-min="5" data-max="13" data-lo="285" data-help="1" data-lat="42.3496" data-lng="-71.0628" data-town="Boston" data-events="[{&quot;title&quot;: &quot;Wang YMCA of Chinatown Day Camp: Open house at participating YMCAs&quot;, &quot;date&quot;: &quot;2027-01-23&quot;, &quot;time&quot;: &quot;10:00&quot;, &quot;url&quot;: &quot;https://ymcaboston.org/youth-and-family/camps/day-camps/wang-camp-guide/&quot;}]">
   <div class="camp-head">
@@ -1796,7 +1872,7 @@
   <dl class="camp-facts"><dt>Ages</dt><dd>Ages 5–13</dd><dt>Cost</dt><dd>Ages 7–13: $285/$350; ages 5–6: $400/$475 (member/non-member)</dd><dt>Dates</dt><dd>Weekly, Jun 22–Aug 28, 2026</dd><dt>Hours</dt><dd>7:30 AM–5:30 PM</dd><dt>Sign-up</dt><dd><div>First come; closed until 2027 details post</div><ul><li>Mid-November 2026: 2027 camp details posted</li><li class="next">Sat, Jan 23 at 10 AM: Open house at participating YMCAs</li></ul></dd><dt>Help</dt><dd>Financial assistance, EEC vouchers and contract slots</dd></dl>
   
   <div class="camp-foot"><span class="camp-season y2026">2026 info, 2027 not posted</span><a class="camp-site" href="https://ymcaboston.org/youth-and-family/camps/day-camps/wang-camp-guide/" target="_blank" rel="noopener">Camp site →</a>
-    <span class="camp-sources">Checked Nov 7, 2026: <a href="https://ymcaboston.org/youth-and-family/camps/day-camps/wang-camp-guide/" target="_blank" rel="noopener">source 1</a> · <a href="https://ymcaboston.org/youth-and-family/camps/day-camps/" target="_blank" rel="noopener">source 2</a></span></div>
+    <span class="camp-sources">Checked Nov 11, 2026: <a href="https://ymcaboston.org/youth-and-family/camps/day-camps/wang-camp-guide/" target="_blank" rel="noopener">source 1</a> · <a href="https://ymcaboston.org/youth-and-family/camps/day-camps/" target="_blank" rel="noopener">source 2</a></span></div>
 </article>
 <article class="camp-card" data-id="ymca-parkway" data-area="boston" data-kind="ymca" data-type="Day" data-season="2027" data-min="4" data-max="13" data-lo="420" data-help="1" data-lat="42.2796" data-lng="-71.1555" data-town="West Roxbury" data-events="[{&quot;title&quot;: &quot;Parkway YMCA Day Camps: Open house at participating YMCAs&quot;, &quot;date&quot;: &quot;2027-01-23&quot;, &quot;time&quot;: &quot;10:00&quot;, &quot;url&quot;: &quot;https://ymcaboston.org/youth-and-family/camps/day-camps/parkway-camp-guide/&quot;}]">
   <div class="camp-head">
@@ -1813,7 +1889,7 @@
   <dl class="camp-facts"><dt>Ages</dt><dd>Ages 4–13</dd><dt>Cost</dt><dd>Ages 4–6 $420–$525; Rocky Woods $488–$672/week</dd><dt>Dates</dt><dd>Weekly, Jun 28–Aug 27, 2027</dd><dt>Hours</dt><dd>Varies by camp</dd><dt>Sign-up</dt><dd><div>Early-bird rates listed; early-bird deadline not stated</div><ul><li>Mid-November 2026: 2027 camp details posted</li><li class="next">Sat, Jan 23 at 10 AM: Open house at participating YMCAs</li></ul></dd><dt>Help</dt><dd>Financial assistance, EEC vouchers and contract slots</dd></dl>
   <p class="camp-note">Rates differ for members, non-members and early bird.</p>
   <div class="camp-foot"><span class="camp-season y2027">2027 info</span><a class="camp-site" href="https://ymcaboston.org/youth-and-family/camps/day-camps/parkway-camp-guide/" target="_blank" rel="noopener">Camp site →</a>
-    <span class="camp-sources">Checked Nov 7, 2026: <a href="https://ymcaboston.org/youth-and-family/camps/day-camps/parkway-camp-guide/" target="_blank" rel="noopener">source 1</a> · <a href="https://ymcaboston.org/youth-and-family/camps/day-camps/" target="_blank" rel="noopener">source 2</a></span></div>
+    <span class="camp-sources">Checked Nov 11, 2026: <a href="https://ymcaboston.org/youth-and-family/camps/day-camps/parkway-camp-guide/" target="_blank" rel="noopener">source 1</a> · <a href="https://ymcaboston.org/youth-and-family/camps/day-camps/" target="_blank" rel="noopener">source 2</a></span></div>
 </article>
 <article class="camp-card" data-id="bnc" data-area="boston" data-kind="nature" data-type="Day" data-season="2026" data-min="5" data-max="15" data-lo="182" data-help="1" data-lat="42.2789" data-lng="-71.1011" data-town="Mattapan &amp; Jamaica Plain" data-events="[]">
   <div class="camp-head">
@@ -1899,7 +1975,7 @@
   <dl class="camp-facts"><dt>Ages</dt><dd>Currently in K–8th grade</dd><dt>Cost</dt><dd>Based on family size and income; tuition chart on city site</dd><dt>Dates</dt><dd>3 two-week sessions, Jul 6–Aug 14, 2026; a planned Jun 29 session was cancelled</dd><dt>Hours</dt><dd>8:30 AM–5:30 PM</dd><dt>Sign-up</dt><dd><div>Lottery. One application covers Community Schools camps, King Open and CYP middle school programs.</div><ul><li>February 2027: 2027 Summer Lottery details announced</li><li class="past">Last year: 2026 lottery window, Feb 2–Mar 9, 2026</li></ul></dd><dt>Who</dt><dd>Cambridge residents and City of Cambridge employees only</dd><dt>Help</dt><dd>Income-based tuition; families can ask for a financial review</dd></dl>
   <p class="camp-note">Nearly all of the 1,609 applicants in 2026 got an offer. Free for 13-year-olds in CYP Pre-Teen / Middle School programs.</p>
   <div class="camp-foot"><span class="camp-season y2026">2026 info, 2027 not posted</span><a class="camp-site" href="https://www.cambridgema.gov/Services/summercampsandprograms" target="_blank" rel="noopener">Camp site →</a>
-    <span class="camp-sources">Checked Nov 7, 2026: <a href="https://www.cambridgema.gov/Services/summercampsandprograms" target="_blank" rel="noopener">source 1</a> · <a href="https://www.finditcambridge.org/programs/dhsp-summer-camps-and-programs-lottery" target="_blank" rel="noopener">source 2</a></span></div>
+    <span class="camp-sources">Checked Nov 11, 2026: <a href="https://www.cambridgema.gov/Services/summercampsandprograms" target="_blank" rel="noopener">source 1</a> · <a href="https://www.finditcambridge.org/programs/dhsp-summer-camps-and-programs-lottery" target="_blank" rel="noopener">source 2</a></span></div>
 </article>
 <article class="camp-card" data-id="somertime" data-area="cam_som" data-kind="city" data-type="Day" data-season="2026" data-min="5" data-max="13" data-lo="200" data-help="0" data-lat="42.3976" data-lng="-71.1219" data-town="Somerville" data-events="[]">
   <div class="camp-head">
@@ -2104,7 +2180,7 @@
   <dl class="camp-facts"><dt>Ages</dt><dd>Ages 3–14</dd><dt>Cost</dt><dd>$330–$500/week by age and program, member vs non-member</dd><dt>Dates</dt><dd>Weekly, Jun 22–Aug 28, 2026</dd><dt>Hours</dt><dd>7:30 AM–5:30 PM</dd><dt>Sign-up</dt><dd><div>First come; closed until 2027 details post</div><ul><li>Mid-November 2026: 2027 camp details posted</li><li class="next">Sat, Jan 23 at 10 AM: Open house at participating YMCAs</li></ul></dd><dt>Help</dt><dd>Financial assistance, EEC vouchers and contract slots</dd></dl>
   <p class="camp-note">Includes Voyagers (9–14) and Sports camps.</p>
   <div class="camp-foot"><span class="camp-season y2026">2026 info, 2027 not posted</span><a class="camp-site" href="https://ymcaboston.org/youth-and-family/camps/day-camps/waltham-camp-guide/" target="_blank" rel="noopener">Camp site →</a>
-    <span class="camp-sources">Checked Nov 7, 2026: <a href="https://ymcaboston.org/youth-and-family/camps/day-camps/waltham-camp-guide/" target="_blank" rel="noopener">source 1</a> · <a href="https://ymcaboston.org/youth-and-family/camps/day-camps/" target="_blank" rel="noopener">source 2</a></span></div>
+    <span class="camp-sources">Checked Nov 11, 2026: <a href="https://ymcaboston.org/youth-and-family/camps/day-camps/waltham-camp-guide/" target="_blank" rel="noopener">source 1</a> · <a href="https://ymcaboston.org/youth-and-family/camps/day-camps/" target="_blank" rel="noopener">source 2</a></span></div>
 </article>
 <article class="camp-card" data-id="camp-chickami" data-area="west" data-kind="ymca" data-type="Day" data-season="2027" data-min="6" data-max="15" data-lo="" data-help="0" data-lat="42.3618" data-lng="-71.3283" data-town="Wayland" data-events="[{&quot;title&quot;: &quot;Camp Chickami (West Suburban YMCA): Returning campers register&quot;, &quot;date&quot;: &quot;2026-12-03&quot;, &quot;time&quot;: &quot;10:00&quot;, &quot;url&quot;: &quot;https://wsymca.org/camps/chickami&quot;}, {&quot;title&quot;: &quot;Camp Chickami (West Suburban YMCA): Open registration&quot;, &quot;date&quot;: &quot;2026-12-10&quot;, &quot;time&quot;: &quot;10:00&quot;, &quot;url&quot;: &quot;https://wsymca.org/camps/chickami&quot;}]">
   <div class="camp-head">
@@ -2140,7 +2216,7 @@
   <div class="camp-foot"><span class="camp-season y2027">2027 info</span><a class="camp-site" href="https://wsymca.org/camps/pikati" target="_blank" rel="noopener">Camp site →</a>
     <span class="camp-sources">Checked Nov 7, 2026: <a href="https://wsymca.org/camps/pikati" target="_blank" rel="noopener">source 1</a></span></div>
 </article>
-<article class="camp-card" data-id="drumlin" data-area="west" data-kind="nature" data-type="Day" data-season="2026" data-min="4" data-max="15" data-lo="142" data-help="1" data-lat="42.4172" data-lng="-71.3328" data-town="Lincoln" data-events="[]">
+<article class="camp-card" data-id="drumlin" data-area="west" data-kind="nature" data-type="Day" data-season="2027" data-min="4" data-max="15" data-lo="142" data-help="1" data-lat="42.4172" data-lng="-71.3328" data-town="Lincoln" data-events="[{&quot;title&quot;: &quot;Drumlin Farm Camp: Early bird for returning families opens&quot;, &quot;date&quot;: &quot;2026-12-10&quot;, &quot;time&quot;: &quot;06:00&quot;, &quot;url&quot;: &quot;https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/drumlin-farm/camp/programs-pricing&quot;}, {&quot;title&quot;: &quot;Drumlin Farm Camp: Early bird closes&quot;, &quot;date&quot;: &quot;2026-12-21&quot;, &quot;time&quot;: &quot;23:59&quot;, &quot;url&quot;: &quot;https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/drumlin-farm/camp/programs-pricing&quot;}, {&quot;title&quot;: &quot;Drumlin Farm Camp: Online registration opens&quot;, &quot;date&quot;: &quot;2027-01-27&quot;, &quot;time&quot;: &quot;06:00&quot;, &quot;url&quot;: &quot;https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/drumlin-farm/camp/programs-pricing&quot;}]">
   <div class="camp-head">
     <div>
       <div class="camp-top-row">
@@ -2152,10 +2228,10 @@
     </div>
     <button type="button" class="camp-save" data-id="drumlin" aria-pressed="false" aria-label="Save Drumlin Farm Camp">☆ Save</button>
   </div>
-  <dl class="camp-facts"><dt>Ages</dt><dd>Ages 4–15</dd><dt>Cost</dt><dd>$142–$710 weekly; $285–$1,675 for two-week sessions</dd><dt>Dates</dt><dd>Sessions Jun 22–Aug 21, 2026; no camp Jul 3</dd><dt>Hours</dt><dd>8:30 AM–3:00 PM</dd><dt>Sign-up</dt><dd><div>First come; opens online at 6 AM on the set date</div></dd><dt>Help</dt><dd>Sliding scale pricing: families choose a tier</dd></dl>
+  <dl class="camp-facts"><dt>Ages</dt><dd>Ages 4–15</dd><dt>Cost</dt><dd>$142–$710 weekly; $285–$1,675 for two-week sessions</dd><dt>Dates</dt><dd>Sessions Jun 21–Aug 20, 2027; no camp Jul 5</dd><dt>Hours</dt><dd>8:30 AM–3:00 PM</dd><dt>Sign-up</dt><dd><div>First come; opens online at 6 AM on the set date. Returning families get an early-bird window first.</div><ul><li class="next">Thu, Dec 10 at 6 AM: Early bird for returning families opens</li><li class="next">Mon, Dec 21 at 11:59 PM: Early bird closes</li><li class="next">Wed, Jan 27 at 6 AM: Online registration opens</li></ul></dd><dt>Help</dt><dd>Sliding scale pricing: families choose a tier</dd></dl>
   
-  <div class="camp-foot"><span class="camp-season y2026">2026 info, 2027 not posted</span><a class="camp-site" href="https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/drumlin-farm/camp/programs-pricing" target="_blank" rel="noopener">Camp site →</a>
-    <span class="camp-sources">Checked Nov 7, 2026: <a href="https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/drumlin-farm/camp/programs-pricing" target="_blank" rel="noopener">source 1</a></span></div>
+  <div class="camp-foot"><span class="camp-season y2027">2027 info</span><a class="camp-site" href="https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/drumlin-farm/camp/programs-pricing" target="_blank" rel="noopener">Camp site →</a>
+    <span class="camp-sources">Checked Nov 11, 2026: <a href="https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/drumlin-farm/camp/programs-pricing" target="_blank" rel="noopener">source 1</a></span></div>
 </article>
 <article class="camp-card" data-id="habitat" data-area="west" data-kind="nature" data-type="Day" data-season="2026" data-min="4" data-max="14" data-lo="164" data-help="1" data-lat="42.4047" data-lng="-71.1668" data-town="Belmont" data-events="[]">
   <div class="camp-head">
@@ -2174,7 +2250,7 @@
   <div class="camp-foot"><span class="camp-season y2026">2026 info, 2027 not posted</span><a class="camp-site" href="https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/habitat/camp/programs-pricing" target="_blank" rel="noopener">Camp site →</a>
     <span class="camp-sources">Checked Nov 7, 2026: <a href="https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/habitat/camp/programs-pricing" target="_blank" rel="noopener">source 1</a></span></div>
 </article>
-<article class="camp-card" data-id="broadmoor" data-area="west" data-kind="nature" data-type="Day" data-season="2026" data-min="4" data-max="17" data-lo="136" data-help="1" data-lat="42.2598" data-lng="-71.3286" data-town="Natick" data-events="[]">
+<article class="camp-card" data-id="broadmoor" data-area="west" data-kind="nature" data-type="Day" data-season="2027" data-min="4" data-max="17" data-lo="136" data-help="1" data-lat="42.2598" data-lng="-71.3286" data-town="Natick" data-events="[{&quot;title&quot;: &quot;Broadmoor Nature Camp: Early bird for returning families opens&quot;, &quot;date&quot;: &quot;2026-12-07&quot;, &quot;time&quot;: &quot;06:00&quot;, &quot;url&quot;: &quot;https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/broadmoor/camp/programs-pricing&quot;}, {&quot;title&quot;: &quot;Broadmoor Nature Camp: Early bird closes&quot;, &quot;date&quot;: &quot;2026-12-18&quot;, &quot;time&quot;: &quot;23:59&quot;, &quot;url&quot;: &quot;https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/broadmoor/camp/programs-pricing&quot;}]">
   <div class="camp-head">
     <div>
       <div class="camp-top-row">
@@ -2186,10 +2262,10 @@
     </div>
     <button type="button" class="camp-save" data-id="broadmoor" aria-pressed="false" aria-label="Save Broadmoor Nature Camp">☆ Save</button>
   </div>
-  <dl class="camp-facts"><dt>Ages</dt><dd>Ages 4–13; CIT to 17</dd><dt>Cost</dt><dd>$136–$680/week; specialty weeks $150–$750</dd><dt>Dates</dt><dd>Weekly, Jun 22–Aug 14, 2026; no camp Jul 3</dd><dt>Hours</dt><dd>9:00 AM–3:00 PM (After Camp to 5:00)</dd><dt>Sign-up</dt><dd><div>First come; opens online at 6 AM on the set date</div><ul><li class="past">Last year: Online registration, Jan 14, 2026 at 6 AM</li></ul></dd><dt>Help</dt><dd>Sliding scale pricing: families choose a tier</dd></dl>
-  
-  <div class="camp-foot"><span class="camp-season y2026">2026 info, 2027 not posted</span><a class="camp-site" href="https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/broadmoor/camp/programs-pricing" target="_blank" rel="noopener">Camp site →</a>
-    <span class="camp-sources">Checked Nov 7, 2026: <a href="https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/broadmoor/camp/programs-pricing" target="_blank" rel="noopener">source 1</a></span></div>
+  <dl class="camp-facts"><dt>Ages</dt><dd>Ages 4–13; CIT to 17</dd><dt>Cost</dt><dd>$136–$680/week; specialty weeks $150–$750</dd><dt>Dates</dt><dd>Weekly, Jun 21–Aug 13, 2027; no camp Jul 5</dd><dt>Hours</dt><dd>9:00 AM–3:00 PM (After Camp to 5:00)</dd><dt>Sign-up</dt><dd><div>First come; opens online at 6 AM. Returning families get an early-bird window first.</div><ul><li class="next">Mon, Dec 7 at 6 AM: Early bird for returning families opens</li><li class="next">Fri, Dec 18 at 11:59 PM: Early bird closes</li><li>Online registration (general)</li></ul></dd><dt>Help</dt><dd>Sliding scale pricing: families choose a tier</dd></dl>
+  <p class="camp-note">Mass Audubon&#x27;s page still lists last year&#x27;s general registration date (Jan 14, 2026); the 2027 date isn&#x27;t posted yet.</p>
+  <div class="camp-foot"><span class="camp-season y2027">2027 info</span><a class="camp-site" href="https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/broadmoor/camp/programs-pricing" target="_blank" rel="noopener">Camp site →</a>
+    <span class="camp-sources">Checked Nov 11, 2026: <a href="https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/broadmoor/camp/programs-pricing" target="_blank" rel="noopener">source 1</a></span></div>
 </article>
 <article class="camp-card" data-id="nobles" data-area="west" data-kind="private" data-type="Day" data-season="2027" data-min="4" data-max="14" data-lo="705" data-help="0" data-lat="42.2547" data-lng="-71.1837" data-town="Dedham" data-events="[{&quot;title&quot;: &quot;Nobles Day Camp: Returning families only&quot;, &quot;date&quot;: &quot;2026-11-11&quot;, &quot;time&quot;: &quot;12:00&quot;, &quot;url&quot;: &quot;https://www.noblesdaycamp.org/registration/&quot;}, {&quot;title&quot;: &quot;Nobles Day Camp: New families&quot;, &quot;date&quot;: &quot;2026-12-02&quot;, &quot;time&quot;: &quot;12:00&quot;, &quot;url&quot;: &quot;https://www.noblesdaycamp.org/registration/&quot;}, {&quot;title&quot;: &quot;Nobles Day Camp: First tuition installment&quot;, &quot;date&quot;: &quot;2027-01-27&quot;, &quot;time&quot;: null, &quot;url&quot;: &quot;https://www.noblesdaycamp.org/registration/&quot;}, {&quot;title&quot;: &quot;Nobles Day Camp: Tuition balance due&quot;, &quot;date&quot;: &quot;2027-04-22&quot;, &quot;time&quot;: null, &quot;url&quot;: &quot;https://www.noblesdaycamp.org/registration/&quot;}]">
   <div class="camp-head">
@@ -2206,7 +2282,7 @@
   <dl class="camp-facts"><dt>Ages</dt><dd>Age 4–entering grade 9</dd><dt>Cost</dt><dd>$1,600–$1,745 for 2 weeks; half day $1,410–$1,535; teens $1,820–$1,955</dd><dt>Dates</dt><dd>Two-week sessions, Jun 28–Aug 20, 2027</dd><dt>Hours</dt><dd>9 AM–4 PM or 9 AM–2 PM (care 7:30 AM–6:00 PM)</dd><dt>Sign-up</dt><dd><div>First come; $200 deposit per session</div><ul><li class="next">Wed, Nov 11 at 12 PM: Returning families only</li><li class="next">Wed, Dec 2 at 12 PM: New families</li><li class="next">Wed, Jan 27: First tuition installment</li><li class="next">Thu, Apr 22: Tuition balance due</li></ul></dd></dl>
   
   <div class="camp-foot"><span class="camp-season y2027">2027 info</span><a class="camp-site" href="https://www.noblesdaycamp.org/registration/" target="_blank" rel="noopener">Camp site →</a>
-    <span class="camp-sources">Checked Nov 7, 2026: <a href="https://www.noblesdaycamp.org/registration/" target="_blank" rel="noopener">source 1</a></span></div>
+    <span class="camp-sources">Checked Nov 11, 2026: <a href="https://www.noblesdaycamp.org/registration/" target="_blank" rel="noopener">source 1</a></span></div>
 </article>
 <article class="camp-card" data-id="summer-at-park" data-area="west" data-kind="private" data-type="Day" data-season="2027" data-min="" data-max="" data-lo="" data-help="1" data-lat="42.3195" data-lng="-71.1352" data-town="Brookline" data-events="[{&quot;title&quot;: &quot;Summer at Park: Returning families&quot;, &quot;date&quot;: &quot;2026-12-02&quot;, &quot;time&quot;: &quot;12:00&quot;, &quot;url&quot;: &quot;https://www.summeratpark.org/&quot;}, {&quot;title&quot;: &quot;Summer at Park: New families&quot;, &quot;date&quot;: &quot;2026-12-04&quot;, &quot;time&quot;: &quot;12:00&quot;, &quot;url&quot;: &quot;https://www.summeratpark.org/&quot;}]">
   <div class="camp-head">
@@ -2376,7 +2452,7 @@
   <dl class="camp-facts"><dt>Ages</dt><dd>Ages 7–12</dd><dt>Cost</dt><dd>$300/week plus $25 membership</dd><dt>Dates</dt><dd>Weekly from Jun 25, 2026</dd><dt>Hours</dt><dd>8:00 AM–4:00 PM (extended to 5:30, $50/week)</dd><dt>Sign-up</dt><dd><div>$75 deposit per child</div></dd></dl>
   
   <div class="camp-foot"><span class="camp-season y2026">2026 info, 2027 not posted</span><a class="camp-site" href="https://watertownbgc.org/wbgc-programs/summer/" target="_blank" rel="noopener">Camp site →</a>
-    <span class="camp-sources">Checked Nov 7, 2026: <a href="https://watertownbgc.org/wbgc-programs/summer/" target="_blank" rel="noopener">source 1</a></span></div>
+    <span class="camp-sources">Checked Nov 11, 2026: <a href="https://watertownbgc.org/wbgc-programs/summer/" target="_blank" rel="noopener">source 1</a></span></div>
 </article>
 <article class="camp-card" data-id="cedar-hill" data-area="west" data-kind="nonprofit" data-type="Day" data-season="2027" data-min="5" data-max="17" data-lo="" data-help="1" data-lat="42.3855" data-lng="-71.2185" data-town="Waltham" data-events="[]">
   <div class="camp-head">
@@ -2496,7 +2572,7 @@
   <dl class="camp-facts"><dt>Ages</dt><dd>Ages 5–13</dd><dt>Cost</dt><dd>$330–$500/week by age and program, member vs non-member</dd><dt>Dates</dt><dd>Weekly, Jun 22–Aug 28, 2026</dd><dt>Hours</dt><dd>7:30 AM–5:30 PM</dd><dt>Sign-up</dt><dd><div>First come; closed until 2027 details post</div><ul><li>Mid-November 2026: 2027 camp details posted</li><li class="next">Sat, Jan 23 at 10 AM: Open house at participating YMCAs</li></ul></dd><dt>Help</dt><dd>Financial assistance, EEC vouchers and contract slots</dd></dl>
   <p class="camp-note">Includes Voyagers (9–13), Dance and Sports camps.</p>
   <div class="camp-foot"><span class="camp-season y2026">2026 info, 2027 not posted</span><a class="camp-site" href="https://ymcaboston.org/youth-and-family/camps/day-camps/ns-camp-guide/" target="_blank" rel="noopener">Camp site →</a>
-    <span class="camp-sources">Checked Nov 7, 2026: <a href="https://ymcaboston.org/youth-and-family/camps/day-camps/ns-camp-guide/" target="_blank" rel="noopener">source 1</a> · <a href="https://ymcaboston.org/youth-and-family/camps/day-camps/" target="_blank" rel="noopener">source 2</a></span></div>
+    <span class="camp-sources">Checked Nov 11, 2026: <a href="https://ymcaboston.org/youth-and-family/camps/day-camps/ns-camp-guide/" target="_blank" rel="noopener">source 1</a> · <a href="https://ymcaboston.org/youth-and-family/camps/day-camps/" target="_blank" rel="noopener">source 2</a></span></div>
 </article>
 <article class="camp-card" data-id="camp-melstone" data-area="north" data-kind="ymca" data-type="Day" data-season="2026" data-min="4" data-max="14" data-lo="" data-help="1" data-lat="42.4632" data-lng="-71.0583" data-town="Melrose" data-events="[]">
   <div class="camp-head">
@@ -3124,6 +3200,39 @@
   render(false);
 })();
 </script>
+  <nav class="hub-more-guides" aria-label="Explore more Boston guides">
+  <h2>Explore More Boston Guides</h2>
+  <div class="hub-more-guides-grid">
+    <a href="../markets-festivals-boston/" class="hub-guide-card">
+      <span class="hub-guide-card-icon">🛍️</span>
+      <div class="hub-guide-card-info">
+        <strong>Markets &amp; Festivals</strong>
+        <p>Farmers markets, craft fairs, vintage fleas &amp; bazaars</p>
+      </div>
+    </a>
+    <a href="../college/" class="hub-guide-card">
+      <span class="hub-guide-card-icon">🎓</span>
+      <div class="hub-guide-card-info">
+        <strong>College Events</strong>
+        <p>Campus athletics, student concerts &amp; public talks</p>
+      </div>
+    </a>
+    <a href="../kids-family-events-boston/" class="hub-guide-card">
+      <span class="hub-guide-card-icon">🎨</span>
+      <div class="hub-guide-card-info">
+        <strong>Kids &amp; Family</strong>
+        <p>All-ages outings, library storytimes &amp; family theater</p>
+      </div>
+    </a>
+    <a href="../summer-camps/" class="hub-guide-card active">
+      <span class="hub-guide-card-icon">⛺</span>
+      <div class="hub-guide-card-info">
+        <strong>Summer Camps</strong>
+        <p>Day &amp; overnight camps with prices, ages &amp; signups</p>
+      </div>
+    </a>
+  </div>
+</nav>
 </main>
 <footer>
   <p><a href="../">Wicked Boston Events</a> · Independent Greater Boston Events Calendar · <a href="https://www.instagram.com/wickedbostonevents/" target="_blank" rel="noopener">Instagram: @wickedbostonevents</a><span id="pwa-install-wrap" hidden> · <button type="button" class="footer-pwa-btn" onclick="installPWA()">📲 Add to Home Screen</button></span></p>

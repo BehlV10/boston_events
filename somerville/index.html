@@ -1695,7 +1695,7 @@
     },
     {
       "@type": "ListItem",
-      "position": 35,
+      "position": 36,
       "item": {
         "@type": "Event",
         "name": "Baker Thomas Band Wednesdays",
@@ -1743,7 +1743,7 @@
     },
     {
       "@type": "ListItem",
-      "position": 36,
+      "position": 37,
       "item": {
         "@type": "Event",
         "name": "Comedy Night",
@@ -1786,54 +1786,6 @@
           "@type": "Organization",
           "name": "The Burren",
           "url": "https://burren.com/music.html"
-        }
-      }
-    },
-    {
-      "@type": "ListItem",
-      "position": 37,
-      "item": {
-        "@type": "Event",
-        "name": "Walking Club (Council on Aging)",
-        "startDate": "2026-11-12T09:00:00-05:00",
-        "eventStatus": "https://schema.org/EventScheduled",
-        "eventAttendanceMode": "https://schema.org/OfflineEventAttendanceMode",
-        "location": {
-          "@type": "Place",
-          "name": "Somerville City Hall",
-          "address": {
-            "@type": "PostalAddress",
-            "addressLocality": "Somerville",
-            "addressRegion": "MA",
-            "addressCountry": "US",
-            "streetAddress": "93 Highland Ave, Somerville"
-          },
-          "geo": {
-            "@type": "GeoCoordinates",
-            "latitude": 42.3871,
-            "longitude": -71.0963
-          }
-        },
-        "image": [
-          "https://www.wickedbostonevents.com/og-image.jpg"
-        ],
-        "description": "Walking Club (Council on Aging) live at Somerville City Hall in Somerville, MA",
-        "url": "https://www.somervillema.gov/events/2026/11/12/walking-club-council-aging",
-        "offers": {
-          "@type": "Offer",
-          "url": "https://www.somervillema.gov/events/2026/11/12/walking-club-council-aging",
-          "availability": "https://schema.org/InStock",
-          "priceCurrency": "USD",
-          "price": "0"
-        },
-        "performer": {
-          "@type": "PerformingGroup",
-          "name": "Walking Club (Council on Aging)"
-        },
-        "organizer": {
-          "@type": "Organization",
-          "name": "City of Somerville",
-          "url": "https://www.somervillema.gov/events/2026/11/12/walking-club-council-aging"
         }
       }
     },
@@ -2522,6 +2474,70 @@
     color: var(--accent);
     font-weight: 600;
   }
+  .hub-more-guides {
+    margin: 44px 0 20px;
+    padding: 22px 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
+  }
+  .hub-more-guides h2 {
+    font-size: 17px;
+    font-weight: 800;
+    margin: 0 0 14px;
+    color: var(--fg);
+    letter-spacing: -0.01em;
+  }
+  .hub-more-guides-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+  }
+  .hub-guide-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    text-decoration: none;
+    color: var(--fg);
+    transition: all 0.15s ease;
+  }
+  .hub-guide-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+  .hub-guide-card.active {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1.5px var(--accent);
+  }
+  .hub-guide-card-icon {
+    font-size: 24px;
+    line-height: 1;
+    flex: none;
+  }
+  .hub-guide-card-info strong {
+    display: block;
+    font-size: 13.5px;
+    font-weight: 700;
+    margin-bottom: 2px;
+    color: var(--fg);
+  }
+  .hub-guide-card-info p {
+    margin: 0;
+    font-size: 11.5px;
+    color: var(--muted);
+    line-height: 1.35;
+  }
+  @media (max-width: 600px) {
+    .hub-more-guides-grid {
+      grid-template-columns: 1fr;
+    }
+  }
   main {
     max-width: 900px;
     margin: 0 auto;
@@ -2690,9 +2706,10 @@
   <a href="../" class="logo"><span>Wicked</span> Boston Events</a>
   <nav class="hub-nav">
     <a href="../">All Events</a>
+    <a href="../markets-festivals-boston/">Markets &amp; Festivals</a>
+    <a href="../college/">College</a>
     <a href="../kids-family-events-boston/">Kids &amp; Family</a>
     <a href="../summer-camps/">Summer Camps</a>
-    <a href="../markets-festivals-boston/">Markets &amp; Festivals</a>
   </nav>
 </header>
 <main>
@@ -3427,6 +3444,7 @@
 </article>
   </div>
   <p id="hub-none" class="no-hub-events" hidden>Nothing in this area in the next few weeks. Try another town.</p>
+  
   
 </main>
 <footer>
