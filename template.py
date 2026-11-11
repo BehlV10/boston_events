@@ -19,6 +19,7 @@ from scrapers import (
     DEAL_LINKS,
     STATIC_LINKS,
     category_bucket,
+    ARTS_SUBCATEGORIES,
     infer_music_genre,
     fetch_boston_weather,
     fetch_luckyseat_boston,
@@ -6665,6 +6666,28 @@ def render_page(results, weather=None, luckyseat_shows=None):
             <input type="checkbox" class="cat-chk" value="{escape(b)}"{chk_attr}>
             <span>{escape(b)} <span class="count">{bucket_counts.get(b, 0)}</span></span>
           </label>'''
+        if b == "Arts & culture":
+            arts_counts = {}
+            for e in all_events_flat:
+                c = _effective_category(e)
+                if category_bucket(c) == "Arts & culture":
+                    k = "art" if c == "arts" else c
+                    arts_counts[k] = arts_counts.get(k, 0) + 1
+            arts_boxes = "\n".join(
+                f'''<label class="chk chk-subgenre">
+            <input type="checkbox" class="artsub-chk" value="{escape(k)}" checked>
+            <span>{escape(lbl)} <span class="count">{arts_counts.get(k, 0)}</span></span>
+          </label>'''
+                for k, lbl in ARTS_SUBCATEGORIES)
+            cat_items.append(item_html + "\n" + f'''<div class="subgenre-container filter-group-arts" id="artsub-container">
+            <div class="subgenre-header">
+              <span class="subgenre-title">Art, books, talks &amp; film</span>
+            </div>
+            <div class="subgenre-grid">
+              {arts_boxes}
+            </div>
+          </div>''')
+            continue
         if b == "Music & nightlife":
             subgenres_html = f'''<div class="subgenre-container filter-group-genre" id="subgenre-container">
             <div class="subgenre-header">
@@ -7592,7 +7615,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
   .bucket[data-bucket="Music & nightlife"] {{ --accent: #7aa2f7; }}
   .bucket[data-bucket="Dance"]             {{ --accent: #ff7ab2; }}
   .bucket[data-bucket="Stage"]             {{ --accent: #f0a07a; }}
-  .bucket[data-bucket="Books & Talks"]     {{ --accent: #9ece6a; }}
   .bucket[data-bucket="Arts & culture"]    {{ --accent: #e0af68; }}
   .bucket[data-bucket="Play"]              {{ --accent: #bb9af7; }}
   .bucket[data-bucket="Food & drink"]      {{ --accent: #c678dd; }}
@@ -10780,6 +10802,14 @@ def render_page(results, weather=None, luckyseat_shows=None):
     const catBoxes = document.querySelectorAll('.cat-chk');
     const defaultUncheckedCats = new Set({json.dumps(sorted(DEFAULT_UNCHECKED_BUCKETS))});
     const genreBoxes = document.querySelectorAll('.genre-chk');
+    // Art / Books / Talks / Film under Arts & culture; they follow its box like the genres follow Music
+    const ARTS_BUCKET = 'Arts & culture';
+    const artsBoxes = document.querySelectorAll('.artsub-chk');
+    function syncArtsPanel() {{
+      const ab = Array.from(catBoxes).find(b => b.value === ARTS_BUCKET);
+      const panel = document.getElementById('artsub-container');
+      if (ab && panel) panel.classList.toggle('disabled', !ab.checked);
+    }}
     const venueBoxes = document.querySelectorAll('.venue-chk');
     const recurBoxes = document.querySelectorAll('.recur-chk');
     const cityBoxes = document.querySelectorAll('.city-chk');
@@ -11882,7 +11912,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
       const isFree = freeOnlyChk && freeOnlyChk.checked;
       const isLgbtq = lgbtqOnlyChk && lgbtqOnlyChk.checked;
       const isTimeFiltered = (timeFrom !== null || timeTo !== null);
-      const isFiltered = isCatFiltered || (chkGenres < allGenres) || (activeGenre !== 'all') || (chkVenues < allVenues) || (chkCities < allCities) || (chkRecurs < allRecurs) || isFree || isLgbtq || popularOnly || starredOnly || (activeTransit !== 'all') || isTimeFiltered || (activeSubarea !== 'all') || (searchInput && !!searchInput.value.trim());
+      const chkArts = Array.from(artsBoxes).filter(b => b.checked).length;
+      const isFiltered = isCatFiltered || (chkArts < artsBoxes.length) || (chkGenres < allGenres) || (activeGenre !== 'all') || (chkVenues < allVenues) || (chkCities < allCities) || (chkRecurs < allRecurs) || isFree || isLgbtq || popularOnly || starredOnly || (activeTransit !== 'all') || isTimeFiltered || (activeSubarea !== 'all') || (searchInput && !!searchInput.value.trim());
 
       if (mobileBadge) {{
         mobileBadge.textContent = isFiltered ? 'Active' : 'All';
@@ -11936,6 +11967,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
         const checkedGenres = Array.from(genreBoxes).filter(b => b.checked).map(b => b.value);
         if (checkedGenres.length > 0 && checkedGenres.length < allGenres.length) params.set('genre', checkedGenres.join(','));
       }}
+
+      const checkedArts = Array.from(artsBoxes).filter(b => b.checked).map(b => b.value);
+      if (checkedArts.length > 0 && checkedArts.length < artsBoxes.length) params.set('arts', checkedArts.join(','));
 
       const allCities = Array.from(cityBoxes).map(b => b.value);
       const checkedCities = Array.from(cityBoxes).filter(b => b.checked).map(b => b.value);
@@ -12021,6 +12055,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
           showAll = (timeFilter === 'all');
         }}
 
+        let legacyArts = null;
         if (hasParam('cat')) {{
           const catVal = getParam('cat');
           if (catVal === 'all') {{
@@ -12029,8 +12064,11 @@ def render_page(results, weather=None, luckyseat_shows=None):
             catBoxes.forEach(b => {{ b.checked = false; }});
           }} else {{
             const vals = new Set(catVal.split(','));
-            // Links shared before Books & Talks split from Arts & culture
-            if (vals.has('Arts & culture')) vals.add('Books & Talks');
+            // Links from when Books & Talks was its own filter: now books and talks under Arts & culture
+            if (vals.has('Books & Talks')) {{
+              if (!vals.has(ARTS_BUCKET) && !hasParam('arts')) legacyArts = ['books', 'talks'];
+              vals.add(ARTS_BUCKET);
+            }}
             catBoxes.forEach(b => {{ b.checked = vals.has(b.value); }});
           }}
         }}
@@ -12055,6 +12093,13 @@ def render_page(results, weather=None, luckyseat_shows=None):
           }}
           const subContainer = document.getElementById('subgenre-container');
           if (subContainer) subContainer.classList.toggle('disabled', !musicBox.checked);
+        }}
+        // Same for Art / Books / Talks / Film under Arts & culture
+        const artsBox = Array.from(catBoxes).find(b => b.value === ARTS_BUCKET);
+        if (artsBox) {{
+          const want = hasParam('arts') ? new Set(getParam('arts').split(',')) : (legacyArts ? new Set(legacyArts) : null);
+          artsBoxes.forEach(b => {{ b.checked = want ? (artsBox.checked && want.has(b.value)) : artsBox.checked; }});
+          syncArtsPanel();
         }}
 
         if (hasParam('city')) {{
@@ -12141,6 +12186,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
     function apply() {{
       const cats = new Set(Array.from(catBoxes).filter(b => b.checked).map(b => b.value));
       const checkedGenres = new Set(Array.from(genreBoxes).filter(b => b.checked).map(b => b.value));
+      const checkedArts = new Set(Array.from(artsBoxes).filter(b => b.checked).map(b => b.value));
       const venues = new Set(Array.from(venueBoxes).filter(b => b.checked).map(b => b.value));
       const recurs = new Set(Array.from(recurBoxes).filter(b => b.checked).map(b => b.value));
       const cities = new Set(Array.from(cityBoxes).filter(b => b.checked).map(b => b.value));
@@ -12267,6 +12313,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
                   votes: vt ? parseInt(vt, 10) : 0,
                   id: li.getAttribute('data-id') || li.getAttribute('data-event-id') || '',
                   genre: li.getAttribute('data-genre') || '',
+                  cat: (li.getAttribute('data-cat') || '') === 'arts' ? 'art' : (li.getAttribute('data-cat') || ''),
                   epoch: ep ? parseInt(ep, 10) : 0,
                   endEpoch: parseInt(li.getAttribute('data-end-epoch') || '0', 10),
                   featured: li.classList.contains('highlighted'),
@@ -12332,7 +12379,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
               }}
 
               const featuredOk = !featuredOnly || m.featured;
-              const isVisible = genreOk && venueOk && recurOk && subareaOk && transitOk && todOk && searchOk && freeOk && lgbtqOk && timePastOk && popularOk && starredOk && featuredOk;
+              const artsOk = bCat !== ARTS_BUCKET || !artsBoxes.length || checkedArts.has(m.cat);
+              const isVisible = artsOk && genreOk && venueOk && recurOk && subareaOk && transitOk && todOk && searchOk && freeOk && lgbtqOk && timePastOk && popularOk && starredOk && featuredOk;
 
               const isHidden = !isVisible;
               if (m.hidden !== isHidden) {{
@@ -12816,6 +12864,10 @@ def render_page(results, weather=None, luckyseat_shows=None):
     if (freeOnlyChk) freeOnlyChk.addEventListener('change', apply);
     if (lgbtqOnlyChk) lgbtqOnlyChk.addEventListener('change', apply);
     catBoxes.forEach(b => b.addEventListener('change', () => {{
+      if (b.value === ARTS_BUCKET) {{
+        artsBoxes.forEach(x => {{ x.checked = b.checked; }});
+        syncArtsPanel();
+      }}
       if (b.value === 'Music & nightlife') {{
         const musicChecked = b.checked;
         genreBoxes.forEach(gb => {{ gb.checked = musicChecked; }});
@@ -12823,6 +12875,13 @@ def render_page(results, weather=None, luckyseat_shows=None):
         if (subContainer) subContainer.classList.toggle('disabled', !musicChecked);
       }}
       apply();
+    }}));
+    artsBoxes.forEach(b => b.addEventListener('change', () => {{
+      const ab = Array.from(catBoxes).find(cb => cb.value === ARTS_BUCKET);
+      if (ab) ab.checked = Array.from(artsBoxes).some(x => x.checked);
+      syncArtsPanel();
+      apply();
+      stateToHash();
     }}));
     genreBoxes.forEach(b => b.addEventListener('change', () => {{
       activeGenre = 'all';
@@ -12859,6 +12918,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
     searchInput.addEventListener('input', apply);
     document.getElementById('cat-all').addEventListener('click', () => {{
       catBoxes.forEach(b => b.checked = true);
+      artsBoxes.forEach(b => b.checked = true);
+      syncArtsPanel();
       genreBoxes.forEach(b => b.checked = true);
       const subContainer = document.getElementById('subgenre-container');
       if (subContainer) subContainer.classList.remove('disabled');
@@ -12866,6 +12927,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
     }});
     document.getElementById('cat-none').addEventListener('click', () => {{
       catBoxes.forEach(b => b.checked = false);
+      artsBoxes.forEach(b => b.checked = false);
+      syncArtsPanel();
       genreBoxes.forEach(b => b.checked = false);
       const subContainer = document.getElementById('subgenre-container');
       if (subContainer) subContainer.classList.add('disabled');
@@ -12961,6 +13024,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
       activeGenre = 'all';
       genreBoxes.forEach(b => b.checked = true);
       catBoxes.forEach(b => b.checked = !defaultUncheckedCats.has(b.value));
+      artsBoxes.forEach(b => b.checked = true);
+      syncArtsPanel();
       const subContainer = document.getElementById('subgenre-container');
       if (subContainer) subContainer.classList.remove('disabled');
       cityBoxes.forEach(b => b.checked = true);

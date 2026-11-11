@@ -14142,8 +14142,7 @@ CATEGORY_BUCKETS = [
     ("Music & nightlife",  ["music", "clubbing", "classical"]),
     ("Dance",              ["dance"]),
     ("Stage",              ["comedy", "theater", "stage"]),
-    ("Books & Talks",      ["books", "talks"]),
-    ("Arts & culture",     ["film", "art", "arts"]),
+    ("Arts & culture",     ["art", "arts", "books", "talks", "film"]),  # with sub-filters (ARTS_SUBCATEGORIES)
     ("Play",               ["gaming", "sports", "fitness", "outdoors"]),
     ("Food & drink",       ["food"]),
     ("Markets & Festivals", ["markets"]),
@@ -14154,6 +14153,9 @@ CATEGORY_BUCKETS = [
     ("Tech & Startups",    ["tech"]),
 ]
 _CAT_TO_BUCKET = {cat: name for name, cats in CATEGORY_BUCKETS for cat in cats}
+
+# Sub-filters under Arts & culture: (key, label). An event's category picks its box ("arts" is "art").
+ARTS_SUBCATEGORIES = [("art", "🎨 Art"), ("books", "📖 Books"), ("talks", "🎙 Talks"), ("film", "🎬 Film")]
 
 # Markets, fairs & festivals: flea and night markets, farmers markets, holiday markets and
 # bazaars, craft/vintage/artisan fairs, street festivals and food fests. Matched on the title.
