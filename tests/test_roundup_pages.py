@@ -138,5 +138,46 @@ class CityPostTest(unittest.TestCase):
 
 
 
+
+class WhatsNewAndLinksTest(unittest.TestCase):
+    def test_news_shows_for_a_week(self):
+        import json as _json
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
+            _json.dump({"items": [{"date": "2026-11-11", "text": "Markets page"},
+                                  {"date": "2026-10-01", "text": "Old news"}]}, f)
+        try:
+            self.assertEqual(R.whats_new(date(2026, 11, 13), f.name), ["* Markets page"])
+            self.assertEqual(R.whats_new(date(2026, 11, 20), f.name), [])   # over a week old
+            self.assertEqual(R.whats_new(date(2026, 11, 6), f.name), [])    # not happened yet
+        finally:
+            os.unlink(f.name)
+        self.assertEqual(R.whats_new(date(2026, 11, 13), "/nonexistent.json"), [])
+
+    def test_real_news_file_parses(self):
+        import json as _json
+        with open(R.NEWS_PATH, encoding="utf-8") as f:
+            for it in _json.load(f)["items"]:
+                date.fromisoformat(it["date"])
+                self.assertTrue(it["text"])
+
+    def test_food_and_drink_deals_are_not_events(self):
+        for t in ("$1 Oysters at Vera's!", "$5 Margaritas", "$2 Tacos Tuesday"):
+            self.assertTrue(R.DEAL_TITLE_RE.search(t), t)
+        for t in ("$5 Comedy Night", "Oyster Festival", "Bob Bradshaw Band"):
+            self.assertFalse(R.DEAL_TITLE_RE.search(t), t)
+
+    def test_city_posts_link_the_r_boston_post_main_post_doesnt(self):
+        _, city_body = R.build_roundup("weekend", city="cambridge")
+        _, main_body = R.build_roundup("weekend")
+        self.assertIn(R.BOSTON_POST_PLACEHOLDER, city_body)
+        self.assertNotIn(R.BOSTON_POST_PLACEHOLDER, main_body)
+        self.assertNotIn("/cambridge/)", city_body)  # no "All Cambridge events" link
+
+    def test_link_box_only_on_pages_with_the_placeholder(self):
+        body = f"Hi\n\nSee [the post]({R.BOSTON_POST_PLACEHOLDER}).\n"
+        self.assertIn('id="bostonLink"', R.render_roundup_page("weekend", "T", body, page="weekend-somerville"))
+        self.assertNotIn('id="bostonLink"', R.render_roundup_page("weekend", "T", "Hi\n", page="weekend"))
+
+
 if __name__ == "__main__":
     unittest.main()
