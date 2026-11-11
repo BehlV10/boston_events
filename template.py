@@ -1,5 +1,6 @@
 """Boston Events — HTML rendering and template logic."""
 
+import copy
 import hashlib
 import json
 import os
@@ -7,7 +8,7 @@ import shutil
 import re
 import unicodedata
 from collections import defaultdict
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from html import escape, unescape
 from urllib.parse import quote, quote_plus, urlparse
 
@@ -1154,6 +1155,9 @@ def filter_events_for_hub(hub, events):
         # Markets from any category (a "Kids Holiday Market", a farmers market a source called
         # food), plus festivals and fairs you wander around: stalls, food, art, produce.
         filtered = [e for e in events if is_market(e) or is_vendor_festival(e)]
+        if hub.get("window_days"):
+            last_day = datetime.now(EASTERN).date() + timedelta(days=hub["window_days"])
+            filtered = [e for e in filtered if (_parse_event_eastern_date(e) or last_day) <= last_day]
         if hub.get("limit"):
             filtered = filtered[:hub["limit"]]
         return filtered
@@ -1300,7 +1304,8 @@ HUBS = {
         "time_filter": None,
         "keyword_filter": None,
         "show_details": True,
-        "limit": 300,
+        "limit": 600,
+        "window_days": 90,
         "subtitle": "Holiday and winter markets, farmers markets, flea and vintage markets, craft and artisan fairs, night markets, and street, food and cultural festivals with stalls to wander around Greater Boston. Filter by kind and town; updated daily.",
         # A market open every day (Snowport) is one card in an "Open every day" strip; others show on
         # each day they're on, split by town (_markets_split, _render_market_sections)
@@ -2063,6 +2068,13 @@ def _render_market_card(e, day_attr, today=None):
         raw_when = f"{span} · {when}"
     else:
         hrs = _market_hours(e)
+        if e.get("_multiday_span"):
+            start_d, end_d = e["_multiday_span"]
+            cur_d = e["_time"].date() if isinstance(e.get("_time"), datetime) else None
+            if cur_d and cur_d < end_d:
+                hrs = f"{hrs} · Through {end_d.strftime('%a, %b %-d')}"
+            elif cur_d and cur_d == end_d and (end_d - start_d).days >= 1:
+                hrs = f"{hrs} · Final day"
         time_html = f'<span class="mk-hours">{escape(hrs)}</span>'
         raw_when = hrs
     desc_html = ""
@@ -7343,6 +7355,18 @@ def format_when(e):
         raw_d = e.get("date") or ""
         if re.fullmatch(r"\d{4}-\d{2}-\d{2}", raw_d):
             return "Time TBA"  # the source gives the day but not the time yet
+        if e.get("_multiday_span"):
+            start_d, end_d = e["_multiday_span"]
+            cur_d = t_obj.date()
+            start = t_obj.astimezone(EASTERN) if t_obj.tzinfo else t_obj
+            if cur_d < end_d:
+                return f"{_clock(start)} · thru {end_d.strftime('%a %b %-d')}"
+            elif cur_d == end_d and (end_d - start_d).days >= 1:
+                end = trusted_end(e)
+                if end and end.date() == cur_d:
+                    same_half = start.strftime("%p") == end.strftime("%p")
+                    return f"{_clock(start, not same_half)}–{_clock(end)} · Final day"
+                return f"{_clock(start)} · Final day"
         if "T" in raw_d or " " in raw_d:
             end = trusted_end(e)
             start = t_obj.astimezone(EASTERN) if t_obj.tzinfo else t_obj
@@ -8238,6 +8262,114 @@ def _merge_duplicates(events, word_freq=None):
     return out
 
 
+_SPAN_MONTH_DAYS_RE = re.compile(
+    r"\b(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+(\d{1,2})\s*(?:[-–]|&|and)\s*(\d{1,2})\b",
+    re.IGNORECASE,
+)
+_SPAN_WEEKDAY_RE = re.compile(
+    r"\b(?:fri(?:day)?)[,\s]+(?:sat(?:urday)?)[,\s]+(?:&|and)\s+(?:sun(?:day)?)\b|"
+    r"\b(?:fri(?:day)?)\s*(?:[-–]|through|thru|to)\s*(?:sun(?:day)?)\b",
+    re.IGNORECASE,
+)
+_SPAN_SAT_SUN_RE = re.compile(
+    r"\b(?:sat(?:urday)?)\s*(?:[-–]|&|and|through|thru|to)\s*(?:sun(?:day)?)\b",
+    re.IGNORECASE,
+)
+_SPAN_THU_SUN_RE = re.compile(
+    r"\b(?:thu(?:rs(?:day)?)?)\s*(?:[-–]|through|thru|to)\s*(?:sun(?:day)?)\b",
+    re.IGNORECASE,
+)
+_SPAN_DAYS_RE = re.compile(r"\b([2-9]|10)\s*days?\s*only\b|\b([2-9]|10)[- ]day\b", re.IGNORECASE)
+_SPAN_UNTIL_RE = re.compile(r"(?:goes until|through|thru)\s+(\d{1,2})/(\d{1,2})", re.IGNORECASE)
+
+
+def _detect_event_date_span(entry, start_date):
+    """Return end date (datetime.date) for multi-day events / festivals spanning 2-10 days, or None."""
+    if not start_date or not isinstance(start_date, (datetime, date)):
+        return None
+    if isinstance(start_date, datetime):
+        start_date = start_date.date()
+
+    end_date = None
+
+    # 1. Check entry["end"]
+    raw_end = entry.get("end")
+    if raw_end and isinstance(raw_end, str):
+        try:
+            clean_end = raw_end.replace("Z", "+00:00")
+            if "T" in clean_end or " " in clean_end:
+                dt_end = datetime.fromisoformat(clean_end)
+                dt_end = (dt_end if dt_end.tzinfo else dt_end.replace(tzinfo=EASTERN)).astimezone(EASTERN)
+                # Overnight single-night shows ending before 5 AM the next morning stay on start_date
+                if dt_end.date() == start_date + timedelta(days=1) and dt_end.hour < 5:
+                    pass
+                elif dt_end.date() > start_date:
+                    end_date = dt_end.date()
+            else:
+                d = datetime.strptime(clean_end[:10], "%Y-%m-%d").date()
+                if d > start_date:
+                    end_date = d
+        except (TypeError, ValueError):
+            pass
+
+    # 2. Check entry["ends"] or entry["end_date"]
+    for k in ("ends", "end_date"):
+        v = entry.get(k)
+        if v and isinstance(v, str):
+            try:
+                d = datetime.strptime(v[:10], "%Y-%m-%d").date()
+                if d > start_date:
+                    end_date = max(end_date or d, d)
+            except (TypeError, ValueError):
+                pass
+
+    # 3. Text patterns in title and time
+    text = f"{entry.get('name') or entry.get('title') or ''} {entry.get('time') or ''}"
+
+    m_md = _SPAN_MONTH_DAYS_RE.search(text)
+    if m_md:
+        d1, d2 = int(m_md.group(1)), int(m_md.group(2))
+        if d1 == start_date.day and d2 > d1 and (d2 - d1) <= 10:
+            try:
+                cand = date(start_date.year, start_date.month, d2)
+                end_date = max(end_date or cand, cand)
+            except ValueError:
+                pass
+
+    if _SPAN_WEEKDAY_RE.search(text) and start_date.weekday() == 4:
+        cand = start_date + timedelta(days=2)
+        end_date = max(end_date or cand, cand)
+
+    if _SPAN_SAT_SUN_RE.search(text) and start_date.weekday() == 5:
+        cand = start_date + timedelta(days=1)
+        end_date = max(end_date or cand, cand)
+
+    if _SPAN_THU_SUN_RE.search(text) and start_date.weekday() == 3:
+        cand = start_date + timedelta(days=3)
+        end_date = max(end_date or cand, cand)
+
+    m_d = _SPAN_DAYS_RE.search(text)
+    if m_d:
+        n = int(m_d.group(1) or m_d.group(2))
+        cand = start_date + timedelta(days=n - 1)
+        end_date = max(end_date or cand, cand)
+
+    m_u = _SPAN_UNTIL_RE.search(text)
+    if m_u:
+        mm, dd = int(m_u.group(1)), int(m_u.group(2))
+        y = start_date.year + (1 if mm < start_date.month else 0)
+        try:
+            cand = date(y, mm, dd)
+            if start_date < cand <= start_date + timedelta(days=10):
+                end_date = max(end_date or cand, cand)
+        except ValueError:
+            pass
+
+    if end_date and 1 < (end_date - start_date).days + 1 <= 10:
+        return end_date
+    return None
+
+
 def group_by_date(results):
     """Flatten venue results into events annotated with venue; group by Eastern calendar date.
 
@@ -8290,6 +8422,25 @@ def group_by_date(results):
                     pass
             if key is None:
                 tba.append(entry)
+                continue
+
+            span_end = _detect_event_date_span(entry, key)
+            if span_end and key < span_end:
+                span_days = (span_end - key).days + 1
+                for i in range(span_days):
+                    cur_day = key + timedelta(days=i)
+                    if cur_day < today or cur_day > horizon:
+                        continue
+                    day_entry = copy.deepcopy(entry)
+                    day_time = dt + timedelta(days=i)
+                    day_entry["_time"] = day_time
+                    day_entry["date"] = day_time.astimezone(timezone.utc).isoformat()
+                    day_entry["_multiday_span"] = (key, span_end)
+                    day_entry["_multiday_day"] = i + 1
+                    day_entry["_multiday_total"] = span_days
+                    buckets.setdefault(cur_day, []).append(day_entry)
+                if span_end < today:
+                    ongoing.append(entry)
             elif key < today:
                 ongoing.append(entry)
             elif key <= horizon:

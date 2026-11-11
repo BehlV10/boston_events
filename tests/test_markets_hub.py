@@ -1,6 +1,6 @@
 """Markets & festivals hub: markets from any category plus festivals with stalls, a chip per kind."""
 import unittest
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 import template
 from scrapers import EASTERN
@@ -228,5 +228,109 @@ class NearMeAndGeocoding(unittest.TestCase):
         self.assertLess(html.index(">Tomorrow Farmers Market<"), html.index(">Future Festival TBA<"))
 
 
+    def test_multiday_festival_expansion_main_page_and_hub(self):
+        # 3-day festival: Fri Nov 13 to Sun Nov 15
+        d1 = date(2026, 11, 13)
+        d2 = date(2026, 11, 14)
+        d3 = date(2026, 11, 15)
+        raw_events = [{
+            "venue": "Saint Athanasius",
+            "url": "https://example.com/arlington",
+            "events": [{
+                "name": "Arlington Greek Festival",
+                "date": "2026-11-13T11:00:00-05:00",
+                "end": "2026-11-15T19:00:00-05:00",
+                "venue": "Saint Athanasius",
+                "category": "markets"
+            }]
+        }]
+        dated, tba, ongoing = template.group_by_date(raw_events)
+        dated_dict = {d: evs for d, evs in dated}
+        self.assertIn(d1, dated_dict, "Should appear on Friday Nov 13")
+        self.assertIn(d2, dated_dict, "Should appear on Saturday Nov 14")
+        self.assertIn(d3, dated_dict, "Should appear on Sunday Nov 15")
+
+        # Format on Friday and Saturday shows thru date; Sunday shows Final day
+        e_fri = dated_dict[d1][0]
+        e_sat = dated_dict[d2][0]
+        e_sun = dated_dict[d3][0]
+        self.assertIn("thru Sun Nov 15", template.format_when(e_fri))
+        self.assertIn("thru Sun Nov 15", template.format_when(e_sat))
+        self.assertIn("Final day", template.format_when(e_sun))
+
+        # Check rendering on the markets hub
+        hub_events = [e_fri, e_sat, e_sun]
+        html = template.render_hub_page("markets-festivals-boston", hub_events, site_url="https://example.com")
+        self.assertIn("2026-11-13", html)
+        self.assertIn("2026-11-14", html)
+        self.assertIn("2026-11-15", html)
+        self.assertIn("Through Sun, Nov 15", html)
+        self.assertIn("Final day", html)
+
+    def test_multiday_running_today_shows_in_today_bucket(self):
+        # Event started yesterday, runs through tomorrow
+        today = datetime.now(EASTERN).date()
+        yesterday = today - timedelta(days=1)
+        tomorrow = today + timedelta(days=1)
+
+        raw_events = [{
+            "venue": "Boston City Hall Plaza",
+            "url": "https://example.com/plaza",
+            "events": [{
+                "name": "Plaza Weekend Festival",
+                "date": f"{yesterday.isoformat()}T10:00:00-05:00",
+                "end": f"{tomorrow.isoformat()}T18:00:00-05:00",
+                "venue": "City Hall Plaza",
+                "category": "markets"
+            }]
+        }]
+        dated, tba, ongoing = template.group_by_date(raw_events)
+        dated_dict = {d: evs for d, evs in dated}
+        self.assertIn(today, dated_dict, "Festival active today must appear in today's dated bucket")
+        self.assertIn(tomorrow, dated_dict, "Festival running tomorrow must appear in tomorrow's bucket")
+        self.assertNotIn(yesterday, dated_dict, "Past day should not be in upcoming dated buckets")
+        self.assertEqual(len(ongoing), 0, "Actively running multi-day festival should not be relegated to ongoing")
+
+    def test_overnight_event_not_expanded_to_next_day(self):
+        # 9 PM Friday to 2 AM Saturday is an overnight show, not a 2-day festival
+        raw_events = [{
+            "venue": "Middle East",
+            "url": "https://example.com/mideast",
+            "events": [{
+                "name": "Late Night Rock Show",
+                "date": "2026-11-13T21:00:00-05:00",
+                "end": "2026-11-14T02:00:00-05:00",
+                "venue": "The Middle East",
+                "category": "music"
+            }]
+        }]
+        dated, tba, ongoing = template.group_by_date(raw_events)
+        dated_dict = {d: evs for d, evs in dated}
+        self.assertIn(date(2026, 11, 13), dated_dict)
+        self.assertNotIn(date(2026, 11, 14), dated_dict, "Overnight show ending 2 AM should not appear on Saturday")
+
+    def test_roslindale_holiday_market_scraper_and_geo(self):
+        from scrapers import scrape_roslindale_holiday_market
+        from venues_geo import resolve_event_geo
+        events = scrape_roslindale_holiday_market("https://www.roslindale.net/2026-holiday-market", "Mozilla/5.0")
+        self.assertGreater(len(events), 0)
+        ev = events[0]
+        self.assertIn("Roslindale Village Annual Holiday Market", ev["name"])
+        self.assertEqual(ev["venue"], "Birch St Plaza")
+        self.assertEqual(ev["price"], "Free")
+
+        geo = resolve_event_geo(ev)
+        self.assertIsNotNone(geo)
+        self.assertEqual(geo["neighborhood"], "Roslindale")
+        self.assertAlmostEqual(geo["lat"], 42.2868, places=3)
+        self.assertAlmostEqual(geo["lng"], -71.1294, places=3)
+
+    def test_markets_hub_lookahead_and_window(self):
+        hub_cfg = template.HUBS["markets-festivals-boston"]
+        self.assertEqual(hub_cfg["limit"], 600)
+        self.assertEqual(hub_cfg["window_days"], 90)
+
+
 if __name__ == "__main__":
     unittest.main()
+
