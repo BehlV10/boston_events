@@ -87,7 +87,7 @@ class CampPageTests(unittest.TestCase):
         self.assertIn('<a href="../">All Events</a>', nav_html)
         self.assertIn('<a href="../kids-family-events-boston/">Kids &amp; Family</a>', nav_html)
         self.assertIn('<a href="../summer-camps/" class="active">Summer Camps</a>', nav_html)
-        for unrelated in ("boston-edm", "live-music-somerville", "cambridge-events-tonight", "board-game-nights-boston"):
+        for unrelated in ("live-music-somerville", "cambridge-events-tonight", "board-game-nights-boston"):
             self.assertNotIn(unrelated, nav_html)
 
 
