@@ -2789,7 +2789,8 @@
     margin: 0 auto 18px;
     line-height: 1.5;
   }
-  .edm-stats { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 0 0 18px; }
+  .edm-hero-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin: 0 0 18px; }
+  .edm-stats { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 0; }
   .edm-stat {
     background: rgba(0, 240, 255, 0.08);
     border: 1px solid rgba(0, 240, 255, 0.25);
@@ -2810,6 +2811,8 @@
     box-shadow: 0 0 16px rgba(0, 240, 255, 0.4);
     text-decoration: none;
     display: inline-block;
+    margin-left: auto;
+    white-space: nowrap;
   }
   .edm-hub .cta-btn:hover { filter: brightness(1.15); transform: translateY(-1px); }
   .edm-layout {
@@ -3355,8 +3358,10 @@
     <div class="edm-hero-copy">
       <h1>Boston EDM &amp; Electronic Shows<small>Boston · Cambridge · Somerville · Nightclubs &amp; Underground</small></h1>
       <p>Techno, house, bass, drum 'n' bass, synthwave, underground warehouse sets and major DJ headliners across Royale, Big Night Live, The Phoenix Landing, ManRay, The Grand, and beyond.</p>
-      <div class="edm-stats"><span class="edm-stat">⚡ 393 shows &amp; club nights</span><span class="edm-stat">💛 100 free / no cover</span><span class="edm-stat">📍 92 nightlife stages</span></div>
-      <a href="../#cat=Music+%26+nightlife&genre=electronic" class="cta-btn">View on interactive calendar →</a>
+      <div class="edm-hero-bar">
+        <div class="edm-stats"><span class="edm-stat">⚡ 393 shows &amp; club nights</span><span class="edm-stat">💛 100 free / no cover</span><span class="edm-stat">📍 92 nightlife stages</span></div>
+        <a href="../#cat=Music+%26+nightlife&genre=electronic" class="cta-btn">Full calendar →</a>
+      </div>
     </div>
   </div>
   <div class="edm-layout">

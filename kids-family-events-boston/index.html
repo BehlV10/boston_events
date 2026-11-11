@@ -912,7 +912,13 @@
             "@type": "PostalAddress",
             "addressLocality": "Boston",
             "addressRegion": "MA",
-            "addressCountry": "US"
+            "addressCountry": "US",
+            "streetAddress": "100 Hanover St, Boston"
+          },
+          "geo": {
+            "@type": "GeoCoordinates",
+            "latitude": 42.3618,
+            "longitude": -71.0567
           }
         },
         "image": [
@@ -2687,11 +2693,11 @@
   @keyframes kid-wave { 0%, 60%, 100% { transform: rotate(0); } 10%, 30% { transform: rotate(14deg); } 20%, 40% { transform: rotate(-8deg); } }
   @media (prefers-reduced-motion: reduce) { .kids-hub .hero h1 .wave { animation: none; } }
   .kids-hub .hero h1 small { display: block; font-size: 0.45em; color: #b08a5a; font-weight: 700; letter-spacing: 0.01em; margin-top: 4px; }
-  .kids-hub .hero p { color: var(--muted); font-size: 16px; margin-bottom: 16px; }
-  .kids-hub .cta-btn { background: #2f86c8; color: #fff; box-shadow: 0 4px 0 #1f6aa3; font-weight: 700; font-size: 16px; padding: 9px 22px; }
-  .kids-hub .cta-btn:hover { transform: translateY(-1px); filter: brightness(1.05); }
-  .kids-stats { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 0 0 16px; }
+  .kids-hero-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin: 0 0 16px; }
+  .kids-stats { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 0; }
   .kids-stat { background: var(--sky); color: #24648f; border-radius: 999px; padding: 4px 14px; font-weight: 800; font-size: 14px; }
+  .kids-hub .cta-btn { background: #2f86c8; color: #fff; box-shadow: 0 4px 0 #1f6aa3; font-weight: 700; font-size: 16px; padding: 9px 22px; margin-left: auto; white-space: nowrap; }
+  .kids-hub .cta-btn:hover { transform: translateY(-1px); filter: brightness(1.05); }
   .kids-layout {
     display: grid;
     grid-template-columns: 260px minmax(0, 1fr);
@@ -3033,8 +3039,10 @@
     <div class="kids-hero-copy">
       <h1>Kids &amp; Family Events <span class="wave" aria-hidden="true">👋</span><small>in Boston, Cambridge, Somerville &amp; nearby</small></h1>
       <p>Story times, baby & toddler sing-alongs, puppet shows, museum days, farm visits and nature walks for kids, gathered every day from libraries, museums, parks and nature centers around Greater Boston.</p>
-      <div class="kids-stats"><span class="kids-stat">🗓️ 927 activities in the next 22 days</span><span class="kids-stat">💛 810 free</span><span class="kids-stat">📍 122 places</span></div>
-      <a href="../#cat=Kids+%26+Family" class="cta-btn">See them on the full calendar →</a>
+      <div class="kids-hero-bar">
+        <div class="kids-stats"><span class="kids-stat">🗓️ 928 activities in the next 22 days</span><span class="kids-stat">💛 810 free</span><span class="kids-stat">📍 122 places</span></div>
+        <a href="../#cat=Kids+%26+Family" class="cta-btn">Full calendar →</a>
+      </div>
     </div>
   </div>
   <div class="kids-layout">
@@ -5941,7 +5949,7 @@
 </div>
 <h2 class="hub-day" id="2026-11-15" data-day="2026-11-15">Sunday, November 15</h2>
 <div class="kid-city-section" data-city="boston" data-day="2026-11-15">
-  <h3 class="kid-city-head"><span class="kid-city-pill kid-c-boston">Boston</span> <span class="count">9</span></h3>
+  <h3 class="kid-city-head"><span class="kid-city-pill kid-c-boston">Boston</span> <span class="count">10</span></h3>
   <div class="kid-city-grid">
 <article class="hub-card kid-card kid-k-other" data-city="boston" data-day="2026-11-15" data-age="family" data-kind="other" data-price="paid">
   <time class="hub-date">10:00 AM</time>
@@ -5983,6 +5991,21 @@
     <div class="hub-meta">
       <span class="hub-venue">📍 Old State House</span>
       <span class="hub-city">(Downtown &amp; Boston Common, Boston)</span>
+      <span class="kid-age">All ages</span>
+    </div>
+    
+  </div>
+</article>
+<article class="hub-card kid-card kid-k-story" data-city="boston" data-day="2026-11-15" data-age="family" data-kind="story" data-price="paid">
+  <time class="hub-date">10:30 AM</time>
+  <div class="kid-card-body">
+    <div class="kid-card-top">
+      <h3 class="hub-title"><a href="https://www.brooklinebooksmith.com/event/2026-11-15/sunday-story-time-diana" target="_blank" rel="noopener">Sunday Story Time with Diana</a></h3>
+      <div class="hub-badges"></div>
+    </div>
+    <div class="hub-meta">
+      <span class="hub-venue">📍 Brookline Booksmith</span>
+      <span class="hub-city">(Brookline / Coolidge, Boston)</span>
       <span class="kid-age">All ages</span>
     </div>
     
@@ -12495,7 +12518,7 @@
     </div>
     <div class="hub-meta">
       <span class="hub-venue">📍 Christopher Columbus Park</span>
-      <span class="hub-city">(Boston)</span>
+      <span class="hub-city">(Downtown &amp; Boston Common, Boston)</span>
       <span class="kid-age">All ages</span>
     </div>
     <p class="hub-desc">Help spread the holiday cheer by joining the City of Boston, the Boston Parks and Recreation Department and the Friends of Christopher Columbus Park for our ann…</p>
