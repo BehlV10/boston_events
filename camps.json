@@ -42,7 +42,9 @@
     "https://www.cambridgema.gov/Services/summercampsandprograms",
     "https://www.finditcambridge.org/programs/dhsp-summer-camps-and-programs-lottery"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.3703,
+   "lng": -71.1017
   },
   {
    "id": "somertime",
@@ -78,7 +80,9 @@
    "sources": [
     "https://somervillema.myrec.com/documents/somertime_handbook_2026.pdf"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.3976,
+   "lng": -71.1219
   },
   {
    "id": "medford-park",
@@ -107,7 +111,9 @@
    "sources": [
     "https://medfordma.myrec.com/forms/6232_family_handbook_2026.pdf"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.4184,
+   "lng": -71.1066
   },
   {
    "id": "pequossette",
@@ -149,7 +155,9 @@
    "sources": [
     "https://www.watertown-ma.gov/1432/Pequossette-Summer-Recreation-Program"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.3704,
+   "lng": -71.1866
   },
   {
    "id": "camp-roar",
@@ -192,7 +200,9 @@
     "https://belmont-ma.gov/2098/Summer-Camps",
     "https://belmont-ma.gov/2161/Summer-Camp-Registration"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.3965,
+   "lng": -71.1772
   },
   {
    "id": "newton-albemarle",
@@ -228,7 +238,9 @@
    "sources": [
     "https://newtonma.myrec.com/documents/2026_albemarle_acres_summer_program_flyer.pdf"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.3584,
+   "lng": -71.2091
   },
   {
    "id": "newton-extreme",
@@ -264,7 +276,9 @@
    "sources": [
     "https://newtonma.myrec.com/documents/2026_camp_extreme_flyer.pdf"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.3533,
+   "lng": -71.2065
   },
   {
    "id": "lexrec",
@@ -293,7 +307,9 @@
    "sources": [
     "https://www.lexingtonma.gov/2503/LexRec-Summer-Day-Camp"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.4394,
+   "lng": -71.2239
   },
   {
    "id": "arlington-clubrec",
@@ -322,7 +338,9 @@
    "sources": [
     "https://arlingtonma.myrec.com/documents/club_rec_parent_handbook_2026.pdf"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.4217,
+   "lng": -71.1685
   },
   {
    "id": "camp-joey",
@@ -351,7 +369,9 @@
    "sources": [
     "https://wellesleyma.gov/2208/CAMP-JOEY"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.3168,
+   "lng": -71.2682
   },
   {
    "id": "camp-harbor-view",
@@ -387,7 +407,9 @@
    "sources": [
     "https://campharborview.org/summer-camp/how-to-apply/"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.3195,
+   "lng": -70.9723
   },
   {
    "id": "bcyf-camp-joy",
@@ -417,7 +439,9 @@
     "https://www.boston.gov/bcyf-camp-joy",
     "https://www.boston.gov/sites/default/files/file/2026/05/BCYFSummerGuide2026_FinalV2.pdf"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.3324,
+   "lng": -71.1002
   },
   {
    "id": "ymca-huntington",
@@ -463,7 +487,9 @@
     "https://ymcaboston.org/youth-and-family/camps/day-camps/huntington-camp-guide/",
     "https://ymcaboston.org/youth-and-family/camps/day-camps/"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.3414,
+   "lng": -71.0877
   },
   {
    "id": "ymca-dorchester",
@@ -509,7 +535,9 @@
     "https://ymcaboston.org/youth-and-family/camps/day-camps/dorchester-camp-guide/",
     "https://ymcaboston.org/youth-and-family/camps/day-camps/"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.2882,
+   "lng": -71.0734
   },
   {
    "id": "ymca-roxbury",
@@ -555,7 +583,9 @@
     "https://ymcaboston.org/youth-and-family/camps/day-camps/roxbury-camp-guide/",
     "https://ymcaboston.org/youth-and-family/camps/day-camps/"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.3168,
+   "lng": -71.0858
   },
   {
    "id": "ymca-wang",
@@ -601,7 +631,9 @@
     "https://ymcaboston.org/youth-and-family/camps/day-camps/wang-camp-guide/",
     "https://ymcaboston.org/youth-and-family/camps/day-camps/"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.3496,
+   "lng": -71.0628
   },
   {
    "id": "ymca-waltham",
@@ -647,7 +679,9 @@
     "https://ymcaboston.org/youth-and-family/camps/day-camps/waltham-camp-guide/",
     "https://ymcaboston.org/youth-and-family/camps/day-camps/"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.3995,
+   "lng": -71.2427
   },
   {
    "id": "ymca-north-suburban",
@@ -693,7 +727,9 @@
     "https://ymcaboston.org/youth-and-family/camps/day-camps/ns-camp-guide/",
     "https://ymcaboston.org/youth-and-family/camps/day-camps/"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.4746,
+   "lng": -71.1711
   },
   {
    "id": "ymca-parkway",
@@ -739,7 +775,9 @@
     "https://ymcaboston.org/youth-and-family/camps/day-camps/parkway-camp-guide/",
     "https://ymcaboston.org/youth-and-family/camps/day-camps/"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.2796,
+   "lng": -71.1555
   },
   {
    "id": "camp-quirk",
@@ -787,7 +825,9 @@
    "sources": [
     "https://ssymca-media-offload.s3.amazonaws.com/wp-content/uploads/2025/12/01141305/2026-SSYMCA-Camp-Quirk-Guide_WEB.pdf"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.2476,
+   "lng": -71.0002
   },
   {
    "id": "camp-melstone",
@@ -823,7 +863,9 @@
    "sources": [
     "https://www.ymcametronorth.org/summer-camp/camp-melstone/about-camp-melstone/"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.4632,
+   "lng": -71.0583
   },
   {
    "id": "camp-nansema",
@@ -852,7 +894,9 @@
    "sources": [
     "https://www.ymcametronorth.org/summer-camp/"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.4746,
+   "lng": -71.1711
   },
   {
    "id": "camp-chickami",
@@ -898,7 +942,9 @@
    "sources": [
     "https://wsymca.org/camps/chickami"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.3618,
+   "lng": -71.3283
   },
   {
    "id": "camp-pikati",
@@ -944,7 +990,9 @@
    "sources": [
     "https://wsymca.org/camps/pikati"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.3533,
+   "lng": -71.1894
   },
   {
    "id": "north-woods",
@@ -980,7 +1028,9 @@
    "sources": [
     "https://camps.ymcaboston.org/north-woods/north-woods-dates-rates/"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 43.6841,
+   "lng": -71.2721
   },
   {
    "id": "bnc",
@@ -1022,7 +1072,9 @@
    "sources": [
     "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/boston-nature-center/camp/programs-pricing"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.2789,
+   "lng": -71.1011
   },
   {
    "id": "drumlin",
@@ -1051,7 +1103,9 @@
    "sources": [
     "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/drumlin-farm/camp/programs-pricing"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.4172,
+   "lng": -71.3328
   },
   {
    "id": "moose-hill",
@@ -1087,7 +1141,9 @@
    "sources": [
     "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/moose-hill/camp/programs-pricing"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.1332,
+   "lng": -71.2065
   },
   {
    "id": "habitat",
@@ -1123,7 +1179,9 @@
    "sources": [
     "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/habitat/camp/programs-pricing"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.4047,
+   "lng": -71.1668
   },
   {
    "id": "broadmoor",
@@ -1159,7 +1217,9 @@
    "sources": [
     "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/broadmoor/camp/programs-pricing"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.2598,
+   "lng": -71.3286
   },
   {
    "id": "blue-hills",
@@ -1195,7 +1255,9 @@
    "sources": [
     "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/blue-hills-trailside-museum/camp/programs-pricing"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.2173,
+   "lng": -71.1002
   },
   {
    "id": "ipswich",
@@ -1231,7 +1293,9 @@
    "sources": [
     "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/ipswich-river/camp/programs-pricing"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.6393,
+   "lng": -70.9324
   },
   {
    "id": "stony-brook",
@@ -1260,7 +1324,9 @@
    "sources": [
     "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/stony-brook/camp/programs-pricing"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.1098,
+   "lng": -71.3142
   },
   {
    "id": "north-river",
@@ -1289,7 +1355,9 @@
    "sources": [
     "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/north-river/camp/programs-pricing"
    ],
-   "checked": "2026-11-08"
+   "checked": "2026-11-08",
+   "lat": 42.1524,
+   "lng": -70.7412
   },
   {
    "id": "nobles",
@@ -1345,7 +1413,9 @@
    "sources": [
     "https://www.noblesdaycamp.org/registration/"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.2547,
+   "lng": -71.1837
   },
   {
    "id": "summer-at-park",
@@ -1390,7 +1460,9 @@
     "https://www.summeratpark.org/",
     "https://www.summeratpark.org/important-information"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.3195,
+   "lng": -71.1352
   },
   {
    "id": "fessenden",
@@ -1434,7 +1506,9 @@
    "sources": [
     "https://fessendensummercamps.org/tuition-registration/dates-and-rates/"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.3541,
+   "lng": -71.2227
   },
   {
    "id": "beaver",
@@ -1478,7 +1552,9 @@
    "sources": [
     "https://bvrcamp.org/"
    ],
-   "checked": "2026-11-08"
+   "checked": "2026-11-08",
+   "lat": 42.3213,
+   "lng": -71.1546
   },
   {
    "id": "chestnut-hill-school",
@@ -1515,7 +1591,9 @@
     "https://www.tchs.org/summer-camp",
     "https://www.tchs.org/summer-camp/summer-at-chs-registration"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.3275,
+   "lng": -71.1611
   },
   {
    "id": "sewataro",
@@ -1563,7 +1641,9 @@
    "sources": [
     "https://sewataro.com/about-us/dates-tuition/dates-tuition"
    ],
-   "checked": "2026-11-08"
+   "checked": "2026-11-08",
+   "lat": 42.4021,
+   "lng": -71.4332
   },
   {
    "id": "everwood",
@@ -1605,7 +1685,9 @@
    "sources": [
     "https://everwooddaycamp.com/dates-enrollment/"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.1072,
+   "lng": -71.2078
   },
   {
    "id": "tenacre",
@@ -1634,7 +1716,9 @@
    "sources": [
     "https://www.tenacrecds.org/summer-programs/programs/dates-and-rates"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.2858,
+   "lng": -71.2872
   },
   {
    "id": "running-brook",
@@ -1663,7 +1747,9 @@
    "sources": [
     "https://www.runningbrook.org/tuition-information"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.3916,
+   "lng": -71.2235
   },
   {
    "id": "summer-fenn",
@@ -1705,7 +1791,9 @@
    "sources": [
     "https://www.summerfenn.org/"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.4788,
+   "lng": -71.3498
   },
   {
    "id": "belmont-day",
@@ -1735,7 +1823,9 @@
     "https://www.belmontday.org/summer/belmont-day-camp/",
     "https://www.belmontday.org/summer/dates-and-rates/"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.4078,
+   "lng": -71.1963
   },
   {
    "id": "hill-house",
@@ -1778,7 +1868,9 @@
     "https://www.hillhouseboston.org/camps",
     "https://www.hillhouseboston.org/Assets/Hill+House+Digital+Assets/2026+Hill+House+Camp+Guide.pdf"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.3582,
+   "lng": -71.0712
   },
   {
    "id": "boston-childrens-museum",
@@ -1814,7 +1906,9 @@
    "sources": [
     "https://summercamp.bostonchildrensmuseum.org/overview"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.3523,
+   "lng": -71.0494
   },
   {
    "id": "zoocamp",
@@ -1843,7 +1937,9 @@
    "sources": [
     "https://www.zoonewengland.org/zoocamp"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.3045,
+   "lng": -71.0886
   },
   {
    "id": "steve-kates",
@@ -1873,7 +1969,9 @@
     "https://steveandkatescamp.com/cambridge/",
     "https://steveandkatescamp.com/fees/financial-aid/"
    ],
-   "checked": "2026-11-08"
+   "checked": "2026-11-08",
+   "lat": 42.3831,
+   "lng": -71.1325
   },
   {
    "id": "cambridge-ymca",
@@ -1909,7 +2007,9 @@
    "sources": [
     "https://www.cambridgeymca.org/child-care/summer-program/"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.3653,
+   "lng": -71.1054
   },
   {
    "id": "cambridge-ellis",
@@ -1938,7 +2038,9 @@
    "sources": [
     "https://cambridge-ellis.org/programs/summer-programs"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.3736,
+   "lng": -71.1118
   },
   {
    "id": "watertown-bgc",
@@ -1967,7 +2069,9 @@
    "sources": [
     "https://watertownbgc.org/wbgc-programs/summer/"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.3683,
+   "lng": -71.1852
   },
   {
    "id": "cedar-hill",
@@ -2004,7 +2108,9 @@
     "https://www.gsema.org/en/activities-and-camp/summer-camp/day.html",
     "https://www.gsema.org/en/activities-and-camp/summer-camp.html"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.3855,
+   "lng": -71.2185
   },
   {
    "id": "camp-nashoba",
@@ -2033,7 +2139,9 @@
    "sources": [
     "https://campnashobaday.com/about-nashoba/dates-tuition/"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.5192,
+   "lng": -71.4674
   },
   {
    "id": "camp-rotary",
@@ -2062,7 +2170,9 @@
    "sources": [
     "http://www.camprotary.org"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 42.6687,
+   "lng": -70.9996
   },
   {
    "id": "camp-ramsbottom",
@@ -2098,7 +2208,9 @@
    "sources": [
     "https://bgcpawt.org/summer-programs/"
    ],
-   "checked": "2026-11-07"
+   "checked": "2026-11-07",
+   "lat": 41.8384,
+   "lng": -71.2678
   },
   {
    "id": "nuvu",
@@ -2134,7 +2246,9 @@
    "sources": [
     "https://nuvusummer.org/"
    ],
-   "checked": "2026-11-08"
+   "checked": "2026-11-08",
+   "lat": 42.3634,
+   "lng": -71.1011
   },
   {
    "id": "linx",
@@ -2163,7 +2277,9 @@
    "sources": [
     "https://www.linxcamps.com/details/pricing"
    ],
-   "checked": "2026-11-08"
+   "checked": "2026-11-08",
+   "lat": 42.2982,
+   "lng": -71.2874
   },
   {
    "id": "bbn",
@@ -2192,7 +2308,9 @@
    "sources": [
     "https://bbnsummer.com/dates-registration/"
    ],
-   "checked": "2026-11-08"
+   "checked": "2026-11-08",
+   "lat": 42.3735,
+   "lng": -71.1394
   }
  ],
  "leads": [

@@ -199,11 +199,12 @@ class CollegeHub(unittest.TestCase):
         self.assertNotIn("summer-camps", self.html)
         self.assertNotIn("board-game-nights-boston", self.html)
 
-    def test_cards_grouped_by_area_with_transit(self):
-        self.assertIn('class="col-area-section" data-area="comm_ave"', self.html)
-        self.assertIn('class="col-area-section" data-area="cambridge"', self.html)
+    def test_cards_carry_area_and_transit(self):
+        self.assertIn('data-area="comm_ave"', self.html)
+        self.assertIn('data-area="cambridge"', self.html)
         self.assertIn("Green Line B", self.html)
         self.assertIn("Red Line", self.html)
+        self.assertNotIn("col-area-section", self.html)
 
     def test_area_filter_chips_present(self):
         areas = re.findall(r'data-group="area" data-val="(\w+)"', self.html)

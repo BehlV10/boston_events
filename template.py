@@ -2119,102 +2119,168 @@ _KIDS_CSS = """
   .kids-hub .cta-btn:hover { transform: translateY(-1px); filter: brightness(1.05); }
   .kids-stats { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 0 0 16px; }
   .kids-stat { background: var(--sky); color: #24648f; border-radius: 999px; padding: 4px 14px; font-weight: 800; font-size: 14px; }
-  .kids-filters { background: #fff; border-radius: 22px; padding: 14px 16px 6px; margin-bottom: 18px;
-    box-shadow: 0 4px 0 #e9dcc6; border: 2px solid #f1e6d4; }
-  .kid-filter-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
-  .kid-filter-label { font-weight: 800; color: #b08a5a; font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; min-width: 58px; }
-  .kid-chip { font-size: 15px; font-weight: 700; padding: 4px 14px 3px; border-radius: 999px; cursor: pointer;
-    border: 2px solid #e6dccb; background: #fffaf2; color: var(--fg); transition: transform 0.12s ease, background 0.12s ease; }
-  .kid-chip:hover { transform: translateY(-1px); border-color: var(--sky-deep); }
-  .kid-chip.active { background: var(--sky); border-color: #6dbbea; color: #1f5d88; box-shadow: 0 3px 0 #9fd3f2; }
-  .kids-hub .hub-day { border: 0; margin: 26px 0 2px; padding: 0; font-size: 22px; color: #2b5d86; display: flex; align-items: center; gap: 10px; }
-  .kids-hub .hub-day::before { content: ""; width: 34px; height: 22px; flex: none;
-    background: radial-gradient(circle at 30% 60%, #fff 9px, transparent 10px), radial-gradient(circle at 62% 45%, #fff 11px, transparent 12px), radial-gradient(circle at 82% 66%, #fff 8px, transparent 9px), var(--sky);
-    border-radius: 12px; }
-  .kids-hub .hub-day::after { content: ""; flex: 1; border-bottom: 3px dotted #e2d3ba; }
-  .kids-hub .hub-grid { gap: 14px; grid-template-columns: minmax(0, 1fr); }
-  @media (min-width: 640px) { .kids-hub .hub-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  .kids-hub .hub-card a, .kids-hub .hub-desc { overflow-wrap: anywhere; }
-  .kids-hub .hub-card { border: 2px solid #f1e6d4; border-radius: 22px; padding: 0; overflow: hidden; justify-content: flex-start; min-width: 0;
-    box-shadow: 0 4px 0 #ece0cb; transition: transform 0.15s ease, box-shadow 0.15s ease; }
-  .kids-hub .hub-card:hover { transform: translateY(-2px) rotate(-0.3deg); box-shadow: 0 7px 0 #e3d4ba; border-color: #e6d6bb; }
-  .kid-card-band { height: 10px; background: var(--band, #d6eefc); }
-  .kid-card-body { padding: 12px 16px 14px; display: flex; gap: 12px; }
-  .kid-emoji { flex: none; width: 46px; height: 46px; border-radius: 16px; display: grid; place-items: center;
-    font-size: 24px; background: var(--band, #d6eefc); }
-  .kid-card-main { min-width: 0; flex: 1; }
-  .kids-hub .hub-card-head { margin-bottom: 4px; }
-  .kids-hub .hub-date { color: #2f86c8; font-size: 13px; font-weight: 800; letter-spacing: 0.02em; text-transform: none; }
-  .kids-hub .hub-title { font-family: "Nunito", system-ui, sans-serif; font-weight: 800; font-size: 16.5px; margin-bottom: 6px; }
-  .kids-hub .hub-title a { color: #3a3550; }
-  .kids-hub .hub-title a:hover { color: #2f86c8; }
-  .kids-hub .hub-meta { flex-wrap: wrap; font-size: 13px; }
-  .kids-hub .hub-desc { color: #6f6884; font-size: 13.5px; }
-  .kid-ages { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
-  .kid-age { font-size: 12px; font-weight: 800; padding: 1px 9px; border-radius: 999px; background: #fff4dc; color: #9a6b24; border: 1px solid #f3dfb3; }
-  .kids-hub .badge-free { background: #dff5e6; color: #23824a; font-size: 12px; font-weight: 800; }
-  .kids-hub .badge-price { background: #f4efe6; color: #6f6884; font-size: 12px; }
-  .kid-city-section {
-    grid-column: 1 / -1;
-    margin-bottom: 22px;
-    background: #ffffff;
-    border: 1px solid #efe4d2;
-    border-left: 4px solid var(--city-color, #2f86c8);
-    border-radius: 18px;
-    padding: 16px;
-    box-shadow: 0 4px 0 #ede1cd;
-  }
-  .kid-city-section[data-city="cambridge"] { --city-color: #f43f5e; }
-  .kid-city-section[data-city="somerville"] { --city-color: #f59e0b; }
-  .kid-city-section[data-city="boston"] { --city-color: #2f86c8; }
-  .kid-city-section[data-city="other"] { --city-color: #8b5cf6; }
-  .kid-city-head {
+  .kids-filters {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-bottom: 10px;
-    margin-bottom: 14px;
-    border-bottom: 2px dashed #f2e7d5;
-  }
-  .kid-city-pill {
-    display: inline-flex;
+    flex-wrap: nowrap;
     align-items: center;
     gap: 8px;
-    color: var(--city-color);
+    padding: 8px 12px;
+    background: #fff;
+    border: 1.5px solid #efe4d2;
+    border-radius: 10px;
+    margin-bottom: 18px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+    scrollbar-width: none;
+  }
+  .kids-filters::-webkit-scrollbar { display: none; }
+  .kid-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background: #fffaf2 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%237c7590' d='M1.4 0L6 4.6 10.6 0 12 1.4l-6 6-6-6z'/%3E%3C/svg%3E") no-repeat right 10px center;
+    color: var(--fg, #3a3550);
+    font-family: inherit;
     font-size: 13.5px;
+    font-weight: 700;
+    padding: 6px 28px 6px 12px;
+    border: 1.5px solid #e6dccb;
+    border-radius: 8px;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+  .kid-select:hover {
+    border-color: var(--sky-deep, #8fcdf0);
+    background-color: #ffffff;
+  }
+  .kid-select:focus {
+    border-color: #2f86c8;
+    box-shadow: 0 0 0 2px rgba(47, 134, 200, 0.2);
+  }
+  .kid-chip { font-size: 14px; font-weight: 700; }
+  .kids-hub .hub-day {
+    grid-column: 1 / -1;
+    border: 0;
+    margin: 26px 0 8px;
+    padding: 0;
+    font-size: 20px;
+    color: #2b5d86;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .kids-hub .hub-day:first-child {
+    margin-top: 4px;
+  }
+  .kids-hub .hub-day::before {
+    content: "";
+    width: 28px;
+    height: 18px;
+    flex: none;
+    background: radial-gradient(circle at 30% 60%, #fff 8px, transparent 9px), radial-gradient(circle at 62% 45%, #fff 9px, transparent 10px), radial-gradient(circle at 82% 66%, #fff 7px, transparent 8px), var(--sky);
+    border-radius: 10px;
+  }
+  .kids-hub .hub-day::after {
+    content: "";
+    flex: 1;
+    border-bottom: 2px dotted #e2d3ba;
+  }
+  .kids-hub .hub-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .kids-hub .hub-card.kid-card {
+    border: 1px solid #efe4d2;
+    border-radius: var(--radius-sm, 6px);
+    padding: 10px 14px;
+    display: grid;
+    grid-template-columns: 78px minmax(0, 1fr);
+    align-items: start;
+    gap: 12px;
+    font-size: 14px;
+    min-width: 0;
+    margin-bottom: 2px;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+  }
+  .kids-hub .hub-card.kid-card:hover {
+    background: #fffaf2;
+    border-color: #6dbbea;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+  }
+  .kid-card-body {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 0;
+  }
+  .kid-card-top {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .kids-hub .hub-title {
+    font-family: "Nunito", system-ui, sans-serif;
     font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    font-size: 15px;
+    line-height: 1.35;
+    margin: 0;
   }
-  .kid-city-pill .city-dot {
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    background: var(--city-color);
-    box-shadow: 0 0 6px var(--city-color);
-    display: inline-block;
-  }
-  .kid-city-head .count {
-    background: #fbf6ec;
+  .kids-hub .hub-title a { color: #2b5d86; text-decoration: none; }
+  .kids-hub .hub-title a:hover { color: #1f5d88; text-decoration: underline; }
+  .kids-hub .hub-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+    font-size: 12.5px;
     color: #7c7590;
+  }
+  .kids-hub .hub-date {
     font-size: 12px;
     font-weight: 800;
-    padding: 2px 9px;
+    color: #2f86c8;
+    padding-top: 2px;
+    white-space: nowrap;
+  }
+  .kid-ages {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .kid-age {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 1px 7px;
     border-radius: 999px;
-    border: 1px solid #efe4d2;
+    background: #fff4dc;
+    color: #9a6b24;
+    border: 1px solid #f3dfb3;
   }
-  .kid-city-cards {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 14px;
+  .kids-hub .badge-free {
+    background: #dff5e6;
+    color: #23824a;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 6px;
   }
-  @media (min-width: 640px) {
-    .kid-city-cards {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+  .kids-hub .badge-price {
+    background: #f4efe6;
+    color: #6f6884;
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 6px;
   }
-  .kid-k-story { --band: #fff1b8; } .kid-k-music { --band: #e7dcff; } .kid-k-nature { --band: #d4f3e1; }
-  .kid-k-make { --band: #ffe0cf; } .kid-k-show { --band: #ffd6e6; } .kid-k-play { --band: #d6eefc; } .kid-k-other { --band: #f1e6d4; }
   .kids-hub .no-hub-events { text-align: center; color: var(--muted); font-size: 16px; padding: 30px 0; }
   .kids-hub .kids-later { text-align: center; margin: 28px 0 8px; }
   .kids-hub footer { border-top: 2px dashed #e7d8bf; }
@@ -2235,7 +2301,11 @@ _KIDS_CSS = """
       min-height: 34px;
     }
     .kids-hero-art { height: 130px; }
-    .kid-filter-label { min-width: 100%; }
+    .kids-hub .hub-card.kid-card {
+      grid-template-columns: 1fr;
+      gap: 4px;
+      padding: 8px 10px;
+    }
   }
 """
 
@@ -2244,12 +2314,10 @@ _KIDS_FILTER_JS = """<script>
   var cards = document.querySelectorAll('.hub-card');
   var laterBox = document.getElementById('kids-later');
   var laterDays = laterBox ? JSON.parse(laterBox.dataset.days || '[]') : [];
-  // The When buttons are made here, not in the page, so "Today" and the week labels stay right
-  // on a page built days ago. Weeks run Monday to Sunday and dates are Boston's.
   var ranges = {};
   (function () {
-    var row = document.getElementById('kid-when');
-    if (!row) return;
+    var sel = document.getElementById('kid-when');
+    if (!sel) return;
     var parts = {};
     new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' })
       .formatToParts(new Date()).forEach(function (p) { parts[p.type] = p.value; });
@@ -2272,13 +2340,13 @@ _KIDS_FILTER_JS = """<script>
       if (seen[key] || !days.some(function (d) { return d >= from && d <= to; })) return;
       seen[key] = 1;
       ranges[val] = [from, to];
-      var b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'kid-chip';
-      b.dataset.group = 'when';
-      b.dataset.val = val;
-      b.textContent = text;
-      row.appendChild(b);
+      var opt = document.createElement('option');
+      opt.className = 'kid-chip';
+      opt.dataset.group = 'when';
+      opt.dataset.val = val;
+      opt.value = val;
+      opt.textContent = text;
+      sel.appendChild(opt);
     }
     var fromMonday = (utc(today).getUTCDay() + 6) % 7;
     var sunday = addDays(today, 6 - fromMonday);
@@ -2292,12 +2360,11 @@ _KIDS_FILTER_JS = """<script>
       add(monday, label(monday, end), monday, end);
     }
   })();
+  var selects = document.querySelectorAll('.kid-select');
   var chips = document.querySelectorAll('.kid-chip');
-  if (!chips.length) return;
+  if (!selects.length && !chips.length) return;
   var heads = document.querySelectorAll('.hub-day');
   var citySecs = document.querySelectorAll('.kid-city-section');
-  // Later days (past the first two weeks) load once: near the bottom of the list, on the button,
-  // or as soon as a filter is used, so filtered results are complete.
   var laterLoad = null;
   function loadLater() {
     if (!laterBox) return Promise.resolve();
@@ -2347,20 +2414,32 @@ _KIDS_FILTER_JS = """<script>
       var cCount = sec.querySelector('.kid-city-head .count');
       if (cCount) cCount.textContent = visible;
     });
+    selects.forEach(function (sel) {
+      if (state[sel.dataset.group] !== undefined) {
+        sel.value = state[sel.dataset.group];
+      }
+    });
     chips.forEach(function (b) { b.classList.toggle('active', state[b.dataset.group] === b.dataset.val); });
     var none = document.getElementById('hub-none');
-    if (none) none.hidden = n > 0 || !!laterBox;  // still loading the later days
+    if (none) none.hidden = n > 0 || !!laterBox;
     if (save) {
       var parts = Object.keys(state).filter(function (k) { return state[k] !== 'all'; }).map(function (k) { return k + '=' + state[k]; });
       history.replaceState(null, '', parts.length ? '#' + parts.join('&') : location.pathname);
     }
   }
+  selects.forEach(function (sel) {
+    sel.addEventListener('change', function () {
+      state[sel.dataset.group] = sel.value;
+      render(true);
+      loadLater();
+    });
+  });
   chips.forEach(function (b) {
     b.addEventListener('click', function () { state[b.dataset.group] = b.dataset.val; render(true); loadLater(); });
   });
   location.hash.replace(/^#/, '').split('&').forEach(function (p) {
     var kv = p.split('=');
-    if (kv.length === 2 && state.hasOwnProperty(kv[0]) && document.querySelector('.kid-chip[data-group="' + kv[0] + '"][data-val="' + kv[1] + '"]')) state[kv[0]] = kv[1];
+    if (kv.length === 2 && state.hasOwnProperty(kv[0])) state[kv[0]] = kv[1];
   });
   render(false);
   if (Object.keys(state).some(function (k) { return state[k] !== 'all'; })) loadLater();
@@ -2413,22 +2492,48 @@ _EDM_FONTS = ""
 _EDM_HERO_ART = """<svg class="edm-hero-art" viewBox="0 0 900 200" aria-hidden="true" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="edm-sky" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#04050a"/>
-      <stop offset="60%" stop-color="#0a0d1c"/>
-      <stop offset="100%" stop-color="#12182e"/>
+      <stop offset="0%" stop-color="#02040a"/>
+      <stop offset="40%" stop-color="#070b1f"/>
+      <stop offset="80%" stop-color="#111638"/>
+      <stop offset="100%" stop-color="#1b1033"/>
     </linearGradient>
-    <linearGradient id="edm-neon" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#00f0ff"/>
-      <stop offset="50%" stop-color="#a855f7"/>
-      <stop offset="100%" stop-color="#ff007f"/>
+    <linearGradient id="beam-cyan" x1="0" y1="1" x2="0.5" y2="0">
+      <stop offset="0%" stop-color="#00f0ff" stop-opacity="0.75"/>
+      <stop offset="60%" stop-color="#00f0ff" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#00f0ff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="beam-pink" x1="1" y1="1" x2="0.3" y2="0">
+      <stop offset="0%" stop-color="#ff007f" stop-opacity="0.7"/>
+      <stop offset="60%" stop-color="#ff007f" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#ff007f" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="beam-lime" x1="0" y1="1" x2="0.7" y2="0">
+      <stop offset="0%" stop-color="#00ff88" stop-opacity="0.55"/>
+      <stop offset="60%" stop-color="#00ff88" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#00ff88" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="beam-purple" x1="0.5" y1="1" x2="0.5" y2="0">
+      <stop offset="0%" stop-color="#b026ff" stop-opacity="0.65"/>
+      <stop offset="60%" stop-color="#b026ff" stop-opacity="0.2"/>
+      <stop offset="100%" stop-color="#b026ff" stop-opacity="0"/>
     </linearGradient>
     <linearGradient id="bar-grad" x1="0" y1="1" x2="0" y2="0">
-      <stop offset="0%" stop-color="#00f0ff" stop-opacity="0.2"/>
-      <stop offset="60%" stop-color="#00f0ff" stop-opacity="0.8"/>
+      <stop offset="0%" stop-color="#00f0ff" stop-opacity="0.25"/>
+      <stop offset="40%" stop-color="#00f0ff" stop-opacity="0.8"/>
+      <stop offset="75%" stop-color="#b026ff"/>
       <stop offset="100%" stop-color="#ff007f"/>
     </linearGradient>
-    <filter id="neon-glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="5" result="blur"/>
+    <radialGradient id="nebula-center" cx="50%" cy="60%" r="45%">
+      <stop offset="0%" stop-color="#b026ff" stop-opacity="0.35"/>
+      <stop offset="50%" stop-color="#00f0ff" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#02040a" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="water-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#060815" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#030409"/>
+    </linearGradient>
+    <filter id="glow-neon" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
       <feMerge>
         <feMergeNode in="blur"/>
         <feMergeNode in="SourceGraphic"/>
@@ -2436,60 +2541,176 @@ _EDM_HERO_ART = """<svg class="edm-hero-art" viewBox="0 0 900 200" aria-hidden="
     </filter>
   </defs>
   <rect width="900" height="200" fill="url(#edm-sky)"/>
-  <g opacity="0.35" stroke="#00f0ff" stroke-width="1">
-    <line x1="450" y1="40" x2="0" y2="200"/>
-    <line x1="450" y1="40" x2="120" y2="200"/>
-    <line x1="450" y1="40" x2="240" y2="200"/>
-    <line x1="450" y1="40" x2="350" y2="200"/>
-    <line x1="450" y1="40" x2="450" y2="200"/>
-    <line x1="450" y1="40" x2="550" y2="200"/>
-    <line x1="450" y1="40" x2="660" y2="200"/>
-    <line x1="450" y1="40" x2="780" y2="200"/>
-    <line x1="450" y1="40" x2="900" y2="200"/>
-    <line x1="200" y1="130" x2="700" y2="130" opacity="0.5"/>
-    <line x1="120" y1="160" x2="780" y2="160" opacity="0.7"/>
-    <line x1="0" y1="200" x2="900" y2="200" stroke-width="2" opacity="0.9"/>
+  <rect width="900" height="200" fill="url(#nebula-center)"/>
+
+  <!-- Sweeping Lasers -->
+  <g opacity="0.85">
+    <polygon points="450,165 40,0 85,0" fill="url(#beam-cyan)"/>
+    <polygon points="450,165 815,0 860,0" fill="url(#beam-pink)"/>
+    <polygon points="450,165 240,0 275,0" fill="url(#beam-lime)"/>
+    <polygon points="450,165 625,0 660,0" fill="url(#beam-purple)"/>
+    <polygon points="450,165 435,0 465,0" fill="url(#beam-cyan)" opacity="0.6"/>
+    <polygon points="180,165 370,0 395,0" fill="url(#beam-pink)" opacity="0.45"/>
+    <polygon points="720,165 505,0 530,0" fill="url(#beam-cyan)" opacity="0.45"/>
   </g>
+
+  <!-- Sharp Neon Laser Lines -->
+  <g stroke-linecap="round" opacity="0.75" filter="url(#glow-neon)">
+    <line x1="450" y1="165" x2="60" y2="0" stroke="#00f0ff" stroke-width="1.5"/>
+    <line x1="450" y1="165" x2="840" y2="0" stroke="#ff007f" stroke-width="1.5"/>
+    <line x1="450" y1="165" x2="255" y2="0" stroke="#00ff88" stroke-width="1"/>
+    <line x1="450" y1="165" x2="645" y2="0" stroke="#b026ff" stroke-width="1"/>
+    <line x1="180" y1="165" x2="380" y2="0" stroke="#ff007f" stroke-width="1"/>
+    <line x1="720" y1="165" x2="520" y2="0" stroke="#00f0ff" stroke-width="1"/>
+  </g>
+
+  <!-- Equalizer Spectrum Bars (Left) -->
   <g fill="url(#bar-grad)">
-    <rect x="40" y="110" width="8" height="70" rx="3"/>
-    <rect x="54" y="90" width="8" height="90" rx="3"/>
-    <rect x="68" y="130" width="8" height="50" rx="3"/>
-    <rect x="82" y="75" width="8" height="105" rx="3"/>
-    <rect x="96" y="105" width="8" height="75" rx="3"/>
-    <rect x="110" y="60" width="8" height="120" rx="3"/>
-    <rect x="124" y="95" width="8" height="85" rx="3"/>
-    <rect x="138" y="125" width="8" height="55" rx="3"/>
-    <rect x="152" y="80" width="8" height="100" rx="3"/>
-    <rect x="166" y="115" width="8" height="65" rx="3"/>
-    <rect x="180" y="70" width="8" height="110" rx="3"/>
-    <rect x="194" y="135" width="8" height="45" rx="3"/>
+    <rect x="30" y="118" width="6" height="36" rx="2"/>
+    <rect x="40" y="98" width="6" height="56" rx="2"/>
+    <rect x="50" y="128" width="6" height="26" rx="2"/>
+    <rect x="60" y="78" width="6" height="76" rx="2"/>
+    <rect x="70" y="106" width="6" height="48" rx="2"/>
+    <rect x="80" y="62" width="6" height="92" rx="2"/>
+    <rect x="90" y="88" width="6" height="66" rx="2"/>
+    <rect x="100" y="116" width="6" height="38" rx="2"/>
+    <rect x="110" y="74" width="6" height="80" rx="2"/>
+    <rect x="120" y="102" width="6" height="52" rx="2"/>
+    <rect x="130" y="58" width="6" height="96" rx="2"/>
+    <rect x="140" y="92" width="6" height="62" rx="2"/>
+    <rect x="150" y="124" width="6" height="30" rx="2"/>
+    <rect x="160" y="82" width="6" height="72" rx="2"/>
   </g>
+
+  <!-- Equalizer Spectrum Bars (Right) -->
   <g fill="url(#bar-grad)">
-    <rect x="698" y="135" width="8" height="45" rx="3"/>
-    <rect x="712" y="70" width="8" height="110" rx="3"/>
-    <rect x="726" y="115" width="8" height="65" rx="3"/>
-    <rect x="740" y="80" width="8" height="100" rx="3"/>
-    <rect x="754" y="125" width="8" height="55" rx="3"/>
-    <rect x="768" y="95" width="8" height="85" rx="3"/>
-    <rect x="782" y="60" width="8" height="120" rx="3"/>
-    <rect x="796" y="105" width="8" height="75" rx="3"/>
-    <rect x="810" y="75" width="8" height="105" rx="3"/>
-    <rect x="824" y="130" width="8" height="50" rx="3"/>
-    <rect x="838" y="90" width="8" height="90" rx="3"/>
-    <rect x="852" y="110" width="8" height="70" rx="3"/>
+    <rect x="734" y="82" width="6" height="72" rx="2"/>
+    <rect x="744" y="124" width="6" height="30" rx="2"/>
+    <rect x="754" y="92" width="6" height="62" rx="2"/>
+    <rect x="764" y="58" width="6" height="96" rx="2"/>
+    <rect x="774" y="102" width="6" height="52" rx="2"/>
+    <rect x="784" y="74" width="6" height="80" rx="2"/>
+    <rect x="794" y="116" width="6" height="38" rx="2"/>
+    <rect x="804" y="88" width="6" height="66" rx="2"/>
+    <rect x="814" y="62" width="6" height="92" rx="2"/>
+    <rect x="824" y="106" width="6" height="48" rx="2"/>
+    <rect x="834" y="78" width="6" height="76" rx="2"/>
+    <rect x="844" y="128" width="6" height="26" rx="2"/>
+    <rect x="854" y="98" width="6" height="56" rx="2"/>
+    <rect x="864" y="118" width="6" height="36" rx="2"/>
   </g>
-  <g transform="translate(450, 95)" filter="url(#neon-glow)">
-    <ellipse rx="130" ry="42" fill="none" stroke="#00f0ff" stroke-width="2.5" opacity="0.8"/>
-    <ellipse rx="100" ry="32" fill="none" stroke="#a855f7" stroke-width="2" opacity="0.9"/>
-    <ellipse rx="70" ry="22" fill="none" stroke="#ff007f" stroke-width="2" opacity="0.85"/>
-    <ellipse rx="35" ry="11" fill="none" stroke="#00f0ff" stroke-width="3" opacity="0.95"/>
-    <circle r="6" fill="#00f0ff"/>
-    <line x1="-120" y1="0" x2="-260" y2="-60" stroke="#ff007f" stroke-width="2" opacity="0.6"/>
-    <line x1="120" y1="0" x2="260" y2="-60" stroke="#00f0ff" stroke-width="2" opacity="0.6"/>
+
+  <!-- Boston Skyline Silhouette Across Water (Center Horizon) -->
+  <g fill="#080d22" opacity="0.95">
+    <!-- Zakim Bridge Pylon (Left of center) -->
+    <polygon points="220,154 225,92 227,92 232,154"/>
+    <polygon points="225,92 227,92 236,154 233,154"/>
+    <!-- Zakim Bridge Cables -->
+    <path d="M226,96 L195,154 M226,102 L202,154 M226,108 L210,154 M226,96 L255,154 M226,102 L248,154 M226,108 L240,154" stroke="#00f0ff" stroke-width="0.6" opacity="0.55" fill="none"/>
+    <!-- Custom House Tower -->
+    <rect x="285" y="96" width="22" height="58"/>
+    <polygon points="296,72 285,96 307,96"/>
+    <rect x="294" y="68" width="4" height="5" fill="#fcee0a" opacity="0.7"/>
+    <!-- Midrises -->
+    <rect x="310" y="114" width="28" height="40"/>
+    <rect x="342" y="104" width="34" height="50"/>
+    <rect x="380" y="120" width="24" height="34"/>
+    <!-- Hancock / 200 Clarendon (Tall angled monolithic skyscraper) -->
+    <polygon points="410,64 434,58 434,154 410,154" fill="#0c132f"/>
+    <!-- Prudential Tower (Center-Right with antenna spire) -->
+    <rect x="448" y="74" width="36" height="80" fill="#0c132f"/>
+    <rect x="456" y="62" width="20" height="12" fill="#0c132f"/>
+    <line x1="466" y1="62" x2="466" y2="38" stroke="#a855f7" stroke-width="1.8"/>
+    <circle cx="466" cy="37" r="2" fill="#ff007f" filter="url(#glow-neon)"/>
+    <!-- Financial District Towers -->
+    <rect x="490" y="92" width="26" height="62"/>
+    <polygon points="503,80 490,92 516,92"/>
+    <rect x="520" y="108" width="32" height="46"/>
+    <rect x="556" y="100" width="28" height="54"/>
+    <polygon points="570,86 556,100 584,100"/>
+    <rect x="588" y="116" width="30" height="38"/>
+    <rect x="622" y="124" width="36" height="30"/>
+    <rect x="662" y="132" width="40" height="22"/>
   </g>
-  <g transform="translate(450, 26)">
-    <rect x="-95" y="-12" width="190" height="24" rx="12" fill="#000" stroke="#00f0ff" stroke-width="1.5" opacity="0.85"/>
-    <text x="0" y="4" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" font-weight="700" fill="#00f0ff" letter-spacing="1">BOSTON RAVE FREQ</text>
+
+  <!-- Skyline Window Lights / Neon Dots -->
+  <g fill="#00f0ff" opacity="0.8">
+    <circle cx="418" cy="82" r="1"/>
+    <circle cx="426" cy="96" r="1"/>
+    <circle cx="418" cy="112" r="1"/>
+    <circle cx="456" cy="86" r="1" fill="#fcee0a"/>
+    <circle cx="472" cy="86" r="1" fill="#fcee0a"/>
+    <circle cx="464" cy="102" r="1" fill="#00ff88"/>
+    <circle cx="472" cy="118" r="1" fill="#00ff88"/>
+    <circle cx="354" cy="120" r="1"/>
+    <circle cx="500" cy="110" r="1" fill="#ff007f"/>
+    <circle cx="568" cy="116" r="1"/>
+  </g>
+
+  <!-- Water Surface & Waterfront Reflections -->
+  <rect x="0" y="154" width="900" height="46" fill="url(#water-grad)"/>
+  <g opacity="0.55" stroke-linecap="round">
+    <line x1="210" y1="158" x2="250" y2="158" stroke="#00f0ff" stroke-width="1.5"/>
+    <line x1="285" y1="160" x2="325" y2="160" stroke="#fcee0a" stroke-width="1.2"/>
+    <line x1="410" y1="158" x2="485" y2="158" stroke="#b026ff" stroke-width="2"/>
+    <line x1="420" y1="163" x2="475" y2="163" stroke="#00f0ff" stroke-width="1.5"/>
+    <line x1="440" y1="168" x2="468" y2="168" stroke="#ff007f" stroke-width="1.2"/>
+    <line x1="500" y1="160" x2="545" y2="160" stroke="#00ff88" stroke-width="1.2"/>
+    <line x1="550" y1="164" x2="585" y2="164" stroke="#ff007f" stroke-width="1.2"/>
+    <line x1="80" y1="162" x2="130" y2="162" stroke="#00f0ff" stroke-width="1" opacity="0.4"/>
+    <line x1="760" y1="162" x2="820" y2="162" stroke="#ff007f" stroke-width="1" opacity="0.4"/>
+  </g>
+
+  <!-- Dancing Crowd Silhouette (Foreground) -->
+  <g fill="#030409">
+    <path d="M0,200 L0,180
+      C15,180 20,172 26,172 C32,172 35,182 44,182
+      C52,182 56,168 62,168 C68,168 72,180 82,180
+      C90,180 94,175 100,175 C108,175 112,183 124,183
+      C135,183 140,170 148,166 C154,163 158,174 168,176
+      C178,178 184,168 192,164 C198,161 204,172 216,174
+      C228,176 235,165 244,162 C252,159 258,170 270,173
+      C282,176 290,166 300,166 C310,166 318,177 330,177
+      C342,177 350,168 360,165 C370,162 376,174 390,174
+      C404,174 412,160 422,158 C430,156 438,168 450,168
+      C462,168 470,158 480,158 C490,158 498,172 512,172
+      C525,172 532,163 542,163 C552,163 560,175 572,175
+      C584,175 592,166 602,164 C612,162 620,174 632,174
+      C645,174 652,162 662,162 C672,162 680,175 694,175
+      C706,175 714,167 724,167 C734,167 742,178 756,178
+      C768,178 776,166 786,166 C796,166 804,177 818,177
+      C830,177 838,169 848,169 C858,169 868,181 882,181
+      L900,181 L900,200 Z"/>
+    <path d="M146,166 L144,150 L149,150 L150,165 Z"/>
+    <path d="M194,164 L198,146 L203,147 L200,165 Z"/>
+    <path d="M245,162 L242,142 L247,141 L249,162 Z"/>
+    <path d="M421,158 L417,138 L422,137 L425,158 Z"/>
+    <path d="M480,158 L484,136 L489,137 L486,158 Z"/>
+    <path d="M542,163 L547,144 L552,145 L549,164 Z"/>
+    <path d="M662,162 L658,140 L663,139 L666,162 Z"/>
+    <path d="M724,167 L728,148 L733,149 L730,168 Z"/>
+    <path d="M786,166 L783,144 L788,143 L790,166 Z"/>
+  </g>
+
+  <!-- Glowing Glowsticks / Wristbands in Crowd -->
+  <g filter="url(#glow-neon)">
+    <circle cx="144" cy="149" r="2.5" fill="#00f0ff"/>
+    <circle cx="199" cy="145" r="2.5" fill="#ff007f"/>
+    <circle cx="243" cy="140" r="2.5" fill="#00ff88"/>
+    <circle cx="417" cy="136" r="3" fill="#00f0ff"/>
+    <circle cx="485" cy="134" r="3" fill="#fcee0a"/>
+    <circle cx="548" cy="143" r="2.5" fill="#ff007f"/>
+    <circle cx="658" cy="138" r="2.5" fill="#00ff88"/>
+    <circle cx="729" cy="147" r="2.5" fill="#00f0ff"/>
+    <circle cx="783" cy="142" r="2.5" fill="#b026ff"/>
+  </g>
+
+  <!-- Glowing DJ / Club Title Badge (Center Top) -->
+  <g transform="translate(450, 24)">
+    <rect x="-135" y="-12" width="270" height="24" rx="12" fill="#04060e" stroke="#00f0ff" stroke-width="1.4" opacity="0.95"/>
+    <circle cx="-118" cy="0" r="4" fill="#00f0ff" filter="url(#glow-neon)"/>
+    <circle cx="118" cy="0" r="4" fill="#ff007f" filter="url(#glow-neon)"/>
+    <text x="0" y="4" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10" font-weight="800" fill="#00f0ff" letter-spacing="1.4">⚡ BOSTON UNDERGROUND &amp; CLUBS</text>
   </g>
 </svg>"""
 
@@ -2522,8 +2743,35 @@ _EDM_CSS = """
     color: var(--cyan) !important;
     text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
   }
-  .edm-hub .hub-nav a { color: var(--muted); }
-  .edm-hub .hub-nav a.active, .edm-hub .hub-nav a:hover { color: var(--cyan); text-shadow: 0 0 8px rgba(0,240,255,0.4); }
+  .edm-hub .edm-nav {
+    display: flex;
+    gap: 8px;
+    font-size: 13.5px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .edm-hub .edm-nav a {
+    color: var(--muted);
+    padding: 5px 12px;
+    border-radius: 999px;
+    transition: all 0.15s ease;
+    text-decoration: none;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    font-weight: 600;
+  }
+  .edm-hub .edm-nav a:hover {
+    color: var(--cyan);
+    background: rgba(0, 240, 255, 0.08);
+    border-color: rgba(0, 240, 255, 0.25);
+  }
+  .edm-hub .edm-nav a.active {
+    color: #04060f;
+    background: var(--cyan);
+    border-color: var(--cyan);
+    box-shadow: 0 0 14px rgba(0, 240, 255, 0.5);
+    font-weight: 800;
+  }
   .edm-hub main { max-width: 980px; padding-top: 22px; }
   .edm-hub .hero {
     border: 1px solid var(--border);
@@ -2585,49 +2833,55 @@ _EDM_CSS = """
     display: inline-block;
   }
   .edm-hub .cta-btn:hover { filter: brightness(1.15); transform: translateY(-1px); }
+  .edm-hub .hub-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
   .edm-filters {
     background: #090c18;
     border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 16px 18px 8px;
-    margin-bottom: 22px;
+    border-radius: 12px;
+    padding: 8px 12px;
+    margin-bottom: 18px;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+    scrollbar-width: none;
     box-shadow: 0 0 20px rgba(0, 240, 255, 0.05);
   }
-  .edm-filter-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
-  .edm-filter-label {
-    font-weight: 700;
-    color: var(--cyan);
-    font-size: 11.5px;
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
-    min-width: 58px;
+  .edm-filters::-webkit-scrollbar { display: none; }
+  .edm-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background: #0d1122 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none' stroke='%2300f0ff' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1l4 4 4-4'/%3E%3C/svg%3E") no-repeat right 10px center;
+    border: 1px solid rgba(0, 240, 255, 0.25);
+    border-radius: 999px;
+    color: #fff;
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 6px 28px 6px 12px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.15s ease;
+  }
+  .edm-select:hover, .edm-select:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
+    outline: none;
   }
   .edm-chip {
     font-size: 13px;
     font-weight: 600;
-    padding: 6px 14px;
-    border-radius: 999px;
-    cursor: pointer;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    background: #0d1122;
-    color: var(--fg);
-    letter-spacing: normal;
-    transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
-  }
-  .edm-chip:hover {
-    transform: translateY(-1px);
-    border-color: var(--cyan);
-    box-shadow: 0 0 10px rgba(0, 240, 255, 0.3);
-  }
-  .edm-chip.active {
-    background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(168, 85, 247, 0.25));
-    border-color: var(--cyan);
-    color: #fff;
-    box-shadow: 0 0 14px rgba(0, 240, 255, 0.45);
   }
   .edm-hub .hub-day {
-    margin: 32px 0 14px;
-    font-size: 19px;
+    grid-column: 1 / -1;
+    margin: 28px 0 12px;
+    font-size: 18px;
     font-weight: 700;
     letter-spacing: -0.01em;
     color: #fff;
@@ -2637,9 +2891,12 @@ _EDM_CSS = """
     border: 0;
     padding: 0;
   }
+  .edm-hub .hub-day:first-child {
+    margin-top: 6px;
+  }
   .edm-hub .hub-day::before {
     content: "⚡";
-    font-size: 16px;
+    font-size: 15px;
     filter: drop-shadow(0 0 6px var(--cyan));
   }
   .edm-hub .hub-day::after {
@@ -2648,85 +2905,32 @@ _EDM_CSS = """
     height: 1px;
     background: linear-gradient(90deg, var(--cyan), rgba(168, 85, 247, 0.3) 60%, transparent);
   }
-  .edm-city-section {
-    background: rgba(13, 16, 29, 0.6);
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    border-radius: 16px;
-    padding: 14px;
-    margin-bottom: 16px;
-  }
-  .edm-city-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-    padding: 0 4px;
-  }
-  .edm-city-pill {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-    padding: 3px 10px;
-    border-radius: 999px;
-  }
-  .edm-city-pill.city-boston {
-    background: rgba(0, 240, 255, 0.15);
-    color: var(--cyan);
-    border: 1px solid rgba(0, 240, 255, 0.35);
-  }
-  .edm-city-pill.city-cambridge {
-    background: rgba(255, 0, 127, 0.15);
-    color: var(--pink);
-    border: 1px solid rgba(255, 0, 127, 0.35);
-  }
-  .edm-city-pill.city-somerville {
-    background: rgba(168, 85, 247, 0.15);
-    color: var(--purple);
-    border: 1px solid rgba(168, 85, 247, 0.35);
-  }
-  .edm-city-pill.city-other {
-    background: rgba(255, 214, 0, 0.15);
-    color: var(--yellow);
-    border: 1px solid rgba(255, 214, 0, 0.35);
-  }
-  .edm-city-head .count {
-    font-size: 11.5px;
-    font-weight: 700;
-    color: var(--muted);
-    background: rgba(255, 255, 255, 0.06);
-    padding: 2px 8px;
-    border-radius: 999px;
-  }
-  .edm-city-cards {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 14px;
-  }
-  @media (min-width: 640px) {
-    .edm-city-cards {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
   .hub-card.edm-card {
-    background: #0d1020;
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 14px;
-    overflow: hidden;
+    display: grid;
+    grid-template-columns: 78px minmax(0, 1fr);
+    gap: 14px;
+    align-items: baseline;
+    padding: 11px 4px;
+    border-radius: 0;
+    border: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    background: transparent;
+    box-shadow: none;
+    transition: background 0.15s ease;
     position: relative;
-    display: flex;
-    flex-direction: column;
-    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
   }
   .hub-card.edm-card:hover {
-    transform: translateY(-2px);
-    border-color: var(--edm-band);
-    box-shadow: 0 0 18px rgba(0, 240, 255, 0.18), 0 8px 24px rgba(0,0,0,0.4);
+    background: rgba(0, 240, 255, 0.03);
+    transform: none;
+    box-shadow: none;
   }
-  .edm-card-band {
-    height: 3px;
-    background: var(--edm-band);
-    box-shadow: 0 0 8px var(--edm-band);
+  .edm-hub .hub-date {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--cyan);
+    white-space: nowrap;
+    padding-top: 1px;
+    font-variant-numeric: tabular-nums;
   }
   .edm-k-techno { --edm-band: var(--cyan); }
   .edm-k-house { --edm-band: var(--pink); }
@@ -2734,34 +2938,31 @@ _EDM_CSS = """
   .edm-k-synth { --edm-band: var(--purple); }
   .edm-k-club { --edm-band: var(--yellow); }
   .edm-card-body {
-    padding: 14px 16px;
+    padding: 0;
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    flex: 1;
+    gap: 4px;
+    min-width: 0;
   }
-  .edm-card-top {
+  .edm-card-row-top {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    align-items: baseline;
     gap: 8px;
+    flex-wrap: wrap;
   }
   .edm-card-subgenre {
     font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
+    font-weight: 800;
+    letter-spacing: 0.03em;
     text-transform: uppercase;
     color: var(--edm-band);
-    display: flex;
-    align-items: center;
-    gap: 4px;
+    white-space: nowrap;
   }
   .edm-card-title {
     margin: 0;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 700;
-    line-height: 1.3;
-    letter-spacing: normal;
+    line-height: 1.35;
   }
   .edm-card-title a {
     color: #fff;
@@ -2774,7 +2975,7 @@ _EDM_CSS = """
   .edm-card-venue {
     font-size: 13px;
     color: #a4b3c9;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 6px;
     flex-wrap: wrap;
@@ -2782,56 +2983,63 @@ _EDM_CSS = """
   .edm-card-neigh {
     font-size: 11px;
     color: var(--muted);
-    background: rgba(255,255,255,0.06);
+    background: rgba(255, 255, 255, 0.06);
     padding: 1px 6px;
     border-radius: 4px;
+    font-weight: 600;
+  }
+  .edm-card-row-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    font-size: 13px;
   }
   .edm-card-desc {
     font-size: 12.5px;
     color: var(--muted);
     line-height: 1.45;
-    margin: 2px 0 6px;
+    margin: 2px 0 0;
     overflow-wrap: anywhere;
   }
-  .edm-card-footer {
-    margin-top: auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-top: 10px;
-    border-top: 1px solid rgba(255,255,255,0.06);
-  }
-  .edm-ticket-btn {
-    background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(168, 85, 247, 0.2));
-    border: 1px solid rgba(0, 240, 255, 0.4);
-    color: #fff;
+  .edm-ticket-link {
     font-size: 12px;
     font-weight: 700;
-    padding: 5px 12px;
-    border-radius: 6px;
+    color: var(--cyan);
     text-decoration: none;
+    margin-left: auto;
+    white-space: nowrap;
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(0, 240, 255, 0.25);
+    background: rgba(0, 240, 255, 0.06);
     transition: all 0.15s ease;
   }
-  .edm-ticket-btn:hover {
+  .edm-ticket-link:hover {
     background: var(--cyan);
     color: #07080f;
-    box-shadow: 0 0 12px rgba(0, 240, 255, 0.5);
+    border-color: var(--cyan);
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
     text-decoration: none;
   }
   @media (max-width: 640px) {
     .edm-hero-art { height: 130px; }
-    .edm-filter-label { min-width: 100%; }
-    .edm-hub .hub-nav { font-size: 12px; gap: 8px 10px; }
+    .edm-hub .hub-card.edm-card {
+      grid-template-columns: 1fr;
+      gap: 4px;
+      padding: 8px 0;
+    }
+    .edm-hub .edm-nav { font-size: 12px; gap: 6px 8px; }
   }
 """
 
 _EDM_FILTER_JS = """<script>
 (function () {
+  var selects = document.querySelectorAll('.edm-select');
   var chips = document.querySelectorAll('.edm-chip');
-  if (!chips.length) return;
+  if (!selects.length && !chips.length) return;
   var cards = document.querySelectorAll('.hub-card.edm-card');
   var heads = document.querySelectorAll('.hub-day');
-  var citySecs = document.querySelectorAll('.edm-city-section');
   var state = { genre: 'all', area: 'all', when: 'all', cost: 'all' };
 
   function matches(c) {
@@ -2851,11 +3059,10 @@ _EDM_FILTER_JS = """<script>
       if (on) { days[c.dataset.day] = 1; n++; }
     });
     heads.forEach(function (h) { h.hidden = !days[h.dataset.day]; });
-    citySecs.forEach(function (sec) {
-      var visible = sec.querySelectorAll('.hub-card.edm-card:not([hidden])').length;
-      sec.hidden = (visible === 0);
-      var cCount = sec.querySelector('.edm-city-head .count');
-      if (cCount) cCount.textContent = visible;
+    selects.forEach(function (sel) {
+      if (state[sel.dataset.group] !== undefined) {
+        sel.value = state[sel.dataset.group];
+      }
     });
     chips.forEach(function (b) {
       var g = b.dataset.group, v = b.dataset.val;
@@ -2868,6 +3075,13 @@ _EDM_FILTER_JS = """<script>
       history.replaceState(null, '', parts.length ? '#' + parts.join('&') : location.pathname);
     }
   }
+
+  selects.forEach(function (sel) {
+    sel.addEventListener('change', function () {
+      state[sel.dataset.group] = sel.value;
+      render(true);
+    });
+  });
 
   chips.forEach(function (b) {
     b.addEventListener('click', function () {
@@ -2884,8 +3098,7 @@ _EDM_FILTER_JS = """<script>
   location.hash.replace(/^#/, '').split('&').forEach(function (p) {
     var kv = p.split('=');
     if (kv.length === 2 && state.hasOwnProperty(kv[0])) {
-      var btn = document.querySelector('.edm-chip[data-group="' + kv[0] + '"][data-val="' + kv[1] + '"]');
-      if (btn) state[kv[0]] = kv[1];
+      state[kv[0]] = kv[1];
     }
   });
   render(false);
@@ -2895,96 +3108,217 @@ _EDM_FILTER_JS = """<script>
 _COLLEGE_HERO_ART = """<svg class="col-hero-art" viewBox="0 0 900 200" aria-hidden="true" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="col-sky" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#090d16"/>
-      <stop offset="50%" stop-color="#121829"/>
-      <stop offset="100%" stop-color="#1e162d"/>
+      <stop offset="0%" stop-color="#080c18"/>
+      <stop offset="35%" stop-color="#11172e"/>
+      <stop offset="70%" stop-color="#231633"/>
+      <stop offset="100%" stop-color="#3b1d2e"/>
     </linearGradient>
-    <linearGradient id="col-arch" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#3b1d28"/>
-      <stop offset="100%" stop-color="#1a1c2e"/>
+    <linearGradient id="col-water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#182038"/>
+      <stop offset="100%" stop-color="#090d18"/>
     </linearGradient>
     <linearGradient id="col-gold" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="0%" stop-color="#fde047"/>
       <stop offset="100%" stop-color="#d97706"/>
     </linearGradient>
-    <filter id="col-glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="3" result="blur"/>
+    <linearGradient id="col-crimson" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#991b1b"/>
+      <stop offset="100%" stop-color="#450a0a"/>
+    </linearGradient>
+    <radialGradient id="col-sunset" cx="50%" cy="80%" r="55%">
+      <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.3"/>
+      <stop offset="60%" stop-color="#ec4899" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#080c18" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="col-lamp-glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="3.5" result="blur"/>
       <feMerge>
         <feMergeNode in="blur"/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
   </defs>
+
   <rect width="900" height="200" fill="url(#col-sky)"/>
-  <g fill="#93c5fd" opacity="0.45">
-    <circle cx="80" cy="35" r="1.5"/>
-    <circle cx="160" cy="50" r="1"/>
-    <circle cx="230" cy="25" r="1.5"/>
-    <circle cx="310" cy="45" r="1"/>
-    <circle cx="580" cy="30" r="1.5"/>
-    <circle cx="670" cy="55" r="1"/>
-    <circle cx="750" cy="35" r="1.5"/>
-    <circle cx="830" cy="20" r="1"/>
+  <rect width="900" height="200" fill="url(#col-sunset)"/>
+
+  <!-- Subtle Stars & Twilight Constellations -->
+  <g fill="#93c5fd" opacity="0.55">
+    <circle cx="85" cy="28" r="1.2"/>
+    <circle cx="140" cy="42" r="1"/>
+    <circle cx="220" cy="22" r="1.5"/>
+    <circle cx="310" cy="35" r="1"/>
+    <circle cx="580" cy="26" r="1.2"/>
+    <circle cx="670" cy="48" r="1"/>
+    <circle cx="740" cy="25" r="1.5"/>
+    <circle cx="820" cy="38" r="1"/>
   </g>
-  <path d="M0 160 Q 225 150 450 160 T 900 160 L 900 200 L 0 200 Z" fill="#0d1322" opacity="0.8"/>
-  <path d="M0 175 Q 450 168 900 175 L 900 200 L 0 200 Z" fill="#0a0e1a"/>
-  <g fill="#161b2e" opacity="0.85">
-    <rect x="95" y="90" width="30" height="85"/>
-    <polygon points="110,25 98,90 122,90"/>
-    <rect x="105" y="45" width="10" height="15" fill="#1e263d"/>
-    <circle cx="110" cy="115" r="5" fill="#fbbf24" opacity="0.75" filter="url(#col-glow)"/>
-    <rect x="50" y="125" width="45" height="50"/>
-    <polygon points="72,105 45,125 100,125"/>
-    <line x1="58" y1="125" x2="58" y2="175" stroke="#0f1320" stroke-width="2"/>
-    <line x1="72" y1="125" x2="72" y2="175" stroke="#0f1320" stroke-width="2"/>
-    <line x1="86" y1="125" x2="86" y2="175" stroke="#0f1320" stroke-width="2"/>
+
+  <!-- Distant Charles River Banks & Skyline Silhouette -->
+  <!-- Layer 1: Back Bay & BU Skyline (Right Background) -->
+  <g fill="#131a30" opacity="0.9">
+    <rect x="570" y="92" width="32" height="60"/>
+    <polygon points="586,72 570,92 602,92"/>
+    <rect x="612" y="105" width="40" height="47"/>
+    <rect x="660" y="84" width="28" height="68"/>
+    <polygon points="674,66 660,84 688,84"/>
+    <rect x="696" y="110" width="36" height="42"/>
+    <rect x="740" y="98" width="45" height="54"/>
+    <!-- BU Castle Turrets (Right) -->
+    <rect x="795" y="102" width="38" height="50"/>
+    <polygon points="804,80 795,102 813,102"/>
+    <polygon points="824,80 815,102 833,102"/>
   </g>
-  <g fill="#1a2035" opacity="0.9">
-    <rect x="220" y="70" width="36" height="105"/>
-    <polygon points="238,20 220,70 256,70"/>
-    <path d="M232 95 Q 238 88 244 95 L 244 125 L 232 125 Z" fill="#fbbf24" opacity="0.4"/>
-    <path d="M160 175 Q 190 145 220 175" stroke="#252d47" stroke-width="3" fill="none"/>
-    <path d="M256 175 Q 286 145 316 175" stroke="#252d47" stroke-width="3" fill="none"/>
+
+  <!-- Layer 2: Iconic Campus Architecture -->
+  <!-- Harvard Lowell House Bell Tower (Left Center) -->
+  <g fill="#18223d">
+    <rect x="170" y="108" width="44" height="44"/>
+    <rect x="176" y="82" width="32" height="26"/>
+    <rect x="182" y="58" width="20" height="24"/>
+    <path d="M182,58 Q192,42 202,58 Z" fill="#2563eb"/>
+    <line x1="192" y1="42" x2="192" y2="30" stroke="#f59e0b" stroke-width="1.8"/>
+    <circle cx="192" cy="29" r="2" fill="#fde047" filter="url(#col-lamp-glow)"/>
+    <!-- Harvard Brick Hall Wings -->
+    <rect x="130" y="122" width="40" height="30"/>
+    <polygon points="150,110 130,122 170,122"/>
+    <rect x="214" y="122" width="42" height="30"/>
+    <polygon points="235,110 214,122 256,122"/>
   </g>
-  <g fill="#21273f">
-    <path d="M400 100 Q 450 48 500 100 Z" fill="#2d3553"/>
-    <rect x="442" y="44" width="16" height="6" fill="#fbbf24" opacity="0.8"/>
-    <rect x="390" y="100" width="120" height="15" fill="#1e2338"/>
-    <rect x="405" y="115" width="90" height="60" fill="#181d2e"/>
-    <line x1="418" y1="115" x2="418" y2="175" stroke="#3b4468" stroke-width="3"/>
-    <line x1="434" y1="115" x2="434" y2="175" stroke="#3b4468" stroke-width="3"/>
-    <line x1="450" y1="115" x2="450" y2="175" stroke="#3b4468" stroke-width="3"/>
-    <line x1="466" y1="115" x2="466" y2="175" stroke="#3b4468" stroke-width="3"/>
-    <line x1="482" y1="115" x2="482" y2="175" stroke="#3b4468" stroke-width="3"/>
-    <polygon points="450,85 390,115 510,115" fill="#2d3553"/>
+
+  <!-- MIT Great Dome & Colonnade (Center) -->
+  <g fill="#1e294b">
+    <!-- Main Classical Colonnade Base -->
+    <rect x="380" y="112" width="140" height="40"/>
+    <!-- Classical Pediment Portico -->
+    <polygon points="450,90 380,112 520,112" fill="#263359"/>
+    <!-- Fluted Columns -->
+    <g stroke="#151d36" stroke-width="2.5">
+      <line x1="400" y1="112" x2="400" y2="152"/>
+      <line x1="416" y1="112" x2="416" y2="152"/>
+      <line x1="432" y1="112" x2="432" y2="152"/>
+      <line x1="448" y1="112" x2="448" y2="152"/>
+      <line x1="468" y1="112" x2="468" y2="152"/>
+      <line x1="484" y1="112" x2="484" y2="152"/>
+      <line x1="500" y1="112" x2="500" y2="152"/>
+    </g>
+    <!-- Dome Drum & Cupola -->
+    <rect x="414" y="78" width="72" height="14" rx="1" fill="#222f52"/>
+    <path d="M414,78 Q450,44 486,78 Z" fill="#2a3a66"/>
+    <circle cx="450" cy="44" r="3.5" fill="#f59e0b" filter="url(#col-lamp-glow)"/>
   </g>
-  <g fill="#1a2035" opacity="0.9">
-    <rect x="630" y="65" width="46" height="110"/>
-    <polygon points="630,65 635,50 640,65" fill="#2d3553"/>
-    <polygon points="648,65 653,30 658,65" fill="#2d3553"/>
-    <polygon points="666,65 671,50 676,65" fill="#2d3553"/>
-    <circle cx="653" cy="90" r="7" fill="#fbbf24" opacity="0.75" filter="url(#col-glow)"/>
-    <path d="M645 115 Q 653 108 661 115 L 661 145 L 645 145 Z" fill="#fbbf24" opacity="0.3"/>
+
+  <!-- Window & Architectural Lights -->
+  <g fill="#fde047" opacity="0.75" filter="url(#col-lamp-glow)">
+    <circle cx="192" cy="70" r="2.5"/>
+    <rect x="188" y="92" width="8" height="10" rx="4"/>
+    <rect x="142" y="130" width="4" height="7"/>
+    <rect x="154" y="130" width="4" height="7"/>
+    <rect x="224" y="130" width="4" height="7"/>
+    <rect x="236" y="130" width="4" height="7"/>
+    <rect x="432" y="98" width="6" height="9"/>
+    <rect x="462" y="98" width="6" height="9"/>
+    <rect x="670" y="100" width="5" height="8" fill="#f43f5e"/>
+    <rect x="808" y="118" width="5" height="8" fill="#f59e0b"/>
   </g>
-  <g fill="#161b2e" opacity="0.85">
-    <rect x="760" y="80" width="35" height="95"/>
-    <polygon points="777,35 760,80 795,80"/>
-    <rect x="805" y="105" width="55" height="70"/>
-    <polygon points="832,90 805,105 860,105"/>
+
+  <!-- Harvard Bridge Across the Charles River (Mass Ave) -->
+  <path d="M0,152 L900,152" stroke="#263352" stroke-width="4"/>
+  <g stroke="#f59e0b" stroke-width="1" opacity="0.8" filter="url(#col-lamp-glow)">
+    <!-- Bridge Lamps & Pillars -->
+    <line x1="80" y1="152" x2="80" y2="144"/><circle cx="80" cy="143" r="1.8" fill="#fde047"/>
+    <line x1="160" y1="152" x2="160" y2="144"/><circle cx="160" cy="143" r="1.8" fill="#fde047"/>
+    <line x1="240" y1="152" x2="240" y2="144"/><circle cx="240" cy="143" r="1.8" fill="#fde047"/>
+    <line x1="320" y1="152" x2="320" y2="144"/><circle cx="320" cy="143" r="1.8" fill="#fde047"/>
+    <line x1="580" y1="152" x2="580" y2="144"/><circle cx="580" cy="143" r="1.8" fill="#fde047"/>
+    <line x1="660" y1="152" x2="660" y2="144"/><circle cx="660" cy="143" r="1.8" fill="#fde047"/>
+    <line x1="740" y1="152" x2="740" y2="144"/><circle cx="740" cy="143" r="1.8" fill="#fde047"/>
+    <line x1="820" y1="152" x2="820" y2="144"/><circle cx="820" cy="143" r="1.8" fill="#fde047"/>
   </g>
-  <path d="M0 195 L 0 50 Q 0 0 50 0 L 120 0 Q 70 40 70 90 L 70 195 Z" fill="url(#col-arch)" opacity="0.95"/>
-  <path d="M900 195 L 900 50 Q 900 0 850 0 L 780 0 Q 830 40 830 90 L 830 195 Z" fill="url(#col-arch)" opacity="0.95"/>
-  <g filter="url(#col-glow)">
-    <line x1="140" y1="180" x2="140" y2="125" stroke="#334155" stroke-width="2.5"/>
-    <circle cx="140" cy="122" r="5" fill="#fbbf24"/>
-    <circle cx="140" cy="122" r="14" fill="#fbbf24" opacity="0.25"/>
-    <line x1="760" y1="180" x2="760" y2="125" stroke="#334155" stroke-width="2.5"/>
-    <circle cx="760" cy="122" r="5" fill="#fbbf24"/>
-    <circle cx="760" cy="122" r="14" fill="#fbbf24" opacity="0.25"/>
+
+  <!-- Charles River Water Surface -->
+  <rect x="0" y="152" width="900" height="48" fill="url(#col-water)"/>
+
+  <!-- Water Reflections -->
+  <g opacity="0.55" stroke-linecap="round">
+    <line x1="170" y1="158" x2="214" y2="158" stroke="#f59e0b" stroke-width="1.5"/>
+    <line x1="180" y1="164" x2="204" y2="164" stroke="#3b82f6" stroke-width="1.2"/>
+    <line x1="410" y1="158" x2="490" y2="158" stroke="#f59e0b" stroke-width="2"/>
+    <line x1="430" y1="164" x2="470" y2="164" stroke="#fde047" stroke-width="1.2"/>
+    <line x1="650" y1="160" x2="690" y2="160" stroke="#f43f5e" stroke-width="1.5"/>
+    <line x1="790" y1="160" x2="830" y2="160" stroke="#f59e0b" stroke-width="1.2"/>
   </g>
+
+  <!-- Charles River Crew Scull (Rowing Shell) in Foreground Water -->
+  <g transform="translate(310, 166)">
+    <!-- Shell Hull -->
+    <path d="M0,6 Q60,3 120,6 Q60,9 0,6 Z" fill="#f59e0b"/>
+    <!-- Rowers & Oars -->
+    <g stroke="#e2e8f0" stroke-width="1.2" stroke-linecap="round">
+      <circle cx="24" cy="4" r="2.2" fill="#0f172a"/>
+      <line x1="24" y1="5" x2="10" y2="0"/><line x1="24" y1="5" x2="10" y2="12"/>
+      <circle cx="44" cy="4" r="2.2" fill="#0f172a"/>
+      <line x1="44" y1="5" x2="30" y2="0"/><line x1="44" y1="5" x2="30" y2="12"/>
+      <circle cx="64" cy="4" r="2.2" fill="#0f172a"/>
+      <line x1="64" y1="5" x2="50" y2="0"/><line x1="64" y1="5" x2="50" y2="12"/>
+      <circle cx="84" cy="4" r="2.2" fill="#0f172a"/>
+      <line x1="84" y1="5" x2="70" y2="0"/><line x1="84" y1="5" x2="70" y2="12"/>
+      <circle cx="102" cy="4" r="1.8" fill="#dc2626"/> <!-- Coxswain in crimson -->
+    </g>
+    <!-- Water Wake -->
+    <path d="M-20,6 L-2,5 M-20,6 L-2,7" stroke="#93c5fd" stroke-width="1" opacity="0.6"/>
+  </g>
+
+  <!-- Celebratory Graduation Mortarboard Flying in Upper Right Sky -->
+  <g transform="translate(775, 48) rotate(-14)">
+    <polygon points="0,-8 22,0 0,8 -22,0" fill="#0f172a" stroke="#f59e0b" stroke-width="0.8"/>
+    <rect x="-5" y="0" width="10" height="8" fill="#1e293b"/>
+    <!-- Golden Tassel -->
+    <path d="M0,0 Q12,6 18,18" stroke="#fde047" stroke-width="1.5" fill="none" filter="url(#col-lamp-glow)"/>
+    <circle cx="18" cy="18" r="1.5" fill="#f59e0b"/>
+  </g>
+
+  <!-- Collegiate Wrought-Iron Arch & Brickwork Gates (Framing Left and Right) -->
+  <g fill="#0f172a">
+    <!-- Left Pillar & Ivy Arch -->
+    <rect x="0" y="0" width="32" height="200" fill="#181224"/>
+    <rect x="28" y="0" width="6" height="200" fill="#221833"/>
+    <path d="M0,0 L0,70 Q50,70 50,0 Z" fill="#181224" opacity="0.9"/>
+    <!-- Ivy Leaves Pattern -->
+    <g fill="#15803d" opacity="0.85">
+      <circle cx="24" cy="45" r="4"/><circle cx="32" cy="52" r="3.5"/>
+      <circle cx="20" cy="60" r="4.5"/><circle cx="28" cy="72" r="4"/>
+      <circle cx="16" cy="85" r="4"/><circle cx="25" cy="96" r="3.5"/>
+      <circle cx="18" cy="112" r="4.5"/>
+    </g>
+    <!-- Left Campus Lantern -->
+    <line x1="34" y1="65" x2="52" y2="65" stroke="#0f172a" stroke-width="2.5"/>
+    <polygon points="48,65 56,65 54,78 50,78" fill="#0f172a"/>
+    <circle cx="52" cy="71" r="3" fill="#fde047" filter="url(#col-lamp-glow)"/>
+
+    <!-- Right Pillar & Ivy Arch -->
+    <rect x="868" y="0" width="32" height="200" fill="#181224"/>
+    <rect x="866" y="0" width="6" height="200" fill="#221833"/>
+    <path d="M900,0 L900,70 Q850,70 850,0 Z" fill="#181224" opacity="0.9"/>
+    <!-- Right Ivy Leaves -->
+    <g fill="#15803d" opacity="0.85">
+      <circle cx="876" cy="45" r="4"/><circle cx="868" cy="52" r="3.5"/>
+      <circle cx="880" cy="60" r="4.5"/><circle cx="872" cy="72" r="4"/>
+      <circle cx="884" cy="85" r="4"/><circle cx="875" cy="96" r="3.5"/>
+      <circle cx="882" cy="112" r="4.5"/>
+    </g>
+    <!-- Right Campus Lantern -->
+    <line x1="866" y1="65" x2="848" y2="65" stroke="#0f172a" stroke-width="2.5"/>
+    <polygon points="852,65 844,65 846,78 850,78" fill="#0f172a"/>
+    <circle cx="848" cy="71" r="3" fill="#fde047" filter="url(#col-lamp-glow)"/>
+  </g>
+
+  <!-- Glowing Collegiate Center Badge (Center Top) -->
   <g transform="translate(450, 24)">
-    <rect x="-115" y="-12" width="230" height="24" rx="12" fill="#0f172a" stroke="#fbbf24" stroke-width="1.2" opacity="0.95"/>
-    <text x="0" y="4" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" font-weight="700" fill="#fbbf24" letter-spacing="1.2">GREATER BOSTON CAMPUSES</text>
+    <rect x="-155" y="-12" width="310" height="24" rx="12" fill="#090d1a" stroke="#f59e0b" stroke-width="1.4" opacity="0.95"/>
+    <circle cx="-138" cy="0" r="3.5" fill="#fde047" filter="url(#col-lamp-glow)"/>
+    <circle cx="138" cy="0" r="3.5" fill="#fde047" filter="url(#col-lamp-glow)"/>
+    <text x="0" y="4" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" font-weight="800" fill="#fde047" letter-spacing="1.4">🎓 GREATER BOSTON CAMPUSES &amp; COLLEGES</text>
   </g>
 </svg>"""
 
@@ -2999,10 +3333,10 @@ _COLLEGE_CSS = """
     width: 100%;
     height: 190px;
     display: block;
-    border-radius: 16px;
+    border-radius: 20px;
     margin-bottom: 20px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
   .col-hero-copy {
     text-align: center;
@@ -3048,30 +3382,55 @@ _COLLEGE_CSS = """
     border-radius: 20px;
     border: 1px solid rgba(255, 255, 255, 0.08);
   }
-  .college-hub .col-filters {
+  .college-hub .hub-grid {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    margin: 0 0 24px;
-    background: rgba(21, 24, 34, 0.7);
-    padding: 16px 18px;
-    border-radius: 14px;
-    border: 1px solid var(--border);
-    backdrop-filter: blur(8px);
+    gap: 4px;
   }
-  .college-hub .col-row {
+  .college-hub .col-filters {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     gap: 8px;
+    margin: 0 0 20px;
+    background: rgba(21, 24, 34, 0.7);
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    backdrop-filter: blur(8px);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+    scrollbar-width: none;
   }
-  .college-hub .col-filter-label {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--muted);
-    min-width: 52px;
+  .college-hub .col-filters::-webkit-scrollbar { display: none; }
+  .college-hub .col-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background: #151926 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2394a3b8' d='M1.4 0L6 4.6 10.6 0 12 1.4l-6 6-6-6z'/%3E%3C/svg%3E") no-repeat right 10px center;
+    color: #e2e8f0;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 28px 6px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+  .college-hub .col-select:hover {
+    border-color: rgba(93, 155, 255, 0.4);
+    background-color: #1c2236;
+  }
+  .college-hub .col-select:focus {
+    border-color: #5d9bff;
+    box-shadow: 0 0 0 2px rgba(93, 155, 255, 0.25);
+  }
+  .college-hub .col-select option {
+    background: #0f1422;
+    color: #f1f5f9;
   }
   .college-hub .col-chip {
     font-size: 12.5px;
@@ -3095,84 +3454,93 @@ _COLLEGE_CSS = """
     box-shadow: 0 2px 10px rgba(37, 99, 235, 0.4);
     font-weight: 600;
   }
-  .college-hub .col-area-section {
-    margin: 20px 0 28px;
-    background: rgba(18, 22, 34, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    border-radius: 14px;
-    padding: 16px 18px;
-  }
-  .college-hub .col-area-head {
+  .college-hub .hub-day {
+    grid-column: 1 / -1;
+    margin: 28px 0 10px;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: #fff;
     display: flex;
     align-items: center;
+    gap: 12px;
+    border: 0;
+    padding: 0;
+  }
+  .college-hub .hub-day:first-child {
+    margin-top: 4px;
+  }
+  .college-hub .hub-day::before {
+    content: "🎓";
+    font-size: 15px;
+  }
+  .college-hub .hub-day::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.6), rgba(245, 158, 11, 0.3) 60%, transparent);
+  }
+  .college-hub .col-card {
+    background: rgba(255, 255, 255, 0.015);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-sm, 6px);
+    padding: 10px 14px;
+    display: grid;
+    grid-template-columns: 78px minmax(0, 1fr);
+    align-items: start;
+    gap: 12px;
+    font-size: 14px;
+    min-width: 0;
+    margin-bottom: 2px;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+  }
+  .college-hub .col-card:hover {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(93, 155, 255, 0.3);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+  }
+  .college-hub .col-card-body {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .college-hub .col-card-top {
+    display: flex;
+    align-items: baseline;
     justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding-bottom: 12px;
-    margin-bottom: 14px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  }
-  .college-hub .col-area-title-wrap {
-    display: flex;
-    align-items: center;
     gap: 10px;
     flex-wrap: wrap;
   }
-  .college-hub .col-area-pill {
-    font-size: 13px;
+  .college-hub .hub-title {
+    margin: 0;
+    font-size: 15px;
     font-weight: 700;
-    padding: 3px 10px;
-    border-radius: 20px;
-    letter-spacing: 0.02em;
+    line-height: 1.35;
   }
-  .college-hub .col-area-cambridge { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.35); }
-  .college-hub .col-area-fenway_symphony { background: rgba(34, 197, 94, 0.15); color: #86efac; border: 1px solid rgba(34, 197, 94, 0.35); }
-  .college-hub .col-area-comm_ave { background: rgba(248, 113, 113, 0.15); color: #fecaca; border: 1px solid rgba(248, 113, 113, 0.35); }
-  .college-hub .col-area-downtown { background: rgba(249, 115, 22, 0.15); color: #fdba74; border: 1px solid rgba(249, 115, 22, 0.35); }
-  .college-hub .col-area-suburbs { background: rgba(168, 85, 247, 0.15); color: #d8b4fe; border: 1px solid rgba(168, 85, 247, 0.35); }
-  .college-hub .col-area-sub {
-    font-size: 12px;
-    color: var(--muted);
+  .college-hub .hub-title a {
+    color: #fff;
+    text-decoration: none;
   }
-  .college-hub .col-area-meta-wrap {
+  .college-hub .hub-title a:hover {
+    color: var(--accent);
+    text-decoration: underline;
+  }
+  .college-hub .hub-meta {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 8px;
-  }
-  .college-hub .col-area-transit {
-    font-size: 11.5px;
+    gap: 6px 10px;
+    font-size: 12.5px;
     color: #94a3b8;
-    background: rgba(255, 255, 255, 0.05);
-    padding: 2px 8px;
-    border-radius: 6px;
   }
-  .college-hub .col-area-count {
-    font-size: 11px;
+  .college-hub .hub-date {
+    font-size: 12px;
     font-weight: 700;
-    background: rgba(255, 255, 255, 0.09);
-    color: var(--fg);
-    padding: 2px 7px;
-    border-radius: 10px;
-  }
-  .college-hub .col-area-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 14px;
-  }
-  .college-hub .col-card {
-    background: var(--card);
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    border-radius: 12px;
-    padding: 14px 16px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
-  }
-  .college-hub .col-card:hover {
-    transform: translateY(-2px);
-    border-color: rgba(93, 155, 255, 0.35);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    color: var(--accent);
+    padding-top: 2px;
+    white-space: nowrap;
   }
   .college-hub .hub-badges {
     display: flex;
@@ -3219,40 +3587,64 @@ _COLLEGE_CSS = """
   }
   .college-hub .col-transit-tag {
     font-size: 11px;
-    color: #64748b;
-    background: rgba(255, 255, 255, 0.03);
-    padding: 1px 6px;
+    color: #94a3b8;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2px 7px;
     border-radius: 4px;
+    font-weight: 600;
   }
   .college-hub .col-nav {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    padding: 10px 16px;
-    margin: 0 0 16px;
-    background: rgba(18, 22, 34, 0.6);
-    border-bottom: 1px solid var(--border);
+    align-items: center;
+  }
+  .college-hub .col-nav a {
+    color: var(--muted);
+    padding: 5px 12px;
+    border-radius: 999px;
+    transition: all 0.15s ease;
+    text-decoration: none;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    font-weight: 600;
+  }
+  .college-hub .col-nav a:hover {
+    color: #60a5fa;
+    background: rgba(37, 99, 235, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
+  }
+  .college-hub .col-nav a.active {
+    color: #fff;
+    background: #2563eb;
+    border-color: #3b82f6;
+    box-shadow: 0 0 12px rgba(37, 99, 235, 0.45);
+    font-weight: 700;
   }
   @media (max-width: 640px) {
-    .col-hero-art { height: 140px; margin-bottom: 14px; }
+    .col-hero-art { height: 130px; margin-bottom: 14px; }
     .col-hero-copy h1 { font-size: 24px; }
-    .college-hub .col-area-cards { grid-template-columns: 1fr; }
-    .college-hub .col-filters { padding: 12px; }
+    .college-hub .col-filters { padding: 8px 10px; }
+    .college-hub .col-card {
+      grid-template-columns: 1fr;
+      gap: 4px;
+      padding: 8px 10px;
+    }
+    .college-hub .col-nav { font-size: 12px; gap: 6px 8px; }
   }
 """
 
-# School / kind / area / free chips on /college/; choice is kept in URL hash (#school=mit&area=cambridge)
 _COLLEGE_FILTER_JS = """<script>
 (function () {
+  var selects = document.querySelectorAll('.col-select');
   var chips = document.querySelectorAll('.col-chip');
-  if (!chips.length) return;
+  if (!selects.length && !chips.length) return;
   var cards = document.querySelectorAll('.hub-card');
   var heads = document.querySelectorAll('.hub-day');
-  var areaSecs = document.querySelectorAll('.col-area-section');
   var state = { area: 'all', school: 'all', kind: 'all', free: 'all' };
 
   function render(save) {
-    var days = {}, areaDays = {};
+    var days = {};
     cards.forEach(function (c) {
       var on = (state.area === 'all' || c.dataset.area === state.area) &&
                (state.school === 'all' || c.dataset.school === state.school) &&
@@ -3261,25 +3653,18 @@ _COLLEGE_FILTER_JS = """<script>
       c.hidden = !on;
       if (on) {
         days[c.dataset.day] = 1;
-        areaDays[c.dataset.area + '_' + c.dataset.day] = 1;
-      }
-    });
-
-    areaSecs.forEach(function (sec) {
-      var key = sec.dataset.area + '_' + sec.dataset.day;
-      var hasVisible = !!areaDays[key];
-      sec.hidden = !hasVisible;
-      if (hasVisible) {
-        var countEl = sec.querySelector('.count');
-        if (countEl) {
-          var n = sec.querySelectorAll('.hub-card:not([hidden])').length;
-          countEl.textContent = n;
-        }
       }
     });
 
     heads.forEach(function (h) {
       h.hidden = !days[h.dataset.day];
+    });
+
+    selects.forEach(function (sel) {
+      var g = sel.dataset.group;
+      if (g && state[g] !== undefined) {
+        sel.value = state[g];
+      }
     });
 
     chips.forEach(function (b) {
@@ -3296,6 +3681,16 @@ _COLLEGE_FILTER_JS = """<script>
     }
   }
 
+  selects.forEach(function (sel) {
+    sel.addEventListener('change', function () {
+      var g = sel.dataset.group;
+      if (g) {
+        state[g] = sel.value;
+        render(true);
+      }
+    });
+  });
+
   chips.forEach(function (b) {
     b.addEventListener('click', function () {
       var g = b.dataset.group, v = b.dataset.val;
@@ -3311,7 +3706,7 @@ _COLLEGE_FILTER_JS = """<script>
   location.hash.replace(/^#/, '').split('&').forEach(function (p) {
     var kv = p.split('=');
     if (kv.length === 2 && state.hasOwnProperty(kv[0]) &&
-        document.querySelector('.col-chip[data-group="' + kv[0] + '"][data-val="' + kv[1] + '"]')) {
+        document.querySelector('.col-chip[data-group="' + kv[0] + '"][data-val="' + kv[1] + '"], .col-select[data-group="' + kv[0] + '"] option[value="' + kv[1] + '"]')) {
       state[kv[0]] = kv[1];
     }
   });
@@ -3422,7 +3817,7 @@ _CAMPS_CSS = """
     background: var(--accent);
     font-weight: 700;
   }
-  .camps-hub main { max-width: 1000px; padding-top: 20px; font-size: 16px; line-height: 1.5; }
+  .camps-hub main { max-width: 1120px; padding-top: 20px; font-size: 16px; line-height: 1.5; }
   .camps-hub .hero { border: 1px solid var(--border); background: #fff; border-radius: 16px; overflow: hidden; margin-bottom: 20px; padding: 0; text-align: left; }
   .camps-hero-art { display: block; width: 100%; height: 120px; }
   .camps-hero-copy { padding: 18px 22px 22px; }
@@ -3430,6 +3825,106 @@ _CAMPS_CSS = """
   .camps-hub .hero h1 small { display: block; font-size: 0.45em; font-weight: 700; color: #3f6f52; letter-spacing: 0; margin-top: 4px; }
   .camps-hub .hero p { color: var(--muted); font-size: 17px; margin: 0 0 10px; max-width: 720px; }
   .camps-stats { margin: 0; font-size: 15px; font-weight: 600; color: var(--fg); }
+  .camps-layout {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 26px;
+    align-items: start;
+    margin-bottom: 24px;
+  }
+  .camps-sidebar {
+    position: sticky;
+    top: 16px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  }
+  .camps-filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .camps-sidebar-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: #14532d;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 0;
+  }
+  .camp-reset-btn {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #c2410c;
+  }
+  .camps-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .camp-filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .camp-filter-label {
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--muted);
+  }
+  .camps-sidebar .camp-select {
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .camp-near-btn {
+    appearance: none;
+    background: #eaf5ed;
+    border: 1px solid #86efac;
+    color: #14532d;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 7px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.15s ease;
+    width: 100%;
+  }
+  .camp-near-btn:hover {
+    background: #166534;
+    color: #fff;
+    border-color: #166534;
+  }
+  .camp-near-btn.active {
+    background: #14532d;
+    color: #fff;
+    border-color: #14532d;
+  }
+  .camp-near-info {
+    font-size: 11.5px;
+    color: #15803d;
+    font-weight: 600;
+    margin-top: 4px;
+    line-height: 1.3;
+  }
+  .camp-origin-select {
+    margin-top: 4px;
+    font-size: 12px;
+  }
+  .camps-main-col {
+    min-width: 0;
+  }
   .camp-panel { background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 18px 20px; margin-bottom: 20px; }
   .camp-panel h2 { font-size: 22px; margin: 0 0 4px; color: #14532d; }
   .camp-panel > p { margin: 0 0 12px; color: var(--muted); }
@@ -3446,44 +3941,154 @@ _CAMPS_CSS = """
   .camp-panel details { margin-top: 12px; border-top: 1px solid #e7ede7; padding-top: 12px; }
   .camp-panel summary { font-weight: 700; cursor: pointer; color: var(--accent); }
   .camp-panel details ul { margin: 8px 0 0; padding-left: 20px; }
-  .camps-filters { background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 16px 20px 6px; margin-bottom: 14px; }
-  .camp-filter-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
-  .camp-filter-label { font-weight: 800; color: #14532d; font-size: 15px; min-width: 76px; }
-  .camp-chip, .camp-age-select { font: inherit; font-size: 15px; font-weight: 600; padding: 7px 14px; border-radius: 999px; cursor: pointer; border: 1px solid #b9c6bb; background: #fff; color: var(--fg); -webkit-tap-highlight-color: transparent; }
-  .camp-chip:hover { border-color: var(--accent); }
-  .camp-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
-  .camps-count-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 16px; font-weight: 700; margin: 0 2px 14px; }
-  .camps-hub .hub-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; margin: 0; }
-  @media (min-width: 760px) { .camps-hub .hub-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .camp-select, .camp-age-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background: #ffffff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%234a5a4f' d='M1.4 0L6 4.6 10.6 0 12 1.4l-6 6-6-6z'/%3E%3C/svg%3E") no-repeat right 10px center;
+    color: var(--fg, #17261b);
+    font-family: inherit;
+    font-size: 13.5px;
+    font-weight: 700;
+    padding: 6px 28px 6px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+  }
+  .camp-select:hover, .camp-age-select:hover {
+    border-color: #166534;
+    background-color: #f6f8f5;
+  }
+  .camp-select:focus, .camp-age-select:focus {
+    border-color: #166534;
+    box-shadow: 0 0 0 2px rgba(22, 101, 52, 0.2);
+  }
+  .camp-chip {
+    font: inherit;
+    font-size: 13.5px;
+    font-weight: 600;
+  }
+  .camps-count-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 15px; font-weight: 700; margin: 0 2px 14px; }
+  .camps-hub .hub-grid { display: flex; flex-direction: column; gap: 6px; margin: 0; }
   .camps-hub #hub-none { text-align: center; background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 28px 20px; color: var(--muted); }
-  .camp-card { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .camp-card {
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid var(--border);
+    border-radius: 0;
+    padding: 12px 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    margin-bottom: 0;
+    transition: background 0.15s ease;
+  }
+  .camp-card:hover {
+    background: #fafcf9;
+    border-color: var(--border);
+    transform: none;
+    box-shadow: none;
+  }
   .camp-card[hidden] { display: none; }
   .camp-head { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
-  .camp-card h3 { margin: 0; font-size: 19px; line-height: 1.25; font-weight: 800; }
+  .camp-card h3 { margin: 0; font-size: 16.5px; line-height: 1.3; font-weight: 800; }
   .camp-card h3 a { color: var(--fg); text-decoration: none; }
   .camp-card h3 a:hover { color: var(--accent); text-decoration: underline; }
-  .camp-where { margin: 2px 0 0; color: var(--muted); font-size: 15px; }
-  .camp-save { flex: none; font: inherit; font-size: 15px; font-weight: 700; color: var(--accent); background: #fff; border: 1px solid #b9c6bb; border-radius: 8px; padding: 4px 10px; cursor: pointer; }
+  .camp-where { margin: 2px 0 0; color: var(--muted); font-size: 13.5px; }
+  .camp-save { flex: none; font: inherit; font-size: 13px; font-weight: 700; color: var(--accent); background: #fff; border: 1px solid #b9c6bb; border-radius: 6px; padding: 3px 9px; cursor: pointer; }
   .camp-save[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
-  .camp-facts { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 6px 10px; margin: 0; font-size: 16px; }
+  .camp-facts { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; margin: 2px 0 0; font-size: 13.5px; }
   .camp-facts dt { font-weight: 700; color: var(--muted); }
   .camp-facts dd { margin: 0; overflow-wrap: anywhere; word-break: break-word; }
-  .camp-facts ul { margin: 2px 0 0; padding: 0; list-style: none; }
+  .camp-facts ul { margin: 0; padding: 0; list-style: none; display: inline-flex; gap: 8px; }
   .camp-facts li.next { font-weight: 700; }
   .camp-facts li.past { color: var(--muted); }
   .camp-unknown { color: var(--muted); font-style: italic; }
-  .camp-note { margin: 0; color: var(--muted); font-size: 15px; }
-  .camp-foot { margin-top: auto; padding-top: 10px; border-top: 1px solid #e7ede7; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .camp-season { font-size: 14px; font-weight: 700; padding: 3px 9px; border-radius: 6px; }
+  .camp-note { margin: 0; color: var(--muted); font-size: 13px; }
+  .camp-foot { margin-top: 2px; padding-top: 6px; border-top: 1px solid #e7ede7; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .camp-season { font-size: 12px; font-weight: 700; padding: 2px 7px; border-radius: 6px; }
   .camp-season.y2027 { background: #e2f3e6; color: #14532d; }
   .camp-season.y2026 { background: var(--amber-bg); color: var(--amber-fg); }
-  .camp-site { font-weight: 700; color: var(--accent); }
-  .camp-sources { font-size: 14px; color: var(--muted); width: 100%; }
-  .camp-sources a { color: var(--muted); }
-  .camp-saved-bar { background: #e2f3e6; border-radius: 12px; padding: 10px 14px; margin-bottom: 14px; font-weight: 600; display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+  .camp-site { font-weight: 700; color: var(--accent); font-size: 13px; }
+  .camp-sources { font-size: 12px; color: var(--muted); width: 100%; }
+  .camp-top-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .camp-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .camp-badge-day {
+    background: #fef3c7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+  }
+  .camp-badge-overnight {
+    background: #ede9fe;
+    color: #5b21b6;
+    border: 1px solid #ddd6fe;
+  }
+  .camp-dist-badge {
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+    white-space: nowrap;
+  }
+  .camp-loc-header {
+    margin: 24px 0 6px;
+    font-size: 16.5px;
+    font-weight: 800;
+    color: #14532d;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 4px;
+    border-bottom: 2px solid #e2ece3;
+  }
+  .camp-loc-header:first-of-type {
+    margin-top: 0;
+  }
+  .camp-loc-header .count {
+    font-size: 12px;
+    font-weight: 700;
+    color: #4a5a4f;
+    background: #e2ece3;
+    padding: 1px 7px;
+    border-radius: 999px;
+  }
+  .camp-saved-bar { background: #e2f3e6; border-radius: 10px; padding: 8px 12px; margin-top: 12px; font-weight: 600; font-size: 13px; display: flex; flex-direction: column; gap: 6px; }
   .camp-saved-bar[hidden] { display: none; }
   .camp-after { margin-top: 24px; }
   .camp-after ul { margin: 8px 0 0; padding-left: 20px; }
+  @media (max-width: 860px) {
+    .camps-layout {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    .camps-sidebar {
+      position: static;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    .camps-filters {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+      gap: 8px;
+    }
+  }
   @media (max-width: 640px) {
     .camps-hero-art { display: none; }
     .camps-hub header {
@@ -3562,106 +4167,81 @@ _CAMPS_CSS = """
       align-items: center;
     }
     .camps-filters {
-      padding: 12px 12px 6px;
-      border-radius: 12px;
+      padding: 8px 10px;
+      border-radius: 10px;
       margin-bottom: 12px;
     }
-    .camp-filter-row {
-      gap: 5px;
-      margin-bottom: 10px;
-    }
-    .camp-filter-label {
-      min-width: 100%;
-      font-size: 12px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 2px;
-    }
-    .camp-chip {
-      font-size: 13px;
-      padding: 5px 10px;
-      min-height: 34px;
-      line-height: 1.2;
-    }
-    .camp-age-select {
-      font-size: 13.5px;
-      padding: 6px 12px;
-      min-height: 36px;
-      max-width: 100%;
-    }
-    .camps-count-bar {
-      font-size: 14.5px;
-      margin-bottom: 10px;
-    }
     .camp-card {
-      padding: 14px 14px 12px;
-      border-radius: 12px;
-      gap: 8px;
+      padding: 10px 2px;
+      border-radius: 0;
+      gap: 6px;
     }
     .camp-card h3 {
-      font-size: 17.5px;
+      font-size: 16px;
     }
     .camp-where {
-      font-size: 13.5px;
+      font-size: 13px;
     }
     .camp-save {
-      font-size: 13.5px;
-      padding: 5px 10px;
-      min-height: 36px;
-      min-width: 68px;
+      font-size: 12.5px;
+      padding: 4px 8px;
     }
     .camp-facts {
-      grid-template-columns: 66px minmax(0, 1fr);
-      gap: 4px 8px;
-      font-size: 14px;
+      font-size: 13px;
       line-height: 1.4;
-    }
-    .camp-facts dt {
-      font-size: 12.5px;
-    }
-    .camp-facts dd {
-      font-size: 14px;
+      gap: 3px 8px;
     }
     .camp-note {
-      font-size: 13.5px;
+      font-size: 12.5px;
     }
     .camp-foot {
-      padding-top: 8px;
-      gap: 8px;
-    }
-    .camp-season {
-      font-size: 12px;
-      padding: 3px 7px;
+      padding-top: 6px;
+      gap: 6px;
     }
     .camp-site {
-      font-size: 13.5px;
-      padding: 4px 10px;
-      background: rgba(22, 101, 52, 0.08);
-      border-radius: 6px;
-      text-decoration: none;
-      min-height: 32px;
-      display: inline-flex;
-      align-items: center;
-    }
-    .camp-sources {
-      font-size: 12px;
+      font-size: 12.5px;
+      padding: 3px 8px;
     }
   }
 """
 
 _CAMPS_FILTER_JS = """<script>
 (function () {
+  var selects = document.querySelectorAll('.camp-select');
   var chips = document.querySelectorAll('.camp-chip');
-  if (!chips.length) return;
+  if (!selects.length && !chips.length) return;
   var cards = document.querySelectorAll('.camp-card');
-  var ageSel = document.getElementById('camp-age');
   var countEl = document.getElementById('camp-results-count');
-  var state = { area: 'all', kind: 'all', cost: 'all', info: 'all', age: 'all' };
+  var resetBtn = document.getElementById('camp-reset-btn');
+  var nearBtn = document.getElementById('camp-near-btn');
+  var originSelect = document.getElementById('camp-origin');
+  var nearInfo = document.getElementById('camp-near-info');
+  var grid = document.querySelector('.hub-grid');
+  var initialNodes = grid ? Array.prototype.slice.call(grid.children) : [];
+
+  var state = { area: 'all', camp_type: 'all', kind: 'all', cost: 'all', info: 'all', age: 'all' };
+  var sorting_dist = false;
+  var lastCoords = null;
   var KEY = 'wbe-saved-camps', saved = {};
   try { (JSON.parse(localStorage.getItem(KEY)) || []).forEach(function (i) { saved[i] = 1; }); } catch (e) {}
   function keep() { try { localStorage.setItem(KEY, JSON.stringify(Object.keys(saved))); } catch (e) {} }
   function num(v) { return v === '' || v === undefined ? null : Number(v); }
+
+  function haversineMiles(lat1, lon1, lat2, lon2) {
+    var R = 3958.8;
+    var dLat = (lat2 - lat1) * Math.PI / 180;
+    var dLon = (lon2 - lon1) * Math.PI / 180;
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  function formatDist(m) {
+    if (m < 10) return m.toFixed(1) + ' mi';
+    return Math.round(m) + ' mi';
+  }
+
   function costOk(d) {
     var lo = num(d.lo);
     if (state.cost === 'free') return lo === 0;
@@ -3670,8 +4250,11 @@ _CAMPS_FILTER_JS = """<script>
     if (state.cost === 'help') return d.help === '1';
     return true;
   }
+
   function matches(c) {
     var d = c.dataset;
+    if (state.camp_type === 'day' && d.type === 'Overnight') return false;
+    if (state.camp_type === 'overnight' && d.type !== 'Overnight') return false;
     if (state.area !== 'all' && d.area !== state.area) return false;
     if (state.kind === 'overnight') { if (d.type !== 'Overnight') return false; }
     else if (state.kind !== 'all' && d.kind !== state.kind) return false;
@@ -3684,14 +4267,116 @@ _CAMPS_FILTER_JS = """<script>
     }
     return true;
   }
+
+  function sortByDistance(userLat, userLng, originLabel) {
+    cards.forEach(function (c) {
+      var lat = parseFloat(c.dataset.lat);
+      var lng = parseFloat(c.dataset.lng);
+      var badge = c.querySelector('.camp-dist-badge');
+      if (!isNaN(lat) && !isNaN(lng)) {
+        var d = haversineMiles(userLat, userLng, lat, lng);
+        c._dist = d;
+        if (badge) {
+          badge.textContent = '📍 ' + formatDist(d);
+          badge.hidden = false;
+        }
+      } else {
+        c._dist = 999999;
+        if (badge) badge.hidden = true;
+      }
+    });
+
+    var cardArr = Array.prototype.slice.call(cards);
+    cardArr.sort(function (a, b) { return (a._dist || 0) - (b._dist || 0); });
+    if (grid) {
+      cardArr.forEach(function (c) { grid.appendChild(c); });
+    }
+    if (nearInfo) {
+      nearInfo.textContent = '📍 Sorted from ' + originLabel;
+      nearInfo.hidden = false;
+    }
+  }
+
+  function restoreInitialOrder() {
+    if (grid && initialNodes.length) {
+      initialNodes.forEach(function (node) { grid.appendChild(node); });
+    }
+    cards.forEach(function (c) {
+      var badge = c.querySelector('.camp-dist-badge');
+      if (badge) badge.hidden = true;
+    });
+    if (nearInfo) {
+      nearInfo.textContent = '';
+      nearInfo.hidden = true;
+    }
+  }
+
+  function activateNear(val) {
+    if (originSelect) originSelect.hidden = false;
+    if (val === 'here') {
+      if (navigator.geolocation) {
+        if (nearInfo) { nearInfo.textContent = '📍 Getting location...'; nearInfo.hidden = false; }
+        navigator.geolocation.getCurrentPosition(
+          function (pos) {
+            lastCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+            sorting_dist = true;
+            if (originSelect) originSelect.value = 'here';
+            sortByDistance(lastCoords.lat, lastCoords.lng, 'Your Location');
+            render(false);
+          },
+          function () {
+            lastCoords = { lat: 42.3601, lng: -71.0589 };
+            sorting_dist = true;
+            if (originSelect) originSelect.value = '42.3601,-71.0589';
+            sortByDistance(lastCoords.lat, lastCoords.lng, 'Boston (Downtown)');
+            render(false);
+          },
+          { timeout: 7000 }
+        );
+        return;
+      }
+      val = '42.3601,-71.0589';
+    }
+    var parts = val.split(',');
+    var lat = parseFloat(parts[0]), lng = parseFloat(parts[1]);
+    var label = 'Boston';
+    if (originSelect && originSelect.selectedIndex >= 0) {
+      label = originSelect.options[originSelect.selectedIndex].text;
+    }
+    sorting_dist = true;
+    lastCoords = { lat: lat, lng: lng };
+    sortByDistance(lat, lng, label);
+    render(false);
+  }
+
   function render(write) {
     var n = 0;
     cards.forEach(function (c) { var on = matches(c); c.hidden = !on; if (on) n++; });
+    selects.forEach(function (sel) {
+      if (state[sel.dataset.group] !== undefined) {
+        sel.value = state[sel.dataset.group];
+      }
+    });
     chips.forEach(function (b) { b.classList.toggle('active', state[b.dataset.group] === b.dataset.val); });
-    if (ageSel) ageSel.value = state.age;
     if (countEl) countEl.textContent = n;
     var none = document.getElementById('hub-none');
     if (none) none.hidden = n > 0;
+
+    var locHeaders = document.querySelectorAll('.camp-loc-header');
+    if (sorting_dist) {
+      locHeaders.forEach(function (h) { h.hidden = true; });
+    } else {
+      locHeaders.forEach(function (h) {
+        var a = h.dataset.area;
+        var hasVisible = false;
+        cards.forEach(function (c) { if (c.dataset.area === a && !c.hidden) hasVisible = true; });
+        h.hidden = !hasVisible;
+      });
+    }
+
+    var isFiltered = Object.keys(state).some(function (k) { return state[k] !== 'all'; }) || sorting_dist;
+    if (resetBtn) resetBtn.hidden = !isFiltered;
+
     var ids = Object.keys(saved).filter(function (i) { return document.querySelector('.camp-card[data-id="' + i + '"]'); });
     document.querySelectorAll('.camp-save').forEach(function (b) {
       var on = !!saved[b.dataset.id];
@@ -3705,6 +4390,32 @@ _CAMPS_FILTER_JS = """<script>
       history.replaceState(null, '', parts.length ? '#' + parts.join('&') : location.pathname);
     }
   }
+
+  if (nearBtn) {
+    nearBtn.addEventListener('click', function () {
+      activateNear('here');
+    });
+  }
+
+  if (originSelect) {
+    originSelect.addEventListener('change', function () {
+      activateNear(originSelect.value);
+    });
+  }
+
+  if (resetBtn) {
+    resetBtn.addEventListener('click', function () {
+      state = { area: 'all', camp_type: 'all', kind: 'all', cost: 'all', info: 'all', age: 'all' };
+      sorting_dist = false;
+      if (originSelect) {
+        originSelect.hidden = true;
+        originSelect.selectedIndex = 0;
+      }
+      restoreInitialOrder();
+      render(true);
+    });
+  }
+
   function stamp(ev) {
     var d = ev.date.replace(/-/g, '');
     return ev.time ? ';TZID=America/New_York:' + d + 'T' + ev.time.replace(':', '') + '00' : ';VALUE=DATE:' + d;
@@ -3759,14 +4470,16 @@ _CAMPS_FILTER_JS = """<script>
       keep(); render(false);
     });
   });
+  selects.forEach(function (sel) {
+    sel.addEventListener('change', function () { state[sel.dataset.group] = sel.value; render(true); });
+  });
   chips.forEach(function (b) {
     b.addEventListener('click', function () { state[b.dataset.group] = b.dataset.val; render(true); });
   });
-  if (ageSel) ageSel.addEventListener('change', function () { state.age = ageSel.value; render(true); });
   location.hash.replace(/^#/, '').split('&').forEach(function (p) {
     var kv = p.split('=');
     if (kv.length !== 2 || !state.hasOwnProperty(kv[0])) return;
-    if (kv[0] === 'age' ? (ageSel && ageSel.querySelector('option[value="' + kv[1] + '"]')) : document.querySelector('.camp-chip[data-group="' + kv[0] + '"][data-val="' + kv[1] + '"]')) state[kv[0]] = kv[1];
+    state[kv[0]] = kv[1];
   });
   render(false);
 })();
@@ -3822,7 +4535,10 @@ def _camp_signup(c, today_iso):
 def _camp_card(c):
     today_iso = datetime.now(EASTERN).date().isoformat()
     name, url = escape(c["name"]), escape(c["url"])
-    where = " · ".join([c["town"], "Overnight" if c["type"] == "Overnight" else "Day camp", _CAMP_TYPE_WORDS[c["kind"]]])
+    is_overnight = (c.get("type") == "Overnight")
+    type_badge = ('<span class="camp-badge camp-badge-overnight">⛺ Overnight Camp</span>'
+                  if is_overnight else '<span class="camp-badge camp-badge-day">☀️ Day Camp</span>')
+    where = " · ".join([c["town"], "Overnight" if is_overnight else "Day camp", _CAMP_TYPE_WORDS[c["kind"]]])
     upcoming = [{"title": f"{c['name']}: {e['label']}", "date": e["date"], "time": e.get("time"), "url": c["url"]}
                 for e in c.get("events") or [] if e.get("date") and e["date"] >= today_iso]
     facts = [_camp_fact("Ages", c.get("ages")), _camp_fact("Cost", c.get("price")), _camp_fact("Dates", c.get("dates")),
@@ -3837,13 +4553,31 @@ def _camp_card(c):
     checked = datetime.strptime(c["checked"], "%Y-%m-%d")
     sources = " · ".join(f'<a href="{escape(u)}" target="_blank" rel="noopener">source {i + 1}</a>'
                          for i, u in enumerate(c["sources"]))
-    attrs = {"id": c["id"], "area": c["area"], "kind": c["kind"], "type": c["type"], "season": c["season"],
-             "min": "" if c.get("age_min") is None else c["age_min"], "max": "" if c.get("age_max") is None else c["age_max"],
-             "lo": "" if c.get("week_low") is None else c["week_low"], "help": 1 if c.get("sliding") or c.get("aid") else 0}
+    attrs = {
+        "id": c["id"],
+        "area": c["area"],
+        "kind": c["kind"],
+        "type": c["type"],
+        "season": c["season"],
+        "min": "" if c.get("age_min") is None else c["age_min"],
+        "max": "" if c.get("age_max") is None else c["age_max"],
+        "lo": "" if c.get("week_low") is None else c["week_low"],
+        "help": 1 if c.get("sliding") or c.get("aid") else 0,
+        "lat": c.get("lat", ""),
+        "lng": c.get("lng", ""),
+        "town": c.get("town", "")
+    }
     data = " ".join(f'data-{k}="{escape(str(v))}"' for k, v in attrs.items())
     return f"""<article class="camp-card" {data} data-events="{escape(json.dumps(upcoming))}">
   <div class="camp-head">
-    <div><h3><a href="{url}" target="_blank" rel="noopener">{name}</a></h3><p class="camp-where">{escape(where)}</p></div>
+    <div>
+      <div class="camp-top-row">
+        <h3><a href="{url}" target="_blank" rel="noopener">{name}</a></h3>
+        {type_badge}
+        <span class="camp-dist-badge" hidden></span>
+      </div>
+      <p class="camp-where">{escape(where)}</p>
+    </div>
     <button type="button" class="camp-save" data-id="{escape(c['id'])}" aria-pressed="false" aria-label="Save {name}">☆ Save</button>
   </div>
   <dl class="camp-facts">{''.join(facts)}</dl>
@@ -3888,13 +4622,13 @@ def _camps_sections(camps):
     rows, later = _camp_date_rows(camps, today_iso)
 
     def chip(group, val, label):
-        return f'<button type="button" class="camp-chip" data-group="{group}" data-val="{val}">{escape(label)}</button>'
+        return f'<option class="camp-chip" data-group="{group}" data-val="{val}" value="{val}">{escape(label)}</option>'
 
     present = {c["area"] for c in camps}
     kinds = {c["kind"] for c in camps}
     areas = chip("area", "all", "Anywhere") + "".join(chip("area", k, v) for k, v in AREAS if k in present)
-    types = chip("kind", "all", "All") + "".join(chip("kind", k, v) for k, v in KINDS if k in kinds) + chip("kind", "overnight", "Overnight")
-    costs = chip("cost", "all", "Any") + chip("cost", "free", "Free") + chip("cost", "u300", "From under $300/wk") + chip("cost", "u500", "From under $500/wk") + chip("cost", "help", "Sliding scale or aid")
+    types = chip("kind", "all", "All types") + "".join(chip("kind", k, v) for k, v in KINDS if k in kinds) + chip("kind", "overnight", "Overnight")
+    costs = chip("cost", "all", "Any cost") + chip("cost", "free", "Free") + chip("cost", "u300", "Under $300/wk") + chip("cost", "u500", "Under $500/wk") + chip("cost", "help", "Sliding scale / aid")
     info = chip("info", "all", "All camps") + chip("info", "y2027", "2027 info posted") + chip("info", "saved", "Saved")
     ages = '<option value="all">Any age</option>' + "".join(f'<option value="{a}">{a} years old</option>' for a in range(3, 18))
     hero = f"""<div class="hero">
@@ -3916,25 +4650,75 @@ def _camps_sections(camps):
     <button type="button" id="camp-dates-more" class="camp-linkish camp-more" hidden>Show all</button>
     {later_html}
   </section>"""
-    filters = f"""{dates}
-  <div class="camps-filters" role="group" aria-label="Filter summer camps">
-    <div class="camp-filter-row"><label class="camp-filter-label" for="camp-age">Child's age</label><select id="camp-age" class="camp-age-select">{ages}</select></div>
-    <div class="camp-filter-row"><span class="camp-filter-label">Area</span>{areas}</div>
-    <div class="camp-filter-row"><span class="camp-filter-label">Type</span>{types}</div>
-    <div class="camp-filter-row"><span class="camp-filter-label">Cost</span>{costs}</div>
-    <div class="camp-filter-row"><span class="camp-filter-label">Show</span>{info}</div>
-  </div>
-  <div id="camp-saved-bar" class="camp-saved-bar" hidden><span><span id="camp-saved-n">0</span> saved on this device</span>
-    <button type="button" id="camp-saved-show" class="camp-linkish">Show saved</button>
-    <button type="button" id="camp-saved-ics" class="camp-linkish">Add their dates to my calendar</button></div>
-  <div class="camps-count-bar"><span><span id="camp-results-count">{len(camps)}</span> camps</span></div>"""
+    sidebar = f"""<aside class="camps-sidebar" aria-label="Camp filters">
+    <div class="camps-filter-header">
+      <h2 class="camps-sidebar-title">Filters</h2>
+      <button type="button" id="camp-reset-btn" class="camp-linkish camp-reset-btn" hidden>Reset</button>
+    </div>
+    <div class="camps-filters" role="group" aria-label="Filter summer camps">
+      <div class="camp-filter-group camp-near-group">
+        <label class="camp-filter-label" for="camp-near-btn">Distance</label>
+        <button type="button" id="camp-near-btn" class="camp-near-btn">📍 Sort by Distance</button>
+        <select id="camp-origin" class="camp-select camp-origin-select" aria-label="Starting location" hidden>
+          <option value="here">📍 Current Location</option>
+          <option value="42.3601,-71.0589">Boston (Downtown)</option>
+          <option value="42.3736,-71.1190">Cambridge (Harvard Sq)</option>
+          <option value="42.3967,-71.1223">Somerville (Davis Sq)</option>
+          <option value="42.3584,-71.2091">Newton / West</option>
+          <option value="42.4217,-71.1685">Arlington / North</option>
+          <option value="42.2476,-71.0002">Quincy / South</option>
+        </select>
+        <div id="camp-near-info" class="camp-near-info" hidden></div>
+      </div>
+      <div class="camp-filter-group">
+        <label class="camp-filter-label" for="camp-type">Camp Format</label>
+        <select id="camp-type" class="camp-select" data-group="camp_type" aria-label="Day or Overnight camp">
+          <option class="camp-chip" data-group="camp_type" data-val="all" value="all">☀️ &amp; ⛺ All Formats</option>
+          <option class="camp-chip" data-group="camp_type" data-val="day" value="day">☀️ Day Camps Only</option>
+          <option class="camp-chip" data-group="camp_type" data-val="overnight" value="overnight">⛺ Overnight Camps Only</option>
+        </select>
+      </div>
+      <div class="camp-filter-group">
+        <label class="camp-filter-label" for="camp-area">Area</label>
+        <select id="camp-area" class="camp-select" data-group="area" aria-label="Camp Area">{areas}</select>
+      </div>
+      <div class="camp-filter-group">
+        <label class="camp-filter-label" for="camp-age">Child's age</label>
+        <select id="camp-age" class="camp-select camp-age-select" data-group="age" aria-label="Child's age">{ages}</select>
+      </div>
+      <div class="camp-filter-group">
+        <label class="camp-filter-label" for="camp-kind">Type of Camp</label>
+        <select id="camp-kind" class="camp-select" data-group="kind" aria-label="Camp Type">{types}</select>
+      </div>
+      <div class="camp-filter-group">
+        <label class="camp-filter-label" for="camp-cost">Cost</label>
+        <select id="camp-cost" class="camp-select" data-group="cost" aria-label="Camp Cost">{costs}</select>
+      </div>
+      <div class="camp-filter-group">
+        <label class="camp-filter-label" for="camp-info">Status</label>
+        <select id="camp-info" class="camp-select" data-group="info" aria-label="Camp Info">{info}</select>
+      </div>
+    </div>
+    <div id="camp-saved-bar" class="camp-saved-bar" hidden>
+      <span><span id="camp-saved-n">0</span> saved</span>
+      <button type="button" id="camp-saved-show" class="camp-linkish">Show saved</button>
+      <button type="button" id="camp-saved-ics" class="camp-linkish">Add dates to calendar</button>
+    </div>
+  </aside>"""
+
+    filters = f"""<div class="camps-layout">
+  {sidebar}
+  <div class="camps-main-col">
+    {dates}
+    <div class="camps-count-bar"><span><span id="camp-results-count">{len(camps)}</span> camps</span></div>"""
 
     def link(name, url):
         return f'<a href="{escape(url)}" target="_blank" rel="noopener">{escape(name)}</a>' if url else escape(name)
     leads = "".join(f"<li>{link(l['name'], l['url'])} ({escape(l['town'])})</li>" for l in data["leads"])
     towns_html = "".join(f"<li>{link(t['town'], t.get('url'))}: {escape(t['note'])}</li>" for t in data["towns"])
     not_camps = "".join(f"<li>{link(n['name'], n['url'])}: {escape(n['note'])}</li>" for n in data["not_camps"])
-    tail = f"""<div class="camp-after">
+    tail = f"""</div></div>
+<div class="camp-after">
   <section class="camp-panel"><h2>Still being checked</h2>
     <p>These may be good options, but we couldn't confirm their prices or dates yet, so check with them directly.</p>
     <details open><summary>Camps nearby</summary><ul>{leads}</ul></details>
@@ -3995,6 +4779,23 @@ def _college_nav(hub_slug):
     links = "\n".join(f'    <a href="{href}"{ACTIVE if slug == hub_slug else ""}>{label}</a>'
                       for href, label, slug in _COLLEGE_NAV)
     return f'  <nav class="hub-nav col-nav">\n{links}\n  </nav>'
+
+
+_EDM_NAV = (
+    ("../", "All Events", None),
+    ("../boston-edm/", "Boston EDM", "boston-edm"),
+    ("../cambridge-events-tonight/", "Cambridge Tonight", "cambridge-events-tonight"),
+    ("../music/", "Live Music", "music"),
+    ("../college/", "College", "college"),
+)
+
+
+def _edm_nav(hub_slug):
+    """The nightlife/music-focused nav for the EDM hub."""
+    ACTIVE = ' class="active"'
+    links = "\n".join(f'    <a href="{href}"{ACTIVE if slug == hub_slug else ""}>{label}</a>'
+                      for href, label, slug in _EDM_NAV)
+    return f'  <nav class="hub-nav edm-nav">\n{links}\n  </nav>'
 
 
 KIDS_INLINE_DAYS = 14  # the Kids page carries two weeks; later days load from later.html
@@ -4168,24 +4969,22 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
             kid_places.add(e.get("venue") or "")
             price_attr = "free" if _is_event_free(e) else "paid"
             pills = [age_label] if age_label else [_KID_AGE_PILL[a] for a in ages]
-            pills_html = "".join(f'<span class="kid-age">{escape(p)}</span>' for p in pills)
-            return f"""<article class="hub-card kid-k-{kind}" data-city="{escape(city)}" data-day="{day_attr}" data-age="{' '.join(ages)}" data-kind="{kind}" data-price="{price_attr}">
-  <div class="kid-card-band"></div>
+            pills_html = " ".join(f'<span class="kid-age">{escape(p)}</span>' for p in pills) if pills else ""
+            time_str = " · ".join(x for x in (d_str, t_str) if x)
+            time_html = f'<time class="hub-date">{time_str}</time>' if time_str else ""
+            return f"""<article class="hub-card kid-card kid-k-{kind}" data-city="{escape(city)}" data-day="{day_attr}" data-age="{' '.join(ages)}" data-kind="{kind}" data-price="{price_attr}">
+  {time_html}
   <div class="kid-card-body">
-    <div class="kid-emoji" aria-hidden="true">{emoji}</div>
-    <div class="kid-card-main">
-      <div class="hub-card-head">
-        <time class="hub-date">{' · '.join(x for x in (d_str, t_str) if x)}</time>
-        <div class="hub-badges">{price_badge}</div>
-      </div>
+    <div class="kid-card-top">
       <h3 class="hub-title"><a href="{url}" target="_blank" rel="noopener">{title}</a></h3>
-      <div class="hub-meta">
-        <span class="hub-venue">📍 {venue}</span>
-        <span class="hub-city">({city_name})</span>
-      </div>
-      {desc_html}
-      <div class="kid-ages">{pills_html}</div>
+      <div class="hub-badges">{price_badge}</div>
     </div>
+    <div class="hub-meta">
+      <span class="hub-venue">📍 {venue}</span>
+      <span class="hub-city">({city_name})</span>
+      {pills_html}
+    </div>
+    {desc_html}
   </div>
 </article>"""
 
@@ -4195,12 +4994,15 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
             d_key = t_obj.date() if isinstance(t_obj, datetime) else None
             by_day.setdefault(d_key, []).append(e)
 
-        city_order = ["cambridge", "somerville", "boston", "other"]
         inline_until = datetime.now(EASTERN).date() + timedelta(days=KIDS_INLINE_DAYS - 1)
         later_html, later_days, inline_html = [], [], cards_html
-        for day_obj, day_events in by_day.items():
-            # Days past the first two weeks go to later.html (loaded on scroll or filter), keeping
-            # the page light on phones; they still count in the stats and the When chips.
+
+        day_keys = sorted((k for k in by_day if k is not None))
+        if None in by_day:
+            day_keys.append(None)
+
+        for day_obj in day_keys:
+            day_events = by_day[day_obj]
             cards_html = later_html if (day_obj and day_obj > inline_until) else inline_html
             if cards_html is later_html:
                 later_days.append(day_obj.isoformat())
@@ -4212,27 +5014,9 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
                 day_iso = "tba"
                 cards_html.append('<h2 class="hub-day" id="tba" data-day="tba">Date TBA</h2>')
 
-            by_city = {c: [] for c in city_order}
+            day_events.sort(key=lambda ev: ev.get("_time") or datetime.max.replace(tzinfo=EASTERN))
             for e in day_events:
-                c = _event_city(e.get("venue"), e.get("_source_venue"), e)
-                by_city.setdefault(c, []).append(e)
-
-            for cname in city_order:
-                cevents = by_city.get(cname) or []
-                if not cevents:
-                    continue
-                cevents.sort(key=lambda ev: ev.get("_time") or datetime.max.replace(tzinfo=EASTERN))
-                city_cards = [_render_kid_card(e) for e in cevents]
-                city_label = CITY_LABELS.get(cname, cname.title())
-                cards_html.append(f'''<div class="kid-city-section" data-city="{escape(cname)}" data-day="{day_iso}">
-  <div class="kid-city-head">
-    <span class="kid-city-pill"><span class="city-dot"></span>{escape(city_label)}</span>
-    <span class="count">{len(cevents)}</span>
-  </div>
-  <div class="kid-city-cards">
-    {"".join(city_cards)}
-  </div>
-</div>''')
+                cards_html.append(_render_kid_card(e))
         cards_html = inline_html
         if later_html:
             if extra_files is not None:
@@ -4251,9 +5035,22 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
             d_str = escape(e.get("date") or "")
             t_str = escape(e.get("time") or "")
             t_obj = e.get("_time")
+            d_key = None
             if isinstance(t_obj, datetime):
+                d_key = t_obj.date()
                 d_str = ""
                 t_str = _hub_time_label(e, t_obj)
+            elif e.get("date"):
+                try:
+                    dt = datetime.fromisoformat(str(e["date"]).replace("Z", "+00:00"))
+                    d_key = dt.date()
+                    d_str = ""
+                    t_str = _hub_time_label(e, dt)
+                except Exception:
+                    try:
+                        d_key = datetime.strptime(str(e["date"])[:10], "%Y-%m-%d").date()
+                    except Exception:
+                        d_key = None
             desc_html = ""
             if e.get("description"):
                 d_txt = re.sub(r"\s+", " ", str(e["description"])).strip()
@@ -4273,39 +5070,51 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
             edm_sub_counts[sub] = edm_sub_counts.get(sub, 0) + 1
             edm_places.add(e.get("venue") or "")
 
-            day_attr = t_obj.date().isoformat() if isinstance(t_obj, datetime) else ""
+            day_attr = d_key.isoformat() if d_key else ""
             free_attr = "1" if is_free else "0"
             area_attr = city if city in ("boston", "cambridge", "somerville") else "other"
-            time_badge = f'<time class="hub-date">{" · ".join(x for x in (d_str, t_str) if x)}</time>'
+            time_display = " · ".join(x for x in (d_str, t_str) if x) or "Night"
 
             return f"""<article class="hub-card edm-card edm-k-{sub}" data-city="{escape(city)}" data-day="{day_attr}" data-genre="{sub}" data-area="{area_attr}" data-when="{time_tag}" data-free="{free_attr}">
-  <div class="edm-card-band"></div>
+  <time class="hub-date">{time_display}</time>
   <div class="edm-card-body">
-    <div class="edm-card-top">
-      <div class="edm-card-subgenre"><span aria-hidden="true">{sub_emoji}</span> {escape(sub_label)}</div>
+    <div class="edm-card-row-top">
+      <span class="edm-card-subgenre" style="color:var(--edm-band);"><span aria-hidden="true">{sub_emoji}</span> {escape(sub_label)}</span>
+      <h3 class="edm-card-title"><a href="{url}" target="_blank" rel="noopener">{title}</a></h3>
       <div class="hub-badges">{price_badge}</div>
     </div>
-    <h3 class="edm-card-title"><a href="{url}" target="_blank" rel="noopener">{title}</a></h3>
-    <div class="edm-card-venue">
-      <span>📍 {venue}</span>
+    <div class="edm-card-row-meta">
+      <span class="edm-card-venue">📍 {venue}</span>
       <span class="edm-card-neigh">{escape(neigh)}</span>
+      <a href="{url}" target="_blank" rel="noopener" class="edm-ticket-link">Tickets / Info →</a>
     </div>
     {desc_html}
-    <div class="edm-card-footer">
-      {time_badge}
-      <a href="{url}" target="_blank" rel="noopener" class="edm-ticket-btn">Tickets / Info →</a>
-    </div>
   </div>
 </article>"""
 
         by_day = {}
         for e in filtered[:card_limit]:
             t_obj = e.get("_time")
-            d_key = t_obj.date() if isinstance(t_obj, datetime) else None
+            if isinstance(t_obj, datetime):
+                d_key = t_obj.date()
+            elif e.get("date"):
+                try:
+                    d_key = datetime.fromisoformat(str(e["date"]).replace("Z", "+00:00")).date()
+                except Exception:
+                    try:
+                        d_key = datetime.strptime(str(e["date"])[:10], "%Y-%m-%d").date()
+                    except Exception:
+                        d_key = None
+            else:
+                d_key = None
             by_day.setdefault(d_key, []).append(e)
 
-        city_order = ["cambridge", "somerville", "boston", "other"]
-        for day_obj, day_events in by_day.items():
+        day_keys = sorted((k for k in by_day if k is not None))
+        if None in by_day:
+            day_keys.append(None)
+
+        for day_obj in day_keys:
+            day_events = by_day[day_obj]
             if day_obj:
                 day_iso = day_obj.isoformat()
                 day_heading = day_obj.strftime("%A, %B %-d")
@@ -4314,44 +5123,132 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
                 day_iso = "tba"
                 cards_html.append('<h2 class="hub-day" id="tba" data-day="tba">Date TBA</h2>')
 
-            by_city = {c: [] for c in city_order}
+            day_events.sort(key=lambda ev: ev.get("_time") or datetime.max.replace(tzinfo=EASTERN))
             for e in day_events:
-                c = _event_city(e.get("venue"), e.get("_source_venue"), e)
-                by_city.setdefault(c, []).append(e)
-
-            for cname in city_order:
-                cevents = by_city.get(cname) or []
-                if not cevents:
-                    continue
-                cevents.sort(key=lambda ev: ev.get("_time") or datetime.max.replace(tzinfo=EASTERN))
-                city_cards = [_render_edm_card(e) for e in cevents]
-                city_label = CITY_LABELS.get(cname, cname.title())
-                pill_cls = f"city-{cname}"
-                cards_html.append(f'''<div class="edm-city-section" data-city="{escape(cname)}" data-day="{day_iso}">
-  <div class="edm-city-head">
-    <span class="edm-city-pill {pill_cls}">{escape(city_label)}</span>
-    <span class="count">{len(cevents)}</span>
-  </div>
-  <div class="edm-city-cards">
-    {"".join(city_cards)}
-  </div>
-</div>''')
+                cards_html.append(_render_edm_card(e))
     elif is_camps:
-        cards_html = [_camp_card(c) for c in filtered[:card_limit]]
+        cards_html = []
+        area_labels = {
+            "boston": "📍 Boston & Neighborhoods",
+            "cam_som": "📍 Cambridge & Somerville",
+            "west": "📍 Brookline, Newton & West Suburbs",
+            "north": "📍 North Suburbs (Arlington, Medford, Lexington)",
+            "south": "📍 South Shore & South Suburbs",
+            "north_shore": "📍 North Shore",
+            "away": "⛺ Overnight & Regional Camps"
+        }
+        area_order = ["boston", "cam_som", "west", "north", "south", "north_shore", "away"]
+        by_area = {}
+        for c in filtered[:card_limit]:
+            by_area.setdefault(c["area"], []).append(c)
+
+        for a_key in area_order:
+            if a_key in by_area:
+                c_list = by_area[a_key]
+                lbl = area_labels.get(a_key, a_key.title())
+                cards_html.append(
+                    f'<div class="camp-loc-header" data-area="{a_key}">'
+                    f'<span>{lbl}</span>'
+                    f'<span class="count">{len(c_list)}</span>'
+                    f'</div>'
+                )
+                for c in c_list:
+                    cards_html.append(_camp_card(c))
     elif is_markets:
         mk_daily, mk_dated = _markets_split(filtered)
         cards_html = _render_market_sections(mk_daily, mk_dated, card_limit)
     elif is_college:
+        def _render_col_card(e, day_iso):
+            nonlocal college_free
+            title = escape(e.get("title") or e.get("name") or "Event")
+            venue = escape(e.get("venue") or e.get("_source_venue") or "Venue")
+            url = escape(e.get("url") or e.get("link") or "#")
+            t_obj = e.get("_time")
+            if isinstance(t_obj, datetime):
+                t_str = _hub_time_label(e, t_obj)
+            elif e.get("date"):
+                try:
+                    dt = datetime.fromisoformat(str(e["date"]).replace("Z", "+00:00"))
+                    t_str = _hub_time_label(e, dt)
+                except Exception:
+                    t_str = escape(e.get("time") or "")
+            else:
+                t_str = escape(e.get("time") or "")
+
+            desc_html = ""
+            if hub.get("show_details") and e.get("description"):
+                d_txt = re.sub(r"\s+", " ", str(e["description"])).strip()
+                desc_html = f'<p class="hub-desc">{escape(d_txt[:160] + ("…" if len(d_txt) > 160 else ""))}</p>'
+            price_val = e.get("price")
+            price_txt = str(price_val or "").strip()
+            if re.fullmatch(r"\d+(?:\.\d+)?", price_txt):
+                price_txt = "$" + price_txt
+            price_badge = f'<span class="badge badge-price">{escape(price_txt)}</span>' if price_txt else ""
+            is_free = _is_event_free(e)
+            if is_free:
+                college_free += 1
+                price_badge = '<span class="badge badge-free">Free</span>'
+
+            school = detect_school(e) or "other"
+            kind = college_kind(e, _effective_category(e))
+            v_name = e.get("venue") or e.get("_source_venue") or ""
+            a_key = college_area(school, v_name)
+
+            college_schools[school] = college_schools.get(school, 0) + 1
+            college_kinds[kind] = college_kinds.get(kind, 0) + 1
+            college_areas_count[a_key] = college_areas_count.get(a_key, 0) + 1
+
+            kind_emojis = {"sports": "🏒", "performances": "🎻", "talks": "🎓", "campus": "🏛️"}
+            kind_labels = {"sports": "Game", "performances": "Concert", "talks": "Lecture", "campus": "Campus"}
+            kind_badge = f'<span class="badge badge-kind">{kind_emojis.get(kind, "🎓")} {kind_labels.get(kind, kind.title())}</span>'
+            school_badge = f'<span class="badge badge-school">{escape(school_label(school))}</span>'
+            badges_html = f"{school_badge}{kind_badge}{price_badge}"
+
+            neigh, transit = college_transit_info(school, v_name)
+            transit_html = f'<span class="col-transit-tag">🚇 {escape(transit)}</span>' if transit else ""
+            neigh_html = f'<span class="col-location-tag">· {escape(neigh)}</span>' if neigh else ""
+
+            time_html = f'<time class="hub-date">{t_str}</time>' if t_str else ""
+            card_attrs = f'data-school="{school}" data-kind="{kind}" data-free="{int(is_free)}" data-area="{a_key}" data-day="{day_iso}"'
+            return f"""<article class="hub-card col-card" {card_attrs}>
+  {time_html}
+  <div class="col-card-body">
+    <div class="col-card-top">
+      <h3 class="hub-title"><a href="{url}" target="_blank" rel="noopener">{title}</a></h3>
+      <div class="hub-badges">{badges_html}</div>
+    </div>
+    <div class="hub-meta">
+      <span class="hub-venue">📍 {venue}</span>
+      {neigh_html}
+      {transit_html}
+    </div>
+    {desc_html}
+  </div>
+</article>"""
+
         by_day = {}
         for e in filtered[:card_limit]:
             t_obj = e.get("_time")
-            d_key = t_obj.date() if isinstance(t_obj, datetime) else None
+            if isinstance(t_obj, datetime):
+                d_key = t_obj.date()
+            elif e.get("date"):
+                try:
+                    d_key = datetime.fromisoformat(str(e["date"]).replace("Z", "+00:00")).date()
+                except Exception:
+                    try:
+                        d_key = datetime.strptime(str(e["date"])[:10], "%Y-%m-%d").date()
+                    except Exception:
+                        d_key = None
+            else:
+                d_key = None
             by_day.setdefault(d_key, []).append(e)
 
-        area_meta = {k: (lbl, sub, emo, tr) for k, lbl, sub, emo, tr in COLLEGE_AREAS}
-        area_order = [k for k, _lbl, _sub, _emo, _tr in COLLEGE_AREAS]
+        day_keys = sorted((k for k in by_day if k is not None))
+        if None in by_day:
+            day_keys.append(None)
 
-        for day_obj, day_events in by_day.items():
+        for day_obj in day_keys:
+            day_events = by_day[day_obj]
             if day_obj:
                 day_iso = day_obj.isoformat()
                 day_heading = day_obj.strftime("%A, %B %-d")
@@ -4360,86 +5257,9 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
                 day_iso = "tba"
                 cards_html.append('<h2 class="hub-day" id="tba" data-day="tba">Date TBA</h2>')
 
-            by_area = {a: [] for a in area_order}
+            day_events.sort(key=lambda ev: ev.get("_time") or datetime.max.replace(tzinfo=EASTERN))
             for e in day_events:
-                s_key = detect_school(e)
-                v_name = e.get("venue") or e.get("_source_venue") or ""
-                a_key = college_area(s_key, v_name)
-                by_area.setdefault(a_key, []).append(e)
-
-            for a_key in area_order:
-                a_events = by_area.get(a_key) or []
-                if not a_events:
-                    continue
-                a_events.sort(key=lambda ev: ev.get("_time") or datetime.max.replace(tzinfo=EASTERN))
-                area_cards = []
-                for e in a_events:
-                    title = escape(e.get("title") or e.get("name") or "Event")
-                    venue = escape(e.get("venue") or e.get("_source_venue") or "Venue")
-                    url = escape(e.get("url") or e.get("link") or "#")
-                    t_obj = e.get("_time")
-                    t_str = _hub_time_label(e, t_obj) if isinstance(t_obj, datetime) else escape(e.get("time") or "")
-                    desc_html = ""
-                    if hub.get("show_details") and e.get("description"):
-                        d_txt = re.sub(r"\s+", " ", str(e["description"])).strip()
-                        desc_html = f'<p class="hub-desc">{escape(d_txt[:160] + ("…" if len(d_txt) > 160 else ""))}</p>'
-                    price_val = e.get("price")
-                    price_txt = str(price_val or "").strip()
-                    if re.fullmatch(r"\d+(?:\.\d+)?", price_txt):
-                        price_txt = "$" + price_txt
-                    price_badge = f'<span class="badge badge-price">{escape(price_txt)}</span>' if price_txt else ""
-                    is_free = _is_event_free(e)
-                    if is_free:
-                        price_badge = '<span class="badge badge-free">Free</span>'
-
-                    school = detect_school(e) or "other"
-                    kind = college_kind(e, _effective_category(e))
-                    college_schools[school] = college_schools.get(school, 0) + 1
-                    college_kinds[kind] = college_kinds.get(kind, 0) + 1
-                    college_areas_count[a_key] = college_areas_count.get(a_key, 0) + 1
-                    college_free += is_free
-
-                    kind_emojis = {"sports": "🏒", "performances": "🎻", "talks": "🎓", "campus": "🏛️"}
-                    kind_labels = {"sports": "Game", "performances": "Concert", "talks": "Lecture", "campus": "Campus"}
-                    kind_badge = f'<span class="badge badge-kind">{kind_emojis.get(kind, "🎓")} {kind_labels.get(kind, kind.title())}</span>'
-                    school_badge = f'<span class="badge badge-school">{escape(school_label(detect_school(e)))}</span>'
-                    badges_html = f"{school_badge}{kind_badge}{price_badge}"
-
-                    neigh, transit = college_transit_info(detect_school(e), e.get("venue") or "")
-                    transit_html = f'<span class="col-transit-tag">🚇 {escape(transit)}</span>' if transit else ""
-                    neigh_html = f'<span class="col-location-tag">· {escape(neigh)}</span>' if neigh else ""
-
-                    card_attrs = f'data-school="{school}" data-kind="{kind}" data-free="{int(is_free)}" data-area="{a_key}" data-day="{day_iso}"'
-                    area_cards.append(f"""<article class="hub-card col-card" {card_attrs}>
-  <div class="hub-card-head">
-    <time class="hub-date">{t_str}</time>
-    <div class="hub-badges">{badges_html}</div>
-  </div>
-  <h3 class="hub-title"><a href="{url}" target="_blank" rel="noopener">{title}</a></h3>
-  <div class="hub-meta">
-    <span class="hub-venue">📍 {venue}</span>
-    {neigh_html}
-    {transit_html}
-  </div>
-  {desc_html}
-</article>""")
-
-                lbl, sub, emo, tr = area_meta.get(a_key, (a_key.title(), "", "🏛️", "MBTA"))
-                cards_html.append(f"""<div class="col-area-section" data-area="{a_key}" data-day="{day_iso}">
-  <div class="col-area-head">
-    <div class="col-area-title-wrap">
-      <span class="col-area-pill col-area-{a_key}">{emo} {escape(lbl)}</span>
-      <span class="col-area-sub">{escape(sub)}</span>
-    </div>
-    <div class="col-area-meta-wrap">
-      <span class="col-area-transit">🚇 {escape(tr)}</span>
-      <span class="col-area-count count">{len(area_cards)}</span>
-    </div>
-  </div>
-  <div class="col-area-cards">
-    {"".join(area_cards)}
-  </div>
-</div>""")
+                cards_html.append(_render_col_card(e, day_iso))
     else:
         last_day = None
         for e in filtered[:card_limit]:
@@ -4513,21 +5333,25 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
         kids_head, kids_css, body_class = _KIDS_FONTS, _KIDS_CSS, ' class="kids-hub"'
         present = {c for c in ("boston", "cambridge", "somerville", "other") if f'data-city="{c}"' in "".join(cards_html)}
 
-        def chip(group, val, label):
-            return f'<button type="button" class="kid-chip" data-group="{group}" data-val="{val}">{label}</button>'
-        where = "".join(chip("city", k, lbl) for k, lbl in _HUB_CITY_CHIPS if k == "all" or k in present)
-        ages = chip("age", "all", "Any age") + "".join(
-            chip("age", k, lbl) for k, lbl, _r in _KID_AGE_BUCKETS if kid_age_counts.get(k)) + (
-            chip("age", "family", "🏡 All Ages / Family") if kid_age_counts.get("family") else "")
-        kinds = chip("kind", "all", "Everything") + "".join(
-            chip("kind", k, f"{emo} {lbl}") for k, lbl, emo, _rx in _KID_KIND_RES if kid_kind_counts.get(k))
-        prices = chip("price", "all", "Any price") + chip("price", "free", "💛 Free only")
+        def opt(group, val, label, is_active=False):
+            active_cls = " active" if is_active else ""
+            return f'<option class="kid-chip{active_cls}" data-group="{group}" data-val="{val}" value="{val}">{label}</option>'
+
+        where = "".join(opt("city", k, lbl, is_active=(k == "all")) for k, lbl in _HUB_CITY_CHIPS if k == "all" or k in present)
+        ages = opt("age", "all", "👶 Any age", is_active=True) + "".join(
+            opt("age", k, lbl) for k, lbl, _r in _KID_AGE_BUCKETS if kid_age_counts.get(k)) + (
+            opt("age", "family", "🏡 All Ages / Family") if kid_age_counts.get("family") else "")
+        kinds = opt("kind", "all", "🎨 Everything", is_active=True) + "".join(
+            opt("kind", k, f"{emo} {lbl}") for k, lbl, emo, _rx in _KID_KIND_RES if kid_kind_counts.get(k))
+        prices = opt("price", "all", "🎟️ Any price", is_active=True) + opt("price", "free", "💛 Free only")
         city_chips_html = f"""<div class="kids-filters" role="group" aria-label="Filter kids events">
-    <div class="kid-filter-row" id="kid-when"><span class="kid-filter-label">When</span>{chip("when", "all", "Any day")}</div>
-    <div class="kid-filter-row"><span class="kid-filter-label">Where</span>{where}</div>
-    <div class="kid-filter-row"><span class="kid-filter-label">Ages</span>{ages}</div>
-    <div class="kid-filter-row"><span class="kid-filter-label">What</span>{kinds}</div>
-    <div class="kid-filter-row"><span class="kid-filter-label">Cost</span>{prices}</div>
+    <select class="kid-select" id="kid-when" data-group="when" aria-label="Filter by Date">
+      <option class="kid-chip active" data-group="when" data-val="all" value="all">🗓️ Any day</option>
+    </select>
+    <select class="kid-select" id="kid-city" data-group="city" aria-label="Filter by Area">{where}</select>
+    <select class="kid-select" id="kid-age" data-group="age" aria-label="Filter by Child's Age">{ages}</select>
+    <select class="kid-select" id="kid-kind" data-group="kind" aria-label="Filter by Activity">{kinds}</select>
+    <select class="kid-select" id="kid-price" data-group="price" aria-label="Filter by Cost">{prices}</select>
   </div>"""
         hub_js = _KIDS_FILTER_JS
         n_cards = sum(kid_kind_counts.values())
@@ -4544,25 +5368,25 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
     elif is_edm:
         kids_head, kids_css, body_class = _EDM_FONTS, _EDM_CSS, ' class="edm-hub"'
         subgenres_html = (
-            '<button type="button" class="edm-chip active" data-group="genre" data-val="all">All Electronic</button>'
-            + "".join(f'<button type="button" class="edm-chip" data-group="genre" data-val="{k}">{lbl}</button>'
+            '<option class="edm-chip active" data-group="genre" data-val="all" value="all">⚡ All Electronic</option>'
+            + "".join(f'<option class="edm-chip" data-group="genre" data-val="{k}" value="{k}">{lbl}</option>'
                       for k, lbl, _emo, _rx in _EDM_SUBGENRE_PATTERNS if edm_sub_counts.get(k))
         )
-        areas_html = """<button type="button" class="edm-chip active" data-group="area" data-val="all">All Areas</button>
-<button type="button" class="edm-chip" data-group="area" data-val="cambridge">Central Sq &amp; Cambridge</button>
-<button type="button" class="edm-chip" data-group="area" data-val="boston">Downtown &amp; Seaport</button>
-<button type="button" class="edm-chip" data-group="area" data-val="somerville">Somerville</button>
-<button type="button" class="edm-chip" data-group="area" data-val="other">Greater Boston</button>"""
-        when_html = """<button type="button" class="edm-chip active" data-group="when" data-val="all">All Dates</button>
-<button type="button" class="edm-chip" data-group="when" data-val="tonight">🔥 Tonight</button>
-<button type="button" class="edm-chip" data-group="when" data-val="weekend">🎉 This Weekend</button>"""
-        cost_html = """<button type="button" class="edm-chip active" data-group="cost" data-val="all">All Prices</button>
-<button type="button" class="edm-chip" data-group="cost" data-val="free">💛 Free / No Cover</button>"""
+        areas_html = """<option class="edm-chip active" data-group="area" data-val="all" value="all">📍 All Areas</option>
+<option class="edm-chip" data-group="area" data-val="cambridge" value="cambridge">Central Sq &amp; Cambridge</option>
+<option class="edm-chip" data-group="area" data-val="boston" value="boston">Downtown &amp; Seaport</option>
+<option class="edm-chip" data-group="area" data-val="somerville" value="somerville">Somerville</option>
+<option class="edm-chip" data-group="area" data-val="other" value="other">Greater Boston</option>"""
+        when_html = """<option class="edm-chip active" data-group="when" data-val="all" value="all">📅 All Dates</option>
+<option class="edm-chip" data-group="when" data-val="tonight" value="tonight">🔥 Tonight</option>
+<option class="edm-chip" data-group="when" data-val="weekend" value="weekend">🎉 This Weekend</option>"""
+        cost_html = """<option class="edm-chip active" data-group="cost" data-val="all" value="all">💵 All Prices</option>
+<option class="edm-chip" data-group="cost" data-val="free" value="free">💛 Free / No Cover</option>"""
         city_chips_html = f"""<div class="edm-filters" role="group" aria-label="Filter electronic and EDM shows">
-    <div class="edm-filter-row"><span class="edm-filter-label">Vibes</span>{subgenres_html}</div>
-    <div class="edm-filter-row"><span class="edm-filter-label">Area</span>{areas_html}</div>
-    <div class="edm-filter-row"><span class="edm-filter-label">When</span>{when_html}</div>
-    <div class="edm-filter-row"><span class="edm-filter-label">Cost</span>{cost_html}</div>
+    <select id="edm-genre" class="edm-select" data-group="genre" aria-label="Vibes">{subgenres_html}</select>
+    <select id="edm-area" class="edm-select" data-group="area" aria-label="Area">{areas_html}</select>
+    <select id="edm-when" class="edm-select" data-group="when" aria-label="When">{when_html}</select>
+    <select id="edm-cost" class="edm-select" data-group="cost" aria-label="Cost">{cost_html}</select>
   </div>"""
         hub_js = _EDM_FILTER_JS
         n_cards = len(filtered[:card_limit])
@@ -4597,24 +5421,24 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
     elif is_college and cards_html:
         kids_css, body_class = _COLLEGE_CSS, ' class="college-hub"'
 
-        def chip(group, val, label, is_active=False):
+        def opt(group, val, label, is_active=False):
             active_cls = " active" if is_active else ""
-            return f'<button type="button" class="hub-city-chip col-chip{active_cls}" data-group="{group}" data-val="{val}">{label}</button>'
+            return f'<option class="hub-city-chip col-chip{active_cls}" data-group="{group}" data-val="{val}" value="{val}">{label}</option>'
 
-        areas = chip("area", "all", "All Campuses", is_active=True) + "".join(
-            chip("area", k, f"{emo} {escape(lbl)}") for k, lbl, _sub, emo, _tr in COLLEGE_AREAS if college_areas_count.get(k))
-        schools = chip("school", "all", "All schools", is_active=True) + "".join(
-            chip("school", k, escape(short)) for k, (short, _full) in COLLEGE_SCHOOLS.items() if college_schools.get(k)) + (
-            chip("school", "other", "Cross-campus") if college_schools.get("other") else "")
-        kinds = chip("kind", "all", "Everything", is_active=True) + "".join(
-            chip("kind", k, f"{emo} {lbl}") for k, emo, lbl in COLLEGE_KINDS if college_kinds.get(k))
-        cost_chips = chip("free", "all", "All prices", is_active=True) + (chip("free", "1", "💛 Free") if college_free else "")
+        areas = opt("area", "all", "📍 All Campuses", is_active=True) + "".join(
+            opt("area", k, f"{emo} {escape(lbl)}") for k, lbl, _sub, emo, _tr in COLLEGE_AREAS if college_areas_count.get(k))
+        schools = opt("school", "all", "🎓 All schools", is_active=True) + "".join(
+            opt("school", k, escape(short)) for k, (short, _full) in COLLEGE_SCHOOLS.items() if college_schools.get(k)) + (
+            opt("school", "other", "Cross-campus") if college_schools.get("other") else "")
+        kinds = opt("kind", "all", "✨ Everything", is_active=True) + "".join(
+            opt("kind", k, f"{emo} {lbl}") for k, emo, lbl in COLLEGE_KINDS if college_kinds.get(k))
+        cost_chips = opt("free", "all", "🎟️ All prices", is_active=True) + (opt("free", "1", "💛 Free") if college_free else "")
 
         city_chips_html = f"""<div class="col-filters" role="group" aria-label="Filter college events">
-    <div class="col-row"><span class="col-filter-label">Area</span>{areas}</div>
-    <div class="col-row"><span class="col-filter-label">School</span>{schools}</div>
-    <div class="col-row"><span class="col-filter-label">What</span>{kinds}</div>
-    <div class="col-row"><span class="col-filter-label">Cost</span>{cost_chips}</div>
+    <select class="col-select" data-group="area" aria-label="Filter by Campus Area">{areas}</select>
+    <select class="col-select" data-group="school" aria-label="Filter by School">{schools}</select>
+    <select class="col-select" data-group="kind" aria-label="Filter by Event Type">{kinds}</select>
+    <select class="col-select" data-group="free" aria-label="Filter by Cost">{cost_chips}</select>
   </div>"""
         hub_js = _COLLEGE_FILTER_JS
         n_cards = len(filtered[:card_limit])
@@ -4644,6 +5468,8 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
         hub_nav_html = _family_nav(hub_slug, "camps-nav" if is_camps else "kids-nav")
     elif is_college:
         hub_nav_html = _college_nav(hub_slug)
+    elif is_edm:
+        hub_nav_html = _edm_nav(hub_slug)
     else:
         hub_nav_html = _main_hub_nav(hub_slug)
 
