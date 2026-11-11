@@ -81,10 +81,8 @@ class EdmHubTests(unittest.TestCase):
         # Verify streamlined nightlife nav
         self.assertIn('class="hub-nav edm-nav"', html)
         self.assertIn('href="../boston-edm/" class="active">Boston EDM</a>', html)
-        self.assertIn('href="../music/">Live Music</a>', html)
-        self.assertIn('href="../college/">College</a>', html)
-        self.assertNotIn("kids-family-events-boston", html)
-        self.assertNotIn("summer-camps", html)
+        for page in ("college", "kids-family-events-boston", "summer-camps", "markets-festivals-boston"):
+            self.assertIn(f'href="../{page}/"', html)
         # Verify sleek hero art badge
         self.assertIn("BOSTON UNDERGROUND &amp; CLUBS", html)
         # Verify sidebar filter and city sections

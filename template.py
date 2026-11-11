@@ -2305,8 +2305,8 @@ _MARKETS_CSS = """
   .mk-count { font-size: 12px; font-weight: 700; color: var(--muted); background: #f3e8da; border-radius: 999px; padding: 2px 8px; }
   .markets-hub .hub-grid { display: flex; flex-direction: column; gap: 12px; }
   .markets-hub .hub-day { text-decoration: none; }
-  .mk-daily { background: linear-gradient(135deg, #2a3560, #7a3f5e); border-radius: 14px; padding: 4px 14px 14px; margin: 4px 0 10px; }
-  .markets-hub .mk-daily .hub-day { color: #ffe7a3; border-bottom-color: rgba(255, 231, 163, 0.25); margin-top: 10px; }
+  .mk-daily { margin: 4px 0 10px; }
+  .markets-hub .mk-daily .hub-day { margin-top: 10px; }
   .mk-city { margin: 2px 0 10px; }
   .mk-city-head { margin: 10px 0 6px; font-size: 13px; }
   .mk-city-pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-weight: 800; color: #fff;
@@ -5806,19 +5806,14 @@ def _camps_sections(camps):
     return hero, filters, tail
 
 
-_FAMILY_NAV = (("../", "All Events", None),
-               ("../markets-festivals-boston/", "Markets &amp; Festivals", "markets-festivals-boston"),
-               ("../college/", "College", "college"),
-               ("../kids-family-events-boston/", "Kids &amp; Family", "kids-family-events-boston"),
-               ("../summer-camps/", "Summer Camps", "summer-camps"))
-
-
-# The header bar on guide pages links to all finished guide pages.
+# The header bar on every guide page links to the same finished pages.
 _MAIN_NAV = (("../", "All Events", None),
              ("../markets-festivals-boston/", "Markets &amp; Festivals", "markets-festivals-boston"),
              ("../college/", "College", "college"),
              ("../kids-family-events-boston/", "Kids &amp; Family", "kids-family-events-boston"),
-             ("../summer-camps/", "Summer Camps", "summer-camps"))
+             ("../summer-camps/", "Summer Camps", "summer-camps"),
+             ("../boston-edm/", "Boston EDM", "boston-edm"))
+_FAMILY_NAV = _COLLEGE_NAV = _EDM_NAV = _MAIN_NAV
 
 
 def _main_hub_nav(hub_slug):
@@ -5836,18 +5831,6 @@ def _family_nav(hub_slug, nav_class):
     return f'  <nav class="hub-nav {nav_class}">\n{links}\n  </nav>'
 
 
-_COLLEGE_NAV = (
-    ("../", "All Events", None),
-    ("../college/", "College", "college"),
-    ("../markets-festivals-boston/", "Markets &amp; Festivals", "markets-festivals-boston"),
-    ("../kids-family-events-boston/", "Kids &amp; Family", "kids-family-events-boston"),
-    ("../summer-camps/", "Summer Camps", "summer-camps"),
-    ("../free/", "Free Events", "free"),
-    ("../boston-edm/", "Boston EDM", "boston-edm"),
-    ("../cambridge-events-tonight/", "Cambridge Tonight", "cambridge-events-tonight"),
-    ("../music/", "Live Music", "music"),
-)
-
 
 def _college_nav(hub_slug):
     """The short student-focused nav for the college hub."""
@@ -5856,14 +5839,6 @@ def _college_nav(hub_slug):
                       for href, label, slug in _COLLEGE_NAV)
     return f'  <nav class="hub-nav col-nav">\n{links}\n  </nav>'
 
-
-_EDM_NAV = (
-    ("../", "All Events", None),
-    ("../boston-edm/", "Boston EDM", "boston-edm"),
-    ("../cambridge-events-tonight/", "Cambridge Tonight", "cambridge-events-tonight"),
-    ("../music/", "Live Music", "music"),
-    ("../college/", "College", "college"),
-)
 
 
 def _edm_nav(hub_slug):

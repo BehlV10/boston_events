@@ -190,10 +190,10 @@ class CollegeHub(unittest.TestCase):
         self.assertIn("14 Campuses", self.html)
 
     def test_top_nav_is_student_focused(self):
-        # Student nav includes: All Events, College (active), Markets & Festivals, Kids & Family, Summer Camps, Free Events, Boston EDM, Cambridge Tonight, Live Music
+        # The bar links the finished pages only (see tests/test_hub_nav.py)
         self.assertIn('<a href="../college/" class="active">College</a>', self.html)
         self.assertIn('<a href="../boston-edm/"', self.html)
-        self.assertIn('<a href="../cambridge-events-tonight/"', self.html)
+        self.assertNotIn('<a href="../cambridge-events-tonight/"', self.html)
         self.assertIn("markets-festivals-boston", self.html)
         self.assertIn("kids-family-events-boston", self.html)
         self.assertIn("summer-camps", self.html)

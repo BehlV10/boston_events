@@ -167,7 +167,7 @@ class HubPageAcceptance(unittest.TestCase):
         self.assertIn('<a href="../">All Events</a>', nav_html)
         self.assertIn('<a href="../kids-family-events-boston/" class="active">Kids &amp; Family</a>', nav_html)
         self.assertIn('<a href="../summer-camps/">Summer Camps</a>', nav_html)
-        for unrelated in ("boston-edm", "live-music-somerville", "cambridge-events-tonight", "board-game-nights-boston", "comedy"):
+        for unrelated in ("live-music-somerville", "cambridge-events-tonight", "board-game-nights-boston", "comedy"):
             self.assertNotIn(unrelated, nav_html)
 
 
