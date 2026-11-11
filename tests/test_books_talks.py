@@ -1,4 +1,4 @@
-"""The Books & Talks filter: author events and lectures/panels, split out of Arts & culture and Community."""
+"""Books and talks (sub-filters of Arts & culture): author events and lectures/panels, split out of Arts & culture and Community."""
 import unittest
 
 import scrapers
@@ -8,15 +8,17 @@ from scrapers import category_bucket, infer_category
 
 class BooksAndTalksBucket(unittest.TestCase):
     def test_bucket_membership(self):
-        self.assertEqual(category_bucket("books"), "Books & Talks")
-        self.assertEqual(category_bucket("talks"), "Books & Talks")
+        self.assertEqual(category_bucket("books"), "Arts & culture")
+        self.assertEqual(category_bucket("talks"), "Arts & culture")
         self.assertEqual(category_bucket("art"), "Arts & culture")
         self.assertEqual(category_bucket("film"), "Arts & culture")
         self.assertIn("talks", scrapers.CATEGORY_STYLES)
 
-    def test_old_shared_links_still_show_books(self):
+    def test_arts_subfilters_in_the_panel(self):
         html = template.render_page([])
-        self.assertIn("if (vals.has('Arts & culture')) vals.add('Books & Talks');", html)
+        for k in ("art", "books", "talks", "film"):
+            self.assertIn(f'class="artsub-chk" value="{k}" checked', html)
+        self.assertNotIn('value="Books & Talks"', html)  # no separate bucket box any more
 
 
 class TalkInference(unittest.TestCase):
