@@ -12045,6 +12045,17 @@ def render_page(results, weather=None, luckyseat_shows=None):
             genreBoxes.forEach(b => {{ b.checked = (b.value === gVal); }});
           }}
         }}
+        // The genre boxes follow the Music box. Unticking Music unticks every genre, and a link
+        // with no genre= must not bring them all back ticked under an unticked Music.
+        const musicBox = Array.from(catBoxes).find(b => b.value === 'Music & nightlife');
+        if (musicBox) {{
+          if (!hasParam('genre')) {{
+            activeGenre = 'all';
+            genreBoxes.forEach(b => {{ b.checked = musicBox.checked; }});
+          }}
+          const subContainer = document.getElementById('subgenre-container');
+          if (subContainer) subContainer.classList.toggle('disabled', !musicBox.checked);
+        }}
 
         if (hasParam('city')) {{
           const vals = new Set(getParam('city').split(','));
