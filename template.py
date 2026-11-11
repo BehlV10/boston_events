@@ -1594,6 +1594,11 @@ _HUB_MARKET_JS = """<script>
   var leafletMap = null;
   var markersLayer = null;
 
+  cards.forEach(function (c) {
+    c._origParent = c.parentNode;
+    c._origNext = c.nextSibling;
+  });
+
   var kindSelect = document.getElementById('mk-kind-select');
   var citySelect = document.getElementById('mk-city-select');
   var nearBtn = document.getElementById('mk-near-btn');
@@ -1605,9 +1610,6 @@ _HUB_MARKET_JS = """<script>
   var mapWrap = document.getElementById('mk-map-wrap');
   var mapCloseBtn = document.getElementById('mk-map-close');
   var mapStatus = document.getElementById('mk-map-status');
-
-  var grid = document.querySelector('.hub-grid');
-  var initialNodes = grid ? Array.prototype.slice.call(grid.children) : [];
 
   function haversineMiles(lat1, lon1, lat2, lon2) {
     var R = 3958.8;
@@ -1704,6 +1706,7 @@ _HUB_MARKET_JS = """<script>
   }
 
   function sortByDistance(userLat, userLng, originLabel) {
+    sorting_dist = true;
     cards.forEach(function (c) {
       var lat = parseFloat(c.dataset.lat), lng = parseFloat(c.dataset.lng);
       var badge = c.querySelector('.mk-dist-badge');
@@ -1720,26 +1723,47 @@ _HUB_MARKET_JS = """<script>
       }
     });
 
-    var cardArr = Array.prototype.slice.call(cards);
-    cardArr.sort(function (a, b) { return (a._dist || 0) - (b._dist || 0); });
-    if (grid) {
-      cardArr.forEach(function (c) { grid.appendChild(c); });
+    var dailySec = document.querySelector('.mk-daily');
+    if (dailySec) {
+      var dailyGrid = dailySec.querySelector('.mk-grid');
+      if (dailyGrid) {
+        var dCards = Array.prototype.slice.call(dailySec.querySelectorAll('.hub-card'));
+        dCards.sort(function (a, b) { return (a._dist || 0) - (b._dist || 0); });
+        dCards.forEach(function (c) { dailyGrid.appendChild(c); });
+      }
     }
-    heads.forEach(function (h) { h.hidden = true; });
-    document.querySelectorAll('.mk-city-head').forEach(function (h) { h.hidden = true; });
+
+    document.querySelectorAll('.mk-day-section').forEach(function (sec) {
+      var distGrid = sec.querySelector('.mk-day-dist-grid');
+      var dayCards = Array.prototype.slice.call(sec.querySelectorAll('.hub-card'));
+      dayCards.sort(function (a, b) { return (a._dist || 0) - (b._dist || 0); });
+      if (distGrid) {
+        dayCards.forEach(function (c) { distGrid.appendChild(c); });
+        distGrid.hidden = false;
+      }
+      sec.querySelectorAll('.mk-city').forEach(function (g) { g.hidden = true; });
+    });
+
     if (nearInfo) {
-      nearInfo.textContent = '📍 Sorted by distance from ' + originLabel;
+      nearInfo.textContent = '📍 Sorted by date, closest first from ' + originLabel;
       nearInfo.hidden = false;
     }
   }
 
   function restoreInitialOrder() {
-    if (grid && initialNodes.length) {
-      initialNodes.forEach(function (node) { grid.appendChild(node); });
-    }
+    sorting_dist = false;
     cards.forEach(function (c) {
       var badge = c.querySelector('.mk-dist-badge');
       if (badge) badge.hidden = true;
+      if (c._origParent) {
+        c._origParent.insertBefore(c, c._origNext || null);
+      }
+    });
+    document.querySelectorAll('.mk-day-dist-grid').forEach(function (g) {
+      g.hidden = true;
+    });
+    document.querySelectorAll('.mk-city').forEach(function (g) {
+      g.hidden = false;
     });
     if (nearInfo) {
       nearInfo.textContent = '';
@@ -1755,14 +1779,12 @@ _HUB_MARKET_JS = """<script>
         navigator.geolocation.getCurrentPosition(
           function (pos) {
             lastCoords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-            sorting_dist = true;
             if (originSelect) originSelect.value = 'here';
             sortByDistance(lastCoords.lat, lastCoords.lng, 'Your Location');
             show();
           },
           function () {
             lastCoords = { lat: 42.3601, lng: -71.0589 };
-            sorting_dist = true;
             if (originSelect) originSelect.value = '42.3601,-71.0589';
             sortByDistance(lastCoords.lat, lastCoords.lng, 'Boston (Downtown)');
             show();
@@ -1779,7 +1801,6 @@ _HUB_MARKET_JS = """<script>
     if (originSelect && originSelect.selectedIndex >= 0) {
       label = originSelect.options[originSelect.selectedIndex].text;
     }
-    sorting_dist = true;
     lastCoords = { lat: lat, lng: lng };
     sortByDistance(lat, lng, label);
     show();
@@ -1794,14 +1815,23 @@ _HUB_MARKET_JS = """<script>
       if (on) days[c.dataset.day] = 1;
     });
 
-    if (sorting_dist) {
-      heads.forEach(function (h) { h.hidden = true; });
-      document.querySelectorAll('.mk-city-head').forEach(function (h) { h.hidden = true; });
-    } else {
-      heads.forEach(function (h) { h.hidden = !days[h.dataset.day]; });
+    heads.forEach(function (h) {
+      var d = h.dataset.day;
+      h.hidden = !days[d];
+    });
+    document.querySelectorAll('.mk-day-section').forEach(function (sec) {
+      sec.hidden = !days[sec.dataset.day];
+    });
+    document.querySelectorAll('.mk-daily').forEach(function (sec) {
+      sec.hidden = !days['daily'];
+    });
+
+    if (!sorting_dist) {
+      groups.forEach(function (g) {
+        g.hidden = !g.querySelector('.hub-card:not([hidden])');
+      });
       document.querySelectorAll('.mk-city-head').forEach(function (h) { h.hidden = false; });
     }
-    groups.forEach(function (g) { g.hidden = !g.querySelector('.hub-card:not([hidden])'); });
 
     if (kindSelect) kindSelect.value = state.type;
     if (citySelect) citySelect.value = state.city;
@@ -2012,15 +2042,8 @@ def _render_market_card(e, day_attr, today=None):
 
     from venues_geo import resolve_event_geo
     geo = resolve_event_geo(e)
-    city_defaults = {
-        "boston": ("42.3601", "-71.0589"),
-        "cambridge": ("42.3736", "-71.1190"),
-        "somerville": ("42.3876", "-71.0995"),
-        "other": ("42.3550", "-71.1000")
-    }
-    def_lat, def_lng = city_defaults.get(city, ("42.3601", "-71.0589"))
-    lat = str(geo["lat"]) if geo and "lat" in geo else str(e.get("lat") or def_lat)
-    lng = str(geo["lng"]) if geo and "lng" in geo else str(e.get("lng") or def_lng)
+    lat = str(geo["lat"]) if geo and "lat" in geo else (str(e.get("lat")) if e.get("lat") else "")
+    lng = str(geo["lng"]) if geo and "lng" in geo else (str(e.get("lng")) if e.get("lng") else "")
 
     dates = e.get("_daily_dates")
     if dates:
@@ -2085,6 +2108,7 @@ def _render_market_sections(daily, dated, card_limit, today=None):
         day_iso = day.isoformat() if day else "tba"
         label = day.strftime("%A, %B %-d") if day else "Date TBA"
         evs = by_day[day]
+        out.append(f'<section class="mk-day-section" data-day="{day_iso}">')
         out.append(f'<h2 class="hub-day" id="{day_iso}" data-day="{day_iso}">{label} <span class="mk-count">{len(evs)}</span></h2>')
         by_city = {}
         for e in evs:
@@ -2097,6 +2121,8 @@ def _render_market_sections(daily, dated, card_limit, today=None):
             out.append(f'<div class="mk-city" data-city="{city}" data-day="{day_iso}">'
                        f'<h3 class="mk-city-head"><span class="mk-city-pill mk-c-{city}">{_MARKET_CITY_LABELS[city]}</span></h3>'
                        '<div class="mk-grid">' + "".join(_render_market_card(e, day_iso, today) for e in cevs) + "</div></div>")
+        out.append('<div class="mk-day-dist-grid mk-grid" hidden></div>')
+        out.append('</section>')
     return out
 
 
@@ -2295,7 +2321,8 @@ _MARKETS_CSS = """
     box-shadow: 0 3px 10px rgba(90, 50, 30, 0.07);
     transform: translateY(-1px);
   }
-  .markets-hub .mk-card[hidden], .mk-city[hidden], .mk-daily[hidden] { display: none !important; }
+  .markets-hub .mk-card[hidden], .mk-city[hidden], .mk-daily[hidden], .mk-day-section[hidden], .mk-day-dist-grid[hidden] { display: none !important; }
+  .mk-day-section { display: flex; flex-direction: column; }
   .mk-time-col { display: flex; flex-direction: column; gap: 2px; }
   .mk-when { display: flex; flex-direction: column; gap: 2px; font-size: 13px; }
   .mk-hours { font-weight: 800; color: #b23a26; font-variant-numeric: tabular-nums; font-size: 13px; line-height: 1.25; }
@@ -6432,7 +6459,8 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
       <option value="here">📍 My Current Location</option>
       <option value="42.3601,-71.0589">Boston (Downtown / Common)</option>
       <option value="42.3519,-71.0469">Seaport</option>
-      <option value="42.3736,-71.1097">Cambridge (Harvard / Central)</option>
+      <option value="42.3653,-71.1030">Cambridge (Central Sq)</option>
+      <option value="42.3736,-71.1190">Cambridge (Harvard Sq)</option>
       <option value="42.3957,-71.1224">Somerville (Davis Sq)</option>
       <option value="42.3370,-71.1060">Brookline / Longwood</option>
     </select>

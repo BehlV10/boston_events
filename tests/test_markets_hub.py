@@ -177,5 +177,56 @@ class HeaderBar(unittest.TestCase):
         self.assertNotIn('href="../comedy/"', html)
 
 
+class NearMeAndGeocoding(unittest.TestCase):
+    def test_near_me_origins_and_sorting_structure(self):
+        t1 = datetime.now(EASTERN) + timedelta(days=2)
+        t2 = datetime.now(EASTERN) + timedelta(days=3)
+        ev1 = _ev("Central Square Flea", 2, venue="Central Square", category="markets")
+        ev1.update(_time=t1, date=t1.isoformat())
+        ev2 = _ev("Arlington Greek Cuisine Fall Fest", 3, venue="Saint Athanasius the Great Greek Orthodox Church", category="markets")
+        ev2.update(_time=t2, date=t2.isoformat())
+        html = template.render_hub_page("markets-festivals-boston", [ev1, ev2], site_url="https://example.com")
+
+        # Origin dropdown includes Central Square option
+        self.assertIn("Cambridge (Central Sq)", html)
+        self.assertIn("42.3653,-71.1030", html)
+
+        # Day sections with dist-grid container for each day
+        self.assertIn('class="mk-day-section"', html)
+        self.assertIn('class="mk-day-dist-grid mk-grid" hidden', html)
+
+        # Script sorts within day section and daily section, keeping day sections in order
+        self.assertIn("document.querySelectorAll('.mk-day-section').forEach", html)
+        self.assertIn("sec.querySelector('.mk-day-dist-grid')", html)
+        self.assertIn("c._origParent.insertBefore(c, c._origNext || null)", html)
+
+    def test_arlington_greek_fest_and_unknown_venue_coordinates(self):
+        t = datetime.now(EASTERN) + timedelta(days=1)
+        greek_ev = _ev("Arlington Greek Cuisine Fall Fest", 1, venue="Saint Athanasius the Great Greek Orthodox Church", category="markets")
+        greek_ev.update(_time=t, date=t.isoformat())
+        card_html = template._render_market_card(greek_ev, "2026-11-13")
+        self.assertIn('data-lat="42.4172"', card_html)
+        self.assertIn('data-lng="-71.1643"', card_html)
+
+        # An event with no geocoded venue must NOT get fake city_defaults
+        unknown_ev = _ev("Mysterious Suburban Flea", 1, venue="Nowhere In Particular 123", category="markets")
+        unknown_ev.update(_time=t, date=t.isoformat())
+        card_unknown = template._render_market_card(unknown_ev, "2026-11-13")
+        self.assertIn('data-lat=""', card_unknown)
+        self.assertIn('data-lng=""', card_unknown)
+        self.assertNotIn('data-lat="42.3550"', card_unknown)
+
+    def test_tba_date_markets_stay_at_bottom(self):
+        t = datetime.now(EASTERN) + timedelta(days=1)
+        dated_ev = _ev("Tomorrow Farmers Market", 1, venue="Copley Square", category="markets")
+        dated_ev.update(_time=t, date=t.isoformat())
+        tba_ev = _ev("Future Festival TBA", 0, venue="Central Square", category="markets")
+        tba_ev.update(_time=None, date=None)
+        html = template.render_hub_page("markets-festivals-boston", [dated_ev, tba_ev], site_url="https://example.com")
+        self.assertIn('id="tba"', html)
+        self.assertIn("Date TBA", html)
+        self.assertLess(html.index(">Tomorrow Farmers Market<"), html.index(">Future Festival TBA<"))
+
+
 if __name__ == "__main__":
     unittest.main()
