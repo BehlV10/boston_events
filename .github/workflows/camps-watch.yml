@@ -1,0 +1,61 @@
+name: Summer camps watch
+
+# Every Monday, read each summer camp's own pages (scripts/camps_watch.py) and keep one issue
+# listing the camps worth re-checking by hand: 2027 info posted, page changed since the camp was
+# checked, a sign-up expected by now or coming up, a broken link. It never edits camps.json.
+# The issue body is rewritten each week; a comment (which emails the repo owner) is added only
+# when something new is flagged. Closing the issue is fine: it reopens when there's news.
+
+on:
+  schedule:
+    - cron: "23 13 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: camps-watch
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      LABEL: camps-watch
+      TITLE: "Summer camps: pages to re-check"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+
+      - name: Find last week's issue
+        id: prev
+        run: |
+          gh label create "$LABEL" --color 0e8a16 --description "Weekly summer camps watch" 2>/dev/null || true
+          num=$(gh issue list --label "$LABEL" --state all --limit 1 --json number --jq '.[0].number // empty')
+          echo "num=$num" >> "$GITHUB_OUTPUT"
+          if [ -n "$num" ]; then gh issue view "$num" --json body --jq .body > prev.md; else : > prev.md; fi
+
+      - name: Check camp pages
+        run: python scripts/camps_watch.py --prev prev.md --out issue.md --new new.md
+
+      - name: Update the issue
+        run: |
+          num="${{ steps.prev.outputs.num }}"
+          if [ -z "$num" ]; then
+            gh issue create --label "$LABEL" --title "$TITLE" --body-file issue.md
+            exit 0
+          fi
+          gh issue edit "$num" --body-file issue.md
+          if [ -s new.md ]; then
+            state=$(gh issue view "$num" --json state --jq .state)
+            if [ "$state" = "CLOSED" ]; then gh issue reopen "$num"; fi
+            gh issue comment "$num" --body-file new.md
+          fi
