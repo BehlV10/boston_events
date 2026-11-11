@@ -8643,6 +8643,447 @@ def scrape_snowport(url, ua, now=None):
     return events
 
 
+def _scrape_holiday_market(url, ua, name, default_venue, default_addr, schedule, desc, price="Free"):
+    """Fetch detail page for a holiday market from The Boston Calendar (or external site).
+    Emits events for each day specified in schedule with accurate times and location."""
+    ext_url = url
+    p_desc = desc
+    p_price = price
+    venue = default_venue
+    addr = default_addr
+    try:
+        soup = fetch_soup(url, ua or UA_CHROME)
+        web_p = soup.find(lambda tag: tag.name == "p" and "Event website:" in tag.get_text())
+        if web_p and web_p.find("a", href=True):
+            ext_url = fix_doubled_url(web_p.find("a")["href"].strip())
+        desc_el = soup.find("div", id="event_description")
+        if desc_el:
+            txt = re.sub(r"\s+", " ", desc_el.get_text(" ", strip=True)).strip()
+            if txt:
+                p_desc = txt[:300]
+        adm_p = soup.find(lambda tag: tag.name == "p" and "Admission:" in tag.get_text())
+        if adm_p:
+            atxt = adm_p.get_text(" ", strip=True).replace("Admission:", "").strip()
+            if atxt:
+                p_price = "Free" if "free" in atxt.lower() else atxt
+        loc = soup.find(attrs={"itemprop": "location"})
+        if loc:
+            v_el = loc.find(attrs={"itemprop": "name"})
+            if v_el and v_el.get_text(strip=True):
+                venue = v_el.get_text(strip=True)
+            st_el = loc.find(attrs={"itemprop": "streetAddress"})
+            ct_el = loc.find(attrs={"itemprop": "addressLocality"})
+            if st_el or ct_el:
+                parts = [p.get_text(strip=True) for p in (st_el, ct_el) if p and p.get_text(strip=True)]
+                if parts:
+                    addr = ", ".join(parts)
+    except Exception:
+        pass
+
+    events = []
+    for start_dt, end_dt in schedule:
+        events.append({
+            "name": name,
+            "date": start_dt.astimezone(timezone.utc).isoformat(),
+            "end": end_dt.astimezone(timezone.utc).isoformat(),
+            "url": ext_url or url,
+            "venue": venue,
+            "address": addr,
+            "price": p_price,
+            "category": "markets",
+            "description": p_desc,
+        })
+    return events
+
+
+def scrape_arsenal_holiday_bazaar(url, ua):
+    """The Arsenal Holiday Bazaar in Bond Square at Arsenal Yards (Watertown)."""
+    return _scrape_holiday_market(
+        url, ua,
+        name="The Arsenal Holiday Bazaar",
+        default_venue="Arsenal Yards",
+        default_addr="Bond Sq, Watertown, MA",
+        schedule=[
+            (datetime(2026, 11, 14, 11, 0, tzinfo=EASTERN), datetime(2026, 11, 14, 17, 0, tzinfo=EASTERN)),
+            (datetime(2026, 11, 15, 11, 0, tzinfo=EASTERN), datetime(2026, 11, 15, 17, 0, tzinfo=EASTERN)),
+        ],
+        desc="Brighton Bazaar brings 50+ local small businesses to Arsenal Yards selling art, vinyl, vintage, and gifts with vinyl DJ sets.",
+        price="Free",
+    )
+
+
+def scrape_sowa_christmas_market(url, ua):
+    """11th Annual SoWa Christmas Market at SoWa Power Station (South End)."""
+    schedule = []
+    d, end_d = date(2026, 11, 20), date(2026, 12, 27)
+    while d <= end_d:
+        wd = d.weekday()
+        if wd == 0 or d == date(2026, 11, 26) or d == date(2026, 12, 25):
+            d += timedelta(days=1)
+            continue
+        if d <= date(2026, 11, 30):
+            if wd in (1, 2, 3):
+                s_h, e_h = 16, 20
+            elif wd == 4:
+                s_h, e_h = (10, 19) if d == date(2026, 11, 27) else (16, 21)
+            elif wd == 5:
+                s_h, e_h = 10, 21
+            elif wd == 6:
+                s_h, e_h = 10, 19
+        else:
+            if d == date(2026, 12, 24):
+                s_h, e_h = 10, 16
+            elif wd in (1, 2, 3):
+                s_h, e_h = 16, 21
+            elif wd == 4:
+                s_h, e_h = 16, 22
+            elif wd == 5:
+                s_h, e_h = 10, 22
+            elif wd == 6:
+                s_h, e_h = 10, 19
+        schedule.append((datetime(d.year, d.month, d.day, s_h, 0, tzinfo=EASTERN),
+                         datetime(d.year, d.month, d.day, e_h, 0, tzinfo=EASTERN)))
+        d += timedelta(days=1)
+
+    return _scrape_holiday_market(
+        url, ua,
+        name="11th Annual SoWa Christmas Market",
+        default_venue="SoWa Power Station",
+        default_addr="540 Harrison Ave, Boston, MA",
+        schedule=schedule,
+        desc="More than 100 local makers and food vendors inside the historic SoWa Power Station with live music at the Sleigh Bar.",
+        price="$10",
+    )
+
+
+def scrape_thanksgiving_market_harbor_fest(url, ua):
+    """Boston Thanksgiving Market & Harbor Festival at Christopher Columbus Waterfront Park."""
+    return _scrape_holiday_market(
+        url, ua,
+        name="Boston Thanksgiving Market & Harbor Festival",
+        default_venue="Christopher Columbus Waterfront Park",
+        default_addr="110 Atlantic Ave, Boston, MA",
+        schedule=[
+            (datetime(2026, 11, 20, 10, 0, tzinfo=EASTERN), datetime(2026, 11, 20, 19, 30, tzinfo=EASTERN)),
+            (datetime(2026, 11, 21, 10, 0, tzinfo=EASTERN), datetime(2026, 11, 21, 19, 30, tzinfo=EASTERN)),
+            (datetime(2026, 11, 22, 10, 0, tzinfo=EASTERN), datetime(2026, 11, 22, 18, 0, tzinfo=EASTERN)),
+        ],
+        desc="Three-day waterfront holiday festival in Christopher Columbus Park with artisan crafts, boutique fashion, specialty foods, and live music.",
+        price="Free",
+    )
+
+
+def scrape_stocking_stuffer_market(url, ua):
+    """Stocking Stuffer Holiday Market at Park-9 Dog Bar (Everett)."""
+    return _scrape_holiday_market(
+        url, ua,
+        name="Stocking Stuffer Holiday Market",
+        default_venue="Park-9 Dog Bar",
+        default_addr="48 Commercial St, Everett, MA",
+        schedule=[
+            (datetime(2026, 11, 21, 15, 0, tzinfo=EASTERN), datetime(2026, 11, 21, 19, 0, tzinfo=EASTERN)),
+        ],
+        desc="Bring your pup for festive shopping with local makers, mulled wine, seasonal cocktails, and treats at New England's first dog bar.",
+        price="Free",
+    )
+
+
+def scrape_marzae_maker_market(url, ua):
+    """Holiday Maker Market at Marzae Cellar + Provisions inside Boston Public Market."""
+    return _scrape_holiday_market(
+        url, ua,
+        name="Holiday Maker Market at Marzae Cellar + Provisions",
+        default_venue="Boston Public Market",
+        default_addr="100 Hanover St, Boston, MA",
+        schedule=[
+            (datetime(2026, 11, 22, 12, 0, tzinfo=EASTERN), datetime(2026, 11, 22, 17, 0, tzinfo=EASTERN)),
+        ],
+        desc="Curated market of New England makers with small-batch cocktail mixers, artisan foods, and natural wine inside Boston Public Market.",
+        price="Free",
+    )
+
+
+def scrape_boston_womens_market_warehouse_xi(url, ua):
+    """Boston Women's Holiday Market at Warehouse XI (Union Square, Somerville)."""
+    return _scrape_holiday_market(
+        url, ua,
+        name="Boston Women's Holiday Market at Warehouse XI",
+        default_venue="Warehouse XI",
+        default_addr="11 Sanborn Ct, Somerville, MA",
+        schedule=[
+            (datetime(2026, 11, 22, 11, 0, tzinfo=EASTERN), datetime(2026, 11, 22, 16, 0, tzinfo=EASTERN)),
+        ],
+        desc="Over 30 woman-owned businesses with handmade jewelry, ceramics, candles, art, skincare, and gourmet treats in Union Square.",
+        price="Free",
+    )
+
+
+def scrape_kilroy_square_holiday_market(url, ua):
+    """Kilroy Square Holiday Market in Quincy Center."""
+    return _scrape_holiday_market(
+        url, ua,
+        name="Kilroy Square Holiday Market",
+        default_venue="Kilroy Square",
+        default_addr="Kilroy Square, Quincy, MA",
+        schedule=[
+            (datetime(2026, 11, 27, 14, 0, tzinfo=EASTERN), datetime(2026, 11, 27, 17, 0, tzinfo=EASTERN)),
+            (datetime(2026, 11, 28, 11, 0, tzinfo=EASTERN), datetime(2026, 11, 28, 16, 0, tzinfo=EASTERN)),
+            (datetime(2026, 11, 29, 11, 0, tzinfo=EASTERN), datetime(2026, 11, 29, 16, 0, tzinfo=EASTERN)),
+            (datetime(2026, 12, 4, 14, 0, tzinfo=EASTERN), datetime(2026, 12, 4, 17, 0, tzinfo=EASTERN)),
+            (datetime(2026, 12, 5, 11, 0, tzinfo=EASTERN), datetime(2026, 12, 5, 16, 0, tzinfo=EASTERN)),
+            (datetime(2026, 12, 6, 11, 0, tzinfo=EASTERN), datetime(2026, 12, 6, 16, 0, tzinfo=EASTERN)),
+        ],
+        desc="Quincy Chamber of Commerce heated tent market with local makers selling jewelry, pottery, candles, soaps, and food trucks.",
+        price="Free",
+    )
+
+
+def scrape_boston_womens_market_armory(url, ua):
+    """Boston Women's Holiday Market at Arts at the Armory (Somerville)."""
+    return _scrape_holiday_market(
+        url, ua,
+        name="Boston Women's Holiday Market at The Armory",
+        default_venue="Arts at the Armory",
+        default_addr="191 Highland Ave, Somerville, MA",
+        schedule=[
+            (datetime(2026, 11, 29, 11, 0, tzinfo=EASTERN), datetime(2026, 11, 29, 16, 0, tzinfo=EASTERN)),
+        ],
+        desc="More than 30 women makers filling two floors of historic Arts at the Armory with handmade jewelry, apparel, and decor.",
+        price="Free",
+    )
+
+
+def scrape_cambridgeside_sip_shop(url, ua):
+    """Sip & Shop at CambridgeSide (East Cambridge)."""
+    return _scrape_holiday_market(
+        url, ua,
+        name="Sip & Shop at CambridgeSide",
+        default_venue="CambridgeSide",
+        default_addr="100 CambridgeSide Pl, Cambridge, MA",
+        schedule=[
+            (datetime(2026, 12, 3, 17, 0, tzinfo=EASTERN), datetime(2026, 12, 3, 20, 0, tzinfo=EASTERN)),
+        ],
+        desc="Holiday shopping evening with local craft vendors, festive cocktails and wine, and wreath-making workshops.",
+        price="Free",
+    )
+
+
+def scrape_beacon_hill_holiday_stroll(url, ua):
+    """Beacon Hill Holiday Stroll and Tree Lighting along Charles Street."""
+    return _scrape_holiday_market(
+        url, ua,
+        name="Beacon Hill Holiday Stroll and Tree Lighting",
+        default_venue="Charles Street",
+        default_addr="Charles St, Boston, MA",
+        schedule=[
+            (datetime(2026, 12, 3, 18, 0, tzinfo=EASTERN), datetime(2026, 12, 3, 21, 0, tzinfo=EASTERN)),
+        ],
+        desc="Annual neighborhood holiday stroll along historic Charles Street with festive shopping, refreshments, and 7pm tree lighting.",
+        price="Free",
+    )
+
+
+def scrape_christkindlmarkt(url, ua):
+    """Christkindlmarkt – German Holiday Market at German International School Boston (Allston)."""
+    return _scrape_holiday_market(
+        url, ua,
+        name="Christkindlmarkt – German Holiday Market",
+        default_venue="German International School Boston",
+        default_addr="57 Holton St, Boston, MA",
+        schedule=[
+            (datetime(2026, 12, 5, 15, 0, tzinfo=EASTERN), datetime(2026, 12, 5, 19, 0, tzinfo=EASTERN)),
+        ],
+        desc="Authentic German holiday market with a petting zoo, caroling, sweet treats, and local craft vendors.",
+        price="Free",
+    )
+
+
+def scrape_open_newbury_holiday_stroll(url, ua):
+    """Open Newbury Street Holiday Stroll in Back Bay."""
+    return _scrape_holiday_market(
+        url, ua,
+        name="Open Newbury Street Holiday Stroll",
+        default_venue="Newbury Street",
+        default_addr="Newbury St, Boston, MA",
+        schedule=[
+            (datetime(2026, 12, 6, 10, 0, tzinfo=EASTERN), datetime(2026, 12, 6, 17, 0, tzinfo=EASTERN)),
+        ],
+        desc="Newbury Street pedestrian-only holiday shopping stroll with hot chocolate, street performers, and local vendors.",
+        price="Free",
+    )
+
+
+def scrape_sam_adams_winter_market(url, ua):
+    """Winter Market at Sam Adams Boston Brewery (Jamaica Plain)."""
+    return _scrape_holiday_market(
+        url, ua,
+        name="Winter Market at Sam Adams Brewery",
+        default_venue="Sam Adams Boston Brewery",
+        default_addr="30 Germania St, Boston, MA",
+        schedule=[
+            (datetime(2026, 12, 6, 12, 0, tzinfo=EASTERN), datetime(2026, 12, 6, 17, 0, tzinfo=EASTERN)),
+        ],
+        desc="Local makers selling handcrafted goods and holiday gifts, live music, and exclusive seasonal beer releases in Jamaica Plain.",
+        price="Free",
+    )
+
+
+def scrape_union_square_holiday_stroll(url, ua):
+    """Union Square Jingle & Holiday Stroll in Somerville."""
+    return _scrape_holiday_market(
+        url, ua,
+        name="Union Square Jingle & Holiday Stroll",
+        default_venue="Union Square",
+        default_addr="Union Square, Somerville, MA",
+        schedule=[
+            (datetime(2026, 12, 5, 11, 0, tzinfo=EASTERN), datetime(2026, 12, 5, 18, 0, tzinfo=EASTERN)),
+        ],
+        desc="Festive light displays, holiday shopping specials across local Union Square businesses, and community celebrations.",
+        price="Free",
+    )
+
+
+def scrape_south_end_holiday_stroll(url, ua):
+    """South End Holiday Stroll with 70+ local businesses and the Jolly Trolley."""
+    return _scrape_holiday_market(
+        url, ua,
+        name="South End Holiday Stroll",
+        default_venue="South End",
+        default_addr="Tremont St & Harrison Ave, Boston, MA",
+        schedule=[
+            (datetime(2026, 12, 9, 16, 0, tzinfo=EASTERN), datetime(2026, 12, 9, 20, 0, tzinfo=EASTERN)),
+        ],
+        desc="Over 70 South End boutiques, art galleries, and restaurants open late with holiday cheer, treats, and the Jolly Trolley.",
+        price="Free",
+    )
+
+
+def scrape_cultural_survival_bazaar(url, ua):
+    """Cultural Survival Bazaar at BCA Cyclorama (South End)."""
+    return _scrape_holiday_market(
+        url, ua,
+        name="Cultural Survival Bazaar",
+        default_venue="Boston Center for the Arts",
+        default_addr="539 Tremont St, Boston, MA",
+        schedule=[
+            (datetime(2026, 12, 12, 10, 0, tzinfo=EASTERN), datetime(2026, 12, 12, 18, 0, tzinfo=EASTERN)),
+            (datetime(2026, 12, 13, 10, 0, tzinfo=EASTERN), datetime(2026, 12, 13, 18, 0, tzinfo=EASTERN)),
+        ],
+        desc="Celebration of Indigenous artists from dozens of countries with handmade crafts, art, jewelry, clothing, and live cultural performances.",
+        price="Free",
+    )
+
+
+def scrape_canal_district_kendall_winter_market(url, ua):
+    """Canal District Kendall Winter Market in Kendall Square (Cambridge)."""
+    return _scrape_holiday_market(
+        url, ua,
+        name="Canal District Kendall Winter Market",
+        default_venue="Canal District Kendall",
+        default_addr="300 Athenaeum St, Cambridge, MA",
+        schedule=[
+            (datetime(2026, 12, 12, 11, 0, tzinfo=EASTERN), datetime(2026, 12, 12, 16, 0, tzinfo=EASTERN)),
+        ],
+        desc="Winter market with local artisan vendors, free ice skating, professional skate shows, Santa photos, and seasonal treats.",
+        price="Free",
+    )
+
+
+def scrape_black_business_holiday_marketplace(url, ua):
+    """2026 Black Business Holiday Marketplace at One Brattle Square (Harvard Square)."""
+    return _scrape_holiday_market(
+        url, ua,
+        name="2026 Black Business Holiday Marketplace",
+        default_venue="One Brattle Square",
+        default_addr="1 Brattle Sq, Cambridge, MA",
+        schedule=[
+            (datetime(2026, 12, 12, 11, 0, tzinfo=EASTERN), datetime(2026, 12, 12, 19, 0, tzinfo=EASTERN)),
+            (datetime(2026, 12, 13, 11, 0, tzinfo=EASTERN), datetime(2026, 12, 13, 19, 0, tzinfo=EASTERN)),
+            (datetime(2026, 12, 19, 11, 0, tzinfo=EASTERN), datetime(2026, 12, 19, 19, 0, tzinfo=EASTERN)),
+            (datetime(2026, 12, 20, 11, 0, tzinfo=EASTERN), datetime(2026, 12, 20, 19, 0, tzinfo=EASTERN)),
+        ],
+        desc="5th annual marketplace by Cambridge-Somerville Black Business Network with dozens of Black-owned vendors and live entertainment.",
+        price="Free",
+    )
+
+
+def scrape_station_street_studios_market(url, ua):
+    """Station Street Studios Holiday Market in Brookline Village."""
+    return _scrape_holiday_market(
+        url, ua,
+        name="Station Street Studios Holiday Market",
+        default_venue="Station St. Studios",
+        default_addr="15 Station St, Brookline, MA",
+        schedule=[
+            (datetime(2026, 12, 12, 11, 0, tzinfo=EASTERN), datetime(2026, 12, 12, 17, 0, tzinfo=EASTERN)),
+            (datetime(2026, 12, 13, 11, 0, tzinfo=EASTERN), datetime(2026, 12, 13, 17, 0, tzinfo=EASTERN)),
+            (datetime(2026, 12, 19, 11, 0, tzinfo=EASTERN), datetime(2026, 12, 19, 17, 0, tzinfo=EASTERN)),
+            (datetime(2026, 12, 20, 11, 0, tzinfo=EASTERN), datetime(2026, 12, 20, 17, 0, tzinfo=EASTERN)),
+        ],
+        desc="Annual Brookline Village market featuring fine art, prints, apparel, crafts, and jewelry from independent studio artists.",
+        price="Free",
+    )
+
+
+def scrape_the_clay_table_holiday_market(url, ua):
+    """Holiday Market, Pottery & Art Sale at The Clay Table in Cambridge."""
+    return _scrape_holiday_market(
+        url, ua,
+        name="Holiday Market, Pottery & Art Sale at The Clay Table",
+        default_venue="The Clay Table",
+        default_addr="651 Concord Ave, Cambridge, MA",
+        schedule=[
+            (datetime(2026, 12, 12, 12, 0, tzinfo=EASTERN), datetime(2026, 12, 12, 18, 0, tzinfo=EASTERN)),
+            (datetime(2026, 12, 13, 12, 0, tzinfo=EASTERN), datetime(2026, 12, 13, 18, 0, tzinfo=EASTERN)),
+        ],
+        desc="Handmade pottery, artwork, and unique gifts from local ceramic artists, plus studio tours and hands-on clay activities.",
+        price="Free",
+    )
+
+
+def scrape_west_end_museum_holiday_market(url, ua):
+    """The West End Museum Holiday Market in Boston."""
+    return _scrape_holiday_market(
+        url, ua,
+        name="The West End Museum Holiday Market",
+        default_venue="The West End Museum",
+        default_addr="150 Staniford St, Boston, MA",
+        schedule=[
+            (datetime(2026, 12, 13, 12, 0, tzinfo=EASTERN), datetime(2026, 12, 13, 17, 0, tzinfo=EASTERN)),
+        ],
+        desc="Cozy indoor market with local craftspeople selling paintings, photography, crochet crafts, books, and complimentary hot chocolate.",
+        price="Free",
+    )
+
+
+def scrape_tuscan_village_holiday_shoppes(url, ua):
+    """The Holiday Shoppes at Tuscan Village (Salem, NH)."""
+    schedule = []
+    d, end_d = date(2026, 11, 6), date(2026, 12, 24)
+    while d <= end_d:
+        wd = d.weekday()
+        if d != date(2026, 11, 26):
+            if wd == 3:
+                schedule.append((datetime(d.year, d.month, d.day, 15, 0, tzinfo=EASTERN), datetime(d.year, d.month, d.day, 20, 0, tzinfo=EASTERN)))
+            elif wd == 4:
+                schedule.append((datetime(d.year, d.month, d.day, 15, 0, tzinfo=EASTERN), datetime(d.year, d.month, d.day, 21, 0, tzinfo=EASTERN)))
+            elif wd == 5:
+                schedule.append((datetime(d.year, d.month, d.day, 11, 0, tzinfo=EASTERN), datetime(d.year, d.month, d.day, 21, 0, tzinfo=EASTERN)))
+            elif wd == 6:
+                schedule.append((datetime(d.year, d.month, d.day, 11, 0, tzinfo=EASTERN), datetime(d.year, d.month, d.day, 18, 0, tzinfo=EASTERN)))
+        d += timedelta(days=1)
+
+    return _scrape_holiday_market(
+        url, ua,
+        name="The Holiday Shoppes at Tuscan Village",
+        default_venue="Tuscan Village",
+        default_addr="9 Via Toscana, Salem, NH",
+        schedule=schedule,
+        desc="Outdoor holiday marketplace of 40+ local crafters and artisans, holiday cocktails at Sam Adams Pavilion, and seasonal treats.",
+        price="Free",
+    )
+
+
 # Weekly worship, office hours and permitting clinics in neighborhood business-district calendars
 _DISTRICT_NOISE_RE = re.compile(
     r"(?i)\b(?:prayer|bible study|worship|sunday service|eucharist|mass\b|vespers|compline|meditation hour|"
@@ -13581,6 +14022,28 @@ _ALL_VENUES = [
     {"name": "Boston Public Market", "url": "https://bostonpublicmarket.org/events/", "ua": UA_CHROME, "scraper": scrape_boston_public_market, "default_category": "food"},
     {"name": "Harvard Square Holiday Fair", "url": "https://www.harvardsquareholidayfair.com/", "ua": UA_CHROME, "scraper": scrape_harvard_square_holiday_fair, "default_category": "markets"},
     {"name": "Snowport Holiday Market", "url": _SNOWPORT_URL, "ua": UA_CHROME, "scraper": scrape_snowport, "default_category": "markets"},
+    {"name": "The Arsenal Holiday Bazaar", "url": "https://www.thebostoncalendar.com/events/the-arsenal-holiday-bazaar", "ua": UA_CHROME, "scraper": scrape_arsenal_holiday_bazaar, "default_category": "markets"},
+    {"name": "11th Annual SoWa Christmas Market", "url": "https://www.thebostoncalendar.com/events/11th-annual-sowa-christmas-market-november-20-december-27", "ua": UA_CHROME, "scraper": scrape_sowa_christmas_market, "default_category": "markets"},
+    {"name": "Boston Thanksgiving Market & Harbor Festival", "url": "https://www.thebostoncalendar.com/events/boston-thanksgiving-market-harbor-festival", "ua": UA_CHROME, "scraper": scrape_thanksgiving_market_harbor_fest, "default_category": "markets"},
+    {"name": "Stocking Stuffer Holiday Market", "url": "https://www.thebostoncalendar.com/events/stocking-stuffer-holiday-market", "ua": UA_CHROME, "scraper": scrape_stocking_stuffer_market, "default_category": "markets"},
+    {"name": "Holiday Maker Market at Marzae", "url": "https://www.thebostoncalendar.com/events/holiday-maker-market", "ua": UA_CHROME, "scraper": scrape_marzae_maker_market, "default_category": "markets"},
+    {"name": "Boston Women's Market at Warehouse XI", "url": "https://www.thebostoncalendar.com/events/boston-women-s-holiday-market-at-warehouse-xi", "ua": UA_CHROME, "scraper": scrape_boston_womens_market_warehouse_xi, "default_category": "markets"},
+    {"name": "Kilroy Square Holiday Market", "url": "https://www.thebostoncalendar.com/events/kilroy-square-holiday-market--3", "ua": UA_CHROME, "scraper": scrape_kilroy_square_holiday_market, "default_category": "markets"},
+    {"name": "Boston Women's Market at The Armory", "url": "https://www.thebostoncalendar.com/events/boston-women-s-holiday-market-at-the-armory--3", "ua": UA_CHROME, "scraper": scrape_boston_womens_market_armory, "default_category": "markets"},
+    {"name": "Sip & Shop at CambridgeSide", "url": "https://www.thebostoncalendar.com/events/sip-shop-at-cambridgeside", "ua": UA_CHROME, "scraper": scrape_cambridgeside_sip_shop, "default_category": "markets"},
+    {"name": "Beacon Hill Holiday Stroll", "url": "https://www.thebostoncalendar.com/events/beacon-hill-holiday-stroll-and-tree-lighting-2023", "ua": UA_CHROME, "scraper": scrape_beacon_hill_holiday_stroll, "default_category": "markets"},
+    {"name": "Christkindlmarkt – German Holiday Market", "url": "https://www.thebostoncalendar.com/events/christkindlmarkt-german-holiday-market--4", "ua": UA_CHROME, "scraper": scrape_christkindlmarkt, "default_category": "markets"},
+    {"name": "Open Newbury Street Holiday Stroll", "url": "https://www.thebostoncalendar.com/events/open-newbury-street-holiday-stroll-2026", "ua": UA_CHROME, "scraper": scrape_open_newbury_holiday_stroll, "default_category": "markets"},
+    {"name": "Winter Market at Sam Adams Brewery", "url": "https://www.thebostoncalendar.com/events/holiday-market--5", "ua": UA_CHROME, "scraper": scrape_sam_adams_winter_market, "default_category": "markets"},
+    {"name": "Union Square Jingle & Holiday Stroll", "url": "https://www.unionsquaremain.org/holiday-stroll", "ua": UA_CHROME, "scraper": scrape_union_square_holiday_stroll, "default_category": "markets"},
+    {"name": "South End Holiday Stroll", "url": "https://www.thebostoncalendar.com/events/the-south-end-holiday-stroll-returns-on-december-9-70-businesses-holiday-cheer-and-the-jolly-trolley", "ua": UA_CHROME, "scraper": scrape_south_end_holiday_stroll, "default_category": "markets"},
+    {"name": "Cultural Survival Bazaar", "url": "https://www.thebostoncalendar.com/events/cultural-survival-bazaar--15", "ua": UA_CHROME, "scraper": scrape_cultural_survival_bazaar, "default_category": "markets"},
+    {"name": "Canal District Kendall Winter Market", "url": "https://www.thebostoncalendar.com/events/canal-district-kendall-winter-market", "ua": UA_CHROME, "scraper": scrape_canal_district_kendall_winter_market, "default_category": "markets"},
+    {"name": "2026 Black Business Holiday Marketplace", "url": "https://www.thebostoncalendar.com/events/2026-black-business-holiday-marketplace", "ua": UA_CHROME, "scraper": scrape_black_business_holiday_marketplace, "default_category": "markets"},
+    {"name": "Station Street Studios Holiday Market", "url": "https://www.thebostoncalendar.com/events/station-street-studios-holiday-market-weekend-1", "ua": UA_CHROME, "scraper": scrape_station_street_studios_market, "default_category": "markets"},
+    {"name": "The Clay Table Holiday Market", "url": "https://www.thebostoncalendar.com/events/holiday-market-pottery-art-sale-open-studio-show", "ua": UA_CHROME, "scraper": scrape_the_clay_table_holiday_market, "default_category": "markets"},
+    {"name": "The West End Museum Holiday Market", "url": "https://www.thebostoncalendar.com/events/the-west-end-museum-holiday-market", "ua": UA_CHROME, "scraper": scrape_west_end_museum_holiday_market, "default_category": "markets"},
+    {"name": "The Holiday Shoppes at Tuscan Village", "url": "https://www.thebostoncalendar.com/events/the-holiday-shoppes-at-tuscan-village-winter-wonderland-outdoor-holiday-marketplace", "ua": UA_CHROME, "scraper": scrape_tuscan_village_holiday_shoppes, "default_category": "markets"},
     {"name": "Harvard Square (HSBA)", "url": "https://www.harvardsquare.com/wp-json/tribe/events/v1/events", "ua": UA_CHROME, "scraper": scrape_harvard_square, "default_category": "community"},
     {"name": "Kendall Square Association", "url": "https://www.kendallsquare.org/wp-json/tribe/events/v1/events", "ua": UA_CHROME, "scraper": scrape_kendall_square, "default_category": "community"},
     {"name": "Brighton Main Streets", "url": "https://www.brightonmainstreets.org/wp-json/tribe/events/v1/events", "ua": UA_CHROME, "scraper": scrape_brighton_main_streets, "default_category": "community"},

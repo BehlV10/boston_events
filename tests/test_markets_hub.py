@@ -54,6 +54,43 @@ class WhatCountsAsAMarket(unittest.TestCase):
     def test_market_held_at_a_market_place_still_counts(self):
         self.assertTrue(template.is_market({"name": "Holiday Pop-Up Market at Boston Public Market"}))
 
+    def test_the_boston_calendar_holiday_markets_covered(self):
+        """Verify all 26 holiday and Christmas markets from The Boston Calendar's guide count as markets."""
+        holiday_markets = [
+            "The Holiday Market at Snowport 2026",
+            "The Arsenal Holiday Bazaar",
+            "11th Annual SoWa Christmas Market | November 20–December 27",
+            "Boston Thanksgiving Market & Harbor Festival",
+            "Stocking Stuffer Holiday Market",
+            "Holiday Maker Market at Marzae Cellar + Provisions",
+            "Boston Women's Holiday Market at Warehouse XI",
+            "Kilroy Square Holiday Market",
+            "Bow Market Small Business Saturday",
+            "Boston Public Market Holiday Pop-up Market",
+            "Boston Women's Holiday Market at The Armory",
+            "Sip & Shop at CambridgeSide",
+            "Beacon Hill Holiday Stroll and Tree Lighting 2026",
+            "Christkindlmarkt – German Holiday Market",
+            "Open Newbury Street Holiday Stroll 2026",
+            "Winter Market at Sam Adams Brewery",
+            "Union Square Jingle & Holiday Stroll",
+            "South End Holiday Stroll",
+            "Harvard Square Holiday Fair",
+            "Cultural Survival Bazaar",
+            "Canal District Kendall Winter Market",
+            "2026 Black Business Holiday Marketplace",
+            "Station Street Studios Holiday Market - Weekend 1",
+            "Holiday Market | Pottery & Art Sale | Open Studio Show",
+            "The West End Museum Holiday Market",
+            "The Holiday Shoppes at Tuscan Village",
+        ]
+        for name in holiday_markets:
+            e = {"name": name, "category": "markets"}
+            is_m = template.is_market(e) or template.is_vendor_festival(e)
+            self.assertTrue(is_m, f"Expected {name} to be identified as a market/vendor festival")
+            m_type = template.market_type(e)
+            self.assertIn(m_type, ("holiday", "craft", "night", "festival", "other"), name)
+
 
 class MarketsPage(unittest.TestCase):
     def setUp(self):
@@ -85,6 +122,11 @@ class MarketsPage(unittest.TestCase):
         self.assertIn('class="hub-city-chip hub-type-chip" data-mtype="festival"', self.html)
         self.assertNotIn('class="hub-city-chip hub-type-chip" data-mtype="night"', self.html)
         self.assertIn("state.type", self.html)
+
+    def test_hero_bar_has_full_calendar_button_on_right(self):
+        self.assertIn('class="mk-hero-bar"', self.html)
+        self.assertIn('>Full calendar →</a>', self.html)
+        self.assertNotIn('>See them on the full calendar →</a>', self.html)
 
 
 class DailyAndHours(unittest.TestCase):

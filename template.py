@@ -1494,7 +1494,8 @@ def _hub_place_label(city, e):
 
 _MARKET_RE = re.compile(
     r"(?i)\b(?:markets?|marketplace|bazaars?|flea|swap\s+meet|yard\s+sale|craft\s+shows?|makers?\s+mart|"
-    r"winter\s+village|holiday\s+(?:pop[- ]?up|shop(?:ping)?\s+(?:night|stroll|event)|stroll)(?!\s*bar)|"
+    r"winter\s+village|holiday\s+(?:pop[- ]?up|shop(?:ping)?\s+(?:night|stroll|event)|stroll|shoppes?)(?!\s*bar)|"
+    r"sip\s*(?:&|and)\s*shop|"
     r"(?:artisan|craft|crafts|holiday|christmas|vintage|antiques?|record|maker'?s?|handmade|art|artists'?|street|"
     r"(?:art\s+|grown[- ]up\s+)?book)\s+fairs?|plant\s+(?:shows?|sales?|swaps?)|small\s+business\s+saturday|shop\s+small|"
     r"thrift\s+(?:festival|fest|sale|market|pop[- ]?up))\b")
@@ -1535,7 +1536,11 @@ _MARKET_OTHER = ("other", "🛍️ Other markets")
 def is_market(e):
     name = e.get("name") or e.get("title") or ""
     bare = _MARKET_PLACE_RE.sub(" ", name)
-    return bool(_MARKET_RE.search(bare)) and not _NOT_MARKET_RE.search(name) and not NOT_MARKET_FESTIVAL_RE.search(name)
+    if not bool(_MARKET_RE.search(bare)):
+        return False
+    if _NOT_MARKET_RE.search(name) and not re.search(r"(?i)\bholiday\s+stroll\b", name):
+        return False
+    return not NOT_MARKET_FESTIVAL_RE.search(name)
 
 
 # A festival or fair, by title (MARKET_FESTIVAL_RE without the market words is_market covers).
@@ -2139,10 +2144,11 @@ _MARKETS_CSS = """
     letter-spacing: -0.015em; font-weight: 800; }
   .markets-hub .hero h1 small { display: block; font-size: 0.42em; color: #a8693a; font-weight: 700; margin-top: 6px; letter-spacing: 0; }
   .markets-hub .hero p { color: var(--muted); font-size: 16px; margin: 0 0 14px; max-width: 760px; }
-  .mk-stats { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }
+  .mk-hero-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin: 0 0 16px; }
+  .mk-stats { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; }
   .mk-stat { background: #fdf0e3; color: #7a3a1c; border: 1px solid #f1d9bf; border-radius: 999px;
     padding: 5px 12px; font-size: 14px; font-weight: 700; }
-  .markets-hub .cta-btn { background: var(--accent); color: #fff; }
+  .markets-hub .cta-btn { background: var(--accent); color: #fff; margin-left: auto; white-space: nowrap; }
 
   /* Controls & Filter Bar */
   .mk-controls-bar { margin: 0 0 20px; }
@@ -2562,11 +2568,11 @@ _KIDS_CSS = """
   @keyframes kid-wave { 0%, 60%, 100% { transform: rotate(0); } 10%, 30% { transform: rotate(14deg); } 20%, 40% { transform: rotate(-8deg); } }
   @media (prefers-reduced-motion: reduce) { .kids-hub .hero h1 .wave { animation: none; } }
   .kids-hub .hero h1 small { display: block; font-size: 0.45em; color: #b08a5a; font-weight: 700; letter-spacing: 0.01em; margin-top: 4px; }
-  .kids-hub .hero p { color: var(--muted); font-size: 16px; margin-bottom: 16px; }
-  .kids-hub .cta-btn { background: #2f86c8; color: #fff; box-shadow: 0 4px 0 #1f6aa3; font-weight: 700; font-size: 16px; padding: 9px 22px; }
-  .kids-hub .cta-btn:hover { transform: translateY(-1px); filter: brightness(1.05); }
-  .kids-stats { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 0 0 16px; }
+  .kids-hero-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin: 0 0 16px; }
+  .kids-stats { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 0; }
   .kids-stat { background: var(--sky); color: #24648f; border-radius: 999px; padding: 4px 14px; font-weight: 800; font-size: 14px; }
+  .kids-hub .cta-btn { background: #2f86c8; color: #fff; box-shadow: 0 4px 0 #1f6aa3; font-weight: 700; font-size: 16px; padding: 9px 22px; margin-left: auto; white-space: nowrap; }
+  .kids-hub .cta-btn:hover { transform: translateY(-1px); filter: brightness(1.05); }
   .kids-layout {
     display: grid;
     grid-template-columns: 260px minmax(0, 1fr);
@@ -3375,7 +3381,8 @@ _EDM_CSS = """
     margin: 0 auto 18px;
     line-height: 1.5;
   }
-  .edm-stats { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 0 0 18px; }
+  .edm-hero-bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin: 0 0 18px; }
+  .edm-stats { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 0; }
   .edm-stat {
     background: rgba(0, 240, 255, 0.08);
     border: 1px solid rgba(0, 240, 255, 0.25);
@@ -3396,6 +3403,8 @@ _EDM_CSS = """
     box-shadow: 0 0 16px rgba(0, 240, 255, 0.4);
     text-decoration: none;
     display: inline-block;
+    margin-left: auto;
+    white-space: nowrap;
   }
   .edm-hub .cta-btn:hover { filter: brightness(1.15); transform: translateY(-1px); }
   .edm-layout {
@@ -4053,12 +4062,20 @@ _COLLEGE_CSS = """
     color: #cbd5e1;
     margin: 0 0 16px;
   }
+  .col-hero-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 0 0 20px;
+  }
   .college-hub .col-stats {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 8px;
-    margin: 0 0 20px;
+    margin: 0;
     font-size: 13px;
   }
   .college-hub .col-stat {
@@ -4069,6 +4086,10 @@ _COLLEGE_CSS = """
     padding: 4px 12px;
     border-radius: 20px;
     border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .college-hub .cta-btn {
+    margin-left: auto;
+    white-space: nowrap;
   }
   .col-layout {
     display: grid;
@@ -6494,8 +6515,10 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
     <div class="kids-hero-copy">
       <h1>{escape(hub.get('h1') or hub['title'])} <span class="wave" aria-hidden="true">👋</span><small>in Boston, Cambridge, Somerville &amp; nearby</small></h1>
       <p>{hub['subtitle']}</p>
-      <div class="kids-stats"><span class="kids-stat">🗓️ {n_cards} activities in the next {n_days} days</span><span class="kids-stat">💛 {kid_free} free</span><span class="kids-stat">📍 {len(kid_places)} places</span></div>
-      <a href="../{hub['query']}" class="cta-btn">See them on the full calendar →</a>
+      <div class="kids-hero-bar">
+        <div class="kids-stats"><span class="kids-stat">🗓️ {n_cards} activities in the next {n_days} days</span><span class="kids-stat">💛 {kid_free} free</span><span class="kids-stat">📍 {len(kid_places)} places</span></div>
+        <a href="../{hub['query']}" class="cta-btn">Full calendar →</a>
+      </div>
     </div>
   </div>"""
     elif is_edm:
@@ -6550,8 +6573,10 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
     <div class="edm-hero-copy">
       <h1>{escape(hub.get('h1') or hub['title'])}<small>Boston · Cambridge · Somerville · Nightclubs &amp; Underground</small></h1>
       <p>{hub['subtitle']}</p>
-      <div class="edm-stats"><span class="edm-stat">⚡ {n_cards} shows &amp; club nights</span><span class="edm-stat">💛 {edm_free_count} free / no cover</span><span class="edm-stat">📍 {len(edm_places)} nightlife stages</span></div>
-      <a href="../{hub['query']}" class="cta-btn">View on interactive calendar →</a>
+      <div class="edm-hero-bar">
+        <div class="edm-stats"><span class="edm-stat">⚡ {n_cards} shows &amp; club nights</span><span class="edm-stat">💛 {edm_free_count} free / no cover</span><span class="edm-stat">📍 {len(edm_places)} nightlife stages</span></div>
+        <a href="../{hub['query']}" class="cta-btn">Full calendar →</a>
+      </div>
     </div>
   </div>"""
     elif is_markets and cards_html:
@@ -6568,8 +6593,10 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
     <div class="mk-hero-copy">
       <h1>{escape(hub.get('h1') or hub['title'])}<small>Boston · Cambridge · Somerville &amp; nearby</small></h1>
       <p>{hub['subtitle']}</p>
-      <div class="mk-stats"><span class="mk-stat">🛍️ {this_week} this week</span>{f'<span class="mk-stat">☀️ {open_today} open today</span>' if open_today else ''}<span class="mk-stat">📍 {len(towns)} neighborhoods &amp; towns</span></div>
-      <a href="../{hub['query']}" class="cta-btn">See them on the full calendar →</a>
+      <div class="mk-hero-bar">
+        <div class="mk-stats"><span class="mk-stat">🛍️ {this_week} this week</span>{f'<span class="mk-stat">☀️ {open_today} open today</span>' if open_today else ''}<span class="mk-stat">📍 {len(towns)} neighborhoods &amp; towns</span></div>
+        <a href="../{hub['query']}" class="cta-btn">Full calendar →</a>
+      </div>
     </div>
   </div>"""
     elif is_college and cards_html:
@@ -6623,14 +6650,16 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
     <div class="col-hero-copy">
       <h1>{escape(hub['h1'])}<small>Boston · Cambridge · Chestnut Hill · Medford · Waltham</small></h1>
       <p>{hub['subtitle']}</p>
-      <div class="col-stats">
-        <span class="col-stat">🎓 14 Campuses</span>
-        <span class="col-stat">🗓️ {n_cards} events in {n_days} days</span>
-        <span class="col-stat">🏒 {college_kinds.get("sports", 0)} games</span>
-        <span class="col-stat">🎻 {college_kinds.get("performances", 0)} concerts</span>
-        <span class="col-stat">💛 {college_free} free admission</span>
+      <div class="col-hero-bar">
+        <div class="col-stats">
+          <span class="col-stat">🎓 14 Campuses</span>
+          <span class="col-stat">🗓️ {n_cards} events in {n_days} days</span>
+          <span class="col-stat">🏒 {college_kinds.get("sports", 0)} games</span>
+          <span class="col-stat">🎻 {college_kinds.get("performances", 0)} concerts</span>
+          <span class="col-stat">💛 {college_free} free admission</span>
+        </div>
+        <a href="../" class="cta-btn">Full calendar →</a>
       </div>
-      <a href="../" class="cta-btn">See everything on the full calendar →</a>
     </div>
   </div>"""
     elif is_camps:
