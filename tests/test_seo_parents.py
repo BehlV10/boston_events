@@ -70,6 +70,14 @@ class KidsLaterDaysTest(unittest.TestCase):
         self.assertNotIn("later.html", extra)
         self.assertNotIn('id="kids-later"', html)
 
+    def test_sidebar_and_city_ordering(self):
+        with patch("template._load_community_events", return_value=[]):
+            html = T.render_hub_page("kids-family-events-boston", _kid_events(3))
+        self.assertIn("kids-sidebar", html)
+        self.assertIn("kid-city-section", html)
+        self.assertIn("kid-city-head", html)
+        self.assertIn('data-city="cambridge"', html)
+
 
 class HomeAndCampsTest(unittest.TestCase):
     def test_home_links_parent_pages_in_useful_links(self):

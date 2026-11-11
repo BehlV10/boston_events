@@ -87,14 +87,23 @@ class EdmHubTests(unittest.TestCase):
         self.assertNotIn("summer-camps", html)
         # Verify sleek hero art badge
         self.assertIn("BOSTON UNDERGROUND &amp; CLUBS", html)
-        # Verify removal of nested edm-city-section "giant tabs"
-        self.assertNotIn("edm-city-section", html)
-        self.assertNotIn("edm-city-head", html)
-        self.assertNotIn("edm-city-pill", html)
+        # Verify sidebar filter and city sections
+        self.assertIn("edm-sidebar", html)
+        self.assertIn("edm-city-section", html)
+        self.assertIn("edm-city-head", html)
+        self.assertIn("edm-city-pill", html)
 
     def test_edm_list_structure_multiple_cities(self):
         now = _dt.datetime.now(_EST)
         events = [
+            {
+                "name": "House Anthems Boston",
+                "venue": "Royale",
+                "date": now.isoformat(),
+                "_time": now,
+                "category": "clubbing",
+                "url": "https://example.com/royale",
+            },
             {
                 "name": "Infra Techno Night",
                 "venue": "The Phoenix Landing",
@@ -103,22 +112,18 @@ class EdmHubTests(unittest.TestCase):
                 "category": "clubbing",
                 "url": "https://example.com/infra",
             },
-            {
-                "name": "House Anthems Boston",
-                "venue": "Royale",
-                "date": now.isoformat(),
-                "_time": now + _dt.timedelta(hours=2),
-                "category": "clubbing",
-                "url": "https://example.com/royale",
-            },
         ]
         html = template.render_hub_page("boston-edm", events)
-        # Cards render directly under the day heading without nested city wrappers
+        # Verify city grouping in cards: Cambridge events appear before Boston events matching main page
         self.assertIn('<h2 class="hub-day"', html)
-        self.assertIn("Infra Techno Night", html)
-        self.assertIn("House Anthems Boston", html)
-        self.assertNotIn("edm-city-section", html)
-        self.assertNotIn("edm-city-cards", html)
+        self.assertIn("edm-city-section", html)
+        self.assertIn("edm-city-head", html)
+        cards_body = html[html.index("<main"):]
+        self.assertIn("Infra Techno Night", cards_body)
+        self.assertIn("House Anthems Boston", cards_body)
+        infra_idx = cards_body.index("Infra Techno Night")
+        house_idx = cards_body.index("House Anthems Boston")
+        self.assertLess(infra_idx, house_idx)
 
 
 if __name__ == "__main__":

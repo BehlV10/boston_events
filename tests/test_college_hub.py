@@ -210,6 +210,12 @@ class CollegeHub(unittest.TestCase):
         areas = re.findall(r'data-group="area" data-val="(\w+)"', self.html)
         self.assertEqual(areas, ["all", "cambridge", "comm_ave"])
 
+    def test_sidebar_and_city_ordering(self):
+        self.assertIn("col-sidebar", self.html)
+        self.assertIn("col-city-section", self.html)
+        self.assertIn("col-city-head", self.html)
+        self.assertIn('data-city="boston"', self.html)
+
     def test_registered_and_in_site_directory(self):
         # Other guide pages' header bar lists only finished pages (template._MAIN_NAV)
         self.assertIn("college", T.HUBS)

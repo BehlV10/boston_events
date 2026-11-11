@@ -2552,7 +2552,7 @@ _KIDS_CSS = """
     box-shadow: 0 3px 0 #9fd3f2;
     font-weight: 800;
   }
-  .kids-hub main { max-width: 980px; padding-top: 22px; }
+  .kids-hub main { max-width: 1120px; padding-top: 22px; }
   .kids-hub .hero { border: 0; padding: 0; margin-bottom: 18px; background: #fff; border-radius: 28px;
     overflow: hidden; box-shadow: 0 6px 0 #e9dcc6, 0 14px 30px rgba(120, 100, 60, 0.10); }
   .kids-hero-art { display: block; width: 100%; height: 190px; }
@@ -2567,23 +2567,69 @@ _KIDS_CSS = """
   .kids-hub .cta-btn:hover { transform: translateY(-1px); filter: brightness(1.05); }
   .kids-stats { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 0 0 16px; }
   .kids-stat { background: var(--sky); color: #24648f; border-radius: 999px; padding: 4px 14px; font-weight: 800; font-size: 14px; }
-  .kids-filters {
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 12px;
+  .kids-layout {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 26px;
+    align-items: start;
+    margin-bottom: 24px;
+  }
+  .kids-sidebar {
+    position: sticky;
+    top: 80px;
     background: #fff;
     border: 1.5px solid #efe4d2;
-    border-radius: 10px;
-    margin-bottom: 18px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    white-space: nowrap;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.03);
-    scrollbar-width: none;
+    border-radius: 16px;
+    padding: 18px 16px;
+    box-shadow: 0 4px 14px rgba(120, 100, 60, 0.06);
   }
-  .kids-filters::-webkit-scrollbar { display: none; }
+  .kids-filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1.5px dashed #efe4d2;
+  }
+  .kids-sidebar-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: #2b5d86;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin: 0;
+  }
+  .kid-reset-btn {
+    background: none;
+    border: none;
+    color: #f27e9a;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 6px;
+  }
+  .kid-reset-btn:hover {
+    background: #fff0f3;
+    text-decoration: underline;
+  }
+  .kids-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .kid-filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .kid-filter-label {
+    font-size: 12px;
+    font-weight: 800;
+    color: #7c7590;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
   .kid-select {
     appearance: none;
     -webkit-appearance: none;
@@ -2599,6 +2645,8 @@ _KIDS_CSS = """
     outline: none;
     transition: all 0.15s ease;
     white-space: nowrap;
+    width: 100%;
+    box-sizing: border-box;
   }
   .kid-select:hover {
     border-color: var(--sky-deep, #8fcdf0);
@@ -2635,6 +2683,46 @@ _KIDS_CSS = """
     content: "";
     flex: 1;
     border-bottom: 2px dotted #e2d3ba;
+  }
+  .kid-city-section {
+    margin-top: 14px;
+    margin-bottom: 8px;
+  }
+  .kid-city-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 8px;
+    font-size: 15px;
+    font-weight: 800;
+    color: #2b5d86;
+  }
+  .kid-city-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+  }
+  .kid-c-cambridge { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+  .kid-c-somerville { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+  .kid-c-boston { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+  .kid-c-other { background: #f3e8ff; color: #7e22ce; border: 1px solid #e9d5ff; }
+  .kid-city-head .count {
+    font-size: 12px;
+    font-weight: 700;
+    color: #7c7590;
+    background: #f4efe6;
+    padding: 1px 7px;
+    border-radius: 999px;
+  }
+  .kid-city-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
   }
   .kids-hub .hub-grid {
     display: flex;
@@ -2732,6 +2820,22 @@ _KIDS_CSS = """
   .kids-hub .no-hub-events { text-align: center; color: var(--muted); font-size: 16px; padding: 30px 0; }
   .kids-hub .kids-later { text-align: center; margin: 28px 0 8px; }
   .kids-hub footer { border-top: 2px dashed #e7d8bf; }
+  @media (max-width: 860px) {
+    .kids-layout {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    .kids-sidebar {
+      position: static;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+    }
+    .kids-filters {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+      gap: 8px;
+    }
+  }
   @media (max-width: 640px) {
     .kids-hub header {
       padding: 10px 14px;
@@ -2870,6 +2974,11 @@ _KIDS_FILTER_JS = """<script>
     chips.forEach(function (b) { b.classList.toggle('active', state[b.dataset.group] === b.dataset.val); });
     var none = document.getElementById('hub-none');
     if (none) none.hidden = n > 0 || !!laterBox;
+    var resetBtn = document.getElementById('kid-reset-btn');
+    if (resetBtn) {
+      var hasFilter = Object.keys(state).some(function (k) { return state[k] !== 'all'; });
+      resetBtn.hidden = !hasFilter;
+    }
     if (save) {
       var parts = Object.keys(state).filter(function (k) { return state[k] !== 'all'; }).map(function (k) { return k + '=' + state[k]; });
       history.replaceState(null, '', parts.length ? '#' + parts.join('&') : location.pathname);
@@ -2885,6 +2994,14 @@ _KIDS_FILTER_JS = """<script>
   chips.forEach(function (b) {
     b.addEventListener('click', function () { state[b.dataset.group] = b.dataset.val; render(true); loadLater(); });
   });
+  var resetBtn = document.getElementById('kid-reset-btn');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', function () {
+      Object.keys(state).forEach(function (k) { state[k] = 'all'; });
+      render(true);
+      loadLater();
+    });
+  }
   location.hash.replace(/^#/, '').split('&').forEach(function (p) {
     var kv = p.split('=');
     if (kv.length === 2 && state.hasOwnProperty(kv[0])) state[kv[0]] = kv[1];
@@ -3220,7 +3337,7 @@ _EDM_CSS = """
     box-shadow: 0 0 14px rgba(0, 240, 255, 0.5);
     font-weight: 800;
   }
-  .edm-hub main { max-width: 980px; padding-top: 22px; }
+  .edm-hub main { max-width: 1120px; padding-top: 22px; }
   .edm-hub .hero {
     border: 1px solid var(--border);
     background: #090b16;
@@ -3281,40 +3398,81 @@ _EDM_CSS = """
     display: inline-block;
   }
   .edm-hub .cta-btn:hover { filter: brightness(1.15); transform: translateY(-1px); }
-  .edm-hub .hub-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 0;
+  .edm-layout {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 26px;
+    align-items: start;
+    margin-bottom: 24px;
   }
-  .edm-filters {
+  .edm-sidebar {
+    position: sticky;
+    top: 80px;
     background: #090c18;
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 8px 12px;
-    margin-bottom: 18px;
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: center;
-    gap: 8px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    white-space: nowrap;
-    scrollbar-width: none;
-    box-shadow: 0 0 20px rgba(0, 240, 255, 0.05);
+    border-radius: 14px;
+    padding: 18px 16px;
+    box-shadow: 0 0 24px rgba(0, 240, 255, 0.06);
   }
-  .edm-filters::-webkit-scrollbar { display: none; }
+  .edm-filter-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .edm-sidebar-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0;
+  }
+  .edm-reset-btn {
+    background: none;
+    border: none;
+    color: var(--cyan);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 2px 6px;
+  }
+  .edm-reset-btn:hover {
+    text-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
+    text-decoration: underline;
+  }
+  .edm-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .edm-filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .edm-filter-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
   .edm-select {
     appearance: none;
     -webkit-appearance: none;
     background: #0d1122 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none' stroke='%2300f0ff' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1l4 4 4-4'/%3E%3C/svg%3E") no-repeat right 10px center;
     border: 1px solid rgba(0, 240, 255, 0.25);
-    border-radius: 999px;
+    border-radius: 8px;
     color: #fff;
-    font-size: 12.5px;
+    font-size: 13px;
     font-weight: 600;
     padding: 6px 28px 6px 12px;
     cursor: pointer;
-    flex-shrink: 0;
+    width: 100%;
+    box-sizing: border-box;
     transition: all 0.15s ease;
   }
   .edm-select:hover, .edm-select:focus {
@@ -3352,6 +3510,51 @@ _EDM_CSS = """
     flex: 1;
     height: 1px;
     background: linear-gradient(90deg, var(--cyan), rgba(168, 85, 247, 0.3) 60%, transparent);
+  }
+  .edm-city-section {
+    margin-top: 14px;
+    margin-bottom: 8px;
+  }
+  .edm-city-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #fff;
+  }
+  .edm-city-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .edm-c-cambridge { background: rgba(0, 240, 255, 0.10); color: var(--cyan); border: 1px solid rgba(0, 240, 255, 0.35); text-shadow: 0 0 6px rgba(0, 240, 255, 0.3); }
+  .edm-c-somerville { background: rgba(252, 238, 10, 0.10); color: var(--yellow); border: 1px solid rgba(252, 238, 10, 0.35); }
+  .edm-c-boston { background: rgba(255, 0, 127, 0.10); color: var(--pink); border: 1px solid rgba(255, 0, 127, 0.35); text-shadow: 0 0 6px rgba(255, 0, 127, 0.3); }
+  .edm-c-other { background: rgba(168, 85, 247, 0.10); color: var(--purple); border: 1px solid rgba(168, 85, 247, 0.35); }
+  .edm-city-head .count {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    background: rgba(255, 255, 255, 0.06);
+    padding: 1px 7px;
+    border-radius: 999px;
+  }
+  .edm-city-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .edm-hub .hub-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
   }
   .hub-card.edm-card {
     display: grid;
@@ -3470,6 +3673,22 @@ _EDM_CSS = """
     box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
     text-decoration: none;
   }
+  @media (max-width: 860px) {
+    .edm-layout {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    .edm-sidebar {
+      position: static;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+    }
+    .edm-filters {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+      gap: 8px;
+    }
+  }
   @media (max-width: 640px) {
     .edm-hero-art { height: 130px; }
     .edm-hub .hub-card.edm-card {
@@ -3488,6 +3707,7 @@ _EDM_FILTER_JS = """<script>
   if (!selects.length && !chips.length) return;
   var cards = document.querySelectorAll('.hub-card.edm-card');
   var heads = document.querySelectorAll('.hub-day');
+  var citySecs = document.querySelectorAll('.edm-city-section');
   var state = { genre: 'all', area: 'all', when: 'all', cost: 'all' };
 
   function matches(c) {
@@ -3507,6 +3727,12 @@ _EDM_FILTER_JS = """<script>
       if (on) { days[c.dataset.day] = 1; n++; }
     });
     heads.forEach(function (h) { h.hidden = !days[h.dataset.day]; });
+    citySecs.forEach(function (sec) {
+      var visible = sec.querySelectorAll('.hub-card.edm-card:not([hidden])').length;
+      sec.hidden = (visible === 0);
+      var cCount = sec.querySelector('.edm-city-head .count');
+      if (cCount) cCount.textContent = visible;
+    });
     selects.forEach(function (sel) {
       if (state[sel.dataset.group] !== undefined) {
         sel.value = state[sel.dataset.group];
@@ -3518,6 +3744,11 @@ _EDM_FILTER_JS = """<script>
     });
     var none = document.getElementById('hub-none');
     if (none) none.hidden = n > 0;
+    var resetBtn = document.getElementById('edm-reset-btn');
+    if (resetBtn) {
+      var hasFilters = Object.keys(state).some(function (k) { return state[k] !== 'all'; });
+      resetBtn.hidden = !hasFilters;
+    }
     if (save) {
       var parts = Object.keys(state).filter(function (k) { return state[k] !== 'all'; }).map(function (k) { return k + '=' + state[k]; });
       history.replaceState(null, '', parts.length ? '#' + parts.join('&') : location.pathname);
@@ -3542,6 +3773,14 @@ _EDM_FILTER_JS = """<script>
       render(true);
     });
   });
+
+  var resetBtn = document.getElementById('edm-reset-btn');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', function () {
+      Object.keys(state).forEach(function (k) { state[k] = 'all'; });
+      render(true);
+    });
+  }
 
   location.hash.replace(/^#/, '').split('&').forEach(function (p) {
     var kv = p.split('=');
@@ -3771,6 +4010,7 @@ _COLLEGE_HERO_ART = """<svg class="col-hero-art" viewBox="0 0 900 200" aria-hidd
 </svg>"""
 
 _COLLEGE_CSS = """
+  .college-hub main { max-width: 1120px; }
   .college-hub .hero.col-hero {
     position: relative;
     padding: 0 0 28px;
@@ -3830,28 +4070,117 @@ _COLLEGE_CSS = """
     border-radius: 20px;
     border: 1px solid rgba(255, 255, 255, 0.08);
   }
+  .col-layout {
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 26px;
+    align-items: start;
+    margin-bottom: 24px;
+  }
+  .col-sidebar {
+    position: sticky;
+    top: 80px;
+    background: #151822;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 16px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+  }
+  .col-filter-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .col-sidebar-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0;
+  }
+  .col-reset-btn {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 2px 6px;
+  }
+  .col-reset-btn:hover {
+    text-decoration: underline;
+  }
+  .college-hub .col-filters {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 0;
+    background: transparent;
+    padding: 0;
+    border: 0;
+    backdrop-filter: none;
+  }
+  .col-filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .col-filter-label {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .col-city-section {
+    margin-top: 14px;
+    margin-bottom: 8px;
+  }
+  .col-city-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 8px;
+    font-size: 14.5px;
+    font-weight: 700;
+    color: #e2e8f0;
+  }
+  .col-city-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+  .col-c-cambridge { background: rgba(56, 189, 248, 0.12); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); }
+  .col-c-somerville { background: rgba(251, 191, 36, 0.12); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.3); }
+  .col-c-boston { background: rgba(74, 222, 128, 0.12); color: #4ade80; border: 1px solid rgba(74, 222, 128, 0.3); }
+  .col-c-other { background: rgba(168, 85, 247, 0.12); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); }
+  .col-city-head .count {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #94a3b8;
+    background: rgba(255, 255, 255, 0.06);
+    padding: 1px 7px;
+    border-radius: 999px;
+  }
+  .col-city-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
   .college-hub .hub-grid {
     display: flex;
     flex-direction: column;
     gap: 4px;
   }
-  .college-hub .col-filters {
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: center;
-    gap: 8px;
-    margin: 0 0 20px;
-    background: rgba(21, 24, 34, 0.7);
-    padding: 8px 12px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    backdrop-filter: blur(8px);
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    white-space: nowrap;
-    scrollbar-width: none;
-  }
-  .college-hub .col-filters::-webkit-scrollbar { display: none; }
   .college-hub .col-select {
     appearance: none;
     -webkit-appearance: none;
@@ -3867,6 +4196,8 @@ _COLLEGE_CSS = """
     outline: none;
     transition: all 0.15s ease;
     white-space: nowrap;
+    width: 100%;
+    box-sizing: border-box;
   }
   .college-hub .col-select:hover {
     border-color: rgba(93, 155, 255, 0.4);
@@ -4069,6 +4400,22 @@ _COLLEGE_CSS = """
     box-shadow: 0 0 12px rgba(37, 99, 235, 0.45);
     font-weight: 700;
   }
+  @media (max-width: 860px) {
+    .col-layout {
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    .col-sidebar {
+      position: static;
+      padding: 12px 14px;
+      margin-bottom: 12px;
+    }
+    .college-hub .col-filters {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+      gap: 8px;
+    }
+  }
   @media (max-width: 640px) {
     .col-hero-art { height: 130px; margin-bottom: 14px; }
     .col-hero-copy h1 { font-size: 24px; }
@@ -4089,6 +4436,7 @@ _COLLEGE_FILTER_JS = """<script>
   if (!selects.length && !chips.length) return;
   var cards = document.querySelectorAll('.hub-card');
   var heads = document.querySelectorAll('.hub-day');
+  var citySecs = document.querySelectorAll('.col-city-section');
   var state = { area: 'all', school: 'all', kind: 'all', free: 'all' };
 
   function render(save) {
@@ -4108,6 +4456,13 @@ _COLLEGE_FILTER_JS = """<script>
       h.hidden = !days[h.dataset.day];
     });
 
+    citySecs.forEach(function (sec) {
+      var visible = sec.querySelectorAll('.hub-card:not([hidden])').length;
+      sec.hidden = (visible === 0);
+      var cCount = sec.querySelector('.col-city-head .count');
+      if (cCount) cCount.textContent = visible;
+    });
+
     selects.forEach(function (sel) {
       var g = sel.dataset.group;
       if (g && state[g] !== undefined) {
@@ -4122,6 +4477,12 @@ _COLLEGE_FILTER_JS = """<script>
 
     var none = document.getElementById('hub-none');
     if (none) none.hidden = Object.keys(days).length > 0;
+
+    var resetBtn = document.getElementById('col-reset-btn');
+    if (resetBtn) {
+      var hasFilters = Object.keys(state).some(function (k) { return state[k] !== 'all'; });
+      resetBtn.hidden = !hasFilters;
+    }
 
     if (save) {
       var parts = Object.keys(state).filter(function (k) { return state[k] !== 'all'; }).map(function (k) { return k + '=' + state[k]; });
@@ -4150,6 +4511,14 @@ _COLLEGE_FILTER_JS = """<script>
       render(true);
     });
   });
+
+  var resetBtn = document.getElementById('col-reset-btn');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', function () {
+      Object.keys(state).forEach(function (k) { state[k] = 'all'; });
+      render(true);
+    });
+  }
 
   location.hash.replace(/^#/, '').split('&').forEach(function (p) {
     var kv = p.split('=');
@@ -5648,6 +6017,8 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
         if None in by_day:
             day_keys.append(None)
 
+        city_day_order = ["cambridge", "somerville", "boston", "other"]
+
         for day_obj in day_keys:
             day_events = by_day[day_obj]
             cards_html = later_html if (day_obj and day_obj > inline_until) else inline_html
@@ -5661,9 +6032,24 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
                 day_iso = "tba"
                 cards_html.append('<h2 class="hub-day" id="tba" data-day="tba">Date TBA</h2>')
 
-            day_events.sort(key=lambda ev: ev.get("_time") or datetime.max.replace(tzinfo=EASTERN))
+            by_city = {c: [] for c in city_day_order}
             for e in day_events:
-                cards_html.append(_render_kid_card(e))
+                c = _event_city(e.get("venue"), e.get("_source_venue"), e)
+                by_city.setdefault(c, []).append(e)
+
+            for cname in city_day_order:
+                city_events = by_city.get(cname) or []
+                if not city_events:
+                    continue
+                city_events.sort(key=lambda ev: ev.get("_time") or datetime.max.replace(tzinfo=EASTERN))
+                city_label = CITY_LABELS.get(cname, cname.title())
+                c_cards = "\n".join(_render_kid_card(e) for e in city_events)
+                cards_html.append(f'''<div class="kid-city-section" data-city="{escape(cname)}" data-day="{day_iso}">
+  <h3 class="kid-city-head"><span class="kid-city-pill kid-c-{escape(cname)}">{escape(city_label)}</span> <span class="count">{len(city_events)}</span></h3>
+  <div class="kid-city-grid">
+{c_cards}
+  </div>
+</div>''')
         cards_html = inline_html
         if later_html:
             if extra_files is not None:
@@ -5760,6 +6146,8 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
         if None in by_day:
             day_keys.append(None)
 
+        city_day_order = ["cambridge", "somerville", "boston", "other"]
+
         for day_obj in day_keys:
             day_events = by_day[day_obj]
             if day_obj:
@@ -5770,9 +6158,24 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
                 day_iso = "tba"
                 cards_html.append('<h2 class="hub-day" id="tba" data-day="tba">Date TBA</h2>')
 
-            day_events.sort(key=lambda ev: ev.get("_time") or datetime.max.replace(tzinfo=EASTERN))
+            by_city = {c: [] for c in city_day_order}
             for e in day_events:
-                cards_html.append(_render_edm_card(e))
+                c = _event_city(e.get("venue"), e.get("_source_venue"), e)
+                by_city.setdefault(c, []).append(e)
+
+            for cname in city_day_order:
+                city_events = by_city.get(cname) or []
+                if not city_events:
+                    continue
+                city_events.sort(key=lambda ev: ev.get("_time") or datetime.max.replace(tzinfo=EASTERN))
+                city_label = CITY_LABELS.get(cname, cname.title())
+                c_cards = "\n".join(_render_edm_card(e) for e in city_events)
+                cards_html.append(f'''<div class="edm-city-section" data-city="{escape(cname)}" data-day="{day_iso}">
+  <h3 class="edm-city-head"><span class="edm-city-pill edm-c-{escape(cname)}">{escape(city_label)}</span> <span class="count">{len(city_events)}</span></h3>
+  <div class="edm-city-grid">
+{c_cards}
+  </div>
+</div>''')
     elif is_camps:
         cards_html = []
         area_labels = {
@@ -5855,8 +6258,9 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
             transit_html = f'<span class="col-transit-tag">🚇 {escape(transit)}</span>' if transit else ""
             neigh_html = f'<span class="col-location-tag">· {escape(neigh)}</span>' if neigh else ""
 
+            city = _event_city(e.get("venue"), e.get("_source_venue"), e)
             time_html = f'<time class="hub-date">{t_str}</time>' if t_str else ""
-            card_attrs = f'data-school="{school}" data-kind="{kind}" data-free="{int(is_free)}" data-area="{a_key}" data-day="{day_iso}"'
+            card_attrs = f'data-city="{escape(city)}" data-school="{school}" data-kind="{kind}" data-free="{int(is_free)}" data-area="{a_key}" data-day="{day_iso}"'
             return f"""<article class="hub-card col-card" {card_attrs}>
   {time_html}
   <div class="col-card-body">
@@ -5894,6 +6298,8 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
         if None in by_day:
             day_keys.append(None)
 
+        city_day_order = ["cambridge", "somerville", "boston", "other"]
+
         for day_obj in day_keys:
             day_events = by_day[day_obj]
             if day_obj:
@@ -5904,9 +6310,24 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
                 day_iso = "tba"
                 cards_html.append('<h2 class="hub-day" id="tba" data-day="tba">Date TBA</h2>')
 
-            day_events.sort(key=lambda ev: ev.get("_time") or datetime.max.replace(tzinfo=EASTERN))
+            by_city = {c: [] for c in city_day_order}
             for e in day_events:
-                cards_html.append(_render_col_card(e, day_iso))
+                c = _event_city(e.get("venue"), e.get("_source_venue"), e)
+                by_city.setdefault(c, []).append(e)
+
+            for cname in city_day_order:
+                city_events = by_city.get(cname) or []
+                if not city_events:
+                    continue
+                city_events.sort(key=lambda ev: ev.get("_time") or datetime.max.replace(tzinfo=EASTERN))
+                city_label = CITY_LABELS.get(cname, cname.title())
+                c_cards = "\n".join(_render_col_card(e, day_iso) for e in city_events)
+                cards_html.append(f'''<div class="col-city-section" data-city="{escape(cname)}" data-day="{day_iso}">
+  <h3 class="col-city-head"><span class="col-city-pill col-c-{escape(cname)}">{escape(city_label)}</span> <span class="count">{len(city_events)}</span></h3>
+  <div class="col-city-grid">
+{c_cards}
+  </div>
+</div>''')
     else:
         last_day = None
         for e in filtered[:card_limit]:
@@ -6032,16 +6453,40 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
         kinds = opt("kind", "all", "🎨 Everything", is_active=True) + "".join(
             opt("kind", k, f"{emo} {lbl}") for k, lbl, emo, _rx in _KID_KIND_RES if kid_kind_counts.get(k))
         prices = opt("price", "all", "🎟️ Any price", is_active=True) + opt("price", "free", "💛 Free only")
-        city_chips_html = f"""<div class="kids-filters" role="group" aria-label="Filter kids events">
-    <select class="kid-select" id="kid-when" data-group="when" aria-label="Filter by Date">
-      <option class="kid-chip active" data-group="when" data-val="all" value="all">🗓️ Any day</option>
-    </select>
-    <select class="kid-select" id="kid-city" data-group="city" aria-label="Filter by Area">{where}</select>
-    <select class="kid-select" id="kid-age" data-group="age" aria-label="Filter by Child's Age">{ages}</select>
-    <select class="kid-select" id="kid-kind" data-group="kind" aria-label="Filter by Activity">{kinds}</select>
-    <select class="kid-select" id="kid-price" data-group="price" aria-label="Filter by Cost">{prices}</select>
-  </div>"""
-        hub_js = _KIDS_FILTER_JS
+        kids_sidebar_html = f"""<aside class="kids-sidebar" aria-label="Kids event filters">
+    <div class="kids-filter-header">
+      <h2 class="kids-sidebar-title">Filters</h2>
+      <button type="button" id="kid-reset-btn" class="kid-reset-btn" hidden>Reset</button>
+    </div>
+    <div class="kids-filters" role="group" aria-label="Filter kids events">
+      <div class="kid-filter-group">
+        <label class="kid-filter-label" for="kid-when">Date</label>
+        <select class="kid-select" id="kid-when" data-group="when" aria-label="Filter by Date">
+          <option class="kid-chip active" data-group="when" data-val="all" value="all">🗓️ Any day</option>
+        </select>
+      </div>
+      <div class="kid-filter-group">
+        <label class="kid-filter-label" for="kid-city">Area</label>
+        <select class="kid-select" id="kid-city" data-group="city" aria-label="Filter by Area">{where}</select>
+      </div>
+      <div class="kid-filter-group">
+        <label class="kid-filter-label" for="kid-age">Child's Age</label>
+        <select class="kid-select" id="kid-age" data-group="age" aria-label="Filter by Child's Age">{ages}</select>
+      </div>
+      <div class="kid-filter-group">
+        <label class="kid-filter-label" for="kid-kind">Activity</label>
+        <select class="kid-select" id="kid-kind" data-group="kind" aria-label="Filter by Activity">{kinds}</select>
+      </div>
+      <div class="kid-filter-group">
+        <label class="kid-filter-label" for="kid-price">Cost</label>
+        <select class="kid-select" id="kid-price" data-group="price" aria-label="Filter by Cost">{prices}</select>
+      </div>
+    </div>
+  </aside>"""
+        city_chips_html = f"""<div class="kids-layout">
+  {kids_sidebar_html}
+  <div class="kids-main-col">"""
+        hub_js = "</div></div>\n" + _KIDS_FILTER_JS
         n_cards = sum(kid_kind_counts.values())
         n_days = len(set(re.findall(r'<h2 class="hub-day" id="([\d-]+)"', "".join(cards_html)))) + len(later_days) or 1
         hero_html = f"""<div class="hero">
@@ -6070,13 +6515,34 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
 <option class="edm-chip" data-group="when" data-val="weekend" value="weekend">🎉 This Weekend</option>"""
         cost_html = """<option class="edm-chip active" data-group="cost" data-val="all" value="all">💵 All Prices</option>
 <option class="edm-chip" data-group="cost" data-val="free" value="free">💛 Free / No Cover</option>"""
-        city_chips_html = f"""<div class="edm-filters" role="group" aria-label="Filter electronic and EDM shows">
-    <select id="edm-genre" class="edm-select" data-group="genre" aria-label="Vibes">{subgenres_html}</select>
-    <select id="edm-area" class="edm-select" data-group="area" aria-label="Area">{areas_html}</select>
-    <select id="edm-when" class="edm-select" data-group="when" aria-label="When">{when_html}</select>
-    <select id="edm-cost" class="edm-select" data-group="cost" aria-label="Cost">{cost_html}</select>
-  </div>"""
-        hub_js = _EDM_FILTER_JS
+        edm_sidebar_html = f"""<aside class="edm-sidebar" aria-label="Electronic &amp; EDM filters">
+    <div class="edm-filter-header">
+      <h2 class="edm-sidebar-title">Filters</h2>
+      <button type="button" id="edm-reset-btn" class="edm-reset-btn" hidden>Reset</button>
+    </div>
+    <div class="edm-filters" role="group" aria-label="Filter electronic and EDM shows">
+      <div class="edm-filter-group">
+        <label class="edm-filter-label" for="edm-genre">Music Style</label>
+        <select id="edm-genre" class="edm-select" data-group="genre" aria-label="Vibes">{subgenres_html}</select>
+      </div>
+      <div class="edm-filter-group">
+        <label class="edm-filter-label" for="edm-area">Area</label>
+        <select id="edm-area" class="edm-select" data-group="area" aria-label="Area">{areas_html}</select>
+      </div>
+      <div class="edm-filter-group">
+        <label class="edm-filter-label" for="edm-when">When</label>
+        <select id="edm-when" class="edm-select" data-group="when" aria-label="When">{when_html}</select>
+      </div>
+      <div class="edm-filter-group">
+        <label class="edm-filter-label" for="edm-cost">Cover / Price</label>
+        <select id="edm-cost" class="edm-select" data-group="cost" aria-label="Cost">{cost_html}</select>
+      </div>
+    </div>
+  </aside>"""
+        city_chips_html = f"""<div class="edm-layout">
+  {edm_sidebar_html}
+  <div class="edm-main-col">"""
+        hub_js = "</div></div>\n" + _EDM_FILTER_JS
         n_cards = len(filtered[:card_limit])
         n_days = len(set(re.findall(r'<h2 class="hub-day" id="([\d-]+)"', "".join(cards_html)))) or 1
         hero_html = f"""<div class="hero">
@@ -6122,13 +6588,34 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
             opt("kind", k, f"{emo} {lbl}") for k, emo, lbl in COLLEGE_KINDS if college_kinds.get(k))
         cost_chips = opt("free", "all", "🎟️ All prices", is_active=True) + (opt("free", "1", "💛 Free") if college_free else "")
 
-        city_chips_html = f"""<div class="col-filters" role="group" aria-label="Filter college events">
-    <select class="col-select" data-group="area" aria-label="Filter by Campus Area">{areas}</select>
-    <select class="col-select" data-group="school" aria-label="Filter by School">{schools}</select>
-    <select class="col-select" data-group="kind" aria-label="Filter by Event Type">{kinds}</select>
-    <select class="col-select" data-group="free" aria-label="Filter by Cost">{cost_chips}</select>
-  </div>"""
-        hub_js = _COLLEGE_FILTER_JS
+        col_sidebar_html = f"""<aside class="col-sidebar" aria-label="College event filters">
+    <div class="col-filter-header">
+      <h2 class="col-sidebar-title">Filters</h2>
+      <button type="button" id="col-reset-btn" class="col-reset-btn" hidden>Reset</button>
+    </div>
+    <div class="col-filters" role="group" aria-label="Filter college events">
+      <div class="col-filter-group">
+        <label class="col-filter-label" for="col-area">Campus Area</label>
+        <select id="col-area" class="col-select" data-group="area" aria-label="Filter by Campus Area">{areas}</select>
+      </div>
+      <div class="col-filter-group">
+        <label class="col-filter-label" for="col-school">School</label>
+        <select id="col-school" class="col-select" data-group="school" aria-label="Filter by School">{schools}</select>
+      </div>
+      <div class="col-filter-group">
+        <label class="col-filter-label" for="col-kind">Event Type</label>
+        <select id="col-kind" class="col-select" data-group="kind" aria-label="Filter by Event Type">{kinds}</select>
+      </div>
+      <div class="col-filter-group">
+        <label class="col-filter-label" for="col-free">Cost</label>
+        <select id="col-free" class="col-select" data-group="free" aria-label="Filter by Cost">{cost_chips}</select>
+      </div>
+    </div>
+  </aside>"""
+        city_chips_html = f"""<div class="col-layout">
+  {col_sidebar_html}
+  <div class="col-main-col">"""
+        hub_js = "</div></div>\n" + _COLLEGE_FILTER_JS
         n_cards = len(filtered[:card_limit])
         n_days = len(set(re.findall(r'<h2 class="hub-day" id="([\d-]+)"', "".join(cards_html)))) or 1
         hero_html = f"""<div class="hero col-hero">
