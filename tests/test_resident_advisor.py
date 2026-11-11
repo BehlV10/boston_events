@@ -14,12 +14,15 @@ def _local(days, hour=22):
     return (datetime.now(EASTERN) + timedelta(days=days)).replace(hour=hour, minute=0, second=0, microsecond=0)
 
 
-def _row(eid, title, venue, address=None, days=3, hours=4, cost="10"):
+def _row(eid, title, venue, address=None, days=3, hours=4, cost="10", promos=None):
     start = _local(days)
     fmt = "%Y-%m-%dT%H:%M:%S.000"
-    return {"event": {"id": str(eid), "title": title, "contentUrl": f"/events/{eid}", "cost": cost,
-                      "startTime": start.strftime(fmt), "endTime": (start + timedelta(hours=hours)).strftime(fmt),
-                      "venue": {"name": venue, "address": address}}}
+    d = {"id": str(eid), "title": title, "contentUrl": f"/events/{eid}", "cost": cost,
+         "startTime": start.strftime(fmt), "endTime": (start + timedelta(hours=hours)).strftime(fmt),
+         "venue": {"name": venue, "address": address}}
+    if promos is not None:
+        d["promotionalLinks"] = promos
+    return {"event": d}
 
 
 def _reply(rows, total=None, status=200):
@@ -100,6 +103,21 @@ class Scrape(unittest.TestCase):
         v = next(x for x in S._ALL_VENUES if x["name"] == "Resident Advisor Boston")
         self.assertIs(v["scraper"], S.scrape_resident_advisor)
         self.assertLess(template._source_priority("Resident Advisor Boston"), template._source_priority("Royale"))
+
+    def test_promotional_links_resolve_to_direct_ticket_urls(self):
+        row_dice = _row(10, "DICE Night", "Royale", promos=[{"title": "Tickets on DICE", "url": "https://link.dice.fm/abc"}])
+        row_posh = _row(11, "Posh Night", "bsmnt", promos=[{"title": "Tickets on Posh", "url": "https://posh.vip/e/xyz"}])
+        row_org = _row(12, "Organizer Site", "Descent", promos=[{"title": "Love On Vinyl", "url": "https://www.loveonvinyl.com"}])
+        row_fallback = _row(13, "RA Only Night", "Descent", promos=[])
+        row_spam = _row(14, "Delmarva Power Pay My Bill Online - Fast & Secure Payment Options", "Descent")
+
+        events, _ = _scrape(_reply([row_dice, row_posh, row_org, row_fallback, row_spam]))
+        by_name = {e["name"]: e for e in events}
+        self.assertNotIn("Delmarva Power Pay My Bill Online - Fast & Secure Payment Options", by_name)
+        self.assertEqual(by_name["DICE Night"]["url"], "https://link.dice.fm/abc")
+        self.assertEqual(by_name["Posh Night"]["url"], "https://posh.vip/e/xyz")
+        self.assertEqual(by_name["Organizer Site"]["url"], "https://www.loveonvinyl.com")
+        self.assertEqual(by_name["RA Only Night"]["url"], "https://ra.co/events/13")
 
 
 if __name__ == "__main__":

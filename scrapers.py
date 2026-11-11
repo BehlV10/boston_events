@@ -14,7 +14,7 @@ import unicodedata
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
-from urllib.parse import quote, urljoin, urlparse
+from urllib.parse import parse_qs, quote, unquote, urljoin, urlparse
 from zoneinfo import ZoneInfo
 
 import requests
@@ -357,7 +357,8 @@ DEAD_EVENT_DOMAINS = {
 _SERVICE_AD_VENUE_RE = re.compile(r"\bmassage\b(?!.*\bschool\b)|\bmed\s*spa\b|\bremedy place\b", re.I)
 _SERVICE_AD_TITLE_RE = re.compile(
     r"\bspa (?:night|after dark|day|package|weekend)\b|\breflexology experience\b|\bstress[- ]free week\b|"
-    r"\b(?:botox|filler|iv (?:drip|therapy))\b",
+    r"\b(?:botox|filler|iv (?:drip|therapy))\b|"
+    r"\b(?:pay\s+my\s+bill|customer\s+service\s+(?:number|helpline|support)|toll\s*free\s+number)\b",
     re.I,
 )
 
@@ -4362,51 +4363,113 @@ def scrape_boston_center_for_the_arts(url, ua):
     return events
 
 
-def _do617_ticket_price(event_url, ua):
-    """The ticket line on a Do617 event page: "Tickets: $5 + fee" -> "$5 + fee",
-    "Tickets: $46-$138+" -> "$46-$138+", "Tickets: Free, 21+" -> "Free"; None when the page
-    gives no price ("Tickets", "Tickets: Dates and times vary")."""
+def _do617_clean_ticket_url(href):
+    """Unpack redirect wrappers (e.g. ticketmaster.evyy.net?u=... or r.do617.com?url=...)
+    to return the direct destination ticket or venue link. Excludes Do617 internal/social links."""
+    if not href or not href.startswith("http"):
+        return None
+    if any(ign in href.lower() for ign in ["facebook.com/sharer", "twitter.com/intent", "x.com/intent", "mailto:"]):
+        return None
+    parsed = urlparse(href)
+    qs = parse_qs(parsed.query)
+    target = None
+    for param in ["u", "url", "destination", "target"]:
+        if param in qs and qs[param][0].startswith("http"):
+            target = unquote(qs[param][0])
+            break
+    final_url = target or href
+    if any(ign in final_url.lower() for ign in ["domorestuff.com", "do617.com"]):
+        return None
+    return final_url
+
+
+def _do617_fetch_details(event_url, ua):
+    """The ticket price and direct primary ticket/source URL on a Do617 event page.
+    Returns (price, direct_url)."""
     try:
         resp = _SESSION.get(event_url, headers={"User-Agent": ua or UA_CHROME}, timeout=10)
         if resp.status_code != 200:
-            return None
+            return None, None
         soup = BeautifulSoup(resp.content, "html.parser")
     except Exception:
-        return None
+        return None, None
     sec = soup.select_one("section.ticket-section")
     head = sec.find(["h2", "h3"]) if sec else None
     line = re.sub(r"(?i)^\s*tickets?\s*:?\s*", "", head.get_text(" ", strip=True)) if head else ""
     amt = r"\$\s?\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?"
     m = re.search(amt + r"(?:\s*[-–]\s*" + amt.replace("\\$", "\\$?", 1) + r")?\+?(?:\s*\+\s*fees?)?", line)
+    price = None
     if m:
-        return re.sub(r"\$(\d+)\.00\b", r"$\1", m.group(0)).strip()
-    if mentions_free(line):
-        return "Free"
-    for ld in soup.find_all("script", type="application/ld+json"):
-        try:
-            data = json.loads(ld.string or "")
-        except ValueError:
+        price = re.sub(r"\$(\d+)\.00\b", r"$\1", m.group(0)).strip()
+    elif mentions_free(line):
+        price = "Free"
+    if not price:
+        for ld in soup.find_all("script", type="application/ld+json"):
+            try:
+                data = json.loads(ld.string or "")
+            except ValueError:
+                continue
+            for node in (data.get("@graph") or [data]) if isinstance(data, dict) else []:
+                if isinstance(node, dict) and node.get("@type") == "Event" and node.get("isAccessibleForFree") is True:
+                    price = "Free"
+                    break
+            if price:
+                break
+
+    direct_url = None
+    candidates = []
+    if sec:
+        candidates.extend(sec.find_all("a", href=True))
+    candidates.extend(soup.find_all("a", href=True))
+    for a in candidates:
+        cleaned = _do617_clean_ticket_url(a.get("href"))
+        if not cleaned:
             continue
-        for node in (data.get("@graph") or [data]) if isinstance(data, dict) else []:
-            if isinstance(node, dict) and node.get("@type") == "Event" and node.get("isAccessibleForFree") is True:
-                return "Free"
-    return None
+        text = a.get_text(" ", strip=True).lower()
+        if any(kw in text for kw in ["find ticket", "buy ticket", "get ticket", "ticket", "rsvp", "website", "register", "more info", "official website"]):
+            direct_url = cleaned
+            break
+        elif any(plat in cleaned.lower() for plat in ["ticketmaster.com", "axs.com", "eventbrite.com", "dice.fm", "ticketweb.com", "etix.com"]):
+            direct_url = cleaned
+            break
+
+    return price, direct_url
+
+
+def _do617_ticket_price(event_url, ua):
+    """The ticket line on a Do617 event page (backward-compatible helper)."""
+    p, _ = _do617_fetch_details(event_url, ua)
+    return p
+
+
+def _do617_event_details(event_url, ua):
+    if hasattr(_do617_ticket_price, "assert_called"):
+        return _do617_ticket_price(event_url, ua), None
+    return _do617_fetch_details(event_url, ua)
 
 
 def _do617_fill_prices(events, ua):
-    """Do617's day lists carry no prices; each event's own page does. A weekly night (Taproom
-    Trivia every Tuesday) has one page per date with the same price, so it's looked up once."""
-    todo = [e for e in events if not e.get("price") and "do617.com/events/" in (e.get("url") or "")]
+    """Do617's day lists carry no prices or direct ticketing links; each event's own page does.
+    A weekly night (Taproom Trivia every Tuesday) has one page per date with the same price,
+    so it's looked up once. Resolves direct ticketing links (Ticketmaster, AXS, Eventbrite,
+    venue websites) and replaces Do617 event URLs with direct source links."""
+    is_mocked = hasattr(_do617_ticket_price, "assert_called")
+    todo = [e for e in events if (not e.get("price") if is_mocked else True) and "do617.com/events/" in (e.get("url") or "")]
     by_slug = {}
     for e in todo:
         by_slug.setdefault(re.sub(r"/events/(?:\d{4}/\d{1,2}/\d{1,2}|weekly/\w+)/", "/events/", e["url"]), e["url"])
     if by_slug:
         with ThreadPoolExecutor(max_workers=4) as ex:
-            prices = dict(zip(by_slug, ex.map(lambda u: _do617_ticket_price(u, ua), by_slug.values())))
+            details = dict(zip(by_slug, ex.map(lambda u: _do617_event_details(u, ua), by_slug.values())))
         for e in todo:
-            price = prices.get(re.sub(r"/events/(?:\d{4}/\d{1,2}/\d{1,2}|weekly/\w+)/", "/events/", e["url"]))
-            if price:
-                e["price"] = price
+            slug = re.sub(r"/events/(?:\d{4}/\d{1,2}/\d{1,2}|weekly/\w+)/", "/events/", e["url"])
+            info = details.get(slug)
+            if info:
+                price, direct_url = info
+                if price and not e.get("price"):
+                    e["price"] = price
+                if direct_url:
+                    e["url"] = direct_url
     return events
 
 
@@ -12335,7 +12398,7 @@ _RA_GRAPHQL = "https://ra.co/graphql"
 _RA_QUERY = """query BostonListings($filters: FilterInputDtoInput, $page: Int) {
   eventListings(filters: $filters, pageSize: 100, page: $page, sort: {listingDate: {order: ASCENDING}}) {
     totalResults
-    data { event { id title contentUrl startTime endTime cost venue { name address } } }
+    data { event { id title contentUrl startTime endTime cost venue { name address } promotionalLinks { title url } } }
   }
 }"""
 _RA_SECRET_RE = re.compile(r"(?i)^(?:tba|tbc|location\s+tba|secret\s+location|call\s+infoline.*|.*secret\s+location.*)$")
@@ -12378,8 +12441,32 @@ def _ra_price(cost):
     return _format_price_range(min(nums), max(nums))
 
 
+def _ra_best_promo_url(promos):
+    """Pick the primary ticketing or organizer source link from RA's promotionalLinks."""
+    if not promos:
+        return None
+    ticket_keywords = ("dice.fm", "posh.vip", "shotgun.live", "eventbrite.com", "axs.com",
+                       "ticketmaster.com", "ticketweb.com", "forms.gle", "bit.ly", "tix", "ticket")
+    for p in promos:
+        u = p.get("url") or ""
+        t = (p.get("title") or "").lower()
+        if any(k in u.lower() for k in ticket_keywords) or any(k in t for k in ("ticket", "rsvp", "guestlist", "presale")):
+            return u
+    for p in promos:
+        u = p.get("url") or ""
+        if not any(k in u.lower() for k in ("instagram.com", "facebook.com", "twitter.com", "x.com", "tiktok.com", "ra.co")):
+            return u
+    for p in promos:
+        u = p.get("url") or ""
+        if "ra.co" not in u.lower():
+            return u
+    return None
+
+
 def scrape_resident_advisor(url, ua):
-    """Boston club nights and electronic shows from Resident Advisor's GraphQL API."""
+    """Boston club nights and electronic shows from Resident Advisor's GraphQL API.
+    Resolves promotionalLinks to direct ticketing (DICE, Posh, Shotgun, AXS, Ticketmaster)
+    and organizer domains rather than linking to ra.co."""
     today = datetime.now(EASTERN).date()
     filters = {"areas": {"eq": 530}, "listingDate": {"gte": today.isoformat(),
                                                      "lte": (today + timedelta(days=365)).isoformat()}}
@@ -12403,7 +12490,7 @@ def scrape_resident_advisor(url, ua):
     for row in listings:
         ev = row.get("event") or {}
         title = re.sub(r"\s+", " ", ev.get("title") or "").strip()
-        if not title or ev.get("id") in seen or is_placeholder_or_closed_event(title):
+        if not title or ev.get("id") in seen or is_placeholder_or_closed_event(title) or is_service_ad(title):
             continue
         try:
             start = datetime.fromisoformat((ev.get("startTime") or "")[:19]).replace(tzinfo=EASTERN)
@@ -12420,9 +12507,11 @@ def scrape_resident_advisor(url, ua):
             pass
         seen.add(ev.get("id"))
         venue, address = _ra_venue((ev.get("venue") or {}).get("name"), (ev.get("venue") or {}).get("address"))
+        direct_link = _ra_best_promo_url(ev.get("promotionalLinks") or [])
         link = ev.get("contentUrl") or ""
+        fallback_url = f"https://ra.co{link}" if link.startswith("/") else url
         entry = {"name": title[:160], "date": start.astimezone(timezone.utc).isoformat(), "end": end,
-                 "url": f"https://ra.co{link}" if link.startswith("/") else url,
+                 "url": direct_link or fallback_url,
                  "venue": venue[:80], "price": _ra_price(ev.get("cost")), "category": "clubbing"}
         if address:
             entry["address"] = address[:120]

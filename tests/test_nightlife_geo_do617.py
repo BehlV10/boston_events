@@ -242,5 +242,56 @@ class Sources(unittest.TestCase):
             self.assertEqual(by_name[name]["url"], f"https://do617.com/venues/{slug}")
 
 
+class Do617DirectTickets(unittest.TestCase):
+    def test_clean_ticket_url_unpacks_redirects_and_filters_noise(self):
+        clean = S._do617_clean_ticket_url
+        tm = "https://ticketmaster.evyy.net/c/253185/264167/4272?SharedId=DoStuff&u=https%3A%2F%2Fwww.ticketmaster.com%2Fevent%2F010064D10F38B5FD"
+        self.assertEqual(clean(tm), "https://www.ticketmaster.com/event/010064D10F38B5FD")
+
+        eb = "https://r.do617.com/aff?url=https%3A%2F%2Fwww.eventbrite.com%2Fe%2Fshow-tickets-12345"
+        self.assertEqual(clean(eb), "https://www.eventbrite.com/e/show-tickets-12345")
+
+        axs = "https://www.axs.com/events/1510070/the-bad-plus-tickets?cid=usaffdostuff"
+        self.assertEqual(clean(axs), axs)
+
+        self.assertIsNone(clean("https://domorestuff.com/?city=boston"))
+        self.assertIsNone(clean("https://do617.com/events/2026/11/11/show"))
+        self.assertIsNone(clean("https://twitter.com/intent/tweet"))
+
+    def test_fill_prices_replaces_do617_url_with_primary_ticket(self):
+        events = [
+            {"name": "Big Concert", "date": "2026-11-12T00:00:00+00:00",
+             "url": "https://do617.com/events/2026/11/12/big-concert-tickets", "price": None},
+            {"name": "No Ticket Link", "date": "2026-11-12T00:00:00+00:00",
+             "url": "https://do617.com/events/2026/11/12/no-link-tickets", "price": None},
+        ]
+        html_concert = """<html><body>
+            <section class="ticket-section">
+                <h2>Tickets: $25 - $40</h2>
+                <a href="https://ticketmaster.evyy.net/c/1/2/3?u=https%3A%2F%2Fwww.ticketmaster.com%2Fevent%2F123">Find tickets</a>
+            </section>
+        </body></html>"""
+        html_nolink = """<html><body>
+            <section class="ticket-section">
+                <h2>Tickets: Free</h2>
+            </section>
+        </body></html>"""
+
+        def mock_get(url, **kw):
+            content = html_concert if "big-concert" in url else html_nolink
+            resp = MagicMock(status_code=200, content=content.encode("utf-8"))
+            return resp
+
+        with patch.object(S, "_SESSION") as session:
+            session.get.side_effect = mock_get
+            res = S._do617_fill_prices(events, "ua")
+
+        by_name = {e["name"]: e for e in res}
+        self.assertEqual(by_name["Big Concert"]["url"], "https://www.ticketmaster.com/event/123")
+        self.assertEqual(by_name["Big Concert"]["price"], "$25 - $40")
+        self.assertEqual(by_name["No Ticket Link"]["url"], "https://do617.com/events/2026/11/12/no-link-tickets")
+        self.assertEqual(by_name["No Ticket Link"]["price"], "Free")
+
+
 if __name__ == "__main__":
     unittest.main()
