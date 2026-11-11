@@ -69,7 +69,6 @@ CITY_CAPS = {"boston": 10, "cambridge": 9, "somerville": 7}
 WEEKEND_PER_CITY = 10   # weekend post: up to 10 per city per day, filled on score
 CITY_POST_PICKS = 20    # single-city weekend posts (r/CambridgeMA, r/Somerville)
 CITY_NAMES = {"boston": "Boston", "cambridge": "Cambridge", "somerville": "Somerville"}
-CITY_HUBS = {"boston": "boston/", "cambridge": "cambridge/", "somerville": "somerville/"}
 REDDIT_LIMIT = 40000      # Reddit self-post body limit (characters)
 SIZE_TARGET = 38500       # leave headroom for hand edits before posting
 
@@ -94,6 +93,32 @@ SKIP_TITLE_RE = re.compile(
     r"luthier collective|preview session|open house|pose|poses|drawing club|runners|group run|"
     r"stair climb|happy hour deals|virtual|council on aging|pre-show)\b"
 )
+# Food and drink specials ("$1 Oysters at Vera's", "$5 Margaritas") are deals, not events
+DEAL_TITLE_RE = re.compile(r"(?i)^\W*\$\d+(?:\.\d+)?\s+(?:oysters?|wings?|tacos?|margaritas?|drafts?|beers?|pints?|"
+                           r"drinks?|shots?|burgers?|pizza|slices?|apps?|appetizers?|mimosas?|wine|cocktails?)\b")
+
+NEWS_PATH = os.path.join(ROOT, "roundup_news.json")
+NEWS_DAYS = 7  # a "what's new" item shows in roundups starting within a week of its date
+# City posts link the main r/boston post; the posting page swaps in the real link before copying.
+BOSTON_POST_PLACEHOLDER = "https://www.reddit.com/r/boston/PASTE_YOUR_R_BOSTON_POST_LINK"
+
+
+def whats_new(first_day, path=NEWS_PATH):
+    """Markdown bullets for site news dated within NEWS_DAYS before the roundup's first day."""
+    try:
+        with open(path, encoding="utf-8") as f:
+            items = json.load(f).get("items", [])
+    except (OSError, ValueError):
+        return []
+    out = []
+    for it in items:
+        try:
+            d = date.fromisoformat(it["date"])
+        except (KeyError, ValueError):
+            continue
+        if timedelta(0) <= first_day - d <= timedelta(days=NEWS_DAYS) and it.get("text"):
+            out.append(f"* {it['text']}")
+    return out
 
 
 def _week_start(arg=None):
@@ -258,7 +283,7 @@ def build_roundup(mode="weekday", start=None, city=None):
                 continue
 
             name = e.get("name") or e.get("title") or ""
-            if SKIP_TITLE_RE.search(name) or re.search(r"(?i)\b(?:closed|closure|canceled|cancelled|postponed)\b", name):
+            if SKIP_TITLE_RE.search(name) or DEAL_TITLE_RE.search(name) or re.search(r"(?i)\b(?:closed|closure|canceled|cancelled|postponed)\b", name):
                 continue
             if re.search(r"(?i)\bsold[ -]?out\b", f"{name} {e.get('price') or ''}"):
                 sold_out.add((ev_time.replace(second=0, microsecond=0), _room_key(e.get("venue") or vname)))
@@ -488,6 +513,13 @@ def build_roundup(mode="weekday", start=None, city=None):
                 "",
             ]
 
+        news = whats_new(mon)
+        if news:
+            out += [f"**New on [wickedbostonevents.com]({SITE}) this week:**", "", *news, ""]
+        if city and weekend:
+            out += [f"For the top picks across Boston, Cambridge & Somerville this weekend, see "
+                    f"[this weekend's post on r/boston]({BOSTON_POST_PLACEHOLDER}).", ""]
+
         if runs:
             out += ["## 🎭 RUNNING ALL WEEKEND" if weekend else "## 🎭 RUNNING ALL WEEK", ""]
             for evs in sorted(runs.values(), key=lambda v: min(e["_time"] for e in v)):
@@ -526,7 +558,6 @@ def build_roundup(mode="weekday", start=None, city=None):
             "",
             "### 🔗 More on Wicked Boston Events",
             f"- **Full calendar** (filter by neighborhood & T line): [{SITE}]({SITE})",
-            *([f"- **All {CITY_NAMES[city]} events**: [{SITE}/{CITY_HUBS[city]}]({SITE}/{CITY_HUBS[city]})"] if city else []),
             f"- **For parents** (kids & family events): [{SITE}/kids-family-events-boston/]({SITE}/kids-family-events-boston/)",
             "",
             f"*Curated from 200+ local venue, theatre, museum, and community calendars at **[wickedbostonevents.com]({SITE})** (ad-free & independent).*",
@@ -650,6 +681,12 @@ def render_roundup_page(mode, title, body, built_at=None, page=None):
                         for r in ROUNDUP_PAGES if r[0] != slug)
     days = roundup_days(mode)
     span = f"{days[0].strftime('%a %b %-d')} – {days[-1].strftime('%a %b %-d')}"
+    link_field = "" if BOSTON_POST_PLACEHOLDER not in body else f"""
+  <div class="field">
+    <label class="label" for="bostonLink">Your r/boston post's link</label>
+    <input id="bostonLink" type="url" placeholder="https://www.reddit.com/r/boston/comments/…" autocomplete="off">
+    <p class="muted" style="margin:0">Post the main roundup to r/boston first, then paste its link here; the copied post uses it. Until then the post links to a placeholder.</p>
+  </div>"""
     built = (built_at or datetime.now(EASTERN)).strftime("%a %b %-d, %-I:%M %p")
     subs = "\n".join(
         f'      <li><a class="sub" href="https://old.reddit.com/r/{n}/submit?selftext=true&amp;title={esc(quote(title))}" '
@@ -683,6 +720,7 @@ a.sub{{font-weight:600}}
 .tabs{{display:flex;gap:4px;border-bottom:1px solid var(--line)}}
 .tab{{border:0;border-bottom:2px solid transparent;border-radius:0;background:none;color:var(--muted)}}
 .tab[aria-selected="true"]{{color:var(--fg);border-bottom-color:var(--accent)}}
+input[type=url]{{width:100%;font:14px/1.4 inherit;font-family:inherit;padding:9px 10px;border:1px solid var(--line);border-radius:6px;background:var(--code);color:var(--fg)}}
 textarea{{width:100%;min-height:60vh;font:13px/1.5 ui-monospace,Menlo,monospace;background:var(--code);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:12px}}
 .preview{{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:4px 18px 18px;overflow-wrap:anywhere}}
 .preview h2{{font:600 18px/1.3 Georgia,serif;margin:24px 0 6px}}
@@ -701,6 +739,7 @@ textarea{{width:100%;min-height:60vh;font:13px/1.5 ui-monospace,Menlo,monospace;
     <div class="titletext" id="t">{esc(title)}</div>
     <div class="row"><button id="copyTitle">Copy title</button></div>
   </div>
+{link_field}
   <div class="row">
     <button class="primary" id="copyBody">Copy post body (Markdown)</button>
     <span class="status" id="status" role="status"></span>
@@ -727,6 +766,21 @@ const ta = document.getElementById('md'), pv = document.getElementById('preview'
 async function copy(text, label, fallback) {{
   try {{ await navigator.clipboard.writeText(text); status.textContent = label + ' copied'; }}
   catch (e) {{ if (fallback) {{ showMd(); ta.focus(); ta.select(); }} status.textContent = 'Copy was blocked: select the text and press Ctrl/Cmd+C.'; }}
+}}
+const PLACEHOLDER = {json.dumps(BOSTON_POST_PLACEHOLDER)}, original = ta.value, linkIn = document.getElementById('bostonLink');
+const LINK_KEY = 'roundup-boston-link-{days[0].isoformat()}';
+function applyLink() {{
+  const v = (linkIn && linkIn.value.trim()) || '';
+  const url = /^https:\/\/(www\.|old\.)?reddit\.com\//.test(v) ? v : PLACEHOLDER;
+  ta.value = original.split(PLACEHOLDER).join(url);
+  pv.querySelectorAll('a[data-ph]').forEach(a => {{ a.href = url; }});
+  try {{ if (linkIn) localStorage.setItem(LINK_KEY, v); }} catch (e) {{}}
+}}
+pv.querySelectorAll('a').forEach(a => {{ if (a.getAttribute('href') === PLACEHOLDER) a.setAttribute('data-ph', ''); }});
+if (linkIn) {{
+  try {{ linkIn.value = localStorage.getItem(LINK_KEY) || ''; }} catch (e) {{}}
+  linkIn.addEventListener('input', applyLink);
+  applyLink();
 }}
 document.getElementById('copyBody').onclick = () => copy(ta.value, 'Post body', true);
 document.getElementById('copyTitle').onclick = () => copy(document.getElementById('t').textContent, 'Title', false);
