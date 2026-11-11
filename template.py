@@ -5378,17 +5378,18 @@ def _camps_sections(camps):
 
 
 _FAMILY_NAV = (("../", "All Events", None),
+               ("../markets-festivals-boston/", "Markets &amp; Festivals", "markets-festivals-boston"),
+               ("../college/", "College", "college"),
                ("../kids-family-events-boston/", "Kids &amp; Family", "kids-family-events-boston"),
                ("../summer-camps/", "Summer Camps", "summer-camps"))
 
 
-# The header bar on guide pages links only to the finished guide pages. The rest (Boston,
-# Cambridge, Free, Comedy, EDM, College...) stay reachable from the homepage directory; add
-# a page here once it's ready.
+# The header bar on guide pages links to all finished guide pages.
 _MAIN_NAV = (("../", "All Events", None),
+             ("../markets-festivals-boston/", "Markets &amp; Festivals", "markets-festivals-boston"),
+             ("../college/", "College", "college"),
              ("../kids-family-events-boston/", "Kids &amp; Family", "kids-family-events-boston"),
-             ("../summer-camps/", "Summer Camps", "summer-camps"),
-             ("../markets-festivals-boston/", "Markets &amp; Festivals", "markets-festivals-boston"))
+             ("../summer-camps/", "Summer Camps", "summer-camps"))
 
 
 def _main_hub_nav(hub_slug):
@@ -5399,7 +5400,7 @@ def _main_hub_nav(hub_slug):
 
 
 def _family_nav(hub_slug, nav_class):
-    """The short header nav on the parent-facing pages (Kids & Family, Summer Camps)."""
+    """The header nav on the parent-facing pages (Kids & Family, Summer Camps)."""
     ACTIVE = ' class="active"'
     links = "\n".join(f'    <a href="{href}"{ACTIVE if slug == hub_slug else ""}>{label}</a>'
                       for href, label, slug in _FAMILY_NAV)
@@ -5409,6 +5410,9 @@ def _family_nav(hub_slug, nav_class):
 _COLLEGE_NAV = (
     ("../", "All Events", None),
     ("../college/", "College", "college"),
+    ("../markets-festivals-boston/", "Markets &amp; Festivals", "markets-festivals-boston"),
+    ("../kids-family-events-boston/", "Kids &amp; Family", "kids-family-events-boston"),
+    ("../summer-camps/", "Summer Camps", "summer-camps"),
     ("../free/", "Free Events", "free"),
     ("../boston-edm/", "Boston EDM", "boston-edm"),
     ("../cambridge-events-tonight/", "Cambridge Tonight", "cambridge-events-tonight"),
@@ -6157,6 +6161,43 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
     else:
         hub_nav_html = _main_hub_nav(hub_slug)
 
+    is_special_hub = is_markets or is_college or is_kids or is_camps
+    hub_guides_html = ""
+    if is_special_hub:
+        hub_guides_html = f"""<nav class="hub-more-guides" aria-label="Explore more Boston guides">
+  <h2>Explore More Boston Guides</h2>
+  <div class="hub-more-guides-grid">
+    <a href="../markets-festivals-boston/" class="hub-guide-card{' active' if is_markets else ''}">
+      <span class="hub-guide-card-icon">🛍️</span>
+      <div class="hub-guide-card-info">
+        <strong>Markets &amp; Festivals</strong>
+        <p>Farmers markets, craft fairs, vintage fleas &amp; bazaars</p>
+      </div>
+    </a>
+    <a href="../college/" class="hub-guide-card{' active' if is_college else ''}">
+      <span class="hub-guide-card-icon">🎓</span>
+      <div class="hub-guide-card-info">
+        <strong>College Events</strong>
+        <p>Campus athletics, student concerts &amp; public talks</p>
+      </div>
+    </a>
+    <a href="../kids-family-events-boston/" class="hub-guide-card{' active' if is_kids else ''}">
+      <span class="hub-guide-card-icon">🎨</span>
+      <div class="hub-guide-card-info">
+        <strong>Kids &amp; Family</strong>
+        <p>All-ages outings, library storytimes &amp; family theater</p>
+      </div>
+    </a>
+    <a href="../summer-camps/" class="hub-guide-card{' active' if is_camps else ''}">
+      <span class="hub-guide-card-icon">⛺</span>
+      <div class="hub-guide-card-info">
+        <strong>Summer Camps</strong>
+        <p>Day &amp; overnight camps with prices, ages &amp; signups</p>
+      </div>
+    </a>
+  </div>
+</nav>"""
+
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -6221,6 +6262,70 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
   .hub-nav a:hover, .hub-nav a.active {{
     color: var(--accent);
     font-weight: 600;
+  }}
+  .hub-more-guides {{
+    margin: 44px 0 20px;
+    padding: 22px 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
+  }}
+  .hub-more-guides h2 {{
+    font-size: 17px;
+    font-weight: 800;
+    margin: 0 0 14px;
+    color: var(--fg);
+    letter-spacing: -0.01em;
+  }}
+  .hub-more-guides-grid {{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+  }}
+  .hub-guide-card {{
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    text-decoration: none;
+    color: var(--fg);
+    transition: all 0.15s ease;
+  }}
+  .hub-guide-card:hover {{
+    border-color: var(--accent);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }}
+  .hub-guide-card.active {{
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1.5px var(--accent);
+  }}
+  .hub-guide-card-icon {{
+    font-size: 24px;
+    line-height: 1;
+    flex: none;
+  }}
+  .hub-guide-card-info strong {{
+    display: block;
+    font-size: 13.5px;
+    font-weight: 700;
+    margin-bottom: 2px;
+    color: var(--fg);
+  }}
+  .hub-guide-card-info p {{
+    margin: 0;
+    font-size: 11.5px;
+    color: var(--muted);
+    line-height: 1.35;
+  }}
+  @media (max-width: 600px) {{
+    .hub-more-guides-grid {{
+      grid-template-columns: 1fr;
+    }}
   }}
   main {{
     max-width: 900px;
@@ -6398,6 +6503,7 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
   </div>
   <p id="hub-none" class="no-hub-events" hidden>{'No camps match those filters. Try removing one.' if is_camps else 'No college events match those filters. Try another school.' if is_college else 'Nothing in this area in the next few weeks. Try another town.'}</p>
   {hub_js}
+  {hub_guides_html}
 </main>
 <footer>
   <p><a href="../">Wicked Boston Events</a> · Independent Greater Boston Events Calendar · <a href="https://www.instagram.com/wickedbostonevents/" target="_blank" rel="noopener">Instagram: @wickedbostonevents</a><span id="pwa-install-wrap" hidden> · <button type="button" class="footer-pwa-btn" onclick="installPWA()">📲 Add to Home Screen</button></span></p>
@@ -8109,9 +8215,11 @@ def render_page(results, weather=None, luckyseat_shows=None):
                 )
             useful_block = f'''
         <div class="useful-inner">
-          <h3>Useful links</h3>
+          <h3>Featured Guides</h3>
+          <div class="useful-cat useful-markets" style="margin-bottom:12px"><div class="useful-cat-head" style="color:#b23a26"><span class="chip-icon">🛍️ </span>Markets &amp; Festivals</div><ul><li><a href="markets-festivals-boston/">Farmers markets, fleas &amp; craft fairs</a></li></ul></div>
+          <div class="useful-cat useful-students" style="margin-bottom:12px"><div class="useful-cat-head" style="color:#5d9bff"><span class="chip-icon">🎓 </span>College Events</div><ul><li><a href="college/">Campus games, concerts &amp; talks</a></li></ul></div>
           <div class="useful-cat useful-parents" style="margin-bottom:12px"><div class="useful-cat-head" style="color:#f27e9a"><span class="chip-icon">👪 </span>For parents</div><ul><li><a href="kids-family-events-boston/">Kids &amp; family events</a></li><li><a href="summer-camps/">Summer camps near Boston</a></li></ul></div>
-          <div class="useful-cat useful-students" style="margin-bottom:12px"><div class="useful-cat-head" style="color:#5d9bff"><span class="chip-icon">🎓 </span>For students</div><ul><li><a href="college/">College games, concerts &amp; talks</a></li></ul></div>
+          <h3 style="margin-top:16px;">Useful links</h3>
           <p class="hint">Venues without a scrapable calendar.</p>
           {"".join(parts)}
         </div>'''
