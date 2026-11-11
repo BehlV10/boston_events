@@ -330,6 +330,33 @@ class NearMeAndGeocoding(unittest.TestCase):
         self.assertEqual(hub_cfg["limit"], 600)
         self.assertEqual(hub_cfg["window_days"], 90)
 
+    def test_all_holiday_markets_have_direct_official_urls(self):
+        from scrapers import _ALL_VENUES
+        market_venues = [
+            "The Arsenal Holiday Bazaar", "11th Annual SoWa Christmas Market",
+            "Boston Thanksgiving Market & Harbor Festival", "Stocking Stuffer Holiday Market",
+            "Holiday Maker Market at Marzae", "Boston Women's Market at Warehouse XI",
+            "Kilroy Square Holiday Market", "Boston Women's Market at The Armory",
+            "Sip & Shop at CambridgeSide", "Beacon Hill Holiday Stroll",
+            "Christkindlmarkt – German Holiday Market", "Open Newbury Street Holiday Stroll",
+            "Winter Market at Sam Adams Brewery", "Union Square Jingle & Holiday Stroll",
+            "South End Holiday Stroll", "Cultural Survival Bazaar",
+            "Canal District Kendall Winter Market", "2026 Black Business Holiday Marketplace",
+            "Station Street Studios Holiday Market", "The Clay Table Holiday Market",
+            "The West End Museum Holiday Market", "The Holiday Shoppes at Tuscan Village",
+            "Roslindale Village Main Street", "Harvard Square Holiday Fair",
+            "Snowport Holiday Market"
+        ]
+        by_name = {v["name"]: v for v in _ALL_VENUES}
+        for name in market_venues:
+            self.assertIn(name, by_name, f"Venue {name} must be registered in _ALL_VENUES")
+            url = by_name[name]["url"]
+            self.assertNotIn("thebostoncalendar.com", url, f"Venue {name} must not point to thebostoncalendar.com: {url}")
+            events = by_name[name]["scraper"](url, "Mozilla/5.0")
+            self.assertGreater(len(events), 0, f"Scraper for {name} must produce events")
+            for ev in events:
+                self.assertNotIn("thebostoncalendar.com", ev.get("url", ""), f"Event url for {name} must not be thebostoncalendar: {ev.get('url')}")
+
 
 if __name__ == "__main__":
     unittest.main()
