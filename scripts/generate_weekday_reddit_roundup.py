@@ -11,6 +11,11 @@ Usage:
     python3 scripts/generate_weekday_reddit_roundup.py 2026-11-09           # week starting that Monday
     python3 scripts/generate_weekday_reddit_roundup.py --weekend            # this/next Friday–Sunday
     python3 scripts/generate_weekday_reddit_roundup.py --weekend 2026-11-13
+    python3 scripts/generate_weekday_reddit_roundup.py --weekend --city cambridge   # Cambridge-only post
+
+The weekend post carries up to WEEKEND_PER_CITY picks per city per day. r/CambridgeMA and
+r/Somerville asked for their own city's events only, so --city builds a single-city post with up
+to CITY_POST_PICKS per day.
 """
 
 import copy
@@ -61,6 +66,10 @@ AGGREGATOR_SOURCES = ("seatgeek", "ticketmaster", "boston shows", "boston calend
 # highlights.json blurb, so the extra slots go to curated events, never filler.
 BASE_PICKS = 5
 CITY_CAPS = {"boston": 10, "cambridge": 9, "somerville": 7}
+WEEKEND_PER_CITY = 10   # weekend post: up to 10 per city per day, filled on score
+CITY_POST_PICKS = 20    # single-city weekend posts (r/CambridgeMA, r/Somerville)
+CITY_NAMES = {"boston": "Boston", "cambridge": "Cambridge", "somerville": "Somerville"}
+CITY_HUBS = {"boston": "boston/", "cambridge": "cambridge/", "somerville": "somerville/"}
 REDDIT_LIMIT = 40000      # Reddit self-post body limit (characters)
 SIZE_TARGET = 38500       # leave headroom for hand edits before posting
 
@@ -116,10 +125,23 @@ def _clean_title(name):
     return t if len(t) <= 75 else t[:72].rstrip() + "…"
 
 
+# A venue that names another town ("110 S Border Rd (Medford)") isn't in the city it was filed under.
+OTHER_TOWN_RE = re.compile(r"(?i)\((?:Medford|Malden|Arlington|Everett|Watertown|Brookline|Newton|Belmont|"
+                           r"Quincy|Chelsea|Revere|Lexington|Waltham|Dedham|Milton)\)")
+_TRACKING_RE = re.compile(r"(?i)([?&])(?:_gl|_ga|fbclid|gclid|mc_cid|mc_eid)=[^&#]*&?")
+
+
+def _clean_url(url):
+    """Drop analytics junk (_gl=…, fbclid=…) so links stay short; the page works without it."""
+    u = _TRACKING_RE.sub(lambda m: m.group(1), url)
+    return re.sub(r"[?&]+(#|$)", r"\1", u)
+
+
 def _link(text, url):
     text = text.replace("[", "(").replace("]", ")")
     if not url or not url.startswith("http"):
         return f"**{text}**"
+    url = _clean_url(url)
     return f"**[{text}]({url.replace(')', '%29').replace(' ', '%20')})**"
 
 
@@ -158,12 +180,9 @@ def _area(e):
 
 
 def _line(e):
-    parts = [_link(_clean_title(e["name"]), e.get("url")) + f" @ {_venue(e)}"]
-    t = _time(e)
-    if t:
-        parts[0] += f" @ {t}"
-    extra = [x for x in (_price(e), _area(e)) if x]
-    s = "* " + parts[0] + (" · " + " · ".join(extra) if extra else "")
+    # **[Title](url)** @ Venue · 7PM · $26-$36 · Allston & Brighton
+    extra = [x for x in (_time(e), _price(e), _area(e)) if x]
+    s = "* " + _link(_clean_title(e["name"]), e.get("url")) + f" @ {_venue(e)}" + "".join(f" · {x}" for x in extra)
     note = (e.get("_highlight") or {}).get("note")
     if note:
         s += f"  \n  {note}"
@@ -187,8 +206,9 @@ def roundup_days(mode, start=None):
     return [mon + timedelta(days=i) for i in range(5)]  # Mon, Tue, Wed, Thu, Fri
 
 
-def build_roundup(mode="weekday", start=None):
-    """(title, markdown body) for the weekday (Mon–Fri) or weekend (Fri–Sun) post."""
+def build_roundup(mode="weekday", start=None, city=None):
+    """(title, markdown body) for the weekday (Mon–Fri) or weekend (Fri–Sun) post; with `city`
+    ("cambridge"/"somerville"), a post of that city's events only."""
     weekend = mode == "weekend"
     weekdays = roundup_days(mode, start)
     mon = weekdays[0]
@@ -199,7 +219,7 @@ def build_roundup(mode="weekday", start=None):
         venues = data["venues"] if isinstance(data, dict) and "venues" in data else data
 
     # Filter events to Mon-Fri and target cities
-    city_keys = ("boston", "cambridge", "somerville")
+    city_keys = (city,) if city else ("boston", "cambridge", "somerville")
     raw_events_by_day = {d: [] for d in weekdays}
     runs = defaultdict(list)  # highlight id -> listings of a multi-night theater run
     sold_out = set()  # (start time, venue) of sold-out listings; other listings of that show go too
@@ -233,8 +253,8 @@ def build_roundup(mode="weekday", start=None):
             if ev_date not in raw_events_by_day:
                 continue
 
-            city = _event_city(e.get("venue"), vname, e)
-            if city not in city_keys:
+            ev_city = _event_city(e.get("venue"), vname, e)
+            if ev_city not in city_keys or OTHER_TOWN_RE.search(e.get("venue") or ""):
                 continue
 
             name = e.get("name") or e.get("title") or ""
@@ -248,7 +268,7 @@ def build_roundup(mode="weekday", start=None):
             ev["_time"] = ev_time
             ev["_source_venue"] = vname
             ev["venue"] = e.get("venue") or vname
-            ev["_city"] = city
+            ev["_city"] = ev_city
             ev["_highlight"] = _get_event_highlight(ev, highlights)
             if ev["_highlight"] and ev["_highlight"].get("run"):
                 runs[ev["_highlight"]["id"]].append(ev)  # listed once under "Running all week"
@@ -367,9 +387,11 @@ def build_roundup(mode="weekday", start=None):
             seen_heads = day_heads
             seen_venue = Counter()
 
-            cap = CITY_CAPS[c]
+            cap = CITY_POST_PICKS if city else (WEEKEND_PER_CITY if weekend else CITY_CAPS[c])
 
             def _room_for(e):
+                if weekend or city:  # fill to the cap on score
+                    return len(day_picked) < cap
                 return len(day_picked) < BASE_PICKS or (len(day_picked) < cap and e.get("_highlight"))
 
             # First pass: try strictly 1 event per venue and unique headliner
@@ -424,7 +446,10 @@ def build_roundup(mode="weekday", start=None):
         # Format Markdown
         fri = weekdays[-1]
         span = f"{mon.strftime('%b %-d')}–{fri.strftime('%-d') if fri.month == mon.month else fri.strftime('%b %-d')}"
-        if weekend:
+        if city:
+            title = (f"Things to do in {CITY_NAMES[city]} this weekend ({span})" if weekend else
+                     f"Things to do in {CITY_NAMES[city]} this week ({span})")
+        elif weekend:
             title = f"Things to do in Boston, Cambridge & Somerville this weekend ({span}) · Weekend Guide"
         else:
             title = f"Things to do in Boston, Cambridge & Somerville this week ({span}) · Weekday Guide"
@@ -435,9 +460,18 @@ def build_roundup(mode="weekday", start=None):
             "somerville": "🎨 SOMERVILLE",
         }
 
-        if weekend:
+        if city:
+            name = CITY_NAMES[city]
             out = [
-                f"Hi Boston! Here are 5–9 curated things to do each day for **Friday {mon.strftime('%b %-d')} through "
+                f"Hi {name}! Here's what's happening **in {name}** from **{mon.strftime('%A %b %-d')} through "
+                f"{fri.strftime('%A %b %-d')}**: up to {max(caps.values())} picks a day, {name} events only.",
+                "",
+                "Shows, comedy, films, markets, talks and free stuff. Add anything I missed below!",
+                "",
+            ]
+        elif weekend:
+            out = [
+                f"Hi Boston! Here are up to {max(caps.values())} things to do each day for **Friday {mon.strftime('%b %-d')} through "
                 f"Sunday {fri.strftime('%b %-d')}**, broken down by city (**Boston**, **Cambridge**, and **Somerville**).",
                 "",
                 "Concerts, comedy, markets, museum days, 35mm films and more for the weekend. "
@@ -463,6 +497,8 @@ def build_roundup(mode="weekday", start=None):
                            f"{days[0].strftime('%a')}–{days[-1].strftime('%a')}")
                 e = evs[0]
                 price = next((_price(x) for x in evs if _price(x)), "")
+                if e.get("_city") not in city_keys:
+                    continue
                 line = "* " + _link(_clean_title(e["name"]), e.get("url")) + f" @ {_venue(e)} · {day_lbl}"
                 line += "".join(f" · {x}" for x in (price, _area(e)) if x)
                 note = e["_highlight"].get("note")
@@ -476,7 +512,8 @@ def build_roundup(mode="weekday", start=None):
 
             for c in city_keys:
                 picks = sorted(picked_by_day_city[d][c][:caps[c]], key=lambda e: e["_time"])
-                out.append(f"### {city_display[c]}")
+                if not city:
+                    out.append(f"### {city_display[c]}")
                 if picks:
                     for e in picks:
                         out.append(_line(e))
@@ -489,6 +526,7 @@ def build_roundup(mode="weekday", start=None):
             "",
             "### 🔗 More on Wicked Boston Events",
             f"- **Full calendar** (filter by neighborhood & T line): [{SITE}]({SITE})",
+            *([f"- **All {CITY_NAMES[city]} events**: [{SITE}/{CITY_HUBS[city]}]({SITE}/{CITY_HUBS[city]})"] if city else []),
             f"- **For parents** (kids & family events): [{SITE}/kids-family-events-boston/]({SITE}/kids-family-events-boston/)",
             "",
             f"*Curated from 200+ local venue, theatre, museum, and community calendars at **[wickedbostonevents.com]({SITE})** (ad-free & independent).*",
@@ -497,7 +535,12 @@ def build_roundup(mode="weekday", start=None):
 
     # Use the extra slots only as far as Reddit's limit allows: trim the lowest-ranked
     # curated extras (largest city first) until the body fits.
-    caps = dict(CITY_CAPS)
+    if city:
+        caps = {city: CITY_POST_PICKS}
+    elif weekend:
+        caps = {c: WEEKEND_PER_CITY for c in city_keys}
+    else:
+        caps = dict(CITY_CAPS)
     title, body = _render(caps)
     while len(body) > SIZE_TARGET and any(v > BASE_PICKS for v in caps.values()):
         c = max(caps, key=lambda k: caps[k])
@@ -510,14 +553,22 @@ def build_roundup(mode="weekday", start=None):
 
 
 def main():
-    args = [a for a in sys.argv[1:] if not a.startswith("--")]
-    mode = "weekend" if "--weekend" in sys.argv else "weekday"
+    argv = sys.argv[1:]
+    city = None
+    if "--city" in argv:
+        i = argv.index("--city")
+        city = argv[i + 1].lower()
+        del argv[i:i + 2]
+        if city not in CITY_NAMES:
+            sys.exit(f"--city must be one of {', '.join(CITY_NAMES)}")
+    args = [a for a in argv if not a.startswith("--")]
+    mode = "weekend" if "--weekend" in argv else "weekday"
     start_arg = args[0] if args else None
-    title, body = build_roundup(mode, start_arg)
+    title, body = build_roundup(mode, start_arg, city=city)
     first = roundup_days(mode, start_arg)[0]
     out_dir = os.path.join(ROOT, "reddit")
     os.makedirs(out_dir, exist_ok=True)
-    out_file = os.path.join(out_dir, f"{mode}-roundup-{first.isoformat()}.md")
+    out_file = os.path.join(out_dir, f"{mode}{'-' + city if city else ''}-roundup-{first.isoformat()}.md")
 
     with open(out_file, "w", encoding="utf-8") as f:
         f.write(f"<!-- Title: {title} -->\n\n{body}")
@@ -582,10 +633,21 @@ def markdown_to_html(md):
     return "\n".join(out)
 
 
-def render_roundup_page(mode, title, body, built_at=None):
+# The posting pages: (directory under roundup/, mode, city, heading, subreddits to post it to)
+ROUNDUP_PAGES = (
+    ("weekday", "weekday", None, "Weekday Reddit roundup", None),
+    ("weekend", "weekend", None, "Weekend Reddit roundup", ("boston", "BostonSocialClub")),
+    ("weekend-cambridge", "weekend", "cambridge", "Cambridge weekend roundup", ("CambridgeMA",)),
+    ("weekend-somerville", "weekend", "somerville", "Somerville weekend roundup", ("Somerville",)),
+)
+
+
+def render_roundup_page(mode, title, body, built_at=None, page=None):
     from html import escape as esc
     from urllib.parse import quote
-    other = "weekend" if mode == "weekday" else "weekday"
+    slug, _, _, heading, only_subs = next((r for r in ROUNDUP_PAGES if r[0] == (page or mode)), ROUNDUP_PAGES[0])
+    others = " · ".join(f'<a href="../{r[0]}/">{esc(r[3].replace(" Reddit roundup", "").replace(" roundup", ""))}</a>'
+                        for r in ROUNDUP_PAGES if r[0] != slug)
     days = roundup_days(mode)
     span = f"{days[0].strftime('%a %b %-d')} – {days[-1].strftime('%a %b %-d')}"
     built = (built_at or datetime.now(EASTERN)).strftime("%a %b %-d, %-I:%M %p")
@@ -593,13 +655,13 @@ def render_roundup_page(mode, title, body, built_at=None):
         f'      <li><a class="sub" href="https://old.reddit.com/r/{n}/submit?selftext=true&amp;title={esc(quote(title))}" '
         f'target="_blank" rel="noopener">Post to r/{n}</a> <span class="muted">{esc(why)} · '
         f'<a href="https://www.reddit.com/r/{n}/about/rules" target="_blank" rel="noopener">rules</a></span></li>'
-        for n, why in SUBREDDITS)
+        for n, why in SUBREDDITS if not only_subs or n in only_subs)
     return f"""<!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow,noarchive">
-<title>{"Weekend" if mode == "weekend" else "Weekday"} Reddit Roundup</title>
+<title>{esc(heading)}</title>
 <style>
 :root{{--bg:#f6f7f9;--panel:#fff;--fg:#1c2230;--muted:#5d6676;--line:#dde1e8;--accent:#c2410c;--accent-fg:#fff;--code:#f0f2f5;color-scheme:light}}
 @media (prefers-color-scheme:dark){{:root{{--bg:#12151b;--panel:#1a1e26;--fg:#e6e9ef;--muted:#9aa3b2;--line:#2c323d;--accent:#fb923c;--accent-fg:#1a1006;--code:#151920;color-scheme:dark}}}}
@@ -631,8 +693,8 @@ textarea{{width:100%;min-height:60vh;font:13px/1.5 ui-monospace,Menlo,monospace;
 </head><body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">{esc(span)} · rebuilt {esc(built)} · <a href="../{other}/">{other} version →</a></div>
-    <h1>{"Weekend" if mode == "weekend" else "Weekday"} Reddit roundup</h1>
+    <div class="eyebrow">{esc(span)} · rebuilt {esc(built)} · also: {others}</div>
+    <h1>{esc(heading)}</h1>
   </header>
   <div class="field">
     <div class="label">Post title</div>
@@ -678,11 +740,11 @@ tm.onclick = showMd; tp.onclick = showPv;
 
 
 def write_roundup_pages(base_dir):
-    """Write roundup/weekday/index.html and roundup/weekend/index.html under base_dir."""
-    for mode in ("weekday", "weekend"):
-        title, body = build_roundup(mode)
-        d = os.path.join(base_dir, "roundup", mode)
+    """Write each posting page in ROUNDUP_PAGES as roundup/<slug>/index.html under base_dir."""
+    for slug, mode, city, _, _ in ROUNDUP_PAGES:
+        title, body = build_roundup(mode, city=city)
+        d = os.path.join(base_dir, "roundup", slug)
         os.makedirs(d, exist_ok=True)
         with open(os.path.join(d, "index.html"), "w", encoding="utf-8") as f:
-            f.write(render_roundup_page(mode, title, body))
-        print(f"wrote roundup/{mode}/: {title} ({len(body):,} chars)")
+            f.write(render_roundup_page(mode, title, body, page=slug))
+        print(f"wrote roundup/{slug}/: {title} ({len(body):,} chars)")
