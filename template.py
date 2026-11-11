@@ -3001,96 +3001,217 @@ _EDM_FILTER_JS = """<script>
 _COLLEGE_HERO_ART = """<svg class="col-hero-art" viewBox="0 0 900 200" aria-hidden="true" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="col-sky" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#090d16"/>
-      <stop offset="50%" stop-color="#121829"/>
-      <stop offset="100%" stop-color="#1e162d"/>
+      <stop offset="0%" stop-color="#080c18"/>
+      <stop offset="35%" stop-color="#11172e"/>
+      <stop offset="70%" stop-color="#231633"/>
+      <stop offset="100%" stop-color="#3b1d2e"/>
     </linearGradient>
-    <linearGradient id="col-arch" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#3b1d28"/>
-      <stop offset="100%" stop-color="#1a1c2e"/>
+    <linearGradient id="col-water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#182038"/>
+      <stop offset="100%" stop-color="#090d18"/>
     </linearGradient>
     <linearGradient id="col-gold" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="0%" stop-color="#fde047"/>
       <stop offset="100%" stop-color="#d97706"/>
     </linearGradient>
-    <filter id="col-glow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="3" result="blur"/>
+    <linearGradient id="col-crimson" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#991b1b"/>
+      <stop offset="100%" stop-color="#450a0a"/>
+    </linearGradient>
+    <radialGradient id="col-sunset" cx="50%" cy="80%" r="55%">
+      <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.3"/>
+      <stop offset="60%" stop-color="#ec4899" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#080c18" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="col-lamp-glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="3.5" result="blur"/>
       <feMerge>
         <feMergeNode in="blur"/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
   </defs>
+
   <rect width="900" height="200" fill="url(#col-sky)"/>
-  <g fill="#93c5fd" opacity="0.45">
-    <circle cx="80" cy="35" r="1.5"/>
-    <circle cx="160" cy="50" r="1"/>
-    <circle cx="230" cy="25" r="1.5"/>
-    <circle cx="310" cy="45" r="1"/>
-    <circle cx="580" cy="30" r="1.5"/>
-    <circle cx="670" cy="55" r="1"/>
-    <circle cx="750" cy="35" r="1.5"/>
-    <circle cx="830" cy="20" r="1"/>
+  <rect width="900" height="200" fill="url(#col-sunset)"/>
+
+  <!-- Subtle Stars & Twilight Constellations -->
+  <g fill="#93c5fd" opacity="0.55">
+    <circle cx="85" cy="28" r="1.2"/>
+    <circle cx="140" cy="42" r="1"/>
+    <circle cx="220" cy="22" r="1.5"/>
+    <circle cx="310" cy="35" r="1"/>
+    <circle cx="580" cy="26" r="1.2"/>
+    <circle cx="670" cy="48" r="1"/>
+    <circle cx="740" cy="25" r="1.5"/>
+    <circle cx="820" cy="38" r="1"/>
   </g>
-  <path d="M0 160 Q 225 150 450 160 T 900 160 L 900 200 L 0 200 Z" fill="#0d1322" opacity="0.8"/>
-  <path d="M0 175 Q 450 168 900 175 L 900 200 L 0 200 Z" fill="#0a0e1a"/>
-  <g fill="#161b2e" opacity="0.85">
-    <rect x="95" y="90" width="30" height="85"/>
-    <polygon points="110,25 98,90 122,90"/>
-    <rect x="105" y="45" width="10" height="15" fill="#1e263d"/>
-    <circle cx="110" cy="115" r="5" fill="#fbbf24" opacity="0.75" filter="url(#col-glow)"/>
-    <rect x="50" y="125" width="45" height="50"/>
-    <polygon points="72,105 45,125 100,125"/>
-    <line x1="58" y1="125" x2="58" y2="175" stroke="#0f1320" stroke-width="2"/>
-    <line x1="72" y1="125" x2="72" y2="175" stroke="#0f1320" stroke-width="2"/>
-    <line x1="86" y1="125" x2="86" y2="175" stroke="#0f1320" stroke-width="2"/>
+
+  <!-- Distant Charles River Banks & Skyline Silhouette -->
+  <!-- Layer 1: Back Bay & BU Skyline (Right Background) -->
+  <g fill="#131a30" opacity="0.9">
+    <rect x="570" y="92" width="32" height="60"/>
+    <polygon points="586,72 570,92 602,92"/>
+    <rect x="612" y="105" width="40" height="47"/>
+    <rect x="660" y="84" width="28" height="68"/>
+    <polygon points="674,66 660,84 688,84"/>
+    <rect x="696" y="110" width="36" height="42"/>
+    <rect x="740" y="98" width="45" height="54"/>
+    <!-- BU Castle Turrets (Right) -->
+    <rect x="795" y="102" width="38" height="50"/>
+    <polygon points="804,80 795,102 813,102"/>
+    <polygon points="824,80 815,102 833,102"/>
   </g>
-  <g fill="#1a2035" opacity="0.9">
-    <rect x="220" y="70" width="36" height="105"/>
-    <polygon points="238,20 220,70 256,70"/>
-    <path d="M232 95 Q 238 88 244 95 L 244 125 L 232 125 Z" fill="#fbbf24" opacity="0.4"/>
-    <path d="M160 175 Q 190 145 220 175" stroke="#252d47" stroke-width="3" fill="none"/>
-    <path d="M256 175 Q 286 145 316 175" stroke="#252d47" stroke-width="3" fill="none"/>
+
+  <!-- Layer 2: Iconic Campus Architecture -->
+  <!-- Harvard Lowell House Bell Tower (Left Center) -->
+  <g fill="#18223d">
+    <rect x="170" y="108" width="44" height="44"/>
+    <rect x="176" y="82" width="32" height="26"/>
+    <rect x="182" y="58" width="20" height="24"/>
+    <path d="M182,58 Q192,42 202,58 Z" fill="#2563eb"/>
+    <line x1="192" y1="42" x2="192" y2="30" stroke="#f59e0b" stroke-width="1.8"/>
+    <circle cx="192" cy="29" r="2" fill="#fde047" filter="url(#col-lamp-glow)"/>
+    <!-- Harvard Brick Hall Wings -->
+    <rect x="130" y="122" width="40" height="30"/>
+    <polygon points="150,110 130,122 170,122"/>
+    <rect x="214" y="122" width="42" height="30"/>
+    <polygon points="235,110 214,122 256,122"/>
   </g>
-  <g fill="#21273f">
-    <path d="M400 100 Q 450 48 500 100 Z" fill="#2d3553"/>
-    <rect x="442" y="44" width="16" height="6" fill="#fbbf24" opacity="0.8"/>
-    <rect x="390" y="100" width="120" height="15" fill="#1e2338"/>
-    <rect x="405" y="115" width="90" height="60" fill="#181d2e"/>
-    <line x1="418" y1="115" x2="418" y2="175" stroke="#3b4468" stroke-width="3"/>
-    <line x1="434" y1="115" x2="434" y2="175" stroke="#3b4468" stroke-width="3"/>
-    <line x1="450" y1="115" x2="450" y2="175" stroke="#3b4468" stroke-width="3"/>
-    <line x1="466" y1="115" x2="466" y2="175" stroke="#3b4468" stroke-width="3"/>
-    <line x1="482" y1="115" x2="482" y2="175" stroke="#3b4468" stroke-width="3"/>
-    <polygon points="450,85 390,115 510,115" fill="#2d3553"/>
+
+  <!-- MIT Great Dome & Colonnade (Center) -->
+  <g fill="#1e294b">
+    <!-- Main Classical Colonnade Base -->
+    <rect x="380" y="112" width="140" height="40"/>
+    <!-- Classical Pediment Portico -->
+    <polygon points="450,90 380,112 520,112" fill="#263359"/>
+    <!-- Fluted Columns -->
+    <g stroke="#151d36" stroke-width="2.5">
+      <line x1="400" y1="112" x2="400" y2="152"/>
+      <line x1="416" y1="112" x2="416" y2="152"/>
+      <line x1="432" y1="112" x2="432" y2="152"/>
+      <line x1="448" y1="112" x2="448" y2="152"/>
+      <line x1="468" y1="112" x2="468" y2="152"/>
+      <line x1="484" y1="112" x2="484" y2="152"/>
+      <line x1="500" y1="112" x2="500" y2="152"/>
+    </g>
+    <!-- Dome Drum & Cupola -->
+    <rect x="414" y="78" width="72" height="14" rx="1" fill="#222f52"/>
+    <path d="M414,78 Q450,44 486,78 Z" fill="#2a3a66"/>
+    <circle cx="450" cy="44" r="3.5" fill="#f59e0b" filter="url(#col-lamp-glow)"/>
   </g>
-  <g fill="#1a2035" opacity="0.9">
-    <rect x="630" y="65" width="46" height="110"/>
-    <polygon points="630,65 635,50 640,65" fill="#2d3553"/>
-    <polygon points="648,65 653,30 658,65" fill="#2d3553"/>
-    <polygon points="666,65 671,50 676,65" fill="#2d3553"/>
-    <circle cx="653" cy="90" r="7" fill="#fbbf24" opacity="0.75" filter="url(#col-glow)"/>
-    <path d="M645 115 Q 653 108 661 115 L 661 145 L 645 145 Z" fill="#fbbf24" opacity="0.3"/>
+
+  <!-- Window & Architectural Lights -->
+  <g fill="#fde047" opacity="0.75" filter="url(#col-lamp-glow)">
+    <circle cx="192" cy="70" r="2.5"/>
+    <rect x="188" y="92" width="8" height="10" rx="4"/>
+    <rect x="142" y="130" width="4" height="7"/>
+    <rect x="154" y="130" width="4" height="7"/>
+    <rect x="224" y="130" width="4" height="7"/>
+    <rect x="236" y="130" width="4" height="7"/>
+    <rect x="432" y="98" width="6" height="9"/>
+    <rect x="462" y="98" width="6" height="9"/>
+    <rect x="670" y="100" width="5" height="8" fill="#f43f5e"/>
+    <rect x="808" y="118" width="5" height="8" fill="#f59e0b"/>
   </g>
-  <g fill="#161b2e" opacity="0.85">
-    <rect x="760" y="80" width="35" height="95"/>
-    <polygon points="777,35 760,80 795,80"/>
-    <rect x="805" y="105" width="55" height="70"/>
-    <polygon points="832,90 805,105 860,105"/>
+
+  <!-- Harvard Bridge Across the Charles River (Mass Ave) -->
+  <path d="M0,152 L900,152" stroke="#263352" stroke-width="4"/>
+  <g stroke="#f59e0b" stroke-width="1" opacity="0.8" filter="url(#col-lamp-glow)">
+    <!-- Bridge Lamps & Pillars -->
+    <line x1="80" y1="152" x2="80" y2="144"/><circle cx="80" cy="143" r="1.8" fill="#fde047"/>
+    <line x1="160" y1="152" x2="160" y2="144"/><circle cx="160" cy="143" r="1.8" fill="#fde047"/>
+    <line x1="240" y1="152" x2="240" y2="144"/><circle cx="240" cy="143" r="1.8" fill="#fde047"/>
+    <line x1="320" y1="152" x2="320" y2="144"/><circle cx="320" cy="143" r="1.8" fill="#fde047"/>
+    <line x1="580" y1="152" x2="580" y2="144"/><circle cx="580" cy="143" r="1.8" fill="#fde047"/>
+    <line x1="660" y1="152" x2="660" y2="144"/><circle cx="660" cy="143" r="1.8" fill="#fde047"/>
+    <line x1="740" y1="152" x2="740" y2="144"/><circle cx="740" cy="143" r="1.8" fill="#fde047"/>
+    <line x1="820" y1="152" x2="820" y2="144"/><circle cx="820" cy="143" r="1.8" fill="#fde047"/>
   </g>
-  <path d="M0 195 L 0 50 Q 0 0 50 0 L 120 0 Q 70 40 70 90 L 70 195 Z" fill="url(#col-arch)" opacity="0.95"/>
-  <path d="M900 195 L 900 50 Q 900 0 850 0 L 780 0 Q 830 40 830 90 L 830 195 Z" fill="url(#col-arch)" opacity="0.95"/>
-  <g filter="url(#col-glow)">
-    <line x1="140" y1="180" x2="140" y2="125" stroke="#334155" stroke-width="2.5"/>
-    <circle cx="140" cy="122" r="5" fill="#fbbf24"/>
-    <circle cx="140" cy="122" r="14" fill="#fbbf24" opacity="0.25"/>
-    <line x1="760" y1="180" x2="760" y2="125" stroke="#334155" stroke-width="2.5"/>
-    <circle cx="760" cy="122" r="5" fill="#fbbf24"/>
-    <circle cx="760" cy="122" r="14" fill="#fbbf24" opacity="0.25"/>
+
+  <!-- Charles River Water Surface -->
+  <rect x="0" y="152" width="900" height="48" fill="url(#col-water)"/>
+
+  <!-- Water Reflections -->
+  <g opacity="0.55" stroke-linecap="round">
+    <line x1="170" y1="158" x2="214" y2="158" stroke="#f59e0b" stroke-width="1.5"/>
+    <line x1="180" y1="164" x2="204" y2="164" stroke="#3b82f6" stroke-width="1.2"/>
+    <line x1="410" y1="158" x2="490" y2="158" stroke="#f59e0b" stroke-width="2"/>
+    <line x1="430" y1="164" x2="470" y2="164" stroke="#fde047" stroke-width="1.2"/>
+    <line x1="650" y1="160" x2="690" y2="160" stroke="#f43f5e" stroke-width="1.5"/>
+    <line x1="790" y1="160" x2="830" y2="160" stroke="#f59e0b" stroke-width="1.2"/>
   </g>
+
+  <!-- Charles River Crew Scull (Rowing Shell) in Foreground Water -->
+  <g transform="translate(310, 166)">
+    <!-- Shell Hull -->
+    <path d="M0,6 Q60,3 120,6 Q60,9 0,6 Z" fill="#f59e0b"/>
+    <!-- Rowers & Oars -->
+    <g stroke="#e2e8f0" stroke-width="1.2" stroke-linecap="round">
+      <circle cx="24" cy="4" r="2.2" fill="#0f172a"/>
+      <line x1="24" y1="5" x2="10" y2="0"/><line x1="24" y1="5" x2="10" y2="12"/>
+      <circle cx="44" cy="4" r="2.2" fill="#0f172a"/>
+      <line x1="44" y1="5" x2="30" y2="0"/><line x1="44" y1="5" x2="30" y2="12"/>
+      <circle cx="64" cy="4" r="2.2" fill="#0f172a"/>
+      <line x1="64" y1="5" x2="50" y2="0"/><line x1="64" y1="5" x2="50" y2="12"/>
+      <circle cx="84" cy="4" r="2.2" fill="#0f172a"/>
+      <line x1="84" y1="5" x2="70" y2="0"/><line x1="84" y1="5" x2="70" y2="12"/>
+      <circle cx="102" cy="4" r="1.8" fill="#dc2626"/> <!-- Coxswain in crimson -->
+    </g>
+    <!-- Water Wake -->
+    <path d="M-20,6 L-2,5 M-20,6 L-2,7" stroke="#93c5fd" stroke-width="1" opacity="0.6"/>
+  </g>
+
+  <!-- Celebratory Graduation Mortarboard Flying in Upper Right Sky -->
+  <g transform="translate(775, 48) rotate(-14)">
+    <polygon points="0,-8 22,0 0,8 -22,0" fill="#0f172a" stroke="#f59e0b" stroke-width="0.8"/>
+    <rect x="-5" y="0" width="10" height="8" fill="#1e293b"/>
+    <!-- Golden Tassel -->
+    <path d="M0,0 Q12,6 18,18" stroke="#fde047" stroke-width="1.5" fill="none" filter="url(#col-lamp-glow)"/>
+    <circle cx="18" cy="18" r="1.5" fill="#f59e0b"/>
+  </g>
+
+  <!-- Collegiate Wrought-Iron Arch & Brickwork Gates (Framing Left and Right) -->
+  <g fill="#0f172a">
+    <!-- Left Pillar & Ivy Arch -->
+    <rect x="0" y="0" width="32" height="200" fill="#181224"/>
+    <rect x="28" y="0" width="6" height="200" fill="#221833"/>
+    <path d="M0,0 L0,70 Q50,70 50,0 Z" fill="#181224" opacity="0.9"/>
+    <!-- Ivy Leaves Pattern -->
+    <g fill="#15803d" opacity="0.85">
+      <circle cx="24" cy="45" r="4"/><circle cx="32" cy="52" r="3.5"/>
+      <circle cx="20" cy="60" r="4.5"/><circle cx="28" cy="72" r="4"/>
+      <circle cx="16" cy="85" r="4"/><circle cx="25" cy="96" r="3.5"/>
+      <circle cx="18" cy="112" r="4.5"/>
+    </g>
+    <!-- Left Campus Lantern -->
+    <line x1="34" y1="65" x2="52" y2="65" stroke="#0f172a" stroke-width="2.5"/>
+    <polygon points="48,65 56,65 54,78 50,78" fill="#0f172a"/>
+    <circle cx="52" cy="71" r="3" fill="#fde047" filter="url(#col-lamp-glow)"/>
+
+    <!-- Right Pillar & Ivy Arch -->
+    <rect x="868" y="0" width="32" height="200" fill="#181224"/>
+    <rect x="866" y="0" width="6" height="200" fill="#221833"/>
+    <path d="M900,0 L900,70 Q850,70 850,0 Z" fill="#181224" opacity="0.9"/>
+    <!-- Right Ivy Leaves -->
+    <g fill="#15803d" opacity="0.85">
+      <circle cx="876" cy="45" r="4"/><circle cx="868" cy="52" r="3.5"/>
+      <circle cx="880" cy="60" r="4.5"/><circle cx="872" cy="72" r="4"/>
+      <circle cx="884" cy="85" r="4"/><circle cx="875" cy="96" r="3.5"/>
+      <circle cx="882" cy="112" r="4.5"/>
+    </g>
+    <!-- Right Campus Lantern -->
+    <line x1="866" y1="65" x2="848" y2="65" stroke="#0f172a" stroke-width="2.5"/>
+    <polygon points="852,65 844,65 846,78 850,78" fill="#0f172a"/>
+    <circle cx="848" cy="71" r="3" fill="#fde047" filter="url(#col-lamp-glow)"/>
+  </g>
+
+  <!-- Glowing Collegiate Center Badge (Center Top) -->
   <g transform="translate(450, 24)">
-    <rect x="-115" y="-12" width="230" height="24" rx="12" fill="#0f172a" stroke="#fbbf24" stroke-width="1.2" opacity="0.95"/>
-    <text x="0" y="4" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="10.5" font-weight="700" fill="#fbbf24" letter-spacing="1.2">GREATER BOSTON CAMPUSES</text>
+    <rect x="-155" y="-12" width="310" height="24" rx="12" fill="#090d1a" stroke="#f59e0b" stroke-width="1.4" opacity="0.95"/>
+    <circle cx="-138" cy="0" r="3.5" fill="#fde047" filter="url(#col-lamp-glow)"/>
+    <circle cx="138" cy="0" r="3.5" fill="#fde047" filter="url(#col-lamp-glow)"/>
+    <text x="0" y="4" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9.5" font-weight="800" fill="#fde047" letter-spacing="1.4">🎓 GREATER BOSTON CAMPUSES &amp; COLLEGES</text>
   </g>
 </svg>"""
 
@@ -3105,10 +3226,10 @@ _COLLEGE_CSS = """
     width: 100%;
     height: 190px;
     display: block;
-    border-radius: 16px;
+    border-radius: 20px;
     margin-bottom: 20px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
   .col-hero-copy {
     text-align: center;
@@ -3201,74 +3322,36 @@ _COLLEGE_CSS = """
     box-shadow: 0 2px 10px rgba(37, 99, 235, 0.4);
     font-weight: 600;
   }
-  .college-hub .col-area-section {
-    margin: 20px 0 28px;
-    background: rgba(18, 22, 34, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    border-radius: 14px;
-    padding: 16px 18px;
-  }
-  .college-hub .col-area-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding-bottom: 12px;
-    margin-bottom: 14px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  }
-  .college-hub .col-area-title-wrap {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-  .college-hub .col-area-pill {
-    font-size: 13px;
+  .college-hub .hub-day {
+    grid-column: 1 / -1;
+    margin: 32px 0 14px;
+    font-size: 19px;
     font-weight: 700;
-    padding: 3px 10px;
-    border-radius: 20px;
-    letter-spacing: 0.02em;
-  }
-  .college-hub .col-area-cambridge { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.35); }
-  .college-hub .col-area-fenway_symphony { background: rgba(34, 197, 94, 0.15); color: #86efac; border: 1px solid rgba(34, 197, 94, 0.35); }
-  .college-hub .col-area-comm_ave { background: rgba(248, 113, 113, 0.15); color: #fecaca; border: 1px solid rgba(248, 113, 113, 0.35); }
-  .college-hub .col-area-downtown { background: rgba(249, 115, 22, 0.15); color: #fdba74; border: 1px solid rgba(249, 115, 22, 0.35); }
-  .college-hub .col-area-suburbs { background: rgba(168, 85, 247, 0.15); color: #d8b4fe; border: 1px solid rgba(168, 85, 247, 0.35); }
-  .college-hub .col-area-sub {
-    font-size: 12px;
-    color: var(--muted);
-  }
-  .college-hub .col-area-meta-wrap {
+    letter-spacing: -0.01em;
+    color: #fff;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
+    border: 0;
+    padding: 0;
   }
-  .college-hub .col-area-transit {
-    font-size: 11.5px;
-    color: #94a3b8;
-    background: rgba(255, 255, 255, 0.05);
-    padding: 2px 8px;
-    border-radius: 6px;
+  .college-hub .hub-day:first-child {
+    margin-top: 8px;
   }
-  .college-hub .col-area-count {
-    font-size: 11px;
-    font-weight: 700;
-    background: rgba(255, 255, 255, 0.09);
-    color: var(--fg);
-    padding: 2px 7px;
-    border-radius: 10px;
+  .college-hub .hub-day::before {
+    content: "🎓";
+    font-size: 16px;
   }
-  .college-hub .col-area-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 14px;
+  .college-hub .hub-day::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(59, 130, 246, 0.6), rgba(245, 158, 11, 0.3) 60%, transparent);
   }
   .college-hub .col-card {
     background: var(--card);
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
     padding: 14px 16px;
     display: flex;
     flex-direction: column;
@@ -3277,8 +3360,8 @@ _COLLEGE_CSS = """
   }
   .college-hub .col-card:hover {
     transform: translateY(-2px);
-    border-color: rgba(93, 155, 255, 0.35);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    border-color: rgba(93, 155, 255, 0.4);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
   }
   .college-hub .hub-badges {
     display: flex;
@@ -3325,40 +3408,58 @@ _COLLEGE_CSS = """
   }
   .college-hub .col-transit-tag {
     font-size: 11px;
-    color: #64748b;
-    background: rgba(255, 255, 255, 0.03);
-    padding: 1px 6px;
+    color: #94a3b8;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2px 7px;
     border-radius: 4px;
+    font-weight: 600;
   }
   .college-hub .col-nav {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    padding: 10px 16px;
-    margin: 0 0 16px;
-    background: rgba(18, 22, 34, 0.6);
-    border-bottom: 1px solid var(--border);
+    align-items: center;
+  }
+  .college-hub .col-nav a {
+    color: var(--muted);
+    padding: 5px 12px;
+    border-radius: 999px;
+    transition: all 0.15s ease;
+    text-decoration: none;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    font-weight: 600;
+  }
+  .college-hub .col-nav a:hover {
+    color: #60a5fa;
+    background: rgba(37, 99, 235, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
+  }
+  .college-hub .col-nav a.active {
+    color: #fff;
+    background: #2563eb;
+    border-color: #3b82f6;
+    box-shadow: 0 0 12px rgba(37, 99, 235, 0.45);
+    font-weight: 700;
   }
   @media (max-width: 640px) {
-    .col-hero-art { height: 140px; margin-bottom: 14px; }
+    .col-hero-art { height: 130px; margin-bottom: 14px; }
     .col-hero-copy h1 { font-size: 24px; }
-    .college-hub .col-area-cards { grid-template-columns: 1fr; }
     .college-hub .col-filters { padding: 12px; }
+    .college-hub .col-nav { font-size: 12px; gap: 6px 8px; }
   }
 """
 
-# School / kind / area / free chips on /college/; choice is kept in URL hash (#school=mit&area=cambridge)
 _COLLEGE_FILTER_JS = """<script>
 (function () {
   var chips = document.querySelectorAll('.col-chip');
   if (!chips.length) return;
   var cards = document.querySelectorAll('.hub-card');
   var heads = document.querySelectorAll('.hub-day');
-  var areaSecs = document.querySelectorAll('.col-area-section');
   var state = { area: 'all', school: 'all', kind: 'all', free: 'all' };
 
   function render(save) {
-    var days = {}, areaDays = {};
+    var days = {};
     cards.forEach(function (c) {
       var on = (state.area === 'all' || c.dataset.area === state.area) &&
                (state.school === 'all' || c.dataset.school === state.school) &&
@@ -3367,20 +3468,6 @@ _COLLEGE_FILTER_JS = """<script>
       c.hidden = !on;
       if (on) {
         days[c.dataset.day] = 1;
-        areaDays[c.dataset.area + '_' + c.dataset.day] = 1;
-      }
-    });
-
-    areaSecs.forEach(function (sec) {
-      var key = sec.dataset.area + '_' + sec.dataset.day;
-      var hasVisible = !!areaDays[key];
-      sec.hidden = !hasVisible;
-      if (hasVisible) {
-        var countEl = sec.querySelector('.count');
-        if (countEl) {
-          var n = sec.querySelectorAll('.hub-card:not([hidden])').length;
-          countEl.textContent = n;
-        }
       }
     });
 
@@ -4474,77 +4561,61 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
         mk_daily, mk_dated = _markets_split(filtered)
         cards_html = _render_market_sections(mk_daily, mk_dated, card_limit)
     elif is_college:
-        by_day = {}
-        for e in filtered[:card_limit]:
+        def _render_col_card(e, day_iso):
+            nonlocal college_free
+            title = escape(e.get("title") or e.get("name") or "Event")
+            venue = escape(e.get("venue") or e.get("_source_venue") or "Venue")
+            url = escape(e.get("url") or e.get("link") or "#")
             t_obj = e.get("_time")
-            d_key = t_obj.date() if isinstance(t_obj, datetime) else None
-            by_day.setdefault(d_key, []).append(e)
-
-        area_meta = {k: (lbl, sub, emo, tr) for k, lbl, sub, emo, tr in COLLEGE_AREAS}
-        area_order = [k for k, _lbl, _sub, _emo, _tr in COLLEGE_AREAS]
-
-        for day_obj, day_events in by_day.items():
-            if day_obj:
-                day_iso = day_obj.isoformat()
-                day_heading = day_obj.strftime("%A, %B %-d")
-                cards_html.append(f'<h2 class="hub-day" id="{day_iso}" data-day="{day_iso}">{day_heading}</h2>')
+            if isinstance(t_obj, datetime):
+                t_str = _hub_time_label(e, t_obj)
+            elif e.get("date"):
+                try:
+                    dt = datetime.fromisoformat(str(e["date"]).replace("Z", "+00:00"))
+                    t_str = _hub_time_label(e, dt)
+                except Exception:
+                    t_str = escape(e.get("time") or "")
             else:
-                day_iso = "tba"
-                cards_html.append('<h2 class="hub-day" id="tba" data-day="tba">Date TBA</h2>')
+                t_str = escape(e.get("time") or "")
 
-            by_area = {a: [] for a in area_order}
-            for e in day_events:
-                s_key = detect_school(e)
-                v_name = e.get("venue") or e.get("_source_venue") or ""
-                a_key = college_area(s_key, v_name)
-                by_area.setdefault(a_key, []).append(e)
+            desc_html = ""
+            if hub.get("show_details") and e.get("description"):
+                d_txt = re.sub(r"\s+", " ", str(e["description"])).strip()
+                desc_html = f'<p class="hub-desc">{escape(d_txt[:160] + ("…" if len(d_txt) > 160 else ""))}</p>'
+            price_val = e.get("price")
+            price_txt = str(price_val or "").strip()
+            if re.fullmatch(r"\d+(?:\.\d+)?", price_txt):
+                price_txt = "$" + price_txt
+            price_badge = f'<span class="badge badge-price">{escape(price_txt)}</span>' if price_txt else ""
+            is_free = _is_event_free(e)
+            if is_free:
+                college_free += 1
+                price_badge = '<span class="badge badge-free">Free</span>'
 
-            for a_key in area_order:
-                a_events = by_area.get(a_key) or []
-                if not a_events:
-                    continue
-                a_events.sort(key=lambda ev: ev.get("_time") or datetime.max.replace(tzinfo=EASTERN))
-                area_cards = []
-                for e in a_events:
-                    title = escape(e.get("title") or e.get("name") or "Event")
-                    venue = escape(e.get("venue") or e.get("_source_venue") or "Venue")
-                    url = escape(e.get("url") or e.get("link") or "#")
-                    t_obj = e.get("_time")
-                    t_str = _hub_time_label(e, t_obj) if isinstance(t_obj, datetime) else escape(e.get("time") or "")
-                    desc_html = ""
-                    if hub.get("show_details") and e.get("description"):
-                        d_txt = re.sub(r"\s+", " ", str(e["description"])).strip()
-                        desc_html = f'<p class="hub-desc">{escape(d_txt[:160] + ("…" if len(d_txt) > 160 else ""))}</p>'
-                    price_val = e.get("price")
-                    price_txt = str(price_val or "").strip()
-                    if re.fullmatch(r"\d+(?:\.\d+)?", price_txt):
-                        price_txt = "$" + price_txt
-                    price_badge = f'<span class="badge badge-price">{escape(price_txt)}</span>' if price_txt else ""
-                    is_free = _is_event_free(e)
-                    if is_free:
-                        price_badge = '<span class="badge badge-free">Free</span>'
+            school = detect_school(e) or "other"
+            kind = college_kind(e, _effective_category(e))
+            v_name = e.get("venue") or e.get("_source_venue") or ""
+            a_key = college_area(school, v_name)
 
-                    school = detect_school(e) or "other"
-                    kind = college_kind(e, _effective_category(e))
-                    college_schools[school] = college_schools.get(school, 0) + 1
-                    college_kinds[kind] = college_kinds.get(kind, 0) + 1
-                    college_areas_count[a_key] = college_areas_count.get(a_key, 0) + 1
-                    college_free += is_free
+            college_schools[school] = college_schools.get(school, 0) + 1
+            college_kinds[kind] = college_kinds.get(kind, 0) + 1
+            college_areas_count[a_key] = college_areas_count.get(a_key, 0) + 1
 
-                    kind_emojis = {"sports": "🏒", "performances": "🎻", "talks": "🎓", "campus": "🏛️"}
-                    kind_labels = {"sports": "Game", "performances": "Concert", "talks": "Lecture", "campus": "Campus"}
-                    kind_badge = f'<span class="badge badge-kind">{kind_emojis.get(kind, "🎓")} {kind_labels.get(kind, kind.title())}</span>'
-                    school_badge = f'<span class="badge badge-school">{escape(school_label(detect_school(e)))}</span>'
-                    badges_html = f"{school_badge}{kind_badge}{price_badge}"
+            kind_emojis = {"sports": "🏒", "performances": "🎻", "talks": "🎓", "campus": "🏛️"}
+            kind_labels = {"sports": "Game", "performances": "Concert", "talks": "Lecture", "campus": "Campus"}
+            kind_badge = f'<span class="badge badge-kind">{kind_emojis.get(kind, "🎓")} {kind_labels.get(kind, kind.title())}</span>'
+            school_badge = f'<span class="badge badge-school">{escape(school_label(school))}</span>'
+            badges_html = f"{school_badge}{kind_badge}{price_badge}"
 
-                    neigh, transit = college_transit_info(detect_school(e), e.get("venue") or "")
-                    transit_html = f'<span class="col-transit-tag">🚇 {escape(transit)}</span>' if transit else ""
-                    neigh_html = f'<span class="col-location-tag">· {escape(neigh)}</span>' if neigh else ""
+            neigh, transit = college_transit_info(school, v_name)
+            transit_html = f'<span class="col-transit-tag">🚇 {escape(transit)}</span>' if transit else ""
+            neigh_html = f'<span class="col-location-tag">· {escape(neigh)}</span>' if neigh else ""
 
-                    card_attrs = f'data-school="{school}" data-kind="{kind}" data-free="{int(is_free)}" data-area="{a_key}" data-day="{day_iso}"'
-                    area_cards.append(f"""<article class="hub-card col-card" {card_attrs}>
+            time_html = f'<time class="hub-date">{t_str}</time>' if t_str else ""
+            card_attrs = f'data-school="{school}" data-kind="{kind}" data-free="{int(is_free)}" data-area="{a_key}" data-day="{day_iso}"'
+            return f"""<article class="hub-card col-card" {card_attrs}>
   <div class="hub-card-head">
-    <time class="hub-date">{t_str}</time>
+    {time_html}
     <div class="hub-badges">{badges_html}</div>
   </div>
   <h3 class="hub-title"><a href="{url}" target="_blank" rel="noopener">{title}</a></h3>
@@ -4554,24 +4625,42 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
     {transit_html}
   </div>
   {desc_html}
-</article>""")
+</article>"""
 
-                lbl, sub, emo, tr = area_meta.get(a_key, (a_key.title(), "", "🏛️", "MBTA"))
-                cards_html.append(f"""<div class="col-area-section" data-area="{a_key}" data-day="{day_iso}">
-  <div class="col-area-head">
-    <div class="col-area-title-wrap">
-      <span class="col-area-pill col-area-{a_key}">{emo} {escape(lbl)}</span>
-      <span class="col-area-sub">{escape(sub)}</span>
-    </div>
-    <div class="col-area-meta-wrap">
-      <span class="col-area-transit">🚇 {escape(tr)}</span>
-      <span class="col-area-count count">{len(area_cards)}</span>
-    </div>
-  </div>
-  <div class="col-area-cards">
-    {"".join(area_cards)}
-  </div>
-</div>""")
+        by_day = {}
+        for e in filtered[:card_limit]:
+            t_obj = e.get("_time")
+            if isinstance(t_obj, datetime):
+                d_key = t_obj.date()
+            elif e.get("date"):
+                try:
+                    d_key = datetime.fromisoformat(str(e["date"]).replace("Z", "+00:00")).date()
+                except Exception:
+                    try:
+                        d_key = datetime.strptime(str(e["date"])[:10], "%Y-%m-%d").date()
+                    except Exception:
+                        d_key = None
+            else:
+                d_key = None
+            by_day.setdefault(d_key, []).append(e)
+
+        day_keys = sorted((k for k in by_day if k is not None))
+        if None in by_day:
+            day_keys.append(None)
+
+        for day_obj in day_keys:
+            day_events = by_day[day_obj]
+            if day_obj:
+                day_iso = day_obj.isoformat()
+                day_heading = day_obj.strftime("%A, %B %-d")
+                cards_html.append(f'<h2 class="hub-day" id="{day_iso}" data-day="{day_iso}">{day_heading}</h2>')
+            else:
+                day_iso = "tba"
+                cards_html.append('<h2 class="hub-day" id="tba" data-day="tba">Date TBA</h2>')
+
+            day_events.sort(key=lambda ev: ev.get("_time") or datetime.max.replace(tzinfo=EASTERN))
+            for e in day_events:
+                cards_html.append(_render_col_card(e, day_iso))
     else:
         last_day = None
         for e in filtered[:card_limit]:
