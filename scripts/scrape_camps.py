@@ -4,7 +4,11 @@
 Usage:
     python3 scripts/scrape_camps.py               # inspect all camps and report findings
     python3 scripts/scrape_camps.py --camp sewataro # check a single camp by id
-    python3 scripts/scrape_camps.py --update      # update verified 2027 info into camps.json
+
+Read-only. It used to have --update, which set a camp's season to 2027 whenever "2027" appeared
+on its page (a "2027 Winter Warm-Up" counted) and left last year's prices and dates in place:
+2026 facts labelled 2027. camps.json is changed by hand from the camp's own page; the weekly
+camps-watch issue (scripts/camps_watch.py) lists which camps to re-check.
 """
 
 import argparse
@@ -15,7 +19,6 @@ import re
 import ssl
 import sys
 import urllib.request
-from datetime import date
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CAMPS_JSON = os.path.join(ROOT, "camps.json")
@@ -160,28 +163,10 @@ def main():
     parser = argparse.ArgumentParser(description="Scrape summer camp websites for updated 2027 info.")
     parser.add_argument("--camp", help="Inspect a single camp by ID")
     parser.add_argument("--workers", type=int, default=6, help="Concurrent HTTP requests")
-    parser.add_argument("--update", action="store_true", help="Update verified 2027 camps in camps.json")
     args = parser.parse_args()
 
-    findings, data = run_checks(camp_id=args.camp, max_workers=args.workers)
+    findings, _ = run_checks(camp_id=args.camp, max_workers=args.workers)
     report(findings)
-
-    if args.update:
-        today_iso = date.today().isoformat()
-        updated_count = 0
-        camps_by_id = {c["id"]: c for c in data["camps"]}
-        for f in findings:
-            if f.get("has_2027") and f["id"] in camps_by_id:
-                c = camps_by_id[f["id"]]
-                if c.get("season") != 2027:
-                    c["season"] = 2027
-                    c["checked"] = today_iso
-                    updated_count += 1
-        if updated_count > 0:
-            with open(CAMPS_JSON, "w", encoding="utf-8") as out:
-                json.dump(data, out, indent=1, ensure_ascii=False)
-                out.write("\n")
-            print(f"\n✅ Updated {updated_count} camps to season 2027 in {CAMPS_JSON}")
 
 
 if __name__ == "__main__":
