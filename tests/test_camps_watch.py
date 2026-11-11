@@ -144,6 +144,16 @@ class IssueBody(unittest.TestCase):
         self.assertLess(len(body), 60000, "GitHub issue bodies max out at 65,536 characters")
 
 
+class NothingWritesCampData(unittest.TestCase):
+    """camps.json is edited by hand from the camps' own pages; no script may rewrite it."""
+
+    def test_camp_scripts_are_read_only(self):
+        for name in ("camps_watch.py", "scrape_camps.py"):
+            src = open(os.path.join(ROOT, "scripts", name), encoding="utf-8").read()
+            self.assertFalse("json.dump(" in src, f"{name} writes JSON")
+            self.assertFalse("--update" in src.split('"""', 2)[2], f"{name} has an --update option")
+
+
 class Workflow(unittest.TestCase):
     def test_weekly_and_issue_only(self):
         src = open(os.path.join(ROOT, ".github", "workflows", "camps-watch.yml")).read()
