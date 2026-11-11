@@ -42,7 +42,7 @@
     "https://www.cambridgema.gov/Services/summercampsandprograms",
     "https://www.finditcambridge.org/programs/dhsp-summer-camps-and-programs-lottery"
    ],
-   "checked": "2026-11-07",
+   "checked": "2026-11-11",
    "lat": 42.3703,
    "lng": -71.1017
   },
@@ -407,7 +407,7 @@
    "sources": [
     "https://campharborview.org/summer-camp/how-to-apply/"
    ],
-   "checked": "2026-11-07",
+   "checked": "2026-11-11",
    "lat": 42.3195,
    "lng": -70.9723
   },
@@ -487,7 +487,7 @@
     "https://ymcaboston.org/youth-and-family/camps/day-camps/huntington-camp-guide/",
     "https://ymcaboston.org/youth-and-family/camps/day-camps/"
    ],
-   "checked": "2026-11-07",
+   "checked": "2026-11-11",
    "lat": 42.3414,
    "lng": -71.0877
   },
@@ -535,7 +535,7 @@
     "https://ymcaboston.org/youth-and-family/camps/day-camps/dorchester-camp-guide/",
     "https://ymcaboston.org/youth-and-family/camps/day-camps/"
    ],
-   "checked": "2026-11-07",
+   "checked": "2026-11-11",
    "lat": 42.2882,
    "lng": -71.0734
   },
@@ -583,7 +583,7 @@
     "https://ymcaboston.org/youth-and-family/camps/day-camps/roxbury-camp-guide/",
     "https://ymcaboston.org/youth-and-family/camps/day-camps/"
    ],
-   "checked": "2026-11-07",
+   "checked": "2026-11-11",
    "lat": 42.3168,
    "lng": -71.0858
   },
@@ -631,7 +631,7 @@
     "https://ymcaboston.org/youth-and-family/camps/day-camps/wang-camp-guide/",
     "https://ymcaboston.org/youth-and-family/camps/day-camps/"
    ],
-   "checked": "2026-11-07",
+   "checked": "2026-11-11",
    "lat": 42.3496,
    "lng": -71.0628
   },
@@ -679,7 +679,7 @@
     "https://ymcaboston.org/youth-and-family/camps/day-camps/waltham-camp-guide/",
     "https://ymcaboston.org/youth-and-family/camps/day-camps/"
    ],
-   "checked": "2026-11-07",
+   "checked": "2026-11-11",
    "lat": 42.3995,
    "lng": -71.2427
   },
@@ -727,7 +727,7 @@
     "https://ymcaboston.org/youth-and-family/camps/day-camps/ns-camp-guide/",
     "https://ymcaboston.org/youth-and-family/camps/day-camps/"
    ],
-   "checked": "2026-11-07",
+   "checked": "2026-11-11",
    "lat": 42.4746,
    "lng": -71.1711
   },
@@ -775,7 +775,7 @@
     "https://ymcaboston.org/youth-and-family/camps/day-camps/parkway-camp-guide/",
     "https://ymcaboston.org/youth-and-family/camps/day-camps/"
    ],
-   "checked": "2026-11-07",
+   "checked": "2026-11-11",
    "lat": 42.2796,
    "lng": -71.1555
   },
@@ -1087,8 +1087,8 @@
    "ages": "Ages 4–15",
    "age_min": 4,
    "age_max": 15,
-   "season": 2026,
-   "dates": "Sessions Jun 22–Aug 21, 2026; no camp Jul 3",
+   "season": 2027,
+   "dates": "Sessions Jun 21–Aug 20, 2027; no camp Jul 5",
    "hours": "8:30 AM–3:00 PM",
    "price": "$142–$710 weekly; $285–$1,675 for two-week sessions",
    "week_low": 142,
@@ -1096,14 +1096,36 @@
    "sliding": true,
    "aid": "Sliding scale pricing: families choose a tier",
    "residents": null,
-   "signup": "First come; opens online at 6 AM on the set date",
-   "events": [],
+   "signup": "First come; opens online at 6 AM on the set date. Returning families get an early-bird window first.",
+   "events": [
+    {
+     "label": "Early bird for returning families opens",
+     "date": "2026-12-10",
+     "time": "06:00",
+     "kind": "open",
+     "season": 2027
+    },
+    {
+     "label": "Early bird closes",
+     "date": "2026-12-21",
+     "time": "23:59",
+     "kind": "deadline",
+     "season": 2027
+    },
+    {
+     "label": "Online registration opens",
+     "date": "2027-01-27",
+     "time": "06:00",
+     "kind": "open",
+     "season": 2027
+    }
+   ],
    "note": null,
    "url": "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/drumlin-farm/camp/programs-pricing",
    "sources": [
     "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/drumlin-farm/camp/programs-pricing"
    ],
-   "checked": "2026-11-07",
+   "checked": "2026-11-11",
    "lat": 42.4172,
    "lng": -71.3328
   },
@@ -1194,8 +1216,8 @@
    "ages": "Ages 4–13; CIT to 17",
    "age_min": 4,
    "age_max": 17,
-   "season": 2026,
-   "dates": "Weekly, Jun 22–Aug 14, 2026; no camp Jul 3",
+   "season": 2027,
+   "dates": "Weekly, Jun 21–Aug 13, 2027; no camp Jul 5",
    "hours": "9:00 AM–3:00 PM (After Camp to 5:00)",
    "price": "$136–$680/week; specialty weeks $150–$750",
    "week_low": 136,
@@ -1203,21 +1225,35 @@
    "sliding": true,
    "aid": "Sliding scale pricing: families choose a tier",
    "residents": null,
-   "signup": "First come; opens online at 6 AM on the set date",
+   "signup": "First come; opens online at 6 AM. Returning families get an early-bird window first.",
    "events": [
     {
-     "label": "Online registration",
-     "when": "Jan 14, 2026 at 6 AM",
+     "label": "Early bird for returning families opens",
+     "date": "2026-12-07",
+     "time": "06:00",
      "kind": "open",
-     "season": 2026
+     "season": 2027
+    },
+    {
+     "label": "Early bird closes",
+     "date": "2026-12-18",
+     "time": "23:59",
+     "kind": "deadline",
+     "season": 2027
+    },
+    {
+     "label": "Online registration (general)",
+     "when": "Not posted yet",
+     "kind": "info",
+     "season": 2027
     }
    ],
-   "note": null,
+   "note": "Mass Audubon's page still lists last year's general registration date (Jan 14, 2026); the 2027 date isn't posted yet.",
    "url": "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/broadmoor/camp/programs-pricing",
    "sources": [
     "https://www.massaudubon.org/places-to-explore/wildlife-sanctuaries/broadmoor/camp/programs-pricing"
    ],
-   "checked": "2026-11-07",
+   "checked": "2026-11-11",
    "lat": 42.2598,
    "lng": -71.3286
   },
@@ -1413,7 +1449,7 @@
    "sources": [
     "https://www.noblesdaycamp.org/registration/"
    ],
-   "checked": "2026-11-07",
+   "checked": "2026-11-11",
    "lat": 42.2547,
    "lng": -71.1837
   },
@@ -2069,7 +2105,7 @@
    "sources": [
     "https://watertownbgc.org/wbgc-programs/summer/"
    ],
-   "checked": "2026-11-07",
+   "checked": "2026-11-11",
    "lat": 42.3683,
    "lng": -71.1852
   },
