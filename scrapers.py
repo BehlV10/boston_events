@@ -2232,7 +2232,7 @@ def scrape_boston_calendar(url, ua):
     start = datetime.now(EASTERN).date()
     events = []
     seen_urls = set()
-    for i in range(14):
+    for i in range(30):
         d = start + timedelta(days=i)
         day_url = f"{base}?day={d.day}&month={d.month}&year={d.year}"
         try:
@@ -2271,10 +2271,13 @@ def scrape_boston_calendar(url, ua):
                 "_price_from_title": bool(price),
             }
             until = _BC_GOES_UNTIL_RE.search(raw_time)
-            if iso is None and until:
+            if until:
                 end_month, end_day = int(until.group(1)), int(until.group(2))
                 end_year = d.year + (1 if end_month < d.month else 0)
                 entry["ends"] = f"{end_year:04d}-{end_month:02d}-{end_day:02d}"
+                if iso is None:
+                    entry["date"] = datetime(d.year, d.month, d.day, 10, 0, tzinfo=EASTERN).astimezone(timezone.utc).isoformat()
+                    entry["time"] = f"Through {end_month}/{end_day}"
             events.append(entry)
     if events:
         cache = _load_tbc_details_cache()
@@ -9139,6 +9142,57 @@ def scrape_brighton_main_streets(url, ua):
     return out
 
 
+def scrape_roslindale_holiday_market(url, ua):
+    """Roslindale Village Main Street Annual Holiday Market: craft vendors, live music, hot cocoa
+    and food across Birch Street Plaza, Emerald Society, and Sophia's Grotto patio."""
+    events = []
+    market_url = "https://www.roslindale.net/2026-holiday-market"
+    try:
+        soup = fetch_soup(url, ua)
+    except Exception:
+        soup = None
+
+    name = "Roslindale Village Annual Holiday Market"
+    venue = "Birch St Plaza"
+    desc = "Annual holiday market featuring craft vendors, live music, hot cocoa and local food across Birch Street Plaza, Emerald Society, and Sophia's Grotto patio."
+    start_dt = datetime(2026, 12, 6, 15, 0, tzinfo=EASTERN)
+    end_dt = datetime(2026, 12, 6, 19, 0, tzinfo=EASTERN)
+
+    if soup:
+        text = soup.get_text(" ")
+        m_date = re.search(r"(?:Sunday|Saturday|Friday),\s*([A-Za-z]+)\s*(\d{1,2})\s*(?:from\s*)?(\d{1,2})(?::(\d{2}))?\s*([ap]m)?\s*[-–]\s*(\d{1,2})(?::(\d{2}))?\s*([ap]m)", text, re.I)
+        if m_date:
+            month_str, day_str, sh, sm, sp, eh, em, ep = m_date.groups()
+            try:
+                mon = datetime.strptime(month_str[:3], "%b").month
+                day = int(day_str)
+                s_hour = int(sh)
+                e_hour = int(eh)
+                if (ep and ep.lower() == "pm") or (not ep and e_hour < 12):
+                    if e_hour < 12:
+                        e_hour += 12
+                if (sp and sp.lower() == "pm") or (not sp and s_hour < 12 and s_hour < e_hour and e_hour >= 12):
+                    if s_hour < 12:
+                        s_hour += 12
+                start_dt = datetime(2026, mon, day, s_hour, int(sm or 0), tzinfo=EASTERN)
+                end_dt = datetime(2026, mon, day, e_hour, int(em or 0), tzinfo=EASTERN)
+            except Exception:
+                pass
+
+    events.append({
+        "name": name,
+        "venue": venue,
+        "date": start_dt.astimezone(timezone.utc).isoformat(),
+        "end": end_dt.astimezone(timezone.utc).isoformat(),
+        "time": "3:00 PM – 7:00 PM",
+        "url": market_url,
+        "price": "Free",
+        "category": "community",
+        "description": desc,
+    })
+    return events
+
+
 def scrape_assembly_row(url, ua):
     """Assembly Row (Somerville): live music at The Row Hotel, Baxter Park events, LEGO Discovery
     Center adult nights, pop-ups."""
@@ -14047,6 +14101,7 @@ _ALL_VENUES = [
     {"name": "Harvard Square (HSBA)", "url": "https://www.harvardsquare.com/wp-json/tribe/events/v1/events", "ua": UA_CHROME, "scraper": scrape_harvard_square, "default_category": "community"},
     {"name": "Kendall Square Association", "url": "https://www.kendallsquare.org/wp-json/tribe/events/v1/events", "ua": UA_CHROME, "scraper": scrape_kendall_square, "default_category": "community"},
     {"name": "Brighton Main Streets", "url": "https://www.brightonmainstreets.org/wp-json/tribe/events/v1/events", "ua": UA_CHROME, "scraper": scrape_brighton_main_streets, "default_category": "community"},
+    {"name": "Roslindale Village Main Street", "url": "https://www.roslindale.net/2026-holiday-market", "ua": UA_CHROME, "scraper": scrape_roslindale_holiday_market, "default_category": "markets"},
     {"name": "Assembly Row", "url": "https://www.assemblyrow.com/wp-json/tribe/events/v1/events", "ua": UA_CHROME, "scraper": scrape_assembly_row, "default_category": "community"},
     {"name": "Arts at the Armory", "url": "https://artsatthearmory.org/upcoming-events/", "ua": UA_CHROME, "scraper": scrape_arts_at_the_armory, "default_category": "arts"},
     {"name": "Somerville Arts Council", "url": "https://somervilleartscouncil.org/events", "ua": UA_CHROME, "scraper": scrape_somerville_arts_council, "default_category": "arts"},
