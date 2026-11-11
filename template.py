@@ -56,21 +56,81 @@ DEFAULT_UNCHECKED_BUCKETS = {"Classes & Services", "Kids & Family", "Deals & Spe
 
 
 # Render-time recategorisation, so listings already in events.json (and sources that set their
-# own category) move too. Only from the catch-all categories: a "Book Club Night" a venue calls
-# music stays music.
-_BOOK_EVENT_RE = re.compile(
-    r"\b(?:author\s+(?:talk|reading|event|discussion|signing|visit|tour|appearance|series)|"
-    r"book\s+(?:talk|reading|launch|signing|discussion|club|tour)|in\s+conversation\s+with|"
-    r"poetry\s+reading|writers?\s+(?:talk|reading)|literary\s+reading)\b", re.I)
+# own category) move too. One rule splits the Books & Talks bucket:
+#   books (📖): you take part: book clubs and groups, silent reading, swaps and fairs, writing
+#               groups, poetry open mics and slams, story slams
+#   talks (🎙): you go to listen to someone: author events ("X at Harvard Book Store",
+#               "author of ... in conversation with ..."), featured readings, lectures, panels
+# Book-club words only move listings out of catch-all categories (a "Book Club" band at a music
+# venue stays music); the unmistakable phrases below move them from any category.
+_BOOK_PARTICIPATE_RE = re.compile(
+    r"\b(?:book\s+(?:conversation\s+|discussion\s+)?(?:club|group|circle)|bookclub|book\s+talkers|"
+    r"book\s+(?:swap|fair|exchange|discussion)|books?\s+(?:and|&)\s+brews|"
+    r"reading\s+(?:group|party|circle|club)|silent\s+(?:book|reading)|"
+    r"poetry\W+(?:open\s+mic|slam|jam|workshop)|story\s*slam|"
+    r"writ(?:ing|ers?'?)\s+(?:group|workshop|night|room|den|circle|corner|club)|write\s+nite?|"
+    r"shut\s+up\s+&\s+write)\b", re.I)
+_BOOK_PARTICIPATE_ANY_RE = re.compile(r"\b(?:poetry\W+(?:open\s+mic|slam|jam)|story\s*slam)\b", re.I)
+_AUTHOR_TALK_RE = re.compile(
+    r"\b(?:author\s+(?:talk|reading|event|discussion|signing|visit|tour|appearance|series|panel)|"
+    r"book\s+(?:talk|reading|launch|signing|tour)|(?:in|a|an)\s+conversation\s+with|author\s+of|"
+    r"poetry\s+(?:reading|series|night)|writers?\s+(?:talk|reading)|literary\s+reading|"
+    r"release\s+(?:party|bash|day))\b", re.I)
 _TALK_EVENT_RE = re.compile(
     r"\b(?:lectures?|panel\s+discussion|guest\s+speaker|keynote|colloquium|symposium|fireside\s+chat|"
-    r"speaker\s+series|talk\s+(?:by|with)|public\s+talk)\b", re.I)
-_TALK_OVERRIDABLE = {"community", "other", "art", "arts"}
+    r"speakers?\s+series|talk\s+(?:by|with)|public\s+talk|tavern\s+talk|public\s+forum|starr\s+forum)\b", re.I)
+# Talks whatever category the source gave them (Symphony Hall's speaker series is "music",
+# Lectures on Tap at a brewery "food", Harvard Book Store's events at the Brattle "film")
+_TALK_ANY_RE = re.compile(
+    r"\b(?:speakers?\s+series|lectures?\s+on\s+tap|lecture\s+series|colloquium|tavern\s+talk|starr\s+forum|"
+    r"at\s+harvard\s+book\s+store|harvard\s+book\s+store\s+welcomes)\b|^(?:a|an|in)\s+conversation\s+with\b", re.I)
+# Places whose own events are talks
+_TALK_VENUE_RE = re.compile(r"(?i)\b(?:wbur\s+cityspace|massachusetts\s+historical\s+society)\b")
+# Bookstores: their titled events ("Amanda Foody and C. L. Herman: A Destiny So Cruel",
+# "Anna Hogeland with Grace Talusan: Wild Aster") are author events
+_BOOKSTORE_RE = re.compile(
+    r"(?i)\b(?:booksmith|harvard\s+book\s+store|porter\s+square\s+books|grolier|lovestruck\s+books|"
+    r"all\s+she\s+wrote|hummingbird\s+books|rozzie\s+bound|papercuts|belmont\s+books|newtonville\s+books|"
+    r"brattle\s+book|trident\s+booksellers|frugal\s+bookstore)\b")
+_NOT_AUTHOR_EVENT_RE = re.compile(
+    r"(?i)\b(?:party|fundraiser|drop-in|hours|sale|trivia|dating|speed|charm|cinema|movie|screening|games?|"
+    r"bingo|crafts?|paint|anniversary|meet\s*&\s*greet|storytime|story\s+hour|kids?)\b")
+_LANGUAGE_RE = re.compile(r"(?i)\b(?:esol|esl|ell|english|spanish|french|mandarin|language)\b")
+_TALK_OVERRIDABLE = {"community", "other", "art", "arts", "books", "talks"}
+_TALK_OVERRIDABLE_ANY = _TALK_OVERRIDABLE | {"music", "comedy", "food", "tech", "clubbing", "services", "film", "theater"}
+
+
+def _books_or_talks(e, cat):
+    """"books"/"talks" when the listing is one, else None (see the rule above)."""
+    name = e.get("name") or ""
+    if cat in _TALK_OVERRIDABLE_ANY:
+        if _BOOK_PARTICIPATE_ANY_RE.search(name):
+            return "books"
+        if _TALK_ANY_RE.search(name):
+            return "talks"
+    if cat not in _TALK_OVERRIDABLE and cat != "services":
+        return None
+    if _BOOK_PARTICIPATE_RE.search(name):
+        return "books"
+    if cat == "services":
+        return None
+    if _AUTHOR_TALK_RE.search(name) or _TALK_EVENT_RE.search(name):
+        return "talks"
+    where = f"{e.get('venue') or ''} {e.get('_source_venue') or ''}"
+    if cat in ("other", "community", "books") and _TALK_VENUE_RE.search(where):
+        return "talks"
+    if cat == "books" and _BOOKSTORE_RE.search(where) and re.search(r":| with | at ", name) \
+            and not _NOT_AUTHOR_EVENT_RE.search(name):
+        return "talks"
+    return None
 
 
 def _effective_category(e):
     name = e.get("name") or ""
     if is_utility_event(name):
+        # "Council on Aging Book Group" is a book group; an ESOL reading class is a class
+        if not _LANGUAGE_RE.search(name) and _books_or_talks(e, "services") == "books":
+            return "books"
         return "services"
     if is_deal_event(name):
         return "deals"
@@ -81,12 +141,7 @@ def _effective_category(e):
     # were classified (or kept from a degraded scrape) still fill the Markets & Festivals page
     if cat in _MARKET_OVERRIDABLE and is_market_or_festival(name):
         return "markets"
-    if cat in _TALK_OVERRIDABLE:
-        if _BOOK_EVENT_RE.search(name):
-            return "books"
-        if _TALK_EVENT_RE.search(name):
-            return "talks"
-    return cat
+    return _books_or_talks(e, cat) or cat
 
 
 CITY_RULES = [

@@ -13859,7 +13859,9 @@ CATEGORY_KEYWORDS = [
                    "one woman show", "one man show", "solo show", "puppet", "burlesque show"]),
     ("books",     ["book club", "book launch", "author", "reading", "storytime", "poet", "poetry", "signing", "booksmith",
                    "literary", "literature", "book talk", "book fair", "writing workshop", "creative writing", "writers",
-                   "in conversation", "conversation with", "storytelling", "novel", "memoir", "acotar"]),
+                   "in conversation", "conversation with", "storytelling", "novel", "memoir", "acotar",
+                   "book group", "book circle", "book discussion", "book swap", "reading group", "storyslam",
+                   "story slam", "writing group"]),
     ("gaming",    ["arcade", "mahjong", "chess", "trivia", "board game", "video game", "ttrpg", "d&d", "dungeons",
                    "tabletop", "escape room", "bingo", "pinball", "axe throw", "darts bar",
                    "one-shot rpg", "rpg night", "game night", "games night", "cornhole", "ping pong", "puzzle party", "puzzle night", "puzzle hunt", "puzzle swap", "jigsaw", "mah jongg", "mahjongg", "trading card", "pack wars", "pokemon"]),
@@ -13899,7 +13901,8 @@ CATEGORY_KEYWORDS = [
     # Lectures and panels. After music/film/sports/food so "Lecture-Recital" stays music,
     # before art/community, where these used to land.
     ("talks",     ["lecture", "lectures", "panel discussion", "guest speaker", "keynote", "colloquium", "symposium",
-                   "fireside chat", "speaker series", "talk by", "talk with", "public talk"]),
+                   "fireside chat", "speaker series", "speakers series", "talk by", "talk with", "public talk",
+                   "lectures on tap", "lecture series"]),
     ("art",       ["art", "arts", "craft", "crafts", "makers", "exhibition", "gallery", "museum", "sculpture", "painting", "curator",
                    "art show", "art walk", "art class", "pottery", "ceramics", "printmaking",
                    "watercolor", "glass fusing", "mosaic", "screen print", "flower arrang",
@@ -13936,7 +13939,11 @@ _WORD_BOUNDARY_KEYWORDS = {
     "baby", "lego", "hike", "yoga", "farm", "beer", "wine", "film", "match",
     "easter",  # not "Northeastern"
     "dj", "djs", "djz",  # not "The Django Cadre"
+    # books: not "Designing", "Songwriters", "Mandarin Conversation", "Songbook Club Cafe", "novelty"
+    "signing", "writers", "in conversation", "book club", "novel", "author",
 }
+# Matched in the title only: "reading" in a venue is usually Reading, MA ("Public Kitchen Reading")
+_NAME_ONLY_KEYWORDS = {"reading"}
 
 # A music venue's own listing whose title happens to contain another category's keyword:
 # "Book Club" is a band ("COLLEGE BAND THURSDAYS!"), "Hollow Harvest" a live-music benefit.
@@ -14062,6 +14069,8 @@ def infer_category(name, venue, default=None):
     name_text = (name or "").lower()
 
     def _match(k, t):
+        if k in _NAME_ONLY_KEYWORDS:
+            t = name_text
         pat = _WORD_BOUNDARY_PATTERNS.get(k)
         return bool(pat.search(t)) if pat is not None else k in t
 
