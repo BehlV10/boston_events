@@ -1,9 +1,11 @@
 {
-  "_about": "What's new on the site, shown at the top of the Reddit roundups for a week after `date`. Newest first; links are Markdown.",
+  "_about": "What's new on the site, shown at the top of the Reddit roundups for a week after `date`. Newest first; links are Markdown; optional `label` shows in bold before the text.",
   "items": [
-    {"date": "2026-11-11", "text": "I'm working on a page just for local markets and winter festivals: [Markets & Festivals](https://www.wickedbostonevents.com/markets-festivals-boston/)"},
-    {"date": "2026-11-10", "text": "Club nights and underground electronic shows now on the [Boston EDM page](https://www.wickedbostonevents.com/boston-edm/)"},
-    {"date": "2026-11-10", "text": "A [college page](https://www.wickedbostonevents.com/college/) with games, concerts and talks open to the public at 14 campuses"},
-    {"date": "2026-11-10", "text": "Arts & culture can now be filtered by art, books, talks and film"}
+    {"date": "2026-11-12", "label": "Winter Markets", "text": "New subpage for [Local Markets & Winter Festivals](https://www.wickedbostonevents.com/markets-festivals-boston/)"},
+    {"date": "2026-11-12", "label": "EDM fans", "text": "Added a page for local [EDM/DJ shows in the Boston area](https://www.wickedbostonevents.com/boston-edm/)"},
+    {"date": "2026-11-12", "label": "For parents", "text": "I added pages for [family events filterable by age](https://www.wickedbostonevents.com/kids-family-events-boston/) and [summer camp registration info and deadlines](https://www.wickedbostonevents.com/summer-camps/) per a few parents reaching out"},
+    {"date": "2026-11-12", "label": "College students", "text": "Work in progress on a [college page](https://www.wickedbostonevents.com/college/) with games, concerts and talks open to the public and targeted at college students at 14 campuses"},
+    {"date": "2026-11-12", "label": "New subcategories", "text": "You can now filter for book talks in Arts and culture"},
+    {"date": "2026-11-12", "label": "New locations", "text": "New venues in Roslindale and Malden, leave a comment if I'm missing any"}
   ]
 }
