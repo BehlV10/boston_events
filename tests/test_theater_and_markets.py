@@ -219,5 +219,73 @@ class WeekendBazaarsAndFallFestTest(unittest.TestCase):
             self.assertEqual(e["price"], "Free")
 
 
+class BostonJewishFilmFestivalTest(unittest.TestCase):
+    def test_jewish_film_festival_geo_resolves(self):
+        geo_jcc = resolve_event_geo({"venue": "JCC Riemer-Goldstein Theater", "name": "The Wedding Entertainer"})
+        self.assertIsNotNone(geo_jcc)
+        self.assertEqual(geo_jcc["venue"], "JCC Greater Boston")
+        self.assertEqual(geo_jcc["neighborhood"], "Newton")
+
+        geo_wnc = resolve_event_geo({"venue": "West Newton Cinema", "name": "I Had The Heart"})
+        self.assertIsNotNone(geo_wnc)
+        self.assertEqual(geo_wnc["venue"], "West Newton Cinema")
+        self.assertEqual(geo_wnc["neighborhood"], "West Newton")
+
+        geo_st = resolve_event_geo({"venue": "Somerville Theatre", "name": "Ethan Bloom"})
+        self.assertIsNotNone(geo_st)
+        self.assertEqual(geo_st["venue"], "Somerville Theatre")
+        self.assertEqual(geo_st["neighborhood"], "Davis Square")
+
+    def test_scrape_boston_jewish_film_festival(self):
+        popup_html = """
+        <html><body>
+          <div class="pum-content">
+            Ethan Bloom
+            Sunday, November 15 | 7pm | Somerville Theatre
+            Director: Herschel Faber
+            Narrative, 2025, US, 96 min
+            <a href="https://ticketing.bostonjfilm.org/websales/pages/info.aspx?evtinfo=580334">Buy Tickets</a>
+          </div>
+          <div class="pum-content">
+            The Wedding Entertainer (The Tale of Moishe Badhan)
+            Saturday, November 14 | 7pm | JCC Riemer-Goldstein Theater
+            Director: Gidi Dar
+            <a href="https://ticketing.bostonjfilm.org/websales/pages/info.aspx?evtinfo=580335">Buy Tickets</a>
+          </div>
+        </body></html>
+        """
+        with mock.patch.object(S, "_SESSION") as session:
+            resp = mock.Mock(status_code=200, text=popup_html)
+            session.get.return_value = resp
+            events = S.scrape_boston_jewish_film_festival("https://www.bostonjcc.org/program/boston-jewish-film-festival/", "ua")
+
+        self.assertEqual(len(events), 2)
+        ethan = events[0]
+        self.assertEqual(ethan["name"], "Boston Jewish Film Festival: Ethan Bloom")
+        self.assertEqual(ethan["venue"], "Somerville Theatre")
+        self.assertEqual(ethan["category"], "film")
+        self.assertIn("ticketing.bostonjfilm.org", ethan["url"])
+
+
+class DearAnnieAndRebelRebelTest(unittest.TestCase):
+    def test_dear_annie_and_rebel_rebel_geo_resolves(self):
+        geo_da = resolve_event_geo({"venue": "Dear Annie", "name": "Unruly Maker's Market"})
+        self.assertIsNotNone(geo_da)
+        self.assertEqual(geo_da["venue"], "Dear Annie")
+        self.assertEqual(geo_da["neighborhood"], "Porter Square")
+        self.assertIn("1741 Massachusetts Ave", geo_da["address"])
+
+        geo_rr = resolve_event_geo({"venue": "Rebel Rebel", "name": "Natural Wine Tasting"})
+        self.assertIsNotNone(geo_rr)
+        self.assertEqual(geo_rr["venue"], "Rebel Rebel")
+        self.assertEqual(geo_rr["neighborhood"], "Union Square")
+
+        geo_wc = resolve_event_geo({"venue": "Wild Child", "name": "The Big Beaujolais Tasting"})
+        self.assertIsNotNone(geo_wc)
+        self.assertEqual(geo_wc["venue"], "Wild Child")
+        self.assertEqual(geo_wc["neighborhood"], "Union Square")
+
+
 if __name__ == "__main__":
     unittest.main()
+

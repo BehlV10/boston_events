@@ -8970,6 +8970,87 @@ def scrape_arlington_greek_fall_fest(url, ua):
     )
 
 
+def scrape_boston_jewish_film_festival(url, ua):
+    """Scrape the Boston Jewish Film Festival lineup from JCC Greater Boston program popups."""
+    try:
+        resp = _SESSION.get(url, headers={"User-Agent": ua}, timeout=15)
+        resp.raise_for_status()
+    except Exception:
+        return []
+    soup = BeautifulSoup(resp.text, "html.parser")
+    events = []
+    seen = set()
+    now = datetime.now(timezone.utc)
+    current_year = datetime.now(EASTERN).year
+
+    for p in soup.find_all("div", class_="pum-content"):
+        text = p.get_text(separator="\n")
+        lines = [l.strip() for l in text.split("\n") if l.strip()]
+        if len(lines) < 2:
+            continue
+        title = lines[0]
+        date_line = lines[1]
+        m = re.search(
+            r"(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday),\s+([A-Za-z]+)\s+(\d{1,2})\s*\|\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)\s*\|\s*([^|\n]+)",
+            date_line, re.IGNORECASE
+        )
+        if not m:
+            continue
+        month_name, day_str, time_str, venue_str = m.groups()
+        try:
+            month = datetime.strptime(month_name, "%B").month
+        except ValueError:
+            try:
+                month = datetime.strptime(month_name, "%b").month
+            except ValueError:
+                continue
+        day = int(day_str)
+        year = current_year
+
+        tm = re.search(r"(\d{1,2})(?::(\d{2}))?\s*(am|pm)?", time_str, re.IGNORECASE)
+        if not tm:
+            continue
+        hour = int(tm.group(1))
+        minute = int(tm.group(2) or 0)
+        ampm = (tm.group(3) or "pm").lower()
+        if ampm == "pm" and hour != 12:
+            hour += 12
+        elif ampm == "am" and hour == 12:
+            hour = 0
+
+        try:
+            dt = datetime(year, month, day, hour, minute, tzinfo=EASTERN)
+            dt_utc = dt.astimezone(timezone.utc)
+        except ValueError:
+            continue
+
+        if (now - dt_utc).days > 30:
+            try:
+                dt = datetime(year + 1, month, day, hour, minute, tzinfo=EASTERN)
+                dt_utc = dt.astimezone(timezone.utc)
+            except ValueError:
+                continue
+
+        ticket_a = p.find("a", href=re.compile(r"ticketing|bostonjfilm|tickets", re.IGNORECASE))
+        ticket_url = ticket_a["href"] if ticket_a else url
+        venue = venue_str.strip().replace("\xa0", " ")
+
+        key = (title.lower(), dt_utc.isoformat())
+        if key in seen:
+            continue
+        seen.add(key)
+
+        events.append({
+            "name": f"Boston Jewish Film Festival: {title}",
+            "date": dt_utc.isoformat(),
+            "venue": venue,
+            "url": ticket_url,
+            "category": "film",
+            "price": None,
+        })
+    return events
+
+
 def scrape_sowa_christmas_market(url, ua):
     """11th Annual SoWa Christmas Market at SoWa Power Station (South End)."""
     schedule = []
@@ -14611,6 +14692,8 @@ _ALL_VENUES = [
     {"name": "Broadway In Boston", "url": "https://boston.broadway.com/shows/", "ua": UA_CHROME, "scraper": scrape_broadway_in_boston, "default_category": "theater"},
     {"name": "Special Interest Social", "url": "https://specialinterestsocial.com/", "ua": UA_CHROME, "scraper": scrape_special_interest_social, "default_category": "community"},
     {"name": "Greek Cuisine Fall Fest", "url": "https://www.saintathanasius.org/news/greek-festival/", "ua": UA_CHROME, "scraper": scrape_arlington_greek_fall_fest, "default_category": "food"},
+    {"name": "Rebel Rebel & Dear Annie (via Eventbrite)", "url": "https://www.eventbrite.com/o/rebel-rebel-wine-bar-17982652543", "ua": UA_CHROME, "scraper": scrape_eventbrite_org, "default_category": "community"},
+    {"name": "Boston Jewish Film Festival", "url": "https://www.bostonjcc.org/program/boston-jewish-film-festival/", "ua": UA_CHROME, "scraper": scrape_boston_jewish_film_festival, "default_category": "film"},
 ]
 
 # Drop venues that require env vars we don't have set — keeps the fail banner clean.
