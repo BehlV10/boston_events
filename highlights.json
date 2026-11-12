@@ -32,6 +32,17 @@
     "expires": "2026-11-13"
   },
   {
+    "id": "2026-11-14-roslindale-book-festival",
+    "match": {
+      "name_contains": "Roslindale Book Festival",
+      "venue_contains": "Roslindale"
+    },
+    "badge": "\ud83d\udcda Book Festival",
+    "note": "The first Roslindale Book Festival, from Rozzie Bound Co-op at the Roslindale library: kids' storytime (10 AM), a writing workshop and open mic, a fiction and social-justice panel, and Jennifer Haigh on Rabbit Moon (3 PM). Free.",
+    "start_date": "2026-11-14",
+    "expires": "2026-11-14"
+  },
+  {
     "id": "2026-11-13-mit-pomeroy",
     "match": {
       "name_contains": "Herb Pomeroy"
