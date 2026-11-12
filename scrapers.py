@@ -9088,19 +9088,119 @@ def scrape_station_street_studios_market(url, ua):
 
 
 def scrape_the_clay_table_holiday_market(url, ua):
-    """Holiday Market, Pottery & Art Sale at The Clay Table in Cambridge."""
+    """Holiday Market, Pottery & Art Sale at The Clay Table in Central Square, Cambridge."""
     return _scrape_holiday_market(
         url, ua,
         name="Holiday Market, Pottery & Art Sale at The Clay Table",
         default_venue="The Clay Table",
-        default_addr="651 Concord Ave, Cambridge, MA",
+        default_addr="19 Brookline St, Cambridge, MA 02142",
         schedule=[
+            (datetime(2026, 12, 11, 18, 0, tzinfo=EASTERN), datetime(2026, 12, 11, 21, 0, tzinfo=EASTERN)),
             (datetime(2026, 12, 12, 12, 0, tzinfo=EASTERN), datetime(2026, 12, 12, 18, 0, tzinfo=EASTERN)),
             (datetime(2026, 12, 13, 12, 0, tzinfo=EASTERN), datetime(2026, 12, 13, 18, 0, tzinfo=EASTERN)),
         ],
-        desc="Handmade pottery, artwork, and unique gifts from local ceramic artists, plus studio tours and hands-on clay activities.",
+        desc="Handmade pottery, artwork, and unique gifts from local ceramic artists, plus studio tours, raffles, and Nightlight Play with Clay (4-6pm) in Central Square.",
         price="Free",
     )
+
+
+def scrape_idle_hands(url, ua):
+    """Idle Hands Craft Ales (Malden): taproom events, food pop-ups, run club, craft markets via Squarespace."""
+    events = []
+    for e in scrape_squarespace_events(url, ua):
+        name = html.unescape(e.get("name") or "").strip()
+        if not name or is_placeholder_or_closed_event(name) or is_service_ad(name):
+            continue
+        price = "Free" if mentions_free(name) or any(k in name.lower() for k in ["run club", "cribbage", "stitch", "listening session", "trivia"]) else None
+        cat = "shopping" if any(k in name.lower() for k in ["market", "bazaar", "craft"]) else ("fitness" if "run club" in name.lower() else "food")
+        e.update(
+            name=name,
+            venue="Idle Hands Craft Ales",
+            address="89 Commercial St, Malden, MA 02148",
+            price=price,
+            category=cat,
+        )
+        events.append(e)
+    return events
+
+
+def scrape_tucks_arcadium(url, ua):
+    """Tuck's Arcadium in Harvard Square (The Garage, 36 JFK St) — 90s/Y2K retro arcade bar.
+    Open Thursday (4-10pm), Friday (3pm-12am), Saturday (3pm-12am) with Neon Nights & Arcade Dreams."""
+    events = []
+    base_url = "https://tucksarcadium.com"
+    today = datetime.now(EASTERN).date()
+    now = datetime.now(timezone.utc)
+
+    for week in range(4):
+        # Thursday: Throwback Arcade Night (4pm - 10pm)
+        thu = today + timedelta(days=((3 - today.weekday()) % 7) + week * 7)
+        dt_thu_start = datetime(thu.year, thu.month, thu.day, 16, 0, tzinfo=EASTERN).astimezone(timezone.utc)
+        dt_thu_end = datetime(thu.year, thu.month, thu.day, 22, 0, tzinfo=EASTERN).astimezone(timezone.utc)
+        if dt_thu_end > now:
+            events.append({
+                "name": "Throwback Arcade Night at Tuck's Arcadium",
+                "date": dt_thu_start.isoformat(),
+                "end": dt_thu_end.isoformat(),
+                "venue": "Tuck's Arcadium",
+                "address": "36 John F. Kennedy St, Cambridge, MA 02138",
+                "url": base_url,
+                "price": "Free",
+                "category": "gaming",
+                "description": "90s and Y2K retro arcade bar with 30+ classic games, pinball, craft cocktails, and nostalgia in Harvard Square.",
+            })
+
+        # Friday: Neon Nights & Arcade Dreams (3pm - 12am)
+        fri = today + timedelta(days=((4 - today.weekday()) % 7) + week * 7)
+        dt_fri_start = datetime(fri.year, fri.month, fri.day, 15, 0, tzinfo=EASTERN).astimezone(timezone.utc)
+        dt_fri_end = datetime(fri.year, fri.month, fri.day + 1, 0, 0, tzinfo=EASTERN).astimezone(timezone.utc)
+        if dt_fri_end > now:
+            events.append({
+                "name": "Neon Nights & Arcade Dreams at Tuck's Arcadium",
+                "date": dt_fri_start.isoformat(),
+                "end": dt_fri_end.isoformat(),
+                "venue": "Tuck's Arcadium",
+                "address": "36 John F. Kennedy St, Cambridge, MA 02138",
+                "url": base_url,
+                "price": "Free",
+                "category": "gaming",
+                "description": "Late-night retro arcade, DDR, pinball, craft cocktails, and throwback music in the heart of Harvard Square.",
+            })
+
+        # Saturday: Neon Nights & Arcade Dreams (3pm - 12am)
+        sat = today + timedelta(days=((5 - today.weekday()) % 7) + week * 7)
+        dt_sat_start = datetime(sat.year, sat.month, sat.day, 15, 0, tzinfo=EASTERN).astimezone(timezone.utc)
+        dt_sat_end = datetime(sat.year, sat.month, sat.day + 1, 0, 0, tzinfo=EASTERN).astimezone(timezone.utc)
+        if dt_sat_end > now:
+            events.append({
+                "name": "Neon Nights & Arcade Dreams at Tuck's Arcadium",
+                "date": dt_sat_start.isoformat(),
+                "end": dt_sat_end.isoformat(),
+                "venue": "Tuck's Arcadium",
+                "address": "36 John F. Kennedy St, Cambridge, MA 02138",
+                "url": base_url,
+                "price": "Free",
+                "category": "gaming",
+                "description": "Weekend arcade party with classic 90s/Y2K games, pinball, claw machines, and craft seltzers in Harvard Square.",
+            })
+
+    return events
+
+
+def scrape_downtown_boston_bid(url, ua):
+    """Downtown Boston BID (downtownboston.org) events in Downtown Crossing, Financial District,
+    and Theatre District via Tribe Events REST API."""
+    def _attach_details(e, item):
+        ext = item.get("website") or ""
+        if ext and "downtownboston.org" not in ext:
+            e["url"] = ext
+        v_data = item.get("venue") or {}
+        if v_data.get("address"):
+            addr = v_data.get("address")
+            city = v_data.get("city") or "Boston"
+            zip_code = v_data.get("zip") or "02108"
+            e["address"] = f"{addr}, {city}, MA {zip_code}".strip(", ")
+    return scrape_tribe_rest(url, ua, default_venue="Downtown Boston", default_category="community", on_item=_attach_details)
 
 
 def scrape_west_end_museum_holiday_market(url, ua):
@@ -14181,6 +14281,9 @@ _ALL_VENUES = [
     {"name": "2026 Black Business Holiday Marketplace", "url": "https://csbbnholiday2026.eventbrite.com", "ua": UA_CHROME, "scraper": scrape_black_business_holiday_marketplace, "default_category": "markets"},
     {"name": "Station Street Studios Holiday Market", "url": "https://artsbrookline.org/events/brookline-village-holiday-market/", "ua": UA_CHROME, "scraper": scrape_station_street_studios_market, "default_category": "markets"},
     {"name": "The Clay Table Holiday Market", "url": "https://theclaytable.com/holiday-market-2026", "ua": UA_CHROME, "scraper": scrape_the_clay_table_holiday_market, "default_category": "markets"},
+    {"name": "Idle Hands Craft Ales", "url": "https://www.idlehandscraftales.com/events", "ua": UA_CHROME, "scraper": scrape_idle_hands, "default_category": "food"},
+    {"name": "Tuck's Arcadium", "url": "https://tucksarcadium.com", "ua": UA_CHROME, "scraper": scrape_tucks_arcadium, "default_category": "gaming"},
+    {"name": "Downtown Boston BID", "url": "https://www.downtownboston.org/wp-json/tribe/events/v1/events?per_page=50", "ua": UA_CHROME, "scraper": scrape_downtown_boston_bid, "default_category": "community"},
     {"name": "The West End Museum Holiday Market", "url": "https://thewestendmuseum.org/", "ua": UA_CHROME, "scraper": scrape_west_end_museum_holiday_market, "default_category": "markets"},
     {"name": "The Holiday Shoppes at Tuscan Village", "url": "https://www.tuscanbrands.com/event/holiday-shoppes/", "ua": UA_CHROME, "scraper": scrape_tuscan_village_holiday_shoppes, "default_category": "markets"},
     {"name": "Harvard Square (HSBA)", "url": "https://www.harvardsquare.com/wp-json/tribe/events/v1/events", "ua": UA_CHROME, "scraper": scrape_harvard_square, "default_category": "community"},
