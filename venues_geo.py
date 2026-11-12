@@ -1159,6 +1159,7 @@ def flag_shared_source_points(events_or_venues) -> int:
             entry = _exact_venue_match(v_lower) or _rule_match(v_lower)
             by_point.setdefault(key, {})[entry[4] if entry else re.sub(r"[^a-z0-9]", "", v_lower)] = entry
     _SHARED_SOURCE_POINTS.clear()
+    _GEO_CACHE.clear()  # answers depend on the flagged points
     for key, venues in by_point.items():
         if len(venues) < 2:
             continue
@@ -1174,7 +1175,31 @@ def flag_shared_source_points(events_or_venues) -> int:
     return len(_SHARED_SOURCE_POINTS)
 
 
+# resolve_event_geo is called millions of times per build (duplicate merging compares event
+# pairs), so answers are cached by everything they depend on: the fields read below, plus the
+# shared-point set (the cache is cleared whenever flag_shared_source_points recomputes it).
+_GEO_CACHE: Dict[tuple, Optional[Dict[str, Any]]] = {}
+_GEO_CACHE_MAX = 200_000
+
+
 def resolve_event_geo(event: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """resolve_event_geo_uncached, cached; returns a fresh dict each call."""
+    key = (event.get("venue"), event.get("_source_venue"), event.get("name"), event.get("title"),
+           event.get("lat"), event.get("latitude"), event.get("lng"), event.get("lon"), event.get("longitude"),
+           event.get("neighborhood"), event.get("address"))
+    try:
+        hit = _GEO_CACHE[key]
+    except KeyError:
+        hit = resolve_event_geo_uncached(event)
+        if len(_GEO_CACHE) >= _GEO_CACHE_MAX:
+            _GEO_CACHE.clear()
+        _GEO_CACHE[key] = hit
+    except TypeError:  # an unhashable field (a list where a string belongs): don't cache
+        return resolve_event_geo_uncached(event)
+    return dict(hit) if hit is not None else None
+
+
+def resolve_event_geo_uncached(event: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     """Resolve latitude, longitude, neighborhood, and venue name for an event.
 
     Order:

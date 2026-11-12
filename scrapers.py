@@ -2233,7 +2233,7 @@ def scrape_boston_calendar(url, ua):
     start = datetime.now(EASTERN).date()
     events = []
     seen_urls = set()
-    for i in range(30):
+    for i in range(14):  # two weeks of day pages; the markets hub gets holiday markets from their own sites
         d = start + timedelta(days=i)
         day_url = f"{base}?day={d.day}&month={d.month}&year={d.year}"
         try:
