@@ -6098,6 +6098,174 @@ def scrape_calderwood_pavilion(url, ua):
     return events
 
 
+def scrape_emerson_colonial(url, ua):
+    """Emerson Colonial Theatre — historic Broadway and touring theatre in Boston's Theatre District.
+    Scrapes official ATG Tickets page and individual production pages for exact curtain times."""
+    base_url = "https://us.atgtickets.com"
+    target_url = url or "https://us.atgtickets.com/venues/emerson-colonial-theatre/whats-on/"
+    events = []
+    seen = set()
+
+    try:
+        resp = _SESSION.get(target_url, headers={"User-Agent": ua or UA_CHROME}, timeout=15)
+        if resp.status_code != 200:
+            return events
+        soup = BeautifulSoup(resp.text, "html.parser")
+    except Exception:
+        return events
+
+    show_links = []
+    for a in soup.find_all("a", href=True):
+        href = a["href"]
+        if "/events/" in href and "/emerson-colonial-theatre/" in href and not "/calendar/" in href:
+            clean_url = urljoin(base_url, href.split("?")[0].rstrip("/"))
+            if clean_url not in show_links:
+                show_links.append(clean_url)
+
+    for show_url in show_links[:25]:
+        try:
+            r = _SESSION.get(show_url + "/", headers={"User-Agent": ua or UA_CHROME}, timeout=10)
+            if r.status_code != 200:
+                continue
+            show_soup = BeautifulSoup(r.text, "html.parser")
+            for s_tag in show_soup.find_all("script", type="application/ld+json"):
+                try:
+                    data = json.loads(s_tag.string)
+                    if data.get("@type") == "TheaterEvent":
+                        sub_events = data.get("subEvent") or [data]
+                        for se in sub_events:
+                            dt_raw = se.get("startDate")
+                            if not dt_raw:
+                                continue
+                            dt = datetime.fromisoformat(dt_raw.replace("Z", "+00:00")).astimezone(EASTERN)
+                            ev_name = se.get("name") or data.get("name")
+                            offers = se.get("offers") or data.get("offers") or {}
+                            ticket_url = offers.get("url") or data.get("url") or show_url
+                            price = "Sold out" if "soldout" in (offers.get("availability") or "").lower() else None
+                            desc = se.get("description") or data.get("description") or ""
+
+                            key = (ev_name.lower(), dt.isoformat()[:16])
+                            if key in seen:
+                                continue
+                            seen.add(key)
+
+                            events.append({
+                                "name": ev_name,
+                                "date": dt.astimezone(timezone.utc).isoformat(),
+                                "venue": "Emerson Colonial Theatre",
+                                "url": ticket_url,
+                                "price": price,
+                                "category": "theater",
+                                "description": desc[:500] if desc else None,
+                            })
+                except Exception:
+                    pass
+        except Exception:
+            continue
+
+    return events
+
+
+def scrape_broadway_in_boston(url, ua):
+    """Broadway In Boston at Citizens Bank Opera House (Washington St, Boston).
+    Scrapes official broadway.com/shows/ for performances and curtain times."""
+    base_url = "https://boston.broadway.com"
+    target_url = url or "https://boston.broadway.com/shows/"
+    events = []
+    seen = set()
+
+    try:
+        resp = _SESSION.get(target_url, headers={"User-Agent": ua or UA_CHROME}, timeout=15)
+        if resp.status_code != 200:
+            return events
+        soup = BeautifulSoup(resp.text, "html.parser")
+    except Exception:
+        return events
+
+    show_urls = []
+    for a in soup.select("a"):
+        href = a.get("href", "")
+        if "/shows/" in href and href != target_url and href not in show_urls:
+            full_url = urljoin(base_url, href)
+            if full_url not in show_urls:
+                show_urls.append(full_url)
+
+    months_map = {
+        "jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6,
+        "jul": 7, "aug": 8, "sep": 9, "oct": 10, "nov": 11, "dec": 12
+    }
+    now = datetime.now(EASTERN)
+
+    for surl in show_urls[:15]:
+        try:
+            sr = _SESSION.get(surl, headers={"User-Agent": ua or UA_CHROME}, timeout=10)
+            if sr.status_code != 200:
+                continue
+            ssoup = BeautifulSoup(sr.text, "html.parser")
+            title_el = ssoup.find("h1") or ssoup.select_one(".engagement-detail-hero__title")
+            title = title_el.get_text(strip=True) if title_el else ""
+            if not title:
+                continue
+
+            desc_el = ssoup.select_one(".engagement-detail-overview__content") or ssoup.select_one(".engagement-detail-synopsis")
+            desc = desc_el.get_text(" ", strip=True)[:400] if desc_el else f"{title} presented by Broadway In Boston at Citizens Bank Opera House."
+
+            loc_text = ssoup.select_one(".engagement-detail-info").get_text(" ", strip=True) if ssoup.select_one(".engagement-detail-info") else ""
+            venue_name = "Citizens Bank Opera House"
+            if "colonial" in loc_text.lower():
+                venue_name = "Emerson Colonial Theatre"
+
+            p_cards = ssoup.select(".performance-card")
+            for card in p_cards:
+                text = card.get_text(" ", strip=True)
+                m_date = re.search(r"\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+(\d{1,2})\b", text, re.I)
+                if not m_date:
+                    continue
+                month_str, day_str = m_date.group(1), m_date.group(2)
+                m_num = months_map.get(month_str.lower()[:3])
+                if not m_num:
+                    continue
+                d_num = int(day_str)
+                year = now.year if m_num >= now.month else now.year + 1
+
+                time_matches = list(re.finditer(r"(\d{1,2})(?::(\d{2}))?\s*(am|pm)", text, re.I))
+                tm_links = [a.get("href") for a in card.find_all("a", href=True) if "ticketmaster" in a.get("href", "")]
+
+                for idx, tm in enumerate(time_matches):
+                    hr = int(tm.group(1))
+                    mn = int(tm.group(2) or 0)
+                    ap = tm.group(3).lower()
+                    if ap == "pm" and hr != 12:
+                        hr += 12
+                    elif ap == "am" and hr == 12:
+                        hr = 0
+
+                    try:
+                        dt = datetime(year, m_num, d_num, hr, mn, tzinfo=EASTERN)
+                    except ValueError:
+                        continue
+
+                    t_url = tm_links[idx] if idx < len(tm_links) else (tm_links[0] if tm_links else surl)
+                    key = (title.lower(), dt.isoformat()[:16])
+                    if key in seen:
+                        continue
+                    seen.add(key)
+
+                    events.append({
+                        "name": title,
+                        "date": dt.astimezone(timezone.utc).isoformat(),
+                        "venue": venue_name,
+                        "url": t_url,
+                        "category": "theater",
+                        "price": None,
+                        "description": desc,
+                    })
+        except Exception:
+            continue
+
+    return events
+
+
 def _central_square_performances(show_url, title, ua):
     """The real performances from a show's ticket page: 'The Getaway Driver 07 nov 2:00 pm'. Talks
     named 'Artists & Audiences for The Getaway Driver' are left out."""
@@ -8785,6 +8953,104 @@ def scrape_arsenal_holiday_bazaar(url, ua):
     )
 
 
+def scrape_arlington_greek_fall_fest(url, ua):
+    """Greek Cuisine Fall Fest at Saint Athanasius the Great Greek Orthodox Church (Arlington)."""
+    return _scrape_holiday_market(
+        url, ua,
+        name="Greek Cuisine Fall Fest 2026",
+        default_venue="Saint Athanasius the Great Greek Orthodox Church",
+        default_addr="4 Appleton St, Arlington, MA 02476",
+        schedule=[
+            (datetime(2026, 11, 13, 11, 30, tzinfo=EASTERN), datetime(2026, 11, 13, 20, 0, tzinfo=EASTERN)),
+            (datetime(2026, 11, 14, 11, 30, tzinfo=EASTERN), datetime(2026, 11, 14, 20, 0, tzinfo=EASTERN)),
+            (datetime(2026, 11, 15, 12, 0, tzinfo=EASTERN), datetime(2026, 11, 15, 18, 0, tzinfo=EASTERN)),
+        ],
+        desc="Annual indoor autumn Greek food festival with traditional dishes (roast lamb, gyros, souvlaki, pastitsio, spanakopita), Greek pastries (baklava, loukoumades), Greek beer and wine.",
+        price="Free",
+    )
+
+
+def scrape_boston_jewish_film_festival(url, ua):
+    """Scrape the Boston Jewish Film Festival lineup from JCC Greater Boston program popups."""
+    try:
+        resp = _SESSION.get(url, headers={"User-Agent": ua}, timeout=15)
+        resp.raise_for_status()
+    except Exception:
+        return []
+    soup = BeautifulSoup(resp.text, "html.parser")
+    events = []
+    seen = set()
+    now = datetime.now(timezone.utc)
+    current_year = datetime.now(EASTERN).year
+
+    for p in soup.find_all("div", class_="pum-content"):
+        text = p.get_text(separator="\n")
+        lines = [l.strip() for l in text.split("\n") if l.strip()]
+        if len(lines) < 2:
+            continue
+        title = lines[0]
+        date_line = lines[1]
+        m = re.search(
+            r"(?:Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday),\s+([A-Za-z]+)\s+(\d{1,2})\s*\|\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)\s*\|\s*([^|\n]+)",
+            date_line, re.IGNORECASE
+        )
+        if not m:
+            continue
+        month_name, day_str, time_str, venue_str = m.groups()
+        try:
+            month = datetime.strptime(month_name, "%B").month
+        except ValueError:
+            try:
+                month = datetime.strptime(month_name, "%b").month
+            except ValueError:
+                continue
+        day = int(day_str)
+        year = current_year
+
+        tm = re.search(r"(\d{1,2})(?::(\d{2}))?\s*(am|pm)?", time_str, re.IGNORECASE)
+        if not tm:
+            continue
+        hour = int(tm.group(1))
+        minute = int(tm.group(2) or 0)
+        ampm = (tm.group(3) or "pm").lower()
+        if ampm == "pm" and hour != 12:
+            hour += 12
+        elif ampm == "am" and hour == 12:
+            hour = 0
+
+        try:
+            dt = datetime(year, month, day, hour, minute, tzinfo=EASTERN)
+            dt_utc = dt.astimezone(timezone.utc)
+        except ValueError:
+            continue
+
+        if (now - dt_utc).days > 30:
+            try:
+                dt = datetime(year + 1, month, day, hour, minute, tzinfo=EASTERN)
+                dt_utc = dt.astimezone(timezone.utc)
+            except ValueError:
+                continue
+
+        ticket_a = p.find("a", href=re.compile(r"ticketing|bostonjfilm|tickets", re.IGNORECASE))
+        ticket_url = ticket_a["href"] if ticket_a else url
+        venue = venue_str.strip().replace("\xa0", " ")
+
+        key = (title.lower(), dt_utc.isoformat())
+        if key in seen:
+            continue
+        seen.add(key)
+
+        events.append({
+            "name": f"Boston Jewish Film Festival: {title}",
+            "date": dt_utc.isoformat(),
+            "venue": venue,
+            "url": ticket_url,
+            "category": "film",
+            "price": None,
+        })
+    return events
+
+
 def scrape_sowa_christmas_market(url, ua):
     """11th Annual SoWa Christmas Market at SoWa Power Station (South End)."""
     schedule = []
@@ -9194,6 +9460,88 @@ def scrape_tucks_arcadium(url, ua):
                 "category": "gaming",
                 "description": "Weekend arcade party with classic 90s/Y2K games, pinball, claw machines, and craft seltzers in Harvard Square.",
             })
+
+    return events
+
+
+def scrape_special_interest_social(url, ua):
+    """Special Interest Social — low-pressure, sensory-friendly meetups for Greater Boston neurodivergent adults.
+    Discovers upcoming mixers from specialinterestsocial.com and partiful.com organizer page."""
+    events = []
+    seen = set()
+    event_urls = set()
+
+    sources = [
+        "https://specialinterestsocial.com/",
+        "https://partiful.com/u/w95OjAZPEGDsSylMEd3O",
+    ]
+
+    for src_url in sources:
+        try:
+            resp = _SESSION.get(src_url, headers={"User-Agent": ua or UA_CHROME}, timeout=10)
+            if resp.status_code != 200:
+                continue
+            soup = BeautifulSoup(resp.text, "html.parser")
+            for s_tag in soup.find_all("script", type="application/ld+json"):
+                try:
+                    data = json.loads(s_tag.string)
+                    if data.get("@type") == "ItemList":
+                        for item in data.get("itemListElement", []):
+                            u = item.get("url")
+                            if u:
+                                event_urls.add(u)
+                except Exception:
+                    pass
+            for a in soup.find_all("a", href=True):
+                href = a["href"]
+                if "/e/" in href:
+                    event_urls.add(urljoin("https://partiful.com", href.split("?")[0]))
+        except Exception:
+            continue
+
+    for elink in event_urls:
+        try:
+            er = _SESSION.get(elink, headers={"User-Agent": ua or UA_CHROME}, timeout=10)
+            if er.status_code != 200:
+                continue
+            esoup = BeautifulSoup(er.text, "html.parser")
+            for stag in esoup.find_all("script", type="application/ld+json"):
+                try:
+                    edata = json.loads(stag.string)
+                    if edata.get("@type") == "Event":
+                        name = edata.get("name")
+                        start_raw = edata.get("startDate")
+                        if not name or not start_raw:
+                            continue
+                        dt = datetime.fromisoformat(start_raw.replace("Z", "+00:00")).astimezone(EASTERN)
+                        loc = edata.get("location", {})
+                        loc_name = loc.get("name") if isinstance(loc, dict) else str(loc or "")
+                        v_name = loc_name.split(",")[0].strip() if loc_name else "Special Interest Social"
+
+                        offers = edata.get("offers", {})
+                        p = offers.get("price") if isinstance(offers, dict) else None
+                        price = "Free" if p == 0 else (f"${p}" if p else None)
+                        if not price and re.search(r"\bfree\b", edata.get("description", ""), re.I):
+                            price = "Free"
+
+                        key = (name.lower(), dt.isoformat()[:16])
+                        if key in seen:
+                            continue
+                        seen.add(key)
+
+                        events.append({
+                            "name": name,
+                            "date": dt.astimezone(timezone.utc).isoformat(),
+                            "venue": v_name,
+                            "url": elink,
+                            "price": price,
+                            "category": "community",
+                            "description": (edata.get("description") or "")[:500] or None,
+                        })
+                except Exception:
+                    pass
+        except Exception:
+            continue
 
     return events
 
@@ -14389,6 +14737,12 @@ _ALL_VENUES = [
     {"name": "Spy Bar", "url": "https://www.spybar.com/event-list", "ua": UA_CHROME, "scraper": scrape_spy_bar, "default_category": "clubbing"},
     {"name": "6one7 Productions (Venu & Icon)", "url": "https://www.eventbrite.com/o/6one7-productions-1459894222", "ua": UA_CHROME, "scraper": scrape_eventbrite_org, "default_category": "clubbing"},
     {"name": "Dope Entertainment (Venu, Icon, Clerys)", "url": "https://www.eventbrite.com/o/dope-entertainment-18760244852", "ua": UA_CHROME, "scraper": scrape_eventbrite_org, "default_category": "clubbing"},
+    {"name": "Emerson Colonial Theatre", "url": "https://us.atgtickets.com/venues/emerson-colonial-theatre/whats-on/", "ua": UA_CHROME, "scraper": scrape_emerson_colonial, "default_category": "theater"},
+    {"name": "Broadway In Boston", "url": "https://boston.broadway.com/shows/", "ua": UA_CHROME, "scraper": scrape_broadway_in_boston, "default_category": "theater"},
+    {"name": "Special Interest Social", "url": "https://specialinterestsocial.com/", "ua": UA_CHROME, "scraper": scrape_special_interest_social, "default_category": "community"},
+    {"name": "Greek Cuisine Fall Fest", "url": "https://www.saintathanasius.org/news/greek-festival/", "ua": UA_CHROME, "scraper": scrape_arlington_greek_fall_fest, "default_category": "food"},
+    {"name": "Rebel Rebel & Dear Annie (via Eventbrite)", "url": "https://www.eventbrite.com/o/rebel-rebel-wine-bar-17982652543", "ua": UA_CHROME, "scraper": scrape_eventbrite_org, "default_category": "community"},
+    {"name": "Boston Jewish Film Festival", "url": "https://www.bostonjcc.org/program/boston-jewish-film-festival/", "ua": UA_CHROME, "scraper": scrape_boston_jewish_film_festival, "default_category": "film"},
 ]
 
 # Drop venues that require env vars we don't have set — keeps the fail banner clean.
