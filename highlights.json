@@ -43,6 +43,16 @@
     "expires": "2026-11-14"
   },
   {
+    "id": "2026-11-14-somerville-cat-tour",
+    "match": {
+      "name_contains": "Cat Tour"
+    },
+    "badge": "\ud83d\udc08 Cat Tour",
+    "note": "The 2nd annual Somerville Cat Tour: meet the coolest kitties around town, with Tandem Vet. Free.",
+    "start_date": "2026-11-14",
+    "expires": "2026-11-14"
+  },
+  {
     "id": "2026-11-13-mit-pomeroy",
     "match": {
       "name_contains": "Herb Pomeroy"

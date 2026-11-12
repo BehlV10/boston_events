@@ -3,6 +3,7 @@
 Rebuilt every morning so the week's post is ready to copy; kept out of search (noindex,
 robots.txt Disallow for every crawler group, not in the sitemap).
 """
+import json
 import os
 import re
 import sys
@@ -127,9 +128,38 @@ class CityPostTest(unittest.TestCase):
             name = R.CITY_NAMES[c]
             self.assertIn(f"Things to do in {name} this weekend", title)
             self.assertNotIn("### ", body.split("---")[0], "a single-city post has no per-city headings")
-            for day in body.split("## 📅 ")[1:]:
-                self.assertLessEqual(day.split("---")[0].count("\n* "), R.CITY_POST_PICKS)
+            self.assertTrue(body.startswith(f"Hey {name}!"))
+            days = body.split("\n# 📅 ")[1:]
+            self.assertTrue(days, "day headings are top-level '# 📅'")
+            for day in days:
+                self.assertLessEqual(day.count("\n* "), R.CITY_POST_PICKS)
+                for line in day.splitlines():
+                    self.assertFalse(line.startswith("  "), "blurbs sit on the event's own line, not below it")
+            self.assertIn("Curated from 300+ local venue calendars", body)
             self.assertLessEqual(len(body), R.REDDIT_LIMIT)
+
+    def test_city_line_format(self):
+        e = {"name": "Neurodivergent Happy Hour", "url": "https://p.example/e",
+             "venue": "Tuck's Arcadium, 36 John F. Kennedy St, Cambridge, MA 02138",
+             "_highlight": {"note": "A low-key hangout."}}
+        line = R._city_line(e)
+        self.assertTrue(line.startswith("* [**Neurodivergent Happy Hour**](https://p.example/e) @ Tuck's Arcadium"), line)
+        self.assertTrue(line.endswith(" — A low-key hangout."), line)
+        self.assertEqual(R._city_venue({"venue": "The Burren — The Back Room"}), "The Burren (The Back Room)")
+
+    def test_blurb_from_description(self):
+        d = "Haitian folk dance and live drumming from a Boston company. Tickets $35."
+        self.assertEqual(R._blurb({"description": d}), "Haitian folk dance and live drumming from a Boston company.")
+        self.assertEqual(R._blurb({"description": d}, frozenset([d])), "", "venue stock text says nothing about the event")
+        self.assertEqual(R._blurb({"description": "Eventbrite - X presents Y - Friday, Nov 13. Find event and ticket information."}), "")
+        self.assertEqual(R._blurb({"description": "Doors 7pm / $15 advance / all ages. Bring friends along tonight please."}), "")
+
+    def test_news_labels(self):
+        import tempfile
+        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
+            json.dump({"items": [{"date": "2026-11-12", "label": "EDM fans", "text": "A page."},
+                                 {"date": "2026-11-12", "text": "Plain."}]}, f)
+        self.assertEqual(R.whats_new(date(2026, 11, 13), f.name), ["* **EDM fans:** A page.", "* Plain."])
 
     def test_main_post_has_up_to_ten_per_city(self):
         _, body = self.main

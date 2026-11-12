@@ -132,7 +132,8 @@ def whats_new(first_day, path=NEWS_PATH):
         except (KeyError, ValueError):
             continue
         if timedelta(0) <= first_day - d <= timedelta(days=NEWS_DAYS) and it.get("text"):
-            out.append(f"* {it['text']}")
+            label = f"**{it['label']}:** " if it.get("label") else ""
+            out.append(f"* {label}{it['text']}")
     return out
 
 
@@ -227,6 +228,46 @@ def _line(e):
     if note:
         s += f"  \n  {note}"
     return s
+
+
+_BLURB_JUNK_RE = re.compile(r"(?i)^(?:eventbrite\b|listing via\b|powered by\b|tickets?\b|doors?\b|\$|\d{1,2}(?::\d\d)?\s*[ap]m\b)"
+                            r"|this event is at capacity|enable javascript|know before you go")
+
+
+def _blurb(e, boilerplate=frozenset()):
+    """One sentence on what the event is like: the highlight note, else the first sentence of
+    the listing's own description when it's about this event (not a venue's stock text)."""
+    note = (e.get("_highlight") or {}).get("note")
+    if note:
+        return note.strip()
+    d = re.sub(r"<[^>]+>", " ", e.get("description") or "")
+    d = _fix_mojibake(re.sub(r"\s+", " ", unescape(d)).strip())
+    if not d or "â" in d or d in boilerplate or _BLURB_JUNK_RE.search(d[:200]):
+        return ""
+    d = re.sub(r"^\d+\+\s*w/[^.]*\.\s*", "", d)  # comedy-club "18+ w/ 2-item minimum." prefix
+    m = re.match(r"(.{40,220}?[.!?])(?:\s|$)", d)
+    if not m or re.search(r"(?i)\$\d|\bdoors\b|\b\d{1,2}(?:st|nd|rd|th)\b|\b\d{1,2}(?::\d\d)?\s*[ap]m\b", m.group(1)):
+        return ""  # ticket and door details, not what the event is like
+    return m.group(1)
+
+
+def _city_venue(e):
+    """'Tuck's Arcadium, 36 John F. Kennedy St, Cambridge, MA 02138' -> "Tuck's Arcadium"."""
+    v = re.sub(r"\s+[—–]\s+(.+)$", r" (\1)", _venue(e))  # "The Burren — The Back Room": the dash leads the blurb
+    head, _, rest = v.partition(",")
+    return head.strip() if rest and re.search(r"\d", rest) and not re.match(r"\d", head) else v
+
+
+def _city_line(e, boilerplate=frozenset()):
+    # * [**Title**](url) @ Venue · 7PM · $20 · Harvard Sq — what it's like, on the same line
+    extra = [x for x in (_time(e), _price(e), _area(e)) if x]
+    title = _clean_title(e["name"]).replace("[", "(").replace("]", ")")
+    url = e.get("url") or ""
+    head = (f"[**{title}**]({_clean_url(url).replace(')', '%29').replace(' ', '%20')})"
+            if url.startswith("http") else f"**{title}**")
+    s = f"* {head} @ {_city_venue(e)}" + "".join(f" · {x}" for x in extra)
+    blurb = _blurb(e, boilerplate)
+    return s + (f" — {blurb}" if blurb else "")
 
 
 def _is_standing(e, day):
@@ -557,6 +598,16 @@ def build_roundup(mode="weekday", start=None, city=None):
 
             picked_by_day_city[d][c] = day_picked  # pick order ~ rank; trimmed to fit, then time-sorted
 
+    # Venue stock text ("Sally's is a friendly neighborhood bar...") repeats across a venue's
+    # different events, so it says nothing about any one of them: no blurb from it.
+    desc_names = defaultdict(set)
+    for evs in raw_events_by_day.values():
+        for x in evs:
+            dd = re.sub(r"\s+", " ", unescape(re.sub(r"<[^>]+>", " ", x.get("description") or ""))).strip()
+            if dd:
+                desc_names[dd].add(frozenset(_title_words(x["name"])))
+    boilerplate = frozenset(dd for dd, names in desc_names.items() if len(names) > 1)
+
     def _render(caps):
         # Format Markdown
         fri = weekdays[-1]
@@ -578,10 +629,8 @@ def build_roundup(mode="weekday", start=None, city=None):
         if city:
             name = CITY_NAMES[city]
             out = [
-                f"Hi {name}! Here's what's happening **in {name}** from **{mon.strftime('%A %b %-d')} through "
-                f"{fri.strftime('%A %b %-d')}**: up to {max(caps.values())} picks a day, {name} events only.",
-                "",
-                "Shows, comedy, films, markets, talks and free stuff. Add anything I missed below!",
+                f"Hey {name}! Here's what's happening **in {name}** from **{mon.strftime('%A %b %-d')} through "
+                f"{fri.strftime('%A %b %-d')}**.",
                 "",
             ]
         elif weekend:
@@ -604,7 +653,12 @@ def build_roundup(mode="weekday", start=None, city=None):
             ]
 
         news = whats_new(mon)
-        if news:
+        if city:
+            out += [f"Visit [**wickedbostonevents.com**]({SITE}) for a full list of events"
+                    + (" - here are some updates this week:" if news else "."), ""]
+            if news:
+                out += [*news, ""]
+        elif news:
             out += [f"**New on [wickedbostonevents.com]({SITE}) this week:**", "", *news, ""]
         if city and weekend:
             out += [f"For the top picks across Boston, Cambridge & Somerville this weekend, see "
@@ -628,7 +682,7 @@ def build_roundup(mode="weekday", start=None, city=None):
             out.append("")
 
         for d in weekdays:
-            day_heading = f"## 📅 {d.strftime('%A, %b %-d').upper()}"
+            day_heading = f"{'#' if city else '##'} 📅 {d.strftime('%A, %b %-d').upper()}"
             out.append(day_heading)
             out.append("")
 
@@ -638,11 +692,14 @@ def build_roundup(mode="weekday", start=None, city=None):
                     out.append(f"### {city_display[c]}")
                 if picks:
                     for e in picks:
-                        out.append(_line(e))
+                        out.append(_city_line(e, boilerplate) if city else _line(e))
                 else:
                     out.append("* *Check the calendar for local shows tonight.*")
                 out.append("")
 
+        if city:
+            out += [f"Curated from 300+ local venue calendars at [**wickedbostonevents.com**]({SITE})."]
+            return title, "\n".join(out) + "\n"
         out += [
             "---",
             "",
@@ -773,9 +830,9 @@ def render_roundup_page(mode, title, body, built_at=None, page=None):
     span = f"{days[0].strftime('%a %b %-d')} – {days[-1].strftime('%a %b %-d')}"
     link_field = "" if BOSTON_POST_PLACEHOLDER not in body else f"""
   <div class="field">
-    <label class="label" for="bostonLink">Your r/boston post's link</label>
+    <label class="label" for="bostonLink">Your main post's link</label>
     <input id="bostonLink" type="url" placeholder="https://www.reddit.com/r/boston/comments/…" autocomplete="off">
-    <p class="muted" style="margin:0">Post the main roundup to r/boston first, then paste its link here; the copied post uses it. Until then the post links to a placeholder.</p>
+    <p class="muted" style="margin:0">Post the main roundup first (r/boston, r/BostonSocialClub…), then paste its link here; the copied post uses it. Until then the post links to a placeholder.</p>
   </div>"""
     built = (built_at or datetime.now(EASTERN)).strftime("%a %b %-d, %-I:%M %p")
     subs = "\n".join(
@@ -862,8 +919,9 @@ const LINK_KEY = 'roundup-boston-link-{days[0].isoformat()}';
 function applyLink() {{
   const v = (linkIn && linkIn.value.trim()) || '';
   const url = /^https:\/\/(www\.|old\.)?reddit\.com\//.test(v) ? v : PLACEHOLDER;
-  ta.value = original.split(PLACEHOLDER).join(url);
-  pv.querySelectorAll('a[data-ph]').forEach(a => {{ a.href = url; }});
+  const sub = (url.match(/reddit\.com\/r\/([A-Za-z0-9_]+)/) || [])[1] || 'boston';
+  ta.value = original.split(PLACEHOLDER).join(url).split("post on r/boston](").join(`post on r/${{sub}}](`);
+  pv.querySelectorAll('a[data-ph]').forEach(a => {{ a.href = url; a.textContent = a.textContent.replace(/post on r\/\w+/, 'post on r/' + sub); }});
   try {{ if (linkIn) localStorage.setItem(LINK_KEY, v); }} catch (e) {{}}
 }}
 pv.querySelectorAll('a').forEach(a => {{ if (a.getAttribute('href') === PLACEHOLDER) a.setAttribute('data-ph', ''); }});
