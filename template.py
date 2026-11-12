@@ -7677,11 +7677,32 @@ def _located_far_apart(e1, e2, miles=0.5):
     return (dlat * dlat + dlng * dlng) ** 0.5 > miles
 
 
+_CITY_WORDS = {"boston", "cambridge", "somerville", "brookline", "medford", "arlington", "watertown", "newton",
+               "quincy", "the", "and", "around", "2026", "2027"}
+_BARE_CITY_VENUE_RE = re.compile(
+    r"(?i)^\s*(?:boston|cambridge|somerville|brookline|medford|arlington|watertown|newton|quincy)(?:,?\s*(?:ma|massachusetts))?\s*$")
+
+
+def _owns_link(e):
+    """The listing comes from the site its link points to (an Eventbrite source's eventbrite.com
+    page), so its date and time are the organizer's own, not a listings site's copy."""
+    host = re.sub(r"^https?://(?:www\.)?", "", e.get("url") or "").split("/")[0].lower()
+    words = re.findall(r"[a-z0-9]{5,}", (e.get("_source_venue") or "").lower())
+    return bool(host) and any(w in host for w in words)
+
+
 def _unknown_venue_could_match(e1, e2):
     """An event whose venue is only its source's name ("Castle Island Brewing" for every
     Castle Island listing) matches any venue, unless both still place far apart: Castle Island's
     and Mighty Squirrel Fenway's Tuesday "Musical Bingo" are 2.3 miles apart."""
-    return bool(e1.get("_venue_unknown") or e2.get("_venue_unknown")) and not _located_far_apart(e1, e2)
+    if not (e1.get("_venue_unknown") or e2.get("_venue_unknown")) or _located_far_apart(e1, e2):
+        return False
+    if e1.get("_venue_bare_city") or e2.get("_venue_bare_city"):
+        # Only a city to go on: the titles must agree ("Cat Tour" inside "2026 Somerville Cat Tour x
+        # Tandem Vet"), not just share "Boston" ("Where to Find $1 Oysters Around Boston")
+        w1, w2 = (set(re.findall(r"[a-z0-9]{3,}", (x.get("name") or "").lower())) - _CITY_WORDS for x in (e1, e2))
+        return bool(w1 and w2) and (w1 <= w2 or w2 <= w1)
+    return True
 
 
 def _same_physical_venue(e1, e2):
@@ -7978,6 +7999,7 @@ def _merge_duplicates(events, word_freq=None):
         curl = _clean_event_url(e.get("url"))
 
         match = None
+        url_match = False
         # 0. Canonical specific URL match check
         if curl and curl in seen_url:
             for cand in seen_url[curl]:
@@ -7985,6 +8007,7 @@ def _merge_duplicates(events, word_freq=None):
                 s_cur = (e.get("_source_venue") or e.get("source") or "").lower()
                 if s_cand != s_cur or not _is_different_show(e, cand):
                     match = cand
+                    url_match = True
                     break
 
         # 1. Exact match check
@@ -8101,6 +8124,12 @@ def _merge_duplicates(events, word_freq=None):
                     break
 
         if match:
+            # Same link from two sources: the listing from the link's own site sets the time (The
+            # Boston Calendar's 1 PM copy of an Eventbrite page that says noon, Nov 2026 cat tour)
+            link_owner = None
+            if url_match and _owns_link(e) != _owns_link(match):
+                link_owner = e if _owns_link(e) else match
+                owner_time, owner_date = link_owner.get("_time"), link_owner.get("date")
             # Consolidate multiple hourly tour departures into a single daily listing
             if _is_attraction_tour(match) or _is_attraction_tour(e):
                 match.setdefault("_tour_times", [])
@@ -8174,7 +8203,11 @@ def _merge_duplicates(events, word_freq=None):
                 if old_url and not old_is_placeholder and not any(a.get("url") == old_url for a in match["_alt_sources"]):
                     match["_alt_sources"].append({"venue": old_src, "url": old_url, "price": match.get("price"), "name": match.get("name")})
                 match["url"] = e.get("url")
-                match["name"] = e.get("name")
+                # A vague listing ("Cat Tour" @ "Somerville") keeps the fuller title it merged into
+                m_words = set(re.findall(r"\w+", (match.get("name") or "").lower()))
+                e_words = set(re.findall(r"\w+", (e.get("name") or "").lower()))
+                if not (e.get("_venue_bare_city") and e_words and e_words < m_words):
+                    match["name"] = e.get("name")
                 # The category goes with the title it describes: a "Time: TBA" placeholder that
                 # absorbed a same-day "Pop Up Market" must not label the game watch that replaces it
                 if e.get("category") and e["category"] not in ("other", "community"):
@@ -8196,6 +8229,11 @@ def _merge_duplicates(events, word_freq=None):
                 if e.get("date"):
                     match["date"] = e["date"]
 
+            if link_owner is not None and owner_time and (owner_time.hour or owner_time.minute):
+                match["_time"] = owner_time
+                if owner_date:
+                    match["date"] = owner_date
+
             # The venue's own price beats a listings site's ("$5 + fee" from Club Café over "Free").
             if new_prio > cur_prio and e.get("price"):
                 match["price"] = e["price"]
@@ -8205,6 +8243,11 @@ def _merge_duplicates(events, word_freq=None):
             if match.get("_venue_unknown") and not e.get("_venue_unknown") and e.get("venue"):
                 match["venue"] = e["venue"]
                 match.pop("_venue_unknown", None)
+                # A vague listing ("Cat Tour" @ "Somerville") takes the fuller title too ("Somerville Cat Tour")
+                m_words = set(re.findall(r"\w+", (match.get("name") or "").lower()))
+                e_words = set(re.findall(r"\w+", (e.get("name") or "").lower()))
+                if match.get("_venue_bare_city") and m_words and m_words < e_words and len(e.get("name") or "") <= 80:
+                    match["name"] = e["name"]
                 for k in ("lat", "lng", "address", "locality", "postal_code"):
                     if e.get(k):
                         match[k] = e[k]
@@ -8372,7 +8415,9 @@ def group_by_date(results):
                 entry["url"] = fix_doubled_url(entry["url"])
             entry["url"] = sanitize_event_url(entry.get("url"), fallback=r.get("url"))
             entry["venue"] = e.get("venue") or r["venue"]
-            if e.get("venue_unknown") or not (e.get("venue") or "").strip():
+            if _BARE_CITY_VENUE_RE.match(e.get("venue") or ""):
+                entry["_venue_bare_city"] = True  # "Cat Tour" @ "Somerville" (Do617): not a place
+            if e.get("venue_unknown") or not (e.get("venue") or "").strip() or entry.get("_venue_bare_city"):
                 # The source gave no venue (e.g. Meetup hides it from non-members), so "venue" is
                 # just the group/source name. Let dedup take the real venue from another listing.
                 entry["_venue_unknown"] = True
