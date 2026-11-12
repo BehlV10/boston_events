@@ -139,6 +139,58 @@ class CityPostTest(unittest.TestCase):
 
 
 
+class RealEventsOnlyTest(unittest.TestCase):
+    """Places, standing offers and weekly fixtures aren't weekend events (Nov 13 2026 posts had a
+    rooftop pickleball garden, free museum admission and a bike path in every day)."""
+
+    def test_standing_listings(self):
+        day = date(2026, 11, 14)
+        self.assertTrue(R._is_standing({"time": "Through 12/31", "ends": "2026-12-31"}, day))
+        self.assertTrue(R._is_standing({"ends": "2026-11-30"}, day))
+        self.assertFalse(R._is_standing({"ends": "2026-11-15"}, day))  # a weekend festival
+        self.assertFalse(R._is_standing({"time": "8PM"}, day))
+
+    def test_fixture_titles(self):
+        for t in ("Sing Ur Heart Out at Sunday Karaoke", "Painted Burro Bottomless Brunch!!", "Portico Brewing Patio",
+                  "Free Admission to the Harvard Art Museums", "DJ at The Chester Tavern"):
+            self.assertTrue(R.FIXTURE_TITLE_RE.search(t), t)
+        for t in ("Emo Philips", "Lagers and Leaves: A Fall Festival", "Boston Swing Central- Friday Dance"):
+            self.assertFalse(R.FIXTURE_TITLE_RE.search(t), t)
+
+    def test_reworded_duplicates_and_mojibake(self):
+        self.assertTrue(R._similar_titles("Loy Kra Thong Thai Night Market @ Harvard Square",
+                                          "Loy Ka Thong Thai Night Market (Cambridge) - Hostless"))
+        self.assertFalse(R._similar_titles("Boston Comedy Festival Presents: Emo Philips",
+                                           "BOSTON COMEDY FESTIVAL FINALS"))
+        self.assertEqual(R._fix_mojibake("Brian O’Donovan".encode("utf-8").decode("cp1252")), "Brian O’Donovan")
+        self.assertEqual(R._fix_mojibake("Café"), "Café")
+
+    def test_built_posts(self):
+        import json as _json
+        def ev(name, hour, **kw):
+            return {"name": name, "date": f"2026-11-14T{hour:02d}:00:00-05:00", "url": "https://example.com/" + name[:5],
+                    **kw}
+        venues = [
+            {"venue": "The Boston Calendar", "events": [
+                ev("Secret Rooftop Garden in Kendall Square", 10, venue="Urban Park Roof Garden, Cambridge",
+                   time="Through 11/30", ends="2026-11-30"),
+                ev("Live Music at Remnant Satellite", 10, venue="Remnant Satellite, Cambridge", time="Through 12/31",
+                   ends="2026-12-31")]},
+            {"venue": "The Sinclair", "events": [ev("Donny Benet", 20, venue="The Sinclair", price="$40")]},
+            {"venue": "Tufts University", "events": [ev("Tufts Choruses", 15, venue="Medford/Somerville campus")]},
+        ]
+        with tempfile.TemporaryDirectory() as d:
+            with open(os.path.join(d, "events.json"), "w") as f:
+                _json.dump({"venues": venues}, f)
+            with patch.object(R, "ROOT", d):
+                _, cam = R.build_roundup("weekend", "2026-11-13", city="cambridge")
+                _, som = R.build_roundup("weekend", "2026-11-13", city="somerville")
+        self.assertIn("Donny Benet", cam)
+        self.assertNotIn("Rooftop", cam)
+        self.assertNotIn("Remnant Satellite", cam)
+        self.assertNotIn("Tufts", som)
+
+
 class WhatsNewAndLinksTest(unittest.TestCase):
     def test_news_shows_for_a_week(self):
         import json as _json
