@@ -36,7 +36,7 @@ textarea{width:100%;min-height:60vh;font:13px/1.5 ui-monospace,Menlo,monospace;b
 </head><body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Mon Nov 9 – Fri Nov 13 · rebuilt Thu Nov 12, 5:02 PM · also: <a href="../weekend/">Weekend</a> · <a href="../weekend-cambridge/">Cambridge weekend</a> · <a href="../weekend-somerville/">Somerville weekend</a></div>
+    <div class="eyebrow">Mon Nov 9 – Fri Nov 13 · rebuilt Thu Nov 12, 5:21 PM · also: <a href="../weekend/">Weekend</a> · <a href="../weekend-cambridge/">Cambridge weekend</a> · <a href="../weekend-somerville/">Somerville weekend</a></div>
     <h1>Weekday Reddit roundup</h1>
   </header>
   <div class="field">
@@ -357,8 +357,9 @@ const LINK_KEY = 'roundup-boston-link-2026-11-09';
 function applyLink() {
   const v = (linkIn && linkIn.value.trim()) || '';
   const url = /^https:\/\/(www\.|old\.)?reddit\.com\//.test(v) ? v : PLACEHOLDER;
-  ta.value = original.split(PLACEHOLDER).join(url);
-  pv.querySelectorAll('a[data-ph]').forEach(a => { a.href = url; });
+  const sub = (url.match(/reddit\.com\/r\/([A-Za-z0-9_]+)/) || [])[1] || 'boston';
+  ta.value = original.split(PLACEHOLDER).join(url).split("post on r/boston](").join(`post on r/${sub}](`);
+  pv.querySelectorAll('a[data-ph]').forEach(a => { a.href = url; a.textContent = a.textContent.replace(/post on r\/\w+/, 'post on r/' + sub); });
   try { if (linkIn) localStorage.setItem(LINK_KEY, v); } catch (e) {}
 }
 pv.querySelectorAll('a').forEach(a => { if (a.getAttribute('href') === PLACEHOLDER) a.setAttribute('data-ph', ''); });
