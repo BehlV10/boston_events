@@ -256,6 +256,13 @@ def build(week_start):
             s -= 15
         return s
 
+    # One show, two listings at different times (the venue's 7PM doors vs. the promoter's 8PM
+    # show, Nov 16 2026 Liana Flores): keep the best-scored listing of each day/title/venue.
+    best = {}
+    for e in sorted(pool, key=lambda e: (-score(e), e["_time"])):
+        best.setdefault((e["_time"].date(), re.sub(r"\W+", "", _clean_title(e["name"]).lower()),
+                         _venue(e).strip().lower()), e)
+    pool = list(best.values())
     pool.sort(key=lambda e: (-score(e), e["_time"]))
     run_pool.sort(key=lambda e: (-score(e), e["_time"]))
     used, venue_count = set(), Counter()
