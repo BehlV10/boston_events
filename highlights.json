@@ -21,6 +21,17 @@
     "expires": "2026-11-13"
   },
   {
+    "id": "2026-11-13-neurodivergent-happy-hour",
+    "match": {
+      "name_contains": "Neurodivergent Happy Hour",
+      "venue_contains": "Tuck"
+    },
+    "badge": "\ud83d\udd79\ufe0f New Meetup",
+    "note": "First-ever Special Interest Social: a free, low-pressure hangout for neurodivergent adults at Tuck's Arcadium, Harvard Square's new barcade. Play games, chat or just chill, no small talk required.",
+    "start_date": "2026-11-13",
+    "expires": "2026-11-13"
+  },
+  {
     "id": "2026-11-13-mit-pomeroy",
     "match": {
       "name_contains": "Herb Pomeroy"
