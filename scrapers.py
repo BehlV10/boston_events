@@ -2022,6 +2022,13 @@ def _parse_boston_calendar_time(text):
 
 
 _BC_GOES_UNTIL_RE = re.compile(r"goes until\s+(\d{1,2})/(\d{1,2})", re.IGNORECASE)
+# The Boston Calendar's dateless "goes until 12/31" rows are mostly venue ads (restaurants, bars,
+# patios, shops, museums, bike paths), listicles ("16 Karaoke Nights in Boston") and class ads,
+# shown at a made-up 10AM on every day page: not events, so they're dropped. Deals ("$1 Oysters
+# at Viale") go to Deals & Specials. Real events on this calendar carry a start time.
+_BC_DEAL_RE = re.compile(
+    r"(?i)happy\s+hour|\$\d+(?:\.\d+)?\s+\S.*\b(?:special|oysters?|tea|lunch|brunch)\b|\$\d+\s+oysters|"
+    r"\bbottomless\b|free\s+wine\s+tastings?|\blunch\s+special\b|\bwhere\s+to\s+find\s+\$")
 _BC_EXTERNAL_RE = re.compile(r"event\s*website", re.IGNORECASE)
 # The end of a "When:" range: "5:00p - 10:00p" -> (10, 00, p)
 _BC_TIME_RANGE_RE = re.compile(r"\d{1,2}(?::\d{2})?\s*[ap]\s*[-–]\s*(\d{1,2})(?::(\d{2}))?\s*([ap])\b", re.IGNORECASE)
@@ -2277,6 +2284,10 @@ def scrape_boston_calendar(url, ua):
                 end_year = d.year + (1 if end_month < d.month else 0)
                 entry["ends"] = f"{end_year:04d}-{end_month:02d}-{end_day:02d}"
                 if iso is None:
+                    if is_deal_event(name) or _BC_DEAL_RE.search(name):
+                        entry["category"] = "deals"
+                    else:
+                        continue  # a venue ad, listicle or class ad, there every day: not an event
                     entry["date"] = datetime(d.year, d.month, d.day, 10, 0, tzinfo=EASTERN).astimezone(timezone.utc).isoformat()
                     entry["time"] = f"Through {end_month}/{end_day}"
             events.append(entry)
