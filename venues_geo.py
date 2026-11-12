@@ -327,6 +327,7 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
     "high street place": (42.3537, -71.0543, "Downtown / Financial District", "100 High St, Boston", "High Street Place"),
     "the huntington theatre": (42.3421, -71.0858, "Back Bay", "264 Huntington Ave, Boston", "The Huntington Theatre"),
     "the substation (roslindale)": (42.2868, -71.1287, "Roslindale", "4228 Washington St, Roslindale", "The Substation (Roslindale)"),
+    "distraction brewing": (42.2869, -71.1301, "Roslindale", "2 Belgrade Ave, Roslindale", "Distraction Brewing"),
     "birch st plaza": (42.2868, -71.1294, "Roslindale", "Birch St Plaza, Roslindale, MA 02131", "Birch St Plaza"),
     "birch street plaza": (42.2868, -71.1294, "Roslindale", "Birch St Plaza, Roslindale, MA 02131", "Birch St Plaza"),
     "roslindale village": (42.2868, -71.1294, "Roslindale", "Birch St Plaza, Roslindale, MA 02131", "Roslindale Village"),

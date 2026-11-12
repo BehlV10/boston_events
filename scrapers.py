@@ -13567,6 +13567,54 @@ def scrape_substation(url, ua):
     return events
 
 
+_DISTRACTION_EVENTS_API = "https://distractionbrewingco.com/api/apps/69ae0cb4d3bf03a072805af9/entities/Event"
+_DISTRACTION_TIME_RE = re.compile(r"(?i)^\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)?(?:\s*-\s*\d{1,2}(?::\d{2})?\s*(am|pm))?")
+
+
+def _distraction_start(text):
+    """'6:30PM-8:30PM' -> (18, 30); '7-9PM' -> (19, 0); '8:00pm' -> (20, 0); unparseable -> None."""
+    m = _DISTRACTION_TIME_RE.match(text or "")
+    if not m or not (m.group(3) or m.group(4)):
+        return None
+    hour, minute = int(m.group(1)), int(m.group(2) or 0)
+    if hour > 12 or minute > 59:
+        return None
+    pm = (m.group(3) or m.group(4)).lower() == "pm"
+    if not m.group(3) and m.group(4) and hour == 12:  # "12-2PM"
+        pm = True
+    return hour % 12 + (12 if pm else 0), minute
+
+
+def scrape_distraction_brewing(url, ua):
+    """Distraction Brewing (Roslindale Square taproom): live music, book talks, food pop-ups. The
+    site's events page reads this list from its own app backend; private bookings are skipped."""
+    resp = _SESSION.get(_DISTRACTION_EVENTS_API, headers={"User-Agent": ua, "Accept": "application/json",
+                                                         "X-App-Id": "69ae0cb4d3bf03a072805af9"}, timeout=15)
+    resp.raise_for_status()
+    today = datetime.now(EASTERN).date()
+    events = []
+    for it in resp.json() or []:
+        title = (it.get("title") or "").strip()
+        if not title or re.search(r"(?i)\bprivate\b|taproom closed", title) or is_placeholder_or_closed_event(title):
+            continue
+        try:
+            day = date.fromisoformat((it.get("date") or "")[:10])
+        except ValueError:
+            continue
+        if day < today:
+            continue
+        name = re.sub(r"\s+-\s+live music$", "", title, flags=re.I)
+        live = bool(re.search(r"(?i)live music|concert|band|album release", f"{title} {it.get('description') or ''}"))
+        events.append({
+            "name": name, "date": _et_iso(day, _distraction_start(it.get("time"))),
+            "time": None if _distraction_start(it.get("time")) else (it.get("time") or None),
+            "url": url, "venue": "Distraction Brewing", "address": "2 Belgrade Ave, Roslindale, MA 02131",
+            "description": (it.get("description") or "").strip() or None,
+            "category": "music" if live else "community",
+        })
+    return events
+
+
 def scrape_music_on_centre(url, ua):
     """Music on Centre (West Roxbury): folk concerts, listed on the Boston Coffeehouses calendar."""
     events = scrape_tribe_rest_paged(url, ua, default_category="music", days=210, max_pages=4)
@@ -14037,6 +14085,7 @@ def scrape_museum_exhibitions(url, ua):
 _ALL_VENUES = [
     # Added from the Boston Shows coverage check: venues' own calendars
     {"name": "The Substation (Roslindale)", "url": "https://thesubstation.space/events-all", "ua": UA_CHROME, "scraper": scrape_substation, "default_category": "community"},
+    {"name": "Distraction Brewing", "url": "https://distractionbrewingco.com/events", "ua": UA_CHROME, "scraper": scrape_distraction_brewing, "default_category": "community"},
     {"name": "Music on Centre", "url": "https://bostoncoffeehouses.org/wp-json/tribe/events/v1/events", "ua": UA_CHROME, "scraper": scrape_music_on_centre, "default_category": "music"},
     {"name": "Edward M. Kennedy Institute", "url": "https://www.emkinstitute.org/events", "ua": UA_CHROME, "scraper": scrape_kennedy_institute, "default_category": "community"},
     {"name": "Dorchester Historical Society", "url": "https://www.dorchesterhistoricalsociety.org/", "ua": UA_CHROME, "scraper": scrape_dorchester_historical, "default_category": "art"},
