@@ -50,7 +50,8 @@ MAJOR_VENUES = (
     "somerville theatre", "arts at the armory", "the middle east", "club passim",
     "museum of fine arts", "isabella stewart gardner", "ica boston", "institute of contemporary art",
     "museum of science", "harvard art museums", "wbur cityspace", "coolidge corner", "brattle",
-    "the burren", "aeronaut", "remnant", "portico", "castle island"
+    "the burren", "aeronaut", "remnant", "portico", "castle island", "somerville theater",
+    "warehouse xi", "the rockwell", "sonia", "lizard lounge", "the lilypad", "regattabar"
 )
 
 # Arenas and big theaters: a highlighted show here outranks one at a club the same night
@@ -96,6 +97,20 @@ SKIP_TITLE_RE = re.compile(
 # Food and drink specials ("$1 Oysters at Vera's", "$5 Margaritas") are deals, not events
 DEAL_TITLE_RE = re.compile(r"(?i)^\W*\$\d+(?:\.\d+)?\s+(?:oysters?|wings?|tacos?|margaritas?|drafts?|beers?|pints?|"
                            r"drinks?|shots?|burgers?|pizza|slices?|apps?|appetizers?|mimosas?|wine|cocktails?)\b")
+
+# Places and standing offers, not events: patios, beer gardens, karaoke, bottomless brunch
+FIXTURE_TITLE_RE = re.compile(r"(?i)\b(?:karaoke|bottomless|patio|beer garden season|free admission|shut up & write|"
+                              r"portrait study|running club|sound bath|fitness|dj at the)\b")
+# Hand cuts: listings that read like events but aren't one (a vague recurring "hike")
+SKIP_TITLES = ("self care sunday",)
+# Low-key listings (gallery tours, seminars, book clubs, "Plant Care 101"): kept, ranked below shows
+LOW_KEY_RE = re.compile(r"(?i)\b(?:tours?|seminar|book club|discussion|101|meetup|meet-up|swap|study|hackathon|"
+                        r"watch party|recital)\b|\bSBC\b")
+# Past this many picks a day, a listing has to clear MIN_SCORE: a thin day gets fewer, better picks
+SURE_PICKS = 8
+MIN_SCORE = 30
+STANDING_DAYS = 7  # a listing "through" a date more than a week out is a place or exhibit
+WEEKLY_REPEATS = 3  # same title at the same room on this many dates = a weekly fixture, ranked down
 
 NEWS_PATH = os.path.join(ROOT, "roundup_news.json")
 NEWS_DAYS = 7  # a "what's new" item shows in roundups starting within a week of its date
@@ -214,6 +229,50 @@ def _line(e):
     return s
 
 
+def _is_standing(e, day):
+    """A dateless listing that runs for weeks (The Boston Calendar's "Through 12/31" rows for
+    museums, patios, bike paths): there every day, so it's not an event for a roundup."""
+    if re.match(r"(?i)through\b", (e.get("time") or "").strip()):
+        return True
+    try:
+        ends = date.fromisoformat((e.get("ends") or "")[:10])
+    except ValueError:
+        return False
+    return (ends - day).days > STANDING_DAYS
+
+
+def _fix_mojibake(text):
+    """UTF-8 read as cp1252 ("Brian OâDonovan", "â¢"): decode it back when that cleanly works."""
+    if not text or not re.search("[âÃ]", text):
+        return text
+    try:
+        return text.encode("cp1252").decode("utf-8")
+    except UnicodeError:
+        return text
+
+
+_TITLE_STOP = {"the", "a", "an", "and", "of", "at", "in", "with", "w", "on", "for", "to", "presents"}
+
+
+def _title_words(name):
+    n = unicodedata.normalize("NFKD", name or "").encode("ascii", "ignore").decode().lower()
+    return {w for w in re.findall(r"[a-z0-9]+", n) if w not in _TITLE_STOP and len(w) > 1}
+
+
+def _similar_titles(a, b):
+    """Two listings of one event with different titles: "Loy Kra Thong Thai Night Market @ Harvard
+    Square" / "Loy Ka Thong Thai Night Market (Cambridge)"."""
+    wa, wb = _title_words(a), _title_words(b)
+    common = wa & wb
+    return len(common) >= 4 and len(common) >= 0.6 * min(len(wa), len(wb))
+
+
+def _repeat_key(e, vname):
+    t = re.sub(r"[^a-z0-9]", "", (e.get("name") or "").lower())[:24]
+    v = re.sub(r"[^a-z]", "", re.sub(r"(?i)^the\s+", "", (e.get("venue") or vname or "")).lower())[:12]
+    return t, v
+
+
 def _norm_key(title):
     t = re.sub(r"[^a-z0-9]+", "", (title or "").lower())
     return t[:20]
@@ -255,12 +314,21 @@ def build_roundup(mode="weekday", start=None, city=None):
 
     def _head_slug(name):
         n = unicodedata.normalize("NFKD", name or "").encode("ascii", "ignore").decode().lower().strip()
+        n = re.sub(r"^.{0,40}?\bpresents:\s*", "", n)  # "Boston Comedy Festival Presents: Emo Philips"
         n = re.sub(r"^(?:the\s+bowery\s+presents:?\s*|an\s+evening\s+with\s+|a\s+conversation\s+with\s+|sold\s+out:?\s*|!\s*)", "", n)
         n = re.sub(r"\s+(?:with|w/|ft\.|feat\.|presents|opened by)\s+.*$", "", n)
         n = re.sub(r"\s+[-–—:]\s+.*$", "", n)
         n = re.sub(r"\s*\((?:18\+|21\+|ages?\s+\d+\+?|boston|cambridge|somerville)\)$", "", n)
         n = re.sub(r"[^a-z0-9]+", "", n)
         return n[:16]
+
+    # Weekly fixtures (the same title in the same room on several dates): open sessions, DJ
+    # nights, karaoke. They still fill gaps, but one-off shows rank first.
+    repeat_dates = defaultdict(set)
+    for v in venues:
+        for e in v.get("events", []):
+            if (e.get("date") or "tba") != "tba":
+                repeat_dates[_repeat_key(e, v["venue"])].add(e["date"][:10])
 
     for v in venues:
         vname = v["venue"]
@@ -281,8 +349,14 @@ def build_roundup(mode="weekday", start=None, city=None):
             ev_city = _event_city(e.get("venue"), vname, e)
             if ev_city not in city_keys or OTHER_TOWN_RE.search(e.get("venue") or ""):
                 continue
+            if re.search(r"(?i)medford/somerville campus", e.get("venue") or ""):  # Tufts, mostly Medford
+                continue
 
-            name = e.get("name") or e.get("title") or ""
+            name = _fix_mojibake(e.get("name") or e.get("title") or "")
+            if FIXTURE_TITLE_RE.search(name) or any(t in name.lower() for t in SKIP_TITLES):
+                continue
+            if _is_standing(e, ev_date) and not _get_event_highlight(dict(e, venue=e.get("venue") or vname, _source_venue=vname), highlights):
+                continue
             if SKIP_TITLE_RE.search(name) or DEAL_TITLE_RE.search(name) or re.search(r"(?i)\b(?:closed|closure|canceled|cancelled|postponed)\b", name):
                 continue
             if re.search(r"(?i)\bsold[ -]?out\b", f"{name} {e.get('price') or ''}"):
@@ -290,11 +364,13 @@ def build_roundup(mode="weekday", start=None, city=None):
                 continue
 
             ev = dict(e)
+            ev["name"] = name
             ev["_time"] = ev_time
             ev["_source_venue"] = vname
             ev["venue"] = e.get("venue") or vname
             ev["_city"] = ev_city
             ev["_highlight"] = _get_event_highlight(ev, highlights)
+            ev["_weekly"] = len(repeat_dates[_repeat_key(e, vname)]) >= WEEKLY_REPEATS
             if ev["_highlight"] and ev["_highlight"].get("run"):
                 runs[ev["_highlight"]["id"]].append(ev)  # listed once under "Running all week"
                 continue
@@ -314,6 +390,11 @@ def build_roundup(mode="weekday", start=None, city=None):
         # Library book groups / craft hours are free but rarely Reddit-worthy unless curated
         if ("public library" in v_low or "city hall" in v_low) and not e.get("_highlight"):
             s -= 40
+        if not e.get("_highlight"):
+            if e.get("_weekly"):
+                s -= 35
+            if LOW_KEY_RE.search(e.get("name") or ""):
+                s -= 25
         if e.get("price"):
             s += 10
         if _time(e):
@@ -327,6 +408,8 @@ def build_roundup(mode="weekday", start=None, city=None):
             s -= 60
         elif weekend and e["_time"].hour < 9:
             s -= 30
+        elif weekend and e["_time"].hour >= 17:
+            s += 10  # the night out is the main event
         src = (e.get("_source_venue") or "").lower()
         if src in ("ticketmaster", "seatgeek", "eventschaser"):
             s -= 5
@@ -414,9 +497,16 @@ def build_roundup(mode="weekday", start=None, city=None):
 
             cap = CITY_POST_PICKS if city else (WEEKEND_PER_CITY if weekend else CITY_CAPS[c])
 
+            def _dup_of_picked(e, slug):
+                # same headliner ("andreagibson" / "andreagibsonslov"), or a reworded title
+                if slug and any(slug == h or (min(len(slug), len(h)) >= 8 and (slug.startswith(h) or h.startswith(slug)))
+                                for h in seen_heads):
+                    return True
+                return any(_similar_titles(e["name"], p["name"]) for p in day_picked)
+
             def _room_for(e):
-                if weekend or city:  # fill to the cap on score
-                    return len(day_picked) < cap
+                if weekend or city:  # fill to the cap on score, but not with filler
+                    return len(day_picked) < cap and (len(day_picked) < SURE_PICKS or score(e) >= MIN_SCORE)
                 return len(day_picked) < BASE_PICKS or (len(day_picked) < cap and e.get("_highlight"))
 
             # First pass: try strictly 1 event per venue and unique headliner
@@ -427,7 +517,7 @@ def build_roundup(mode="weekday", start=None, city=None):
                     continue
                 slug = _head_slug(e["name"])
                 v_clean = _venue_key(e)
-                if slug and slug in seen_heads:
+                if _dup_of_picked(e, slug):
                     continue
                 if seen_venue[v_clean] >= 1:
                     continue
@@ -456,7 +546,7 @@ def build_roundup(mode="weekday", start=None, city=None):
                         continue
                     if any(_same_listing(e, p) for p in day_picked):
                         continue
-                    if slug and slug in seen_heads:
+                    if _dup_of_picked(e, slug):
                         continue
                     if seen_venue[v_clean] >= 2:
                         continue
