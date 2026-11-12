@@ -3,7 +3,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow,noarchive">
-<title>Weekend Reddit Roundup</title>
+<title>Weekend Reddit roundup</title>
 <style>
 :root{--bg:#f6f7f9;--panel:#fff;--fg:#1c2230;--muted:#5d6676;--line:#dde1e8;--accent:#c2410c;--accent-fg:#fff;--code:#f0f2f5;color-scheme:light}
 @media (prefers-color-scheme:dark){:root{--bg:#12151b;--panel:#1a1e26;--fg:#e6e9ef;--muted:#9aa3b2;--line:#2c323d;--accent:#fb923c;--accent-fg:#1a1006;--code:#151920;color-scheme:dark}}
@@ -25,6 +25,7 @@ a.sub{font-weight:600}
 .tabs{display:flex;gap:4px;border-bottom:1px solid var(--line)}
 .tab{border:0;border-bottom:2px solid transparent;border-radius:0;background:none;color:var(--muted)}
 .tab[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+input[type=url]{width:100%;font:14px/1.4 inherit;font-family:inherit;padding:9px 10px;border:1px solid var(--line);border-radius:6px;background:var(--code);color:var(--fg)}
 textarea{width:100%;min-height:60vh;font:13px/1.5 ui-monospace,Menlo,monospace;background:var(--code);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:12px}
 .preview{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:4px 18px 18px;overflow-wrap:anywhere}
 .preview h2{font:600 18px/1.3 Georgia,serif;margin:24px 0 6px}
@@ -35,7 +36,7 @@ textarea{width:100%;min-height:60vh;font:13px/1.5 ui-monospace,Menlo,monospace;b
 </head><body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Fri Nov 13 – Sun Nov 15 · rebuilt Wed Nov 11, 1:07 PM · <a href="../weekday/">weekday version →</a></div>
+    <div class="eyebrow">Fri Nov 13 – Sun Nov 15 · rebuilt Wed Nov 11, 7:50 PM · also: <a href="../weekday/">Weekday</a> · <a href="../weekend-cambridge/">Cambridge weekend</a> · <a href="../weekend-somerville/">Somerville weekend</a></div>
     <h1>Weekend Reddit roundup</h1>
   </header>
   <div class="field">
@@ -43,17 +44,16 @@ textarea{width:100%;min-height:60vh;font:13px/1.5 ui-monospace,Menlo,monospace;b
     <div class="titletext" id="t">Things to do in Boston, Cambridge &amp; Somerville this weekend (Nov 13–15) · Weekend Guide</div>
     <div class="row"><button id="copyTitle">Copy title</button></div>
   </div>
+
   <div class="row">
     <button class="primary" id="copyBody">Copy post body (Markdown)</button>
     <span class="status" id="status" role="status"></span>
-    <span class="status">16,746 of 40,000 characters</span>
+    <span class="status">21,764 of 40,000 characters</span>
   </div>
   <div class="field">
     <div class="label">Where to post</div>
     <ul class="subs">
       <li><a class="sub" href="https://old.reddit.com/r/boston/submit?selftext=true&amp;title=Things%20to%20do%20in%20Boston%2C%20Cambridge%20%26%20Somerville%20this%20weekend%20%28Nov%2013%E2%80%9315%29%20%C2%B7%20Weekend%20Guide" target="_blank" rel="noopener">Post to r/boston</a> <span class="muted">the main city sub · <a href="https://www.reddit.com/r/boston/about/rules" target="_blank" rel="noopener">rules</a></span></li>
-      <li><a class="sub" href="https://old.reddit.com/r/CambridgeMA/submit?selftext=true&amp;title=Things%20to%20do%20in%20Boston%2C%20Cambridge%20%26%20Somerville%20this%20weekend%20%28Nov%2013%E2%80%9315%29%20%C2%B7%20Weekend%20Guide" target="_blank" rel="noopener">Post to r/CambridgeMA</a> <span class="muted">Cambridge · <a href="https://www.reddit.com/r/CambridgeMA/about/rules" target="_blank" rel="noopener">rules</a></span></li>
-      <li><a class="sub" href="https://old.reddit.com/r/Somerville/submit?selftext=true&amp;title=Things%20to%20do%20in%20Boston%2C%20Cambridge%20%26%20Somerville%20this%20weekend%20%28Nov%2013%E2%80%9315%29%20%C2%B7%20Weekend%20Guide" target="_blank" rel="noopener">Post to r/Somerville</a> <span class="muted">Somerville · <a href="https://www.reddit.com/r/Somerville/about/rules" target="_blank" rel="noopener">rules</a></span></li>
       <li><a class="sub" href="https://old.reddit.com/r/BostonSocialClub/submit?selftext=true&amp;title=Things%20to%20do%20in%20Boston%2C%20Cambridge%20%26%20Somerville%20this%20weekend%20%28Nov%2013%E2%80%9315%29%20%C2%B7%20Weekend%20Guide" target="_blank" rel="noopener">Post to r/BostonSocialClub</a> <span class="muted">people looking for things to do and company · <a href="https://www.reddit.com/r/BostonSocialClub/about/rules" target="_blank" rel="noopener">rules</a></span></li>
     </ul>
     <p class="muted" style="margin:0">Each link opens old Reddit's text-post form with the title filled in; paste the body (old Reddit takes Markdown as is). On new Reddit, switch the editor to Markdown mode first. Check each sub's rules on self-promotion, and space posts out rather than cross-posting all at once.</p>
@@ -63,107 +63,144 @@ textarea{width:100%;min-height:60vh;font:13px/1.5 ui-monospace,Menlo,monospace;b
     <button class="tab" role="tab" id="tabMd" aria-selected="false">Markdown</button>
   </div>
   <div class="preview" id="preview">
-<p>Hi Boston! Here are 5–9 curated things to do each day for <strong>Friday Nov 13 through Sunday Nov 15</strong>, broken down by city (<strong>Boston</strong>, <strong>Cambridge</strong>, and <strong>Somerville</strong>).</p>
+<p>Hi Boston! Here are up to 10 things to do each day for <strong>Friday Nov 13 through Sunday Nov 15</strong>, broken down by city (<strong>Boston</strong>, <strong>Cambridge</strong>, and <strong>Somerville</strong>).</p>
 <p>Concerts, comedy, markets, museum days, 35mm films and more for the weekend. Add anything else happening below!</p>
+<p><strong>New on <a href="https://www.wickedbostonevents.com" target="_blank" rel="noopener">wickedbostonevents.com</a> this week:</strong></p>
+<ul>
+<li>I'm working on a page just for local markets and winter festivals: <a href="https://www.wickedbostonevents.com/markets-festivals-boston/" target="_blank" rel="noopener">Markets &amp; Festivals</a></li>
+<li>Club nights and underground electronic shows now on the <a href="https://www.wickedbostonevents.com/boston-edm/" target="_blank" rel="noopener">Boston EDM page</a></li>
+<li>A <a href="https://www.wickedbostonevents.com/college/" target="_blank" rel="noopener">college page</a> with games, concerts and talks open to the public at 14 campuses</li>
+<li>Arts &amp; culture can now be filtered by art, books, talks and film</li>
+</ul>
 <h2>🎭 RUNNING ALL WEEKEND</h2>
 <ul>
-<li><strong><a href="https://boston.broadway.com/shows/til-death-do-us-part-late-nite-catechism/" target="_blank" rel="noopener">‘Til Death Do Us Part: Late Nite Catechism</a></strong> @ The Charles Playhouse · Fri–Sun · $55 · Theater District<br>Long-running audience-participation comedy: Sister's catechism class, this time on marriage.</li>
-<li><strong><a href="https://www.bostontheatrescene.com/shows-and-events/youre-a-good-man-charlie-brown/" target="_blank" rel="noopener">You're A Good Man, Charlie Brown</a></strong> @ BCA Plaza Theatre · Fri–Sun · South End<br>The Peanuts musical, up close at the BCA Plaza Theatre in the South End.</li>
+<li><strong><a href="https://boston.broadway.com/shows/til-death-do-us-part-late-nite-catechism/" target="_blank" rel="noopener">'Til Death Do Us Part: Late Nite Catechism</a></strong> @ Charles Playhouse · Fri–Sun · $55 - $65 · Theater District<br>Long-running audience-participation comedy: Sister's catechism class, this time on marriage.</li>
+<li><strong><a href="https://www.thebostoncalendar.com/events/broadway-in-boston-wicked--2" target="_blank" rel="noopener">Broadway In Boston: Wicked</a></strong> @ Citizens Bank Opera House · Fri–Sun · Downtown Crossing<br>The Broadway blockbuster's national tour at the Citizens Bank Opera House.</li>
+<li><strong><a href="https://www.thebostoncalendar.com/events/hadestown-the-tony-winning-best-musical" target="_blank" rel="noopener">HADESTOWN - The Tony-Winning Best Musical</a></strong> @ Emerson Colonial Theatre · Fri–Sat · Theater District<br>Anaïs Mitchell's haunting, Tony-winning underworld folk opera, at the Emerson Colonial through Nov 14.</li>
+<li><strong><a href="https://www.bostontheatrescene.com/shows-and-events/youre-a-good-man-charlie-brown/" target="_blank" rel="noopener">You're a Good Man, Charlie Brown</a></strong> @ Plaza Theatre at Boston Center for the Arts · Fri–Sun · Boston<br>The Peanuts musical, up close at the BCA Plaza Theatre in the South End.</li>
 <li><strong><a href="https://www.bostontheatrescene.com/shows-and-events/the-beauty-queen-of-leenane/" target="_blank" rel="noopener">THE BEAUTY QUEEN OF LEENANE</a></strong> @ Calderwood Pavilion · Fri–Sun · South End<br>Martin McDonagh's pitch-black comedy-thriller about a mother and daughter in rural Connemara.</li>
 <li><strong><a href="https://lyricstage.my.salesforce-sites.com/ticket/#/instances/a0FQp000007xDRpMAM" target="_blank" rel="noopener">Peter Pan Goes Wrong</a></strong> @ Lyric Stage Company · Fri–Sun · Back Bay<br>Slapstick farce from the creators of 'The Play That Goes Wrong', at the Lyric Stage.</li>
-<li><strong><a href="https://boston.broadway.com/shows/wicked-2/" target="_blank" rel="noopener">Wicked</a></strong> @ Citizens Opera House · Fri–Sun · Downtown Crossing<br>The Broadway blockbuster's national tour at the Citizens Bank Opera House.</li>
-<li><strong><a href="https://www.ticketmaster.com/event/Z7r9jZ1A70orZ" target="_blank" rel="noopener">Hadestown (Touring)</a></strong> @ Emerson Colonial Theatre · Fri–Sat · Theater District<br>Anaïs Mitchell's haunting, Tony-winning underworld folk opera, at the Emerson Colonial through Nov 14.</li>
 <li><strong><a href="https://www.meetup.com/takebetterpictures/events/317356436/" target="_blank" rel="noopener">Boston Art Book Fair Free Fun</a></strong> @ Cyclorama · Sat–Sun · Free · South End<br>Free weekend fair of zines, artist books and small-press prints filling the domed Cyclorama in the South End.</li>
 </ul>
 <h2>📅 FRIDAY, NOV 13</h2>
 <h3>🏙️ BOSTON</h3>
 <ul>
-<li><strong><a href="https://www.ticketmaster.com/blue-october-foiled-20th-anniversary-world-boston-massachusetts-11-13-2026/event/0100646C922AA104" target="_blank" rel="noopener">Blue October: Foiled 20th Anniversary World Tour</a></strong> @ Citizens House of Blues Boston @ 7PM · $68-$82 · Fenway<br>Texas alt-rockers mark 20 years of 'Foiled', the album with 'Hate Me' and 'Into the Ocean'.</li>
-<li><strong><a href="https://www.tixr.com/groups/laughboston/events/mohanad-elshieky-green-books--194203" target="_blank" rel="noopener">Laugh Boston: Mohanad Elshieky: Green Books'</a></strong> @ Laugh Boston @ 7PM · $25 - $45 · Seaport<br>Libyan-American stand-up Mohanad Elshieky's 'Green Books' hour.</li>
-<li><strong><a href="https://shop.axs.com/?c=axs&amp;amp;e=90215480360066470" target="_blank" rel="noopener">JoJo</a></strong> @ Royale @ 7PM · Theater District<br>The 'Leave (Get Out)' singer's unplugged 20th-anniversary tour.</li>
-<li><strong><a href="https://www.ticketmaster.com/lucy-darling-the-more-the-merrier-boston-massachusetts-11-13-2026/event/0100651AC9173E9E" target="_blank" rel="noopener">Lucy Darling: The More the Merrier</a></strong> @ Boch Center Wang Theatre @ 7:30PM · Theater District<br>Brash, boozy comedy-magic act on the Wang Theatre stage.</li>
-<li><strong><a href="https://www.ticketmaster.com/phoebe-robinson-feral-fired-up-boston-massachusetts-11-13-2026/event/01006470DBBD340E" target="_blank" rel="noopener">Phoebe Robinson: Feral &amp; Fired Up!</a></strong> @ The Wilbur @ 7:30PM · Theater District<br>The '2 Dope Queens' comedian and author's new hour.</li>
-<li><strong><a href="https://www.ticketmaster.com/punch-brothers-boston-massachusetts-11-13-2026/event/0100649EEDED11B0" target="_blank" rel="noopener">Punch Brothers</a></strong> @ Boch Center Shubert Theatre @ 8PM · $58-$197 · Theater District<br>Chris Thile's virtuosic progressive-bluegrass quintet.</li>
-<li><strong><a href="https://www.trumba.com/eventactions/nec#/actions/8a2yadwyav2n4kwd7wj8p60kbz" target="_blank" rel="noopener">Vivo Performing Arts Presents: Nemanja Radulović &amp; Double Sens Chamber O…</a></strong> @ Jordan Hall (NEC) @ 8PM · $66–$94 · Fenway / Symphony<br>Serbian violin firebrand with his Double Sens ensemble.</li>
-<li><strong><a href="https://www.ticketmaster.com/victoria-monet-frequency-of-love-tour-boston-massachusetts-11-13-2026/event/01006525F9EBE9E1" target="_blank" rel="noopener">Victoria Monét: Frequency Of Love Tour</a></strong> @ MGM Music Hall at Fenway @ 9PM · Fenway<br>Grammy Best New Artist winner's Frequency of Love tour.</li>
-<li><strong><a href="https://www.ticketmaster.com/madeon-presents-victory-live-18-boston-massachusetts-11-13-2026/event/010064A5B98A7722" target="_blank" rel="noopener">Madeon presents Victory Live ( 18+ )</a></strong> @ Big Night Live @ 9PM · West End / North Station<br>French producer Madeon brings his live show to Big Night Live.</li>
-<li><strong><a href="https://coolidge.org/films/rocky-horror-picture-show" target="_blank" rel="noopener">The Rocky Horror Picture Show</a></strong> @ Coolidge Corner Theatre @ 11:59PM · Coolidge Corner<br>Friday the 13th midnight 'Rocky Horror' at the Coolidge: costumes and callbacks encouraged.</li>
+<li><strong><a href="https://www.ticketmaster.com/blue-october-foiled-20th-anniversary-world-boston-massachusetts-11-13-2026/event/0100646C922AA104" target="_blank" rel="noopener">Blue October: Foiled 20th Anniversary World Tour</a></strong> @ Citizens House of Blues Boston · 7PM · $68-$82 · Fenway<br>Texas alt-rockers mark 20 years of 'Foiled', the album with 'Hate Me' and 'Into the Ocean'.</li>
+<li><strong><a href="https://www.tixr.com/groups/laughboston/events/mohanad-elshieky-green-books--194203" target="_blank" rel="noopener">Laugh Boston: Mohanad Elshieky: Green Books'</a></strong> @ Laugh Boston · 7PM · $25 - $45 · Seaport<br>Libyan-American stand-up Mohanad Elshieky's 'Green Books' hour.</li>
+<li><strong><a href="https://shop.axs.com/?c=axs&amp;amp;e=90215480360066470" target="_blank" rel="noopener">JoJo</a></strong> @ Royale · 7PM · Theater District<br>The 'Leave (Get Out)' singer's unplugged 20th-anniversary tour.</li>
+<li><strong><a href="https://www.ticketmaster.com/lucy-darling-the-more-the-merrier-boston-massachusetts-11-13-2026/event/0100651AC9173E9E" target="_blank" rel="noopener">Lucy Darling: The More the Merrier</a></strong> @ Boch Center Wang Theatre · 7:30PM · Theater District<br>Brash, boozy comedy-magic act on the Wang Theatre stage.</li>
+<li><strong><a href="https://www.ticketmaster.com/phoebe-robinson-feral-fired-up-boston-massachusetts-11-13-2026/event/01006470DBBD340E" target="_blank" rel="noopener">Phoebe Robinson: Feral &amp; Fired Up!</a></strong> @ The Wilbur · 7:30PM · Theater District<br>The '2 Dope Queens' comedian and author's new hour.</li>
+<li><strong><a href="https://www.ticketmaster.com/punch-brothers-boston-massachusetts-11-13-2026/event/0100649EEDED11B0" target="_blank" rel="noopener">Punch Brothers</a></strong> @ Boch Center Shubert Theatre · 8PM · $58-$197 · Theater District<br>Chris Thile's virtuosic progressive-bluegrass quintet.</li>
+<li><strong><a href="https://www.trumba.com/eventactions/nec#/actions/8a2yadwyav2n4kwd7wj8p60kbz" target="_blank" rel="noopener">Vivo Performing Arts Presents: Nemanja Radulović &amp; Double Sens Chamber O…</a></strong> @ Jordan Hall (NEC) · 8PM · $66–$94 · Fenway / Symphony<br>Serbian violin firebrand with his Double Sens ensemble.</li>
+<li><strong><a href="https://www.ticketmaster.com/victoria-monet-frequency-of-love-tour-boston-massachusetts-11-13-2026/event/01006525F9EBE9E1" target="_blank" rel="noopener">Victoria Monét: Frequency Of Love Tour</a></strong> @ MGM Music Hall at Fenway · 9PM · Fenway<br>Grammy Best New Artist winner's Frequency of Love tour.</li>
+<li><strong><a href="https://www.ticketmaster.com/madeon-presents-victory-live-18-boston-massachusetts-11-13-2026/event/010064A5B98A7722" target="_blank" rel="noopener">Madeon presents Victory Live ( 18+ )</a></strong> @ Big Night Live · 9PM · West End / North Station<br>French producer Madeon brings his live show to Big Night Live.</li>
+<li><strong><a href="https://coolidge.org/films/rocky-horror-picture-show" target="_blank" rel="noopener">The Rocky Horror Picture Show</a></strong> @ Coolidge Corner Theatre · 11:59PM · Coolidge Corner<br>Friday the 13th midnight 'Rocky Horror' at the Coolidge: costumes and callbacks encouraged.</li>
 </ul>
 <h3>🎓 CAMBRIDGE</h3>
 <ul>
-<li><strong><a href="https://www.ticketweb.com/event/bill-charlap-trio-with-david-regattabar-tickets/14818433" target="_blank" rel="noopener">Bill Charlap Trio with David Wong and Dennis Mackrel</a></strong> @ Regattabar @ 7PM · $35–$47 · Harvard Sq<br>Grammy-winning pianist and American Songbook master Bill Charlap, in Harvard Square.</li>
-<li><strong><a href="https://www.ticketweb.com/event/tracy-bonham-abbie-barrett-sonia-tickets/14256554" target="_blank" rel="noopener">Tracy Bonham, Abbie Barrett</a></strong> @ Sonia @ 7:30PM · $33 · Central Sq<br>'Mother Mother' singer-songwriter Tracy Bonham, in Central Square.</li>
-<li><strong><a href="https://www.axs.com/events/1402619/donny-benet-tickets?skin=sinclair" target="_blank" rel="noopener">Donny Benét</a></strong> @ The Sinclair @ 8PM · $40 · Harvard Sq<br>Australian synth-disco crooner with an '80s lounge-lizard persona.</li>
-<li><strong><a href="https://calendar.mit.edu/event/festival-jazz-ensembles-fall-concert" target="_blank" rel="noopener">MIT Festival Jazz Ensemble's 19th Annual Herb Pomeroy Memorial Concert—G…</a></strong> @ Building W18 (MIT) @ 8PM · Free · Kendall / MIT<br>MIT Festival Jazz Ensemble's annual tribute to Boston jazz educator Herb Pomeroy.</li>
-<li><strong><a href="https://www.theplatformkendall.org/productions/jean-appolon-expressions-fy27/" target="_blank" rel="noopener">Jean Appolon Expressions Pouvwa</a></strong> @ The Platform Kendall @ 8PM · Kendall Sq<br>World premiere from Haitian dance company Jean Appolon Expressions in Kendall Square.</li>
-<li><strong><a href="https://www.bostonswingcentral.org/" target="_blank" rel="noopener">Boston Swing Central- Friday Dance</a></strong> @ Q Ballroom @ 8PM · $20 · West Cambridge<br>Boston Swing Central's Friday Lindy Hop dance, the city's longest-running swing night, with a lesson to start.</li>
-<li><strong><a href="https://www.lilypadinman.com/home/2026/11/13/sirintip-feat-adam-neely-matt-wong-nolan-byrd" target="_blank" rel="noopener">SIRINTIP feat. Adam Neely, Matt Wong, Nolan Byrd</a></strong> @ The Lilypad @ 10:45PM · $14–$18 · Inman Sq<br>Singer-composer SIRINTIP with YouTube bassist Adam Neely in the band, late set.</li>
+<li><strong><a href="https://harvardartmuseums.org/visit" target="_blank" rel="noopener">Free Admission to the Harvard Art Museums</a></strong> @ Harvard Art Museums · 10AM · Free · Harvard Sq</li>
+<li><strong><a href="https://www.remnantsomerville.com/calendar#everyweek" target="_blank" rel="noopener">Live Music at Remnant Satellite</a></strong> @ Remnant Satellite · 10AM · Free · East Cambridge</li>
+<li><strong><a href="https://www.ticketweb.com/event/bill-charlap-trio-with-david-regattabar-tickets/14818433" target="_blank" rel="noopener">Bill Charlap Trio with David Wong and Dennis Mackrel</a></strong> @ Regattabar · 7PM · $35–$47 · Harvard Sq<br>Grammy-winning pianist and American Songbook master Bill Charlap, in Harvard Square.</li>
+<li><strong><a href="https://www.thecomedystudio.com/checkout/af976710-2d4e-4627-956a-dce677c735a2" target="_blank" rel="noopener">Comedy Gold Boston Comedy Fest Edition w/ host AJ Hapenny</a></strong> @ The Comedy Studio · 7:15PM · $20 · Harvard Sq</li>
+<li><strong><a href="https://www.ticketweb.com/event/tracy-bonham-abbie-barrett-sonia-tickets/14256554" target="_blank" rel="noopener">Tracy Bonham, Abbie Barrett</a></strong> @ Sonia · 7:30PM · $33 · Central Sq<br>'Mother Mother' singer-songwriter Tracy Bonham, in Central Square.</li>
+<li><strong><a href="https://www.axs.com/events/1402619/donny-benet-tickets?skin=sinclair" target="_blank" rel="noopener">Donny Benét</a></strong> @ The Sinclair · 8PM · $40 · Harvard Sq<br>Australian synth-disco crooner with an '80s lounge-lizard persona.</li>
+<li><strong><a href="https://calendar.mit.edu/event/festival-jazz-ensembles-fall-concert" target="_blank" rel="noopener">MIT Festival Jazz Ensemble's 19th Annual Herb Pomeroy Memorial Concert—G…</a></strong> @ Building W18 (MIT) · 8PM · Free · Kendall / MIT<br>MIT Festival Jazz Ensemble's annual tribute to Boston jazz educator Herb Pomeroy.</li>
+<li><strong><a href="https://www.theplatformkendall.org/productions/jean-appolon-expressions-fy27/" target="_blank" rel="noopener">Jean Appolon Expressions Pouvwa</a></strong> @ The Platform Kendall · 8PM · Kendall Sq<br>World premiere from Haitian dance company Jean Appolon Expressions in Kendall Square.</li>
+<li><strong><a href="https://www.bostonswingcentral.org/" target="_blank" rel="noopener">Boston Swing Central- Friday Dance</a></strong> @ Q Ballroom · 8PM · $20 · West Cambridge<br>Boston Swing Central's Friday Lindy Hop dance, the city's longest-running swing night, with a lesson to start.</li>
+<li><strong><a href="https://www.lilypadinman.com/home/2026/11/13/sirintip-feat-adam-neely-matt-wong-nolan-byrd" target="_blank" rel="noopener">SIRINTIP feat. Adam Neely, Matt Wong, Nolan Byrd</a></strong> @ The Lilypad · 10:45PM · $14–$18 · Inman Sq<br>Singer-composer SIRINTIP with YouTube bassist Adam Neely in the band, late set.</li>
 </ul>
 <h3>🎨 SOMERVILLE</h3>
 <ul>
-<li><strong><a href="https://www.somervilletheatre.com/production/andrea-gibsons-love-letter-from-the-afterlife/" target="_blank" rel="noopener">Andrea Gibson's Love Letter from the Afterlife</a></strong> @ Somerville Theatre @ 6PM · Davis Sq</li>
-<li><strong><a href="https://therockwell.org/calendar/bcf-semifinal-round-1/" target="_blank" rel="noopener">Boston Comedy Festival Comedy Contest: Semifinal Round 1</a></strong> @ The Rockwell @ 7PM · $20 · Davis Sq<br>Boston Comedy Festival's stand-up contest semifinals in Davis Square.</li>
-<li><strong><a href="https://assemblyrow.com/event/space-out-adult-night-lego/" target="_blank" rel="noopener">Space Out Adult Night @ LEGO</a></strong> @ LEGO Discovery Center @ 7PM · $19.99 · Assembly &amp; East Somerville<br>Kid-free adults night at the LEGO Discovery Center at Assembly Row.</li>
-<li><strong><a href="https://www.meetup.com/somerville-board-games-meetup-group/events/315404634/" target="_blank" rel="noopener">Games and Beers at Aeronaut Brewery</a></strong> @ Aeronaut Brewing Company @ 7PM · Somerville</li>
-<li><strong><a href="https://burren.com/music.html" target="_blank" rel="noopener">Irish Session</a></strong> @ The Burren — The Front Room @ 9:30PM · Free · Davis Sq</li>
+<li><strong><a href="https://www.aeronautbrewing.com/visit/somerville/" target="_blank" rel="noopener">Live Music at Aeronaut Brewing | Somerville</a></strong> @ Aeronaut Brewing Somerville · 10AM · Free · Somerville</li>
+<li><strong><a href="https://www.burren.com/music.html" target="_blank" rel="noopener">Live Music at The Burren | Davis Square</a></strong> @ The Burren · 10AM · Free · Davis Sq</li>
+<li><strong><a href="https://www.remnantsomerville.com/visit" target="_blank" rel="noopener">Remnant Brewing: Beer Garden @ Bow Market | Somerville</a></strong> @ Remnant Brewing · 10AM · Union Sq</li>
+<li><strong><a href="https://porticobrewing.com/" target="_blank" rel="noopener">Portico Brewing Patio</a></strong> @ Portico Brewing · 10AM · Boynton Yards</li>
+<li><strong><a href="https://mass.streetsblog.org/2023/06/09/somervilles-community-path-extension-opens-saturday" target="_blank" rel="noopener">Green Line Extension Community Path</a></strong> @ Green Line Extension Community Path · 10AM · Free · Somerville</li>
+<li><strong><a href="https://www.somervilletheatre.com/production/andrea-gibsons-love-letter-from-the-afterlife/" target="_blank" rel="noopener">Andrea Gibson's Love Letter from the Afterlife</a></strong> @ Somerville Theatre · 6PM · Davis Sq</li>
+<li><strong><a href="https://therockwell.org/calendar/bcf-semifinal-round-1/" target="_blank" rel="noopener">Boston Comedy Festival Comedy Contest: Semifinal Round 1</a></strong> @ The Rockwell · 7PM · $20 · Davis Sq<br>Boston Comedy Festival's stand-up contest semifinals in Davis Square.</li>
+<li><strong><a href="https://assemblyrow.com/event/space-out-adult-night-lego/" target="_blank" rel="noopener">Space Out Adult Night @ LEGO</a></strong> @ LEGO Discovery Center · 7PM · $19.99 · Assembly &amp; East Somerville<br>Kid-free adults night at the LEGO Discovery Center at Assembly Row.</li>
+<li><strong><a href="https://www.meetup.com/somerville-board-games-meetup-group/events/315404634/" target="_blank" rel="noopener">Games and Beers at Aeronaut Brewery</a></strong> @ Aeronaut Brewing Company · 7PM · Somerville</li>
+<li><strong><a href="https://artsatthearmory.org/events/the-nova-comedy-collective-presents-nebula-night-2026-11-13/" target="_blank" rel="noopener">The Nova Comedy Collective Presents: Nebula Night</a></strong> @ Arts at the Armory · 8PM · Spring Hill</li>
 </ul>
 <h2>📅 SATURDAY, NOV 14</h2>
 <h3>🏙️ BOSTON</h3>
 <ul>
-<li><strong><a href="https://www.ticketmaster.com/event/010064BAA42CCC9C" target="_blank" rel="noopener">Catch Your Breath</a></strong> @ Big Night Live @ 5PM · West End / North Station<br>Texas rock band's Not Broken Enough tour.</li>
-<li><strong><a href="https://www.meetup.com/boston-bhangra-south-asian-nation-events/events/316475752/" target="_blank" rel="noopener">Boston Bhangra Competition 2026</a></strong> @ Strand Theatre (Dorchester) @ 6PM · $20 - $100 · JP &amp; Dorchester<br>College bhangra teams battle it out with high-energy Punjabi folk dance at Dorchester's Strand Theatre.</li>
-<li><strong><a href="https://www.ticketmaster.com/dark-star-orchestra-boston-massachusetts-11-14-2026/event/010064F791E8D8D1" target="_blank" rel="noopener">Dark Star Orchestra</a></strong> @ Orpheum Theatre @ 7PM · $38-$179+ · Downtown Crossing<br>Recreates actual Grateful Dead setlists, show by show.</li>
-<li><strong><a href="https://www.bso.org/events/nov-12-14-golijov?performance=2026-11-14-20:00" target="_blank" rel="noopener">Creation by Osvaldo Golijov</a></strong> @ Symphony Hall @ 8PM · $43–$67 · Fenway / Symphony<br>The BSO takes on Osvaldo Golijov's Creation, a big new piece from one of today's most vivid composers.</li>
-<li><strong><a href="https://www.ticketmaster.com/prateek-kuhad-full-moon-chamber-tour-boston-massachusetts-11-14-2026/event/01006522B982FD7C" target="_blank" rel="noopener">Prateek Kuhad: Full Moon Chamber Tour (Acoustic)</a></strong> @ Boch Center Shubert Theatre @ 8PM · Theater District<br>Indian singer-songwriter behind the indie hit 'cold/mess'.</li>
-<li><strong><a href="https://shop.axs.com/?c=axs&amp;amp;e=90215480359668322" target="_blank" rel="noopener">Slow Pulp</a></strong> @ Roadrunner @ 8PM · Boston Landing<br>Hazy, heartfelt Chicago indie rock with Ivy and Her New Knife opening.</li>
-<li><strong><a href="https://www.choruspromusica.org/event/julia-wolfe-anthracite-fields" target="_blank" rel="noopener">Julia Wolfe's Anthracite Fields</a></strong> @ Cutler Majestic Theatre @ 8PM · $36.85 · Theater District<br>Julia Wolfe's Pulitzer-winning oratorio on Pennsylvania coal-mining life.</li>
-<li><strong><a href="https://www.puppetshowplace.org/calendar/2026/11/14/fall-puppet-slam" target="_blank" rel="noopener">Fall Puppet Slam</a></strong> @ Puppet Showplace Theater @ 8PM · $25 - $100 · Brookline Village<br>Short, strange, grown-up puppet acts from local and visiting artists. Not the usual kids' matinee.</li>
+<li><strong><a href="https://www.mos.org/events/native-american-heritage-month-celebration-2026" target="_blank" rel="noopener">Native American Heritage Month Celebration 2026</a></strong> @ Museum of Science · 10AM · Free · West End</li>
+<li><strong><a href="https://castleislandbeer.com/calendar/national-pickle-day-party" target="_blank" rel="noopener">National Pickle Day Party</a></strong> @ Castle Island Brewing · 12PM · Free · South Boston</li>
+<li><strong><a href="https://www.ticketmaster.com/event/010064BAA42CCC9C" target="_blank" rel="noopener">Catch Your Breath</a></strong> @ Big Night Live · 5PM · West End / North Station<br>Texas rock band's Not Broken Enough tour.</li>
+<li><strong><a href="https://www.meetup.com/boston-bhangra-south-asian-nation-events/events/316475752/" target="_blank" rel="noopener">Boston Bhangra Competition 2026</a></strong> @ Strand Theatre (Dorchester) · 6PM · $20 - $100 · JP &amp; Dorchester<br>College bhangra teams battle it out with high-energy Punjabi folk dance at Dorchester's Strand Theatre.</li>
+<li><strong><a href="https://www.ticketmaster.com/dark-star-orchestra-boston-massachusetts-11-14-2026/event/010064F791E8D8D1" target="_blank" rel="noopener">Dark Star Orchestra</a></strong> @ Orpheum Theatre · 7PM · $38-$179+ · Downtown Crossing<br>Recreates actual Grateful Dead setlists, show by show.</li>
+<li><strong><a href="https://www.bso.org/events/nov-12-14-golijov?performance=2026-11-14-20:00" target="_blank" rel="noopener">Creation by Osvaldo Golijov</a></strong> @ Symphony Hall · 8PM · $43–$67 · Fenway / Symphony<br>The BSO takes on Osvaldo Golijov's Creation, a big new piece from one of today's most vivid composers.</li>
+<li><strong><a href="https://www.ticketmaster.com/prateek-kuhad-full-moon-chamber-tour-boston-massachusetts-11-14-2026/event/01006522B982FD7C" target="_blank" rel="noopener">Prateek Kuhad: Full Moon Chamber Tour (Acoustic)</a></strong> @ Boch Center Shubert Theatre · 8PM · Theater District<br>Indian singer-songwriter behind the indie hit 'cold/mess'.</li>
+<li><strong><a href="https://shop.axs.com/?c=axs&amp;amp;e=90215480359668322" target="_blank" rel="noopener">Slow Pulp</a></strong> @ Roadrunner · 8PM · Boston Landing<br>Hazy, heartfelt Chicago indie rock with Ivy and Her New Knife opening.</li>
+<li><strong><a href="https://www.choruspromusica.org/event/julia-wolfe-anthracite-fields" target="_blank" rel="noopener">Julia Wolfe's Anthracite Fields</a></strong> @ Cutler Majestic Theatre · 8PM · $36.85 · Theater District<br>Julia Wolfe's Pulitzer-winning oratorio on Pennsylvania coal-mining life.</li>
+<li><strong><a href="https://www.puppetshowplace.org/calendar/2026/11/14/fall-puppet-slam" target="_blank" rel="noopener">Fall Puppet Slam</a></strong> @ Puppet Showplace Theater · 8PM · $25 - $100 · Brookline Village<br>Short, strange, grown-up puppet acts from local and visiting artists. Not the usual kids' matinee.</li>
 </ul>
 <h3>🎓 CAMBRIDGE</h3>
 <ul>
-<li><strong><a href="https://harvardartmuseums.org/event/4260" target="_blank" rel="noopener">Spotlight Tour: Model as Muse, with Giselle Acosta ’27</a></strong> @ Harvard Art Museums @ 11AM · Free · Harvard Sq</li>
-<li><strong><a href="http://www.nathikaevents.com" target="_blank" rel="noopener">Loy Kra Thong Thai Night Market @ Harvard Square</a></strong> @ Harvard Square @ 4PM · Free · Harvard Sq<br>Free Thai night market for the Loy Krathong festival of lights: street food and lanterns in Harvard Square.</li>
-<li><strong><a href="https://www.ticketweb.com/event/bill-charlap-trio-with-david-regattabar-tickets/14818443" target="_blank" rel="noopener">Bill Charlap Trio with David Wong and Dennis Mackrel</a></strong> @ Regattabar @ 7PM · $35–$47 · Harvard Sq<br>One of the great jazz pianists of his generation, a master of the American songbook, in an intimate club.</li>
-<li><strong><a href="https://www.theplatformkendall.org/productions/jean-appolon-expressions-fy27/" target="_blank" rel="noopener">Jean Appolon Expressions Pouvwa</a></strong> @ The Platform Kendall @ 8PM · Kendall Sq<br>World premiere from Haitian dance company Jean Appolon Expressions in Kendall Square.</li>
-<li><strong><a href="https://www.axs.com/events/1660240/fruitstandys-3rd-birthday-fruit-tickets" target="_blank" rel="noopener">fruitstand’s 3rd birthday: fruit</a></strong> @ The Sinclair @ 10PM · $10–$15 · Harvard Sq<br>Third birthday of fruitstand, a queer pop dance party, in Harvard Square's 52 Church.</li>
+<li><strong><a href="https://harvardartmuseums.org/visit" target="_blank" rel="noopener">Free Admission to the Harvard Art Museums</a></strong> @ Harvard Art Museums · 10AM · Free · Harvard Sq</li>
+<li><strong><a href="https://www.remnantsomerville.com/calendar#everyweek" target="_blank" rel="noopener">Live Music at Remnant Satellite</a></strong> @ Remnant Satellite · 10AM · Free · East Cambridge</li>
+<li><strong><a href="https://www.passim.org/live-music/events/passim-school-of-music-recital/" target="_blank" rel="noopener">Passim School of Music Recital</a></strong> @ Club Passim · 12PM · $15 · Harvard Sq</li>
+<li><strong><a href="https://brattlefilm.org/movies/teenage-sex-and-death-at-camp-miasma/" target="_blank" rel="noopener">Teenage Sex and Death at Camp Miasma</a></strong> @ Brattle Theatre · 1PM · Harvard Sq</li>
+<li><strong><a href="http://www.nathikaevents.com" target="_blank" rel="noopener">Loy Kra Thong Thai Night Market @ Harvard Square</a></strong> @ Harvard Square · 4PM · Free · Harvard Sq<br>Free Thai night market for the Loy Krathong festival of lights: street food and lanterns in Harvard Square.</li>
+<li><strong><a href="https://www.ticketweb.com/event/bill-charlap-trio-with-david-regattabar-tickets/14818443" target="_blank" rel="noopener">Bill Charlap Trio with David Wong and Dennis Mackrel</a></strong> @ Regattabar · 7PM · $35–$47 · Harvard Sq<br>One of the great jazz pianists of his generation, a master of the American songbook, in an intimate club.</li>
+<li><strong><a href="https://www.thecomedystudio.com/checkout/60c07356-4acf-44a3-8345-eeee20522b18" target="_blank" rel="noopener">TCS presents: Irene Tu</a></strong> @ The Comedy Studio · 7:15PM · $30 · Harvard Sq</li>
+<li><strong><a href="https://www.theplatformkendall.org/productions/jean-appolon-expressions-fy27/" target="_blank" rel="noopener">Jean Appolon Expressions Pouvwa</a></strong> @ The Platform Kendall · 8PM · Kendall Sq<br>World premiere from Haitian dance company Jean Appolon Expressions in Kendall Square.</li>
+<li><strong><a href="https://harvardsquare.com/event/harvard-radcliffe-orchestra-concert-2/" target="_blank" rel="noopener">Harvard-Radcliffe Orchestra Concert 2</a></strong> @ Sanders Theatre · 8PM · Free · Harvard Sq</li>
+<li><strong><a href="https://www.axs.com/events/1660240/fruitstandys-3rd-birthday-fruit-tickets" target="_blank" rel="noopener">fruitstand’s 3rd birthday: fruit</a></strong> @ The Sinclair · 10PM · $10–$15 · Harvard Sq<br>Third birthday of fruitstand, a queer pop dance party, in Harvard Square's 52 Church.</li>
 </ul>
 <h3>🎨 SOMERVILLE</h3>
 <ul>
-<li><strong><a href="https://do617.com/events/2026/11/14/lagers-and-leaves-a-fall-festival-tickets" target="_blank" rel="noopener">Lagers and Leaves: A Fall Festival</a></strong> @ Aeronaut Brewing @ 12PM · Free · Somerville<br>Free fall party at Aeronaut's Somerville brewery: seasonal beer, food and a full afternoon of hanging out.</li>
-<li><strong><a href="https://www.remnantsomerville.com/malt-memoirs/beer-garden-moments" target="_blank" rel="noopener">Beer Garden Season at Remnant Brewing (Outdoor Patio &amp; Beer Garden)</a></strong> @ Remnant Brewing @ 12PM · Free · Union Sq</li>
-<li><strong><a href="https://burren.com/music.html" target="_blank" rel="noopener">Bluegrass Jam</a></strong> @ The Burren — The Front Room @ 5PM · Free · Davis Sq</li>
-<li><strong><a href="https://therockwell.org/calendar/emo-phillips/" target="_blank" rel="noopener">Boston Comedy Festival Presents: Emo Philips</a></strong> @ The Rockwell @ 7PM · $29 · Davis Sq<br>The surreal, wide-eyed one-liner master, headlining a Boston Comedy Festival night in Davis Square.</li>
-<li><strong><a href="https://artsatthearmory.org/events/orkest-at-the-rooted-armory-cafe/" target="_blank" rel="noopener">Orkest at the ROOTED Armory Cafe</a></strong> @ Arts at the Armory @ 7PM · Free · Spring Hill</li>
+<li><strong><a href="https://www.aeronautbrewing.com/visit/somerville/" target="_blank" rel="noopener">Live Music at Aeronaut Brewing | Somerville</a></strong> @ Aeronaut Brewing Somerville · 10AM · Free · Somerville</li>
+<li><strong><a href="https://www.burren.com/music.html" target="_blank" rel="noopener">Live Music at The Burren | Davis Square</a></strong> @ The Burren · 10AM · Free · Davis Sq</li>
+<li><strong><a href="https://porticobrewing.com/" target="_blank" rel="noopener">Portico Brewing Patio</a></strong> @ Portico Brewing · 10AM · Boynton Yards</li>
+<li><strong><a href="https://mass.streetsblog.org/2023/06/09/somervilles-community-path-extension-opens-saturday" target="_blank" rel="noopener">Green Line Extension Community Path</a></strong> @ Green Line Extension Community Path · 10AM · Free · Somerville</li>
+<li><strong><a href="http://www.rosebudkitchen.com" target="_blank" rel="noopener">Rosebud Bar &amp; Kitchen | Davis Square, Somerville</a></strong> @ Rosebud · 10AM · Free · Davis Sq</li>
+<li><strong><a href="https://do617.com/events/2026/11/14/lagers-and-leaves-a-fall-festival-tickets" target="_blank" rel="noopener">Lagers and Leaves: A Fall Festival</a></strong> @ Aeronaut Brewing · 12PM · Free · Somerville<br>Free fall party at Aeronaut's Somerville brewery: seasonal beer, food and a full afternoon of hanging out.</li>
+<li><strong><a href="https://www.remnantsomerville.com/malt-memoirs/beer-garden-moments" target="_blank" rel="noopener">Beer Garden Season at Remnant Brewing (Outdoor Patio &amp; Beer Garden)</a></strong> @ Remnant Brewing · 12PM · Free · Union Sq</li>
+<li><strong><a href="https://therockwell.org/calendar/emo-phillips/" target="_blank" rel="noopener">Boston Comedy Festival Presents: Emo Philips</a></strong> @ The Rockwell · 7PM · $29 · Davis Sq<br>The surreal, wide-eyed one-liner master, headlining a Boston Comedy Festival night in Davis Square.</li>
+<li><strong><a href="https://artsatthearmory.org/events/orkest-at-the-rooted-armory-cafe/" target="_blank" rel="noopener">Orkest at the ROOTED Armory Cafe</a></strong> @ Arts at the Armory · 7PM · Free · Spring Hill</li>
+<li><strong><a href="https://www.crystalballroomboston.com/events/lee-emi/" target="_blank" rel="noopener">Lee Emi</a></strong> @ Crystal Ballroom · 8PM · Davis Sq</li>
 </ul>
 <h2>📅 SUNDAY, NOV 15</h2>
 <h3>🏙️ BOSTON</h3>
 <ul>
-<li><strong><a href="https://www.thebostoncalendar.com/events/found-mega-vintage-market-at-sowa" target="_blank" rel="noopener">FOUND Mega Vintage Market at Sowa</a></strong> @ SoWa Power Station @ 12PM · Free · South End<br>Free mega vintage market at the SoWa Power Station: clothes, records and furniture from dozens of sellers.</li>
-<li><strong><a href="https://arboretum.harvard.edu/event/mushroom-hunt-7/" target="_blank" rel="noopener">Mushroom Hunt</a></strong> @ Arnold Arboretum @ 12PM · Free · JP &amp; Dorchester<br>Free guided fungus hunt through the Arnold Arboretum while the fall mushrooms are out.</li>
-<li><strong><a href="https://www.gardnermuseum.org/calendar/lysander-piano-trio-20261115" target="_blank" rel="noopener">Isabella Stewart Gardner Museum: Lysander Piano Trio</a></strong> @ Calderwood Hall @ 1:30PM · $70 - $99 · South End<br>Sunday chamber music in the Gardner Museum's Calderwood Hall, where the musicians sit in the middle of the audience.</li>
-<li><strong><a href="https://www.trumba.com/eventactions/nec#/actions/4jbc17gcmdv5x9ybw7ny4j8y26" target="_blank" rel="noopener">Vivo Performing Arts Presents: Dover Quartet</a></strong> @ Jordan Hall (NEC) @ 3PM · $44–$94 · Fenway / Symphony<br>One of the world's top string quartets in Jordan Hall, one of the best-sounding rooms in the country.</li>
-<li><strong><a href="https://www.ticketmaster.com/strawberry-guy-boston-massachusetts-11-15-2026/event/010064B4CF37AFDD" target="_blank" rel="noopener">Strawberry Guy</a></strong> @ Paradise Rock Club @ 7PM · Allston<br>Welsh songwriter whose soft, gauzy bedroom-pop songs blew up online, live on Comm Ave.</li>
-<li><strong><a href="https://us.atgtickets.com/events/drag-queen-christmas/emerson-colonial-theatre/" target="_blank" rel="noopener">A Drag Queen Christmas</a></strong> @ Emerson Colonial Theatre @ 7:30PM · $9–$73 · Theater District<br>Drag Race queens' annual holiday revue.</li>
-<li><strong><a href="https://www.collagenewmusic.org/202627-concert-2" target="_blank" rel="noopener">Collage New Music: Scenes from a Novel</a></strong> @ Goethe-Institut Boston @ 7:30PM · $35 · Back Bay<br>Boston's long-running contemporary music ensemble plays an intimate program at the Goethe-Institut.</li>
-<li><strong><a href="https://www.bso.org/events/zade-dirani?performance=2026-11-15-20:00" target="_blank" rel="noopener">Zade Dirani Live in Concert</a></strong> @ Symphony Hall @ 8PM · $60–$190 · Fenway / Symphony<br>Jordanian pianist-composer's lush cinematic concert.</li>
-<li><strong><a href="https://shop.axs.com/?c=axs&amp;amp;e=90215480360070395" target="_blank" rel="noopener">Third Eye Blind</a></strong> @ Roadrunner @ 8PM · Boston Landing<br>'Semi-Charmed Life' hitmakers in Allston's big standing-room hall.</li>
+<li><strong><a href="https://lu.ma/5v94z7l0" target="_blank" rel="noopener">ISA at the MFA</a></strong> @ Museum of Fine Arts, Boston · 11AM · Free · Museum District</li>
+<li><strong><a href="https://www.thebostoncalendar.com/events/found-mega-vintage-market-at-sowa" target="_blank" rel="noopener">FOUND Mega Vintage Market at Sowa</a></strong> @ SoWa Power Station · 12PM · Free · South End<br>Free mega vintage market at the SoWa Power Station: clothes, records and furniture from dozens of sellers.</li>
+<li><strong><a href="https://arboretum.harvard.edu/event/mushroom-hunt-7/" target="_blank" rel="noopener">Mushroom Hunt</a></strong> @ Arnold Arboretum · 12PM · Free · JP &amp; Dorchester<br>Free guided fungus hunt through the Arnold Arboretum while the fall mushrooms are out.</li>
+<li><strong><a href="https://www.gardnermuseum.org/calendar/lysander-piano-trio-20261115" target="_blank" rel="noopener">Isabella Stewart Gardner Museum: Lysander Piano Trio</a></strong> @ Calderwood Hall · 1:30PM · $70 - $99 · South End<br>Sunday chamber music in the Gardner Museum's Calderwood Hall, where the musicians sit in the middle of the audience.</li>
+<li><strong><a href="https://www.trumba.com/eventactions/nec#/actions/4jbc17gcmdv5x9ybw7ny4j8y26" target="_blank" rel="noopener">Vivo Performing Arts Presents: Dover Quartet</a></strong> @ Jordan Hall (NEC) · 3PM · $44–$94 · Fenway / Symphony<br>One of the world's top string quartets in Jordan Hall, one of the best-sounding rooms in the country.</li>
+<li><strong><a href="https://www.ticketmaster.com/strawberry-guy-boston-massachusetts-11-15-2026/event/010064B4CF37AFDD" target="_blank" rel="noopener">Strawberry Guy</a></strong> @ Paradise Rock Club · 7PM · Allston<br>Welsh songwriter whose soft, gauzy bedroom-pop songs blew up online, live on Comm Ave.</li>
+<li><strong><a href="https://us.atgtickets.com/events/drag-queen-christmas/emerson-colonial-theatre/" target="_blank" rel="noopener">A Drag Queen Christmas</a></strong> @ Emerson Colonial Theatre · 7:30PM · $9–$73 · Theater District<br>Drag Race queens' annual holiday revue.</li>
+<li><strong><a href="https://shop.axs.com/?c=axs&amp;amp;e=90215480360070395" target="_blank" rel="noopener">Third Eye Blind</a></strong> @ Roadrunner · 7:30PM · Boston Landing<br>'Semi-Charmed Life' hitmakers in Allston's big standing-room hall.</li>
+<li><strong><a href="https://www.collagenewmusic.org/202627-concert-2" target="_blank" rel="noopener">Collage New Music: Scenes from a Novel</a></strong> @ Goethe-Institut Boston · 7:30PM · $35 · Back Bay<br>Boston's long-running contemporary music ensemble plays an intimate program at the Goethe-Institut.</li>
+<li><strong><a href="https://www.bso.org/events/zade-dirani?performance=2026-11-15-20:00" target="_blank" rel="noopener">Zade Dirani Live in Concert</a></strong> @ Symphony Hall · 8PM · $60–$190 · Fenway / Symphony<br>Jordanian pianist-composer's lush cinematic concert.</li>
 </ul>
 <h3>🎓 CAMBRIDGE</h3>
 <ul>
-<li><strong><a href="https://lu.ma/0iufmn6q" target="_blank" rel="noopener">CBAI Boston Biosecurity Hackathon</a></strong> @ 20 Brattle St, Cambridge @ 10AM · Free · Harvard Sq</li>
-<li><strong><a href="https://www.passim.org/live-music/events/jenna-moynihan-owen-marshall/" target="_blank" rel="noopener">Jenna Moynihan &amp; Owen Marshall</a></strong> @ Club Passim @ 2PM · $35 · Harvard Sq<br>Fiddler Jenna Moynihan and guitarist Owen Marshall in Passim's basement room.</li>
-<li><strong><a href="https://bostonchambermusic.my.salesforce-sites.com/ticket/#/events/a0SVX00000QAVZp2AP" target="_blank" rel="noopener">Boston Chamber Music Society: Beethoven, Dvořák, Brahms</a></strong> @ Sanders Theatre at Harvard University @ 3PM · $9 - $73 · Harvard Sq<br>Beethoven, Dvořák and Brahms in Harvard's wood-paneled Sanders Theatre.</li>
-<li><strong><a href="https://www.ticketweb.com/event/laszlo-gardony-sextet-with-don-regattabar-tickets/14352214" target="_blank" rel="noopener">Laszlo Gardony Sextet with Don Braden, Stan Strickland, Temidayo Balogun…</a></strong> @ Regattabar @ 6PM · $30–$41 · Harvard Sq<br>Berklee piano great Laszlo Gardony leads a sextet of Boston jazz heavyweights, including Don Braden.</li>
-<li><strong><a href="https://www.axs.com/events/1510656/freak-slug-tickets?skin=sinclair" target="_blank" rel="noopener">Freak Slug</a></strong> @ The Sinclair @ 8PM · $30.37 · Harvard Sq<br>Manchester songwriter with lo-fi, cinematic guitar songs, in a great-sounding Harvard Square room.</li>
+<li><strong><a href="https://harvardsquare.com/event/self-care-sunday/" target="_blank" rel="noopener">Self Care Sunday</a></strong> @ Blue Hills Reservation · 9AM · Free · Harvard Sq</li>
+<li><strong><a href="https://lu.ma/0iufmn6q" target="_blank" rel="noopener">CBAI Boston Biosecurity Hackathon</a></strong> @ 20 Brattle St, Cambridge · 10AM · Free · Harvard Sq</li>
+<li><strong><a href="https://harvardartmuseums.org/visit" target="_blank" rel="noopener">Free Admission to the Harvard Art Museums</a></strong> @ Harvard Art Museums · 10AM · Free · Harvard Sq</li>
+<li><strong><a href="https://www.remnantsomerville.com/calendar#everyweek" target="_blank" rel="noopener">Live Music at Remnant Satellite</a></strong> @ Remnant Satellite · 10AM · Free · East Cambridge</li>
+<li><strong><a href="https://brattlefilm.org/movies/sunset-boulevard/" target="_blank" rel="noopener">Sunset Boulevard</a></strong> @ Brattle Theatre · 12:30PM · Harvard Sq</li>
+<li><strong><a href="https://www.passim.org/live-music/events/jenna-moynihan-owen-marshall/" target="_blank" rel="noopener">Jenna Moynihan &amp; Owen Marshall</a></strong> @ Club Passim · 2PM · $35 · Harvard Sq<br>Fiddler Jenna Moynihan and guitarist Owen Marshall in Passim's basement room.</li>
+<li><strong><a href="https://bostonchambermusic.my.salesforce-sites.com/ticket/#/events/a0SVX00000QAVZp2AP" target="_blank" rel="noopener">Boston Chamber Music Society: Beethoven, Dvořák, Brahms</a></strong> @ Sanders Theatre at Harvard University · 3PM · $9 - $73 · Harvard Sq<br>Beethoven, Dvořák and Brahms in Harvard's wood-paneled Sanders Theatre.</li>
+<li><strong><a href="https://www.ticketweb.com/event/laszlo-gardony-sextet-with-don-regattabar-tickets/14352214" target="_blank" rel="noopener">Laszlo Gardony Sextet with Don Braden, Stan Strickland, Temidayo Balogun…</a></strong> @ Regattabar · 6PM · $30–$41 · Harvard Sq<br>Berklee piano great Laszlo Gardony leads a sextet of Boston jazz heavyweights, including Don Braden.</li>
+<li><strong><a href="https://www.thecomedystudio.com/checkout/b0555aa1-1fd9-4f1f-9626-f8dac6c9b18b" target="_blank" rel="noopener">TCS presents: Ian Edwards</a></strong> @ The Comedy Studio · 6PM · $25 · Harvard Sq</li>
+<li><strong><a href="https://www.axs.com/events/1510656/freak-slug-tickets?skin=sinclair" target="_blank" rel="noopener">Freak Slug</a></strong> @ The Sinclair · 8PM · $30.37 · Harvard Sq<br>Manchester songwriter with lo-fi, cinematic guitar songs, in a great-sounding Harvard Square room.</li>
 </ul>
 <h3>🎨 SOMERVILLE</h3>
 <ul>
-<li><strong><a href="https://artsatthearmory.org/events/impulse-ecstatic-dance-find-your-power/" target="_blank" rel="noopener">Impulse Ecstatic Dance - FIND YOUR POWER</a></strong> @ Arts at the Armory @ 10:30AM · Spring Hill</li>
-<li><strong><a href="https://www.allshewrotebooks.com/event-details/november-all-she-wrote-books-queer-sbc" target="_blank" rel="noopener">November All She Wrote Books - Queer SBC</a></strong> @ All She Wrote Books @ 10:30AM · Free · East Somerville</li>
-<li><strong><a href="https://www.sallyobriensbar.com/music" target="_blank" rel="noopener">The nÓgs</a></strong> @ Sally O'Brien's @ 12:30PM · Free · Union Sq</li>
-<li><strong><a href="https://sean-lemkey-music.square.site/" target="_blank" rel="noopener">Sean Lemkey</a></strong> @ Aeronaut Brewing @ 2:30PM · Free · Somerville</li>
-<li><strong><a href="https://burren.com/music.html" target="_blank" rel="noopener">Brian O'Donovan Legacy Series: VOICES OF IRELAND - DON STIFFE • GER O'DO…</a></strong> @ The Burren — The Back Room @ 5PM · $44 · Davis Sq<br>Irish singers in the Brian O'Donovan Legacy Series, named for the late host of GBH's A Celtic Sojourn.</li>
-<li><strong><a href="https://tickets.24hourmusic.com/eventperformances.asp?evt=1907" target="_blank" rel="noopener">Brian OâDonovan Legacy Series: VOICES OF IRELAND - Don Stiffe â¢ Ger…</a></strong> @ The Burren @ 7:30PM · $44 · Davis Sq<br>Irish singers in the Brian O'Donovan Legacy Series, named for the late host of GBH's A Celtic Sojourn.</li>
+<li><strong><a href="https://www.aeronautbrewing.com/visit/somerville/" target="_blank" rel="noopener">Live Music at Aeronaut Brewing | Somerville</a></strong> @ Aeronaut Brewing Somerville · 10AM · Free · Somerville</li>
+<li><strong><a href="https://www.remnantsomerville.com/visit" target="_blank" rel="noopener">Remnant Brewing: Beer Garden @ Bow Market | Somerville</a></strong> @ Remnant Brewing · 10AM · Union Sq</li>
+<li><strong><a href="https://porticobrewing.com/" target="_blank" rel="noopener">Portico Brewing Patio</a></strong> @ Portico Brewing · 10AM · Boynton Yards</li>
+<li><strong><a href="https://mass.streetsblog.org/2023/06/09/somervilles-community-path-extension-opens-saturday" target="_blank" rel="noopener">Green Line Extension Community Path</a></strong> @ Green Line Extension Community Path · 10AM · Free · Somerville</li>
+<li><strong><a href="http://www.rosebudkitchen.com" target="_blank" rel="noopener">Rosebud Bar &amp; Kitchen | Davis Square, Somerville</a></strong> @ Rosebud · 10AM · Free · Davis Sq</li>
+<li><strong><a href="https://sidequestbooks.com/" target="_blank" rel="noopener">Woman-owned Fantasy-inspired Bookshop: Side Quest | Bow Market</a></strong> @ sidequest · 10AM · Free · Union Sq</li>
+<li><strong><a href="https://artsatthearmory.org/events/impulse-ecstatic-dance-find-your-power/" target="_blank" rel="noopener">Impulse Ecstatic Dance - FIND YOUR POWER</a></strong> @ Arts at the Armory · 10:30AM · Spring Hill</li>
+<li><strong><a href="https://www.allshewrotebooks.com/event-details/november-all-she-wrote-books-queer-sbc" target="_blank" rel="noopener">November All She Wrote Books - Queer SBC</a></strong> @ All She Wrote Books · 10:30AM · Free · East Somerville</li>
+<li><strong><a href="https://sean-lemkey-music.square.site/" target="_blank" rel="noopener">Sean Lemkey</a></strong> @ Aeronaut Brewing · 2:30PM · Free · Somerville</li>
+<li><strong><a href="https://burren.com/music.html" target="_blank" rel="noopener">Brian O'Donovan Legacy Series: VOICES OF IRELAND - DON STIFFE • GER O'DO…</a></strong> @ The Burren — The Back Room · 5PM · $44 · Davis Sq<br>Irish singers in the Brian O'Donovan Legacy Series, named for the late host of GBH's A Celtic Sojourn.</li>
 </ul>
 <hr>
 <h3>🔗 More on Wicked Boston Events</h3>
@@ -173,157 +210,193 @@ textarea{width:100%;min-height:60vh;font:13px/1.5 ui-monospace,Menlo,monospace;b
 </ul>
 <p><em>Curated from 200+ local venue, theatre, museum, and community calendars at <strong><a href="https://www.wickedbostonevents.com" target="_blank" rel="noopener">wickedbostonevents.com</a></strong> (ad-free &amp; independent).</em></p>
   </div>
-  <textarea id="md" spellcheck="false" hidden>Hi Boston! Here are 5–9 curated things to do each day for **Friday Nov 13 through Sunday Nov 15**, broken down by city (**Boston**, **Cambridge**, and **Somerville**).
+  <textarea id="md" spellcheck="false" hidden>Hi Boston! Here are up to 10 things to do each day for **Friday Nov 13 through Sunday Nov 15**, broken down by city (**Boston**, **Cambridge**, and **Somerville**).
 
 Concerts, comedy, markets, museum days, 35mm films and more for the weekend. Add anything else happening below!
 
+**New on [wickedbostonevents.com](https://www.wickedbostonevents.com) this week:**
+
+* I&#x27;m working on a page just for local markets and winter festivals: [Markets &amp; Festivals](https://www.wickedbostonevents.com/markets-festivals-boston/)
+* Club nights and underground electronic shows now on the [Boston EDM page](https://www.wickedbostonevents.com/boston-edm/)
+* A [college page](https://www.wickedbostonevents.com/college/) with games, concerts and talks open to the public at 14 campuses
+* Arts &amp; culture can now be filtered by art, books, talks and film
+
 ## 🎭 RUNNING ALL WEEKEND
 
-* **[‘Til Death Do Us Part: Late Nite Catechism](https://boston.broadway.com/shows/til-death-do-us-part-late-nite-catechism/)** @ The Charles Playhouse · Fri–Sun · $55 · Theater District  
+* **[&#x27;Til Death Do Us Part: Late Nite Catechism](https://boston.broadway.com/shows/til-death-do-us-part-late-nite-catechism/)** @ Charles Playhouse · Fri–Sun · $55 - $65 · Theater District  
   Long-running audience-participation comedy: Sister&#x27;s catechism class, this time on marriage.
-* **[You&#x27;re A Good Man, Charlie Brown](https://www.bostontheatrescene.com/shows-and-events/youre-a-good-man-charlie-brown/)** @ BCA Plaza Theatre · Fri–Sun · South End  
+* **[Broadway In Boston: Wicked](https://www.thebostoncalendar.com/events/broadway-in-boston-wicked--2)** @ Citizens Bank Opera House · Fri–Sun · Downtown Crossing  
+  The Broadway blockbuster&#x27;s national tour at the Citizens Bank Opera House.
+* **[HADESTOWN - The Tony-Winning Best Musical](https://www.thebostoncalendar.com/events/hadestown-the-tony-winning-best-musical)** @ Emerson Colonial Theatre · Fri–Sat · Theater District  
+  Anaïs Mitchell&#x27;s haunting, Tony-winning underworld folk opera, at the Emerson Colonial through Nov 14.
+* **[You&#x27;re a Good Man, Charlie Brown](https://www.bostontheatrescene.com/shows-and-events/youre-a-good-man-charlie-brown/)** @ Plaza Theatre at Boston Center for the Arts · Fri–Sun · Boston  
   The Peanuts musical, up close at the BCA Plaza Theatre in the South End.
 * **[THE BEAUTY QUEEN OF LEENANE](https://www.bostontheatrescene.com/shows-and-events/the-beauty-queen-of-leenane/)** @ Calderwood Pavilion · Fri–Sun · South End  
   Martin McDonagh&#x27;s pitch-black comedy-thriller about a mother and daughter in rural Connemara.
 * **[Peter Pan Goes Wrong](https://lyricstage.my.salesforce-sites.com/ticket/#/instances/a0FQp000007xDRpMAM)** @ Lyric Stage Company · Fri–Sun · Back Bay  
   Slapstick farce from the creators of &#x27;The Play That Goes Wrong&#x27;, at the Lyric Stage.
-* **[Wicked](https://boston.broadway.com/shows/wicked-2/)** @ Citizens Opera House · Fri–Sun · Downtown Crossing  
-  The Broadway blockbuster&#x27;s national tour at the Citizens Bank Opera House.
-* **[Hadestown (Touring)](https://www.ticketmaster.com/event/Z7r9jZ1A70orZ)** @ Emerson Colonial Theatre · Fri–Sat · Theater District  
-  Anaïs Mitchell&#x27;s haunting, Tony-winning underworld folk opera, at the Emerson Colonial through Nov 14.
 * **[Boston Art Book Fair Free Fun](https://www.meetup.com/takebetterpictures/events/317356436/)** @ Cyclorama · Sat–Sun · Free · South End  
   Free weekend fair of zines, artist books and small-press prints filling the domed Cyclorama in the South End.
 
 ## 📅 FRIDAY, NOV 13
 
 ### 🏙️ BOSTON
-* **[Blue October: Foiled 20th Anniversary World Tour](https://www.ticketmaster.com/blue-october-foiled-20th-anniversary-world-boston-massachusetts-11-13-2026/event/0100646C922AA104)** @ Citizens House of Blues Boston @ 7PM · $68-$82 · Fenway  
+* **[Blue October: Foiled 20th Anniversary World Tour](https://www.ticketmaster.com/blue-october-foiled-20th-anniversary-world-boston-massachusetts-11-13-2026/event/0100646C922AA104)** @ Citizens House of Blues Boston · 7PM · $68-$82 · Fenway  
   Texas alt-rockers mark 20 years of &#x27;Foiled&#x27;, the album with &#x27;Hate Me&#x27; and &#x27;Into the Ocean&#x27;.
-* **[Laugh Boston: Mohanad Elshieky: Green Books&#x27;](https://www.tixr.com/groups/laughboston/events/mohanad-elshieky-green-books--194203)** @ Laugh Boston @ 7PM · $25 - $45 · Seaport  
+* **[Laugh Boston: Mohanad Elshieky: Green Books&#x27;](https://www.tixr.com/groups/laughboston/events/mohanad-elshieky-green-books--194203)** @ Laugh Boston · 7PM · $25 - $45 · Seaport  
   Libyan-American stand-up Mohanad Elshieky&#x27;s &#x27;Green Books&#x27; hour.
-* **[JoJo](https://shop.axs.com/?c=axs&amp;e=90215480360066470)** @ Royale @ 7PM · Theater District  
+* **[JoJo](https://shop.axs.com/?c=axs&amp;e=90215480360066470)** @ Royale · 7PM · Theater District  
   The &#x27;Leave (Get Out)&#x27; singer&#x27;s unplugged 20th-anniversary tour.
-* **[Lucy Darling: The More the Merrier](https://www.ticketmaster.com/lucy-darling-the-more-the-merrier-boston-massachusetts-11-13-2026/event/0100651AC9173E9E)** @ Boch Center Wang Theatre @ 7:30PM · Theater District  
+* **[Lucy Darling: The More the Merrier](https://www.ticketmaster.com/lucy-darling-the-more-the-merrier-boston-massachusetts-11-13-2026/event/0100651AC9173E9E)** @ Boch Center Wang Theatre · 7:30PM · Theater District  
   Brash, boozy comedy-magic act on the Wang Theatre stage.
-* **[Phoebe Robinson: Feral &amp; Fired Up!](https://www.ticketmaster.com/phoebe-robinson-feral-fired-up-boston-massachusetts-11-13-2026/event/01006470DBBD340E)** @ The Wilbur @ 7:30PM · Theater District  
+* **[Phoebe Robinson: Feral &amp; Fired Up!](https://www.ticketmaster.com/phoebe-robinson-feral-fired-up-boston-massachusetts-11-13-2026/event/01006470DBBD340E)** @ The Wilbur · 7:30PM · Theater District  
   The &#x27;2 Dope Queens&#x27; comedian and author&#x27;s new hour.
-* **[Punch Brothers](https://www.ticketmaster.com/punch-brothers-boston-massachusetts-11-13-2026/event/0100649EEDED11B0)** @ Boch Center Shubert Theatre @ 8PM · $58-$197 · Theater District  
+* **[Punch Brothers](https://www.ticketmaster.com/punch-brothers-boston-massachusetts-11-13-2026/event/0100649EEDED11B0)** @ Boch Center Shubert Theatre · 8PM · $58-$197 · Theater District  
   Chris Thile&#x27;s virtuosic progressive-bluegrass quintet.
-* **[Vivo Performing Arts Presents: Nemanja Radulović &amp; Double Sens Chamber O…](https://www.trumba.com/eventactions/nec#/actions/8a2yadwyav2n4kwd7wj8p60kbz)** @ Jordan Hall (NEC) @ 8PM · $66–$94 · Fenway / Symphony  
+* **[Vivo Performing Arts Presents: Nemanja Radulović &amp; Double Sens Chamber O…](https://www.trumba.com/eventactions/nec#/actions/8a2yadwyav2n4kwd7wj8p60kbz)** @ Jordan Hall (NEC) · 8PM · $66–$94 · Fenway / Symphony  
   Serbian violin firebrand with his Double Sens ensemble.
-* **[Victoria Monét: Frequency Of Love Tour](https://www.ticketmaster.com/victoria-monet-frequency-of-love-tour-boston-massachusetts-11-13-2026/event/01006525F9EBE9E1)** @ MGM Music Hall at Fenway @ 9PM · Fenway  
+* **[Victoria Monét: Frequency Of Love Tour](https://www.ticketmaster.com/victoria-monet-frequency-of-love-tour-boston-massachusetts-11-13-2026/event/01006525F9EBE9E1)** @ MGM Music Hall at Fenway · 9PM · Fenway  
   Grammy Best New Artist winner&#x27;s Frequency of Love tour.
-* **[Madeon presents Victory Live ( 18+ )](https://www.ticketmaster.com/madeon-presents-victory-live-18-boston-massachusetts-11-13-2026/event/010064A5B98A7722)** @ Big Night Live @ 9PM · West End / North Station  
+* **[Madeon presents Victory Live ( 18+ )](https://www.ticketmaster.com/madeon-presents-victory-live-18-boston-massachusetts-11-13-2026/event/010064A5B98A7722)** @ Big Night Live · 9PM · West End / North Station  
   French producer Madeon brings his live show to Big Night Live.
-* **[The Rocky Horror Picture Show](https://coolidge.org/films/rocky-horror-picture-show)** @ Coolidge Corner Theatre @ 11:59PM · Coolidge Corner  
+* **[The Rocky Horror Picture Show](https://coolidge.org/films/rocky-horror-picture-show)** @ Coolidge Corner Theatre · 11:59PM · Coolidge Corner  
   Friday the 13th midnight &#x27;Rocky Horror&#x27; at the Coolidge: costumes and callbacks encouraged.
 
 ### 🎓 CAMBRIDGE
-* **[Bill Charlap Trio with David Wong and Dennis Mackrel](https://www.ticketweb.com/event/bill-charlap-trio-with-david-regattabar-tickets/14818433)** @ Regattabar @ 7PM · $35–$47 · Harvard Sq  
+* **[Free Admission to the Harvard Art Museums](https://harvardartmuseums.org/visit)** @ Harvard Art Museums · 10AM · Free · Harvard Sq
+* **[Live Music at Remnant Satellite](https://www.remnantsomerville.com/calendar#everyweek)** @ Remnant Satellite · 10AM · Free · East Cambridge
+* **[Bill Charlap Trio with David Wong and Dennis Mackrel](https://www.ticketweb.com/event/bill-charlap-trio-with-david-regattabar-tickets/14818433)** @ Regattabar · 7PM · $35–$47 · Harvard Sq  
   Grammy-winning pianist and American Songbook master Bill Charlap, in Harvard Square.
-* **[Tracy Bonham, Abbie Barrett](https://www.ticketweb.com/event/tracy-bonham-abbie-barrett-sonia-tickets/14256554)** @ Sonia @ 7:30PM · $33 · Central Sq  
+* **[Comedy Gold Boston Comedy Fest Edition w/ host AJ Hapenny](https://www.thecomedystudio.com/checkout/af976710-2d4e-4627-956a-dce677c735a2)** @ The Comedy Studio · 7:15PM · $20 · Harvard Sq
+* **[Tracy Bonham, Abbie Barrett](https://www.ticketweb.com/event/tracy-bonham-abbie-barrett-sonia-tickets/14256554)** @ Sonia · 7:30PM · $33 · Central Sq  
   &#x27;Mother Mother&#x27; singer-songwriter Tracy Bonham, in Central Square.
-* **[Donny Benét](https://www.axs.com/events/1402619/donny-benet-tickets?skin=sinclair)** @ The Sinclair @ 8PM · $40 · Harvard Sq  
+* **[Donny Benét](https://www.axs.com/events/1402619/donny-benet-tickets?skin=sinclair)** @ The Sinclair · 8PM · $40 · Harvard Sq  
   Australian synth-disco crooner with an &#x27;80s lounge-lizard persona.
-* **[MIT Festival Jazz Ensemble&#x27;s 19th Annual Herb Pomeroy Memorial Concert—G…](https://calendar.mit.edu/event/festival-jazz-ensembles-fall-concert)** @ Building W18 (MIT) @ 8PM · Free · Kendall / MIT  
+* **[MIT Festival Jazz Ensemble&#x27;s 19th Annual Herb Pomeroy Memorial Concert—G…](https://calendar.mit.edu/event/festival-jazz-ensembles-fall-concert)** @ Building W18 (MIT) · 8PM · Free · Kendall / MIT  
   MIT Festival Jazz Ensemble&#x27;s annual tribute to Boston jazz educator Herb Pomeroy.
-* **[Jean Appolon Expressions Pouvwa](https://www.theplatformkendall.org/productions/jean-appolon-expressions-fy27/)** @ The Platform Kendall @ 8PM · Kendall Sq  
+* **[Jean Appolon Expressions Pouvwa](https://www.theplatformkendall.org/productions/jean-appolon-expressions-fy27/)** @ The Platform Kendall · 8PM · Kendall Sq  
   World premiere from Haitian dance company Jean Appolon Expressions in Kendall Square.
-* **[Boston Swing Central- Friday Dance](https://www.bostonswingcentral.org/)** @ Q Ballroom @ 8PM · $20 · West Cambridge  
+* **[Boston Swing Central- Friday Dance](https://www.bostonswingcentral.org/)** @ Q Ballroom · 8PM · $20 · West Cambridge  
   Boston Swing Central&#x27;s Friday Lindy Hop dance, the city&#x27;s longest-running swing night, with a lesson to start.
-* **[SIRINTIP feat. Adam Neely, Matt Wong, Nolan Byrd](https://www.lilypadinman.com/home/2026/11/13/sirintip-feat-adam-neely-matt-wong-nolan-byrd)** @ The Lilypad @ 10:45PM · $14–$18 · Inman Sq  
+* **[SIRINTIP feat. Adam Neely, Matt Wong, Nolan Byrd](https://www.lilypadinman.com/home/2026/11/13/sirintip-feat-adam-neely-matt-wong-nolan-byrd)** @ The Lilypad · 10:45PM · $14–$18 · Inman Sq  
   Singer-composer SIRINTIP with YouTube bassist Adam Neely in the band, late set.
 
 ### 🎨 SOMERVILLE
-* **[Andrea Gibson&#x27;s Love Letter from the Afterlife](https://www.somervilletheatre.com/production/andrea-gibsons-love-letter-from-the-afterlife/)** @ Somerville Theatre @ 6PM · Davis Sq
-* **[Boston Comedy Festival Comedy Contest: Semifinal Round 1](https://therockwell.org/calendar/bcf-semifinal-round-1/)** @ The Rockwell @ 7PM · $20 · Davis Sq  
+* **[Live Music at Aeronaut Brewing | Somerville](https://www.aeronautbrewing.com/visit/somerville/)** @ Aeronaut Brewing Somerville · 10AM · Free · Somerville
+* **[Live Music at The Burren | Davis Square](https://www.burren.com/music.html)** @ The Burren · 10AM · Free · Davis Sq
+* **[Remnant Brewing: Beer Garden @ Bow Market | Somerville](https://www.remnantsomerville.com/visit)** @ Remnant Brewing · 10AM · Union Sq
+* **[Portico Brewing Patio](https://porticobrewing.com/)** @ Portico Brewing · 10AM · Boynton Yards
+* **[Green Line Extension Community Path](https://mass.streetsblog.org/2023/06/09/somervilles-community-path-extension-opens-saturday)** @ Green Line Extension Community Path · 10AM · Free · Somerville
+* **[Andrea Gibson&#x27;s Love Letter from the Afterlife](https://www.somervilletheatre.com/production/andrea-gibsons-love-letter-from-the-afterlife/)** @ Somerville Theatre · 6PM · Davis Sq
+* **[Boston Comedy Festival Comedy Contest: Semifinal Round 1](https://therockwell.org/calendar/bcf-semifinal-round-1/)** @ The Rockwell · 7PM · $20 · Davis Sq  
   Boston Comedy Festival&#x27;s stand-up contest semifinals in Davis Square.
-* **[Space Out Adult Night @ LEGO](https://assemblyrow.com/event/space-out-adult-night-lego/)** @ LEGO Discovery Center @ 7PM · $19.99 · Assembly &amp; East Somerville  
+* **[Space Out Adult Night @ LEGO](https://assemblyrow.com/event/space-out-adult-night-lego/)** @ LEGO Discovery Center · 7PM · $19.99 · Assembly &amp; East Somerville  
   Kid-free adults night at the LEGO Discovery Center at Assembly Row.
-* **[Games and Beers at Aeronaut Brewery](https://www.meetup.com/somerville-board-games-meetup-group/events/315404634/)** @ Aeronaut Brewing Company @ 7PM · Somerville
-* **[Irish Session](https://burren.com/music.html)** @ The Burren — The Front Room @ 9:30PM · Free · Davis Sq
+* **[Games and Beers at Aeronaut Brewery](https://www.meetup.com/somerville-board-games-meetup-group/events/315404634/)** @ Aeronaut Brewing Company · 7PM · Somerville
+* **[The Nova Comedy Collective Presents: Nebula Night](https://artsatthearmory.org/events/the-nova-comedy-collective-presents-nebula-night-2026-11-13/)** @ Arts at the Armory · 8PM · Spring Hill
 
 ## 📅 SATURDAY, NOV 14
 
 ### 🏙️ BOSTON
-* **[Catch Your Breath](https://www.ticketmaster.com/event/010064BAA42CCC9C)** @ Big Night Live @ 5PM · West End / North Station  
+* **[Native American Heritage Month Celebration 2026](https://www.mos.org/events/native-american-heritage-month-celebration-2026)** @ Museum of Science · 10AM · Free · West End
+* **[National Pickle Day Party](https://castleislandbeer.com/calendar/national-pickle-day-party)** @ Castle Island Brewing · 12PM · Free · South Boston
+* **[Catch Your Breath](https://www.ticketmaster.com/event/010064BAA42CCC9C)** @ Big Night Live · 5PM · West End / North Station  
   Texas rock band&#x27;s Not Broken Enough tour.
-* **[Boston Bhangra Competition 2026](https://www.meetup.com/boston-bhangra-south-asian-nation-events/events/316475752/)** @ Strand Theatre (Dorchester) @ 6PM · $20 - $100 · JP &amp; Dorchester  
+* **[Boston Bhangra Competition 2026](https://www.meetup.com/boston-bhangra-south-asian-nation-events/events/316475752/)** @ Strand Theatre (Dorchester) · 6PM · $20 - $100 · JP &amp; Dorchester  
   College bhangra teams battle it out with high-energy Punjabi folk dance at Dorchester&#x27;s Strand Theatre.
-* **[Dark Star Orchestra](https://www.ticketmaster.com/dark-star-orchestra-boston-massachusetts-11-14-2026/event/010064F791E8D8D1)** @ Orpheum Theatre @ 7PM · $38-$179+ · Downtown Crossing  
+* **[Dark Star Orchestra](https://www.ticketmaster.com/dark-star-orchestra-boston-massachusetts-11-14-2026/event/010064F791E8D8D1)** @ Orpheum Theatre · 7PM · $38-$179+ · Downtown Crossing  
   Recreates actual Grateful Dead setlists, show by show.
-* **[Creation by Osvaldo Golijov](https://www.bso.org/events/nov-12-14-golijov?performance=2026-11-14-20:00)** @ Symphony Hall @ 8PM · $43–$67 · Fenway / Symphony  
+* **[Creation by Osvaldo Golijov](https://www.bso.org/events/nov-12-14-golijov?performance=2026-11-14-20:00)** @ Symphony Hall · 8PM · $43–$67 · Fenway / Symphony  
   The BSO takes on Osvaldo Golijov&#x27;s Creation, a big new piece from one of today&#x27;s most vivid composers.
-* **[Prateek Kuhad: Full Moon Chamber Tour (Acoustic)](https://www.ticketmaster.com/prateek-kuhad-full-moon-chamber-tour-boston-massachusetts-11-14-2026/event/01006522B982FD7C)** @ Boch Center Shubert Theatre @ 8PM · Theater District  
+* **[Prateek Kuhad: Full Moon Chamber Tour (Acoustic)](https://www.ticketmaster.com/prateek-kuhad-full-moon-chamber-tour-boston-massachusetts-11-14-2026/event/01006522B982FD7C)** @ Boch Center Shubert Theatre · 8PM · Theater District  
   Indian singer-songwriter behind the indie hit &#x27;cold/mess&#x27;.
-* **[Slow Pulp](https://shop.axs.com/?c=axs&amp;e=90215480359668322)** @ Roadrunner @ 8PM · Boston Landing  
+* **[Slow Pulp](https://shop.axs.com/?c=axs&amp;e=90215480359668322)** @ Roadrunner · 8PM · Boston Landing  
   Hazy, heartfelt Chicago indie rock with Ivy and Her New Knife opening.
-* **[Julia Wolfe&#x27;s Anthracite Fields](https://www.choruspromusica.org/event/julia-wolfe-anthracite-fields)** @ Cutler Majestic Theatre @ 8PM · $36.85 · Theater District  
+* **[Julia Wolfe&#x27;s Anthracite Fields](https://www.choruspromusica.org/event/julia-wolfe-anthracite-fields)** @ Cutler Majestic Theatre · 8PM · $36.85 · Theater District  
   Julia Wolfe&#x27;s Pulitzer-winning oratorio on Pennsylvania coal-mining life.
-* **[Fall Puppet Slam](https://www.puppetshowplace.org/calendar/2026/11/14/fall-puppet-slam)** @ Puppet Showplace Theater @ 8PM · $25 - $100 · Brookline Village  
+* **[Fall Puppet Slam](https://www.puppetshowplace.org/calendar/2026/11/14/fall-puppet-slam)** @ Puppet Showplace Theater · 8PM · $25 - $100 · Brookline Village  
   Short, strange, grown-up puppet acts from local and visiting artists. Not the usual kids&#x27; matinee.
 
 ### 🎓 CAMBRIDGE
-* **[Spotlight Tour: Model as Muse, with Giselle Acosta ’27](https://harvardartmuseums.org/event/4260)** @ Harvard Art Museums @ 11AM · Free · Harvard Sq
-* **[Loy Kra Thong Thai Night Market @ Harvard Square](http://www.nathikaevents.com)** @ Harvard Square @ 4PM · Free · Harvard Sq  
+* **[Free Admission to the Harvard Art Museums](https://harvardartmuseums.org/visit)** @ Harvard Art Museums · 10AM · Free · Harvard Sq
+* **[Live Music at Remnant Satellite](https://www.remnantsomerville.com/calendar#everyweek)** @ Remnant Satellite · 10AM · Free · East Cambridge
+* **[Passim School of Music Recital](https://www.passim.org/live-music/events/passim-school-of-music-recital/)** @ Club Passim · 12PM · $15 · Harvard Sq
+* **[Teenage Sex and Death at Camp Miasma](https://brattlefilm.org/movies/teenage-sex-and-death-at-camp-miasma/)** @ Brattle Theatre · 1PM · Harvard Sq
+* **[Loy Kra Thong Thai Night Market @ Harvard Square](http://www.nathikaevents.com)** @ Harvard Square · 4PM · Free · Harvard Sq  
   Free Thai night market for the Loy Krathong festival of lights: street food and lanterns in Harvard Square.
-* **[Bill Charlap Trio with David Wong and Dennis Mackrel](https://www.ticketweb.com/event/bill-charlap-trio-with-david-regattabar-tickets/14818443)** @ Regattabar @ 7PM · $35–$47 · Harvard Sq  
+* **[Bill Charlap Trio with David Wong and Dennis Mackrel](https://www.ticketweb.com/event/bill-charlap-trio-with-david-regattabar-tickets/14818443)** @ Regattabar · 7PM · $35–$47 · Harvard Sq  
   One of the great jazz pianists of his generation, a master of the American songbook, in an intimate club.
-* **[Jean Appolon Expressions Pouvwa](https://www.theplatformkendall.org/productions/jean-appolon-expressions-fy27/)** @ The Platform Kendall @ 8PM · Kendall Sq  
+* **[TCS presents: Irene Tu](https://www.thecomedystudio.com/checkout/60c07356-4acf-44a3-8345-eeee20522b18)** @ The Comedy Studio · 7:15PM · $30 · Harvard Sq
+* **[Jean Appolon Expressions Pouvwa](https://www.theplatformkendall.org/productions/jean-appolon-expressions-fy27/)** @ The Platform Kendall · 8PM · Kendall Sq  
   World premiere from Haitian dance company Jean Appolon Expressions in Kendall Square.
-* **[fruitstand’s 3rd birthday: fruit](https://www.axs.com/events/1660240/fruitstandys-3rd-birthday-fruit-tickets)** @ The Sinclair @ 10PM · $10–$15 · Harvard Sq  
+* **[Harvard-Radcliffe Orchestra Concert 2](https://harvardsquare.com/event/harvard-radcliffe-orchestra-concert-2/)** @ Sanders Theatre · 8PM · Free · Harvard Sq
+* **[fruitstand’s 3rd birthday: fruit](https://www.axs.com/events/1660240/fruitstandys-3rd-birthday-fruit-tickets)** @ The Sinclair · 10PM · $10–$15 · Harvard Sq  
   Third birthday of fruitstand, a queer pop dance party, in Harvard Square&#x27;s 52 Church.
 
 ### 🎨 SOMERVILLE
-* **[Lagers and Leaves: A Fall Festival](https://do617.com/events/2026/11/14/lagers-and-leaves-a-fall-festival-tickets)** @ Aeronaut Brewing @ 12PM · Free · Somerville  
+* **[Live Music at Aeronaut Brewing | Somerville](https://www.aeronautbrewing.com/visit/somerville/)** @ Aeronaut Brewing Somerville · 10AM · Free · Somerville
+* **[Live Music at The Burren | Davis Square](https://www.burren.com/music.html)** @ The Burren · 10AM · Free · Davis Sq
+* **[Portico Brewing Patio](https://porticobrewing.com/)** @ Portico Brewing · 10AM · Boynton Yards
+* **[Green Line Extension Community Path](https://mass.streetsblog.org/2023/06/09/somervilles-community-path-extension-opens-saturday)** @ Green Line Extension Community Path · 10AM · Free · Somerville
+* **[Rosebud Bar &amp; Kitchen | Davis Square, Somerville](http://www.rosebudkitchen.com)** @ Rosebud · 10AM · Free · Davis Sq
+* **[Lagers and Leaves: A Fall Festival](https://do617.com/events/2026/11/14/lagers-and-leaves-a-fall-festival-tickets)** @ Aeronaut Brewing · 12PM · Free · Somerville  
   Free fall party at Aeronaut&#x27;s Somerville brewery: seasonal beer, food and a full afternoon of hanging out.
-* **[Beer Garden Season at Remnant Brewing (Outdoor Patio &amp; Beer Garden)](https://www.remnantsomerville.com/malt-memoirs/beer-garden-moments)** @ Remnant Brewing @ 12PM · Free · Union Sq
-* **[Bluegrass Jam](https://burren.com/music.html)** @ The Burren — The Front Room @ 5PM · Free · Davis Sq
-* **[Boston Comedy Festival Presents: Emo Philips](https://therockwell.org/calendar/emo-phillips/)** @ The Rockwell @ 7PM · $29 · Davis Sq  
+* **[Beer Garden Season at Remnant Brewing (Outdoor Patio &amp; Beer Garden)](https://www.remnantsomerville.com/malt-memoirs/beer-garden-moments)** @ Remnant Brewing · 12PM · Free · Union Sq
+* **[Boston Comedy Festival Presents: Emo Philips](https://therockwell.org/calendar/emo-phillips/)** @ The Rockwell · 7PM · $29 · Davis Sq  
   The surreal, wide-eyed one-liner master, headlining a Boston Comedy Festival night in Davis Square.
-* **[Orkest at the ROOTED Armory Cafe](https://artsatthearmory.org/events/orkest-at-the-rooted-armory-cafe/)** @ Arts at the Armory @ 7PM · Free · Spring Hill
+* **[Orkest at the ROOTED Armory Cafe](https://artsatthearmory.org/events/orkest-at-the-rooted-armory-cafe/)** @ Arts at the Armory · 7PM · Free · Spring Hill
+* **[Lee Emi](https://www.crystalballroomboston.com/events/lee-emi/)** @ Crystal Ballroom · 8PM · Davis Sq
 
 ## 📅 SUNDAY, NOV 15
 
 ### 🏙️ BOSTON
-* **[FOUND Mega Vintage Market at Sowa](https://www.thebostoncalendar.com/events/found-mega-vintage-market-at-sowa)** @ SoWa Power Station @ 12PM · Free · South End  
+* **[ISA at the MFA](https://lu.ma/5v94z7l0)** @ Museum of Fine Arts, Boston · 11AM · Free · Museum District
+* **[FOUND Mega Vintage Market at Sowa](https://www.thebostoncalendar.com/events/found-mega-vintage-market-at-sowa)** @ SoWa Power Station · 12PM · Free · South End  
   Free mega vintage market at the SoWa Power Station: clothes, records and furniture from dozens of sellers.
-* **[Mushroom Hunt](https://arboretum.harvard.edu/event/mushroom-hunt-7/)** @ Arnold Arboretum @ 12PM · Free · JP &amp; Dorchester  
+* **[Mushroom Hunt](https://arboretum.harvard.edu/event/mushroom-hunt-7/)** @ Arnold Arboretum · 12PM · Free · JP &amp; Dorchester  
   Free guided fungus hunt through the Arnold Arboretum while the fall mushrooms are out.
-* **[Isabella Stewart Gardner Museum: Lysander Piano Trio](https://www.gardnermuseum.org/calendar/lysander-piano-trio-20261115)** @ Calderwood Hall @ 1:30PM · $70 - $99 · South End  
+* **[Isabella Stewart Gardner Museum: Lysander Piano Trio](https://www.gardnermuseum.org/calendar/lysander-piano-trio-20261115)** @ Calderwood Hall · 1:30PM · $70 - $99 · South End  
   Sunday chamber music in the Gardner Museum&#x27;s Calderwood Hall, where the musicians sit in the middle of the audience.
-* **[Vivo Performing Arts Presents: Dover Quartet](https://www.trumba.com/eventactions/nec#/actions/4jbc17gcmdv5x9ybw7ny4j8y26)** @ Jordan Hall (NEC) @ 3PM · $44–$94 · Fenway / Symphony  
+* **[Vivo Performing Arts Presents: Dover Quartet](https://www.trumba.com/eventactions/nec#/actions/4jbc17gcmdv5x9ybw7ny4j8y26)** @ Jordan Hall (NEC) · 3PM · $44–$94 · Fenway / Symphony  
   One of the world&#x27;s top string quartets in Jordan Hall, one of the best-sounding rooms in the country.
-* **[Strawberry Guy](https://www.ticketmaster.com/strawberry-guy-boston-massachusetts-11-15-2026/event/010064B4CF37AFDD)** @ Paradise Rock Club @ 7PM · Allston  
+* **[Strawberry Guy](https://www.ticketmaster.com/strawberry-guy-boston-massachusetts-11-15-2026/event/010064B4CF37AFDD)** @ Paradise Rock Club · 7PM · Allston  
   Welsh songwriter whose soft, gauzy bedroom-pop songs blew up online, live on Comm Ave.
-* **[A Drag Queen Christmas](https://us.atgtickets.com/events/drag-queen-christmas/emerson-colonial-theatre/)** @ Emerson Colonial Theatre @ 7:30PM · $9–$73 · Theater District  
+* **[A Drag Queen Christmas](https://us.atgtickets.com/events/drag-queen-christmas/emerson-colonial-theatre/)** @ Emerson Colonial Theatre · 7:30PM · $9–$73 · Theater District  
   Drag Race queens&#x27; annual holiday revue.
-* **[Collage New Music: Scenes from a Novel](https://www.collagenewmusic.org/202627-concert-2)** @ Goethe-Institut Boston @ 7:30PM · $35 · Back Bay  
-  Boston&#x27;s long-running contemporary music ensemble plays an intimate program at the Goethe-Institut.
-* **[Zade Dirani Live in Concert](https://www.bso.org/events/zade-dirani?performance=2026-11-15-20:00)** @ Symphony Hall @ 8PM · $60–$190 · Fenway / Symphony  
-  Jordanian pianist-composer&#x27;s lush cinematic concert.
-* **[Third Eye Blind](https://shop.axs.com/?c=axs&amp;e=90215480360070395)** @ Roadrunner @ 8PM · Boston Landing  
+* **[Third Eye Blind](https://shop.axs.com/?c=axs&amp;e=90215480360070395)** @ Roadrunner · 7:30PM · Boston Landing  
   &#x27;Semi-Charmed Life&#x27; hitmakers in Allston&#x27;s big standing-room hall.
+* **[Collage New Music: Scenes from a Novel](https://www.collagenewmusic.org/202627-concert-2)** @ Goethe-Institut Boston · 7:30PM · $35 · Back Bay  
+  Boston&#x27;s long-running contemporary music ensemble plays an intimate program at the Goethe-Institut.
+* **[Zade Dirani Live in Concert](https://www.bso.org/events/zade-dirani?performance=2026-11-15-20:00)** @ Symphony Hall · 8PM · $60–$190 · Fenway / Symphony  
+  Jordanian pianist-composer&#x27;s lush cinematic concert.
 
 ### 🎓 CAMBRIDGE
-* **[CBAI Boston Biosecurity Hackathon](https://lu.ma/0iufmn6q)** @ 20 Brattle St, Cambridge @ 10AM · Free · Harvard Sq
-* **[Jenna Moynihan &amp; Owen Marshall](https://www.passim.org/live-music/events/jenna-moynihan-owen-marshall/)** @ Club Passim @ 2PM · $35 · Harvard Sq  
+* **[Self Care Sunday](https://harvardsquare.com/event/self-care-sunday/)** @ Blue Hills Reservation · 9AM · Free · Harvard Sq
+* **[CBAI Boston Biosecurity Hackathon](https://lu.ma/0iufmn6q)** @ 20 Brattle St, Cambridge · 10AM · Free · Harvard Sq
+* **[Free Admission to the Harvard Art Museums](https://harvardartmuseums.org/visit)** @ Harvard Art Museums · 10AM · Free · Harvard Sq
+* **[Live Music at Remnant Satellite](https://www.remnantsomerville.com/calendar#everyweek)** @ Remnant Satellite · 10AM · Free · East Cambridge
+* **[Sunset Boulevard](https://brattlefilm.org/movies/sunset-boulevard/)** @ Brattle Theatre · 12:30PM · Harvard Sq
+* **[Jenna Moynihan &amp; Owen Marshall](https://www.passim.org/live-music/events/jenna-moynihan-owen-marshall/)** @ Club Passim · 2PM · $35 · Harvard Sq  
   Fiddler Jenna Moynihan and guitarist Owen Marshall in Passim&#x27;s basement room.
-* **[Boston Chamber Music Society: Beethoven, Dvořák, Brahms](https://bostonchambermusic.my.salesforce-sites.com/ticket/#/events/a0SVX00000QAVZp2AP)** @ Sanders Theatre at Harvard University @ 3PM · $9 - $73 · Harvard Sq  
+* **[Boston Chamber Music Society: Beethoven, Dvořák, Brahms](https://bostonchambermusic.my.salesforce-sites.com/ticket/#/events/a0SVX00000QAVZp2AP)** @ Sanders Theatre at Harvard University · 3PM · $9 - $73 · Harvard Sq  
   Beethoven, Dvořák and Brahms in Harvard&#x27;s wood-paneled Sanders Theatre.
-* **[Laszlo Gardony Sextet with Don Braden, Stan Strickland, Temidayo Balogun…](https://www.ticketweb.com/event/laszlo-gardony-sextet-with-don-regattabar-tickets/14352214)** @ Regattabar @ 6PM · $30–$41 · Harvard Sq  
+* **[Laszlo Gardony Sextet with Don Braden, Stan Strickland, Temidayo Balogun…](https://www.ticketweb.com/event/laszlo-gardony-sextet-with-don-regattabar-tickets/14352214)** @ Regattabar · 6PM · $30–$41 · Harvard Sq  
   Berklee piano great Laszlo Gardony leads a sextet of Boston jazz heavyweights, including Don Braden.
-* **[Freak Slug](https://www.axs.com/events/1510656/freak-slug-tickets?skin=sinclair)** @ The Sinclair @ 8PM · $30.37 · Harvard Sq  
+* **[TCS presents: Ian Edwards](https://www.thecomedystudio.com/checkout/b0555aa1-1fd9-4f1f-9626-f8dac6c9b18b)** @ The Comedy Studio · 6PM · $25 · Harvard Sq
+* **[Freak Slug](https://www.axs.com/events/1510656/freak-slug-tickets?skin=sinclair)** @ The Sinclair · 8PM · $30.37 · Harvard Sq  
   Manchester songwriter with lo-fi, cinematic guitar songs, in a great-sounding Harvard Square room.
 
 ### 🎨 SOMERVILLE
-* **[Impulse Ecstatic Dance - FIND YOUR POWER](https://artsatthearmory.org/events/impulse-ecstatic-dance-find-your-power/)** @ Arts at the Armory @ 10:30AM · Spring Hill
-* **[November All She Wrote Books - Queer SBC](https://www.allshewrotebooks.com/event-details/november-all-she-wrote-books-queer-sbc)** @ All She Wrote Books @ 10:30AM · Free · East Somerville
-* **[The nÓgs](https://www.sallyobriensbar.com/music)** @ Sally O&#x27;Brien&#x27;s @ 12:30PM · Free · Union Sq
-* **[Sean Lemkey](https://sean-lemkey-music.square.site/)** @ Aeronaut Brewing @ 2:30PM · Free · Somerville
-* **[Brian O&#x27;Donovan Legacy Series: VOICES OF IRELAND - DON STIFFE • GER O&#x27;DO…](https://burren.com/music.html)** @ The Burren — The Back Room @ 5PM · $44 · Davis Sq  
-  Irish singers in the Brian O&#x27;Donovan Legacy Series, named for the late host of GBH&#x27;s A Celtic Sojourn.
-* **[Brian OâDonovan Legacy Series: VOICES OF IRELAND - Don Stiffe â¢ Ger…](https://tickets.24hourmusic.com/eventperformances.asp?evt=1907)** @ The Burren @ 7:30PM · $44 · Davis Sq  
+* **[Live Music at Aeronaut Brewing | Somerville](https://www.aeronautbrewing.com/visit/somerville/)** @ Aeronaut Brewing Somerville · 10AM · Free · Somerville
+* **[Remnant Brewing: Beer Garden @ Bow Market | Somerville](https://www.remnantsomerville.com/visit)** @ Remnant Brewing · 10AM · Union Sq
+* **[Portico Brewing Patio](https://porticobrewing.com/)** @ Portico Brewing · 10AM · Boynton Yards
+* **[Green Line Extension Community Path](https://mass.streetsblog.org/2023/06/09/somervilles-community-path-extension-opens-saturday)** @ Green Line Extension Community Path · 10AM · Free · Somerville
+* **[Rosebud Bar &amp; Kitchen | Davis Square, Somerville](http://www.rosebudkitchen.com)** @ Rosebud · 10AM · Free · Davis Sq
+* **[Woman-owned Fantasy-inspired Bookshop: Side Quest | Bow Market](https://sidequestbooks.com/)** @ sidequest · 10AM · Free · Union Sq
+* **[Impulse Ecstatic Dance - FIND YOUR POWER](https://artsatthearmory.org/events/impulse-ecstatic-dance-find-your-power/)** @ Arts at the Armory · 10:30AM · Spring Hill
+* **[November All She Wrote Books - Queer SBC](https://www.allshewrotebooks.com/event-details/november-all-she-wrote-books-queer-sbc)** @ All She Wrote Books · 10:30AM · Free · East Somerville
+* **[Sean Lemkey](https://sean-lemkey-music.square.site/)** @ Aeronaut Brewing · 2:30PM · Free · Somerville
+* **[Brian O&#x27;Donovan Legacy Series: VOICES OF IRELAND - DON STIFFE • GER O&#x27;DO…](https://burren.com/music.html)** @ The Burren — The Back Room · 5PM · $44 · Davis Sq  
   Irish singers in the Brian O&#x27;Donovan Legacy Series, named for the late host of GBH&#x27;s A Celtic Sojourn.
 
 ---
@@ -340,6 +413,21 @@ const ta = document.getElementById('md'), pv = document.getElementById('preview'
 async function copy(text, label, fallback) {
   try { await navigator.clipboard.writeText(text); status.textContent = label + ' copied'; }
   catch (e) { if (fallback) { showMd(); ta.focus(); ta.select(); } status.textContent = 'Copy was blocked: select the text and press Ctrl/Cmd+C.'; }
+}
+const PLACEHOLDER = "https://www.reddit.com/r/boston/PASTE_YOUR_R_BOSTON_POST_LINK", original = ta.value, linkIn = document.getElementById('bostonLink');
+const LINK_KEY = 'roundup-boston-link-2026-11-13';
+function applyLink() {
+  const v = (linkIn && linkIn.value.trim()) || '';
+  const url = /^https:\/\/(www\.|old\.)?reddit\.com\//.test(v) ? v : PLACEHOLDER;
+  ta.value = original.split(PLACEHOLDER).join(url);
+  pv.querySelectorAll('a[data-ph]').forEach(a => { a.href = url; });
+  try { if (linkIn) localStorage.setItem(LINK_KEY, v); } catch (e) {}
+}
+pv.querySelectorAll('a').forEach(a => { if (a.getAttribute('href') === PLACEHOLDER) a.setAttribute('data-ph', ''); });
+if (linkIn) {
+  try { linkIn.value = localStorage.getItem(LINK_KEY) || ''; } catch (e) {}
+  linkIn.addEventListener('input', applyLink);
+  applyLink();
 }
 document.getElementById('copyBody').onclick = () => copy(ta.value, 'Post body', true);
 document.getElementById('copyTitle').onclick = () => copy(document.getElementById('t').textContent, 'Title', false);

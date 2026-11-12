@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>Cambridge weekend roundup</title>
+<style>
+:root{--bg:#f6f7f9;--panel:#fff;--fg:#1c2230;--muted:#5d6676;--line:#dde1e8;--accent:#c2410c;--accent-fg:#fff;--code:#f0f2f5;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#12151b;--panel:#1a1e26;--fg:#e6e9ef;--muted:#9aa3b2;--line:#2c323d;--accent:#fb923c;--accent-fg:#1a1006;--code:#151920;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 system-ui,-apple-system,sans-serif}
+.wrap{max-width:820px;margin:0 auto;padding:28px 16px 64px;display:grid;gap:18px}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font:600 clamp(22px,4vw,30px)/1.2 Georgia,serif;margin:6px 0 0}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.field{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:grid;gap:8px;min-width:0}
+.label{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.titletext{font-weight:600;overflow-wrap:anywhere}
+button{font:600 14px/1 inherit;font-family:inherit;border-radius:6px;padding:10px 14px;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--fg)}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.muted,.status{color:var(--muted);font-size:13px}
+.subs{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+a{color:var(--accent)}
+a.sub{font-weight:600}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line)}
+.tab{border:0;border-bottom:2px solid transparent;border-radius:0;background:none;color:var(--muted)}
+.tab[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+input[type=url]{width:100%;font:14px/1.4 inherit;font-family:inherit;padding:9px 10px;border:1px solid var(--line);border-radius:6px;background:var(--code);color:var(--fg)}
+textarea{width:100%;min-height:60vh;font:13px/1.5 ui-monospace,Menlo,monospace;background:var(--code);color:var(--fg);border:1px solid var(--line);border-radius:8px;padding:12px}
+.preview{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:4px 18px 18px;overflow-wrap:anywhere}
+.preview h2{font:600 18px/1.3 Georgia,serif;margin:24px 0 6px}
+.preview h3{font-size:13px;letter-spacing:.06em;color:var(--muted);margin:14px 0 4px}
+.preview ul{padding-left:20px;margin:4px 0} .preview li{margin:5px 0}
+[hidden]{display:none!important}
+</style>
+</head><body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Fri Nov 13 – Sun Nov 15 · rebuilt Wed Nov 11, 7:50 PM · also: <a href="../weekday/">Weekday</a> · <a href="../weekend/">Weekend</a> · <a href="../weekend-somerville/">Somerville weekend</a></div>
+    <h1>Cambridge weekend roundup</h1>
+  </header>
+  <div class="field">
+    <div class="label">Post title</div>
+    <div class="titletext" id="t">Things to do in Cambridge this weekend (Nov 13–15)</div>
+    <div class="row"><button id="copyTitle">Copy title</button></div>
+  </div>
+
+  <div class="field">
+    <label class="label" for="bostonLink">Your r/boston post's link</label>
+    <input id="bostonLink" type="url" placeholder="https://www.reddit.com/r/boston/comments/…" autocomplete="off">
+    <p class="muted" style="margin:0">Post the main roundup to r/boston first, then paste its link here; the copied post uses it. Until then the post links to a placeholder.</p>
+  </div>
+  <div class="row">
+    <button class="primary" id="copyBody">Copy post body (Markdown)</button>
+    <span class="status" id="status" role="status"></span>
+    <span class="status">12,653 of 40,000 characters</span>
+  </div>
+  <div class="field">
+    <div class="label">Where to post</div>
+    <ul class="subs">
+      <li><a class="sub" href="https://old.reddit.com/r/CambridgeMA/submit?selftext=true&amp;title=Things%20to%20do%20in%20Cambridge%20this%20weekend%20%28Nov%2013%E2%80%9315%29" target="_blank" rel="noopener">Post to r/CambridgeMA</a> <span class="muted">Cambridge · <a href="https://www.reddit.com/r/CambridgeMA/about/rules" target="_blank" rel="noopener">rules</a></span></li>
+    </ul>
+    <p class="muted" style="margin:0">Each link opens old Reddit's text-post form with the title filled in; paste the body (old Reddit takes Markdown as is). On new Reddit, switch the editor to Markdown mode first. Check each sub's rules on self-promotion, and space posts out rather than cross-posting all at once.</p>
+  </div>
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tabPrev" aria-selected="true">Preview</button>
+    <button class="tab" role="tab" id="tabMd" aria-selected="false">Markdown</button>
+  </div>
+  <div class="preview" id="preview">
+<p>Hi Cambridge! Here's what's happening <strong>in Cambridge</strong> from <strong>Friday Nov 13 through Sunday Nov 15</strong>: up to 20 picks a day, Cambridge events only.</p>
+<p>Shows, comedy, films, markets, talks and free stuff. Add anything I missed below!</p>
+<p><strong>New on <a href="https://www.wickedbostonevents.com" target="_blank" rel="noopener">wickedbostonevents.com</a> this week:</strong></p>
+<ul>
+<li>I'm working on a page just for local markets and winter festivals: <a href="https://www.wickedbostonevents.com/markets-festivals-boston/" target="_blank" rel="noopener">Markets &amp; Festivals</a></li>
+<li>Club nights and underground electronic shows now on the <a href="https://www.wickedbostonevents.com/boston-edm/" target="_blank" rel="noopener">Boston EDM page</a></li>
+<li>A <a href="https://www.wickedbostonevents.com/college/" target="_blank" rel="noopener">college page</a> with games, concerts and talks open to the public at 14 campuses</li>
+<li>Arts &amp; culture can now be filtered by art, books, talks and film</li>
+</ul>
+<p>For the top picks across Boston, Cambridge &amp; Somerville this weekend, see <a href="https://www.reddit.com/r/boston/PASTE_YOUR_R_BOSTON_POST_LINK" target="_blank" rel="noopener">this weekend's post on r/boston</a>.</p>
+<h2>📅 FRIDAY, NOV 13</h2>
+<ul>
+<li><strong><a href="https://harvardartmuseums.org/visit" target="_blank" rel="noopener">Free Admission to the Harvard Art Museums</a></strong> @ Harvard Art Museums · 10AM · Free · Harvard Sq</li>
+<li><strong><a href="https://www.remnantsomerville.com/calendar#everyweek" target="_blank" rel="noopener">Live Music at Remnant Satellite</a></strong> @ Remnant Satellite · 10AM · Free · East Cambridge</li>
+<li><strong><a href="https://www.kendallcenter.com/events-public-programs/roof-garden/" target="_blank" rel="noopener">Secret Rooftop Garden in Kendall Square (Including Free Pickleball &amp; Equ…</a></strong> @ Urban Park Roof Garden · 10AM · Free · Kendall Sq</li>
+<li><strong><a href="https://www.cambridgeseven.com/about/dietrich-gallery/" target="_blank" rel="noopener">STEVE ROSENTHAL RETURNS TO PAUL DIETRICH GALLERY WITH NEW PHOTOGRAPHY EX…</a></strong> @ Paul Dietrich Gallery at CambridgeSeven · 10AM · Free · Harvard Sq</li>
+<li><strong><a href="https://listart.mit.edu/" target="_blank" rel="noopener">MIT List Visual Arts Center</a></strong> @ MIT List Visual Arts Center · 10AM · Free · Kendall Sq / MIT</li>
+<li><strong><a href="https://www.mass.gov/locations/north-point-park-spray-deck" target="_blank" rel="noopener">North Point Park Spray Deck</a></strong> @ North Point Park Spray Deck · 10AM · Free · Cambridge</li>
+<li><strong><a href="https://commonspaces.harvard.edu/smith-campus-center/about" target="_blank" rel="noopener">The Harvard University Richard A. and Susan F. Smith Campus Center</a></strong> @ The Harvard University Richard A. and Susan F. Smith Campus Center · 10AM · Free · Harvard Sq</li>
+<li><strong><a href="https://www.mass.gov/locations/middlesex-fells-reservation" target="_blank" rel="noopener">Middlesex Fells Reservation | Stoneham, Massachusetts</a></strong> @ Middlesex Fells Reservation · 10AM · Free · Central Sq</li>
+<li><strong><a href="https://www.mccarthystoad.com/music" target="_blank" rel="noopener">Live Music at McCarthy's and Toad</a></strong> @ McCarthy's &amp; Toad · 10AM · Free · Porter Sq</li>
+<li><strong><a href="https://scma.smith.edu/composingcolor" target="_blank" rel="noopener">“Composing Color: Paintings by Alma Thomas from the Smithsonian American…</a></strong> @ Smith College Museum of Art · 10AM · Free · Central Sq</li>
+<li><strong><a href="https://brattlefilm.org/movies/the-secret-policemans-other-ball/" target="_blank" rel="noopener">The Secret Policeman’s Other Ball</a></strong> @ Brattle Theatre · 3:30PM · Harvard Sq</li>
+<li><strong><a href="https://www.ticketweb.com/event/bill-charlap-trio-with-david-regattabar-tickets/14818433" target="_blank" rel="noopener">Bill Charlap Trio with David Wong and Dennis Mackrel</a></strong> @ Regattabar · 7PM · $35–$47 · Harvard Sq<br>Grammy-winning pianist and American Songbook master Bill Charlap, in Harvard Square.</li>
+<li><strong><a href="https://www.thecomedystudio.com/checkout/af976710-2d4e-4627-956a-dce677c735a2" target="_blank" rel="noopener">Comedy Gold Boston Comedy Fest Edition w/ host AJ Hapenny</a></strong> @ The Comedy Studio · 7:15PM · $20 · Harvard Sq</li>
+<li><strong><a href="https://www.ticketweb.com/event/tracy-bonham-abbie-barrett-sonia-tickets/14256554" target="_blank" rel="noopener">Tracy Bonham, Abbie Barrett</a></strong> @ Sonia · 7:30PM · $33 · Central Sq<br>'Mother Mother' singer-songwriter Tracy Bonham, in Central Square.</li>
+<li><strong><a href="https://www.axs.com/events/1402619/donny-benet-tickets?skin=sinclair" target="_blank" rel="noopener">Donny Benét</a></strong> @ The Sinclair · 8PM · $40 · Harvard Sq<br>Australian synth-disco crooner with an '80s lounge-lizard persona.</li>
+<li><strong><a href="https://calendar.mit.edu/event/festival-jazz-ensembles-fall-concert" target="_blank" rel="noopener">MIT Festival Jazz Ensemble's 19th Annual Herb Pomeroy Memorial Concert—G…</a></strong> @ Building W18 (MIT) · 8PM · Free · Kendall / MIT<br>MIT Festival Jazz Ensemble's annual tribute to Boston jazz educator Herb Pomeroy.</li>
+<li><strong><a href="https://www.theplatformkendall.org/productions/jean-appolon-expressions-fy27/" target="_blank" rel="noopener">Jean Appolon Expressions Pouvwa</a></strong> @ The Platform Kendall · 8PM · Kendall Sq<br>World premiere from Haitian dance company Jean Appolon Expressions in Kendall Square.</li>
+<li><strong><a href="https://www.bostonswingcentral.org/" target="_blank" rel="noopener">Boston Swing Central- Friday Dance</a></strong> @ Q Ballroom · 8PM · $20 · West Cambridge<br>Boston Swing Central's Friday Lindy Hop dance, the city's longest-running swing night, with a lesson to start.</li>
+<li><strong><a href="https://www.passim.org/live-music/events/rosin/" target="_blank" rel="noopener">Rosin</a></strong> @ Club Passim · 8PM · $35 · Harvard Sq</li>
+<li><strong><a href="https://www.lilypadinman.com/home/2026/11/13/sirintip-feat-adam-neely-matt-wong-nolan-byrd" target="_blank" rel="noopener">SIRINTIP feat. Adam Neely, Matt Wong, Nolan Byrd</a></strong> @ The Lilypad · 10:45PM · $14–$18 · Inman Sq<br>Singer-composer SIRINTIP with YouTube bassist Adam Neely in the band, late set.</li>
+</ul>
+<h2>📅 SATURDAY, NOV 14</h2>
+<ul>
+<li><strong><a href="https://lu.ma/o7ks5zej" target="_blank" rel="noopener">Founders Running Club :: Boston</a></strong> @ 77 Massachusetts Ave, Cambridge · 9:30AM · Free · Massachusetts Institute of Technology</li>
+<li><strong><a href="https://harvardartmuseums.org/visit" target="_blank" rel="noopener">Free Admission to the Harvard Art Museums</a></strong> @ Harvard Art Museums · 10AM · Free · Harvard Sq</li>
+<li><strong><a href="https://www.remnantsomerville.com/calendar#everyweek" target="_blank" rel="noopener">Live Music at Remnant Satellite</a></strong> @ Remnant Satellite · 10AM · Free · East Cambridge</li>
+<li><strong><a href="https://www.kendallcenter.com/events-public-programs/roof-garden/" target="_blank" rel="noopener">Secret Rooftop Garden in Kendall Square (Including Free Pickleball &amp; Equ…</a></strong> @ Urban Park Roof Garden · 10AM · Free · Kendall Sq</li>
+<li><strong><a href="https://www.cambridgeseven.com/about/dietrich-gallery/" target="_blank" rel="noopener">STEVE ROSENTHAL RETURNS TO PAUL DIETRICH GALLERY WITH NEW PHOTOGRAPHY EX…</a></strong> @ Paul Dietrich Gallery at CambridgeSeven · 10AM · Free · Harvard Sq</li>
+<li><strong><a href="https://listart.mit.edu/" target="_blank" rel="noopener">MIT List Visual Arts Center</a></strong> @ MIT List Visual Arts Center · 10AM · Free · Kendall Sq / MIT</li>
+<li><strong><a href="https://www.mass.gov/locations/north-point-park-spray-deck" target="_blank" rel="noopener">North Point Park Spray Deck</a></strong> @ North Point Park Spray Deck · 10AM · Free · Cambridge</li>
+<li><strong><a href="https://commonspaces.harvard.edu/smith-campus-center/about" target="_blank" rel="noopener">The Harvard University Richard A. and Susan F. Smith Campus Center</a></strong> @ The Harvard University Richard A. and Susan F. Smith Campus Center · 10AM · Free · Harvard Sq</li>
+<li><strong><a href="https://www.mass.gov/locations/middlesex-fells-reservation" target="_blank" rel="noopener">Middlesex Fells Reservation | Stoneham, Massachusetts</a></strong> @ Middlesex Fells Reservation · 10AM · Free · Central Sq</li>
+<li><strong><a href="https://www.mccarthystoad.com/music" target="_blank" rel="noopener">Live Music at McCarthy's and Toad</a></strong> @ McCarthy's &amp; Toad · 10AM · Free · Porter Sq</li>
+<li><strong><a href="https://scma.smith.edu/composingcolor" target="_blank" rel="noopener">“Composing Color: Paintings by Alma Thomas from the Smithsonian American…</a></strong> @ Smith College Museum of Art · 10AM · Free · Central Sq</li>
+<li><strong><a href="https://www.passim.org/live-music/events/passim-school-of-music-recital/" target="_blank" rel="noopener">Passim School of Music Recital</a></strong> @ Club Passim · 12PM · $15 · Harvard Sq</li>
+<li><strong><a href="https://brattlefilm.org/movies/teenage-sex-and-death-at-camp-miasma/" target="_blank" rel="noopener">Teenage Sex and Death at Camp Miasma</a></strong> @ Brattle Theatre · 1PM · Harvard Sq</li>
+<li><strong><a href="http://www.nathikaevents.com" target="_blank" rel="noopener">Loy Kra Thong Thai Night Market @ Harvard Square</a></strong> @ Harvard Square · 4PM · Free · Harvard Sq<br>Free Thai night market for the Loy Krathong festival of lights: street food and lanterns in Harvard Square.</li>
+<li><strong><a href="https://www.meetup.com/meetup-com-its-a-vibe-tribe/events/317349988/" target="_blank" rel="noopener">Loy Ka Thong Thai Night Market (Cambridge) - Hostless</a></strong> @ 1 Brattle Square (STUDS Store) · 4PM · Harvard Sq</li>
+<li><strong><a href="https://www.ticketweb.com/event/bill-charlap-trio-with-david-regattabar-tickets/14818443" target="_blank" rel="noopener">Bill Charlap Trio with David Wong and Dennis Mackrel</a></strong> @ Regattabar · 7PM · $35–$47 · Harvard Sq<br>One of the great jazz pianists of his generation, a master of the American songbook, in an intimate club.</li>
+<li><strong><a href="https://www.thecomedystudio.com/checkout/60c07356-4acf-44a3-8345-eeee20522b18" target="_blank" rel="noopener">TCS presents: Irene Tu</a></strong> @ The Comedy Studio · 7:15PM · $30 · Harvard Sq</li>
+<li><strong><a href="https://www.theplatformkendall.org/productions/jean-appolon-expressions-fy27/" target="_blank" rel="noopener">Jean Appolon Expressions Pouvwa</a></strong> @ The Platform Kendall · 8PM · Kendall Sq<br>World premiere from Haitian dance company Jean Appolon Expressions in Kendall Square.</li>
+<li><strong><a href="https://harvardsquare.com/event/harvard-radcliffe-orchestra-concert-2/" target="_blank" rel="noopener">Harvard-Radcliffe Orchestra Concert 2</a></strong> @ Sanders Theatre · 8PM · Free · Harvard Sq</li>
+<li><strong><a href="https://www.axs.com/events/1660240/fruitstandys-3rd-birthday-fruit-tickets" target="_blank" rel="noopener">fruitstand’s 3rd birthday: fruit</a></strong> @ The Sinclair · 10PM · $10–$15 · Harvard Sq<br>Third birthday of fruitstand, a queer pop dance party, in Harvard Square's 52 Church.</li>
+</ul>
+<h2>📅 SUNDAY, NOV 15</h2>
+<ul>
+<li><strong><a href="https://harvardsquare.com/event/self-care-sunday/" target="_blank" rel="noopener">Self Care Sunday</a></strong> @ Blue Hills Reservation · 9AM · Free · Harvard Sq</li>
+<li><strong><a href="https://www.easternedgefoodhall.com/happenings" target="_blank" rel="noopener">Patriots Watch Party @ Eastern Edge Food Hall</a></strong> @ Eastern Edge Food Hall &amp; Gathering Place · 9:30AM · Free · Cambridge</li>
+<li><strong><a href="https://lu.ma/0iufmn6q" target="_blank" rel="noopener">CBAI Boston Biosecurity Hackathon</a></strong> @ 20 Brattle St, Cambridge · 10AM · Free · Harvard Sq</li>
+<li><strong><a href="https://harvardartmuseums.org/visit" target="_blank" rel="noopener">Free Admission to the Harvard Art Museums</a></strong> @ Harvard Art Museums · 10AM · Free · Harvard Sq</li>
+<li><strong><a href="https://www.remnantsomerville.com/calendar#everyweek" target="_blank" rel="noopener">Live Music at Remnant Satellite</a></strong> @ Remnant Satellite · 10AM · Free · East Cambridge</li>
+<li><strong><a href="https://www.kendallcenter.com/events-public-programs/roof-garden/" target="_blank" rel="noopener">Secret Rooftop Garden in Kendall Square (Including Free Pickleball &amp; Equ…</a></strong> @ Urban Park Roof Garden · 10AM · Free · Kendall Sq</li>
+<li><strong><a href="https://www.cambridgeseven.com/about/dietrich-gallery/" target="_blank" rel="noopener">STEVE ROSENTHAL RETURNS TO PAUL DIETRICH GALLERY WITH NEW PHOTOGRAPHY EX…</a></strong> @ Paul Dietrich Gallery at CambridgeSeven · 10AM · Free · Harvard Sq</li>
+<li><strong><a href="https://listart.mit.edu/" target="_blank" rel="noopener">MIT List Visual Arts Center</a></strong> @ MIT List Visual Arts Center · 10AM · Free · Kendall Sq / MIT</li>
+<li><strong><a href="https://www.mass.gov/locations/north-point-park-spray-deck" target="_blank" rel="noopener">North Point Park Spray Deck</a></strong> @ North Point Park Spray Deck · 10AM · Free · Cambridge</li>
+<li><strong><a href="https://commonspaces.harvard.edu/smith-campus-center/about" target="_blank" rel="noopener">The Harvard University Richard A. and Susan F. Smith Campus Center</a></strong> @ The Harvard University Richard A. and Susan F. Smith Campus Center · 10AM · Free · Harvard Sq</li>
+<li><strong><a href="https://www.mass.gov/locations/middlesex-fells-reservation" target="_blank" rel="noopener">Middlesex Fells Reservation | Stoneham, Massachusetts</a></strong> @ Middlesex Fells Reservation · 10AM · Free · Central Sq</li>
+<li><strong><a href="https://www.mccarthystoad.com/music" target="_blank" rel="noopener">Live Music at McCarthy's and Toad</a></strong> @ McCarthy's &amp; Toad · 10AM · Free · Porter Sq</li>
+<li><strong><a href="https://scma.smith.edu/composingcolor" target="_blank" rel="noopener">“Composing Color: Paintings by Alma Thomas from the Smithsonian American…</a></strong> @ Smith College Museum of Art · 10AM · Free · Central Sq</li>
+<li><strong><a href="https://wearelous.com" target="_blank" rel="noopener">Sunday Jazz Brunch</a></strong> @ Lou's · 11:30AM · Free · Harvard Sq</li>
+<li><strong><a href="https://brattlefilm.org/movies/sunset-boulevard/" target="_blank" rel="noopener">Sunset Boulevard</a></strong> @ Brattle Theatre · 12:30PM · Harvard Sq</li>
+<li><strong><a href="https://www.passim.org/live-music/events/jenna-moynihan-owen-marshall/" target="_blank" rel="noopener">Jenna Moynihan &amp; Owen Marshall</a></strong> @ Club Passim · 2PM · $35 · Harvard Sq<br>Fiddler Jenna Moynihan and guitarist Owen Marshall in Passim's basement room.</li>
+<li><strong><a href="https://bostonchambermusic.my.salesforce-sites.com/ticket/#/events/a0SVX00000QAVZp2AP" target="_blank" rel="noopener">Boston Chamber Music Society: Beethoven, Dvořák, Brahms</a></strong> @ Sanders Theatre at Harvard University · 3PM · $9 - $73 · Harvard Sq<br>Beethoven, Dvořák and Brahms in Harvard's wood-paneled Sanders Theatre.</li>
+<li><strong><a href="https://www.ticketweb.com/event/laszlo-gardony-sextet-with-don-regattabar-tickets/14352214" target="_blank" rel="noopener">Laszlo Gardony Sextet with Don Braden, Stan Strickland, Temidayo Balogun…</a></strong> @ Regattabar · 6PM · $30–$41 · Harvard Sq<br>Berklee piano great Laszlo Gardony leads a sextet of Boston jazz heavyweights, including Don Braden.</li>
+<li><strong><a href="https://www.thecomedystudio.com/checkout/b0555aa1-1fd9-4f1f-9626-f8dac6c9b18b" target="_blank" rel="noopener">TCS presents: Ian Edwards</a></strong> @ The Comedy Studio · 6PM · $25 · Harvard Sq</li>
+<li><strong><a href="https://www.axs.com/events/1510656/freak-slug-tickets?skin=sinclair" target="_blank" rel="noopener">Freak Slug</a></strong> @ The Sinclair · 8PM · $30.37 · Harvard Sq<br>Manchester songwriter with lo-fi, cinematic guitar songs, in a great-sounding Harvard Square room.</li>
+</ul>
+<hr>
+<h3>🔗 More on Wicked Boston Events</h3>
+<ul>
+<li><strong>Full calendar</strong> (filter by neighborhood &amp; T line): <a href="https://www.wickedbostonevents.com" target="_blank" rel="noopener">https://www.wickedbostonevents.com</a></li>
+<li><strong>For parents</strong> (kids &amp; family events): <a href="https://www.wickedbostonevents.com/kids-family-events-boston/" target="_blank" rel="noopener">https://www.wickedbostonevents.com/kids-family-events-boston/</a></li>
+</ul>
+<p><em>Curated from 200+ local venue, theatre, museum, and community calendars at <strong><a href="https://www.wickedbostonevents.com" target="_blank" rel="noopener">wickedbostonevents.com</a></strong> (ad-free &amp; independent).</em></p>
+  </div>
+  <textarea id="md" spellcheck="false" hidden>Hi Cambridge! Here&#x27;s what&#x27;s happening **in Cambridge** from **Friday Nov 13 through Sunday Nov 15**: up to 20 picks a day, Cambridge events only.
+
+Shows, comedy, films, markets, talks and free stuff. Add anything I missed below!
+
+**New on [wickedbostonevents.com](https://www.wickedbostonevents.com) this week:**
+
+* I&#x27;m working on a page just for local markets and winter festivals: [Markets &amp; Festivals](https://www.wickedbostonevents.com/markets-festivals-boston/)
+* Club nights and underground electronic shows now on the [Boston EDM page](https://www.wickedbostonevents.com/boston-edm/)
+* A [college page](https://www.wickedbostonevents.com/college/) with games, concerts and talks open to the public at 14 campuses
+* Arts &amp; culture can now be filtered by art, books, talks and film
+
+For the top picks across Boston, Cambridge &amp; Somerville this weekend, see [this weekend&#x27;s post on r/boston](https://www.reddit.com/r/boston/PASTE_YOUR_R_BOSTON_POST_LINK).
+
+## 📅 FRIDAY, NOV 13
+
+* **[Free Admission to the Harvard Art Museums](https://harvardartmuseums.org/visit)** @ Harvard Art Museums · 10AM · Free · Harvard Sq
+* **[Live Music at Remnant Satellite](https://www.remnantsomerville.com/calendar#everyweek)** @ Remnant Satellite · 10AM · Free · East Cambridge
+* **[Secret Rooftop Garden in Kendall Square (Including Free Pickleball &amp; Equ…](https://www.kendallcenter.com/events-public-programs/roof-garden/)** @ Urban Park Roof Garden · 10AM · Free · Kendall Sq
+* **[STEVE ROSENTHAL RETURNS TO PAUL DIETRICH GALLERY WITH NEW PHOTOGRAPHY EX…](https://www.cambridgeseven.com/about/dietrich-gallery/)** @ Paul Dietrich Gallery at CambridgeSeven · 10AM · Free · Harvard Sq
+* **[MIT List Visual Arts Center](https://listart.mit.edu/)** @ MIT List Visual Arts Center · 10AM · Free · Kendall Sq / MIT
+* **[North Point Park Spray Deck](https://www.mass.gov/locations/north-point-park-spray-deck)** @ North Point Park Spray Deck · 10AM · Free · Cambridge
+* **[The Harvard University Richard A. and Susan F. Smith Campus Center](https://commonspaces.harvard.edu/smith-campus-center/about)** @ The Harvard University Richard A. and Susan F. Smith Campus Center · 10AM · Free · Harvard Sq
+* **[Middlesex Fells Reservation | Stoneham, Massachusetts](https://www.mass.gov/locations/middlesex-fells-reservation)** @ Middlesex Fells Reservation · 10AM · Free · Central Sq
+* **[Live Music at McCarthy&#x27;s and Toad](https://www.mccarthystoad.com/music)** @ McCarthy&#x27;s &amp; Toad · 10AM · Free · Porter Sq
+* **[“Composing Color: Paintings by Alma Thomas from the Smithsonian American…](https://scma.smith.edu/composingcolor)** @ Smith College Museum of Art · 10AM · Free · Central Sq
+* **[The Secret Policeman’s Other Ball](https://brattlefilm.org/movies/the-secret-policemans-other-ball/)** @ Brattle Theatre · 3:30PM · Harvard Sq
+* **[Bill Charlap Trio with David Wong and Dennis Mackrel](https://www.ticketweb.com/event/bill-charlap-trio-with-david-regattabar-tickets/14818433)** @ Regattabar · 7PM · $35–$47 · Harvard Sq  
+  Grammy-winning pianist and American Songbook master Bill Charlap, in Harvard Square.
+* **[Comedy Gold Boston Comedy Fest Edition w/ host AJ Hapenny](https://www.thecomedystudio.com/checkout/af976710-2d4e-4627-956a-dce677c735a2)** @ The Comedy Studio · 7:15PM · $20 · Harvard Sq
+* **[Tracy Bonham, Abbie Barrett](https://www.ticketweb.com/event/tracy-bonham-abbie-barrett-sonia-tickets/14256554)** @ Sonia · 7:30PM · $33 · Central Sq  
+  &#x27;Mother Mother&#x27; singer-songwriter Tracy Bonham, in Central Square.
+* **[Donny Benét](https://www.axs.com/events/1402619/donny-benet-tickets?skin=sinclair)** @ The Sinclair · 8PM · $40 · Harvard Sq  
+  Australian synth-disco crooner with an &#x27;80s lounge-lizard persona.
+* **[MIT Festival Jazz Ensemble&#x27;s 19th Annual Herb Pomeroy Memorial Concert—G…](https://calendar.mit.edu/event/festival-jazz-ensembles-fall-concert)** @ Building W18 (MIT) · 8PM · Free · Kendall / MIT  
+  MIT Festival Jazz Ensemble&#x27;s annual tribute to Boston jazz educator Herb Pomeroy.
+* **[Jean Appolon Expressions Pouvwa](https://www.theplatformkendall.org/productions/jean-appolon-expressions-fy27/)** @ The Platform Kendall · 8PM · Kendall Sq  
+  World premiere from Haitian dance company Jean Appolon Expressions in Kendall Square.
+* **[Boston Swing Central- Friday Dance](https://www.bostonswingcentral.org/)** @ Q Ballroom · 8PM · $20 · West Cambridge  
+  Boston Swing Central&#x27;s Friday Lindy Hop dance, the city&#x27;s longest-running swing night, with a lesson to start.
+* **[Rosin](https://www.passim.org/live-music/events/rosin/)** @ Club Passim · 8PM · $35 · Harvard Sq
+* **[SIRINTIP feat. Adam Neely, Matt Wong, Nolan Byrd](https://www.lilypadinman.com/home/2026/11/13/sirintip-feat-adam-neely-matt-wong-nolan-byrd)** @ The Lilypad · 10:45PM · $14–$18 · Inman Sq  
+  Singer-composer SIRINTIP with YouTube bassist Adam Neely in the band, late set.
+
+## 📅 SATURDAY, NOV 14
+
+* **[Founders Running Club :: Boston](https://lu.ma/o7ks5zej)** @ 77 Massachusetts Ave, Cambridge · 9:30AM · Free · Massachusetts Institute of Technology
+* **[Free Admission to the Harvard Art Museums](https://harvardartmuseums.org/visit)** @ Harvard Art Museums · 10AM · Free · Harvard Sq
+* **[Live Music at Remnant Satellite](https://www.remnantsomerville.com/calendar#everyweek)** @ Remnant Satellite · 10AM · Free · East Cambridge
+* **[Secret Rooftop Garden in Kendall Square (Including Free Pickleball &amp; Equ…](https://www.kendallcenter.com/events-public-programs/roof-garden/)** @ Urban Park Roof Garden · 10AM · Free · Kendall Sq
+* **[STEVE ROSENTHAL RETURNS TO PAUL DIETRICH GALLERY WITH NEW PHOTOGRAPHY EX…](https://www.cambridgeseven.com/about/dietrich-gallery/)** @ Paul Dietrich Gallery at CambridgeSeven · 10AM · Free · Harvard Sq
+* **[MIT List Visual Arts Center](https://listart.mit.edu/)** @ MIT List Visual Arts Center · 10AM · Free · Kendall Sq / MIT
+* **[North Point Park Spray Deck](https://www.mass.gov/locations/north-point-park-spray-deck)** @ North Point Park Spray Deck · 10AM · Free · Cambridge
+* **[The Harvard University Richard A. and Susan F. Smith Campus Center](https://commonspaces.harvard.edu/smith-campus-center/about)** @ The Harvard University Richard A. and Susan F. Smith Campus Center · 10AM · Free · Harvard Sq
+* **[Middlesex Fells Reservation | Stoneham, Massachusetts](https://www.mass.gov/locations/middlesex-fells-reservation)** @ Middlesex Fells Reservation · 10AM · Free · Central Sq
+* **[Live Music at McCarthy&#x27;s and Toad](https://www.mccarthystoad.com/music)** @ McCarthy&#x27;s &amp; Toad · 10AM · Free · Porter Sq
+* **[“Composing Color: Paintings by Alma Thomas from the Smithsonian American…](https://scma.smith.edu/composingcolor)** @ Smith College Museum of Art · 10AM · Free · Central Sq
+* **[Passim School of Music Recital](https://www.passim.org/live-music/events/passim-school-of-music-recital/)** @ Club Passim · 12PM · $15 · Harvard Sq
+* **[Teenage Sex and Death at Camp Miasma](https://brattlefilm.org/movies/teenage-sex-and-death-at-camp-miasma/)** @ Brattle Theatre · 1PM · Harvard Sq
+* **[Loy Kra Thong Thai Night Market @ Harvard Square](http://www.nathikaevents.com)** @ Harvard Square · 4PM · Free · Harvard Sq  
+  Free Thai night market for the Loy Krathong festival of lights: street food and lanterns in Harvard Square.
+* **[Loy Ka Thong Thai Night Market (Cambridge) - Hostless](https://www.meetup.com/meetup-com-its-a-vibe-tribe/events/317349988/)** @ 1 Brattle Square (STUDS Store) · 4PM · Harvard Sq
+* **[Bill Charlap Trio with David Wong and Dennis Mackrel](https://www.ticketweb.com/event/bill-charlap-trio-with-david-regattabar-tickets/14818443)** @ Regattabar · 7PM · $35–$47 · Harvard Sq  
+  One of the great jazz pianists of his generation, a master of the American songbook, in an intimate club.
+* **[TCS presents: Irene Tu](https://www.thecomedystudio.com/checkout/60c07356-4acf-44a3-8345-eeee20522b18)** @ The Comedy Studio · 7:15PM · $30 · Harvard Sq
+* **[Jean Appolon Expressions Pouvwa](https://www.theplatformkendall.org/productions/jean-appolon-expressions-fy27/)** @ The Platform Kendall · 8PM · Kendall Sq  
+  World premiere from Haitian dance company Jean Appolon Expressions in Kendall Square.
+* **[Harvard-Radcliffe Orchestra Concert 2](https://harvardsquare.com/event/harvard-radcliffe-orchestra-concert-2/)** @ Sanders Theatre · 8PM · Free · Harvard Sq
+* **[fruitstand’s 3rd birthday: fruit](https://www.axs.com/events/1660240/fruitstandys-3rd-birthday-fruit-tickets)** @ The Sinclair · 10PM · $10–$15 · Harvard Sq  
+  Third birthday of fruitstand, a queer pop dance party, in Harvard Square&#x27;s 52 Church.
+
+## 📅 SUNDAY, NOV 15
+
+* **[Self Care Sunday](https://harvardsquare.com/event/self-care-sunday/)** @ Blue Hills Reservation · 9AM · Free · Harvard Sq
+* **[Patriots Watch Party @ Eastern Edge Food Hall](https://www.easternedgefoodhall.com/happenings)** @ Eastern Edge Food Hall &amp; Gathering Place · 9:30AM · Free · Cambridge
+* **[CBAI Boston Biosecurity Hackathon](https://lu.ma/0iufmn6q)** @ 20 Brattle St, Cambridge · 10AM · Free · Harvard Sq
+* **[Free Admission to the Harvard Art Museums](https://harvardartmuseums.org/visit)** @ Harvard Art Museums · 10AM · Free · Harvard Sq
+* **[Live Music at Remnant Satellite](https://www.remnantsomerville.com/calendar#everyweek)** @ Remnant Satellite · 10AM · Free · East Cambridge
+* **[Secret Rooftop Garden in Kendall Square (Including Free Pickleball &amp; Equ…](https://www.kendallcenter.com/events-public-programs/roof-garden/)** @ Urban Park Roof Garden · 10AM · Free · Kendall Sq
+* **[STEVE ROSENTHAL RETURNS TO PAUL DIETRICH GALLERY WITH NEW PHOTOGRAPHY EX…](https://www.cambridgeseven.com/about/dietrich-gallery/)** @ Paul Dietrich Gallery at CambridgeSeven · 10AM · Free · Harvard Sq
+* **[MIT List Visual Arts Center](https://listart.mit.edu/)** @ MIT List Visual Arts Center · 10AM · Free · Kendall Sq / MIT
+* **[North Point Park Spray Deck](https://www.mass.gov/locations/north-point-park-spray-deck)** @ North Point Park Spray Deck · 10AM · Free · Cambridge
+* **[The Harvard University Richard A. and Susan F. Smith Campus Center](https://commonspaces.harvard.edu/smith-campus-center/about)** @ The Harvard University Richard A. and Susan F. Smith Campus Center · 10AM · Free · Harvard Sq
+* **[Middlesex Fells Reservation | Stoneham, Massachusetts](https://www.mass.gov/locations/middlesex-fells-reservation)** @ Middlesex Fells Reservation · 10AM · Free · Central Sq
+* **[Live Music at McCarthy&#x27;s and Toad](https://www.mccarthystoad.com/music)** @ McCarthy&#x27;s &amp; Toad · 10AM · Free · Porter Sq
+* **[“Composing Color: Paintings by Alma Thomas from the Smithsonian American…](https://scma.smith.edu/composingcolor)** @ Smith College Museum of Art · 10AM · Free · Central Sq
+* **[Sunday Jazz Brunch](https://wearelous.com)** @ Lou&#x27;s · 11:30AM · Free · Harvard Sq
+* **[Sunset Boulevard](https://brattlefilm.org/movies/sunset-boulevard/)** @ Brattle Theatre · 12:30PM · Harvard Sq
+* **[Jenna Moynihan &amp; Owen Marshall](https://www.passim.org/live-music/events/jenna-moynihan-owen-marshall/)** @ Club Passim · 2PM · $35 · Harvard Sq  
+  Fiddler Jenna Moynihan and guitarist Owen Marshall in Passim&#x27;s basement room.
+* **[Boston Chamber Music Society: Beethoven, Dvořák, Brahms](https://bostonchambermusic.my.salesforce-sites.com/ticket/#/events/a0SVX00000QAVZp2AP)** @ Sanders Theatre at Harvard University · 3PM · $9 - $73 · Harvard Sq  
+  Beethoven, Dvořák and Brahms in Harvard&#x27;s wood-paneled Sanders Theatre.
+* **[Laszlo Gardony Sextet with Don Braden, Stan Strickland, Temidayo Balogun…](https://www.ticketweb.com/event/laszlo-gardony-sextet-with-don-regattabar-tickets/14352214)** @ Regattabar · 6PM · $30–$41 · Harvard Sq  
+  Berklee piano great Laszlo Gardony leads a sextet of Boston jazz heavyweights, including Don Braden.
+* **[TCS presents: Ian Edwards](https://www.thecomedystudio.com/checkout/b0555aa1-1fd9-4f1f-9626-f8dac6c9b18b)** @ The Comedy Studio · 6PM · $25 · Harvard Sq
+* **[Freak Slug](https://www.axs.com/events/1510656/freak-slug-tickets?skin=sinclair)** @ The Sinclair · 8PM · $30.37 · Harvard Sq  
+  Manchester songwriter with lo-fi, cinematic guitar songs, in a great-sounding Harvard Square room.
+
+---
+
+### 🔗 More on Wicked Boston Events
+- **Full calendar** (filter by neighborhood &amp; T line): [https://www.wickedbostonevents.com](https://www.wickedbostonevents.com)
+- **For parents** (kids &amp; family events): [https://www.wickedbostonevents.com/kids-family-events-boston/](https://www.wickedbostonevents.com/kids-family-events-boston/)
+
+*Curated from 200+ local venue, theatre, museum, and community calendars at **[wickedbostonevents.com](https://www.wickedbostonevents.com)** (ad-free &amp; independent).*
+</textarea>
+</div>
+<script>
+const ta = document.getElementById('md'), pv = document.getElementById('preview'), status = document.getElementById('status');
+async function copy(text, label, fallback) {
+  try { await navigator.clipboard.writeText(text); status.textContent = label + ' copied'; }
+  catch (e) { if (fallback) { showMd(); ta.focus(); ta.select(); } status.textContent = 'Copy was blocked: select the text and press Ctrl/Cmd+C.'; }
+}
+const PLACEHOLDER = "https://www.reddit.com/r/boston/PASTE_YOUR_R_BOSTON_POST_LINK", original = ta.value, linkIn = document.getElementById('bostonLink');
+const LINK_KEY = 'roundup-boston-link-2026-11-13';
+function applyLink() {
+  const v = (linkIn && linkIn.value.trim()) || '';
+  const url = /^https:\/\/(www\.|old\.)?reddit\.com\//.test(v) ? v : PLACEHOLDER;
+  ta.value = original.split(PLACEHOLDER).join(url);
+  pv.querySelectorAll('a[data-ph]').forEach(a => { a.href = url; });
+  try { if (linkIn) localStorage.setItem(LINK_KEY, v); } catch (e) {}
+}
+pv.querySelectorAll('a').forEach(a => { if (a.getAttribute('href') === PLACEHOLDER) a.setAttribute('data-ph', ''); });
+if (linkIn) {
+  try { linkIn.value = localStorage.getItem(LINK_KEY) || ''; } catch (e) {}
+  linkIn.addEventListener('input', applyLink);
+  applyLink();
+}
+document.getElementById('copyBody').onclick = () => copy(ta.value, 'Post body', true);
+document.getElementById('copyTitle').onclick = () => copy(document.getElementById('t').textContent, 'Title', false);
+const tp = document.getElementById('tabPrev'), tm = document.getElementById('tabMd');
+function showMd() { ta.hidden = false; pv.hidden = true; tm.setAttribute('aria-selected', 'true'); tp.setAttribute('aria-selected', 'false'); }
+function showPv() { ta.hidden = true; pv.hidden = false; tp.setAttribute('aria-selected', 'true'); tm.setAttribute('aria-selected', 'false'); }
+tm.onclick = showMd; tp.onclick = showPv;
+</script>
+</body></html>
