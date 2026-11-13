@@ -283,6 +283,9 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
     "loov": (42.3786, -71.0866, "East Somerville", "72 Joy St, Somerville", "Life Drawing Boston"),
     "perry park": (42.3792, -71.1032, "Somerville", "355 Washington St, Somerville", "Perry Park"),
     "nathan tufts park": (42.4014, -71.1189, "Powderhouse", "Broadway, Somerville", "Nathan Tufts Park"),
+    "han": (42.3510, -71.1310, "Allston", "186 Harvard Ave, Allston, Boston", "HAN"),
+    "lego discovery center": (42.3921, -71.0775, "Assembly Row", "598 Assembly Row, Somerville", "LEGO Discovery Center"),
+    "lego discovery center boston": (42.3921, -71.0775, "Assembly Row", "598 Assembly Row, Somerville", "LEGO Discovery Center"),
     "assembly row": (42.3928, -71.0776, "Assembly Row", "Assembly Row, Somerville", "Assembly Row"),
 
     # Holiday Markets & Pop-ups
