@@ -565,6 +565,8 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
     "puppet showplace": (42.3323, -71.1172, "Brookline Village", "32 Station St, Brookline", "Puppet Showplace Theater"),
 
     # Jamaica Plain & Roxbury
+    "footlight club": (42.3109, -71.1142, "Jamaica Plain", "7A Eliot St, Jamaica Plain", "Footlight Club"),
+    "eliot hall": (42.3109, -71.1142, "Jamaica Plain", "7A Eliot St, Jamaica Plain", "Footlight Club"),
     "midway cafe": (42.3062, -71.1075, "Jamaica Plain", "3496 Washington St, Jamaica Plain", "Midway Cafe"),
     "jeanie johnston pub": (42.3039, -71.1147, "Jamaica Plain", "144 South St, Jamaica Plain", "Jeanie Johnston Pub"),
     "the haven": (42.3153, -71.1042, "Jamaica Plain", "284 Amory St, Jamaica Plain", "The Haven"),
