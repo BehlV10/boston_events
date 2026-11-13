@@ -14596,6 +14596,9 @@ _ALL_VENUES = [
     {"name": "Citizens House of Blues Boston", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZpZAEA7eA&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
     {"name": "Orpheum Theatre", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZpZA1J7JA&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
     {"name": "Leader Bank Pavilion", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZ917AxdQ&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
+    # Worcester: outside the core area, filed under Other > Outer Suburbs
+    {"name": "The Palladium (Worcester)", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZpZAat67A&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
+    {"name": "The Hanover Theatre (Worcester)", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZpZA16l7A&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "stage"},
     {"name": "Chevalier Theatre", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZpZAJd6aA&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "music"},
     {"name": "Sonia", "url": "https://www.ticketweb.com/venue/sonia-cambridge-ma/435615", "ua": UA_CHROME, "scraper": scrape_ticketweb, "default_category": "music"},
     {"name": "Scullers Jazz Club", "url": "https://www.ticketweb.com/venue/scullers-jazz-club-boston-ma/18647", "ua": UA_CHROME, "scraper": scrape_ticketweb, "default_category": "music"},
