@@ -10331,6 +10331,16 @@ def scrape_sally_obriens(url, ua):
     return events
 
 
+def scrape_dont_tell_aunty(url, ua):
+    """Don't Tell Aunty (1080 Boylston St): the club's Eventbrite organizer page. Its Bollywood nights
+    are also sold on Flite, which has no public listing, so only what it posts here is picked up."""
+    events = scrape_eventbrite_org(url, ua)
+    for e in events:
+        e["venue"] = e.get("venue") or "Don't Tell Aunty"
+        e["category"] = "clubbing"
+    return events
+
+
 def scrape_side_quest(url, ua):
     """Side Quest Books & Games at Bow Market in Somerville — sci-fi/fantasy books & indie TTRPGs."""
     evs = scrape_eventbrite_org(url, ua)
@@ -14729,6 +14739,7 @@ _ALL_VENUES = [
     {"name": "Dani's Queer Bar", "url": "https://www.eventbrite.com/d/ma--boston/danis-queer-bar/", "ua": UA_CHROME, "scraper": scrape_danis_queer_bar, "default_category": "clubbing"},
     {"name": "Club Café", "url": "https://www.clubcafe.com/full-calendar/", "ua": UA_CHROME, "scraper": scrape_club_cafe, "default_category": "clubbing"},
     {"name": "FERAL", "url": "https://www.eventbrite.com/o/feral-events-71015854393", "ua": UA_CHROME, "scraper": scrape_feral, "default_category": "clubbing"},
+    {"name": "Don't Tell Aunty", "url": "https://www.eventbrite.com/o/dont-tell-aunty-121023442169", "ua": UA_CHROME, "scraper": scrape_dont_tell_aunty, "default_category": "clubbing"},
     {"name": "Boston LGBTQ+ Nightlife", "url": "https://www.eventbrite.com/d/ma--boston/lgbtq-nightlife/", "ua": UA_CHROME, "scraper": scrape_boston_queer_nightlife, "default_category": "clubbing"},
     {"name": "Midway Cafe", "url": "https://tockify.com/api/feeds/ics/midwaycafejp", "ua": UA_CHROME, "scraper": scrape_ical, "default_category": "music"},
     {"name": "The Beehive", "url": "https://tockify.com/api/feeds/ics/beehive", "ua": UA_CHROME, "scraper": scrape_ical, "default_category": "music"},
