@@ -14484,7 +14484,7 @@ def _exhibition(name, link, when, venue, today):
     if not name or not end or end < today or (start and start > today):
         return None   # upcoming, closed, or a permanent gallery
     return {"name": f"{name} (through {end.strftime('%b %-d')})", "date": None, "url": link,
-            "venue": venue, "price": None, "category": "art", "_exhibition": True,
+            "venue": venue, "price": None, "category": "art", "_exhibition": True, "_closes": end.isoformat(),
             "description": f"Exhibition on view through {end.strftime('%B %-d, %Y')}."}
 
 
@@ -14544,6 +14544,34 @@ _OPEN_ENDED_EXHIBITIONS = (
 )
 
 
+# Exhibition pages that answer 403 to GitHub's runners but work from a home network (the Gardner's
+# calendar is behind a Cloudflare challenge everywhere, so only its exhibitions page is saved). Run
+# scripts/refresh_local_sources.py from a laptop now and then; builds fall back to that copy,
+# minus shows that have closed, whenever the live fetch fails.
+LOCAL_SOURCES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "local_sources.json")
+LOCAL_REFRESH_EXHIBITIONS = ("Isabella Stewart Gardner Museum",)
+
+
+def load_local_sources(path=None):
+    try:
+        with open(path or LOCAL_SOURCES_FILE, encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, ValueError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def _local_exhibitions(venue, today):
+    out = []
+    for e in (load_local_sources().get("exhibitions") or {}).get(venue) or []:
+        try:
+            if date.fromisoformat(e.get("_closes") or "") >= today:
+                out.append(e)
+        except ValueError:
+            continue
+    return out
+
+
 def scrape_museum_exhibitions(url, ua):
     """What's on view at the big museums. These have no date of their own, so they go in the
     site's "On view now" section instead of on a day."""
@@ -14555,6 +14583,10 @@ def scrape_museum_exhibitions(url, ua):
             found = [_exhibition(n, link, when, venue, today) for n, link, when in parse(soup, page)]
             events += [e for e in found if e]
         except Exception as ex:
+            saved = _local_exhibitions(venue, today)
+            if saved:
+                events += saved
+                continue
             errors.append(f"{venue}: {ex}")
     if len(errors) == len(_EXHIBITION_PAGES):
         raise RuntimeError(errors[0][:200])
