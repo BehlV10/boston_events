@@ -144,6 +144,7 @@ HOST_POLICY = {
     "partiful.com": (1, 1.0),
     "do617.com": (1, 0.5),
     "bostonchildrensmuseum.org": (1, 1.0),  # answered 504 at four at a time
+    "pandemoniumbooks.com": (1, 2.0),  # Shopify product JSON answers 429 after a handful at 0.5 s
 }
 RETRY_STATUSES = {429, 502, 503, 504}
 MAX_RETRY_WAIT = 30
@@ -10278,6 +10279,134 @@ def scrape_side_quest(url, ua):
     return results
 
 
+PANDEMONIUM_BTA = "https://pandemonium-books-games.bookthatapp.com"
+PANDEMONIUM_SHOP = "https://pandemoniumbooks.com"
+
+
+def _bta_datetime(parts):
+    """BookThatApp sends local wall-clock times as [y, m, d, H, M, S]."""
+    try:
+        return datetime(*[int(x) for x in parts[:6]], tzinfo=EASTERN)
+    except (TypeError, ValueError):
+        return None
+
+
+def _shopify_price_and_blurb(prod):
+    """("$7.50" / "Free" / "$5–$10", first sentence of the description) for a Shopify product."""
+    price = None
+    amounts = sorted({float(v["price"]) for v in prod.get("variants") or [] if v.get("price")})
+    if amounts:
+        lo, hi = amounts[0], amounts[-1]
+        fmt = lambda a: f"${a:.2f}".replace(".00", "")
+        price = "Free" if hi == 0 else (fmt(lo) if lo == hi else f"{fmt(lo)}–{fmt(hi)}")
+    text = BeautifulSoup(prod.get("body_html") or "", "html.parser").get_text(" ", strip=True)
+    first = re.split(r"(?<=[.!?])\s|RULES FOR ATTENDING", text, maxsplit=1)[0].strip()
+    return price, (first[:240] or None)
+
+
+def _pandemonium_products(handles, ua):
+    """{handle: (price, blurb)} for BookThatApp event products. Shopify answers 429 after a few
+    single-product requests, so read the "bookthat" collection a page at a time and look up only
+    the handful of products it doesn't list."""
+    found = {}
+    for page in range(1, 9):
+        try:
+            r = _SESSION.get(f"{PANDEMONIUM_SHOP}/collections/bookthat/products.json",
+                             params={"limit": 250, "page": page}, headers={"User-Agent": ua}, timeout=20)
+            r.raise_for_status()
+            prods = r.json().get("products") or []
+        except (requests.RequestException, ValueError):
+            break
+        for prod in prods:
+            if prod.get("handle") in handles:
+                found[prod["handle"]] = _shopify_price_and_blurb(prod)
+        if len(prods) < 250 or handles <= set(found):
+            break
+    for handle in sorted(handles - set(found)):
+        try:
+            r = _SESSION.get(f"{PANDEMONIUM_SHOP}/products/{handle}.json", headers={"User-Agent": ua}, timeout=15)
+            if r.status_code == 200:
+                found[handle] = _shopify_price_and_blurb(r.json().get("product") or {})
+        except (requests.RequestException, ValueError):
+            break  # refused: leave the rest unpriced rather than keep asking
+    return found
+
+
+def scrape_pandemonium(url, ua, days=45):
+    """Pandemonium Books & Games (Central Square) — game nights, tournaments, D&D and author events
+    from its BookThatApp calendar, plus store announcements such as the holiday Geek Faire."""
+    now = datetime.now(EASTERN)
+    params = {"start": now.strftime("%Y-%m-%d"), "end": (now + timedelta(days=days)).strftime("%Y-%m-%d")}
+    hdrs = {"User-Agent": ua, "Accept": "application/json"}
+    events = []
+
+    r = _SESSION.get(f"{PANDEMONIUM_BTA}/availability/schedule.json", params={**params, "calendar": "true"}, headers=hdrs, timeout=20)
+    r.raise_for_status()
+    schedule = r.json().get("schedule") or []
+    products = _pandemonium_products({i["handle"] for i in schedule if i.get("handle")}, ua)
+    for item in schedule:
+        title = (item.get("title") or "").strip()
+        start, end = _bta_datetime(item.get("start")), _bta_datetime(item.get("end"))
+        if not title or not start or start < now or is_placeholder_or_closed_event(title):
+            continue
+        handle = item.get("handle") or ""
+        price, blurb = products.get(handle, (None, None))
+        tags = {t.lower() for t in item.get("tags") or []}
+        is_book = "author events" in tags or "books-product-event" in tags or re.search(r"(?i)\bauthor|book (?:launch|club|signing)", title)
+        desc = blurb or ""
+        if item.get("bookedOut"):
+            desc = ("Sold out. " + desc).strip()
+        events.append({
+            "name": title,
+            "date": start.astimezone(timezone.utc).isoformat(),
+            "end": end.astimezone(timezone.utc).isoformat() if end and end > start else None,
+            "url": urljoin(PANDEMONIUM_SHOP, item.get("url") or f"/products/{handle}"),
+            "venue": "Pandemonium Books & Games",
+            "price": price,
+            "description": desc or None,
+            "category": "books" if is_book else "gaming",
+        })
+
+    # Store-wide announcements (craft fairs, closures). Keep the events, drop the closures.
+    try:
+        r = _SESSION.get(f"{PANDEMONIUM_BTA}/calendar/events.json", params=params, headers=hdrs, timeout=20)
+        r.raise_for_status()
+        announcements = r.json().get("events") or []
+    except (requests.RequestException, ValueError):
+        announcements = []
+    for item in announcements:
+        text = (item.get("title") or "").strip()
+        start, end = _bta_datetime(item.get("start")), _bta_datetime(item.get("end"))
+        if not text or not start or re.search(r"(?i)\b(closed|closing|holiday hours|open (?:late|early)|hours)\b", text):
+            continue
+        if (end or start) < now:
+            continue
+        name = re.sub(r"(?i)^join us (?:for|at) (?:our |the )?", "", text)
+        name = re.split(r"[!.]", name, maxsplit=1)[0].strip()
+        name = name[:1].upper() + name[1:]
+        if len(name) > 80 or is_placeholder_or_closed_event(name):
+            continue
+        # The feed's end time is the store's close; use the hours given in the text when there are any.
+        m = re.search(r"(?i)(\d{1,2})\s*(am|pm)\s*(?:to|-|–)\s*(\d{1,2})\s*(am|pm)", text)
+        if m and not item.get("allDay"):
+            h1 = int(m.group(1)) % 12 + (12 if m.group(2).lower() == "pm" else 0)
+            h2 = int(m.group(3)) % 12 + (12 if m.group(4).lower() == "pm" else 0)
+            start = start.replace(hour=h1, minute=0)
+            end = start.replace(hour=h2, minute=0)
+        is_market = re.search(r"(?i)\b(faire?|market|bazaar|craft)\b", name)
+        events.append({
+            "name": f"{name} at Pandemonium" if is_market else name,
+            "date": start.astimezone(timezone.utc).isoformat(),
+            "end": end.astimezone(timezone.utc).isoformat() if end and end > start else None,
+            "url": url,
+            "venue": "Pandemonium Books & Games",
+            "price": "Free" if is_market else None,
+            "description": text,
+            "category": "markets" if is_market else "gaming",
+        })
+    return events
+
+
 def scrape_remnant(url, ua):
     """Remnant Brewing — splits events between Bow Market (Somerville) and Remnant Satellite (Cambridge)."""
     sep = "&" if "?" in url else "?"
@@ -14707,6 +14836,7 @@ _ALL_VENUES = [
     {"name": "The Plough and Stars", "url": "https://calendar.ploughandstars.com/events/calendar", "ua": UA_CHROME, "scraper": scrape_plough_and_stars, "default_category": "music"},
     {"name": "Sally O'Brien's", "url": "https://www.sallyobriensbar.com/music", "ua": UA_CHROME, "scraper": scrape_sally_obriens, "default_category": "music"},
     {"name": "Side Quest Books & Games", "url": "https://www.eventbrite.com/o/side-quest-books-games-73153292453", "ua": UA_CHROME, "scraper": scrape_side_quest, "default_category": "books"},
+    {"name": "Pandemonium Books & Games", "url": "https://pandemoniumbooks.com/apps/bookthatapp/calendar", "ua": UA_CHROME, "scraper": scrape_pandemonium, "default_category": "gaming"},
     {"name": "Duck Duck Goofs", "url": "https://www.eventbrite.com/d/ma--somerville/duck-duck-goofs/", "ua": UA_CHROME, "scraper": scrape_duck_duck_goofs, "default_category": "comedy"},
     {"name": "Gather Here", "url": "https://gatherhereonline.com/apps/bookthatapp/calendar", "ua": UA_CHROME, "scraper": scrape_gather_here, "default_category": "arts"},
     {"name": "MIT Open Space", "url": "https://openspace.mit.edu/calendar", "ua": UA_CHROME, "scraper": scrape_mit_open_space, "default_category": "community"},
