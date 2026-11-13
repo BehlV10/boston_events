@@ -284,6 +284,8 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
     "perry park": (42.3792, -71.1032, "Somerville", "355 Washington St, Somerville", "Perry Park"),
     "nathan tufts park": (42.4014, -71.1189, "Powderhouse", "Broadway, Somerville", "Nathan Tufts Park"),
     "han": (42.3510, -71.1310, "Allston", "186 Harvard Ave, Allston, Boston", "HAN"),
+    "don't tell aunty": (42.3470, -71.0881, "Back Bay", "1080 Boylston St, Boston", "Don't Tell Aunty"),
+    "dont tell aunty": (42.3470, -71.0881, "Back Bay", "1080 Boylston St, Boston", "Don't Tell Aunty"),
     "lego discovery center": (42.3921, -71.0775, "Assembly Row", "598 Assembly Row, Somerville", "LEGO Discovery Center"),
     "lego discovery center boston": (42.3921, -71.0775, "Assembly Row", "598 Assembly Row, Somerville", "LEGO Discovery Center"),
     "assembly row": (42.3928, -71.0776, "Assembly Row", "Assembly Row, Somerville", "Assembly Row"),
