@@ -236,5 +236,19 @@
     "date": "2026-11-15T12:00:00-05:00",
     "price": "Free",
     "description": "Artist books, zines, catalogs, comics and printed matter from local, national and international publishers. Open to the public 12–5 PM, free admission."
+  },
+  {
+    "name": "Diwali at Don't Tell Aunty with DJ Ravlor",
+    "venue": "Don't Tell Aunty",
+    "date": "2026-11-13T22:00:00-05:00",
+    "url": "https://flite.city/e/diwali-at-don-t-tell-aunty-with-dj-ravlor",
+    "category": "clubbing",
+    "price": "$23",
+    "city": "boston",
+    "address": "1080 Boylston St, Boston, MA 02115",
+    "description": "One last Diwali party with DJ Ravlor, presented by Bollywood In Boston. Traditional wear highly recommended. Doors 10 PM, 21+ with valid ID, no refunds. VIP tables: 480-371-7787.",
+    "_is_community": true,
+    "_source_venue": "Community Submission",
+    "submitted_at": "2026-11-13T19:32:18.005945+00:00"
   }
 ]
