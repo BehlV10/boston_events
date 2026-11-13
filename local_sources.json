@@ -1,0 +1,40 @@
+{
+ "exhibitions": {
+  "Isabella Stewart Gardner Museum": [
+   {
+    "_closes": "2027-01-18",
+    "_exhibition": true,
+    "category": "art",
+    "date": null,
+    "description": "Exhibition on view through January 18, 2027.",
+    "name": "The Book of Esther in the Age of Rembrandt (through Jan 18)",
+    "price": null,
+    "url": "https://www.gardnermuseum.org/calendar/exhibition/esther",
+    "venue": "Isabella Stewart Gardner Museum"
+   },
+   {
+    "_closes": "2027-01-18",
+    "_exhibition": true,
+    "category": "art",
+    "date": null,
+    "description": "Exhibition on view through January 18, 2027.",
+    "name": "Michal Rovner: Esther Scrolls (through Jan 18)",
+    "price": null,
+    "url": "https://www.gardnermuseum.org/calendar/exhibition/esther-scrolls",
+    "venue": "Isabella Stewart Gardner Museum"
+   },
+   {
+    "_closes": "2027-02-08",
+    "_exhibition": true,
+    "category": "art",
+    "date": null,
+    "description": "Exhibition on view through February 8, 2027.",
+    "name": "Michal Rovner: Untitled/Night, 2016 (through Feb 8)",
+    "price": null,
+    "url": "https://www.gardnermuseum.org/calendar/exhibition/rovner-facade",
+    "venue": "Isabella Stewart Gardner Museum"
+   }
+  ]
+ },
+ "fetched_at": "2026-11-13T14:45:36+00:00"
+}

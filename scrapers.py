@@ -1847,6 +1847,61 @@ def scrape_wheelock_family_theatre(url, ua):
     return out
 
 
+_OVATIONTIX_SOCIAL_RE = re.compile(r"(?i)\b(?:celebration|reunion|bbq|barbecue|party|gala|social)\b")
+
+
+def scrape_ovationtix_calendar(url, ua, client_id, venue, address=None, category="stage", days=120):
+    """Every showtime on an OvationTix box office's public calendar (the API its own calendar page calls)."""
+    now = datetime.now(EASTERN)
+    resp = _SESSION.get("https://web.ovationtix.com/trs/api/rest/CalendarProductions",
+                        params={"startDate": now.strftime("%Y-%m-%d"),
+                                "endDate": (now + timedelta(days=days)).strftime("%Y-%m-%d")},
+                        headers={"User-Agent": ua, "clientId": str(client_id), "newCIRequest": "true",
+                                 "Accept": "application/json"}, timeout=20)
+    resp.raise_for_status()
+    out = []
+    for day in resp.json() or []:
+        for prod in day.get("productions") or []:
+            name = html.unescape(prod.get("name") or "").strip()
+            if not name or prod.get("hidden") or is_placeholder_or_closed_event(name):
+                continue
+            for show in prod.get("showtimes") or []:
+                if show.get("isCancelled") or not show.get("isVisible", True):
+                    continue
+                try:
+                    start = datetime.strptime(show["performanceStartTime"], "%Y-%m-%d %H:%M").replace(tzinfo=EASTERN)
+                except (KeyError, ValueError):
+                    continue
+                if start < now:
+                    continue
+                end = None
+                try:
+                    end = datetime.strptime(show.get("performanceEndTime") or "", "%Y-%m-%d %H:%M").replace(tzinfo=EASTERN)
+                except ValueError:
+                    pass
+                sold_out = show.get("isSoldOut") or show.get("remainingTix") is False
+                ev = {
+                    "name": name,
+                    "date": start.astimezone(timezone.utc).isoformat(),
+                    "end": end.astimezone(timezone.utc).isoformat() if end and end > start else None,
+                    "url": f"https://ci.ovationtix.com/{client_id}/production/{prod.get('productionId')}",
+                    "venue": venue,
+                    "price": None,
+                    "category": "community" if _OVATIONTIX_SOCIAL_RE.search(name) else category,
+                }
+                if address:
+                    ev["address"] = address
+                if sold_out:
+                    ev["description"] = "Sold out."
+                out.append(ev)
+    return out
+
+
+def scrape_footlight_club(url, ua):
+    """The Footlight Club, Jamaica Plain's community theater (Eliot Hall), via its OvationTix box office."""
+    return scrape_ovationtix_calendar(url, ua, 36903, "Footlight Club", "7A Eliot St, Jamaica Plain, MA")
+
+
 _CAMBRIDGE_FAMILIES_TOPIC = "{4E643AB6-0153-4FE4-A112-51C0B463F2F3}"
 _CAMBRIDGE_FORM = "body_0$content_0$"
 _CAMBRIDGE_SKIP_RE = re.compile(r"(?i)\b(?:meeting|hearing|commission|committee|board of)\b")
@@ -14484,7 +14539,7 @@ def _exhibition(name, link, when, venue, today):
     if not name or not end or end < today or (start and start > today):
         return None   # upcoming, closed, or a permanent gallery
     return {"name": f"{name} (through {end.strftime('%b %-d')})", "date": None, "url": link,
-            "venue": venue, "price": None, "category": "art", "_exhibition": True,
+            "venue": venue, "price": None, "category": "art", "_exhibition": True, "_closes": end.isoformat(),
             "description": f"Exhibition on view through {end.strftime('%B %-d, %Y')}."}
 
 
@@ -14544,6 +14599,34 @@ _OPEN_ENDED_EXHIBITIONS = (
 )
 
 
+# Exhibition pages that answer 403 to GitHub's runners but work from a home network (the Gardner's
+# calendar is behind a Cloudflare challenge everywhere, so only its exhibitions page is saved). Run
+# scripts/refresh_local_sources.py from a laptop now and then; builds fall back to that copy,
+# minus shows that have closed, whenever the live fetch fails.
+LOCAL_SOURCES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "local_sources.json")
+LOCAL_REFRESH_EXHIBITIONS = ("Isabella Stewart Gardner Museum",)
+
+
+def load_local_sources(path=None):
+    try:
+        with open(path or LOCAL_SOURCES_FILE, encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, ValueError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def _local_exhibitions(venue, today):
+    out = []
+    for e in (load_local_sources().get("exhibitions") or {}).get(venue) or []:
+        try:
+            if date.fromisoformat(e.get("_closes") or "") >= today:
+                out.append(e)
+        except ValueError:
+            continue
+    return out
+
+
 def scrape_museum_exhibitions(url, ua):
     """What's on view at the big museums. These have no date of their own, so they go in the
     site's "On view now" section instead of on a day."""
@@ -14555,6 +14638,10 @@ def scrape_museum_exhibitions(url, ua):
             found = [_exhibition(n, link, when, venue, today) for n, link, when in parse(soup, page)]
             events += [e for e in found if e]
         except Exception as ex:
+            saved = _local_exhibitions(venue, today)
+            if saved:
+                events += saved
+                continue
             errors.append(f"{venue}: {ex}")
     if len(errors) == len(_EXHIBITION_PAGES):
         raise RuntimeError(errors[0][:200])
@@ -14758,6 +14845,7 @@ _ALL_VENUES = [
     {"name": "USS Constitution Museum", "url": "https://ussconstitutionmuseum.org/events/", "ua": UA_SITE, "scraper": scrape_uss_constitution_museum, "default_category": "community"},
     {"name": "Mosesian Center for the Arts", "url": "https://www.mosesianarts.org/events/", "ua": UA_SITE, "scraper": scrape_mosesian_center, "default_category": "art"},
     {"name": "Wheelock Family Theatre", "url": "https://www.wheelockfamilytheatre.org/performances/current-season/", "ua": UA_SITE, "scraper": scrape_wheelock_family_theatre, "default_category": "family"},
+    {"name": "Footlight Club", "url": "https://ci.ovationtix.com/36903", "ua": UA_CHROME, "scraper": scrape_footlight_club, "default_category": "stage"},
     {"name": "Fenway Community Center", "url": "https://fenwaycommunitycenter.org/wp-json/tribe/events/v1/events", "ua": UA_CHROME, "scraper": scrape_fenway_community_center, "default_category": "family"},
     {"name": "Discovery Museum", "url": "https://www.discoveryacton.org/visit/events-programs", "ua": UA_CHROME, "scraper": scrape_discovery_museum, "default_category": "family"},
     {"name": "Emerald Necklace Conservancy", "url": "https://www.emeraldnecklace.org/calendar", "ua": UA_CHROME, "scraper": scrape_emerald_necklace, "default_category": "outdoors"},
