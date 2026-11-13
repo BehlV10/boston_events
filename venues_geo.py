@@ -308,6 +308,13 @@ VENUE_COORDINATES: Dict[str, Tuple[float, float, str, str, str]] = {
     "tuck's arcadium": (42.3725, -71.1205, "Harvard Square", "36 John F. Kennedy St, Cambridge", "Tuck's Arcadium"),
     "tucks arcadium": (42.3725, -71.1205, "Harvard Square", "36 John F. Kennedy St, Cambridge", "Tuck's Arcadium"),
     "special interest social": (42.3725, -71.1205, "Harvard Square", "36 John F. Kennedy St, Cambridge", "Special Interest Social"),
+    "the palladium (worcester)": (42.2667, -71.8008, "Worcester", "261 Main St, Worcester", "The Palladium"),
+    "palladium-ma": (42.2667, -71.8008, "Worcester", "261 Main St, Worcester", "The Palladium"),
+    "palladium worcester": (42.2667, -71.8008, "Worcester", "261 Main St, Worcester", "The Palladium"),
+    "palladium": (42.2667, -71.8008, "Worcester", "261 Main St, Worcester", "The Palladium"),
+    "the hanover theatre (worcester)": (42.2612, -71.8032, "Worcester", "2 Southbridge St, Worcester", "The Hanover Theatre"),
+    "the hanover theatre": (42.2612, -71.8032, "Worcester", "2 Southbridge St, Worcester", "The Hanover Theatre"),
+    "hanover theatre": (42.2612, -71.8032, "Worcester", "2 Southbridge St, Worcester", "The Hanover Theatre"),
     "tuscan village": (42.7788, -71.2185, "Salem, NH", "9 Via Toscana, Salem, NH", "Tuscan Village"),
     "seaport common": (42.3517, -71.0446, "Seaport", "85 Northern Ave, Boston", "Seaport Common"),
     "union square": (42.3797, -71.0965, "Union Square", "Union Square, Somerville", "Union Square"),
@@ -1105,7 +1112,7 @@ VENUE_RULES = [
 
 # Coordinate bounding box for valid Greater Boston / Eastern MA events
 MIN_LAT, MAX_LAT = 41.8, 42.8
-MIN_LNG, MAX_LNG = -71.8, -70.5
+MIN_LNG, MAX_LNG = -71.85, -70.5  # west edge takes in downtown Worcester (Palladium, Hanover Theatre)
 
 
 # Sources whose coordinates are approximate (Ticketmaster often returns an area point, not the
