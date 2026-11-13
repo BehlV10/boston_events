@@ -14533,6 +14533,11 @@ _EXHIBITION_PAGES = (
     ("Harvard Art Museums", "https://harvardartmuseums.org/visit/exhibitions", _exhibits_harvard),
     ("Peabody Essex Museum", "https://www.pem.org/exhibitions", _exhibits_pem),
 )
+# Shows at museums whose pages we can't read (MIT Museum sits behind a Vercel bot check), entered
+# by hand from their press releases: (name, url, venue, opens, closes). Each drops off after it closes.
+_CURATED_EXHIBITIONS = (
+    ("Split | Second", "https://mitmuseum.mit.edu/exhibitions", "MIT Museum", date(2026, 2, 19), date(2027, 1, 4)),
+)
 # Shows with no closing date, from pages with no list to read
 _OPEN_ENDED_EXHIBITIONS = (
     ("Music America", "https://www.bochcenter.org/", "Boch Center Wang Theatre"),
@@ -14553,6 +14558,11 @@ def scrape_museum_exhibitions(url, ua):
             errors.append(f"{venue}: {ex}")
     if len(errors) == len(_EXHIBITION_PAGES):
         raise RuntimeError(errors[0][:200])
+    for name, link, venue, opens, closes in _CURATED_EXHIBITIONS:
+        if opens <= today <= closes:
+            events.append({"name": f"{name} (through {closes.strftime('%b %-d')})", "date": None, "url": link,
+                           "venue": venue, "price": None, "category": "art", "_exhibition": True,
+                           "description": f"Exhibition on view through {closes.strftime('%B %-d, %Y')}."})
     for name, link, venue in _OPEN_ENDED_EXHIBITIONS:
         events.append({"name": name, "date": None, "url": link, "venue": venue, "price": None,
                        "category": "art", "_exhibition": True, "description": "Exhibition on view."})
