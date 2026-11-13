@@ -8855,16 +8855,20 @@ def render_page(results, weather=None, luckyseat_shows=None):
 
     deferred_content = "".join(deferred_sections)
     try:
+        from affiliate import rewrite_html as _affiliate
+    except ImportError:
+        _affiliate = lambda page: page  # noqa: E731
+    try:
         base_dir = os.path.dirname(os.path.abspath(__file__))
         with open(os.path.join(base_dir, "deferred_days.html"), "w", encoding="utf-8") as f:
-            f.write(deferred_content)
+            f.write(_affiliate(deferred_content))
         # Rewritten from scratch each build, so days that have passed don't pile up
         days_dir = os.path.join(base_dir, "days")
         shutil.rmtree(days_dir, ignore_errors=True)
         os.makedirs(days_dir, exist_ok=True)
         for iso, sec_html in deferred_by_date:
             with open(os.path.join(days_dir, f"{iso}.html"), "w", encoding="utf-8") as f:
-                f.write(sec_html)
+                f.write(_affiliate(sec_html))
     except Exception:
         pass
 

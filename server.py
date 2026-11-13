@@ -227,6 +227,15 @@ def export_json(path="events.json", force=False):
     print(f"wrote {path}: {new_total} events across {len(venues)} venues")
 
 
+def _with_affiliate_links(page):
+    """Ticket links through the affiliate programs switched on in affiliates.json (none: unchanged)."""
+    try:
+        from affiliate import rewrite_html
+    except ImportError:
+        return page
+    return rewrite_html(page)
+
+
 def export_html(path="index.html", force=False, source_json="events.json"):
     """Render and write a static self-contained HTML page."""
     venues = None
@@ -251,7 +260,7 @@ def export_html(path="index.html", force=False, source_json="events.json"):
     if not luckyseat:
         luckyseat = fetch_luckyseat_boston()
 
-    html = render_page(venues, weather=weather, luckyseat_shows=luckyseat)
+    html = _with_affiliate_links(render_page(venues, weather=weather, luckyseat_shows=luckyseat))
     with open(path, "w", encoding="utf-8") as f:
         f.write(html)
     print(f"wrote {path}: {len(html):,} bytes")
@@ -266,7 +275,7 @@ def export_html(path="index.html", force=False, source_json="events.json"):
             hub_dir = os.path.join(base_dir, hub_slug)
             os.makedirs(hub_dir, exist_ok=True)
             extra = {}
-            hub_html = render_hub_page(hub_slug, hub_events, site_url=site_url, extra_files=extra)
+            hub_html = _with_affiliate_links(render_hub_page(hub_slug, hub_events, site_url=site_url, extra_files=extra))
             hub_path = os.path.join(hub_dir, "index.html")
             with open(hub_path, "w", encoding="utf-8") as f:
                 f.write(hub_html)
@@ -274,7 +283,7 @@ def export_html(path="index.html", force=False, source_json="events.json"):
                 extra_path = os.path.join(hub_dir, name)
                 if name in extra:
                     with open(extra_path, "w", encoding="utf-8") as f:
-                        f.write(extra[name])
+                        f.write(_with_affiliate_links(extra[name]))
                 elif os.path.exists(extra_path):
                     os.remove(extra_path)
             print(f"wrote directory hub {hub_path}: {len(hub_html):,} bytes")

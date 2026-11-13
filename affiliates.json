@@ -1,0 +1,7 @@
+{
+ "_how": "Paste each seller's deep-link template from its affiliate network with {url} where the ticket page goes, e.g. https://ticketmaster.evyy.net/c/<your publisher id>/264167/4272?u={url}. An empty template means the seller is off. See affiliate.py.",
+ "sellers": [
+  {"name": "Ticketmaster", "network": "Impact", "hosts": ["ticketmaster.com", "livenation.com"], "template": ""},
+  {"name": "SeatGeek", "network": "Impact", "hosts": ["seatgeek.com"], "template": ""}
+ ]
+}
