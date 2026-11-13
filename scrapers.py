@@ -5340,14 +5340,25 @@ def scrape_mfa_boston(url, ua):
             except ValueError:
                 pass
         is_free = mentions_free(raw_text)
-        events.append({
+        # A row reads "Film | Boston Turkish Festival's ... Competition | Night of Blindness | Friday, ...":
+        # the kind of program, then the series it belongs to (when there is one), then the title.
+        parts = [p.strip() for p in (row.get_text("|", strip=True) if row else "").split("|") if p.strip()]
+        kind, series = "", ""
+        if title in parts:
+            i = parts.index(title)
+            kind = parts[0] if i >= 1 else ""
+            series = " ".join(parts[1:i]) if i >= 2 else ""
+        ev = {
             "name": f"MFA: {title}",
             "date": iso,
             "url": full_url,
             "venue": "Museum of Fine Arts (MFA)",
             "price": "Free with admission" if is_free else None,
-            "category": "art",
-        })
+            "category": "film" if kind.lower() == "film" else "art",
+        }
+        if series and not re.match(r"[A-Z0-9]{2,}-[A-Z0-9]+\b", series):  # not a course code ("WK4-F Printmaking")
+            ev["description"] = f"Part of {series}."
+        events.append(ev)
     return events
 
 

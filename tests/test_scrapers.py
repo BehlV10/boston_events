@@ -2032,6 +2032,24 @@ class TestBostonEvents(unittest.TestCase):
             names = [e["name"] for e in scrapers.scrape_mfa_boston("https://www.mfa.org/programs", "ua")]
         self.assertEqual(names, ["MFA: Revere and Rodallega", "MFA: Late Nites"])
 
+    def test_mfa_films_get_film_category_and_series(self):
+        from unittest.mock import patch
+        from bs4 import BeautifulSoup
+        import scrapers
+        rows = [["Film", "Boston Turkish Festival’s Documentary and Short Film Competition", "Night of Blindness"],
+                ["Lecture", "Revere and Rodallega"], ["Course", "WK4-F Printmaking", "Relief Printmaking"]]
+        page = "".join('<div class="row">' + "".join(f"<span>{p}</span>" for p in r[:-1]) +
+                       f'<a href="/event/{i}">{r[-1]}</a><span>Friday, November 13, 2026</span><span>7:30 pm</span></div>'
+                       for i, r in enumerate(rows))
+        with patch.object(scrapers, "fetch_soup", return_value=BeautifulSoup(page, "html.parser")):
+            evs = {e["name"]: e for e in scrapers.scrape_mfa_boston("https://www.mfa.org/programs", "ua")}
+        film = evs["MFA: Night of Blindness"]
+        self.assertEqual(film["category"], "film")
+        self.assertEqual(film["description"], "Part of Boston Turkish Festival’s Documentary and Short Film Competition.")
+        self.assertEqual(evs["MFA: Revere and Rodallega"]["category"], "art")
+        self.assertNotIn("description", evs["MFA: Revere and Rodallega"])
+        self.assertNotIn("description", evs["MFA: Relief Printmaking"])
+
     def test_bibliocommons_kids_audience_and_bpl_branches(self):
         from unittest.mock import patch, MagicMock
         # (uses the module's frozen clock; see setUpModule)
