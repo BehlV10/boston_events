@@ -7,8 +7,8 @@ X-WR-CALNAME:Boston Live Events & Shows
 X-WR-TIMEZONE:America/New_York
 X-WR-CALDESC:Curated live shows, concerts, and comedy across Boston, Cambridge, and Somerville.
 BEGIN:VEVENT
-UID:20261114_5319387855@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261114_6928046043@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261114
 SUMMARY:"Broad Strokes" Paint & Sip Social @ The Substation (Roslindale)
 LOCATION:The Substation (Roslindale), Boston MA
@@ -17,8 +17,8 @@ URL:https://thesubstation.space/events-all/paint-amp-sip
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261118_6993413562@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261118_1137254536@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261118
 SUMMARY:Cardivalle: Trading Card Show @ The Substation (Roslindale)
 LOCATION:The Substation (Roslindale), Boston MA
@@ -27,8 +27,8 @@ URL:https://thesubstation.space/events-all/cardivalle-trading-card-show-ft62f
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261120_8672433580@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261120_6616765156@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261120
 SUMMARY:Retro Game Night @ The Substation (Roslindale)
 LOCATION:The Substation (Roslindale), Boston MA
@@ -37,8 +37,8 @@ URL:https://thesubstation.space/events-all/sntmxj43w35j67for0p3pc8mtzxrip-fz88b-
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261125_3498171326@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261125_6499955315@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261125
 SUMMARY:Playing Games With @ The Substation (Roslindale)
 LOCATION:The Substation (Roslindale), Boston MA
@@ -47,8 +47,8 @@ URL:https://thesubstation.space/events-all/playing-games-with
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261128_7569391134@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261128_5159500380@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261128
 SUMMARY:Folk Song Society Pub Carol Sing 2026 @ The Substation (Roslindale)
 LOCATION:The Substation (Roslindale), Boston MA
@@ -57,8 +57,8 @@ URL:https://thesubstation.space/events-all/folk-song-society-pub-carol-sing-2026
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261128_4204507467@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261128_7385519046@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261128
 SUMMARY:Tree Lighting In The Square AFTERPARTY @ The Substation (Roslindale)
 LOCATION:The Substation (Roslindale), Boston MA
@@ -67,8 +67,8 @@ URL:https://thesubstation.space/events-all/tree-lighting-in-the-square-afterpart
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261204_2959381058@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261204_2930729060@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261204
 SUMMARY:Rozzie Bound Author Talk: The House of the Mouse @ The Substation (Roslindale)
 LOCATION:The Substation (Roslindale), Boston MA
@@ -77,8 +77,8 @@ URL:https://thesubstation.space/events-all/rozzie-bound-author-talk-the-house-of
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261205_8019717470@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261205_4585983487@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261205
 SUMMARY:Overtime Comedy @ The Substation (Roslindale)
 LOCATION:The Substation (Roslindale), Boston MA
@@ -87,8 +87,8 @@ URL:https://thesubstation.space/events-all/overtime-comedy-ghkmp
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261206_4210461937@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261206_4923889946@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261206
 SUMMARY:The Joy Party @ The Substation (Roslindale)
 LOCATION:The Substation (Roslindale), Boston MA
@@ -97,8 +97,8 @@ URL:https://thesubstation.space/events-all/the-joy-party-1-tgdtg
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261211_8359493999@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261211_2536896808@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261211
 SUMMARY:Holiday Concert and Cookie Swap @ The Substation (Roslindale)
 LOCATION:The Substation (Roslindale), Boston MA
@@ -107,8 +107,8 @@ URL:https://thesubstation.space/events-all/holiday-concert-and-cookie-swap
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261216_6993413562@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261216_1137254536@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261216
 SUMMARY:Cardivalle: Trading Card Show @ The Substation (Roslindale)
 LOCATION:The Substation (Roslindale), Boston MA
@@ -117,8 +117,8 @@ URL:https://thesubstation.space/events-all/cardivalle-trading-card-show-ft62f-4j
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261218_2444718592@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261218_8369052677@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261218
 SUMMARY:Thirdsday Night Karaoke! @ The Substation (Roslindale)
 LOCATION:The Substation (Roslindale), Boston MA
@@ -127,8 +127,8 @@ URL:https://thesubstation.space/events-all/thirdsday-night-karaoke-xh4xc-sxlr8-f
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270110_4210461937@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20270110_4923889946@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20270110
 SUMMARY:The Joy Party @ The Substation (Roslindale)
 LOCATION:The Substation (Roslindale), Boston MA
@@ -137,8 +137,8 @@ URL:https://thesubstation.space/events-all/the-joy-party-1-tgdtg-6rl67
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270214_4210461937@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20270214_4923889946@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20270214
 SUMMARY:The Joy Party @ The Substation (Roslindale)
 LOCATION:The Substation (Roslindale), Boston MA
@@ -147,8 +147,8 @@ URL:https://thesubstation.space/events-all/the-joy-party-1-tgdtg-lktsb
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270314_4210461937@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20270314_4923889946@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20270314
 SUMMARY:The Joy Party @ The Substation (Roslindale)
 LOCATION:The Substation (Roslindale), Boston MA
@@ -157,8 +157,8 @@ URL:https://thesubstation.space/events-all/the-joy-party-1-tgdtg-rygar
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270411_4210461937@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20270411_4923889946@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20270411
 SUMMARY:The Joy Party @ The Substation (Roslindale)
 LOCATION:The Substation (Roslindale), Boston MA
@@ -167,8 +167,8 @@ URL:https://thesubstation.space/events-all/the-joy-party-1-tgdtg-rygar-8s93z
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20271007_3789841631@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20271007_1479166446@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20271007
 SUMMARY:Open Circuit: Special Event with AgeStrong and OYEA @ The Substation (Roslindale)
 LOCATION:The Substation (Roslindale), Boston MA
@@ -177,8 +177,8 @@ URL:https://thesubstation.space/events-all/open-circuit-special-event-with-agest
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270228_5520515783@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20270228_5811614466@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20270228
 SUMMARY:James Keelaghan @ Music on Centre
 LOCATION:Music on Centre, Boston MA
@@ -187,8 +187,8 @@ URL:https://bostoncoffeehouses.org/event/james-keelaghan-5/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270314_7210842407@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20270314_3193321125@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20270314
 SUMMARY:Kathleen Parks Trio @ Music on Centre
 LOCATION:Music on Centre, Boston MA
@@ -197,8 +197,8 @@ URL:https://bostoncoffeehouses.org/event/kathleen-parks-trio/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270410_2499692318@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20270410_8639365691@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20270410
 SUMMARY:Cliff Eberhardt with Louise Coombe opening @ Music on Centre
 LOCATION:Music on Centre, Boston MA
@@ -207,8 +207,8 @@ URL:https://bostoncoffeehouses.org/event/cliff-eberhardt-with-louise-coombe-open
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270508_2790732929@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20270508_4300256395@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20270508
 SUMMARY:Joe Crookston @ Music on Centre
 LOCATION:Music on Centre, Boston MA
@@ -217,8 +217,8 @@ URL:https://bostoncoffeehouses.org/event/joe-crookston-4/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261118_1374001521@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261118_6415998309@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261118
 SUMMARY:Dorchester Historical Society: Boston in 50 Maps @ Dorchester Historical Society
 LOCATION:Dorchester Historical Society, Boston MA
@@ -227,8 +227,8 @@ URL:https://www.dorchesterhistoricalsociety.org/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261114_4642902666@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261114_4202794749@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261114
 SUMMARY:Crime Machine (ex Answerman)\, Guilloteenagers and Bad Idea @ Square Root
 LOCATION:Square Root, Boston MA
@@ -237,8 +237,8 @@ URL:https://tockify.com/sqrozzietester/detail/1174/1794618000000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261115_5276086722@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261115_4645852954@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261115
 SUMMARY:The Melt @ Square Root
 LOCATION:Square Root, Boston MA
@@ -247,8 +247,8 @@ URL:https://tockify.com/sqrozzietester/detail/1023/1794704400000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261116_1748961698@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261116_7785176471@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261116
 SUMMARY:Sunday Jazz: Brian Friedland birthday jam @ Square Root
 LOCATION:Square Root, Boston MA
@@ -257,8 +257,8 @@ URL:https://tockify.com/sqrozzietester/detail/991/1794787200000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261117_1418516508@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261117_2642879494@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261117
 SUMMARY:Trivia with Ticco and Matt @ Square Root
 LOCATION:Square Root, Boston MA
@@ -267,8 +267,8 @@ URL:https://tockify.com/sqrozzietester/detail/434/1794873600000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261119_8937921531@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261119_2444594451@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261119
 SUMMARY:Tent IPO 1 @ Square Root
 LOCATION:Square Root, Boston MA
@@ -277,8 +277,8 @@ URL:https://tockify.com/sqrozzietester/detail/1154/1795046400000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261120_5171517961@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261120_4916104506@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261120
 SUMMARY:Tent IPO 2 @ Square Root
 LOCATION:Square Root, Boston MA
@@ -287,8 +287,8 @@ URL:https://tockify.com/sqrozzietester/detail/1155/1795132800000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261121_5035769335@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261121_4107005912@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261121
 SUMMARY:Tent IPO 3 @ Square Root
 LOCATION:Square Root, Boston MA
@@ -297,8 +297,8 @@ URL:https://tockify.com/sqrozzietester/detail/1156/1795219200000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261122_1092805871@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261122_1431777158@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261122
 SUMMARY:Tent IPO 4 @ Square Root
 LOCATION:Square Root, Boston MA
@@ -307,8 +307,8 @@ URL:https://tockify.com/sqrozzietester/detail/1157/1795305600000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261122_2436681162@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261122_2977397084@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261122
 SUMMARY:Slow Boat Home @ Square Root
 LOCATION:Square Root, Boston MA
@@ -317,8 +317,8 @@ URL:https://tockify.com/sqrozzietester/detail/1141/1795381200000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261123_8158015035@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261123_7367601971@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261123
 SUMMARY:Sunday Jazz: New World Jazz Composers Octet @ Square Root
 LOCATION:Square Root, Boston MA
@@ -327,8 +327,8 @@ URL:https://tockify.com/sqrozzietester/detail/992/1795392000000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261124_6549395141@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261124_1048941418@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261124
 SUMMARY:TableTop Game Night @ Square Root
 LOCATION:Square Root, Boston MA
@@ -337,8 +337,8 @@ URL:https://tockify.com/sqrozzietester/detail/1177/1795482000000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261126_6017238973@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261126_8818080292@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261126
 SUMMARY:Pub Quiz @ Square Root
 LOCATION:Square Root, Boston MA
@@ -347,8 +347,8 @@ URL:https://tockify.com/sqrozzietester/detail/307/1795654800000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261129_6941241503@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261129_1259495261@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261129
 SUMMARY:Amelia Cate\, Frank Critelli and Kara Colvin @ Square Root
 LOCATION:Square Root, Boston MA
@@ -357,8 +357,8 @@ URL:https://tockify.com/sqrozzietester/detail/1180/1795914000000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261129_8646649633@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261129_3502721305@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261129
 SUMMARY:Mess Around @ Square Root
 LOCATION:Square Root, Boston MA
@@ -367,8 +367,8 @@ URL:https://tockify.com/sqrozzietester/detail/642/1794776400000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261130_9167550401@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261130_5827844830@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261130
 SUMMARY:Karaoke @ Square Root
 LOCATION:Square Root, Boston MA
@@ -377,8 +377,8 @@ URL:https://tockify.com/sqrozzietester/detail/855/1796000400000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261201_1418516508@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261201_2642879494@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261201
 SUMMARY:Trivia with Ticco and Matt @ Square Root
 LOCATION:Square Root, Boston MA
@@ -387,8 +387,8 @@ URL:https://tockify.com/sqrozzietester/detail/434/1796083200000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261203_5026703269@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261203_5923017842@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261203
 SUMMARY:Square Root Readings: Furious Poetry Reading + Open Mic hosted by Kristin Kelley with Danielle Jones\, K.T. Landon\, and Clay Ventre. $5 cover or pay what you can. All proceeds go to PAWSitive Pantry. @ Square Root
 LOCATION:Square Root, Boston MA
@@ -397,8 +397,8 @@ URL:https://tockify.com/sqrozzietester/detail/939/1796259600000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261204_2601730387@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261204_4889989364@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261204
 SUMMARY:Singer Songwriter Night with Levon Roussin and Carla Ryder @ Square Root
 LOCATION:Square Root, Boston MA
@@ -407,8 +407,8 @@ URL:https://tockify.com/sqrozzietester/detail/874/1796342400000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261205_6362881197@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261205_1432371205@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261205
 SUMMARY:Carboy @ Square Root
 LOCATION:Square Root, Boston MA
@@ -417,8 +417,8 @@ URL:https://tockify.com/sqrozzietester/detail/1170/1796432400000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261205_9206358683@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261205_3582776159@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261205
 SUMMARY:Zweigelt Duo @ Square Root
 LOCATION:Square Root, Boston MA
@@ -427,8 +427,8 @@ URL:https://tockify.com/sqrozzietester/detail/1193/1796482800000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261206_7776822855@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261206_6343772273@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261206
 SUMMARY:Hold for Monterey Mountain @ Square Root
 LOCATION:Square Root, Boston MA
@@ -437,8 +437,8 @@ URL:https://tockify.com/sqrozzietester/detail/1001/1796518800000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261206_2274237889@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261206_5250051124@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261206
 SUMMARY:Royer’s One Man Band @ Square Root
 LOCATION:Square Root, Boston MA
@@ -447,8 +447,8 @@ URL:https://tockify.com/sqrozzietester/detail/863/1796158800000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261207_1960376911@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261207_4933180115@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261207
 SUMMARY:Clear Audience @ Square Root
 LOCATION:Square Root, Boston MA
@@ -457,8 +457,8 @@ URL:https://tockify.com/sqrozzietester/detail/933/1796601600000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261210_6017238973@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261210_8818080292@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261210
 SUMMARY:Pub Quiz @ Square Root
 LOCATION:Square Root, Boston MA
@@ -467,8 +467,8 @@ URL:https://tockify.com/sqrozzietester/detail/307/1796864400000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261211_2742015105@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261211_7671210659@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261211
 SUMMARY:RFS presents Eyes Wide Shut @ Square Root
 LOCATION:Square Root, Boston MA
@@ -477,8 +477,8 @@ URL:https://tockify.com/sqrozzietester/detail/1152/1796947200000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261212_6036230442@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261212_8183680645@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261212
 SUMMARY:Louder than Milk\, Emily Grogan and Rozbuds @ Square Root
 LOCATION:Square Root, Boston MA
@@ -487,8 +487,8 @@ URL:https://tockify.com/sqrozzietester/detail/1171/1797037200000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261213_4768871513@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261213_5716348583@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261213
 SUMMARY:Stop Calling Me Frank\, The Wynotts and TBD @ Square Root
 LOCATION:Square Root, Boston MA
@@ -497,8 +497,8 @@ URL:https://tockify.com/sqrozzietester/detail/1166/1797123600000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261213_4265370093@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261213_3522577572@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261213
 SUMMARY:Sado Domestics @ Square Root
 LOCATION:Square Root, Boston MA
@@ -507,8 +507,8 @@ URL:https://tockify.com/sqrozzietester/detail/824/1797195600000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261214_8735096773@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261214_2327353300@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261214
 SUMMARY:Sunday Jazz: Xmas jam @ Square Root
 LOCATION:Square Root, Boston MA
@@ -517,8 +517,8 @@ URL:https://tockify.com/sqrozzietester/detail/993/1797206400000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261215_1418516508@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261215_2642879494@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261215
 SUMMARY:Trivia with Ticco and Matt @ Square Root
 LOCATION:Square Root, Boston MA
@@ -527,8 +527,8 @@ URL:https://tockify.com/sqrozzietester/detail/434/1797292800000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261217_6476511843@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261217_3877089341@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261217
 SUMMARY:Jazz with Hellbender @ Square Root
 LOCATION:Square Root, Boston MA
@@ -537,8 +537,8 @@ URL:https://tockify.com/sqrozzietester/detail/889/1797469200000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261218_1252714036@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261218_2743295209@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261218
 SUMMARY:Roslindale Comedy @ Square Root
 LOCATION:Square Root, Boston MA
@@ -547,8 +547,8 @@ URL:https://tockify.com/sqrozzietester/detail/702/1797552000000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261219_5276086722@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261219_4645852954@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261219
 SUMMARY:The Melt @ Square Root
 LOCATION:Square Root, Boston MA
@@ -557,8 +557,8 @@ URL:https://tockify.com/sqrozzietester/detail/1024/1797642000000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261220_6335887569@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261220_6370328350@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261220
 SUMMARY:hold for RFS @ Square Root
 LOCATION:Square Root, Boston MA
@@ -567,8 +567,8 @@ URL:https://tockify.com/sqrozzietester/detail/1165/1797728400000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261220_8646649633@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261220_3502721305@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261220
 SUMMARY:Mess Around @ Square Root
 LOCATION:Square Root, Boston MA
@@ -577,8 +577,8 @@ URL:https://tockify.com/sqrozzietester/detail/642/1797800400000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261221_4135751896@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261221_6023850742@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261221
 SUMMARY:Sunday Jazz: Brooke Sofferman’s Adventure Time/Dave Fox Trio @ Square Root
 LOCATION:Square Root, Boston MA
@@ -587,8 +587,8 @@ URL:https://tockify.com/sqrozzietester/detail/994/1797811200000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261222_6549395141@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261222_1048941418@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261222
 SUMMARY:TableTop Game Night @ Square Root
 LOCATION:Square Root, Boston MA
@@ -597,8 +597,8 @@ URL:https://tockify.com/sqrozzietester/detail/1178/1797901200000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261224_6017238973@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261224_8818080292@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261224
 SUMMARY:Pub Quiz @ Square Root
 LOCATION:Square Root, Boston MA
@@ -607,8 +607,8 @@ URL:https://tockify.com/sqrozzietester/detail/307/1798074000000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261227_2436681162@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261227_2977397084@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261227
 SUMMARY:Slow Boat Home @ Square Root
 LOCATION:Square Root, Boston MA
@@ -617,8 +617,8 @@ URL:https://tockify.com/sqrozzietester/detail/1142/1798405200000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261228_9167550401@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261228_5827844830@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261228
 SUMMARY:Karaoke @ Square Root
 LOCATION:Square Root, Boston MA
@@ -627,8 +627,8 @@ URL:https://tockify.com/sqrozzietester/detail/855/1798419600000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261229_1418516508@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261229_2642879494@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261229
 SUMMARY:Trivia with Ticco and Matt @ Square Root
 LOCATION:Square Root, Boston MA
@@ -637,8 +637,8 @@ URL:https://tockify.com/sqrozzietester/detail/434/1798502400000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270102_9206358683@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20270102_3582776159@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20270102
 SUMMARY:Zweigelt Duo @ Square Root
 LOCATION:Square Root, Boston MA
@@ -647,8 +647,8 @@ URL:https://tockify.com/sqrozzietester/detail/1193/1798902000000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270103_1820018519@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20270103_3682354401@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20270103
 SUMMARY:Monterey Mountain @ Square Root
 LOCATION:Square Root, Boston MA
@@ -657,8 +657,8 @@ URL:https://tockify.com/sqrozzietester/detail/1194/1798938000000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270103_2274237889@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20270103_5250051124@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20270103
 SUMMARY:Royer’s One Man Band @ Square Root
 LOCATION:Square Root, Boston MA
@@ -667,8 +667,8 @@ URL:https://tockify.com/sqrozzietester/detail/1230/1799010000000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270104_1960376911@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20270104_4933180115@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20270104
 SUMMARY:Clear Audience @ Square Root
 LOCATION:Square Root, Boston MA
@@ -677,8 +677,8 @@ URL:https://tockify.com/sqrozzietester/detail/1187/1799020800000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270105_6017238973@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20270105_8818080292@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20270105
 SUMMARY:Pub Quiz @ Square Root
 LOCATION:Square Root, Boston MA
@@ -687,8 +687,8 @@ URL:https://tockify.com/sqrozzietester/detail/1184/1799109000000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270107_4991984286@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20270107_1782733418@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20270107
 SUMMARY:Rozzie Old Time Players Belgian Beer Cellar @ Square Root
 LOCATION:Square Root, Boston MA
@@ -697,8 +697,8 @@ URL:https://tockify.com/sqrozzietester/detail/1239/1799280000000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270107_5494178648@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20270107_8788542694@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20270107
 SUMMARY:Rozzie Old-Time Players / Belgian Beer Cellar @ Square Root
 LOCATION:Square Root, Boston MA
@@ -707,8 +707,8 @@ URL:https://tockify.com/sqrozzietester/detail/1201/1799280000000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20270108_6175725338@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20270108_6001015680@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20270108
 SUMMARY:Singer Songwriter Night with Drew Dunphy\, Bob Uvello and Chrissy Ann @ Square Root
 LOCATION:Square Root, Boston MA
@@ -717,8 +717,8 @@ URL:https://tockify.com/sqrozzietester/detail/874/1799366400000
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261114_7762128937@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261114_9880199163@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261114
 SUMMARY:Johnny Horner Quintet @ POSTunderground
 LOCATION:POSTunderground, Boston MA
@@ -727,8 +727,8 @@ URL:https://postunderground.com/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261114_1294027735@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261114_8029572538@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261114
 SUMMARY:District 5 @ POSTunderground
 LOCATION:POSTunderground, Boston MA
@@ -737,8 +737,8 @@ URL:https://postunderground.com/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261114_6190155551@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261114_4719195444@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261114
 SUMMARY:Hard Bop Cafe @ POSTunderground
 LOCATION:POSTunderground, Boston MA
@@ -747,8 +747,8 @@ URL:https://postunderground.com/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261121_6886981013@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261121_1419095537@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261121
 SUMMARY:Station Street @ POSTunderground
 LOCATION:POSTunderground, Boston MA
@@ -757,8 +757,8 @@ URL:https://postunderground.com/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261121_8419848348@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261121_8561206011@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261121
 SUMMARY:Nate Aronow Nextet @ POSTunderground
 LOCATION:POSTunderground, Boston MA
@@ -767,8 +767,8 @@ URL:https://postunderground.com/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261121_6190155551@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261121_4719195444@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261121
 SUMMARY:Hard Bop Cafe @ POSTunderground
 LOCATION:POSTunderground, Boston MA
@@ -777,8 +777,8 @@ URL:https://postunderground.com/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261128_8500439709@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261128_3570402981@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261128
 SUMMARY:Epistrophy @ POSTunderground
 LOCATION:POSTunderground, Boston MA
@@ -787,8 +787,8 @@ URL:https://postunderground.com/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261128_8717121208@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261128_4987091953@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261128
 SUMMARY:Fenno Street Jazz @ POSTunderground
 LOCATION:POSTunderground, Boston MA
@@ -797,8 +797,8 @@ URL:https://postunderground.com/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261128_6190155551@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261128_4719195444@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261128
 SUMMARY:Hard Bop Cafe @ POSTunderground
 LOCATION:POSTunderground, Boston MA
@@ -807,8 +807,8 @@ URL:https://postunderground.com/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261205_6559150107@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261205_4166884849@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261205
 SUMMARY:Bob's Chili Combo @ POSTunderground
 LOCATION:POSTunderground, Boston MA
@@ -817,8 +817,8 @@ URL:https://postunderground.com/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261205_2285450822@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261205_7503519466@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261205
 SUMMARY:Albert Lam Sextet @ POSTunderground
 LOCATION:POSTunderground, Boston MA
@@ -827,8 +827,8 @@ URL:https://postunderground.com/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261205_7540440555@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261205_2217526266@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261205
 SUMMARY:KR5 @ POSTunderground
 LOCATION:POSTunderground, Boston MA
@@ -837,8 +837,8 @@ URL:https://postunderground.com/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261113_7820217379@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261113_3448565502@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261113
 SUMMARY:Andrew Geano @ Lower Mills Tavern
 LOCATION:Lower Mills Tavern, Boston MA
@@ -847,8 +847,8 @@ URL:https://www.lowermillstavern.com/livemusicschedule/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261118_2157974141@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261118_5854035686@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261118
 SUMMARY:Joe Sabourin @ Lower Mills Tavern
 LOCATION:Lower Mills Tavern, Boston MA
@@ -857,8 +857,8 @@ URL:https://www.lowermillstavern.com/livemusicschedule/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261120_2103571289@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261120_6077732424@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261120
 SUMMARY:Suzanne McNeil @ Lower Mills Tavern
 LOCATION:Lower Mills Tavern, Boston MA
@@ -867,8 +867,8 @@ URL:https://www.lowermillstavern.com/livemusicschedule/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261125_2157974141@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261125_5854035686@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261125
 SUMMARY:Joe Sabourin @ Lower Mills Tavern
 LOCATION:Lower Mills Tavern, Boston MA
@@ -877,8 +877,8 @@ URL:https://www.lowermillstavern.com/livemusicschedule/
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261117_1487066419@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261117_3159360952@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261117
 SUMMARY:Ariel Woodwind Quintet @ King's Chapel
 LOCATION:King's Chapel, Boston MA
@@ -887,8 +887,8 @@ URL:https://www.kings-chapel.org/music/tuesday-recitals
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261124_3413046742@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261124_4860668636@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261124
 SUMMARY:Peter Sulski\, Viola @ King's Chapel
 LOCATION:King's Chapel, Boston MA
@@ -897,8 +897,8 @@ URL:https://www.kings-chapel.org/music/tuesday-recitals
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261201_6646238974@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261201_8121730534@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261201
 SUMMARY:Karl Henning Ensemble @ King's Chapel
 LOCATION:King's Chapel, Boston MA
@@ -907,8 +907,8 @@ URL:https://www.kings-chapel.org/music/tuesday-recitals
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261208_5046183579@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261208_2566099105@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261208
 SUMMARY:Pioneer Singers @ King's Chapel
 LOCATION:King's Chapel, Boston MA
@@ -917,8 +917,8 @@ URL:https://www.kings-chapel.org/music/tuesday-recitals
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261215_2039249792@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261215_7294092876@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261215
 SUMMARY:Half-Hour Messiah @ King's Chapel
 LOCATION:King's Chapel, Boston MA
@@ -927,8 +927,8 @@ URL:https://www.kings-chapel.org/music/tuesday-recitals
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261222_4979317316@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261222_1943043043@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261222
 SUMMARY:A-No-Ne Christmas @ King's Chapel
 LOCATION:King's Chapel, Boston MA
@@ -937,8 +937,8 @@ URL:https://www.kings-chapel.org/music/tuesday-recitals
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261229_3413046742@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261229_4860668636@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261229
 SUMMARY:Peter Sulski\, Viola @ King's Chapel
 LOCATION:King's Chapel, Boston MA
@@ -947,8 +947,8 @@ URL:https://www.kings-chapel.org/music/tuesday-recitals
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261114_1326280271@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261114_5144805317@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261114
 SUMMARY:Your Friends In Hell\, Identical Palms\, The Ghouls\, Fenwa Teryen @ Faces Brewing
 LOCATION:Faces Brewing, Boston MA
@@ -957,8 +957,8 @@ URL:https://www.facesbrewing.com/events/p/yourfriendsinhell
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261122_7439450387@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261122_7345901379@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261122
 SUMMARY:Vic Firecracker\, Ruin the Nite\, Saint Throwaway @ Faces Brewing
 LOCATION:Faces Brewing, Boston MA
@@ -967,8 +967,8 @@ URL:https://www.facesbrewing.com/events/p/vicfirecracker
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261205_1366193009@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261205_7238264929@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261205
 SUMMARY:MIRACLE ON COMM AVE w/ Coffin Salesman\, Miketon & The Nightblinders\, The Old Edison @ Faces Brewing
 LOCATION:Faces Brewing, Boston MA
@@ -977,8 +977,8 @@ URL:https://www.facesbrewing.com/events/p/miracle
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261206_8593743845@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261206_8164991437@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261206
 SUMMARY:Michael Kane & The Morning Afters\, Perfectly Lethal\, Perpetual Stu @ Faces Brewing
 LOCATION:Faces Brewing, Boston MA
@@ -987,8 +987,8 @@ URL:https://www.facesbrewing.com/events/p/michaelkane
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261224_5577197479@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261224_8174979793@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261224
 SUMMARY:The AUX\, Gia Greene\, Eggy Benedict\, Kevin King @ Faces Brewing
 LOCATION:Faces Brewing, Boston MA
@@ -997,8 +997,8 @@ URL:https://www.facesbrewing.com/events/p/theaux
 STATUS:CONFIRMED
 END:VEVENT
 BEGIN:VEVENT
-UID:20261114_7760707199@wickedbostonevents.com
-DTSTAMP:20261113T151037Z
+UID:20261114_4297798582@wickedbostonevents.com
+DTSTAMP:20261113T160101Z
 DTSTART;VALUE=DATE:20261114
 SUMMARY:Arthur's 30th Birthday Bash at the BPL @ GBH Studios
 LOCATION:GBH Studios, Boston MA
