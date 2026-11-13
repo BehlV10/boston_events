@@ -9123,6 +9123,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<meta name='impact-site-verification' value='52cbf274-6291-449c-829e-6d0f2be81614'>
 {seo_meta_tags}
 {json_ld_scripts}
 <script>
