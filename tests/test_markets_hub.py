@@ -1,5 +1,6 @@
 """Markets & festivals hub: markets from any category plus festivals with stalls, a chip per kind."""
 import unittest
+from unittest import mock
 from datetime import date, datetime, timedelta
 
 import template
@@ -10,6 +11,20 @@ def _ev(name, days=2, venue="Somewhere", category="markets"):
     t = (datetime.now(EASTERN) + timedelta(days=days)).replace(hour=11, minute=0, second=0, microsecond=0)
     return {"name": name, "venue": venue, "category": category, "_time": t, "date": t.isoformat(),
             "url": "https://example.com/" + name.replace(" ", "-"), "_source_venue": "Test"}
+
+
+# For tests whose fixtures are pinned to Fri Nov 13 2026 (group_by_date drops past days).
+_FRI_NOV_13 = datetime(2026, 11, 13, 9, 0, tzinfo=EASTERN)
+
+
+class _FrozenFriNov13(datetime):
+    @classmethod
+    def now(cls, tz=None):
+        return _FRI_NOV_13.astimezone(tz) if tz else _FRI_NOV_13.replace(tzinfo=None)
+
+
+def _frozen_fri_nov_13():
+    return mock.patch.object(template, "datetime", _FrozenFriNov13)
 
 
 class WhatCountsAsAMarket(unittest.TestCase):
@@ -244,7 +259,8 @@ class NearMeAndGeocoding(unittest.TestCase):
                 "category": "markets"
             }]
         }]
-        dated, tba, ongoing = template.group_by_date(raw_events)
+        with _frozen_fri_nov_13():
+            dated, tba, ongoing = template.group_by_date(raw_events)
         dated_dict = {d: evs for d, evs in dated}
         self.assertIn(d1, dated_dict, "Should appear on Friday Nov 13")
         self.assertIn(d2, dated_dict, "Should appear on Saturday Nov 14")
@@ -304,7 +320,8 @@ class NearMeAndGeocoding(unittest.TestCase):
                 "category": "music"
             }]
         }]
-        dated, tba, ongoing = template.group_by_date(raw_events)
+        with _frozen_fri_nov_13():
+            dated, tba, ongoing = template.group_by_date(raw_events)
         dated_dict = {d: evs for d, evs in dated}
         self.assertIn(date(2026, 11, 13), dated_dict)
         self.assertNotIn(date(2026, 11, 14), dated_dict, "Overnight show ending 2 AM should not appear on Saturday")
