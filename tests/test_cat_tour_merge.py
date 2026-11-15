@@ -4,6 +4,8 @@ import copy
 import os
 import sys
 import unittest
+from datetime import datetime
+from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import template as T  # noqa: E402
@@ -28,9 +30,20 @@ VENUES = [
 ]
 
 
+# The fixtures are dated Nov 14 2026; group_by_date drops past days, so pin "now" before them.
+NOW = datetime(2026, 11, 13, 9, 0, tzinfo=T.EASTERN)
+
+
+class _Frozen(datetime):
+    @classmethod
+    def now(cls, tz=None):
+        return NOW.astimezone(tz) if tz else NOW.replace(tzinfo=None)
+
+
 class CatTourMergeTest(unittest.TestCase):
     def setUp(self):
-        dated, _, _ = T.group_by_date(copy.deepcopy(VENUES))
+        with mock.patch.object(T, "datetime", _Frozen):
+            dated, _, _ = T.group_by_date(copy.deepcopy(VENUES))
         self.evs = [e for _, evs in dated for e in evs]
 
     def test_one_listing_at_the_organizers_time(self):
