@@ -40,6 +40,16 @@ class HighlightsPage(unittest.TestCase):
         self.assertIn("https://example.com/boston-event-highlights/", self.html)
         self.assertIn('<a href="../boston-event-highlights/" class="active">Highlights</a>', self.html)
 
+    def test_filters_can_hide_cards(self):
+        # .pick sets display:grid, which beats the browser's own [hidden] rule unless the page restates it
+        self.assertIn("[hidden] { display: none !important; }", self.html)
+
+    def test_days_split_by_city(self):
+        day = self.html.split('<section class="day"')[1]
+        self.assertIn('<div class="city-group" data-city="boston"><h3>Boston</h3>', day)
+        self.assertIn('<div class="city-group" data-city="cambridge"><h3>Cambridge</h3>', day)
+        self.assertLess(day.index('data-city="boston"><h3>'), day.index('data-city="cambridge"><h3>'))
+
     def test_in_sitemap(self):
         with tempfile.TemporaryDirectory() as d:
             path = os.path.join(d, "sitemap.xml")
