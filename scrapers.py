@@ -5070,6 +5070,29 @@ _SINCLAIR_DAY_MONTHS = {m: i for i, m in enumerate(
     ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], start=1)}
 
 
+def _with_support(title, support):
+    """"Sweet Pill" + "Heart to Gold, Stereosity" -> "Sweet Pill with Heart to Gold, Stereosity".
+
+    Takes a string or a list of acts; skips acts already named in the title, and leaves very
+    long lineups off rather than make an unreadable title. "X with Y" keeps the head title
+    "x", so it still merges with other sources' plain "X" listing."""
+    if isinstance(support, str):
+        support = [a for a in re.split(r"\s*,\s*", support)]
+    low = (title or "").lower()
+    acts, seen = [], set()
+    for a in support or []:
+        a = re.sub(r"\s+", " ", html.unescape(a or "")).strip()
+        a = re.sub(r"^(?:with|w/|feat\.?|featuring|special guests?:?)\s+", "", a, flags=re.I)
+        a = re.sub(r"\s+(?:opening|opens|to open)$", "", a, flags=re.I).strip()
+        if a and a.lower() not in low and a.lower() not in seen:
+            seen.add(a.lower())
+            acts.append(a)
+    if not acts:
+        return title
+    full = f"{title} with {', '.join(acts)}"
+    return full if len(full) <= 100 else title
+
+
 def scrape_sinclair(url, ua):
     """Sinclair's events page renders AXS event cards server-side as
     `.entry.sinclair` blocks. Date text like 'Mon, Apr 20, 2026' + 'Doors 7:00 PM'."""
@@ -5080,6 +5103,9 @@ def scrape_sinclair(url, ua):
         if not h:
             continue
         name = re.sub(r"\s+", " ", h.get_text(" ", strip=True))
+        sup = entry.select_one(".supporting")
+        if sup:
+            name = _with_support(name, sup.get_text(" ", strip=True))
         href = h.get("href") or url
         date_el = entry.select_one(".date")
         time_el = entry.select_one(".time")
@@ -5148,6 +5174,7 @@ def scrape_bowery_boston(url, ua):
         title = (e.get("title", {}).get("headlinersText") or e.get("title", {}).get("eventTitleText") or "").strip()
         if not title:
             continue
+        title = _with_support(title, e.get("title", {}).get("supportingText") or "")
         ticketing = e.get("ticketing", {})
         ticket_url = ticketing.get("ticketURL") or f"https://www.bowerypresents.com/events/detail/{e.get('eventId')}"
         vname = venue.get("title") or "Bowery Presents"
@@ -8507,8 +8534,22 @@ def scrape_franklin_park_coalition(url, ua):
 
 
 def scrape_speedway(url, ua):
-    """Charles River Speedway in Brighton (Notch Brewing, run club, markets, comedy)."""
-    return scrape_tribe_rest(url, ua, default_venue="Charles River Speedway", default_category="food")
+    """Charles River Speedway in Brighton (Notch Brewing, run club, markets, comedy).
+
+    Paged by date: the API's first 50 rows are a year of the weekly run club, which hid
+    everything else (Brighton Bazaar, Standup at the Speedway)."""
+    endpoint = url.split("?")[0].rstrip("/")
+    if "/wp-json/" not in endpoint:
+        endpoint += "/wp-json/tribe/events/v1/events"
+    events = scrape_tribe_rest_paged(endpoint, ua, default_venue="Charles River Speedway", default_category="food",
+                                     days=60)
+    for e in events:
+        low = e["name"].lower()
+        if re.search(r"\b(bazaar|market|flea|makers?)\b", low):
+            e["category"] = "markets"
+        elif re.search(r"\b(stand-?up|comedy)\b", low):
+            e["category"] = "comedy"
+    return events
 
 
 def scrape_kendall_center(url, ua):
@@ -9252,7 +9293,7 @@ def scrape_sowa_christmas_market(url, ua):
                          datetime(d.year, d.month, d.day, e_h, 0, tzinfo=EASTERN)))
         d += timedelta(days=1)
 
-    return _scrape_holiday_market(
+    events = _scrape_holiday_market(
         url, ua,
         name="11th Annual SoWa Christmas Market",
         default_venue="SoWa Power Station",
@@ -9261,6 +9302,63 @@ def scrape_sowa_christmas_market(url, ua):
         desc="More than 100 local makers and food vendors inside the historic SoWa Power Station with live music at the Sleigh Bar.",
         price="$10",
     )
+    try:
+        events += _sowa_christmas_performers(fetch_soup(_SOWA_ENTERTAINMENT_URL, ua or UA_CHROME))
+    except Exception:
+        pass
+    return events
+
+
+_SOWA_ENTERTAINMENT_URL = "https://www.sowaboston.com/sowa-christmas-market/christmas-market-entertainment/"
+_SOWA_SLOT_RE = re.compile(r"(\d{1,2}:\d{2}\s*[AP]M)\s*[–—-]\s*(\d{1,2}:\d{2}\s*[AP]M)\s*:\s*(.+)", re.I)
+
+
+def _sowa_christmas_performers(soup, today=None):
+    """Each live set on the Christmas Market's entertainment page (an <h4> per day, then
+    "6:00 PM – 9:00 PM: Matt Koelsch" lines) as its own event at SoWa Power Station."""
+    today = today or datetime.now(EASTERN).date()
+    events = []
+    for h in soup.find_all("h4") if soup else []:
+        try:
+            day = datetime.strptime(re.sub(r"\s+", " ", h.get_text(" ", strip=True)), "%B %d").date()
+        except ValueError:
+            continue
+        day = day.replace(year=today.year)
+        if day < today - timedelta(days=180):  # a January date listed in December
+            day = day.replace(year=today.year + 1)
+        if day < today:
+            continue
+        p = h.find_next_sibling()
+        if not p or p.name != "p":
+            continue
+        lines = [ln.strip() for ln in p.get_text("\n").split("\n") if ln.strip()]
+        theme = None
+        for ln in lines:
+            m = _SOWA_SLOT_RE.match(ln)
+            if not m:
+                theme = ln  # "Country Night" heads that day's slots
+                continue
+            try:
+                t0 = datetime.strptime(m.group(1).replace(" ", "").upper(), "%I:%M%p").time()
+                t1 = datetime.strptime(m.group(2).replace(" ", "").upper(), "%I:%M%p").time()
+            except ValueError:
+                continue
+            act = m.group(3).strip()
+            start = datetime.combine(day, t0, tzinfo=EASTERN)
+            end = datetime.combine(day, t1, tzinfo=EASTERN)
+            events.append({
+                "name": f"{theme + ': ' if theme else ''}{act} at the SoWa Christmas Market",
+                "date": start.astimezone(timezone.utc).isoformat(),
+                "end": end.astimezone(timezone.utc).isoformat(),
+                "url": _SOWA_ENTERTAINMENT_URL,
+                "venue": "SoWa Power Station",
+                "address": "540 Harrison Ave, Boston, MA",
+                "price": "$10",
+                "category": "music",
+                "description": f"Live entertainment at the SoWa Christmas Market: {act}. Included with market admission.",
+                "one_off": True,  # an act booked a few times this season, not a weekly series
+            })
+    return events
 
 
 def scrape_thanksgiving_market_harbor_fest(url, ua):
@@ -11510,6 +11608,25 @@ def _club_cafe_offers(soup):
     return out
 
 
+def _club_cafe_start_dates(soup):
+    """Event URL (no query, no trailing slash) -> "YYYY-MM-DD" from the calendar's JSON-LD blocks.
+
+    Ignores eventStatus: on 2026-11-16 the Nov 22 Drag Brunch was marked EventCancelled there while
+    its own page was selling tickets and showed no cancellation."""
+    out = {}
+    for s in soup.find_all("script", type="application/ld+json"):
+        try:
+            j = json.loads(s.string or "", strict=False)
+        except ValueError:
+            continue
+        if not isinstance(j, dict) or not j.get("url"):
+            continue
+        m = re.match(r"(\d{4}-\d{2}-\d{2})", str(j.get("startDate") or ""))
+        if m:
+            out.setdefault(j["url"].split("?")[0].rstrip("/"), m.group(1))
+    return out
+
+
 def _club_cafe_cost_line(event_url, ua):
     """The "Cost" line on a Club Café event page: "$15 after 10 pm", "$40 & $30 + fee", "No Cover"."""
     try:
@@ -11547,6 +11664,7 @@ def scrape_club_cafe(url, ua):
     """Club Café in South End — historic LGBT nightlife, cabaret, piano bar & dance club."""
     soup = fetch_soup(url, ua)
     offers = _club_cafe_offers(soup)
+    starts = _club_cafe_start_dates(soup)
     events = []
     seen = set()
     for a in soup.find_all("article", class_=lambda c: c and "mec-event-article" in c):
@@ -11558,7 +11676,9 @@ def scrape_club_cafe(url, ua):
         href = a_link["href"] if a_link and a_link.has_attr("href") else ""
 
         m_occ = re.search(r"occurrence=(\d{4}-\d{2}-\d{2})", href)
-        date_str = m_occ.group(1) if m_occ else None
+        # One-off ticketed shows (/events/<slug>/, e.g. Drag Brunch) carry no ?occurrence= date;
+        # their JSON-LD block has it.
+        date_str = m_occ.group(1) if m_occ else starts.get(href.split("?")[0].rstrip("/"))
         if not date_str:
             continue
 
@@ -12225,6 +12345,9 @@ def scrape_ticketweb(url, ua):
                 link = it.get("url") or url
                 loc = it.get("location", {})
                 vname = loc.get("name") if isinstance(loc, dict) else None
+                perf = it.get("performer") or []
+                name = _with_support(name, [p.get("name") for p in (perf if isinstance(perf, list) else [perf])
+                                            if isinstance(p, dict)])
 
                 key = (name.lower(), dt.strftime("%Y-%m-%d"))
                 if key in seen:

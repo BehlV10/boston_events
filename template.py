@@ -7456,7 +7456,7 @@ def compute_recurring(dated):
         for e in events:
             t = e.get("_time")
             name = (e.get("name") or "").strip().lower()
-            if not t or not name:
+            if not t or not name or e.get("one_off"):
                 continue
             # Venue is part of the key: a group posting the same title at a different bar each
             # week ("Skip the Small Talk") isn't one recurring event.
