@@ -28,9 +28,10 @@ namespace_id = "1001"
 
 # Upvote counts (existing) and flyer rate limits. Create once with
 # `npx wrangler kv namespace create UPVOTES` (and FLYER_LIMITS), then paste the ids here.
-# [[kv_namespaces]]
-# binding = "UPVOTES"
-# id = "<id>"
-# [[kv_namespaces]]
-# binding = "FLYER_LIMITS"
-# id = "<id>"
+[[kv_namespaces]]
+binding = "UPVOTES"
+id = "ba6778566aa4471eadf0d1c0ea8816f4"
+
+[[kv_namespaces]]
+binding = "FLYER_LIMITS"
+id = "b207bcfbca814be295be17ec0de9ff61"
