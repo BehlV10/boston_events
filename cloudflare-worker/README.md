@@ -3,7 +3,7 @@
 A Cloudflare Worker behind the site's **Add to Boston Events** form. It:
 
 - **`POST /` (event or venue submission):** checks the honeypot and optional Turnstile CAPTCHA, then triggers the `community-event.yml` GitHub Action, which adds the event and republishes the site.
-- **`POST /extract-flyer`:** reads an uploaded flyer image with Claude Haiku 5.5 (`claude-haiku-5-5`) and returns the form fields for the visitor to check before publishing. Each read costs a fraction of a cent.
+- **`POST /extract-flyer`:** reads an uploaded flyer image with Gemini (`gemini-3.5-flash-lite`, on the Gemini API's free tier) and returns the form fields for the visitor to check before publishing.
 - **`GET /api/upvotes`, `POST /api/upvote`:** upvote counts.
 
 When a submission includes the venue's or organizer's **website** (usually read off a flyer), the GitHub Action tries the repo's generic scrapers (JSON-LD, iCal, Squarespace, WordPress Events Calendar, Eventbrite organizer pages) on it. If one finds upcoming events, the Action opens a PR adding the site to `discovered_sources.json`. Nothing is scraped until that PR is merged.
@@ -23,7 +23,7 @@ npx wrangler kv namespace create FLYER_LIMITS
 
 # Secrets (prompted, never committed)
 npx wrangler secret put GITHUB_TOKEN        # fine-grained PAT: Actions read/write on BehlV10/boston_events
-npx wrangler secret put ANTHROPIC_API_KEY   # from console.anthropic.com; enables flyer reading
+npx wrangler secret put GEMINI_API_KEY      # from aistudio.google.com/apikey; enables flyer reading
 # optional: npx wrangler secret put TURNSTILE_SECRET_KEY
 
 npm run deploy
@@ -43,15 +43,15 @@ For the automatic scraper PRs, also enable **Settings → Actions → General �
 
 Five layers, from strictest to softest:
 
-1. **Hard cap at Anthropic (do this first).** Create a separate workspace in the Anthropic Console (for example "website-flyers"), set a **monthly spend limit** on it (such as $5), and create the worker's `ANTHROPIC_API_KEY` in that workspace. Once the cap is hit, Anthropic rejects calls; nothing the worker does can spend past it. The usage page there also shows this key's spend on its own.
-2. **Daily dollar budget:** the worker tallies each call's cost from the token counts the API returns and stops reading flyers for the day at `FLYER_DAILY_BUDGET_USD` ($1 by default, about 1,000 flyers). After that it returns "paused for today" and the form still works by hand.
+1. **Free tier, no billing (the hard cap).** The `GEMINI_API_KEY` comes from a Google AI Studio project with billing **not** enabled, so it can't cost anything. When Google's free daily quota runs out, calls fail and visitors fill in the form by hand until it resets (midnight Pacific). Don't enable billing on that project unless you mean to pay. Note that on the free tier, Google may use submitted images to improve its products.
+2. **Daily budget:** the worker tallies what each call would cost at paid Gemini rates (from the token counts the API returns) and stops reading flyers for the day at `FLYER_DAILY_BUDGET_USD` ($1 by default, several hundred flyers). On the free tier this is just another cap; it matters if billing is ever turned on. After that it returns "paused for today" and the form still works by hand.
 3. **Daily counts:** 15 reads per IP and 400 in total per day (`FLYER_DAILY_LIMIT_*`).
 4. **Burst limit:** 3 reads per minute per IP (the `FLYER_RATE_LIMITER` binding in `wrangler.toml`).
 5. **Origin check:** reads are only accepted from the site's own origins (`ALLOWED_ORIGINS`). Scripts can fake this header, which is why the limits above exist.
 
-Each read costs well under a cent: an image is about 1,600 input tokens, and output is capped at 4,000 tokens.
-
 Layers 2–4 are approximate. KV and the rate limiter are eventually consistent and per data center, so a burst can slip a few calls past them. Layer 1 is the real guarantee.
+
+To switch models, change `GEMINI_MODEL` in `wrangler.toml` and redeploy.
 
 Optional: set `TURNSTILE_SECRET_KEY` to require a Turnstile token on flyer reads. The site doesn't render the widget yet, so only set it after adding the widget.
 

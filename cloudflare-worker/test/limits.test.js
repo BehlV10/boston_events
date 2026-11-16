@@ -1,9 +1,8 @@
 // Spend controls on /extract-flyer: burst limiter, daily caps, dollar budget, audit log, admin view.
-// The Anthropic API is faked by intercepting fetch, so nothing is billed.
+// The Gemini API is faked by intercepting fetch, so nothing is sent to Google.
 import { test, beforeEach, afterEach } from "node:test";
 import assert from "node:assert/strict";
 import worker from "../worker.js";
-import { costUsd } from "../flyer.js";
 
 class FakeKV {
   constructor() { this.m = new Map(); }
@@ -26,19 +25,18 @@ beforeEach(() => {
   realFetch = globalThis.fetch;
   apiCalls = 0;
   globalThis.fetch = async (url) => {
-    assert.match(String(url), /api\.anthropic\.com/);
+    assert.match(String(url), /generativelanguage\.googleapis\.com/);
     apiCalls++;
     return new Response(JSON.stringify({
-      id: "msg_test", type: "message", role: "assistant", model: "claude-haiku-5-5",
-      content: [{ type: "text", text: JSON.stringify(FIELDS) }], stop_reason: "end_turn", stop_sequence: null,
-      usage: { input_tokens: 2000, output_tokens: 400 },
-    }), { status: 200, headers: { "content-type": "application/json", "request-id": "req_test" } });
+      candidates: [{ content: { role: "model", parts: [{ text: JSON.stringify(FIELDS) }] }, finishReason: "STOP" }],
+      usageMetadata: { promptTokenCount: 1000, candidatesTokenCount: 40 },
+    }), { status: 200, headers: { "content-type": "application/json" } });
   };
 });
 afterEach(() => { globalThis.fetch = realFetch; });
 
 function env(over = {}) {
-  return { ANTHROPIC_API_KEY: "sk-test", FLYER_LIMITS: new FakeKV(), ALLOWED_ORIGINS: ORIGIN,
+  return { GEMINI_API_KEY: "test-key", FLYER_LIMITS: new FakeKV(), ALLOWED_ORIGINS: ORIGIN,
            ADMIN_TOKEN: "admin-secret", FLYER_DAILY_LIMIT_PER_IP: "15", FLYER_DAILY_LIMIT_TOTAL: "400",
            FLYER_DAILY_BUDGET_USD: "1", ...over };
 }
@@ -48,10 +46,6 @@ const flyer = (ip = "203.0.113.5") => new Request("https://w.example/extract-fly
 const usage = (e, token = "admin-secret") => worker.fetch(new Request("https://w.example/admin/flyer-usage",
   { headers: token ? { Authorization: `Bearer ${token}` } : {} }), e, {});
 
-test("cost uses Haiku 5.5 rates", () => {
-  assert.equal(costUsd({ input_tokens: 1_000_000, output_tokens: 1_000_000 }), 0.6);
-  assert.equal(costUsd(null), 0);
-});
 
 test("a successful read is audited, tallied, and the IP is stored hashed", async () => {
   const e = env();

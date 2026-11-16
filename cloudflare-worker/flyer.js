@@ -1,20 +1,18 @@
 /**
- * Read an event flyer image with Claude and return the fields the "Add an Event" form needs.
- * The visitor reviews and edits the result before anything is submitted.
+ * Read an event flyer image with Gemini (free tier of the Gemini API) and return the fields the
+ * "Add an Event" form needs. The visitor reviews and edits the result before anything is submitted.
  */
-import Anthropic from "@anthropic-ai/sdk";
-import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
-import { z } from "zod";
 
-export const FLYER_MODEL = "claude-haiku-5-5";
-// Claude Haiku 5.5 list prices (USD per million tokens, prompts under 100K tokens), used to keep the
-// worker's own spend tally. Thinking tokens are billed as output and are included in output_tokens.
-export const PRICE_PER_MTOK = { input: 0.1, output: 0.5 };
+export const FLYER_MODEL = "gemini-3.5-flash-lite";
+const API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
+
+// Paid-tier list prices for gemini-3.5-flash-lite (USD per million tokens). The free tier costs nothing;
+// the worker still tallies what calls *would* cost so the daily budget works as a cap if billing is ever on.
+export const PRICE_PER_MTOK = { input: 0.3, output: 2.5 };
 
 export function costUsd(usage) {
   if (!usage) return 0;
-  const input = (usage.input_tokens || 0) + (usage.cache_creation_input_tokens || 0) + (usage.cache_read_input_tokens || 0);
-  return (input * PRICE_PER_MTOK.input + (usage.output_tokens || 0) * PRICE_PER_MTOK.output) / 1e6;
+  return ((usage.input_tokens || 0) * PRICE_PER_MTOK.input + (usage.output_tokens || 0) * PRICE_PER_MTOK.output) / 1e6;
 }
 
 export const CATEGORIES = [
@@ -25,21 +23,27 @@ export const CITIES = ["boston", "cambridge", "somerville", "other"];
 export const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
 export const MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 
-export const FlyerSchema = z.object({
-  is_event_flyer: z.boolean().describe("False if the image is not an event flyer or poster."),
-  name: z.string().nullable().describe("Event title as printed."),
-  venue: z.string().nullable().describe("Venue or place name."),
-  address: z.string().nullable().describe("Street address if printed."),
-  city: z.enum(CITIES).describe("Boston (incl. Allston, Brighton, South End, Seaport), Cambridge, Somerville, or other."),
-  date: z.string().nullable().describe("Event date as YYYY-MM-DD."),
-  start_time: z.string().nullable().describe("Start time as 24-hour HH:MM."),
-  price: z.string().nullable().describe('Price as printed, e.g. "Free", "$15", "$20-$30".'),
-  category: z.enum(CATEGORIES),
-  ticket_url: z.string().nullable().describe("Ticket or RSVP link printed on the flyer."),
-  website: z.string().nullable().describe("Website of the venue or organizer printed on the flyer."),
-  description: z.string().nullable().describe("One or two plain sentences about the event, under 300 characters."),
-  guessed_fields: z.array(z.string()).describe("Names of fields above that were inferred rather than printed."),
-});
+const str = (description) => ({ type: ["string", "null"], description });
+export const FLYER_SCHEMA = {
+  type: "object",
+  properties: {
+    is_event_flyer: { type: "boolean", description: "False if the image is not an event flyer or poster." },
+    name: str("Event title as printed."),
+    venue: str("Venue or place name."),
+    address: str("Street address if printed."),
+    city: { type: "string", enum: CITIES, description: "Boston (incl. Allston, Brighton, South End, Seaport), Cambridge, Somerville, or other." },
+    date: str("Event date as YYYY-MM-DD."),
+    start_time: str("Start time as 24-hour HH:MM."),
+    price: str('Price as printed, e.g. "Free", "$15", "$20-$30".'),
+    category: { type: "string", enum: CATEGORIES },
+    ticket_url: str("Ticket or RSVP link printed on the flyer."),
+    website: str("Website of the venue or organizer printed on the flyer."),
+    description: str("One or two plain sentences about the event, under 300 characters."),
+    guessed_fields: { type: "array", items: { type: "string" }, description: "Names of fields above that were inferred rather than printed." },
+  },
+  required: ["is_event_flyer", "name", "venue", "address", "city", "date", "start_time", "price", "category",
+             "ticket_url", "website", "description", "guessed_fields"],
+};
 
 const SYSTEM = `You read event flyers for a Greater Boston events calendar and fill in a submission form.
 Copy what the flyer says. Do not invent details: use null for anything not on the flyer.
@@ -49,7 +53,7 @@ Write URLs with https:// when the flyer shows a bare domain (e.g. "thevenue.com"
 List in guessed_fields every field you inferred (for example city from a neighborhood, or category).`;
 
 export class FlyerError extends Error {
-  /** usage is set when the API answered (and billed) but the answer wasn't usable. */
+  /** usage is set when the API answered but the answer wasn't usable. */
   constructor(message, status = 400, usage = null) {
     super(message);
     this.status = status;
@@ -93,51 +97,87 @@ export function cleanFields(out) {
   };
 }
 
+/** Gemini's usageMetadata -> {input_tokens, output_tokens}; thinking tokens are billed as output. */
+function normalizeUsage(m) {
+  if (!m) return null;
+  return { input_tokens: m.promptTokenCount || 0, output_tokens: (m.candidatesTokenCount || 0) + (m.thoughtsTokenCount || 0) };
+}
+
 /**
- * @param {Anthropic} client
+ * @param {{apiKey: string, model?: string, fetch?: typeof fetch}} api
  * @param {{image: string, mediaType: string, today: string}} input  today is YYYY-MM-DD in Boston
  */
-export async function extractFlyer(client, { image, mediaType, today }) {
+export async function extractFlyer(api, { image, mediaType, today }) {
   validateImage(image, mediaType);
-  let response;
-  try {
-    response = await client.messages.parse({
-      model: FLYER_MODEL,
-      max_tokens: 4000,
-      system: SYSTEM,
-      output_config: { effort: "low", format: zodOutputFormat(FlyerSchema) },
-      messages: [
-        {
-          role: "user",
-          content: [
-            { type: "image", source: { type: "base64", media_type: mediaType, data: image } },
-            { type: "text", text: `Today is ${today}. Fill in the event form from this flyer.` },
-          ],
-        },
+  const doFetch = api.fetch || fetch;
+  const model = api.model || FLYER_MODEL;
+  const body = {
+    systemInstruction: { parts: [{ text: SYSTEM }] },
+    contents: [{
+      role: "user",
+      parts: [
+        { text: `Today is ${today}. Fill in the event form from this flyer.` },
+        { inlineData: { mimeType: mediaType, data: image } },
       ],
+    }],
+    generationConfig: { responseMimeType: "application/json", responseJsonSchema: FLYER_SCHEMA, maxOutputTokens: 8192 },
+  };
+  let resp;
+  try {
+    resp = await doFetch(`${API_BASE}/${encodeURIComponent(model)}:generateContent`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-goog-api-key": api.apiKey },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(45_000),
     });
   } catch (err) {
-    if (err instanceof Anthropic.RateLimitError) {
-      throw new FlyerError("The flyer reader is busy. Please try again in a minute.", 503);
+    console.error("gemini request failed", err);
+    throw new FlyerError("The flyer reader is unavailable right now. Please fill in the form by hand.", 502);
+  }
+  if (!resp.ok) {
+    const detail = (await resp.text().catch(() => "")).slice(0, 500);
+    console.error("gemini error", resp.status, detail);
+    if (resp.status === 429) {
+      throw new FlyerError("The flyer reader has hit its limit for now. Please fill in the form by hand.", 503);
     }
-    if (err instanceof Anthropic.BadRequestError) {
+    if (resp.status === 400 && !/API key|api_key|model/i.test(detail)) {
       throw new FlyerError("That image couldn't be read. Try a clearer photo or a screenshot.", 400);
     }
-    if (err instanceof Anthropic.APIConnectionError || err instanceof Anthropic.APIError) {
-      throw new FlyerError("The flyer reader is unavailable right now. Please fill in the form by hand.", 502);
-    }
-    throw err;
+    throw new FlyerError("The flyer reader is unavailable right now. Please fill in the form by hand.", 502);
   }
 
-  if (response.stop_reason === "refusal") {
-    throw new FlyerError("This image couldn't be processed. Please fill in the form by hand.", 422, response.usage);
+  const data = await resp.json();
+  const usage = normalizeUsage(data.usageMetadata);
+  const cand = (data.candidates || [])[0];
+  if (data.promptFeedback?.blockReason || !cand || (cand.finishReason && !["STOP", "MAX_TOKENS"].includes(cand.finishReason))) {
+    throw new FlyerError("This image couldn't be processed. Please fill in the form by hand.", 422, usage);
   }
-  if (response.stop_reason === "max_tokens" || !response.parsed_output) {
-    throw new FlyerError("Couldn't read the flyer. Try a clearer photo or a screenshot.", 422, response.usage);
+  const text = (cand.content?.parts || []).filter((p) => !p.thought && typeof p.text === "string").map((p) => p.text).join("");
+  let out = null;
+  try {
+    out = JSON.parse(text);
+  } catch {
+    // truncated (MAX_TOKENS) or not JSON
   }
-  const out = response.parsed_output;
+  if (!out || typeof out !== "object") {
+    throw new FlyerError("Couldn't read the flyer. Try a clearer photo or a screenshot.", 422, usage);
+  }
   if (!out.is_event_flyer) {
-    throw new FlyerError("That doesn't look like an event flyer. Please try another image.", 422, response.usage);
+    throw new FlyerError("That doesn't look like an event flyer. Please try another image.", 422, usage);
   }
-  return { fields: cleanFields(out), usage: response.usage };
+  return { fields: rollDateForward(cleanFields(out), today), usage };
+}
+
+/**
+ * Flyers rarely print the year and models often guess last year's. Move a past date to its next
+ * occurrence on or after today (Feb 29 falls back to Mar 1) and flag it for the visitor to check.
+ */
+export function rollDateForward(fields, today) {
+  if (!fields.date || !DATE_RE.test(today || "") || fields.date >= today) return fields;
+  const [, m, d] = fields.date.split("-");
+  let year = parseInt(today.slice(0, 4), 10);
+  const iso = (y) => new Date(Date.UTC(y, parseInt(m, 10) - 1, parseInt(d, 10))).toISOString().slice(0, 10);
+  if (iso(year) < today) year += 1;
+  const guessed = fields.guessed_fields.includes("date") ? fields.guessed_fields : [...fields.guessed_fields, "date"];
+  return { ...fields, date: iso(year), guessed_fields: guessed };
 }

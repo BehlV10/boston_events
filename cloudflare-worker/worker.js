@@ -2,10 +2,9 @@
  * Cloudflare Worker: Event Submission Proxy for Boston Events
  * Accepts POST /submit-event from the frontend, validates the event,
  * and triggers a GitHub Action repository_dispatch to automatically rebuild and publish the site.
- * POST /extract-flyer reads an uploaded flyer image with Claude and returns form fields to review.
+ * POST /extract-flyer reads an uploaded flyer image with Gemini and returns form fields to review.
  * Deploy with `npm run deploy` (see README.md).
  */
-import Anthropic from "@anthropic-ai/sdk";
 import { costUsd, extractFlyer, FlyerError } from "./flyer.js";
 
 function bostonToday() {
@@ -15,8 +14,8 @@ function bostonToday() {
 const DAY_TTL = { expirationTtl: 60 * 60 * 48 };
 const AUDIT_TTL = { expirationTtl: 60 * 60 * 24 * 30 };
 
-/** Soft daily caps in KV (eventually consistent; the per-minute limiter and the Anthropic
- * workspace spend limit cover bursts). Returns an error message, or null to go ahead. */
+/** Soft daily caps in KV (eventually consistent; the per-minute limiter and Gemini's own
+ * free-tier quota cover bursts). Returns an error message, or null to go ahead. */
 async function checkFlyerQuota(env, ip, day) {
   const perIp = parseInt(env.FLYER_DAILY_LIMIT_PER_IP || "15", 10);
   const total = parseInt(env.FLYER_DAILY_LIMIT_TOTAL || "400", 10);
@@ -99,7 +98,7 @@ async function handleExtractFlyer(request, env, corsHeaders) {
   if (allowed.length && !allowed.includes(origin)) {
     return json({ error: "Flyer upload is only available on the Wicked Boston Events site." }, 403);
   }
-  if (!env.ANTHROPIC_API_KEY || !env.FLYER_LIMITS) {
+  if (!env.GEMINI_API_KEY || !env.FLYER_LIMITS) {
     return json({ error: "Flyer upload isn't set up yet. Please fill in the form by hand." }, 503);
   }
 
@@ -128,11 +127,10 @@ async function handleExtractFlyer(request, env, corsHeaders) {
     return json({ error: quotaError }, 429);
   }
 
-  const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, maxRetries: 1, timeout: 45_000 });
   let usage = null;
   let result;
   try {
-    const out = await extractFlyer(client, { image: body.image, mediaType: body.media_type, today: day });
+    const out = await extractFlyer({ apiKey: env.GEMINI_API_KEY, model: env.GEMINI_MODEL }, { image: body.image, mediaType: body.media_type, today: day });
     usage = out.usage;
     result = json({ success: true, fields: out.fields });
     await audit(env, day, { ip: ipHash, ok: true, in: usage?.input_tokens, out: usage?.output_tokens,
