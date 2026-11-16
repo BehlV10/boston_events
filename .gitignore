@@ -10,3 +10,9 @@ reddit/
 
 # Per-day event files, rebuilt by every render (deployed via the Pages artifact, not committed)
 days/
+
+# Cloudflare worker build output
+cloudflare-worker/node_modules/
+cloudflare-worker/.wrangler/
+cloudflare-worker/dist/
+cloudflare-worker/.dev.vars

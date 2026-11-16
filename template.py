@@ -257,6 +257,11 @@ CITY_RULES = [
     )),
 ]
 
+# Cloudflare worker that receives event submissions and reads flyers (cloudflare-worker/).
+# Empty means submissions only stay in the submitter's browser and the flyer upload is hidden.
+SUBMISSION_ENDPOINT_JS = json.dumps((os.environ.get("EVENT_SUBMISSION_ENDPOINT") or "").strip().rstrip("/"))
+
+
 CITY_LABELS = {
     "boston": "Boston",
     "cambridge": "Cambridge",
@@ -11738,6 +11743,22 @@ def render_page(results, weather=None, luckyseat_shows=None):
     border: 1px solid rgba(224, 90, 107, 0.4);
     color: #ff7b8b;
   }}
+  .form-status.info {{
+    background: rgba(93, 155, 255, 0.12);
+    border: 1px solid rgba(93, 155, 255, 0.35);
+    color: var(--accent, #5d9bff);
+  }}
+  .flyer-upload {{ margin: 0 0 14px; display: grid; gap: 8px; }}
+  .flyer-drop {{
+    display: flex; align-items: center; gap: 12px; cursor: pointer;
+    padding: 12px 14px; border: 1.5px dashed rgba(93, 155, 255, 0.45); border-radius: var(--radius-sm);
+    background: rgba(93, 155, 255, 0.06); font-size: 13px; line-height: 1.4;
+  }}
+  .flyer-drop:hover, .flyer-upload.dragging .flyer-drop {{ background: rgba(93, 155, 255, 0.14); }}
+  .flyer-icon {{ font-size: 22px; }}
+  .flyer-file {{ position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }}
+  .flyer-upload.busy .flyer-drop {{ opacity: 0.6; cursor: progress; }}
+  .form-input.ai-guess, .form-select.ai-guess {{ border-color: #f59e0b; box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.35); }}
   .form-actions {{
     display: flex;
     align-items: center;
@@ -13016,6 +13037,16 @@ def render_page(results, weather=None, luckyseat_shows=None):
         <form id="community-event-form" class="modal-form" novalidate>
           <!-- Anti-bot honeypot field (hidden from real users) -->
           <input type="text" name="_hp_company" class="hp-field" tabindex="-1" autocomplete="off" aria-hidden="true" style="display:none !important;">
+
+          <div class="flyer-upload" id="flyer-upload" hidden>
+            <label class="flyer-drop" for="ev-flyer">
+              <span class="flyer-icon" aria-hidden="true">📸</span>
+              <span><strong>Have a flyer?</strong> Upload a photo or screenshot and we'll fill in the form. You can check and edit everything before publishing.</span>
+            </label>
+            <input type="file" id="ev-flyer" accept="image/*" class="flyer-file">
+            <div class="form-status" id="flyer-status" style="display:none;" role="status"></div>
+          </div>
+          <input type="hidden" id="ev-website" name="website">
 
           <div class="form-row">
             <label for="ev-title" class="form-label">
@@ -16079,6 +16110,93 @@ def render_page(results, weather=None, luckyseat_shows=None):
     const formStatus = document.getElementById('form-submit-status');
     const btnSubmitAction = document.getElementById('btn-submit-action');
 
+    // --- Flyer upload: the worker reads the image with Claude and we pre-fill the form for review ---
+    (function () {{
+      const endpoint = (window.EVENT_SUBMISSION_ENDPOINT || {SUBMISSION_ENDPOINT_JS}).replace(/[/]$/, '');
+      const box = document.getElementById('flyer-upload');
+      const input = document.getElementById('ev-flyer');
+      const status = document.getElementById('flyer-status');
+      if (!endpoint || !box || !input) return;
+      box.hidden = false;
+      const say = (msg, type) => {{ status.textContent = msg; status.className = `form-status ${{type}}`; status.style.display = 'block'; }};
+      const LABELS = {{ name: 'title', venue: 'venue', address: 'address', city: 'city', date: 'date', start_time: 'time',
+                       price: 'price', category: 'category', ticket_url: 'link', website: 'link', description: 'description' }};
+      const FIELD_IDS = {{ name: 'ev-title', venue: 'ev-venue', address: 'ev-address', city: 'ev-city', date: 'ev-date',
+                          start_time: 'ev-time', price: 'ev-price', category: 'ev-category', description: 'ev-desc' }};
+
+      // Shrink to at most 1568px on the long edge (what the model reads anyway) and re-encode as JPEG.
+      async function toJpegBase64(file) {{
+        const url = URL.createObjectURL(file);
+        try {{
+          const img = await new Promise((resolve, reject) => {{
+            const im = new Image();
+            im.onload = () => resolve(im);
+            im.onerror = () => reject(new Error('decode'));
+            im.src = url;
+          }});
+          const scale = Math.min(1, 1568 / Math.max(img.naturalWidth, img.naturalHeight));
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.max(1, Math.round(img.naturalWidth * scale));
+          canvas.height = Math.max(1, Math.round(img.naturalHeight * scale));
+          const ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#fff';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          return canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
+        }} finally {{
+          URL.revokeObjectURL(url);
+        }}
+      }}
+
+      function fill(f) {{
+        document.querySelectorAll('#community-event-form .ai-guess').forEach((el) => el.classList.remove('ai-guess'));
+        for (const [key, id] of Object.entries(FIELD_IDS)) {{
+          const el = document.getElementById(id);
+          if (el && f[key]) el.value = f[key];
+        }}
+        const link = f.ticket_url || f.website;
+        const urlEl = document.getElementById('ev-url');
+        if (urlEl && link) urlEl.value = link;
+        const webEl = document.getElementById('ev-website');
+        if (webEl) webEl.value = f.website || '';
+        const missing = ['name', 'venue', 'date'].filter((k) => !f[k]).map((k) => LABELS[k]);
+        if (!link) missing.push('link');
+        const guessed = (f.guessed_fields || []).filter((k) => LABELS[k]);
+        guessed.forEach((k) => {{ const el = document.getElementById(FIELD_IDS[k] || (k === 'ticket_url' || k === 'website' ? 'ev-url' : '')); if (el) el.classList.add('ai-guess'); }});
+        let msg = 'Filled in from your flyer. Please check every field before publishing.';
+        if (guessed.length) msg += ` Double-check the highlighted ones (${{[...new Set(guessed.map((k) => LABELS[k]))].join(', ')}}).`;
+        if (missing.length) msg += ` Still needed: ${{missing.join(', ')}}.`;
+        say(msg, 'info');
+      }}
+
+      async function handle(file) {{
+        if (!file || !file.type.startsWith('image/')) {{ say('Please choose an image file.', 'error'); return; }}
+        box.classList.add('busy');
+        say('Reading your flyer…', 'info');
+        try {{
+          const image = await toJpegBase64(file);
+          const resp = await fetch(`${{endpoint}}/extract-flyer`, {{
+            method: 'POST',
+            headers: {{ 'Content-Type': 'application/json' }},
+            body: JSON.stringify({{ image, media_type: 'image/jpeg' }}),
+          }});
+          const data = await resp.json().catch(() => ({{}}));
+          if (!resp.ok || !data.fields) throw new Error(data.error || 'Could not read that flyer.');
+          fill(data.fields);
+        }} catch (err) {{
+          say(err.message === 'decode' ? "That image format can't be opened here. Try a screenshot or a JPEG." : (err.message || 'Could not read that flyer.'), 'error');
+        }} finally {{
+          box.classList.remove('busy');
+          input.value = '';
+        }}
+      }}
+
+      input.addEventListener('change', () => handle(input.files && input.files[0]));
+      box.addEventListener('dragover', (e) => {{ e.preventDefault(); box.classList.add('dragging'); }});
+      box.addEventListener('dragleave', () => box.classList.remove('dragging'));
+      box.addEventListener('drop', (e) => {{ e.preventDefault(); box.classList.remove('dragging'); handle(e.dataTransfer.files && e.dataTransfer.files[0]); }});
+    }})();
+
     const tabBtnEvent = document.getElementById('tab-btn-event');
     const tabBtnVenue = document.getElementById('tab-btn-venue');
     const modalViewEvent = document.getElementById('modal-view-event');
@@ -16474,7 +16592,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
           return;
         }}
 
-        const isoDate = `${{dateVal}}T${{timeVal}}:00-04:00`;
+        // No offset: the server reads it as Boston time, so daylight saving is handled there.
+        const isoDate = `${{dateVal}}T${{timeVal}}:00`;
 
         const newEvent = {{
           name: name,
@@ -16486,6 +16605,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
           address: address,
           price: price || null,
           description: desc,
+          website: ((document.getElementById('ev-website') || {{}}).value || '').trim(),
           _is_community: true,
           submitted_at: new Date().toISOString(),
         }};
@@ -16507,7 +16627,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
         injectUserEventIntoDOM(newEvent);
         apply();
 
-        const submitEndpoint = window.EVENT_SUBMISSION_ENDPOINT || '';
+        const submitEndpoint = window.EVENT_SUBMISSION_ENDPOINT || {SUBMISSION_ENDPOINT_JS};
         if (submitEndpoint) {{
           try {{
             await fetch(submitEndpoint, {{
@@ -16525,6 +16645,11 @@ def render_page(results, weather=None, luckyseat_shows=None):
         setTimeout(() => {{
           closeSubmitModal();
           communityForm.reset();
+          const webEl = document.getElementById('ev-website');
+          if (webEl) webEl.value = '';
+          communityForm.querySelectorAll('.ai-guess').forEach((el) => el.classList.remove('ai-guess'));
+          const flyerStatus = document.getElementById('flyer-status');
+          if (flyerStatus) flyerStatus.style.display = 'none';
           if (btnSubmitAction) {{
             btnSubmitAction.disabled = false;
             const btnText = btnSubmitAction.querySelector('.btn-text');
@@ -16610,7 +16735,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
           localStorage.setItem('boston_suggested_venues', JSON.stringify(stored.slice(-20)));
         }} catch (_) {{}}
 
-        const submitEndpoint = window.EVENT_SUBMISSION_ENDPOINT || '';
+        const submitEndpoint = window.EVENT_SUBMISSION_ENDPOINT || {SUBMISSION_ENDPOINT_JS};
         if (submitEndpoint) {{
           try {{
             await fetch(submitEndpoint, {{
