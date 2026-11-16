@@ -11510,6 +11510,25 @@ def _club_cafe_offers(soup):
     return out
 
 
+def _club_cafe_start_dates(soup):
+    """Event URL (no query, no trailing slash) -> "YYYY-MM-DD" from the calendar's JSON-LD blocks.
+
+    Ignores eventStatus: on 2026-11-16 the Nov 22 Drag Brunch was marked EventCancelled there while
+    its own page was selling tickets and showed no cancellation."""
+    out = {}
+    for s in soup.find_all("script", type="application/ld+json"):
+        try:
+            j = json.loads(s.string or "", strict=False)
+        except ValueError:
+            continue
+        if not isinstance(j, dict) or not j.get("url"):
+            continue
+        m = re.match(r"(\d{4}-\d{2}-\d{2})", str(j.get("startDate") or ""))
+        if m:
+            out.setdefault(j["url"].split("?")[0].rstrip("/"), m.group(1))
+    return out
+
+
 def _club_cafe_cost_line(event_url, ua):
     """The "Cost" line on a Club Café event page: "$15 after 10 pm", "$40 & $30 + fee", "No Cover"."""
     try:
@@ -11547,6 +11566,7 @@ def scrape_club_cafe(url, ua):
     """Club Café in South End — historic LGBT nightlife, cabaret, piano bar & dance club."""
     soup = fetch_soup(url, ua)
     offers = _club_cafe_offers(soup)
+    starts = _club_cafe_start_dates(soup)
     events = []
     seen = set()
     for a in soup.find_all("article", class_=lambda c: c and "mec-event-article" in c):
@@ -11558,7 +11578,9 @@ def scrape_club_cafe(url, ua):
         href = a_link["href"] if a_link and a_link.has_attr("href") else ""
 
         m_occ = re.search(r"occurrence=(\d{4}-\d{2}-\d{2})", href)
-        date_str = m_occ.group(1) if m_occ else None
+        # One-off ticketed shows (/events/<slug>/, e.g. Drag Brunch) carry no ?occurrence= date;
+        # their JSON-LD block has it.
+        date_str = m_occ.group(1) if m_occ else starts.get(href.split("?")[0].rstrip("/"))
         if not date_str:
             continue
 
