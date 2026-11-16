@@ -81,7 +81,7 @@ def _pick_html(p):
     title = escape(p["title"])
     head = f'<a href="{escape(p["url"])}" target="_blank" rel="noopener">{title}</a>' if p["url"] else title
     meta = " · ".join(escape(x) for x in (p["venue"], p["price"], p["area"]) if x)
-    badge = '<span class="pick-badge" title="Hand-picked by the editor">✨ Pick</span>' if p["curated"] else ""
+    badge = '<span class="pick-badge" title="Hand-chosen, with a note on why it\'s worth going">✨ Editor\'s pick</span>' if p["curated"] else ""
     note = f'<p class="pick-note">{escape(p["note"])}</p>' if p["note"] else ""
     when = escape(p["time"]) if p["time"] else "All day"
     return (f'<li class="pick" data-city="{p["city"]}" data-curated="{int(p["curated"])}">'
@@ -102,14 +102,20 @@ def render_highlights_page(site_url=None, today=None, days=None, runs=None):
     sections = []
     for i, day in enumerate(days):
         d = day["date"]
-        items = "".join(_pick_html(p) for p in day["picks"]) or '<li class="pick-empty">Nothing picked yet for this day.</li>'
+        groups = []
+        for c, label in CITY_LABELS.items():
+            ps = [p for p in day["picks"] if p["city"] == c]
+            if ps:
+                groups.append(f'<div class="city-group" data-city="{c}"><h3>{label}</h3>'
+                              f'<ul class="picks">{"".join(_pick_html(p) for p in ps)}</ul></div>')
+        items = "".join(groups) or '<ul class="picks"><li class="pick-empty">Nothing picked yet for this day.</li></ul>'
         curated = sum(p["curated"] for p in day["picks"])
         hidden = " hidden" if i >= DEFAULT_DAYS else ""
         sections.append(
             f'<section class="day" data-date="{d.isoformat()}"{hidden}>'
             f'<h2><span class="day-name">{d.strftime("%A")}</span> {d.strftime("%B %-d")}'
             f'<span class="day-count">{len(day["picks"])} picks{f" · {curated} ✨" if curated else ""}</span></h2>'
-            f'<ul class="picks">{items}</ul></section>')
+            f'{items}</section>')
 
     run_items = "".join(_run_html(x) for x in runs)
     runs_html = (f'<section class="runs" id="runs"><h2>Running through these dates</h2><ul class="run-list">{run_items}</ul></section>'
@@ -150,6 +156,7 @@ def render_highlights_page(site_url=None, today=None, days=None, runs=None):
     --accent: #2563eb; --border: #dfe3ec; --gold: #92400e; --gold-bg: #fdf3d7;
   }}
   * {{ box-sizing: border-box; }}
+  [hidden] {{ display: none !important; }}
   body {{ margin: 0; background: var(--bg); color: var(--fg); line-height: 1.5;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }}
   a {{ color: var(--accent); }}
@@ -180,6 +187,9 @@ def render_highlights_page(site_url=None, today=None, days=None, runs=None):
   .day h2 {{ font-size: 19px; margin: 0 0 10px; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }}
   .day-name {{ color: var(--accent); }}
   .day-count {{ font-size: 12px; font-weight: 500; color: var(--muted); margin-left: auto; }}
+  .city-group h3 {{ font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--muted); margin: 14px 0 6px; }}
+  .city-group:first-of-type h3 {{ margin-top: 4px; }}
   .picks, .run-list {{ list-style: none; margin: 0; padding: 0; background: var(--card);
     border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }}
   .pick {{ display: grid; grid-template-columns: 70px 1fr; gap: 10px; padding: 11px 14px; border-top: 1px solid var(--border); }}
@@ -214,9 +224,10 @@ def render_highlights_page(site_url=None, today=None, days=None, runs=None):
 </header>
 <main>
   <h1>Boston Event Highlights</h1>
-  <p class="lede">The best few things to do each day in Boston, Cambridge &amp; Somerville. Picks marked ✨ are
-  hand-chosen with a note on why they're worth it; the rest are the strongest listings from 300+ local calendars.
-  For everything, see the <a href="../">full calendar</a>.</p>
+  <p class="lede">The best few things to do each day in Boston, Cambridge &amp; Somerville.
+  <strong>✨ Editor's picks</strong> (highlighted in gold) are hand-chosen, each with a note on why it's worth going.
+  The rest are the next-strongest listings from 300+ local calendars, chosen automatically: big venues, one-off
+  shows over weekly regulars, evenings over daytime. For everything, see the <a href="../">full calendar</a>.</p>
 
   <div class="controls" role="region" aria-label="Choose dates">
     <div class="range">
@@ -234,7 +245,7 @@ def render_highlights_page(site_url=None, today=None, days=None, runs=None):
       <button class="chip" data-city="cambridge" aria-pressed="false">Cambridge</button>
       <button class="chip" data-city="somerville" aria-pressed="false">Somerville</button>
       <span class="chip-sep" aria-hidden="true"></span>
-      <button class="chip" id="curated" aria-pressed="false">✨ Picks only</button>
+      <button class="chip" id="curated" aria-pressed="false">✨ Editor's picks only</button>
     </div>
     <div class="status" id="status" aria-live="polite">{total} picks over {min(DEFAULT_DAYS, len(days))} days</div>
   </div>
@@ -275,6 +286,9 @@ def render_highlights_page(site_url=None, today=None, days=None, runs=None):
       sec.querySelectorAll('.pick').forEach(function (li) {{
         var ok = (city === 'all' || li.dataset.city === city) && (!curatedOnly || li.dataset.curated === '1');
         li.hidden = !ok; if (ok) {{ n++; if (li.dataset.curated === '1') c++; }}
+      }});
+      sec.querySelectorAll('.city-group').forEach(function (g) {{
+        g.hidden = !g.querySelector('.pick:not([hidden])');
       }});
       var dc = sec.querySelector('.day-count');
       if (dc) dc.textContent = n + ' pick' + (n === 1 ? '' : 's') + (c ? ' · ' + c + ' ✨' : '');
