@@ -7933,6 +7933,71 @@ def _same_event_retitled(e1, e2, freq):
     return len(shared) == 1 and len(rare) == 1 and len(rare[0]) >= 5 and freq.get(rare[0], 0) <= 4
 
 
+def _venue_key(v):
+    """'Club Café (Moonshine Room)' and 'The Club Cafe' -> 'clubcafe' (whole name; generic words kept)."""
+    v = re.sub(r"\(.*?\)", "", _fold(v or ""))
+    v = re.sub(r"^the\s+", "", v.strip())
+    return re.sub(r"[^a-z0-9]+", "", v)
+
+
+def _title_key(t):
+    return re.sub(r"[^a-z0-9]+", "", _fold(t or ""))
+
+
+def _title_lead(t, venue_key=""):
+    """First two words, minus a leading "the" and plural s: "The Late Night w/ host Theo" -> ("late", "night")."""
+    words = [re.sub(r"s$", "", w) for w in re.findall(r"[a-z0-9]+", _fold(t or ""))]
+    if words and words[0] == "the":
+        words = words[1:]
+    return tuple(words[:2]) if len(words) >= 2 else None
+
+
+def _drop_misdated_aggregator_listings(buckets, window_days=21):
+    """Listings sites get recurring dates wrong: The Boston Calendar had Club Café's monthly "Queer Line &
+    Partner Dancing" on Nov 16 and 23 while Club Café's own calendar has only the 23rd (the 16th was Drag
+    Bingo). Drop an aggregator's listing when the venue's own feed
+      - covers that day (has other events there that day, so it isn't just a short or summary feed),
+      - has nothing that day with a similar title (same first two words, so "Comedy Gold w/ host X" still
+        counts as "Comedy Gold Stand-Up Showcase"), and
+      - has the exact same title on a later date within three weeks (a skipped occurrence; an earlier
+        one proves nothing, since Eventbrite organizer pages show each weekly series only once).
+    Anything the venue doesn't list at all is left alone."""
+    own = {}  # venue key -> {date: [titles]} from the venue's own scraper
+    for day, events in buckets.items():
+        for e in events:
+            vk = _venue_key(e.get("venue"))
+            sk = _venue_key(e.get("_source_venue"))
+            if vk and sk and (vk == sk or vk.startswith(sk) or sk.startswith(vk)):
+                own.setdefault(vk, {}).setdefault(day, []).append(e.get("name") or "")
+
+    def exact(a, b):
+        a, b = _title_key(a), _title_key(b)
+        return a and b and (a == b or (min(len(a), len(b)) >= 6 and (a in b or b in a)))
+
+    def similar(a, b):
+        return exact(a, b) or (_title_lead(a) is not None and _title_lead(a) == _title_lead(b))
+
+    dropped = 0
+    for day, events in buckets.items():
+        keep = []
+        for e in events:
+            vk = _venue_key(e.get("venue"))
+            by_day = own.get(vk)
+            if by_day and day in by_day and _source_priority(e.get("_source_venue")) == 5:
+                name = e.get("name")
+                here = any(similar(name, t) for t in by_day[day])
+                # Only a *later* own date counts: Eventbrite organizer pages show a weekly series once, at
+                # its next date, so an own listing on an earlier date says nothing about this one.
+                later = any(day < d <= day + timedelta(days=window_days) and any(exact(name, t) for t in ts)
+                            for d, ts in by_day.items())
+                if later and not here:
+                    dropped += 1
+                    continue
+            keep.append(e)
+        buckets[day] = keep
+    return dropped
+
+
 def _merge_duplicates(events, word_freq=None):
     """Collapse events sharing a normalized name or head title within the same day bucket.
 
@@ -8545,6 +8610,7 @@ def group_by_date(results):
                 ongoing.append(entry)
             elif key <= horizon:
                 buckets.setdefault(key, []).append(entry)
+    _drop_misdated_aggregator_listings(buckets)
     word_freq = title_word_freq([e for evs in buckets.values() for e in evs])
     for date_key, events in list(buckets.items()):
         events.sort(key=lambda e: e["_time"])
