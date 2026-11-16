@@ -7,6 +7,9 @@ import re
 import sys
 from datetime import datetime, timezone, timedelta
 from urllib.parse import urlparse
+from zoneinfo import ZoneInfo
+
+EASTERN = ZoneInfo("America/New_York")
 
 # Base directories
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -46,8 +49,11 @@ def validate_and_normalize(raw: dict) -> dict:
             dt = datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
             date_iso = dt.isoformat()
         else:
-            # Try ISO 8601
+            # Try ISO 8601; a time with no offset is Boston local time (the form sends it that way,
+            # so daylight saving is handled here instead of a hard-coded -04:00 in the browser)
             dt = datetime.fromisoformat(date_str.replace("Z", "+00:00"))
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=EASTERN)
             date_iso = dt.isoformat()
     except Exception as e:
         raise ValueError(f"Invalid date format '{date_str}': {e}")
@@ -78,6 +84,13 @@ def validate_and_normalize(raw: dict) -> dict:
     address = sanitize_string(raw.get("address"), 150)
     description = sanitize_string(raw.get("description"), 500)
 
+    # The venue's or organizer's own site (e.g. read off a flyer); probed later for a scraper.
+    website = (raw.get("website") or "").strip()[:500]
+    if website:
+        parsed = urlparse(website)
+        if parsed.scheme not in ("http", "https") or not parsed.netloc:
+            website = ""
+
     return {
         "name": name,
         "venue": venue,
@@ -88,6 +101,7 @@ def validate_and_normalize(raw: dict) -> dict:
         "city": city,
         "address": address,
         "description": description,
+        **({"website": website} if website else {}),
         "_is_community": True,
         "_source_venue": "Community Submission",
         "submitted_at": now.isoformat(),

@@ -14998,6 +14998,36 @@ _ALL_VENUES = [
     {"name": "Boston Jewish Film Festival", "url": "https://www.bostonjcc.org/program/boston-jewish-film-festival/", "ua": UA_CHROME, "scraper": scrape_boston_jewish_film_festival, "default_category": "film"},
 ]
 
+# Sites found from submitted flyers (scripts/probe_source.py opens a PR adding them here). Each
+# names one of the generic scrapers below; nothing else can be referenced from the JSON file.
+DISCOVERED_SOURCES_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "discovered_sources.json")
+GENERIC_SCRAPERS = {
+    "jsonld": scrape_jsonld,
+    "ical": scrape_ical,
+    "squarespace": scrape_squarespace_events,
+    "tribe": scrape_tribe_rest,
+    "eventbrite_org": scrape_eventbrite_org,
+}
+
+
+def load_discovered_sources(path=None):
+    try:
+        with open(path or DISCOVERED_SOURCES_FILE, encoding="utf-8") as f:
+            rows = json.load(f)
+    except (OSError, ValueError):
+        return []
+    out = []
+    for r in rows if isinstance(rows, list) else []:
+        scraper = GENERIC_SCRAPERS.get(r.get("scraper"))
+        if not (scraper and r.get("name") and str(r.get("url", "")).startswith(("http://", "https://"))):
+            continue
+        out.append({"name": r["name"], "url": r["url"], "ua": UA_CHROME, "scraper": scraper,
+                    "default_category": r.get("default_category") or "community", "_discovered": True})
+    return out
+
+
+_ALL_VENUES += load_discovered_sources()
+
 # Drop venues that require env vars we don't have set — keeps the fail banner clean.
 VENUES = [v for v in _ALL_VENUES if not v.get("requires_env") or os.environ.get(v["requires_env"])]
 

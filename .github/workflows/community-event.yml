@@ -17,6 +17,7 @@ permissions:
   contents: write
   pages: write
   id-token: write
+  pull-requests: write
 
 concurrency:
   group: pages
@@ -26,6 +27,9 @@ jobs:
   process_submission:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      # The submission worker's URL (Settings → Secrets and variables → Actions → Variables).
+      EVENT_SUBMISSION_ENDPOINT: ${{ vars.EVENT_SUBMISSION_ENDPOINT }}
     steps:
       - uses: actions/checkout@v4
 
@@ -77,6 +81,36 @@ jobs:
             git commit -m "Process community submission: $(date -u +%Y-%m-%dT%H:%MZ) [skip ci]"
             git push
           fi
+
+      # If the submission (e.g. read off a flyer) names the venue's or organizer's website, try the
+      # generic scrapers on it. A hit opens a PR adding it to discovered_sources.json for review.
+      - name: Look for a scraper for the submitted website
+        id: probe
+        if: (github.event_name == 'repository_dispatch' && github.event.action == 'community-event') || (github.event_name == 'workflow_dispatch' && github.event.inputs.submission_type == 'event')
+        continue-on-error: true
+        env:
+          EVENT_PAYLOAD: ${{ github.event_name == 'repository_dispatch' && toJson(github.event.client_payload) || github.event.inputs.payload_json }}
+        run: python scripts/probe_source.py --payload "$EVENT_PAYLOAD" --out "$RUNNER_TEMP/probe.json"
+
+      - name: Open a PR adding the source
+        if: steps.probe.outputs.found == 'true'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ steps.probe.outputs.branch }}
+          TITLE: ${{ steps.probe.outputs.title }}
+        run: |
+          if git ls-remote --exit-code --heads origin "$BRANCH" >/dev/null; then
+            echo "A PR branch for this site already exists"; exit 0
+          fi
+          main_sha=$(git rev-parse HEAD)
+          git switch -c "$BRANCH"
+          python scripts/probe_source.py --apply "$RUNNER_TEMP/probe.json"
+          git add discovered_sources.json
+          git commit -m "$TITLE"
+          git push -u origin "$BRANCH"
+          gh pr create --base main --head "$BRANCH" --title "$TITLE" --body-file "$RUNNER_TEMP/probe_pr.md"
+          git switch --detach "$main_sha"
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
