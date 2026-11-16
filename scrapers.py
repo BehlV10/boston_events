@@ -8507,8 +8507,22 @@ def scrape_franklin_park_coalition(url, ua):
 
 
 def scrape_speedway(url, ua):
-    """Charles River Speedway in Brighton (Notch Brewing, run club, markets, comedy)."""
-    return scrape_tribe_rest(url, ua, default_venue="Charles River Speedway", default_category="food")
+    """Charles River Speedway in Brighton (Notch Brewing, run club, markets, comedy).
+
+    Paged by date: the API's first 50 rows are a year of the weekly run club, which hid
+    everything else (Brighton Bazaar, Standup at the Speedway)."""
+    endpoint = url.split("?")[0].rstrip("/")
+    if "/wp-json/" not in endpoint:
+        endpoint += "/wp-json/tribe/events/v1/events"
+    events = scrape_tribe_rest_paged(endpoint, ua, default_venue="Charles River Speedway", default_category="food",
+                                     days=60)
+    for e in events:
+        low = e["name"].lower()
+        if re.search(r"\b(bazaar|market|flea|makers?)\b", low):
+            e["category"] = "markets"
+        elif re.search(r"\b(stand-?up|comedy)\b", low):
+            e["category"] = "comedy"
+    return events
 
 
 def scrape_kendall_center(url, ua):
