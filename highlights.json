@@ -4368,8 +4368,7 @@
   {
     "id": "2026-11-20-fiddle-funk-folk",
     "match": {
-      "name_contains": "Fiddle Funk Folk",
-      "venue_contains": "Passim"
+      "name_contains": "Fiddle Funk Folk"
     },
     "badge": "\ud83c\udfbb Fiddle Fest",
     "note": "Passim's fiddle festival night at the Armory with Scottish Fish and friends.",
@@ -6241,5 +6240,590 @@
     "note": "Free talk with public health scholar Sandro Galea.",
     "start_date": "2026-11-30",
     "expires": "2026-11-30"
+  },
+  {
+    "id": "2026-11-17-unplugged-game-night",
+    "match": {
+      "name_contains": "Game Night at CanalSide"
+    },
+    "badge": "\ud83c\udfb2 Game Night",
+    "note": "Free drop-in board games with Unplugged Boston at CanalSide in CambridgeSide.",
+    "start_date": "2026-11-17",
+    "expires": "2026-11-17"
+  },
+  {
+    "id": "2026-11-20-business-donut",
+    "match": {
+      "name_contains": "Business Donut"
+    },
+    "badge": "\ud83c\udfad Improv Pick",
+    "note": "Business Donut's Thanksgiving improv show in Somerville.",
+    "spotlight": true,
+    "start_date": "2026-11-20",
+    "expires": "2026-11-20"
+  },
+  {
+    "id": "2026-11-16-celtics-vs-magic",
+    "match": {
+      "name_contains": "magic"
+    },
+    "badge": "Editor's Pick",
+    "note": "A Monday-night Celtics home game against the Magic at the Garden.",
+    "start_date": "2026-11-16",
+    "expires": "2026-11-16",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-16-snowport-holiday-market",
+    "match": {
+      "name_contains": "snowport holiday market"
+    },
+    "badge": "Editor's Pick",
+    "note": "Seaport's big holiday village is back with 125+ makers, food, cocktail bars and live music (Mondays bring free sets on the Mohegan stage).",
+    "start_date": "2026-11-16",
+    "expires": "2026-11-16",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-16-berklee-blues-band",
+    "match": {
+      "name_contains": "berklee blues band",
+      "venue_contains": "Wally's Caf\u00e9"
+    },
+    "badge": "Editor's Pick",
+    "note": "Free blues at Wally's, the legendary family-run jazz club that's been on Mass Ave since 1947.",
+    "start_date": "2026-11-16",
+    "expires": "2026-11-16",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-16-drag-bingo",
+    "match": {
+      "name_contains": "drag"
+    },
+    "badge": "Editor's Pick",
+    "note": "Free bingo hosted by drag queens, a South End Monday-night staple.",
+    "start_date": "2026-11-16",
+    "expires": "2026-11-16",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-16-raise-the-red-lantern",
+    "match": {
+      "name_contains": "raise the red lantern"
+    },
+    "badge": "Editor's Pick",
+    "note": "Zhang Yimou's gorgeous, suffocating 1991 drama about a young concubine, on the big screen.",
+    "start_date": "2026-11-16",
+    "expires": "2026-11-16",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-16-srr-bur-run",
+    "match": {
+      "name_contains": "srr bur-run: free 3-mile group run",
+      "venue_contains": "Kenney Park, Davis Sq"
+    },
+    "badge": "Editor's Pick",
+    "note": "Somerville Road Runners' free, all-paces 3-mile group run that ends at the Burren.",
+    "start_date": "2026-11-16",
+    "expires": "2026-11-16",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-16-skip-the-small-talk",
+    "match": {
+      "name_contains": "skip the small talk"
+    },
+    "badge": "Editor's Pick",
+    "note": "A guided social night where you trade surface-level chitchat for real conversation with strangers.",
+    "start_date": "2026-11-16",
+    "expires": "2026-11-16",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-16-the-white-owls",
+    "match": {
+      "name_contains": "owls"
+    },
+    "badge": "Editor's Pick",
+    "note": "Monday live music at Sally O's, a cozy, neighborly bar in Union Square.",
+    "start_date": "2026-11-16",
+    "expires": "2026-11-16",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-17-bruins-vs-kings",
+    "match": {
+      "name_contains": "los angeles kings",
+      "venue_contains": "TD Garden"
+    },
+    "badge": "Editor's Pick",
+    "note": "Bruins hockey at the Garden against the visiting LA Kings.",
+    "start_date": "2026-11-17",
+    "expires": "2026-11-17",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-17-pouya-the-foreverglades-tour",
+    "match": {
+      "name_contains": "pouya",
+      "venue_contains": "Big Night Live"
+    },
+    "badge": "Editor's Pick",
+    "note": "The Miami underground rap veteran brings his rowdy, mosh-ready set to the Garden-adjacent club.",
+    "start_date": "2026-11-17",
+    "expires": "2026-11-17",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-17-boston-debate-showcase-mit-faculty-debat",
+    "match": {
+      "name_contains": "boston debate showcase: mit faculty debate ai at laugh boston",
+      "venue_contains": "Laugh Boston"
+    },
+    "badge": "Editor's Pick",
+    "note": "MIT professors argue about AI on a comedy club stage, which is exactly as fun as it sounds.",
+    "start_date": "2026-11-17",
+    "expires": "2026-11-17",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-17-caroline",
+    "match": {
+      "name_contains": "caroline",
+      "venue_contains": "The Sinclair"
+    },
+    "badge": "Editor's Pick",
+    "note": "The London collective's slow-building, folk-meets-post-rock songs, touring 2025's acclaimed *caroline 2*.",
+    "start_date": "2026-11-17",
+    "expires": "2026-11-17",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-17-racecourse",
+    "match": {
+      "name_contains": "racecourse",
+      "venue_contains": "The Lilypad"
+    },
+    "badge": "Editor's Pick",
+    "note": "An intimate Tuesday set in Inman Square's tiny, art-filled music room, the Lilypad.",
+    "start_date": "2026-11-17",
+    "expires": "2026-11-17",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-17-pace-jay-w-tonino-jens-rybo-trillium",
+    "match": {
+      "name_contains": "pace jay w/ tonino and jens rybo & trillium",
+      "venue_contains": "Cantab Underground"
+    },
+    "badge": "Editor's Pick",
+    "note": "A multi-band local bill in the Cantab's beloved basement.",
+    "start_date": "2026-11-17",
+    "expires": "2026-11-17",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-17-johnny-trama-and-the-b3-kings",
+    "match": {
+      "name_contains": "johnny trama and the b3 kings",
+      "venue_contains": "The Plough and Stars"
+    },
+    "badge": "Editor's Pick",
+    "note": "Free late-night Hammond organ grooves in one of Cambridge's tiniest, best-loved bars.",
+    "start_date": "2026-11-17",
+    "expires": "2026-11-17",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-17-bluesy-tuesy",
+    "match": {
+      "name_contains": "blues dance lesson and social - bluesy tuesy",
+      "venue_contains": "NESFA"
+    },
+    "badge": "Editor's Pick",
+    "note": "A blues dance lesson, then a slow-groove social.",
+    "start_date": "2026-11-17",
+    "expires": "2026-11-17",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-17-the-django-cadre",
+    "match": {
+      "name_contains": "the django cadre"
+    },
+    "badge": "Editor's Pick",
+    "note": "Free gypsy jazz in the Burren's front room, Django Reinhardt-style.",
+    "start_date": "2026-11-17",
+    "expires": "2026-11-17",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-18-bu-hockey-vs-quinnipiac",
+    "match": {
+      "name_contains": "boston university",
+      "venue_contains": "Agganis Arena"
+    },
+    "badge": "Editor's Pick",
+    "note": "College hockey at its loudest: the Terriers and the BU student section host a perennial national power.",
+    "start_date": "2026-11-18",
+    "expires": "2026-11-18",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-18-the-getaway-driver",
+    "match": {
+      "name_contains": "central square theater: the getaway driver",
+      "venue_contains": "Central Square Theater"
+    },
+    "badge": "Editor's Pick",
+    "note": "A Boston-area premiere at Central Square Theater, running through Nov 29.",
+    "start_date": "2026-11-18",
+    "expires": "2026-11-18",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-18-legends-of-mary",
+    "match": {
+      "name_contains": "legends of mary",
+      "venue_contains": "Lizard Lounge"
+    },
+    "badge": "Editor's Pick",
+    "note": "An all-star tribute to Jerry Garcia's Legion of Mary in the cozy basement club under Cambridge Common.",
+    "start_date": "2026-11-18",
+    "expires": "2026-11-18",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-18-the-lilypad-variety-show",
+    "match": {
+      "name_contains": "the lilypad variety show",
+      "venue_contains": "The Lilypad"
+    },
+    "badge": "Editor's Pick",
+    "note": "A five-dollar grab bag of music, comedy and whatever else shows up on the Lilypad's tiny stage.",
+    "start_date": "2026-11-18",
+    "expires": "2026-11-18",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-18-line-dancing-wednesdays-with-ldq",
+    "match": {
+      "name_contains": "dancing"
+    },
+    "badge": "Editor's Pick",
+    "note": "Five-dollar line dancing with a teacher, so total beginners can keep up.",
+    "start_date": "2026-11-18",
+    "expires": "2026-11-18",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-18-worst-party-ever-equipment",
+    "match": {
+      "name_contains": "worst party ever"
+    },
+    "badge": "Editor's Pick",
+    "note": "An all-ages emo double bill in one of Davis Square's best small rooms.",
+    "start_date": "2026-11-18",
+    "expires": "2026-11-18",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-18-grain-thief",
+    "match": {
+      "name_contains": "grain thief"
+    },
+    "badge": "Editor's Pick",
+    "note": "Free, foot-stomping Americana from a Boston string band.",
+    "start_date": "2026-11-18",
+    "expires": "2026-11-18",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-18-two-stepping-lesson-open-floor",
+    "match": {
+      "name_contains": "live music: two stepping instruction and open floor",
+      "venue_contains": "Remnant Satellite"
+    },
+    "badge": "Editor's Pick",
+    "note": "A two-step lesson to live music, then an open dance floor in the brewery.",
+    "start_date": "2026-11-18",
+    "expires": "2026-11-18",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-18-fresh-goofs",
+    "match": {
+      "name_contains": "fresh"
+    },
+    "badge": "Editor's Pick",
+    "note": "Up-and-coming stand-ups with $4 drinks.",
+    "start_date": "2026-11-18",
+    "expires": "2026-11-18",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-19-bso-jan-lisiecki-plays-mendelssohn",
+    "match": {
+      "name_contains": "open rehearsal: jan lisiecki performs mendelssohn piano concerto no. 1",
+      "venue_contains": "Symphony Hall"
+    },
+    "badge": "Editor's Pick",
+    "note": "The star Canadian pianist plays Mendelssohn's sparkling first concerto with the BSO, with tickets starting at $25.",
+    "start_date": "2026-11-19",
+    "expires": "2026-11-19",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-19-il-volo",
+    "match": {
+      "name_contains": "il volo",
+      "venue_contains": "TD Garden"
+    },
+    "badge": "Editor's Pick",
+    "note": "The Italian operatic-pop trio brings their huge, sweeping voices to an arena.",
+    "start_date": "2026-11-19",
+    "expires": "2026-11-19",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-19-trippie-redd",
+    "match": {
+      "name_contains": "trippie redd",
+      "venue_contains": "House of Blues"
+    },
+    "badge": "Editor's Pick",
+    "note": "The melodic rap-rock star on his Non-Disclosure Agreement tour.",
+    "start_date": "2026-11-19",
+    "expires": "2026-11-19",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-19-frost-children",
+    "match": {
+      "name_contains": "frost children",
+      "venue_contains": "Big Night Live"
+    },
+    "badge": "Editor's Pick",
+    "note": "The sibling duo's chaotic, glittering hyperpop and dance-punk.",
+    "start_date": "2026-11-19",
+    "expires": "2026-11-19",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-19-timba-messengers",
+    "match": {
+      "name_contains": "timba messengers",
+      "venue_contains": "Wally's Caf\u00e9"
+    },
+    "badge": "Editor's Pick",
+    "note": "Free late-night Cuban timba at Wally's. Expect salsa dancers.",
+    "start_date": "2026-11-19",
+    "expires": "2026-11-19",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-19-throwback-arcade-night",
+    "match": {
+      "name_contains": "throwback arcade night at tuck's arcadium",
+      "venue_contains": "Tuck's Arcadium"
+    },
+    "badge": "Editor's Pick",
+    "note": "Harvard Square's new '90s/Y2K barcade, with 30+ classic games, pinball and cocktails.",
+    "start_date": "2026-11-19",
+    "expires": "2026-11-19",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-19-elements-paul-t-edward-oberon",
+    "match": {
+      "name_contains": "paul t & edward oberon (v recordings",
+      "venue_contains": "The Phoenix Landing"
+    },
+    "badge": "Editor's Pick",
+    "note": "Boston's long-running drum & bass night hosts a UK duo from the V Recordings label.",
+    "start_date": "2026-11-19",
+    "expires": "2026-11-19",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-19-kill-tiny",
+    "match": {
+      "name_contains": "kill tiny",
+      "venue_contains": "The Comedy Studio"
+    },
+    "badge": "Editor's Pick",
+    "note": "A cheap late-night stand-up show after the main event.",
+    "start_date": "2026-11-19",
+    "expires": "2026-11-19",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-19-popcorn-comedy-with-jamie-aird",
+    "match": {
+      "name_contains": "popcorn comedy with jamie aird (seen at the wilbur",
+      "venue_contains": "Somerville Theatre"
+    },
+    "badge": "Editor's Pick",
+    "note": "A stand-up night inside the historic movie house.",
+    "start_date": "2026-11-19",
+    "expires": "2026-11-19",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-19-gkit-magnificent-danger",
+    "match": {
+      "name_contains": "gkit & magnificent danger",
+      "venue_contains": "The Rockwell"
+    },
+    "badge": "Editor's Pick",
+    "note": "A fusion big band plays reimagined video game music, from classic soundtracks to deep cuts.",
+    "start_date": "2026-11-19",
+    "expires": "2026-11-19",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-19-resavoir",
+    "match": {
+      "name_contains": "resavoir",
+      "venue_contains": "Arts at the Armory"
+    },
+    "badge": "Editor's Pick",
+    "note": "Chicago's lush jazz-meets-indie collective, at the Armory.",
+    "start_date": "2026-11-19",
+    "expires": "2026-11-19",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-19-atomic-comedy-indie-improv-night",
+    "match": {
+      "name_contains": "atomic comedy indie improv night",
+      "venue_contains": "Arts at the Armory"
+    },
+    "badge": "Editor's Pick",
+    "note": "A lineup of local indie improv teams.",
+    "start_date": "2026-11-19",
+    "expires": "2026-11-19",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-19-jazz-night-ervin-dhimo-trio",
+    "match": {
+      "name_contains": "jazz night: ervin dhimo trio",
+      "venue_contains": "Aeronaut Brewing"
+    },
+    "badge": "Editor's Pick",
+    "note": "No-cover jazz with your pint at Aeronaut.",
+    "start_date": "2026-11-19",
+    "expires": "2026-11-19",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-20-barcelona-guitar-trio-and-dance",
+    "match": {
+      "name_contains": "barcelona guitar trio and dance",
+      "venue_contains": "Jordan Hall"
+    },
+    "badge": "Editor's Pick",
+    "note": "Flamenco guitar and dance in one of the city's most beautiful halls.",
+    "start_date": "2026-11-20",
+    "expires": "2026-11-20",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-20-dream-academy-the-drag-show",
+    "match": {
+      "name_contains": "dream academy: the drag show",
+      "venue_contains": "Club Caf\u00e9"
+    },
+    "badge": "Editor's Pick",
+    "note": "A Friday-night drag show at the South End's longtime LGBTQ+ hub.",
+    "start_date": "2026-11-20",
+    "expires": "2026-11-20",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-20-noah-preminger-quintet",
+    "match": {
+      "name_contains": "noah preminger quintet",
+      "venue_contains": "Wally's Caf\u00e9"
+    },
+    "badge": "Editor's Pick",
+    "note": "The fiery tenor saxophonist, free, late at Wally's.",
+    "start_date": "2026-11-20",
+    "expires": "2026-11-20",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-20-mit-choir-symphony-carmina-burana",
+    "match": {
+      "name_contains": "mit concert choir & mit symphony orchestra: carmina burana",
+      "venue_contains": "Kresge Auditorium"
+    },
+    "badge": "Editor's Pick",
+    "note": "MIT's choir and full orchestra take on Orff's thundering \"O Fortuna\" and the rest of Carmina Burana.",
+    "start_date": "2026-11-20",
+    "expires": "2026-11-20",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-20-back-to-black-amy-winehouse-tribute",
+    "match": {
+      "name_contains": "back to black amy winehouse tribute",
+      "venue_contains": "Lizard Lounge"
+    },
+    "badge": "Editor's Pick",
+    "note": "Megan Wolf leads a soulful Amy Winehouse tribute in the cozy basement club.",
+    "start_date": "2026-11-20",
+    "expires": "2026-11-20",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-20-next-level-k-pop-night",
+    "match": {
+      "name_contains": "next level kpop"
+    },
+    "badge": "Editor's Pick",
+    "note": "A K-pop dance party that packs the Middle East's big room.",
+    "start_date": "2026-11-20",
+    "expires": "2026-11-20",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-20-gladdy8rs-stand-up-comedy-death-battle",
+    "match": {
+      "name_contains": "gladdy8rs: standup comedy death battle",
+      "venue_contains": "The Rockwell"
+    },
+    "badge": "Editor's Pick",
+    "note": "A stand-up competition where audience members vote comics off the stage, with a cash prize for whoever survives.",
+    "start_date": "2026-11-20",
+    "expires": "2026-11-20",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-20-keltie-knight-evil-genius-book-tour",
+    "match": {
+      "name_contains": "keltie knight's evil genius book tour",
+      "venue_contains": "The Rockwell"
+    },
+    "badge": "Editor's Pick",
+    "note": "The TV host and podcaster's book-tour night: a pep talk, a celebrity conversation and a meet-and-greet.",
+    "start_date": "2026-11-20",
+    "expires": "2026-11-20",
+    "from_post": true
+  },
+  {
+    "id": "2026-11-20-somerville-cine-club-splicetape-1",
+    "match": {
+      "name_contains": "presents: splicetape #1",
+      "venue_contains": "Aeronaut Brewing"
+    },
+    "badge": "Editor's Pick",
+    "note": "The first SpliceTape screening night from the Somerville Cin\u00e9-Club, free at the brewery.",
+    "start_date": "2026-11-20",
+    "expires": "2026-11-20",
+    "from_post": true
   }
 ]

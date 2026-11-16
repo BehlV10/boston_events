@@ -8829,7 +8829,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
         v_prefix = f" · {venue_html}" if venue_html else ""
 
         hl = _get_event_highlight(e, highlights)
-        hl_class = " highlighted" if hl else ""
+        hl_class = (" highlighted spotlight" if hl.get("spotlight") else " highlighted") if hl else ""
         hl_attr = ' data-highlight="true"' if hl else ""
         b_text = (hl.get("badge") or "Editor's Pick") if hl else ""
         note = hl.get("note") if hl else None
@@ -11479,6 +11479,17 @@ def render_page(results, weather=None, luckyseat_shows=None):
     font-style: normal;
     color: #ffca47;
     margin-right: 5px;
+  }}
+  /* "spotlight": true in highlights.json: a yellow card for picks that should really stand out */
+  .event.spotlight {{
+    background: linear-gradient(135deg, rgba(255, 216, 102, 0.20), rgba(255, 184, 0, 0.09));
+    border: 1px solid rgba(255, 196, 0, 0.55);
+    border-left: 4px solid #ffc400;
+    box-shadow: 0 0 14px rgba(255, 184, 0, 0.16);
+  }}
+  .event.spotlight:hover {{
+    background: linear-gradient(135deg, rgba(255, 216, 102, 0.27), rgba(255, 184, 0, 0.13));
+    border-color: rgba(255, 196, 0, 0.75);
   }}
   .chip-featured.active {{
     background: linear-gradient(135deg, rgba(255, 184, 0, 0.35), rgba(255, 138, 0, 0.28)) !important;
