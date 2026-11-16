@@ -5070,6 +5070,29 @@ _SINCLAIR_DAY_MONTHS = {m: i for i, m in enumerate(
     ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], start=1)}
 
 
+def _with_support(title, support):
+    """"Sweet Pill" + "Heart to Gold, Stereosity" -> "Sweet Pill with Heart to Gold, Stereosity".
+
+    Takes a string or a list of acts; skips acts already named in the title, and leaves very
+    long lineups off rather than make an unreadable title. "X with Y" keeps the head title
+    "x", so it still merges with other sources' plain "X" listing."""
+    if isinstance(support, str):
+        support = [a for a in re.split(r"\s*,\s*", support)]
+    low = (title or "").lower()
+    acts, seen = [], set()
+    for a in support or []:
+        a = re.sub(r"\s+", " ", html.unescape(a or "")).strip()
+        a = re.sub(r"^(?:with|w/|feat\.?|featuring|special guests?:?)\s+", "", a, flags=re.I)
+        a = re.sub(r"\s+(?:opening|opens|to open)$", "", a, flags=re.I).strip()
+        if a and a.lower() not in low and a.lower() not in seen:
+            seen.add(a.lower())
+            acts.append(a)
+    if not acts:
+        return title
+    full = f"{title} with {', '.join(acts)}"
+    return full if len(full) <= 100 else title
+
+
 def scrape_sinclair(url, ua):
     """Sinclair's events page renders AXS event cards server-side as
     `.entry.sinclair` blocks. Date text like 'Mon, Apr 20, 2026' + 'Doors 7:00 PM'."""
@@ -5080,6 +5103,9 @@ def scrape_sinclair(url, ua):
         if not h:
             continue
         name = re.sub(r"\s+", " ", h.get_text(" ", strip=True))
+        sup = entry.select_one(".supporting")
+        if sup:
+            name = _with_support(name, sup.get_text(" ", strip=True))
         href = h.get("href") or url
         date_el = entry.select_one(".date")
         time_el = entry.select_one(".time")
@@ -5148,6 +5174,7 @@ def scrape_bowery_boston(url, ua):
         title = (e.get("title", {}).get("headlinersText") or e.get("title", {}).get("eventTitleText") or "").strip()
         if not title:
             continue
+        title = _with_support(title, e.get("title", {}).get("supportingText") or "")
         ticketing = e.get("ticketing", {})
         ticket_url = ticketing.get("ticketURL") or f"https://www.bowerypresents.com/events/detail/{e.get('eventId')}"
         vname = venue.get("title") or "Bowery Presents"
@@ -12261,6 +12288,9 @@ def scrape_ticketweb(url, ua):
                 link = it.get("url") or url
                 loc = it.get("location", {})
                 vname = loc.get("name") if isinstance(loc, dict) else None
+                perf = it.get("performer") or []
+                name = _with_support(name, [p.get("name") for p in (perf if isinstance(perf, list) else [perf])
+                                            if isinstance(p, dict)])
 
                 key = (name.lower(), dt.strftime("%Y-%m-%d"))
                 if key in seen:
