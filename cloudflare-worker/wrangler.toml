@@ -1,0 +1,24 @@
+name = "boston-events-submissions"
+main = "worker.js"
+compatibility_date = "2026-11-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Secrets (set with `npx wrangler secret put NAME`, never committed):
+#   GITHUB_TOKEN          fine-grained PAT with Actions: write on BehlV10/boston_events
+#   ANTHROPIC_API_KEY     enables POST /extract-flyer
+#   TURNSTILE_SECRET_KEY  optional Cloudflare Turnstile check
+
+[vars]
+GITHUB_REPO = "BehlV10/boston_events"
+ALLOWED_ORIGINS = "https://www.wickedbostonevents.com,https://wickedbostonevents.com,https://behlv10.github.io"
+FLYER_DAILY_LIMIT_PER_IP = "15"
+FLYER_DAILY_LIMIT_TOTAL = "400"
+
+# Upvote counts (existing) and flyer rate limits. Create once with
+# `npx wrangler kv namespace create UPVOTES` (and FLYER_LIMITS), then paste the ids here.
+# [[kv_namespaces]]
+# binding = "UPVOTES"
+# id = "<id>"
+# [[kv_namespaces]]
+# binding = "FLYER_LIMITS"
+# id = "<id>"
