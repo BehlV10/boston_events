@@ -54,20 +54,5 @@
     "date": "2026-11-15T12:00:00-05:00",
     "price": "Free",
     "description": "Artist books, zines, catalogs, comics and printed matter from local, national and international publishers. Open to the public 12\u20135 PM, free admission."
-  },
-  {
-    "name": "TEST submission (please ignore)",
-    "venue": "The Rockwell",
-    "date": "2026-12-05T19:30:00-05:00",
-    "url": "https://therockwell.org",
-    "category": "dance",
-    "price": "$10 at the door",
-    "city": "somerville",
-    "address": "255 Elm St, Davis Square",
-    "description": "Swing Night with the Union Square Stompers - live big band. Includes a lesson at 7:30pm and dancing at 8pm.",
-    "website": "https://www.evabroadwaystrings.com/",
-    "_is_community": true,
-    "_source_venue": "Community Submission",
-    "submitted_at": "2026-11-16T05:21:40.101285+00:00"
   }
 ]
