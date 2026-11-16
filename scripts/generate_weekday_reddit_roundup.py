@@ -389,11 +389,16 @@ def build_roundup(mode="weekday", start=None, city=None, days=None, picks_only=F
                 continue
 
             name = _fix_mojibake(e.get("name") or e.get("title") or "")
-            if FIXTURE_TITLE_RE.search(name) or any(t in name.lower() for t in SKIP_TITLES):
+            # Hand-picked events skip the title filters ("AJ Lee & Blue Summit" isn't a summit)
+            picked = _get_event_highlight(dict(e, name=name, venue=e.get("venue") or vname, _source_venue=vname,
+                                               _time=ev_time), highlights)
+            if not picked and (FIXTURE_TITLE_RE.search(name) or any(t in name.lower() for t in SKIP_TITLES)):
                 continue
-            if _is_standing(e, ev_date) and not _get_event_highlight(dict(e, venue=e.get("venue") or vname, _source_venue=vname), highlights):
+            if _is_standing(e, ev_date) and not picked:
                 continue
-            if SKIP_TITLE_RE.search(name) or DEAL_TITLE_RE.search(name) or re.search(r"(?i)\b(?:closed|closure|canceled|cancelled|postponed)\b", name):
+            if not picked and (SKIP_TITLE_RE.search(name) or DEAL_TITLE_RE.search(name)):
+                continue
+            if re.search(r"(?i)\b(?:closed|closure|canceled|cancelled|postponed)\b", name):
                 continue
             if re.search(r"(?i)\bsold[ -]?out\b", f"{name} {e.get('price') or ''}"):
                 sold_out.add((ev_time.replace(second=0, microsecond=0), _room_key(e.get("venue") or vname)))
@@ -517,6 +522,11 @@ def build_roundup(mode="weekday", start=None, city=None, days=None, picks_only=F
         day_heads = set()
         w_freq = title_word_freq(day_events)
         merged_day = _merge_duplicates(day_events, w_freq)
+        # The merged listing may carry another calendar's title; keep the hand pick on it either way.
+        hl_by_key = {k: e["_highlight"] for e in day_events if e.get("_highlight") for k in _alt_keys(e)}
+        for e in merged_day:
+            if not e.get("_highlight"):
+                e["_highlight"] = next((hl_by_key[k] for k in _alt_keys(e) if k in hl_by_key), None)
 
         # Group by city
         city_pools = {c: [] for c in city_keys}
@@ -527,7 +537,8 @@ def build_roundup(mode="weekday", start=None, city=None, days=None, picks_only=F
 
         for c in city_keys:
             evs = city_pools[c]
-            evs.sort(key=lambda e: (-score(e), e["_time"]))
+            # The highlights page takes every hand-picked event first; scored listings only fill what's left.
+            evs.sort(key=lambda e: (mode == "range" and not e.get("_highlight"), -score(e), e["_time"]))
             day_picked = []
             seen_heads = day_heads
             seen_venue = Counter()
@@ -541,9 +552,16 @@ def build_roundup(mode="weekday", start=None, city=None, days=None, picks_only=F
                     return True
                 return any(_similar_titles(e["name"], p["name"]) for p in day_picked)
 
+            n_curated = sum(1 for e in evs if e.get("_highlight"))
+            if mode == "range":
+                cap = max(cap, n_curated)  # every hand-picked event makes the highlights page
+
             def _room_for(e):
+                if mode == "range" and n_curated >= BASE_PICKS and not e.get("_highlight"):
+                    return False  # a hand-picked day: no automatic filler
                 if weekend or city or mode == "range":  # fill to the cap on score, but not with filler
-                    return len(day_picked) < cap and (len(day_picked) < SURE_PICKS or score(e) >= MIN_SCORE)
+                    return len(day_picked) < cap and (len(day_picked) < SURE_PICKS or score(e) >= MIN_SCORE
+                                                      or (mode == "range" and bool(e.get("_highlight"))))
                 return len(day_picked) < BASE_PICKS or (len(day_picked) < cap and e.get("_highlight"))
 
             # First pass: try strictly 1 event per venue and unique headliner
@@ -556,7 +574,7 @@ def build_roundup(mode="weekday", start=None, city=None, days=None, picks_only=F
                 v_clean = _venue_key(e)
                 if _dup_of_picked(e, slug):
                     continue
-                if seen_venue[v_clean] >= 1:
+                if seen_venue[v_clean] >= 1 and not (mode == "range" and e.get("_highlight")):
                     continue
                 if _is_trivia(e) and any(_is_trivia(p) for p in day_picked):
                     continue
@@ -585,8 +603,8 @@ def build_roundup(mode="weekday", start=None, city=None, days=None, picks_only=F
                         continue
                     if _dup_of_picked(e, slug):
                         continue
-                    if seen_venue[v_clean] >= 2:
-                        continue
+                    if seen_venue[v_clean] >= 2 and not (mode == "range" and e.get("_highlight")):
+                        continue  # (the highlights page keeps every hand-picked event at a venue)
                     if slug:
                         seen_heads.add(slug)
                     seen_venue[v_clean] += 1

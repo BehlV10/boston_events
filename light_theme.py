@@ -130,6 +130,8 @@ LIGHT_THEME_CSS = """
   [data-theme="light"] .week-nav button.chip-copy-plan:hover { color: #065f46; }
   [data-theme="light"] .curator-note { color: #78350f; background: rgba(245, 158, 11, 0.10); }
   [data-theme="light"] .curator-note .note-label { color: #92400e; }
+  [data-theme="light"] .event.spotlight { background: #fff6c2; border-color: #f5c400; border-left-color: #e0a800; box-shadow: 0 1px 8px rgba(224, 168, 0, 0.18); }
+  [data-theme="light"] .event.spotlight:hover { background: #ffef9e; }
 
   /* Category and genre pills get their color inline (pastels picked for a dark page). Darken the
      text so it reads on white; the tinted background and border stay. */
