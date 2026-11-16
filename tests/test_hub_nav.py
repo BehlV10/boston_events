@@ -4,7 +4,7 @@ import unittest
 
 import template
 
-FINISHED = ["../", "../boston-event-highlights/", "../markets-festivals-boston/", "../college/", "../kids-family-events-boston/",
+FINISHED = ["../", "../things-to-do-boston/", "../boston-event-highlights/", "../markets-festivals-boston/", "../college/", "../kids-family-events-boston/",
             "../summer-camps/", "../boston-edm/"]
 PAGES = ["markets-festivals-boston", "college", "kids-family-events-boston", "summer-camps", "boston-edm"]
 

@@ -660,7 +660,7 @@ def build_seo_meta_tags(site_url=None, title=None, description=None, path="", im
 
     clean_path = path.lstrip("/")
     canonical_url = f"{site_url}/{clean_path}" if clean_path else f"{site_url}/"
-    default_title = "Wicked Boston Events · Live Music, Comedy, Nightlife & Things to Do in Boston, Cambridge & Somerville"
+    default_title = "Things to Do in Boston This Week: Concerts, Comedy & Free Events · Wicked Boston Events"
     default_desc = "Find 8,000+ live music shows, comedy, theater, nightlife, and free events across Boston, Cambridge & Somerville. Filter by neighborhood and MBTA subway lines."
 
     t = title or default_title
@@ -964,6 +964,7 @@ def build_seo_directory_html(all_events_flat, all_venue_names):
 
         <h3 style="margin-top:18px;">🔥 Programmatic Event Guides</h3>
         <ul>
+          <li><a href="things-to-do-boston/">Things to Do in Boston This Week</a></li>
           <li><a href="boston-event-highlights/">Event Highlights: Best Picks Each Day</a></li>
           <li><a href="free-events-boston-this-weekend/">Free Events This Weekend</a></li>
           <li><a href="cambridge-events-tonight/">Cambridge Events Tonight</a></li>
@@ -5851,6 +5852,7 @@ def _camps_sections(camps):
 
 # The header bar on every guide page links to the same finished pages.
 _MAIN_NAV = (("../", "All Events", None),
+             ("../things-to-do-boston/", "Things to Do", "things-to-do-boston"),
              ("../boston-event-highlights/", "Highlights", "boston-event-highlights"),
              ("../markets-festivals-boston/", "Markets &amp; Festivals", "markets-festivals-boston"),
              ("../college/", "College", "college"),
@@ -9463,6 +9465,14 @@ def render_page(results, weather=None, luckyseat_shows=None):
     line-height: 1.05;
     text-shadow: 0 2px 20px rgba(0,0,0,0.6);
   }}
+  .banner-tagline {{
+    display: block;
+    margin-top: 6px;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 0;
+    color: rgba(255, 255, 255, 0.86);
+  }}
   .banner-meta-pill {{
     display: inline-flex;
     align-items: center;
@@ -11253,6 +11263,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
   }}
   @media (max-width: 860px) {{
     .banner-title {{ font-size: 28px; }}
+    .banner-tagline {{ font-size: 14px; margin-top: 4px; }}
     .banner {{ min-height: 190px; padding: 24px 16px 16px; width: 100%; max-width: 100vw; }}
     .banner-meta-pill {{
       border-radius: var(--radius-md);
@@ -12873,7 +12884,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
         </div>
       </div>
       <div class="banner-title-row">
-        <h1 class="banner-title">Wicked Boston Events</h1>
+        <h1 class="banner-title">Wicked Boston Events<span class="banner-tagline">Things to do in Boston, Cambridge &amp; Somerville this week</span></h1>
       </div>
       {holiday_greetings}
       <div class="banner-meta-pill">

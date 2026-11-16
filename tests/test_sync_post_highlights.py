@@ -55,11 +55,30 @@ class SyncPostHighlightsTest(unittest.TestCase):
         ]}
         new, already, missing = sp.sync(POST, 2026, [], by_day)
         pouya = next(h for h in new if "pouya" in h["id"])
-        self.assertEqual(pouya["match"], {"name_contains": "pouya", "venue_contains": "Big Night Live"})
+        self.assertEqual(pouya["match"], {"name_contains": "pouya"})
         self.assertEqual((pouya["start_date"], pouya["expires"]), ("2026-11-17", "2026-11-17"))
         game = next(h for h in new if "game-night" in h["id"])
         self.assertEqual(game["note"], "Free drop-in board games.")
         self.assertEqual([m[1] for m in missing], ["Noah Preminger Quintet"])
+
+    def test_short_shared_name_must_not_hit_other_events(self):
+        post = ("## 📅 MONDAY, NOV 16\n\n"
+                "* **[Celtics vs. Magic](https://example.com/c)** @ TD Garden · 7PM · West End\n"
+                "* **[Drag Bingo](https://www.clubcafe.com/drag-bingo)** @ Club Café · 7PM · South End\n"
+                "* **[Fresh Goofs](https://example.com/fg)** @ Goofs Comedy Club · 8PM · Somerville\n")
+        day = [ev("Boston Celtics vs. Orlando Magic", "2026-11-16T19:00:00-05:00", "https://example.com/c", "TD Garden"),
+               ev("Orlando Magic at Boston Celtics", "2026-11-16T19:00:00-05:00", "https://seatgeek.com/c", "TD Garden"),
+               ev("New Readers Book Group: Sweet Magic", "2026-11-16T16:30:00-05:00", "", "Boston Public Library"),
+               ev("Drag Bingo", "2026-11-16T19:00:00-05:00", "https://www.clubcafe.com/drag-bingo", "Club Café"),
+               ev("Dungeons and Dragons", "2026-11-16T18:00:00-05:00", "", "Trident Booksellers"),
+               ev("Fresh Goofs: Standup Comedy Show", "2026-11-16T20:00:00-05:00", "https://example.com/fg", "Goofs Comedy Club"),
+               ev("Certified Fresh w/ host AJ", "2026-11-16T21:00:00-05:00", "", "Goofs Comedy Club")]
+        new, _, _ = sp.sync(post, 2026, [], {date(2026, 11, 16): day})
+        self.assertEqual(len(new), 3)
+        for h in new:
+            hit = [x["name"] for x in day if sp._matches(h["match"], x, date(2026, 11, 16))]
+            self.assertFalse(any(n in hit for n in ("New Readers Book Group: Sweet Magic", "Dungeons and Dragons",
+                                                    "Certified Fresh w/ host AJ")), (h["match"], hit))
 
     def test_already_highlighted_is_left_alone(self):
         by_day = {date(2026, 11, 17): [ev("Game Night at CanalSide", "2026-11-17T17:30:00-05:00", "", "CanalSide")]}

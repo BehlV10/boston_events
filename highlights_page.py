@@ -23,6 +23,77 @@ DESCRIPTION = ("A short, hand-picked list of the best concerts, comedy, film, ma
                "in Boston, Cambridge & Somerville for each of the next three weeks, with a line on why each is worth going to.")
 
 
+# Shared with guide_pages.py (the things-to-do guide and month pages)
+PAGE_CSS = """  :root {
+    --bg: #0c0e14; --card: #151822; --card-2: #1c202e; --fg: #eef1f8; --muted: #8e96a8;
+    --accent: #5d9bff; --border: rgba(255,255,255,0.08); --gold: #f5c35b; --gold-bg: rgba(245,195,91,0.12);
+  }
+  [data-theme="light"] {
+    --bg: #f5f6fa; --card: #ffffff; --card-2: #eef1f7; --fg: #10131c; --muted: #5a6275;
+    --accent: #2563eb; --border: #dfe3ec; --gold: #92400e; --gold-bg: #fdf3d7;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body { margin: 0; background: var(--bg); color: var(--fg); line-height: 1.5;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  a { color: var(--accent); }
+  header { background: var(--card); border-bottom: 1px solid var(--border); padding: 14px 20px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .logo { font-size: 16px; font-weight: 800; color: var(--fg); text-decoration: none; }
+  .logo span { color: var(--accent); }
+  .hub-nav { display: flex; gap: 12px; font-size: 13px; flex-wrap: wrap; }
+  .hub-nav a { color: var(--muted); text-decoration: none; }
+  .hub-nav a:hover, .hub-nav a.active { color: var(--accent); font-weight: 600; }
+  main { max-width: 860px; margin: 0 auto; padding: 28px 16px 60px; }
+  h1 { font-size: clamp(26px, 5vw, 36px); line-height: 1.15; margin: 0 0 8px; letter-spacing: -0.01em; }
+  .lede { color: var(--muted); margin: 0 0 22px; max-width: 640px; }
+  .controls { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 12px 0 14px;
+    border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+  .range { display: flex; gap: 10px; align-items: end; flex-wrap: wrap; }
+  .range label { display: flex; flex-direction: column; font-size: 12px; color: var(--muted); gap: 4px; }
+  .range input[type=date] { background: var(--card); color: var(--fg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 7px 9px; font: inherit; font-size: 14px; color-scheme: dark; }
+  [data-theme="light"] .range input[type=date] { color-scheme: light; }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+  .chip { background: var(--card); color: var(--fg); border: 1px solid var(--border); border-radius: 999px;
+    padding: 5px 12px; font: inherit; font-size: 13px; cursor: pointer; }
+  .chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .chip-sep { width: 1px; background: var(--border); margin: 2px 4px; }
+  .status { font-size: 13px; color: var(--muted); margin-top: 10px; }
+  .day { margin-top: 26px; }
+  .day h2 { font-size: 19px; margin: 0 0 10px; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .day-name { color: var(--accent); }
+  .day-count { font-size: 12px; font-weight: 500; color: var(--muted); margin-left: auto; }
+  .city-group h3 { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--muted); margin: 14px 0 6px; }
+  .city-group:first-of-type h3 { margin-top: 4px; }
+  .picks, .run-list { list-style: none; margin: 0; padding: 0; background: var(--card);
+    border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+  .pick { display: grid; grid-template-columns: 70px 1fr; gap: 10px; padding: 11px 14px; border-top: 1px solid var(--border); }
+  .pick:first-child { border-top: 0; }
+  .pick[data-curated="1"] { background: linear-gradient(90deg, var(--gold-bg), transparent 60%); }
+  .pick-time { font-size: 13px; font-weight: 600; color: var(--muted); padding-top: 1px; white-space: nowrap; }
+  .pick-title { font-weight: 650; overflow-wrap: anywhere; }
+  .pick-title a { color: var(--fg); text-decoration: none; }
+  .pick-title a:hover { color: var(--accent); text-decoration: underline; }
+  .pick-badge { display: inline-block; margin-left: 8px; font-size: 11px; font-weight: 600; color: var(--gold);
+    border: 1px solid currentColor; border-radius: 999px; padding: 0 7px; vertical-align: 2px; }
+  .pick-meta { font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
+  .pick-note { margin: 4px 0 0; font-size: 14px; }
+  .pick-empty { padding: 12px 14px; color: var(--muted); }
+  .runs { margin-top: 34px; }
+  .runs h2 { font-size: 19px; margin: 0 0 10px; }
+  .run { padding: 11px 14px; border-top: 1px solid var(--border); }
+  .run:first-child { border-top: 0; }
+  .empty-range { margin-top: 26px; color: var(--muted); }
+  footer { max-width: 860px; margin: 0 auto; padding: 0 16px 40px; font-size: 13px; color: var(--muted); }
+  @media (max-width: 520px) {
+    .pick { grid-template-columns: 1fr; gap: 2px; }
+    .controls { position: static; }
+    header { padding: 12px 16px; }
+  }
+"""
+
 def _roundup():
     spec = importlib.util.spec_from_file_location(
         "generate_weekday_reddit_roundup", os.path.join(ROOT, "scripts", "generate_weekday_reddit_roundup.py"))
@@ -35,12 +106,12 @@ def _safe_url(u):
     return u if isinstance(u, str) and u.startswith(("https://", "http://")) else ""
 
 
-def build_highlight_days(today=None):
-    """[{"date": date, "picks": [row, ...]}, ...] for MAX_DAYS days from today, plus run rows.
-    A row: title, url, venue, time, sort, price, area, city, note, curated."""
+def build_highlight_days(today=None, days=None):
+    """[{"date": date, "picks": [row, ...]}, ...] for MAX_DAYS days from today (or the given `days`),
+    plus run rows. A row: title, url, venue, time, sort, price, area, city, note, curated."""
     r = _roundup()
     today = today or datetime.now(EASTERN).date()
-    days = [today + timedelta(days=i) for i in range(MAX_DAYS)]
+    days = list(days) if days else [today + timedelta(days=i) for i in range(MAX_DAYS)]
     res = r.build_roundup("range", days=days, picks_only=True)
 
     def row(e):
@@ -138,7 +209,6 @@ def render_highlights_page(site_url=None, today=None, days=None, runs=None):
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{escape(TITLE)} · Wicked Boston Events</title>
 {meta}
 <script type="application/ld+json">{ld_json}</script>
 <link rel="icon" href="/favicon.ico" sizes="48x48">
@@ -147,75 +217,7 @@ def render_highlights_page(site_url=None, today=None, days=None, runs=None):
 <link rel="manifest" href="/site.webmanifest">
 <script>try{{if(localStorage.getItem('boston_events_theme')==='light')document.documentElement.setAttribute('data-theme','light')}}catch(e){{}}</script>
 <style>
-  :root {{
-    --bg: #0c0e14; --card: #151822; --card-2: #1c202e; --fg: #eef1f8; --muted: #8e96a8;
-    --accent: #5d9bff; --border: rgba(255,255,255,0.08); --gold: #f5c35b; --gold-bg: rgba(245,195,91,0.12);
-  }}
-  [data-theme="light"] {{
-    --bg: #f5f6fa; --card: #ffffff; --card-2: #eef1f7; --fg: #10131c; --muted: #5a6275;
-    --accent: #2563eb; --border: #dfe3ec; --gold: #92400e; --gold-bg: #fdf3d7;
-  }}
-  * {{ box-sizing: border-box; }}
-  [hidden] {{ display: none !important; }}
-  body {{ margin: 0; background: var(--bg); color: var(--fg); line-height: 1.5;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }}
-  a {{ color: var(--accent); }}
-  header {{ background: var(--card); border-bottom: 1px solid var(--border); padding: 14px 20px;
-    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }}
-  .logo {{ font-size: 16px; font-weight: 800; color: var(--fg); text-decoration: none; }}
-  .logo span {{ color: var(--accent); }}
-  .hub-nav {{ display: flex; gap: 12px; font-size: 13px; flex-wrap: wrap; }}
-  .hub-nav a {{ color: var(--muted); text-decoration: none; }}
-  .hub-nav a:hover, .hub-nav a.active {{ color: var(--accent); font-weight: 600; }}
-  main {{ max-width: 860px; margin: 0 auto; padding: 28px 16px 60px; }}
-  h1 {{ font-size: clamp(26px, 5vw, 36px); line-height: 1.15; margin: 0 0 8px; letter-spacing: -0.01em; }}
-  .lede {{ color: var(--muted); margin: 0 0 22px; max-width: 640px; }}
-  .controls {{ position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 12px 0 14px;
-    border-bottom: 1px solid var(--border); margin-bottom: 8px; }}
-  .range {{ display: flex; gap: 10px; align-items: end; flex-wrap: wrap; }}
-  .range label {{ display: flex; flex-direction: column; font-size: 12px; color: var(--muted); gap: 4px; }}
-  .range input[type=date] {{ background: var(--card); color: var(--fg); border: 1px solid var(--border);
-    border-radius: 8px; padding: 7px 9px; font: inherit; font-size: 14px; color-scheme: dark; }}
-  [data-theme="light"] .range input[type=date] {{ color-scheme: light; }}
-  .chips {{ display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }}
-  .chip {{ background: var(--card); color: var(--fg); border: 1px solid var(--border); border-radius: 999px;
-    padding: 5px 12px; font: inherit; font-size: 13px; cursor: pointer; }}
-  .chip[aria-pressed="true"] {{ background: var(--accent); border-color: var(--accent); color: #fff; }}
-  .chip-sep {{ width: 1px; background: var(--border); margin: 2px 4px; }}
-  .status {{ font-size: 13px; color: var(--muted); margin-top: 10px; }}
-  .day {{ margin-top: 26px; }}
-  .day h2 {{ font-size: 19px; margin: 0 0 10px; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }}
-  .day-name {{ color: var(--accent); }}
-  .day-count {{ font-size: 12px; font-weight: 500; color: var(--muted); margin-left: auto; }}
-  .city-group h3 {{ font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
-    color: var(--muted); margin: 14px 0 6px; }}
-  .city-group:first-of-type h3 {{ margin-top: 4px; }}
-  .picks, .run-list {{ list-style: none; margin: 0; padding: 0; background: var(--card);
-    border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }}
-  .pick {{ display: grid; grid-template-columns: 70px 1fr; gap: 10px; padding: 11px 14px; border-top: 1px solid var(--border); }}
-  .pick:first-child {{ border-top: 0; }}
-  .pick[data-curated="1"] {{ background: linear-gradient(90deg, var(--gold-bg), transparent 60%); }}
-  .pick-time {{ font-size: 13px; font-weight: 600; color: var(--muted); padding-top: 1px; white-space: nowrap; }}
-  .pick-title {{ font-weight: 650; overflow-wrap: anywhere; }}
-  .pick-title a {{ color: var(--fg); text-decoration: none; }}
-  .pick-title a:hover {{ color: var(--accent); text-decoration: underline; }}
-  .pick-badge {{ display: inline-block; margin-left: 8px; font-size: 11px; font-weight: 600; color: var(--gold);
-    border: 1px solid currentColor; border-radius: 999px; padding: 0 7px; vertical-align: 2px; }}
-  .pick-meta {{ font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }}
-  .pick-note {{ margin: 4px 0 0; font-size: 14px; }}
-  .pick-empty {{ padding: 12px 14px; color: var(--muted); }}
-  .runs {{ margin-top: 34px; }}
-  .runs h2 {{ font-size: 19px; margin: 0 0 10px; }}
-  .run {{ padding: 11px 14px; border-top: 1px solid var(--border); }}
-  .run:first-child {{ border-top: 0; }}
-  .empty-range {{ margin-top: 26px; color: var(--muted); }}
-  footer {{ max-width: 860px; margin: 0 auto; padding: 0 16px 40px; font-size: 13px; color: var(--muted); }}
-  @media (max-width: 520px) {{
-    .pick {{ grid-template-columns: 1fr; gap: 2px; }}
-    .controls {{ position: static; }}
-    header {{ padding: 12px 16px; }}
-  }}
-</style>
+{PAGE_CSS}</style>
 </head>
 <body>
 <header>

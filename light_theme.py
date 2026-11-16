@@ -19,6 +19,7 @@ LIGHT_THEME_CSS = """
       url('banner.jpg');
   }
   [data-theme="light"] .banner-title { color: #10131c; text-shadow: 0 1px 12px rgba(255, 255, 255, 0.7); }
+  [data-theme="light"] .banner-tagline { color: #3b4252; }
   [data-theme="light"] .banner-top-tag {
     color: #92400e;
     text-shadow: none;
