@@ -2366,6 +2366,40 @@ _MARKETS_CSS = """
 _HUB_CITY_CHIPS = (("all", "All"), ("boston", "Boston"), ("cambridge", "Cambridge"),
                    ("somerville", "Somerville"), ("other", "Nearby towns"))
 
+_LIST_HUB_CSS = """
+  .list-hub .hub-grid { display: flex; flex-direction: column; gap: 4px; }
+  .list-hub .hub-day { margin: 26px 0 8px; }
+  .list-hub .hub-day:first-child { margin-top: 0; }
+  .list-hub .hub-city-section { margin: 10px 0 4px; }
+  .list-hub .hub-city-head { display: flex; align-items: center; gap: 8px; margin: 0 0 6px; font-size: 13px; }
+  .list-hub .hub-city-pill { font-weight: 700; padding: 2px 10px; border-radius: 999px; }
+  .list-hub .hub-c-cambridge { background: rgba(239, 68, 68, 0.12); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+  .list-hub .hub-c-somerville { background: rgba(34, 197, 94, 0.12); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+  .list-hub .hub-c-boston { background: rgba(59, 130, 246, 0.12); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+  .list-hub .hub-c-other { background: rgba(168, 85, 247, 0.12); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.3); }
+  .list-hub .hub-city-head .count { font-size: 11.5px; font-weight: 600; color: var(--muted); background: rgba(255, 255, 255, 0.06); padding: 1px 7px; border-radius: 999px; }
+  .list-hub .hub-city-list { display: flex; flex-direction: column; gap: 4px; }
+  .list-hub .hub-row {
+    display: grid;
+    grid-template-columns: 78px minmax(0, 1fr);
+    align-items: start;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    min-width: 0;
+  }
+  .list-hub .hub-row .hub-date { padding-top: 2px; white-space: normal; line-height: 1.3; }
+  .list-hub .hub-row-body { min-width: 0; }
+  .list-hub .hub-row-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .list-hub .hub-row .hub-title { margin: 0 0 4px; overflow-wrap: anywhere; }
+  .list-hub .hub-row .hub-badges { flex-shrink: 0; }
+  .list-hub .hub-row .hub-meta { flex-wrap: wrap; }
+  @media (max-width: 480px) {
+    .list-hub .hub-row { grid-template-columns: 1fr; gap: 4px; padding: 10px 12px; }
+  }
+"""
+
+
 _HUB_CITY_JS = """<script>
 (function () {
   var chips = document.querySelectorAll('.hub-city-chip');
@@ -2380,6 +2414,9 @@ _HUB_CITY_JS = """<script>
       if (on) days[c.dataset.day] = 1;
     });
     heads.forEach(function (h) { h.hidden = !days[h.dataset.day]; });
+    document.querySelectorAll('.hub-city-section').forEach(function (sec) {
+      sec.hidden = city !== 'all' && sec.dataset.city !== city;
+    });
     chips.forEach(function (b) { b.classList.toggle('active', b.dataset.city === city); });
     var none = document.getElementById('hub-none');
     if (none) none.hidden = Object.keys(days).length > 0;
@@ -6364,8 +6401,9 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
   </div>
 </div>''')
     else:
-        last_day = None
-        for e in filtered[:card_limit]:
+        # Plain list pages: a header per day, then (unless the page is one city) a section per city,
+        # in the same Cambridge / Somerville / Boston / other order as the kids, EDM and college pages.
+        def _render_list_card(e):
             title = escape(e.get("title") or e.get("name") or "Event")
             venue = escape(e.get("venue") or e.get("_source_venue") or "Venue")
             url = escape(e.get("url") or e.get("link") or "#")
@@ -6373,11 +6411,7 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
             t_str = escape(e.get("time") or "")
             t_obj = e.get("_time")
             if isinstance(t_obj, datetime):
-                # A "Wednesday, November 4" header starts each day; cards then show just the time
-                if t_obj.date() != last_day:
-                    last_day = t_obj.date()
-                    cards_html.append(f'<h2 class="hub-day" id="{last_day.isoformat()}" data-day="{last_day.isoformat()}">{t_obj.strftime("%A, %B %-d")}</h2>')
-                d_str = ""
+                d_str = ""  # the day header carries the date; the row shows just the time
                 t_str = _hub_time_label(e, t_obj)
             desc_html = ""
             if hub.get("show_details") and e.get("description"):
@@ -6388,25 +6422,62 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
             if re.fullmatch(r"\d+(?:\.\d+)?", price_txt):
                 price_txt = "$" + price_txt  # bare numbers only; most prices already carry "$"
             price_badge = f'<span class="badge badge-price">{escape(price_txt)}</span>' if price_txt else ""
-            is_free = _is_event_free(e)
-            if is_free:
+            if _is_event_free(e):
                 price_badge = '<span class="badge badge-free">Free</span>'
             city = _event_city(e.get("venue"), e.get("_source_venue"), e)
             city_name = escape(_hub_place_label(city, e))
             day_attr = t_obj.date().isoformat() if isinstance(t_obj, datetime) else ""
-            mtype_attr = f' data-mtype="{market_type(e)}"' if is_markets else ""
-            cards_html.append(f"""<article class="hub-card" data-city="{escape(city)}" data-day="{day_attr}"{mtype_attr}>
-  <div class="hub-card-head">
-    <time class="hub-date">{' · '.join(x for x in (d_str, t_str) if x)}</time>
-    <div class="hub-badges">{price_badge}</div>
+            return f"""<article class="hub-card hub-row" data-city="{escape(city)}" data-day="{day_attr}">
+  <time class="hub-date">{' · '.join(x for x in (d_str, t_str) if x)}</time>
+  <div class="hub-row-body">
+    <div class="hub-row-top">
+      <h3 class="hub-title"><a href="{url}" target="_blank" rel="noopener">{title}</a></h3>
+      <div class="hub-badges">{price_badge}</div>
+    </div>
+    <div class="hub-meta">
+      <span class="hub-venue">📍 {venue}</span>
+      <span class="hub-city">({city_name})</span>
+    </div>
+    {desc_html}
   </div>
-  <h3 class="hub-title"><a href="{url}" target="_blank" rel="noopener">{title}</a></h3>
-  <div class="hub-meta">
-    <span class="hub-venue">📍 {venue}</span>
-    <span class="hub-city">({city_name})</span>
+</article>"""
+
+        by_day = {}
+        for e in filtered[:card_limit]:
+            t_obj = e.get("_time")
+            by_day.setdefault(t_obj.date() if isinstance(t_obj, datetime) else None, []).append(e)
+        day_keys = sorted(k for k in by_day if k is not None)
+        if None in by_day:
+            day_keys.append(None)
+        city_day_order = ["cambridge", "somerville", "boston", "other"]
+        split_by_city = not hub.get("city_filter")
+
+        for day_obj in day_keys:
+            day_events = by_day[day_obj]
+            if day_obj:
+                day_iso = day_obj.isoformat()
+                cards_html.append(f'<h2 class="hub-day" id="{day_iso}" data-day="{day_iso}">{day_obj.strftime("%A, %B %-d")}</h2>')
+            else:
+                day_iso = ""
+                cards_html.append('<h2 class="hub-day" id="tba" data-day="">Date TBA</h2>')
+            if not split_by_city:
+                cards_html.extend(_render_list_card(e) for e in day_events)
+                continue
+            by_city = {c: [] for c in city_day_order}
+            for e in day_events:
+                by_city.setdefault(_event_city(e.get("venue"), e.get("_source_venue"), e), []).append(e)
+            for cname in city_day_order:
+                city_events = by_city.get(cname) or []
+                if not city_events:
+                    continue
+                city_label = CITY_LABELS.get(cname, cname.title())
+                rows = "\n".join(_render_list_card(e) for e in city_events)
+                cards_html.append(f'''<div class="hub-city-section" data-city="{escape(cname)}" data-day="{day_iso}">
+  <h3 class="hub-city-head"><span class="hub-city-pill hub-c-{escape(cname)}">{escape(city_label)}</span> <span class="count">{len(city_events)}</span></h3>
+  <div class="hub-city-list">
+{rows}
   </div>
-  {desc_html}
-</article>""")
+</div>''')
 
     city_chips_html, hub_js = "", ""  # the filter script must come after the cards it filters
     if not hub.get("city_filter") and cards_html:
@@ -6683,6 +6754,8 @@ def render_hub_page(hub_slug, events, site_url=None, extra_files=None):
         hub_js = camps_tail + _CAMPS_FILTER_JS
     cards_joined = "\n".join(cards_html) if cards_html else "<p class='no-hub-events'>No scheduled events matching this directory right now. Check the interactive calendar for all upcoming dates.</p>"
 
+    if not (is_kids or is_edm or is_camps or is_college or is_markets):
+        kids_css, body_class = _LIST_HUB_CSS, ' class="list-hub"'
     if is_camps or is_kids:
         hub_nav_html = _family_nav(hub_slug, "camps-nav" if is_camps else "kids-nav")
     elif is_college:
