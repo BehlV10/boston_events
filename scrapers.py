@@ -34,6 +34,38 @@ DEFAULT_VENUE_TTL = 3 * 3600    # 3 hours for standard venue feeds
 FAST_VENUE_TTL = 1 * 3600       # 1 hour for high-turnover feeds (Ticketmaster, SeatGeek, Eventbrite, Do617, Boston Calendar, Boston Shows)
 SLOW_VENUE_TTL = 12 * 3600      # 12 hours for evergreen/institutional feeds (Libraries, Museums, Bookstores, Parks)
 
+# Every source should reach at least this many days ahead, so the two-week highlights page and the
+# Reddit posts aren't missing events from feeds that cut off after a page or a few days.
+MIN_LOOKAHEAD_DAYS = 14
+
+
+def _lookahead_iso(days=MIN_LOOKAHEAD_DAYS):
+    """UTC ISO timestamp `days` from now, to compare with event "date" strings."""
+    return (datetime.now(timezone.utc) + timedelta(days=days)).isoformat()
+
+
+def _pages_until_horizon(fetch_page, max_pages, days=MIN_LOOKAHEAD_DAYS):
+    """Read a paged list (page 0, 1, ...) until it reaches `days` ahead, a page adds nothing new,
+    or max_pages. fetch_page(n) returns that page's events. Only a failure on page 0 is raised."""
+    horizon = _lookahead_iso(days)
+    out, seen = [], set()
+    for n in range(max_pages):
+        try:
+            batch = fetch_page(n)
+        except Exception:
+            if n == 0:
+                raise
+            break
+        new = [e for e in batch if (e.get("url"), e.get("name"), e.get("date")) not in seen]
+        if not new:
+            break
+        for e in new:
+            seen.add((e.get("url"), e.get("name"), e.get("date")))
+            out.append(e)
+        if max((e.get("date") or "") for e in batch) >= horizon:
+            break
+    return out
+
 
 def _get_venue_ttl(vname):
     low = (vname or "").lower()
@@ -3552,6 +3584,36 @@ def _clean_ical_description(desc):
     return text[:250] if text else None
 
 
+def scrape_tribe_ical(url, ua):
+    """A WordPress Events Calendar (Tribe) ?ical=1 feed. It sends only the next ~15 events, so
+    step the list's start day (tribe-bar-date) forward until the feed reaches two weeks out."""
+    base = url.split("?")[0].rstrip("/")
+    out, seen = [], set()
+    horizon = _lookahead_iso()
+    day = datetime.now(EASTERN).date()
+    for n in range(MIN_LOOKAHEAD_DAYS):
+        page_url = url if n == 0 else f"{base}/list/?ical=1&tribe-bar-date={day.isoformat()}"
+        try:
+            batch = scrape_ical(page_url, ua)
+        except Exception:
+            if n == 0:
+                raise
+            break
+        new = [e for e in batch if (e.get("url"), e.get("name"), e.get("date")) not in seen]
+        if not new:
+            break
+        for e in new:
+            seen.add((e.get("url"), e.get("name"), e.get("date")))
+            out.append(e)
+        last = max((e.get("date") or "") for e in batch)
+        if last >= horizon:
+            break
+        # next start: the day after the last one fully listed (its own events may be cut off mid-day)
+        last_day = datetime.fromisoformat(last.replace("Z", "+00:00")).astimezone(EASTERN).date()
+        day = max(last_day, day + timedelta(days=1))
+    return out
+
+
 def scrape_ical(url, ua):
     """Fetch and parse a public iCal (.ics) feed — works for Google Calendar and others."""
     resp = _SESSION.get(url, headers={"User-Agent": ua, "Accept": "text/calendar,*/*"}, timeout=15)
@@ -4526,7 +4588,7 @@ def _do617_fill_prices(events, ua):
     for e in todo:
         by_slug.setdefault(re.sub(r"/events/(?:\d{4}/\d{1,2}/\d{1,2}|weekly/\w+)/", "/events/", e["url"]), e["url"])
     if by_slug:
-        with ThreadPoolExecutor(max_workers=4) as ex:
+        with ThreadPoolExecutor(max_workers=8) as ex:
             details = dict(zip(by_slug, ex.map(lambda u: _do617_event_details(u, ua), by_slug.values())))
         for e in todo:
             slug = re.sub(r"/events/(?:\d{4}/\d{1,2}/\d{1,2}|weekly/\w+)/", "/events/", e["url"])
@@ -4640,8 +4702,8 @@ def scrape_do617(url, ua):
     if "/venues/" in (url or ""):
         return scrape_do617_venue(url, ua)
 
-    # 1. Scrape today + next 4 days from Do617 date feeds
-    for i in range(5):
+    # 1. Scrape today + the next two weeks from Do617 date feeds
+    for i in range(MIN_LOOKAHEAD_DAYS):
         d = start_date + timedelta(days=i)
         day_url = f"https://do617.com/events/{d.year}/{d.month:02d}/{d.day:02d}"
         try:
@@ -5302,7 +5364,14 @@ def scrape_boch_center(url, ua):
 
 
 def scrape_mfa_boston(url, ua):
-    """Museum of Fine Arts (MFA Boston) upcoming programs, gallery tours, lectures, art classes."""
+    """Museum of Fine Arts (MFA Boston) upcoming programs, gallery tours, lectures, art classes.
+    The list is paged (?page=1, 2, ...), about ten a page; read pages until two weeks out."""
+    base = url.split("?")[0]
+    return _pages_until_horizon(
+        lambda n: _scrape_mfa_page(f"{base}?page={n}" if n else url, ua), max_pages=10)
+
+
+def _scrape_mfa_page(url, ua):
     soup = fetch_soup(url, ua)
     events = []
     seen = set()
@@ -7739,24 +7808,40 @@ def scrape_bostonsalsa(url, ua):
         return []
 
 
+def _ticketmaster_pages(key):
+    """Discovery API results sorted by date, 200 a page, until MIN_LOOKAHEAD_DAYS + a week out.
+    One page of 150 used to reach only ~6 days. The API won't page past 1,000 results."""
+    now = datetime.now(timezone.utc)
+    end = now + timedelta(days=MIN_LOOKAHEAD_DAYS + 7)
+    for page in range(5):
+        resp = _SESSION.get(
+            "https://app.ticketmaster.com/discovery/v2/events.json",
+            params={
+                "apikey": key,
+                "latlong": "42.3601,-71.0589",
+                "radius": 25,
+                "unit": "miles",
+                "size": 200,
+                "page": page,
+                "sort": "date,asc",
+                "startDateTime": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "endDateTime": end.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            },
+            timeout=15,
+        )
+        if page and resp.status_code != 200:
+            break
+        resp.raise_for_status()
+        data = resp.json()
+        yield from data.get("_embedded", {}).get("events", [])
+        if page + 1 >= int((data.get("page") or {}).get("totalPages") or 1):
+            break
+
+
 def scrape_ticketmaster(_url, _ua):
     key = os.environ.get("TICKETMASTER_API_KEY") or "oo1qd0wzLe7WJpm61ALQuUCTMXGK7U5z"
-    resp = _SESSION.get(
-        "https://app.ticketmaster.com/discovery/v2/events.json",
-        params={
-            "apikey": key,
-            "latlong": "42.3601,-71.0589",
-            "radius": 25,
-            "unit": "miles",
-            "size": 150,
-            "sort": "date,asc",
-            "startDateTime": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-        },
-        timeout=15,
-    )
-    resp.raise_for_status()
     events = []
-    for ev in resp.json().get("_embedded", {}).get("events", []):
+    for ev in _ticketmaster_pages(key):
         start = ev.get("dates", {}).get("start", {})
         iso = start.get("dateTime")
         if not iso and start.get("localDate"):
@@ -7810,7 +7895,8 @@ def scrape_ticketmaster(_url, _ua):
 def scrape_seatgeek(_url, _ua):
     cid = os.environ.get("SEATGEEK_CLIENT_ID") or "MTg5NjE5MzZ8MTc3NjcwMTYxNS4yODM3MDE3"
     events = []
-    for page in range(1, 3):
+    horizon = (datetime.now(timezone.utc) + timedelta(days=MIN_LOOKAHEAD_DAYS + 7)).strftime("%Y-%m-%dT%H:%M:%S")
+    for page in range(1, 9):  # 100 a page; two pages reached only ~12 days
         try:
             resp = _SESSION.get(
                 "https://api.seatgeek.com/2/events",
@@ -7823,6 +7909,7 @@ def scrape_seatgeek(_url, _ua):
                     "page": page,
                     "sort": "datetime_local.asc",
                     "datetime_utc.gte": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S"),
+                    "datetime_utc.lte": horizon,
                 },
                 timeout=15,
             )
@@ -10655,7 +10742,22 @@ def scrape_mit_open_space(url, ua):
 
 
 def scrape_somerville_library(url, ua):
-    """Somerville Public Library (Central, East, West) via Assabet Interactive calendar."""
+    """Somerville Public Library (Central, East, West) via Assabet Interactive calendar. The page
+    shows one month, so when two weeks out falls in the next month its page is read too."""
+    events = _scrape_assabet_month(url, ua)
+    today = datetime.now(EASTERN).date()
+    ahead = today + timedelta(days=MIN_LOOKAHEAD_DAYS)
+    if ahead.month != today.month and re.search(r"/calendar/?$", url):
+        nxt = f"{url.rstrip('/')}/{ahead.year}-{ahead.strftime('%B').lower()}/"
+        try:
+            seen = {(e["name"], e["date"]) for e in events}
+            events += [e for e in _scrape_assabet_month(nxt, ua) if (e["name"], e["date"]) not in seen]
+        except Exception:
+            pass
+    return events
+
+
+def _scrape_assabet_month(url, ua):
     resp = _SESSION.get(url, headers={"User-Agent": ua}, timeout=15)
     resp.raise_for_status()
     soup = BeautifulSoup(resp.text, "html.parser")
@@ -12336,7 +12438,14 @@ def scrape_squarespace_calendar_block(url, ua):
 
 
 def scrape_somerville_city(url, ua):
-    """Scrape municipal community events from City of Somerville calendar (Truck O' Treat, etc.)."""
+    """Scrape municipal community events from City of Somerville calendar (Truck O' Treat, etc.).
+    The calendar is paged (?page=1, ...) at about a day a page; read pages until two weeks out."""
+    base = url.split("?")[0]
+    return _drop_generic_meeting_copies(_pages_until_horizon(
+        lambda n: _scrape_somerville_city_page(f"{base}?page={n}" if n else url, ua), max_pages=20))
+
+
+def _scrape_somerville_city_page(url, ua):
     soup = fetch_soup(url, ua)
     events = []
     seen = set()
@@ -12386,7 +12495,7 @@ def scrape_somerville_city(url, ua):
             "venue": "Somerville City Hall",
             "price": "Free",
         })
-    return _drop_generic_meeting_copies(events)
+    return events
 
 
 def _drop_generic_meeting_copies(events):
@@ -12404,18 +12513,30 @@ def _drop_generic_meeting_copies(events):
     return keep
 
 
+def _localist_items(url, ua, max_pages=5):
+    """Every event in a Localist API listing. Localist sends 10 a page unless asked (pp, max 100)."""
+    sep = "&" if "?" in url else "?"
+    items = []
+    for page in range(1, max_pages + 1):
+        r = _SESSION.get(f"{url}{sep}pp=100&page={page}", headers={"User-Agent": ua or UA_CHROME}, timeout=10)
+        r.raise_for_status()
+        data = r.json()
+        items += data.get("events", [])
+        if page >= int((data.get("page") or {}).get("total") or 1):
+            break
+    return items
+
+
 def scrape_northeastern(url, ua):
     """Scrape campus lectures and public performances from Northeastern University Localist API."""
     try:
-        r = _SESSION.get(url, headers={"User-Agent": ua or UA_CHROME}, timeout=10)
-        r.raise_for_status()
-        data = r.json()
+        items = _localist_items(url, ua)
     except Exception:
         return []
 
     events = []
     seen = set()
-    for it in data.get("events", []):
+    for it in items:
         ev = it.get("event", {})
         title = ev.get("title")
         if not title or is_placeholder_or_closed_event(title):
@@ -14789,7 +14910,7 @@ _ALL_VENUES = [
     {"name": "Do617", "url": "https://do617.com/events", "ua": UA_CHROME, "scraper": scrape_do617, "default_category": None},
     {"name": "Middle East Cambridge", "url": "https://mideastoffers.com", "ua": UA_CHROME, "scraper": scrape_middle_east, "default_category": "music"},
     {"name": "The Wilbur", "url": "https://app.ticketmaster.com/discovery/v2/events.json?venueId=KovZpZAEAIvA&size=100&sort=date,asc", "ua": UA_CHROME, "scraper": scrape_ticketmaster_discovery, "default_category": "comedy"},
-    {"name": "The Dance Complex", "url": "https://www.dancecomplex.org/events/?ical=1", "ua": UA_CHROME, "scraper": scrape_ical, "default_category": "dance"},
+    {"name": "The Dance Complex", "url": "https://www.dancecomplex.org/events/?ical=1", "ua": UA_CHROME, "scraper": scrape_tribe_ical, "default_category": "dance"},
     {"name": "Dorchester Brewing Company", "url": "https://www.dorchesterbrewing.com/events/", "ua": UA_CHROME, "scraper": scrape_dorchester_brewing, "default_category": "food"},
     {"name": "The Huntington Theatre", "url": "https://www.huntingtontheatre.org/season/", "ua": UA_CHROME, "scraper": scrape_huntington_theatre, "default_category": "theater"},
     {"name": "CCAE (Cambridge Center for Adult Education)", "url": "https://ccae.org/events", "ua": UA_CHROME, "scraper": scrape_ccae, "default_category": "community"},
