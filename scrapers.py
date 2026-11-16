@@ -164,12 +164,14 @@ def _make_session():
 
 
 # --- Polite crawling ------------------------------------------------------------------------
-# A daily build sends ~1,500 requests to ~130 sites. Every request goes through _SESSION and this
-# gate, so no site sees a burst: at most two requests in flight per site with a pause between
-# them (one at a time for sites with bot protection). A 429 ("slow down") or 5xx gets one retry
-# after a pause; a site that refuses us (403, or 429 again) isn't asked again for the rest of
-# the run, and its source keeps its last good data.
-HOST_POLICY_DEFAULT = (2, 0.5)  # (max requests in flight, min seconds between request starts)
+# A daily build sends a few thousand requests to ~150 sites. Every request goes through _SESSION
+# and this gate, so no site sees a burst: one request at a time per site, with a pause between
+# request starts. Up to 16 sources scrape at once, so requests take turns across different sites
+# rather than piling onto one. Subdomains of one site (the eleven *.assabetinteractive.com library
+# calendars, *.libcal.com) share a single slot. A 429 ("slow down") or 5xx gets one retry after a
+# pause; a site that refuses us (403, or 429 again) isn't asked again for the rest of the run, and
+# its source keeps its last good data.
+HOST_POLICY_DEFAULT = (1, 0.5)  # (max requests in flight, min seconds between request starts)
 HOST_POLICY = {
     "eventbrite.com": (1, 1.0),
     "meetup.com": (1, 1.0),
@@ -201,6 +203,17 @@ def _host_policy(host):
     return HOST_POLICY_DEFAULT
 
 
+def _site_of(host):
+    """The site a host belongs to, so its subdomains share one slot: "waltham.assabetinteractive.com"
+    -> "assabetinteractive.com". Two-letter country domains keep three labels ("bbc.co.uk")."""
+    for domain in HOST_POLICY:
+        if host == domain or host.endswith("." + domain):
+            return domain
+    parts = host.split(".")
+    n = 3 if len(parts) >= 3 and len(parts[-1]) == 2 and parts[-2] in ("co", "com", "org", "ac", "gov", "net") else 2
+    return ".".join(parts[-n:])
+
+
 class _HostGate:
     """Per-site concurrency and spacing, plus the list of sites that refused us this run."""
 
@@ -218,6 +231,7 @@ class _HostGate:
 
     def acquire(self, host):
         in_flight, gap = _host_policy(host)
+        host = _site_of(host)
         with self._lock:
             slot = self._slots.setdefault(host, threading.BoundedSemaphore(in_flight))
         slot.acquire()
@@ -229,7 +243,7 @@ class _HostGate:
             time.sleep(start - now)
 
     def release(self, host):
-        self._slots[host].release()
+        self._slots[_site_of(host)].release()
 
     def refuse(self, host, reason):
         with self._lock:
@@ -4588,7 +4602,7 @@ def _do617_fill_prices(events, ua):
     for e in todo:
         by_slug.setdefault(re.sub(r"/events/(?:\d{4}/\d{1,2}/\d{1,2}|weekly/\w+)/", "/events/", e["url"]), e["url"])
     if by_slug:
-        with ThreadPoolExecutor(max_workers=8) as ex:
+        with ThreadPoolExecutor(max_workers=4) as ex:  # the host gate still sends Do617 one at a time
             details = dict(zip(by_slug, ex.map(lambda u: _do617_event_details(u, ua), by_slug.values())))
         for e in todo:
             slug = re.sub(r"/events/(?:\d{4}/\d{1,2}/\d{1,2}|weekly/\w+)/", "/events/", e["url"])
