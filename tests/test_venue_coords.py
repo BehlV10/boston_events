@@ -132,7 +132,12 @@ VENUES = [  # (venue name as a source would write it, title, category)
 
 def _render_page():
     import template as T
-    when = (datetime.now(timezone.utc) + timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
+    # An hour from now, but never past 11:58 PM Eastern: after 11 PM, "an hour from now" is tomorrow,
+    # which isn't in the page's default view, and the list came back empty.
+    eastern = T.EASTERN
+    now = datetime.now(eastern)
+    when = min((now + timedelta(hours=1)).replace(minute=0, second=0, microsecond=0),
+               now.replace(hour=23, minute=58, second=0, microsecond=0))
     # Each on its own site: two same-time events on one host at neighboring venues merge as one listing.
     venues = [{"venue": name, "url": f"https://venue{i}.example.org/", "error": None,
                "events": [{"name": title, "date": when.isoformat(), "venue": name,
