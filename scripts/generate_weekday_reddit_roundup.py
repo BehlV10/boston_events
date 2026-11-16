@@ -235,20 +235,11 @@ _BLURB_JUNK_RE = re.compile(r"(?i)^(?:eventbrite\b|listing via\b|powered by\b|ti
 
 
 def _blurb(e, boilerplate=frozenset()):
-    """One sentence on what the event is like: the highlight note, else the first sentence of
-    the listing's own description when it's about this event (not a venue's stock text)."""
+    """The hand-written highlights.json note for this pick, or "". Listings' own descriptions
+    (Eventbrite boilerplate, "Hosted by ...", ticket details) read worse than no blurb, so they
+    aren't used; picks without a note are listed on the posting page so one can be written."""
     note = (e.get("_highlight") or {}).get("note")
-    if note:
-        return note.strip()
-    d = re.sub(r"<[^>]+>", " ", e.get("description") or "")
-    d = _fix_mojibake(re.sub(r"\s+", " ", unescape(d)).strip())
-    if not d or "â" in d or d in boilerplate or _BLURB_JUNK_RE.search(d[:200]):
-        return ""
-    d = re.sub(r"^\d+\+\s*w/[^.]*\.\s*", "", d)  # comedy-club "18+ w/ 2-item minimum." prefix
-    m = re.match(r"(.{40,220}?[.!?])(?:\s|$)", d)
-    if not m or re.search(r"(?i)\$\d|\bdoors\b|\b\d{1,2}(?:st|nd|rd|th)\b|\b\d{1,2}(?::\d\d)?\s*[ap]m\b", m.group(1)):
-        return ""  # ticket and door details, not what the event is like
-    return m.group(1)
+    return note.strip() if note else ""
 
 
 def _city_venue(e):
@@ -331,7 +322,7 @@ def roundup_days(mode, start=None):
     return [mon + timedelta(days=i) for i in range(5)]  # Mon, Tue, Wed, Thu, Fri
 
 
-def build_roundup(mode="weekday", start=None, city=None, days=None, picks_only=False):
+def build_roundup(mode="weekday", start=None, city=None, days=None, picks_only=False, with_unnoted=False):
     """(title, markdown body) for the weekday (Mon–Fri) or weekend (Fri–Sun) post; with `city`
     ("cambridge"/"somerville"), a post of that city's events only.
 
@@ -734,6 +725,10 @@ def build_roundup(mode="weekday", start=None, city=None, days=None, picks_only=F
     social = re.findall(r"\]\((https?://[^)\s]+)\)", body)
     assert not any(SOCIAL_URL_RE.match(u) for u in social), "social-network link left in post"
     assert len(body) <= REDDIT_LIMIT, f"post is {len(body):,} chars, over Reddit's {REDDIT_LIMIT:,}"
+    if with_unnoted:  # picks in the post with no highlights.json note, for the posting page
+        unnoted = [(d, e) for d in weekdays for c in city_keys
+                   for e in sorted(picked_by_day_city[d][c][:caps[c]], key=lambda x: x["_time"]) if not e.get("_highlight")]
+        return title, body, unnoted
     return title, body
 
 
@@ -827,7 +822,7 @@ ROUNDUP_PAGES = (
 )
 
 
-def render_roundup_page(mode, title, body, built_at=None, page=None):
+def render_roundup_page(mode, title, body, built_at=None, page=None, unnoted=None):
     from html import escape as esc
     from urllib.parse import quote
     slug, _, _, heading, only_subs = next((r for r in ROUNDUP_PAGES if r[0] == (page or mode)), ROUNDUP_PAGES[0])
@@ -906,6 +901,7 @@ textarea{{width:100%;min-height:60vh;font:13px/1.5 ui-monospace,Menlo,monospace;
     </ul>
     <p class="muted" style="margin:0">Each link opens old Reddit's text-post form with the title filled in; paste the body (old Reddit takes Markdown as is). On new Reddit, switch the editor to Markdown mode first. Check each sub's rules on self-promotion, and space posts out rather than cross-posting all at once.</p>
   </div>
+{_unnoted_html(unnoted, body)}
   <div class="tabs" role="tablist">
     <button class="tab" role="tab" id="tabPrev" aria-selected="true">Preview</button>
     <button class="tab" role="tab" id="tabMd" aria-selected="false">Markdown</button>
@@ -948,12 +944,29 @@ tm.onclick = showMd; tp.onclick = showPv;
 """
 
 
+def _unnoted_html(unnoted, body):
+    """A fold listing the post's picks that have no hand-written note yet (add them to highlights.json)."""
+    from html import escape as esc
+    if not unnoted:
+        return ""
+    total = body.count("\n* ") + body.startswith("* ")
+    rows = "\n".join(f'      <li>{esc(d.strftime("%a %b %-d"))} · {esc(_clean_title(e["name"]))} '
+                     f'<span class="muted">@ {esc(_venue(e))}</span></li>' for d, e in unnoted)
+    return f"""  <details class="field">
+    <summary class="label" style="cursor:pointer">{len(unnoted)} of ~{total} picks have no note yet</summary>
+    <p class="muted" style="margin:0">Blurbs come only from highlights.json. Add a note for any of these (or ask Claude to draft them) and the next build includes it.</p>
+    <ul class="muted" style="margin:0;padding-left:18px">
+{rows}
+    </ul>
+  </details>"""
+
+
 def write_roundup_pages(base_dir):
     """Write each posting page in ROUNDUP_PAGES as roundup/<slug>/index.html under base_dir."""
     for slug, mode, city, _, _ in ROUNDUP_PAGES:
-        title, body = build_roundup(mode, city=city)
+        title, body, unnoted = build_roundup(mode, city=city, with_unnoted=True)
         d = os.path.join(base_dir, "roundup", slug)
         os.makedirs(d, exist_ok=True)
         with open(os.path.join(d, "index.html"), "w", encoding="utf-8") as f:
-            f.write(render_roundup_page(mode, title, body, page=slug))
+            f.write(render_roundup_page(mode, title, body, page=slug, unnoted=unnoted))
         print(f"wrote roundup/{slug}/: {title} ({len(body):,} chars)")

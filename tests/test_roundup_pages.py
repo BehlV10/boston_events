@@ -9,7 +9,7 @@ import re
 import sys
 import tempfile
 import unittest
-from datetime import date
+from datetime import date, datetime
 from unittest.mock import patch
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -71,7 +71,8 @@ class RoundupPageTest(unittest.TestCase):
     def test_writes_every_page(self):
         with tempfile.TemporaryDirectory() as d, \
              patch.object(R, "build_roundup",
-                          side_effect=lambda mode, start=None, city=None: (f"{mode} {city} title", self.BODY)):
+                          side_effect=lambda mode, start=None, city=None, with_unnoted=False: (
+                              f"{mode} {city} title", self.BODY, [])):
             R.write_roundup_pages(d)
             for slug, mode, city in (("weekday", "weekday", None), ("weekend", "weekend", None),
                                      ("weekend-cambridge", "weekend", "cambridge"),
@@ -147,12 +148,16 @@ class CityPostTest(unittest.TestCase):
         self.assertTrue(line.endswith(" — A low-key hangout."), line)
         self.assertEqual(R._city_venue({"venue": "The Burren — The Back Room"}), "The Burren (The Back Room)")
 
-    def test_blurb_from_description(self):
+    def test_blurbs_only_from_highlight_notes(self):
         d = "Haitian folk dance and live drumming from a Boston company. Tickets $35."
-        self.assertEqual(R._blurb({"description": d}), "Haitian folk dance and live drumming from a Boston company.")
-        self.assertEqual(R._blurb({"description": d}, frozenset([d])), "", "venue stock text says nothing about the event")
-        self.assertEqual(R._blurb({"description": "Eventbrite - X presents Y - Friday, Nov 13. Find event and ticket information."}), "")
-        self.assertEqual(R._blurb({"description": "Doors 7pm / $15 advance / all ages. Bring friends along tonight please."}), "")
+        self.assertEqual(R._blurb({"description": d}), "", "a listing's own description is never the blurb")
+        self.assertEqual(R._blurb({"description": d, "_highlight": {"note": "Our note."}}), "Our note.")
+
+    def test_posting_page_lists_picks_without_notes(self):
+        e = {"name": "Some Show", "venue": "Club", "_time": datetime(2026, 11, 20, 20, tzinfo=R.EASTERN)}
+        html = R.render_roundup_page("weekend", "T", "* a\n* b\n", page="weekend", unnoted=[(date(2026, 11, 20), e)])
+        self.assertIn("1 of ~2 picks have no note yet", html)
+        self.assertIn("Fri Nov 20 · Some Show", html)
 
     def test_news_labels(self):
         import tempfile
