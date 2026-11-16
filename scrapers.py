@@ -9293,7 +9293,7 @@ def scrape_sowa_christmas_market(url, ua):
                          datetime(d.year, d.month, d.day, e_h, 0, tzinfo=EASTERN)))
         d += timedelta(days=1)
 
-    return _scrape_holiday_market(
+    events = _scrape_holiday_market(
         url, ua,
         name="11th Annual SoWa Christmas Market",
         default_venue="SoWa Power Station",
@@ -9302,6 +9302,63 @@ def scrape_sowa_christmas_market(url, ua):
         desc="More than 100 local makers and food vendors inside the historic SoWa Power Station with live music at the Sleigh Bar.",
         price="$10",
     )
+    try:
+        events += _sowa_christmas_performers(fetch_soup(_SOWA_ENTERTAINMENT_URL, ua or UA_CHROME))
+    except Exception:
+        pass
+    return events
+
+
+_SOWA_ENTERTAINMENT_URL = "https://www.sowaboston.com/sowa-christmas-market/christmas-market-entertainment/"
+_SOWA_SLOT_RE = re.compile(r"(\d{1,2}:\d{2}\s*[AP]M)\s*[–—-]\s*(\d{1,2}:\d{2}\s*[AP]M)\s*:\s*(.+)", re.I)
+
+
+def _sowa_christmas_performers(soup, today=None):
+    """Each live set on the Christmas Market's entertainment page (an <h4> per day, then
+    "6:00 PM – 9:00 PM: Matt Koelsch" lines) as its own event at SoWa Power Station."""
+    today = today or datetime.now(EASTERN).date()
+    events = []
+    for h in soup.find_all("h4") if soup else []:
+        try:
+            day = datetime.strptime(re.sub(r"\s+", " ", h.get_text(" ", strip=True)), "%B %d").date()
+        except ValueError:
+            continue
+        day = day.replace(year=today.year)
+        if day < today - timedelta(days=180):  # a January date listed in December
+            day = day.replace(year=today.year + 1)
+        if day < today:
+            continue
+        p = h.find_next_sibling()
+        if not p or p.name != "p":
+            continue
+        lines = [ln.strip() for ln in p.get_text("\n").split("\n") if ln.strip()]
+        theme = None
+        for ln in lines:
+            m = _SOWA_SLOT_RE.match(ln)
+            if not m:
+                theme = ln  # "Country Night" heads that day's slots
+                continue
+            try:
+                t0 = datetime.strptime(m.group(1).replace(" ", "").upper(), "%I:%M%p").time()
+                t1 = datetime.strptime(m.group(2).replace(" ", "").upper(), "%I:%M%p").time()
+            except ValueError:
+                continue
+            act = m.group(3).strip()
+            start = datetime.combine(day, t0, tzinfo=EASTERN)
+            end = datetime.combine(day, t1, tzinfo=EASTERN)
+            events.append({
+                "name": f"{theme + ': ' if theme else ''}{act} at the SoWa Christmas Market",
+                "date": start.astimezone(timezone.utc).isoformat(),
+                "end": end.astimezone(timezone.utc).isoformat(),
+                "url": _SOWA_ENTERTAINMENT_URL,
+                "venue": "SoWa Power Station",
+                "address": "540 Harrison Ave, Boston, MA",
+                "price": "$10",
+                "category": "music",
+                "description": f"Live entertainment at the SoWa Christmas Market: {act}. Included with market admission.",
+                "one_off": True,  # an act booked a few times this season, not a weekly series
+            })
+    return events
 
 
 def scrape_thanksgiving_market_harbor_fest(url, ua):
