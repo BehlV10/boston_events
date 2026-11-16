@@ -7,12 +7,24 @@ compatibility_flags = ["nodejs_compat"]
 #   GITHUB_TOKEN          fine-grained PAT with Actions: write on BehlV10/boston_events
 #   ANTHROPIC_API_KEY     enables POST /extract-flyer
 #   TURNSTILE_SECRET_KEY  optional Cloudflare Turnstile check
+#   ADMIN_TOKEN           long random string; enables GET /admin/flyer-usage (audit log)
+#   AUDIT_SALT            optional random string mixed into hashed IPs in the audit log
 
 [vars]
 GITHUB_REPO = "BehlV10/boston_events"
 ALLOWED_ORIGINS = "https://www.wickedbostonevents.com,https://wickedbostonevents.com,https://behlv10.github.io"
 FLYER_DAILY_LIMIT_PER_IP = "15"
 FLYER_DAILY_LIMIT_TOTAL = "400"
+# Stop reading flyers for the day once the worker's own tally of Claude spend reaches this.
+FLYER_DAILY_BUDGET_USD = "1"
+
+# Per-IP burst limit for /extract-flyer: 3 flyers a minute (approximate, per Cloudflare location).
+[[ratelimits]]
+name = "FLYER_RATE_LIMITER"
+namespace_id = "1001"
+  [ratelimits.simple]
+  limit = 3
+  period = 60
 
 # Upvote counts (existing) and flyer rate limits. Create once with
 # `npx wrangler kv namespace create UPVOTES` (and FLYER_LIMITS), then paste the ids here.

@@ -6,30 +6,79 @@
  * Deploy with `npm run deploy` (see README.md).
  */
 import Anthropic from "@anthropic-ai/sdk";
-import { extractFlyer, FlyerError } from "./flyer.js";
+import { costUsd, extractFlyer, FlyerError } from "./flyer.js";
 
 function bostonToday() {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "America/New_York" }).format(new Date());
 }
 
-/** Soft daily caps in KV (eventually consistent, which is fine for limiting cost). */
-async function takeFlyerQuota(env, ip) {
-  const day = bostonToday();
+const DAY_TTL = { expirationTtl: 60 * 60 * 48 };
+const AUDIT_TTL = { expirationTtl: 60 * 60 * 24 * 30 };
+
+/** Soft daily caps in KV (eventually consistent; the per-minute limiter and the Anthropic
+ * workspace spend limit cover bursts). Returns an error message, or null to go ahead. */
+async function checkFlyerQuota(env, ip, day) {
   const perIp = parseInt(env.FLYER_DAILY_LIMIT_PER_IP || "15", 10);
   const total = parseInt(env.FLYER_DAILY_LIMIT_TOTAL || "400", 10);
-  const ipKey = `ip:${ip}:${day}`;
-  const totalKey = `total:${day}`;
-  const [ipCount, totalCount] = await Promise.all([
-    env.FLYER_LIMITS.get(ipKey).then((v) => parseInt(v || "0", 10)),
-    env.FLYER_LIMITS.get(totalKey).then((v) => parseInt(v || "0", 10)),
+  const budget = parseFloat(env.FLYER_DAILY_BUDGET_USD || "1");
+  const [ipCount, totalCount, spent] = await Promise.all([
+    env.FLYER_LIMITS.get(`ip:${ip}:${day}`).then((v) => parseInt(v || "0", 10)),
+    env.FLYER_LIMITS.get(`total:${day}`).then((v) => parseInt(v || "0", 10)),
+    env.FLYER_LIMITS.get(`spend:${day}`).then((v) => parseFloat(v || "0")),
   ]);
-  if (ipCount >= perIp || totalCount >= total) return false;
-  const ttl = { expirationTtl: 60 * 60 * 48 };
+  if (ipCount >= perIp) return "You've reached today's flyer limit. Please fill in the form by hand.";
+  if (totalCount >= total || spent >= budget) return "Flyer reading is paused for today. Please fill in the form by hand.";
   await Promise.all([
-    env.FLYER_LIMITS.put(ipKey, String(ipCount + 1), ttl),
-    env.FLYER_LIMITS.put(totalKey, String(totalCount + 1), ttl),
+    env.FLYER_LIMITS.put(`ip:${ip}:${day}`, String(ipCount + 1), DAY_TTL),
+    env.FLYER_LIMITS.put(`total:${day}`, String(totalCount + 1), DAY_TTL),
   ]);
-  return true;
+  return null;
+}
+
+async function addSpend(env, day, usd) {
+  if (!usd) return;
+  const spent = parseFloat((await env.FLYER_LIMITS.get(`spend:${day}`)) || "0");
+  await env.FLYER_LIMITS.put(`spend:${day}`, (spent + usd).toFixed(6), DAY_TTL);
+}
+
+/** Hash IPs before storing them: enough to spot one address hammering the endpoint, without keeping it. */
+async function hashIp(ip, day, salt) {
+  const data = new TextEncoder().encode(`${salt || "flyer"}:${day}:${ip}`);
+  const digest = await crypto.subtle.digest("SHA-256", data);
+  return [...new Uint8Array(digest).slice(0, 6)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+/** One audit row per flyer request, kept 30 days; the data lives in the key's metadata so a list() reads it all. */
+async function audit(env, day, row) {
+  const key = `log:${day}:${new Date().toISOString()}:${crypto.randomUUID().slice(0, 8)}`;
+  await env.FLYER_LIMITS.put(key, "", { ...AUDIT_TTL, metadata: row });
+}
+
+async function handleFlyerUsage(request, env, url) {
+  const auth = request.headers.get("Authorization") || "";
+  if (!env.ADMIN_TOKEN || !env.FLYER_LIMITS || auth !== `Bearer ${env.ADMIN_TOKEN}`) {
+    return new Response("Not found", { status: 404 });
+  }
+  const day = /^\d{4}-\d{2}-\d{2}$/.test(url.searchParams.get("day") || "") ? url.searchParams.get("day") : bostonToday();
+  const rows = [];
+  let cursor;
+  do {
+    const page = await env.FLYER_LIMITS.list({ prefix: `log:${day}:`, cursor });
+    for (const k of page.keys) rows.push({ at: k.name.split(":").slice(2, -1).join(":"), ...(k.metadata || {}) });
+    cursor = page.list_complete ? undefined : page.cursor;
+  } while (cursor && rows.length < 5000);
+  const byIp = {};
+  for (const r of rows) byIp[r.ip] = (byIp[r.ip] || 0) + 1;
+  const body = {
+    day,
+    requests: rows.length,
+    ok: rows.filter((r) => r.ok).length,
+    spend_usd: parseFloat((await env.FLYER_LIMITS.get(`spend:${day}`)) || "0"),
+    budget_usd: parseFloat(env.FLYER_DAILY_BUDGET_USD || "1"),
+    top_ips: Object.entries(byIp).sort((a, b) => b[1] - a[1]).slice(0, 10),
+    rows,
+  };
+  return new Response(JSON.stringify(body, null, 2), { headers: { "Content-Type": "application/json" } });
 }
 
 async function verifyTurnstile(env, token) {
@@ -65,23 +114,40 @@ async function handleExtractFlyer(request, env, corsHeaders) {
   }
 
   const ip = request.headers.get("CF-Connecting-IP") || "unknown";
-  if (!(await takeFlyerQuota(env, ip))) {
-    return json({ error: "Daily flyer limit reached. Please fill in the form by hand." }, 429);
+  const day = bostonToday();
+  const ipHash = await hashIp(ip, day, env.AUDIT_SALT);
+
+  // Per-minute burst limit (Cloudflare rate limiting binding; approximate, per data center).
+  if (env.FLYER_RATE_LIMITER && !(await env.FLYER_RATE_LIMITER.limit({ key: ip })).success) {
+    await audit(env, day, { ip: ipHash, ok: false, err: "rate_limited" });
+    return json({ error: "Too many flyers at once. Please wait a minute and try again." }, 429);
+  }
+  const quotaError = await checkFlyerQuota(env, ip, day);
+  if (quotaError) {
+    await audit(env, day, { ip: ipHash, ok: false, err: "daily_limit" });
+    return json({ error: quotaError }, 429);
   }
 
   const client = new Anthropic({ apiKey: env.ANTHROPIC_API_KEY, maxRetries: 1, timeout: 45_000 });
+  let usage = null;
+  let result;
   try {
-    const { fields } = await extractFlyer(client, {
-      image: body.image,
-      mediaType: body.media_type,
-      today: bostonToday(),
-    });
-    return json({ success: true, fields });
+    const out = await extractFlyer(client, { image: body.image, mediaType: body.media_type, today: day });
+    usage = out.usage;
+    result = json({ success: true, fields: out.fields });
+    await audit(env, day, { ip: ipHash, ok: true, in: usage?.input_tokens, out: usage?.output_tokens,
+                            usd: +costUsd(usage).toFixed(6), name: (out.fields.name || "").slice(0, 60) });
   } catch (err) {
-    if (err instanceof FlyerError) return json({ error: err.message }, err.status);
-    console.error("extract-flyer failed", err);
-    return json({ error: "Couldn't read the flyer. Please fill in the form by hand." }, 500);
+    usage = err.usage || null;
+    const known = err instanceof FlyerError;
+    if (!known) console.error("extract-flyer failed", err);
+    result = known ? json({ error: err.message }, err.status)
+                   : json({ error: "Couldn't read the flyer. Please fill in the form by hand." }, 500);
+    await audit(env, day, { ip: ipHash, ok: false, err: known ? err.message.slice(0, 60) : "server_error",
+                            in: usage?.input_tokens, out: usage?.output_tokens, usd: +costUsd(usage).toFixed(6) });
   }
+  await addSpend(env, day, costUsd(usage));
+  return result;
 }
 
 export default {
@@ -98,6 +164,9 @@ export default {
 
     const url = new URL(request.url);
 
+    if (request.method === "GET" && url.pathname === "/admin/flyer-usage") {
+      return handleFlyerUsage(request, env, url);
+    }
     if (request.method === "POST" && url.pathname === "/extract-flyer") {
       const origin = request.headers.get("Origin") || "";
       return handleExtractFlyer(request, env, origin ? { ...corsHeaders, "Access-Control-Allow-Origin": origin, Vary: "Origin" } : corsHeaders);

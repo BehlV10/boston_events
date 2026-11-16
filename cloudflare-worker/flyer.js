@@ -7,6 +7,15 @@ import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
 
 export const FLYER_MODEL = "claude-haiku-5-5";
+// Claude Haiku 5.5 list prices (USD per million tokens, prompts under 100K tokens), used to keep the
+// worker's own spend tally. Thinking tokens are billed as output and are included in output_tokens.
+export const PRICE_PER_MTOK = { input: 0.1, output: 0.5 };
+
+export function costUsd(usage) {
+  if (!usage) return 0;
+  const input = (usage.input_tokens || 0) + (usage.cache_creation_input_tokens || 0) + (usage.cache_read_input_tokens || 0);
+  return (input * PRICE_PER_MTOK.input + (usage.output_tokens || 0) * PRICE_PER_MTOK.output) / 1e6;
+}
 
 export const CATEGORIES = [
   "music", "comedy", "dance", "theater", "art", "food", "fitness",
@@ -40,9 +49,11 @@ Write URLs with https:// when the flyer shows a bare domain (e.g. "thevenue.com"
 List in guessed_fields every field you inferred (for example city from a neighborhood, or category).`;
 
 export class FlyerError extends Error {
-  constructor(message, status = 400) {
+  /** usage is set when the API answered (and billed) but the answer wasn't usable. */
+  constructor(message, status = 400, usage = null) {
     super(message);
     this.status = status;
+    this.usage = usage;
   }
 }
 
@@ -119,14 +130,14 @@ export async function extractFlyer(client, { image, mediaType, today }) {
   }
 
   if (response.stop_reason === "refusal") {
-    throw new FlyerError("This image couldn't be processed. Please fill in the form by hand.", 422);
+    throw new FlyerError("This image couldn't be processed. Please fill in the form by hand.", 422, response.usage);
   }
   if (response.stop_reason === "max_tokens" || !response.parsed_output) {
-    throw new FlyerError("Couldn't read the flyer. Try a clearer photo or a screenshot.", 422);
+    throw new FlyerError("Couldn't read the flyer. Try a clearer photo or a screenshot.", 422, response.usage);
   }
   const out = response.parsed_output;
   if (!out.is_event_flyer) {
-    throw new FlyerError("That doesn't look like an event flyer. Please try another image.", 422);
+    throw new FlyerError("That doesn't look like an event flyer. Please try another image.", 422, response.usage);
   }
   return { fields: cleanFields(out), usage: response.usage };
 }

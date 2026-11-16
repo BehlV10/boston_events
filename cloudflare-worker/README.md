@@ -39,16 +39,48 @@ The flyer upload box only appears on the site once that variable is set.
 
 For the automatic scraper PRs, also enable **Settings → Actions → General → Allow GitHub Actions to create and approve pull requests**.
 
-## Limits and safety
+## Spending limits and auditing
 
-- **Origins:** flyer reads are only accepted from the site's own origins (`ALLOWED_ORIGINS` in `wrangler.toml`).
-- **Daily caps:** 15 reads per IP and 400 in total per day (`FLYER_DAILY_LIMIT_*`), counted in the `FLYER_LIMITS` KV namespace. Without that namespace or an API key, the endpoint returns 503 and the form still works by hand.
-- **Turnstile:** if `TURNSTILE_SECRET_KEY` is set, flyer reads require a Turnstile token. The site doesn't render the widget yet, so only set this secret after adding the widget.
-- **Model output:** the model's output is constrained to a fixed schema. Dates, times and URLs are re-validated in the worker, and the visitor reviews everything before it's submitted.
+Five layers, from strictest to softest:
+
+1. **Hard cap at Anthropic (do this first).** Create a separate workspace in the Anthropic Console (for example "website-flyers"), set a **monthly spend limit** on it (such as $5), and create the worker's `ANTHROPIC_API_KEY` in that workspace. Once the cap is hit, Anthropic rejects calls; nothing the worker does can spend past it. The usage page there also shows this key's spend on its own.
+2. **Daily dollar budget:** the worker tallies each call's cost from the token counts the API returns and stops reading flyers for the day at `FLYER_DAILY_BUDGET_USD` ($1 by default, about 1,000 flyers). After that it returns "paused for today" and the form still works by hand.
+3. **Daily counts:** 15 reads per IP and 400 in total per day (`FLYER_DAILY_LIMIT_*`).
+4. **Burst limit:** 3 reads per minute per IP (the `FLYER_RATE_LIMITER` binding in `wrangler.toml`).
+5. **Origin check:** reads are only accepted from the site's own origins (`ALLOWED_ORIGINS`). Scripts can fake this header, which is why the limits above exist.
+
+Each read costs well under a cent: an image is about 1,600 input tokens, and output is capped at 4,000 tokens.
+
+Layers 2–4 are approximate. KV and the rate limiter are eventually consistent and per data center, so a burst can slip a few calls past them. Layer 1 is the real guarantee.
+
+Optional: set `TURNSTILE_SECRET_KEY` to require a Turnstile token on flyer reads. The site doesn't render the widget yet, so only set it after adding the widget.
+
+### Audit log
+
+Every flyer request is logged for 30 days in the `FLYER_LIMITS` KV namespace, whether it succeeded, failed or was blocked. Each entry has the time, a hashed IP (salted per day, so the raw address is never stored), the token counts and cost, the event name read, and any error.
+
+To read it, set an admin token once:
+
+```bash
+npx wrangler secret put ADMIN_TOKEN   # any long random string, e.g. from: openssl rand -hex 24
+```
+
+Then:
+
+```bash
+curl -H "Authorization: Bearer $ADMIN_TOKEN" https://<worker-url>/admin/flyer-usage            # today
+curl -H "Authorization: Bearer $ADMIN_TOKEN" "https://<worker-url>/admin/flyer-usage?day=2026-11-20"
+```
+
+It returns that day's request count, successes, spend vs. budget, the busiest hashed IPs, and every entry. Without the token, the endpoint returns 404.
+
+To raise or lower a limit, edit the value in `wrangler.toml` and run `npm run deploy`.
+
+**KV write quota:** each read makes about 4 KV writes. The Workers free plan allows 1,000 writes a day, so it covers about 250 flyers a day. The $5/month paid plan removes that limit in practice.
 
 ## Test
 
 ```bash
-npm test                                   # unit tests for the flyer reader (no API calls)
+npm test                                   # flyer reader + spend limits (fake API, nothing billed)
 npx wrangler deploy --dry-run --outdir dist  # bundle check
 ```
