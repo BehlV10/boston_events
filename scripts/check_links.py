@@ -24,6 +24,9 @@ from zoneinfo import ZoneInfo
 
 import requests
 
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from scrapers import _SESSION, SiteRefused  # noqa: E402  (one request at a time per site)
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
       "(KHTML, like Gecko) Chrome/124.0 Safari/537.36")
@@ -73,6 +76,8 @@ def check(url, session):
                 last = ("dead", code, r.url)
                 continue
             return ("ok", code, r.url)
+        except SiteRefused:
+            return ("blocked", "refused", url)
         except requests.exceptions.Timeout:
             last = ("timeout", None, "")
         except requests.exceptions.SSLError as ex:
@@ -94,7 +99,7 @@ def main():
     urls = collect(args.date)
     print(f"Checking {len(urls)} unique URLs...", file=sys.stderr)
     results = {}
-    session = requests.Session()
+    session = _SESSION  # the polite session: threads take turns across sites, one request per site at a time
     with ThreadPoolExecutor(max_workers=args.workers) as ex:
         futs = {ex.submit(check, u, session): u for u in urls}
         for i, fut in enumerate(as_completed(futs), 1):
