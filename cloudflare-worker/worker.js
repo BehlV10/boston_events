@@ -374,7 +374,8 @@ export default {
         description: description || "",
         address: address || "",
         website: /^https?:\/\//i.test(website) ? website : "",
-        _is_community: true,
+        // GitHub rejects a client_payload with more than 10 top-level fields; add_community_event.py
+        // marks the event as community-submitted itself.
       };
 
       // 4. Trigger GitHub Action via repository_dispatch (GITHUB_REPO / GITHUB_TOKEN set above)
