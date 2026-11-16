@@ -9315,6 +9315,7 @@ def _sowa_christmas_performers(soup, today=None):
                 "price": "$10",
                 "category": "music",
                 "description": f"Live entertainment at the SoWa Christmas Market: {act}. Included with market admission.",
+                "one_off": True,  # an act booked a few times this season, not a weekly series
             })
     return events
 

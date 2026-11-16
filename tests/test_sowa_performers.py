@@ -32,6 +32,16 @@ class SowaPerformers(unittest.TestCase):
         ])
         self.assertTrue(all(e["venue"] == "SoWa Power Station" and e["category"] == "music" for e in evs))
 
+    def test_sets_are_not_badged_weekly(self):
+        from datetime import datetime
+        import template as T
+        evs = [{"name": "Anna Daley Young at the SoWa Christmas Market", "venue": "SoWa Power Station", "one_off": True,
+                "_time": datetime(2026, 11, d, 18)} for d in (21, 28)]
+        self.assertEqual(T.compute_recurring([(None, evs)]), set())
+        for e in evs:
+            e.pop("one_off")
+        self.assertEqual(len(T.compute_recurring([(None, evs)])), 1)
+
     def test_missing_page(self):
         self.assertEqual(S._sowa_christmas_performers(None), [])
 
