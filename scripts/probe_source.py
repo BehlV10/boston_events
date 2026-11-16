@@ -29,6 +29,7 @@ SKIP_DOMAINS = {
     "linkin.bio", "bit.ly", "tinyurl.com", "google.com", "forms.gle", "goo.gl", "youtube.com",
     "ticketmaster.com", "livenation.com", "dice.fm", "partiful.com", "meetup.com", "tixr.com",
     "eventbrite.com", "axs.com", "seetickets.us", "venmo.com", "paypal.com", "gofundme.com",
+    "posh.vip",  # its terms forbid scrapers; Posh events come in through submissions
 }
 
 

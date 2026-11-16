@@ -54,5 +54,33 @@
     "date": "2026-11-15T12:00:00-05:00",
     "price": "Free",
     "description": "Artist books, zines, catalogs, comics and printed matter from local, national and international publishers. Open to the public 12\u20135 PM, free admission."
+  },
+  {
+    "name": "Brave Rave",
+    "venue": "HAN",
+    "date": "2026-11-21T21:00:00-05:00",
+    "url": "https://posh.vip/e/brave-rave-nov-21st-sat",
+    "category": "clubbing",
+    "price": "$25+",
+    "city": "boston",
+    "address": "186 Harvard Ave, Allston, MA 02134",
+    "description": "Hard rave music all night, 9 PM\u20132 AM, with 88 MPH, Junk and No Ash.",
+    "_is_community": true,
+    "_source_venue": "Community Submission",
+    "submitted_at": "2026-11-16T19:03:39.646133+00:00"
+  },
+  {
+    "name": "Kulture Lounge Presents Friendsgiving: The Reunion (Thanksgiving Eve)",
+    "venue": "La Fabrica",
+    "date": "2026-11-25T21:00:00-05:00",
+    "url": "https://posh.vip/e/friendsgiving-144",
+    "category": "clubbing",
+    "price": "$33.99+",
+    "city": "cambridge",
+    "address": "450 Massachusetts Ave, Cambridge, MA 02139",
+    "description": "Grown & sexy Thanksgiving Eve party, 9 PM\u20132 AM: 90s & 2000s hip-hop, R&B and dancehall in two rooms with DJ Mez Wav and DJ Motivate Merren.",
+    "_is_community": true,
+    "_source_venue": "Community Submission",
+    "submitted_at": "2026-11-16T19:03:39.646430+00:00"
   }
 ]
