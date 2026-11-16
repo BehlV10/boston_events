@@ -964,6 +964,7 @@ def build_seo_directory_html(all_events_flat, all_venue_names):
 
         <h3 style="margin-top:18px;">🔥 Programmatic Event Guides</h3>
         <ul>
+          <li><a href="boston-event-highlights/">Event Highlights: Best Picks Each Day</a></li>
           <li><a href="free-events-boston-this-weekend/">Free Events This Weekend</a></li>
           <li><a href="cambridge-events-tonight/">Cambridge Events Tonight</a></li>
           <li><a href="live-music-somerville/">Somerville Live Music</a></li>
@@ -5850,6 +5851,7 @@ def _camps_sections(camps):
 
 # The header bar on every guide page links to the same finished pages.
 _MAIN_NAV = (("../", "All Events", None),
+             ("../boston-event-highlights/", "Highlights", "boston-event-highlights"),
              ("../markets-festivals-boston/", "Markets &amp; Festivals", "markets-festivals-boston"),
              ("../college/", "College", "college"),
              ("../kids-family-events-boston/", "Kids &amp; Family", "kids-family-events-boston"),
@@ -9013,6 +9015,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
             useful_block = f'''
         <div class="useful-inner">
           <h3>Featured Guides</h3>
+          <div class="useful-cat useful-highlights" style="margin-bottom:12px"><div class="useful-cat-head" style="color:#f5c35b"><span class="chip-icon">✨ </span>Highlights</div><ul><li><a href="boston-event-highlights/">The best picks each day, up to 3 weeks out</a></li></ul></div>
           <div class="useful-cat useful-markets" style="margin-bottom:12px"><div class="useful-cat-head" style="color:#b23a26"><span class="chip-icon">🛍️ </span>Markets &amp; Festivals</div><ul><li><a href="markets-festivals-boston/">Farmers markets, fleas &amp; craft fairs</a></li></ul></div>
           <div class="useful-cat useful-students" style="margin-bottom:12px"><div class="useful-cat-head" style="color:#5d9bff"><span class="chip-icon">🎓 </span>College Events</div><ul><li><a href="college/">Campus games, concerts &amp; talks</a></li></ul></div>
           <div class="useful-cat useful-parents" style="margin-bottom:12px"><div class="useful-cat-head" style="color:#f27e9a"><span class="chip-icon">👪 </span>For parents</div><ul><li><a href="kids-family-events-boston/">Kids &amp; family events</a></li><li><a href="summer-camps/">Summer camps near Boston</a></li></ul></div>

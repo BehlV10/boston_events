@@ -5020,5 +5020,1226 @@
     "note": "Boston songwriters taking turns in the round, free at the Cantab.",
     "start_date": "2026-11-24",
     "expires": "2026-11-24"
+  },
+  {
+    "id": "2026-11-23-trellis-lighting-at-christopher-columbus",
+    "match": {
+      "name_contains": "Trellis Lighting at Christopher Columbus",
+      "venue_contains": "Columbus Park"
+    },
+    "badge": "\ud83c\udf84 Free Lighting",
+    "note": "The waterfront park's trellis lights up for the season. Free, with the City of Boston.",
+    "start_date": "2026-11-23",
+    "expires": "2026-11-23"
+  },
+  {
+    "id": "2026-11-23-doja-cat",
+    "match": {
+      "name_contains": "Doja Cat",
+      "venue_contains": "TD Garden"
+    },
+    "badge": "\ud83c\udfa4 Arena Show",
+    "note": "Doja Cat brings the Tour Ma Vie world tour to the Garden.",
+    "start_date": "2026-11-23",
+    "expires": "2026-11-23"
+  },
+  {
+    "id": "2026-11-23-cecil-mcbee-and-joe-morris",
+    "match": {
+      "name_contains": "Cecil McBee and Joe Morris",
+      "venue_contains": "Conservatory"
+    },
+    "badge": "\ud83c\udfb7 Free Jazz",
+    "note": "Free NEC night of student bands coached by bass legend Cecil McBee and guitarist Joe Morris.",
+    "start_date": "2026-11-23",
+    "expires": "2026-11-23"
+  },
+  {
+    "id": "2026-11-23-berklee-symphonic-winds",
+    "match": {
+      "name_contains": "Berklee Symphonic Winds",
+      "venue_contains": "Berklee Performance Center"
+    },
+    "badge": "\ud83c\udfba Free Concert",
+    "note": "Berklee's wind ensemble plays its free fall concert.",
+    "start_date": "2026-11-23",
+    "expires": "2026-11-23"
+  },
+  {
+    "id": "2026-11-23-sina-bathaie",
+    "match": {
+      "name_contains": "Sina Bathaie",
+      "venue_contains": "Armory"
+    },
+    "badge": "\ud83c\udfb6 World Music",
+    "note": "Santur player Sina Bathaie's meditative Persian-rooted music on his White Lotus tour.",
+    "start_date": "2026-11-23",
+    "expires": "2026-11-23"
+  },
+  {
+    "id": "2026-11-23-sam-reid",
+    "match": {
+      "name_contains": "Sam Reid",
+      "venue_contains": "Remnant Satellite"
+    },
+    "badge": "\ud83e\ude95 Bluegrass",
+    "note": "Monday bluegrass night at Remnant Satellite.",
+    "start_date": "2026-11-23",
+    "expires": "2026-11-23"
+  },
+  {
+    "id": "2026-11-23-alice-miranda-ollstein",
+    "match": {
+      "name_contains": "Alice Miranda Ollstein",
+      "venue_contains": "Harvard Book Store"
+    },
+    "badge": "\ud83d\udcda Author Talk",
+    "note": "Free talk with Politico reporter Alice Miranda Ollstein.",
+    "start_date": "2026-11-23",
+    "expires": "2026-11-23"
+  },
+  {
+    "id": "2026-11-23-kassidy-collins",
+    "match": {
+      "name_contains": "Kassidy Collins",
+      "venue_contains": "Snowport"
+    },
+    "badge": "\ud83c\udf84 Free Set",
+    "note": "A free set from a rising Boston artist on the stage above Snowport's holiday market.",
+    "start_date": "2026-11-23",
+    "expires": "2026-11-23"
+  },
+  {
+    "id": "2026-11-23-irish-session",
+    "match": {
+      "name_contains": "Irish Session",
+      "venue_contains": "Burren \u2014 The Front Room"
+    },
+    "badge": "\u2618\ufe0f Free Session",
+    "note": "Free Monday Irish session in the Burren's front room with Helena Delaney, Tommy Sheridan and Terry O'Shea.",
+    "start_date": "2026-11-23",
+    "expires": "2026-11-30"
+  },
+  {
+    "id": "2026-11-24-father-of-peace",
+    "match": {
+      "name_contains": "Father Of Peace",
+      "venue_contains": "Sinclair"
+    },
+    "badge": "\ud83c\udfb8 Indie Pick",
+    "note": "Indie band started in 2023 by childhood best friends Avshalom Ariel and Tom Bollig.",
+    "start_date": "2026-11-24",
+    "expires": "2026-11-24"
+  },
+  {
+    "id": "2026-11-24-red-mcadam",
+    "match": {
+      "name_contains": "Red McAdam",
+      "venue_contains": "Passim"
+    },
+    "badge": "\ud83e\ude95 Folk Pick",
+    "note": "Folk songwriter Red McAdam at Passim, with The Talking Hearts Trio opening.",
+    "start_date": "2026-11-24",
+    "expires": "2026-11-24"
+  },
+  {
+    "id": "2026-11-24-jazz-combos-fall-concert",
+    "match": {
+      "name_contains": "Jazz Combos Fall Concert",
+      "venue_contains": "MIT"
+    },
+    "badge": "\ud83c\udfb7 Free Jazz",
+    "note": "MIT's student jazz combos open their season. Free.",
+    "start_date": "2026-11-24",
+    "expires": "2026-11-24"
+  },
+  {
+    "id": "2026-11-24-bluesy-tuesy",
+    "match": {
+      "name_contains": "Bluesy Tuesy",
+      "venue_contains": "NESFA"
+    },
+    "badge": "\ud83d\udc83 Blues Dance",
+    "note": "Blues dance lesson, then a social. Good first night out for beginners.",
+    "start_date": "2026-11-24",
+    "expires": "2026-11-24"
+  },
+  {
+    "id": "2026-11-24-haitian-folkloric-dance",
+    "match": {
+      "name_contains": "Haitian Folkloric Dance",
+      "venue_contains": "Jean Appolon"
+    },
+    "badge": "\ud83e\udd41 Dance Class",
+    "note": "Haitian folkloric dance class at Jean Appolon Expressions.",
+    "start_date": "2026-11-24",
+    "expires": "2026-11-24"
+  },
+  {
+    "id": "2026-11-24-strummerville-ukulele-club",
+    "match": {
+      "name_contains": "Strummerville Ukulele Club",
+      "venue_contains": "Armory"
+    },
+    "badge": "\ud83c\udfb6 Strum Along",
+    "note": "Bring a uke and sing along. All levels welcome.",
+    "start_date": "2026-11-24",
+    "expires": "2026-11-24"
+  },
+  {
+    "id": "2026-11-24-voices-unheard",
+    "match": {
+      "name_contains": "Voices Unheard",
+      "venue_contains": "Rockwell"
+    },
+    "badge": "\ud83c\udf99\ufe0f Showcase",
+    "note": "Back for a seventh year, giving the mic to voices from the margins.",
+    "start_date": "2026-11-24",
+    "expires": "2026-11-24"
+  },
+  {
+    "id": "2026-11-24-super-pop-party",
+    "match": {
+      "name_contains": "Super Pop Party",
+      "venue_contains": "Middle East"
+    },
+    "badge": "\ud83e\udea9 Pop Night",
+    "note": "Pop dance party upstairs at the Middle East.",
+    "start_date": "2026-11-24",
+    "expires": "2026-11-24"
+  },
+  {
+    "id": "2026-11-24-manga-book-club",
+    "match": {
+      "name_contains": "Manga Book Club",
+      "venue_contains": "Comicazi"
+    },
+    "badge": "\ud83d\udcda Free Club",
+    "note": "Free manga book club at Davis Square's comic shop.",
+    "start_date": "2026-11-24",
+    "expires": "2026-11-24"
+  },
+  {
+    "id": "2026-11-25-tyla",
+    "match": {
+      "name_contains": "TYLA",
+      "venue_contains": "MGM Music Hall"
+    },
+    "badge": "\ud83c\udfa4 Pop Pick",
+    "note": "South African pop star Tyla, of \"Water\", on her A*POP world tour.",
+    "start_date": "2026-11-25",
+    "expires": "2026-11-25"
+  },
+  {
+    "id": "2026-11-25-vintage-culture",
+    "match": {
+      "name_contains": "Vintage Culture",
+      "venue_contains": "Royale"
+    },
+    "badge": "\ud83e\udea9 House Pick",
+    "note": "Brazilian house star Vintage Culture on Thanksgiving Eve.",
+    "start_date": "2026-11-25",
+    "expires": "2026-11-25"
+  },
+  {
+    "id": "2026-11-25-rozzi",
+    "match": {
+      "name_contains": "Rozzi",
+      "venue_contains": "City Winery"
+    },
+    "badge": "\ud83c\udfa4 Soul Pop",
+    "note": "Soul-pop singer Rozzi on her Good News tour.",
+    "start_date": "2026-11-25",
+    "expires": "2026-11-25"
+  },
+  {
+    "id": "2026-11-25-doughboys",
+    "match": {
+      "name_contains": "Doughboys",
+      "venue_contains": "Wilbur"
+    },
+    "badge": "\ud83c\udf99\ufe0f Live Podcast",
+    "note": "Mike Mitchell and Nick Wiger's chain-restaurant review podcast, live.",
+    "start_date": "2026-11-25",
+    "expires": "2026-11-25"
+  },
+  {
+    "id": "2026-11-25-winnipeg-jets-at-boston-bruins",
+    "match": {
+      "name_contains": "Winnipeg Jets at Boston Bruins",
+      "venue_contains": "TD Garden"
+    },
+    "badge": "\ud83c\udfd2 Bruins",
+    "note": "The Bruins host the Jets on Thanksgiving Eve.",
+    "start_date": "2026-11-25",
+    "expires": "2026-11-25"
+  },
+  {
+    "id": "2026-11-25-spellbound-1945",
+    "match": {
+      "name_contains": "Spellbound (1945)",
+      "venue_contains": "Coolidge"
+    },
+    "badge": "\ud83c\udfac Hitchcock",
+    "note": "Hitchcock's 1945 thriller with Ingrid Bergman, Gregory Peck and a Dal\u00ed dream sequence.",
+    "start_date": "2026-11-25",
+    "expires": "2026-11-25"
+  },
+  {
+    "id": "2026-11-25-burbs",
+    "match": {
+      "name_contains": "Burbs",
+      "venue_contains": "Brattle"
+    },
+    "badge": "\ud83c\udfac Cult Comedy",
+    "note": "Joe Dante's 1989 comedy of suburban paranoia, with Tom Hanks.",
+    "start_date": "2026-11-25",
+    "expires": "2026-11-26"
+  },
+  {
+    "id": "2026-11-25-ghostwoman",
+    "match": {
+      "name_contains": "GHOSTWOMAN",
+      "venue_contains": "Rockwell"
+    },
+    "badge": "\ud83c\udfb8 Psych Rock",
+    "note": "Hypnotic psych-rock duo Evan Uschenko and Ille van Dessel.",
+    "start_date": "2026-11-25",
+    "expires": "2026-11-25"
+  },
+  {
+    "id": "2026-11-25-hot-start",
+    "match": {
+      "name_contains": "Hot Start",
+      "venue_contains": "Burren"
+    },
+    "badge": "\ud83c\udfb8 Local Indie",
+    "note": "Up-and-coming Boston indie rock band in the Burren's back room.",
+    "start_date": "2026-11-25",
+    "expires": "2026-11-25"
+  },
+  {
+    "id": "2026-11-25-dennis-brennan-band",
+    "match": {
+      "name_contains": "Dennis Brennan Band",
+      "venue_contains": "Lizard Lounge"
+    },
+    "badge": "\ud83c\udfb8 Roots Rock",
+    "note": "Boston roots-rock veteran Dennis Brennan's Thanksgiving Eve shows, early and late.",
+    "start_date": "2026-11-25",
+    "expires": "2026-11-25"
+  },
+  {
+    "id": "2026-11-25-jason-myles-goss",
+    "match": {
+      "name_contains": "Jason Myles Goss",
+      "venue_contains": "Passim"
+    },
+    "badge": "\ud83e\ude95 Songwriter",
+    "note": "Singer-songwriter Jason Myles Goss at Passim.",
+    "start_date": "2026-11-25",
+    "expires": "2026-11-25"
+  },
+  {
+    "id": "2026-11-25-thanksgiving-eve-dance-party",
+    "match": {
+      "name_contains": "Thanksgiving Eve Dance Party",
+      "venue_contains": "Club Caf"
+    },
+    "badge": "\ud83e\udea9 Free Dance Party",
+    "note": "Free Thanksgiving Eve dance party at Club Caf\u00e9.",
+    "start_date": "2026-11-25",
+    "expires": "2026-11-25"
+  },
+  {
+    "id": "2026-11-25-soundz-of-now",
+    "match": {
+      "name_contains": "Soundz of Now",
+      "venue_contains": "Wally"
+    },
+    "badge": "\ud83c\udfb7 Free Jazz",
+    "note": "Free late-night jazz at Wally's, the South End club that's been open since 1947.",
+    "start_date": "2026-11-25",
+    "expires": "2026-11-25"
+  },
+  {
+    "id": "2026-11-25-live-band-line-dancing",
+    "match": {
+      "name_contains": "Live Band Line Dancing",
+      "venue_contains": "Loretta"
+    },
+    "badge": "\ud83e\udd20 Free Line Dancing",
+    "note": "Free line dancing to a live band.",
+    "start_date": "2026-11-25",
+    "expires": "2026-11-25"
+  },
+  {
+    "id": "2026-11-25-drag-bingo",
+    "match": {
+      "name_contains": "Drag Bingo",
+      "venue_contains": "Vera"
+    },
+    "badge": "\ud83d\udc51 Drag Bingo",
+    "note": "Free drag bingo in Union Square.",
+    "start_date": "2026-11-25",
+    "expires": "2026-11-25"
+  },
+  {
+    "id": "2026-11-25-konpa-on-blast",
+    "match": {
+      "name_contains": "Konpa on blast",
+      "venue_contains": "Sinclair"
+    },
+    "badge": "\ud83e\udd41 Konpa Night",
+    "note": "Haitian konpa dance night at The Sinclair.",
+    "start_date": "2026-11-25",
+    "expires": "2026-11-25"
+  },
+  {
+    "id": "2026-11-25-free-circuit-hacking-night",
+    "match": {
+      "name_contains": "Free Circuit Hacking Night",
+      "venue_contains": "Artisans Asylum"
+    },
+    "badge": "\ud83d\udd27 Free Maker Night",
+    "note": "Free night of soldering and electronics at the Allston makerspace. Bring a project or start one.",
+    "start_date": "2026-11-25",
+    "expires": "2026-11-25"
+  },
+  {
+    "id": "2026-11-26-the-maltese-falcon",
+    "match": {
+      "name_contains": "The Maltese Falcon",
+      "venue_contains": "Brattle"
+    },
+    "badge": "\ud83c\udfac Noir",
+    "note": "Bogart is Sam Spade in John Huston's 1941 noir.",
+    "start_date": "2026-11-26",
+    "expires": "2026-11-26"
+  },
+  {
+    "id": "2026-11-26-elements-boston-drum-bass",
+    "match": {
+      "name_contains": "elements: Boston Drum & Bass",
+      "venue_contains": "Phoenix Landing"
+    },
+    "badge": "\ud83c\udfa7 DnB Weekly",
+    "note": "Boston's longest-running weekly drum & bass night, going since 1999.",
+    "start_date": "2026-11-26",
+    "expires": "2026-11-26"
+  },
+  {
+    "id": "2026-11-26-chiefs-v-bills",
+    "match": {
+      "name_contains": "Chiefs v Bills",
+      "venue_contains": "Anchor"
+    },
+    "badge": "\ud83c\udfc8 Watch Party",
+    "note": "Thanksgiving night football at The Anchor.",
+    "start_date": "2026-11-26",
+    "expires": "2026-11-26"
+  },
+  {
+    "id": "2026-11-26-benjamin-kassner-quintet",
+    "match": {
+      "name_contains": "Benjamin Kassner Quintet",
+      "venue_contains": "Wally"
+    },
+    "badge": "\ud83c\udfb7 Free Jazz",
+    "note": "Free jazz at Wally's on Thanksgiving night.",
+    "start_date": "2026-11-26",
+    "expires": "2026-11-26"
+  },
+  {
+    "id": "2026-11-26-throwback-arcade-night",
+    "match": {
+      "name_contains": "Throwback Arcade Night",
+      "venue_contains": "Tuck's Arcadium"
+    },
+    "badge": "\ud83d\udd79\ufe0f Retro Arcade",
+    "note": "Free-entry 90s and Y2K arcade bar in Harvard Square: 30+ classic games and pinball.",
+    "start_date": "2026-11-26",
+    "expires": "2026-11-26"
+  },
+  {
+    "id": "2026-11-26-irish-session-with-elias-cardoso",
+    "match": {
+      "name_contains": "Irish Session with Elias Cardoso",
+      "venue_contains": "McCarthy"
+    },
+    "badge": "\u2618\ufe0f Free Session",
+    "note": "Free Irish session at McCarthy's session table.",
+    "start_date": "2026-11-26",
+    "expires": "2026-11-26"
+  },
+  {
+    "id": "2026-11-26-bluegrass-roots-night",
+    "match": {
+      "name_contains": "Bluegrass & Roots Night",
+      "venue_contains": "Redbones"
+    },
+    "badge": "\ud83e\ude95 Free Bluegrass",
+    "note": "Free bluegrass and roots night under Redbones.",
+    "start_date": "2026-11-26",
+    "expires": "2026-11-26"
+  },
+  {
+    "id": "2026-11-26-traditional-irish-music-session",
+    "match": {
+      "name_contains": "Traditional Irish Music Session",
+      "venue_contains": "Druid"
+    },
+    "badge": "\u2618\ufe0f Free Session",
+    "note": "Free Irish session at The Druid in Inman Square.",
+    "start_date": "2026-11-26",
+    "expires": "2026-11-26"
+  },
+  {
+    "id": "2026-11-26-bachata-thursdays",
+    "match": {
+      "name_contains": "Bachata Thursdays",
+      "venue_contains": "Havana Club"
+    },
+    "badge": "\ud83d\udc83 Bachata",
+    "note": "Thursday bachata social in Central Square.",
+    "start_date": "2026-11-26",
+    "expires": "2026-11-26"
+  },
+  {
+    "id": "2026-11-26-jazz-night-long-live-roxbury",
+    "match": {
+      "name_contains": "Jazz Night @ Long Live Roxbury",
+      "venue_contains": "Long Live Roxbury"
+    },
+    "badge": "\ud83c\udfb7 Free Jazz",
+    "note": "Free jazz night at Long Live Roxbury.",
+    "start_date": "2026-11-26",
+    "expires": "2026-11-26"
+  },
+  {
+    "id": "2026-11-26-casey-s-run",
+    "match": {
+      "name_contains": "Casey's Run",
+      "venue_contains": "Casey"
+    },
+    "badge": "\ud83c\udfc3 Free Run",
+    "note": "Free 4-mile group run with the Somerville Road Runners. Earn the pie.",
+    "start_date": "2026-11-26",
+    "expires": "2026-11-26"
+  },
+  {
+    "id": "2026-11-26-line-dancing-at-the-harp",
+    "match": {
+      "name_contains": "Line Dancing at The Harp",
+      "venue_contains": "Harp"
+    },
+    "badge": "\ud83e\udd20 Free Line Dancing",
+    "note": "Free line dancing at The Harp near North Station.",
+    "start_date": "2026-11-26",
+    "expires": "2026-11-26"
+  },
+  {
+    "id": "2026-11-27-handel-s-messiah",
+    "match": {
+      "name_contains": "Handel's Messiah",
+      "venue_contains": "Symphony Hall"
+    },
+    "badge": "\ud83c\udfbc Holiday Classic",
+    "note": "The Handel and Haydn Society's yearly Messiah, led by conductor laureate Harry Christophers.",
+    "start_date": "2026-11-27",
+    "expires": "2026-11-29"
+  },
+  {
+    "id": "2026-11-27-chris-botti",
+    "match": {
+      "name_contains": "Chris Botti",
+      "venue_contains": "Wilbur"
+    },
+    "badge": "\ud83c\udfba Jazz Pick",
+    "note": "Grammy-winning trumpeter Chris Botti at the Wilbur.",
+    "start_date": "2026-11-27",
+    "expires": "2026-11-28"
+  },
+  {
+    "id": "2026-11-27-the-hotelier",
+    "match": {
+      "name_contains": "The Hotelier",
+      "venue_contains": "Paradise"
+    },
+    "badge": "\ud83c\udfb8 Emo Pick",
+    "note": "Worcester emo favorites The Hotelier, of \"Home, Like Noplace Is There\".",
+    "start_date": "2026-11-27",
+    "expires": "2026-11-27"
+  },
+  {
+    "id": "2026-11-27-ian-lara",
+    "match": {
+      "name_contains": "Ian Lara",
+      "venue_contains": "Laugh Boston"
+    },
+    "badge": "\ud83d\ude02 Comedy Pick",
+    "note": "Rising New York comic Ian Lara, known for his Comedy Central Stand-Up Featuring set.",
+    "start_date": "2026-11-27",
+    "expires": "2026-11-27"
+  },
+  {
+    "id": "2026-11-27-atlanta-hawks-at-boston-celtics",
+    "match": {
+      "name_contains": "Atlanta Hawks at Boston Celtics",
+      "venue_contains": "TD Garden"
+    },
+    "badge": "\ud83c\udfc0 Celtics",
+    "note": "The Celtics host the Hawks the night after Thanksgiving.",
+    "start_date": "2026-11-27",
+    "expires": "2026-11-27"
+  },
+  {
+    "id": "2026-11-27-dinty-child-mark-erelli",
+    "match": {
+      "name_contains": "Dinty Child & Mark Erelli",
+      "venue_contains": "Passim"
+    },
+    "badge": "\ud83e\ude95 Folk Pick",
+    "note": "Two New England folk favorites share the Passim stage.",
+    "start_date": "2026-11-27",
+    "expires": "2026-11-27"
+  },
+  {
+    "id": "2026-11-27-last-waltz-50th",
+    "match": {
+      "name_contains": "Last Waltz 50th",
+      "venue_contains": "Lizard Lounge"
+    },
+    "badge": "\ud83e\ude95 Bluegrass Tribute",
+    "note": "A bluegrass take on The Band's Last Waltz, 50 years after the Thanksgiving 1976 original.",
+    "start_date": "2026-11-27",
+    "expires": "2026-11-27"
+  },
+  {
+    "id": "2026-11-27-the-glitter-boys",
+    "match": {
+      "name_contains": "The Glitter Boys",
+      "venue_contains": "Sinclair"
+    },
+    "badge": "\ud83e\udea9 Disco Night",
+    "note": "All-vinyl DJ crew The Glitter Boys' dance party.",
+    "start_date": "2026-11-27",
+    "expires": "2026-11-27"
+  },
+  {
+    "id": "2026-11-27-alice-howe-freebo",
+    "match": {
+      "name_contains": "Alice Howe & Freebo",
+      "venue_contains": "Burren"
+    },
+    "badge": "\ud83c\udfb8 Songwriters",
+    "note": "Songwriter Alice Howe with Freebo, longtime bassist for Bonnie Raitt.",
+    "start_date": "2026-11-27",
+    "expires": "2026-11-27"
+  },
+  {
+    "id": "2026-11-27-faced-shakespeare-romeo",
+    "match": {
+      "name_contains": "Faced Shakespeare: Romeo",
+      "venue_contains": "Rockwell"
+    },
+    "badge": "\ud83c\udfad Theater Pick",
+    "note": "Romeo & Juliet played straight, except one actor is genuinely drunk.",
+    "start_date": "2026-11-27",
+    "expires": "2026-11-28"
+  },
+  {
+    "id": "2026-11-27-rinse-repeat-2-year-anniversary",
+    "match": {
+      "name_contains": "Rinse & Repeat 2 Year Anniversary",
+      "venue_contains": "ZuZu"
+    },
+    "badge": "\ud83c\udfa7 Free Party",
+    "note": "Free house party for the Rinse & Repeat crew's second birthday at ZuZu.",
+    "start_date": "2026-11-27",
+    "expires": "2026-11-27"
+  },
+  {
+    "id": "2026-11-27-all-black-luxury",
+    "match": {
+      "name_contains": "All Black Luxury",
+      "venue_contains": "Royale"
+    },
+    "badge": "\ud83c\udfb6 Live Music",
+    "note": "Dress-in-black night of live music with Vayb, Rutshelle, Jim Rama & Patrick Andrey.",
+    "start_date": "2026-11-27",
+    "expires": "2026-11-27"
+  },
+  {
+    "id": "2026-11-27-the-reckoning-crew",
+    "match": {
+      "name_contains": "The Reckoning Crew",
+      "venue_contains": "Midway"
+    },
+    "badge": "\ud83c\udf39 Dead Night",
+    "note": "Grateful Dead music in JP. $10, cash only.",
+    "start_date": "2026-11-27",
+    "expires": "2026-11-27"
+  },
+  {
+    "id": "2026-11-27-luke-curran-the-steel-dust-revival",
+    "match": {
+      "name_contains": "Luke Curran & The Steel Dust Revival",
+      "venue_contains": "Off the Rails"
+    },
+    "badge": "\ud83e\udd20 Free Country",
+    "note": "Free live country at Off the Rails.",
+    "start_date": "2026-11-27",
+    "expires": "2026-11-27"
+  },
+  {
+    "id": "2026-11-27-jeff-jam-singalong",
+    "match": {
+      "name_contains": "Jeff Jam Singalong",
+      "venue_contains": "PlayUnion"
+    },
+    "badge": "\ud83e\uddd2 Kids Singalong",
+    "note": "Morning singalong for little kids in Somerville.",
+    "start_date": "2026-11-27",
+    "expires": "2026-11-27"
+  },
+  {
+    "id": "2026-11-27-the-glass-key",
+    "match": {
+      "name_contains": "The Glass Key",
+      "venue_contains": "Brattle"
+    },
+    "badge": "\ud83c\udfac Noir",
+    "note": "Alan Ladd and Veronica Lake in Dashiell Hammett's 1942 political noir.",
+    "start_date": "2026-11-27",
+    "expires": "2026-11-27"
+  },
+  {
+    "id": "2026-11-28-bonobo",
+    "match": {
+      "name_contains": "Bonobo",
+      "venue_contains": "House of Blues"
+    },
+    "badge": "\ud83c\udfa7 Electronic Pick",
+    "note": "Simon Green's Bonobo brings the Distance in Static live show.",
+    "start_date": "2026-11-28",
+    "expires": "2026-11-28"
+  },
+  {
+    "id": "2026-11-28-fountains-of-rome",
+    "match": {
+      "name_contains": "Fountains of Rome",
+      "venue_contains": "Symphony Hall"
+    },
+    "badge": "\ud83c\udfbc BSO",
+    "note": "Jean-Yves Thibaudet plays Gershwin with the BSO, conducted by Kazuki Yamada.",
+    "start_date": "2026-11-28",
+    "expires": "2026-11-28"
+  },
+  {
+    "id": "2026-11-28-peter-wolf",
+    "match": {
+      "name_contains": "Peter Wolf",
+      "venue_contains": "Shubert"
+    },
+    "badge": "\ud83c\udfb8 Hometown Hero",
+    "note": "Former J. Geils Band frontman Peter Wolf plays his hometown.",
+    "start_date": "2026-11-28",
+    "expires": "2026-11-28"
+  },
+  {
+    "id": "2026-11-28-jinkx-dela-holiday-show",
+    "match": {
+      "name_contains": "Jinkx & DeLa Holiday Show",
+      "venue_contains": "Wang"
+    },
+    "badge": "\ud83d\udc51 Drag Holiday",
+    "note": "Drag stars Jinkx Monsoon and BenDeLaCreme's campy holiday show.",
+    "start_date": "2026-11-28",
+    "expires": "2026-11-28"
+  },
+  {
+    "id": "2026-11-28-token",
+    "match": {
+      "name_contains": "Token",
+      "venue_contains": "Brighton Music Hall"
+    },
+    "badge": "\ud83c\udfa4 Hip-Hop Pick",
+    "note": "Massachusetts-born rapper Token on his I'm Leaving Soon tour.",
+    "start_date": "2026-11-28",
+    "expires": "2026-11-28"
+  },
+  {
+    "id": "2026-11-28-duke-v-uconn",
+    "match": {
+      "name_contains": "Duke v. UConn",
+      "venue_contains": "TD Garden"
+    },
+    "badge": "\ud83c\udfc0 College Hoops",
+    "note": "Women's college basketball heavyweights Duke and UConn meet at the Garden.",
+    "start_date": "2026-11-28",
+    "expires": "2026-11-28"
+  },
+  {
+    "id": "2026-11-28-janet-mcnamara",
+    "match": {
+      "name_contains": "Janet McNamara",
+      "venue_contains": "Laugh Boston"
+    },
+    "badge": "\ud83d\ude02 Comedy Pick",
+    "note": "Boston-bred comic and Comedy Cellar regular Janet McNamara.",
+    "start_date": "2026-11-28",
+    "expires": "2026-11-28"
+  },
+  {
+    "id": "2026-11-28-club-d",
+    "match": {
+      "name_contains": "Club d",
+      "venue_contains": "Lizard Lounge"
+    },
+    "badge": "\ud83c\udfb6 Groove Pick",
+    "note": "Mike Rivard's genre-blending groove collective, with Rob Compa and Vicente Lebron. Early and late shows.",
+    "start_date": "2026-11-28",
+    "expires": "2026-11-28"
+  },
+  {
+    "id": "2026-11-28-say-darling",
+    "match": {
+      "name_contains": "Say Darling",
+      "venue_contains": "Burren"
+    },
+    "badge": "\ud83c\udfb8 Local Pick",
+    "note": "Boston band Say Darling's yearly Thanksgiving-weekend show.",
+    "start_date": "2026-11-28",
+    "expires": "2026-11-28"
+  },
+  {
+    "id": "2026-11-28-lighting-of-the-ship",
+    "match": {
+      "name_contains": "Lighting of the Ship",
+      "venue_contains": "Martin"
+    },
+    "badge": "\ud83c\udf84 Free Lighting",
+    "note": "Free: the ship at Martin's Park gets its holiday lights.",
+    "start_date": "2026-11-28",
+    "expires": "2026-11-28"
+  },
+  {
+    "id": "2026-11-28-charles-hotel-harvard-square-annual-tree",
+    "match": {
+      "name_contains": "Charles Hotel Harvard Square Annual Tree Lighting",
+      "venue_contains": "Charles Hotel"
+    },
+    "badge": "\ud83c\udf84 Free Lighting",
+    "note": "Free tree lighting in Harvard Square.",
+    "start_date": "2026-11-28",
+    "expires": "2026-11-28"
+  },
+  {
+    "id": "2026-11-28-small-business-saturday",
+    "match": {
+      "name_contains": "Small Business Saturday",
+      "venue_contains": "Bow Market"
+    },
+    "badge": "\ud83d\udecd\ufe0f Shop Local",
+    "note": "Small Business Saturday at Union Square's courtyard of tiny shops and makers.",
+    "start_date": "2026-11-28",
+    "expires": "2026-11-28"
+  },
+  {
+    "id": "2026-11-28-mizik-mizik-40th-anniversary",
+    "match": {
+      "name_contains": "Mizik Mizik 40th Anniversary",
+      "venue_contains": "Royale"
+    },
+    "badge": "\ud83e\udd41 Konpa Pick",
+    "note": "Haitian band Mizik Mizik marks 40 years, with Zafem.",
+    "start_date": "2026-11-28",
+    "expires": "2026-11-28"
+  },
+  {
+    "id": "2026-11-28-vudu-sister",
+    "match": {
+      "name_contains": "Vudu Sister",
+      "venue_contains": "Underbones"
+    },
+    "badge": "\ud83c\udfbb Dark Folk",
+    "note": "ONCE and Somergloom's bill of dark folk with Vudu Sister.",
+    "start_date": "2026-11-28",
+    "expires": "2026-11-28"
+  },
+  {
+    "id": "2026-11-28-super-smash-bros-tournament",
+    "match": {
+      "name_contains": "Super Smash Bros. Tournament",
+      "venue_contains": "Roxy"
+    },
+    "badge": "\ud83c\udfae Free Tournament",
+    "note": "Free monthly Smash tournament with the Boston Gaymers.",
+    "start_date": "2026-11-28",
+    "expires": "2026-11-28"
+  },
+  {
+    "id": "2026-11-28-a-band-of-brothers",
+    "match": {
+      "name_contains": "A Band Of Brothers",
+      "venue_contains": "Sinclair"
+    },
+    "badge": "\ud83c\udfb8 Tribute",
+    "note": "All-star tribute to the Allman Brothers Band.",
+    "start_date": "2026-11-28",
+    "expires": "2026-11-28"
+  },
+  {
+    "id": "2026-11-28-city-of-four",
+    "match": {
+      "name_contains": "City of Four",
+      "venue_contains": "Cantab Underground"
+    },
+    "badge": "\ud83c\udfb7 Jazz Fusion",
+    "note": "Groove-based jazz fusion from City of Four, with Quantum Moon.",
+    "start_date": "2026-11-28",
+    "expires": "2026-11-28"
+  },
+  {
+    "id": "2026-11-28-murder-my-sweet",
+    "match": {
+      "name_contains": "Murder, My Sweet",
+      "venue_contains": "Brattle"
+    },
+    "badge": "\ud83c\udfac Noir",
+    "note": "Dick Powell plays Philip Marlowe in the 1944 noir.",
+    "start_date": "2026-11-28",
+    "expires": "2026-11-28"
+  },
+  {
+    "id": "2026-11-29-underoath",
+    "match": {
+      "name_contains": "Underoath",
+      "venue_contains": "MGM Music Hall"
+    },
+    "badge": "\ud83c\udfb8 Anniversary Tour",
+    "note": "Underoath marks 20 years of Define the Great Line.",
+    "start_date": "2026-11-29",
+    "expires": "2026-11-29"
+  },
+  {
+    "id": "2026-11-29-santa-on-the-common",
+    "match": {
+      "name_contains": "Santa on the Common",
+      "venue_contains": "Boston Common"
+    },
+    "badge": "\ud83c\udf85 Free Family",
+    "note": "Free visit with Santa on Boston Common.",
+    "start_date": "2026-11-29",
+    "expires": "2026-11-29"
+  },
+  {
+    "id": "2026-11-29-sowa-vintage-market",
+    "match": {
+      "name_contains": "SoWa Vintage Market",
+      "venue_contains": "SoWa"
+    },
+    "badge": "\ud83d\udecd\ufe0f Vintage",
+    "note": "The South End's Sunday vintage market.",
+    "start_date": "2026-11-29",
+    "expires": "2026-11-29"
+  },
+  {
+    "id": "2026-11-29-boston-women-s-holiday-market",
+    "match": {
+      "name_contains": "Boston Women's Holiday Market",
+      "venue_contains": "Armory"
+    },
+    "badge": "\ud83d\udecd\ufe0f Holiday Market",
+    "note": "Two floors of women-owned makers at the Armory, the day after Small Business Saturday.",
+    "start_date": "2026-11-29",
+    "expires": "2026-11-29"
+  },
+  {
+    "id": "2026-11-29-boston-japan-film-festival",
+    "match": {
+      "name_contains": "Boston Japan Film Festival",
+      "venue_contains": "MIT"
+    },
+    "badge": "\ud83c\udfac Free Festival",
+    "note": "Free Japanese film festival at MIT, themed around space.",
+    "start_date": "2026-11-29",
+    "expires": "2026-11-29"
+  },
+  {
+    "id": "2026-11-29-the-long-goodbye",
+    "match": {
+      "name_contains": "The Long Goodbye",
+      "venue_contains": "Brattle"
+    },
+    "badge": "\ud83c\udfac Noir",
+    "note": "Altman's shaggy 1973 Marlowe with Elliott Gould.",
+    "start_date": "2026-11-29",
+    "expires": "2026-11-29"
+  },
+  {
+    "id": "2026-11-29-sunday-jazz-brunch",
+    "match": {
+      "name_contains": "Sunday Jazz Brunch",
+      "venue_contains": "Lou"
+    },
+    "badge": "\ud83c\udfb7 Jazz Brunch",
+    "note": "Free live jazz with brunch in Harvard Square.",
+    "start_date": "2026-11-29",
+    "expires": "2026-11-29"
+  },
+  {
+    "id": "2026-11-29-beantown-buckaroos",
+    "match": {
+      "name_contains": "Beantown Buckaroos",
+      "venue_contains": "Burren"
+    },
+    "badge": "\ud83e\udd20 Honky Tonk",
+    "note": "Western swing and Cajun dance party with The Beantown Buckaroos.",
+    "start_date": "2026-11-29",
+    "expires": "2026-11-29"
+  },
+  {
+    "id": "2026-11-29-doprah",
+    "match": {
+      "name_contains": "Doprah",
+      "venue_contains": "Rockwell"
+    },
+    "badge": "\ud83d\udc8b Burlesque",
+    "note": "Angry Banana Burlesque's two-act variety show, Oprah's Favorite Things-style.",
+    "start_date": "2026-11-29",
+    "expires": "2026-11-29"
+  },
+  {
+    "id": "2026-11-29-mor-ve-tesi",
+    "match": {
+      "name_contains": "mor ve \u00f6tesi",
+      "venue_contains": "Crystal Ballroom"
+    },
+    "badge": "\ud83c\udfb8 Turkish Rock",
+    "note": "Turkish rock giants mor ve \u00f6tesi.",
+    "start_date": "2026-11-29",
+    "expires": "2026-11-29"
+  },
+  {
+    "id": "2026-11-29-fandango",
+    "match": {
+      "name_contains": "Fandango",
+      "venue_contains": "Toad"
+    },
+    "badge": "\ud83c\udfb6 Free Matinee",
+    "note": "Free Sunday-afternoon soul, funk and swing at Toad.",
+    "start_date": "2026-11-29",
+    "expires": "2026-11-29"
+  },
+  {
+    "id": "2026-11-29-once-upon-a-time",
+    "match": {
+      "name_contains": "ONCE Upon a Time",
+      "venue_contains": "Underbones"
+    },
+    "badge": "\ud83c\udfb6 Free New Music",
+    "note": "Free weekly new-music matinee. This week: Devin Music, Crushdepth, Tiberius.",
+    "start_date": "2026-11-29",
+    "expires": "2026-11-29"
+  },
+  {
+    "id": "2026-11-29-lizard-lounge-poetry-jam",
+    "match": {
+      "name_contains": "Lizard Lounge Poetry Jam",
+      "venue_contains": "Lizard Lounge"
+    },
+    "badge": "\ud83d\udcdc Poetry Jam",
+    "note": "Cambridge's long-running Sunday poetry jam.",
+    "start_date": "2026-11-29",
+    "expires": "2026-11-29"
+  },
+  {
+    "id": "2026-11-29-a-night-of-jazz-with-tiniqua",
+    "match": {
+      "name_contains": "A Night of Jazz with Tiniqua",
+      "venue_contains": "Eitz Chayim"
+    },
+    "badge": "\ud83c\udfb7 Free Jazz",
+    "note": "Free jazz with singer Tiniqua.",
+    "start_date": "2026-11-29",
+    "expires": "2026-11-29"
+  },
+  {
+    "id": "2026-11-29-comedy-at-the-88-club",
+    "match": {
+      "name_contains": "Comedy at The 88 Club",
+      "venue_contains": "88 Club"
+    },
+    "badge": "\ud83d\ude02 Free Comedy",
+    "note": "Free Sunday comedy.",
+    "start_date": "2026-11-29",
+    "expires": "2026-11-29"
+  },
+  {
+    "id": "2026-11-29-sarah-potenza-christmas",
+    "match": {
+      "name_contains": "Sarah Potenza Christmas",
+      "venue_contains": "City Winery"
+    },
+    "badge": "\ud83c\udf84 Holiday Show",
+    "note": "Powerhouse singer and Voice alum Sarah Potenza's holiday show.",
+    "start_date": "2026-11-29",
+    "expires": "2026-11-29"
+  },
+  {
+    "id": "2026-11-30-copley-square-tree-lighting",
+    "match": {
+      "name_contains": "Copley Square Tree Lighting",
+      "venue_contains": "Boylston"
+    },
+    "badge": "\ud83c\udf84 Free Lighting",
+    "note": "Copley Square Park's grand reopening, plus the yearly tree lighting.",
+    "start_date": "2026-11-30",
+    "expires": "2026-11-30"
+  },
+  {
+    "id": "2026-11-30-temples",
+    "match": {
+      "name_contains": "Temples",
+      "venue_contains": "Sinclair"
+    },
+    "badge": "\ud83c\udfb8 Psych Pop",
+    "note": "UK psych-pop band Temples.",
+    "start_date": "2026-11-30",
+    "expires": "2026-11-30"
+  },
+  {
+    "id": "2026-11-30-jeremy-jordan",
+    "match": {
+      "name_contains": "Jeremy Jordan",
+      "venue_contains": "Emerson Colonial"
+    },
+    "badge": "\ud83c\udfad Broadway Star",
+    "note": "Broadway's Jeremy Jordan (Newsies, The Great Gatsby) in concert.",
+    "start_date": "2026-11-30",
+    "expires": "2026-11-30"
+  },
+  {
+    "id": "2026-11-30-man-of-iron",
+    "match": {
+      "name_contains": "Man of Iron",
+      "venue_contains": "Harvard Film Archive"
+    },
+    "badge": "\ud83c\udfac Film Pick",
+    "note": "Wajda's Palme d'Or-winning 1981 Solidarity drama, on film.",
+    "start_date": "2026-11-30",
+    "expires": "2026-11-30"
+  },
+  {
+    "id": "2026-11-30-ruth-ben-string-band",
+    "match": {
+      "name_contains": "Ruth & Ben String Band",
+      "venue_contains": "Passim"
+    },
+    "badge": "\ud83e\ude95 Album Release",
+    "note": "The Ruth & Ben String Band celebrates a new album.",
+    "start_date": "2026-11-30",
+    "expires": "2026-11-30"
+  },
+  {
+    "id": "2026-11-30-elan-mehler-trio",
+    "match": {
+      "name_contains": "Elan Mehler Trio",
+      "venue_contains": "Lilypad"
+    },
+    "badge": "\ud83c\udfb7 Jazz Pick",
+    "note": "Pianist Elan Mehler's trio at the Lilypad.",
+    "start_date": "2026-11-30",
+    "expires": "2026-11-30"
+  },
+  {
+    "id": "2026-11-30-superconductivity",
+    "match": {
+      "name_contains": "Superconductivity",
+      "venue_contains": "Seaport"
+    },
+    "badge": "\ud83e\uddea Lectures on Tap",
+    "note": "A science lecture in a bar: why superconductors are materials science's holy grail.",
+    "start_date": "2026-11-30",
+    "expires": "2026-11-30"
+  },
+  {
+    "id": "2026-11-30-ben-buchanan",
+    "match": {
+      "name_contains": "Ben Buchanan",
+      "venue_contains": "COOP"
+    },
+    "badge": "\ud83c\udf99\ufe0f Author Talk",
+    "note": "Former White House AI adviser Ben Buchanan on AI and democracy.",
+    "start_date": "2026-11-30",
+    "expires": "2026-11-30"
+  },
+  {
+    "id": "2026-11-30-stealing-saint-nick",
+    "match": {
+      "name_contains": "Stealing Saint Nick",
+      "venue_contains": "Booksmith"
+    },
+    "badge": "\ud83d\udcda Author Talk",
+    "note": "National Book Award winner M. T. Anderson talks Stealing Saint Nick.",
+    "start_date": "2026-11-30",
+    "expires": "2026-11-30"
+  },
+  {
+    "id": "2026-11-30-drag-trivia-hosted-by-missy-steak",
+    "match": {
+      "name_contains": "Drag Trivia Hosted by Missy Steak",
+      "venue_contains": "Roxy"
+    },
+    "badge": "\ud83d\udc51 Drag Trivia",
+    "note": "Free drag trivia with arcade games and grilled cheese.",
+    "start_date": "2026-11-30",
+    "expires": "2026-11-30"
+  },
+  {
+    "id": "2026-11-30-the-splinters",
+    "match": {
+      "name_contains": "The Splinters",
+      "venue_contains": "Remnant Satellite"
+    },
+    "badge": "\ud83e\ude95 Bluegrass",
+    "note": "Monday bluegrass night at Remnant Satellite.",
+    "start_date": "2026-11-30",
+    "expires": "2026-11-30"
+  },
+  {
+    "id": "2026-11-30-trad-dentata",
+    "match": {
+      "name_contains": "TRAD & DENTATA",
+      "venue_contains": "Rockwell"
+    },
+    "badge": "\ud83c\udfad Theater Pick",
+    "note": "A theatrical tear-down of tradwife culture.",
+    "start_date": "2026-11-30",
+    "expires": "2026-11-30"
+  },
+  {
+    "id": "2026-11-30-elise-roche",
+    "match": {
+      "name_contains": "Elise Roche",
+      "venue_contains": "Snowport"
+    },
+    "badge": "\ud83c\udf84 Free Set",
+    "note": "A free set from a rising Boston artist above Snowport's holiday market.",
+    "start_date": "2026-11-30",
+    "expires": "2026-11-30"
+  },
+  {
+    "id": "2026-11-30-sandro-galea",
+    "match": {
+      "name_contains": "Sandro Galea",
+      "venue_contains": "Harvard Book Store"
+    },
+    "badge": "\ud83d\udcda Author Talk",
+    "note": "Free talk with public health scholar Sandro Galea.",
+    "start_date": "2026-11-30",
+    "expires": "2026-11-30"
   }
 ]

@@ -300,6 +300,13 @@ def export_html(path="index.html", force=False, source_json="events.json"):
         except Exception as e:
             print(f"Warning: failed to write Reddit roundup pages: {e}")
 
+        # Public highlights page: the best few picks a day, up to three weeks out
+        try:
+            from highlights_page import write_highlights_page
+            write_highlights_page(base_dir, site_url)
+        except Exception as e:
+            print(f"Warning: failed to write highlights page: {e}")
+
         write_sitemap(os.path.join(base_dir, "sitemap.xml"), site_url)
 
         # Generate dynamic OpenGraph cards for programmatic landing pages
@@ -332,7 +339,7 @@ def write_sitemap(path, site_url=None):
     from template import HUBS
     base = (site_url or "https://www.wickedbostonevents.com").rstrip("/")
     today = datetime.now(timezone.utc).date().isoformat()
-    rows = [(f"{base}/", today)]
+    rows = [(f"{base}/", today), (f"{base}/boston-event-highlights/", today)]
     for slug in HUBS:
         # Event pages are rebuilt from fresh events daily; the camps guide changes when camps.json is rechecked
         mod = (_camps_checked_date() if slug == "summer-camps" else None) or today
