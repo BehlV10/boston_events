@@ -33,7 +33,9 @@ class SitemapTest(unittest.TestCase):
                 xml = f.read()
         rows = dict(re.findall(r"<loc>([^<]+)</loc>\s*<lastmod>([^<]+)</lastmod>", xml))
         base = "https://www.wickedbostonevents.com/"
-        self.assertEqual(set(rows), {base, f"{base}boston-event-highlights/"} | {f"{base}{slug}/" for slug in T.HUBS})
+        from guide_pages import guide_paths
+        self.assertEqual(set(rows), {base, f"{base}boston-event-highlights/"} | {f"{base}{slug}/" for slug in T.HUBS}
+                         | {f"{base}{p}" for p in guide_paths()})
         self.assertEqual(rows[f"{base}summer-camps/"], "2026-11-07")
         self.assertEqual(rows[f"{base}kids-family-events-boston/"], datetime.now(timezone.utc).date().isoformat())
         self.assertNotIn("roundup", xml)

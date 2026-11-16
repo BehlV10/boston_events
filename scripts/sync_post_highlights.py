@@ -123,18 +123,34 @@ def _key_words(text):
     return set(_fold(text).split()) - GENERIC
 
 
-def listing_cluster(day_events, e, title):
-    """The day's listings of the same show as `e`: within 90 minutes, carrying half or more of the pick's key words."""
+VENUE_GENERIC = {"the", "a", "of", "at", "and", "boston", "cambridge", "somerville", "club", "bar", "hall", "theatre",
+                 "theater", "cafe", "center", "music", "live", "room", "main", "stage", "pub", "brewing"}
+
+
+def _venue_words(x):
+    return set(_fold(f"{x.get('venue') or ''} {x.get('_source_venue') or ''}").split()) - VENUE_GENERIC
+
+
+def listing_cluster(day_events, e, title, venue=""):
+    """The day's listings of the same show as `e`: within 90 minutes, carrying half or more of the
+    pick's key words (see below), and at the same venue (or listed with no venue at the same start time)."""
     t0 = _with_time(e).get("_time")
     words = _key_words(title) & _key_words(e.get("name")) or _key_words(e.get("name"))
+    vwords = (set(_fold(venue).split()) - VENUE_GENERIC) | _venue_words(e)
     out = []
     for x in day_events:
         t = _with_time(x).get("_time")
         if not (t0 and t and abs((t - t0).total_seconds()) <= 90 * 60):
             continue
-        if words and len(words & _key_words(x.get("name"))) / len(words) >= 0.5:
+        xw = _key_words(x.get("name"))
+        # one title's key words inside the other's ("Pouya" / "Pouya - The Foreverglades Tour"),
+        # not just one shared word ("Fresh Goofs" / "Certified Fresh" at the same club)
+        if not (words and xw and (words <= xw or xw <= words or len(words & xw) / len(words | xw) >= 0.6)):
+            continue
+        xv = _venue_words(x)
+        if (xv & vwords) or (not (x.get("venue") or "").strip() and t == t0):
             out.append(x)
-    return out if e in out else out + [e]
+    return out if any(x is e for x in out) else out + [e]
 
 
 def match_name(cluster, e, title):
@@ -154,6 +170,29 @@ def _with_time(e):
         return e
 
 
+def _matches(m, x, d):
+    h = {"match": m, "start_date": d.isoformat(), "expires": d.isoformat()}
+    return bool(_get_event_highlight(_with_time(dict(x, venue=x.get("venue") or x.get("_source_venue"))), [h]))
+
+
+def safe_match(day_events, cluster, e, name, venue, d):
+    """A highlights.json match that hits this show's listings and nothing else that day. A short
+    shared name ("magic" from "Orlando Magic at Boston Celtics") can also hit "Sweet Magic" at a
+    library; then fall back to the listing's full name, then add the venue."""
+    ids = {id(x) for x in cluster}
+    full = re.sub(r"\s+", " ", e["name"]).strip().lower()
+    tries = []
+    for nm in (name, full):
+        tries.append({"name_contains": nm})
+        if venue:
+            tries.append({"name_contains": nm, "venue_contains": venue})
+    for m in tries:
+        hits = [x for x in day_events if _matches(m, x, d)]
+        if any(id(x) == id(e) for x in hits) and all(id(x) in ids for x in hits):
+            return m
+    return {"name_contains": full, "venue_contains": venue} if venue else {"name_contains": full}
+
+
 def sync(post_text, year, highlights, by_day):
     """Returns (new_entries, already, missing)."""
     new, already, missing = [], [], []
@@ -167,7 +206,7 @@ def sync(post_text, year, highlights, by_day):
         if _get_event_highlight(ev, highlights + new):
             already.append((d, title))
             continue
-        cluster = listing_cluster(by_day.get(d, []), e, title)
+        cluster = listing_cluster(by_day.get(d, []), e, title, venue)
         name = match_name(cluster, e, title)
         v_low = venue.lower()
         slug = re.sub(r"[^a-z0-9]+", "-", _fold(title))[:40].strip("-")
@@ -176,9 +215,8 @@ def sync(post_text, year, highlights, by_day):
         while hid in taken:
             hid, n = f"{d.isoformat()}-{slug}-{n}", n + 1
         taken.add(hid)
-        match = {"name_contains": name}
-        if all(v_low in (x.get("venue") or x.get("_source_venue") or "").lower() for x in cluster):
-            match["venue_contains"] = venue  # keeps a short name ("sombr") off other events that day
+        same_venue = all(v_low in (x.get("venue") or x.get("_source_venue") or "").lower() for x in cluster)
+        match = safe_match(by_day.get(d, []), cluster, e, name, venue if same_venue else None, d)
         entry = {"id": hid, "match": match, "badge": "Editor's Pick"}
         if note:
             entry["note"] = note
