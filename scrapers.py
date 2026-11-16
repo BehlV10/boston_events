@@ -15629,13 +15629,31 @@ KID_FAMILY_EVENT_RE = re.compile(
 )
 
 
+# "Primary Ballet I (Ages 4-6)", "Ballet I/II (Ages 8+)", "Art Lab (Ages 6-12)", "Grades K-2": a class
+# or program for children, whatever the source filed it under. A range counts when it starts at 12
+# or under; an open-ended "N+" only when N is 10 or under ("Ages 13+" / "14+" classes run into adult levels).
+_KID_AGE_RANGE_RE = re.compile(r"(?i)\bages?\s*(\d{1,2})\s*(?:[-–—]|to)\s*\d{1,2}\b")
+_KID_AGE_PLUS_RE = re.compile(r"(?i)\bages?\s*(\d{1,2})\s*(?:\+|and up\b|& up\b)")
+_KID_GRADES_RE = re.compile(r"(?i)\bgrades?\s*(?:pre-?k|k|[1-5])\b")
+
+
+def _for_kids_by_age(name):
+    m = _KID_AGE_RANGE_RE.search(name)
+    if m and int(m.group(1)) <= 12:
+        return True
+    m = _KID_AGE_PLUS_RE.search(name)
+    if m and int(m.group(1)) <= 10:
+        return True
+    return bool(_KID_GRADES_RE.search(name))
+
+
 def is_kid_family_event(name, venue=None):
     """Return True if an event is meant for infants, toddlers, kids, or family storytimes."""
     if not name:
         return False
     if EXCLUDE_KID_FAMILY_RE.search(name):
         return False
-    return bool(KID_FAMILY_EVENT_RE.search(name))
+    return bool(KID_FAMILY_EVENT_RE.search(name)) or _for_kids_by_age(name)
 
 
 _WEAK_CLUBBING_KEYWORDS = {"party", "parties", "bash"}
