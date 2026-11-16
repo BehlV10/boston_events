@@ -331,11 +331,15 @@ def roundup_days(mode, start=None):
     return [mon + timedelta(days=i) for i in range(5)]  # Mon, Tue, Wed, Thu, Fri
 
 
-def build_roundup(mode="weekday", start=None, city=None):
+def build_roundup(mode="weekday", start=None, city=None, days=None, picks_only=False):
     """(title, markdown body) for the weekday (Mon–Fri) or weekend (Fri–Sun) post; with `city`
-    ("cambridge"/"somerville"), a post of that city's events only."""
+    ("cambridge"/"somerville"), a post of that city's events only.
+
+    mode="range" with `days` (a list of dates) and picks_only=True is the highlights page: each
+    day filled to CITY_CAPS on score (Sat/Sun scored as weekend days); returns
+    {"days": {date: {city: [events]}}, "runs": {highlight id: [events]}, "boilerplate": set}."""
     weekend = mode == "weekend"
-    weekdays = roundup_days(mode, start)
+    weekdays = list(days) if days else roundup_days(mode, start)
     mon = weekdays[0]
     highlights = _load_highlights()
 
@@ -441,15 +445,16 @@ def build_roundup(mode="weekday", start=None, city=None):
         if _time(e):
             s += 10
         # Deprioritize aggregator duplicates or missing times
+        wk = weekend or (mode == "range" and e["_time"].weekday() >= 5)
         if not _time(e):
             s -= 15
         # Weekday post is for after work: daytime talks/matinees only fill gaps.
         # On weekends daytime is prime time; only very early listings sink.
-        elif not weekend and e["_time"].hour < 17:
+        elif not wk and e["_time"].hour < 17:
             s -= 60
-        elif weekend and e["_time"].hour < 9:
+        elif wk and e["_time"].hour < 9:
             s -= 30
-        elif weekend and e["_time"].hour >= 17:
+        elif wk and e["_time"].hour >= 17:
             s += 10  # the night out is the main event
         src = (e.get("_source_venue") or "").lower()
         if src in ("ticketmaster", "seatgeek", "eventschaser"):
@@ -546,7 +551,7 @@ def build_roundup(mode="weekday", start=None, city=None):
                 return any(_similar_titles(e["name"], p["name"]) for p in day_picked)
 
             def _room_for(e):
-                if weekend or city:  # fill to the cap on score, but not with filler
+                if weekend or city or mode == "range":  # fill to the cap on score, but not with filler
                     return len(day_picked) < cap and (len(day_picked) < SURE_PICKS or score(e) >= MIN_SCORE)
                 return len(day_picked) < BASE_PICKS or (len(day_picked) < cap and e.get("_highlight"))
 
@@ -607,6 +612,8 @@ def build_roundup(mode="weekday", start=None, city=None):
             if dd:
                 desc_names[dd].add(frozenset(_title_words(x["name"])))
     boilerplate = frozenset(dd for dd, names in desc_names.items() if len(names) > 1)
+    if picks_only:
+        return {"days": picked_by_day_city, "runs": dict(runs), "boilerplate": boilerplate}
 
     def _render(caps):
         # Format Markdown

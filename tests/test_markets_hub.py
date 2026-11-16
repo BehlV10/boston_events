@@ -184,8 +184,8 @@ class DailyAndHours(unittest.TestCase):
 class HeaderBar(unittest.TestCase):
     def test_guide_pages_link_only_finished_pages(self):
         nav = template._main_hub_nav("boston")
-        self.assertEqual(nav.count("<a "), 6)
-        for href in ("../", "../kids-family-events-boston/", "../summer-camps/", "../markets-festivals-boston/", "../college/", "../boston-edm/"):
+        self.assertEqual(nav.count("<a "), 7)
+        for href in ("../", "../boston-event-highlights/", "../kids-family-events-boston/", "../summer-camps/", "../markets-festivals-boston/", "../college/", "../boston-edm/"):
             self.assertIn(f'href="{href}"', nav)
         html = template.render_hub_page("markets-festivals-boston", [], site_url="https://example.com")
         self.assertIn('<a href="../markets-festivals-boston/" class="active">Markets &amp; Festivals</a>', html)
