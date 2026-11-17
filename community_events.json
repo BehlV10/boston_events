@@ -4,34 +4,6 @@
     "category": "art",
     "city": "boston",
     "address": "539 Tremont St, Boston, MA 02116",
-    "url": "https://bostonarts.my.salesforce-sites.com/ticket/#/events/a0SPk00000GDGIfMAP",
-    "_is_community": true,
-    "_source_venue": "Community Submission",
-    "submitted_at": "2026-11-09T17:30:00+00:00",
-    "name": "Boston Art Book Fair Preview Party + Sojourn Dance Party",
-    "date": "2026-11-13T19:00:00-05:00",
-    "price": null,
-    "description": "Opening night of the Boston Art Book Fair and launch of Boston Art Review Issue 17: food, drinks, live performances, screen printing, and a late-night dance party with Sojourn. 7 PM\u20131 AM (exhibitors open 7\u201310 PM). Ticketed."
-  },
-  {
-    "name": "Diwali at Don't Tell Aunty with DJ Ravlor",
-    "venue": "Don't Tell Aunty",
-    "date": "2026-11-13T22:00:00-05:00",
-    "url": "https://flite.city/e/diwali-at-don-t-tell-aunty-with-dj-ravlor",
-    "category": "clubbing",
-    "price": "$23",
-    "city": "boston",
-    "address": "1080 Boylston St, Boston, MA 02115",
-    "description": "One last Diwali party with DJ Ravlor, presented by Bollywood In Boston. Traditional wear highly recommended. Doors 10 PM, 21+ with valid ID, no refunds. VIP tables: 480-371-7787.",
-    "_is_community": true,
-    "_source_venue": "Community Submission",
-    "submitted_at": "2026-11-13T19:32:18.005945+00:00"
-  },
-  {
-    "venue": "The BCA Cyclorama",
-    "category": "art",
-    "city": "boston",
-    "address": "539 Tremont St, Boston, MA 02116",
     "url": "https://bostonarts.org/event/boston-art-book-fair-2026/",
     "_is_community": true,
     "_source_venue": "Community Submission",
@@ -82,5 +54,19 @@
     "_is_community": true,
     "_source_venue": "Community Submission",
     "submitted_at": "2026-11-16T19:03:39.646430+00:00"
+  },
+  {
+    "name": "Contact High Album Release Celebration!",
+    "venue": "The Rockwell",
+    "date": "2026-12-02T20:00:00-05:00",
+    "url": "https://therockwell.org/calendar/hooly-j-chan/",
+    "category": "music",
+    "price": "$15-$20",
+    "city": "somerville",
+    "address": "255 Elm St, Somerville, MA 02144",
+    "description": "Album release celebration featuring Hooly J Chan & Band with giant paper mache puppetry from The Wicked Queer Puppet Theater, opening act Jessye DeSilva.",
+    "_is_community": true,
+    "_source_venue": "Community Submission",
+    "submitted_at": "2026-11-17T16:43:48.429608+00:00"
   }
 ]
