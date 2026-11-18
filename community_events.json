@@ -9,23 +9,23 @@
     "_source_venue": "Community Submission",
     "submitted_at": "2026-11-09T17:30:00+00:00",
     "name": "Boston Art Book Fair 2026",
-    "date": "2026-11-14T12:00:00-05:00",
-    "price": "Free",
-    "description": "Artist books, zines, catalogs, comics and printed matter from local, national and international publishers. Open to the public 12\u20136 PM, free admission."
-  },
-  {
-    "venue": "The BCA Cyclorama",
-    "category": "art",
-    "city": "boston",
-    "address": "539 Tremont St, Boston, MA 02116",
-    "url": "https://bostonarts.org/event/boston-art-book-fair-2026/",
-    "_is_community": true,
-    "_source_venue": "Community Submission",
-    "submitted_at": "2026-11-09T17:30:00+00:00",
-    "name": "Boston Art Book Fair 2026",
     "date": "2026-11-15T12:00:00-05:00",
     "price": "Free",
     "description": "Artist books, zines, catalogs, comics and printed matter from local, national and international publishers. Open to the public 12\u20135 PM, free admission."
+  },
+  {
+    "name": "Ireland vs South Africa: Rugby & Charity Raffle for FamilyAid",
+    "venue": "An Sibin",
+    "date": "2026-11-21T11:30:00-05:00",
+    "url": "https://www.givengain.com/project/jack-raising-funds-for-familyaid-boston-136213",
+    "category": "community",
+    "price": "Free",
+    "city": "cambridge",
+    "address": "1193 Cambridge Street, Cambridge, MA 02139",
+    "description": "Watch Ireland vs South Africa at An Sibin in Inman Square and support FamilyAid Boston. Free entry, full Irish breakfast available, $1 per pint donated, and a raffle with 18+ local prizes. Kickoff 11:40 AM. Doors 11:30 AM to 2:00 PM. Organizer: Jack Rowland.",
+    "_is_community": true,
+    "_source_venue": "Community Submission",
+    "submitted_at": "2026-11-18T02:59:14.298175+00:00"
   },
   {
     "name": "Brave Rave",
