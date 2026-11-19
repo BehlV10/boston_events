@@ -1235,12 +1235,19 @@ def _is_edm_event(e):
     return False
 
 
+# Goth page: genre words in the title or description, plus the area's recurring goth nights by
+# name (titles start with them; "Synapse" or "Crypt" alone mean nothing elsewhere). Not every
+# ManRay night: Clown Town, Daddy-O and Automatique are other scenes.
 _GOTH_RE = re.compile(
-    r"\b(?:goth|gothic|industrial|darkwave|coldwave|ebm|post[- ]?punk|synthpop|new wave|"
-    r"crypt|xmortis|fetish|dark rave|witch house|deathrock|minimal synth|karaoke noir|"
-    r"heroes\b.*manray|manray|chamber:\s*goth)\b",
+    r"\b(?:goth|gothic|goth-folk|darkwave|coldwave|ebm|post[- ]?punk|deathrock|dark rave|witch house|"
+    r"minimal synth|horrorpunk|batcave|goth/industrial|industrial (?:night|dance|music|club))\b",
     re.IGNORECASE,
 )
+_GOTH_NIGHTS_RE = re.compile(
+    r"(?i)^(?:crypt\b|xmortis|elysium|synapse|chamber:|the portal|fantasy factory|karaoke noir|"
+    r"mourning night|dark meet|haint presents|hellbound|carnivore carnival|nokturnal|darq\b|resurrection:)"
+)
+_GOTH_CATS = {"music", "clubbing", "dance", "community", "other", "markets"}
 _GOTH_EXCLUDE_RE = re.compile(
     r"\b(?:sawstop|table saw|woodworking|cabinet saw|industrial design|industrial arts|"
     r"remembrance ceremony|graduation|award ceremony|tea ceremony|citizenship|"
@@ -1248,35 +1255,31 @@ _GOTH_EXCLUDE_RE = re.compile(
     re.IGNORECASE,
 )
 _JAZZ_RE = re.compile(
-    r"\b(?:jazz|blues|bebop|big band|swing band|ragtime|gypsy jazz|bossa nova|"
-    r"wally'?s|scullers|regattabar|mad monkfish|beehive)\b",
+    r"\b(?:jazz|blues|bebop|big band|swing band|ragtime|gypsy jazz|bossa nova)\b",
     re.IGNORECASE,
 )
 _FILM_RE = re.compile(
-    r"\b(?:35mm|70mm|film festival|movie screening|cinema|film screening|short films?|"
-    r"brattle theat|coolidge corner|harvard film archive|silent film)\b",
+    r"\b(?:35mm|70mm|film festival|movie screening|film screening|short films?|silent film)\b",
     re.IGNORECASE,
 )
 _DANCE_RE = re.compile(
     r"\b(?:salsa|bachata|swing danc|lindy hop|contra danc|west coast swing|westie|"
-    r"tango|kizomba|zouk|ballroom|line danc|havana club|social danc|ceili|ceilidh|"
+    r"tango|kizomba|zouk|ballroom danc|line danc|social danc|ceili|ceilidh|"
     r"square danc|scottish country danc|folk danc)\b",
     re.IGNORECASE,
 )
 _BOOK_RE = re.compile(
     r"\b(?:author talk|book launch|book signing|book club|book reading|poetry reading|"
-    r"harvard book store|porter square books|brookline booksmith|trident booksellers|"
-    r"lovestruck books|all she wrote books|literary|storyteller|storytelling)\b",
+    r"literary|storyteller|storytelling|in conversation with)\b",
     re.IGNORECASE,
 )
 _CLASSICAL_RE = re.compile(
-    r"\b(?:symphony|orchestra|philharmonic|chamber music|string quartet|recital|"
-    r"concerto|sonata|choral|choir|opera|baroque|early music|jordan hall|"
-    r"new england conservatory|longy school)\b",
+    r"\b(?:symphon(?:y|ies|ic)|orchestras?|philharmonic|chamber music|string quartet|recital|"
+    r"concerto|sonata|choral|choir|opera|baroque|early music)\b",
     re.IGNORECASE,
 )
 _METAL_RE = re.compile(
-    r"\b(?:metal|punk|hardcore|doom|thrash|deathcore|shoegaze|emo night|post[- ]?hardcore|"
+    r"\b(?:metal|punk|hardcore|doom metal|thrash|deathcore|shoegaze|emo night|post[- ]?hardcore|"
     r"sludge|grindcore|screamo|black metal|death metal|heavy metal|pop[- ]?punk|ska[- ]?punk|"
     r"crust punk|noise rock|stoner rock)\b",
     re.IGNORECASE,
@@ -1291,7 +1294,7 @@ _CRAFTS_RE = re.compile(
     r"printmaking|glassblowing|stained glass|paint\s*(?:&|and)\s*sip|watercolor|"
     r"weaving|woodworking|bookbinding|craft night|craft nite|craft workshop|"
     r"maker workshop|quilting|macrame|calligraphy|linocut|terracotta|clay table|"
-    r"gather here|artisans asylum|origami|wreath making|candle making|soap making|"
+    r"origami|wreath making|candle making|soap making|"
     r"flower arranging|terrarium|floral workshop)\b",
     re.IGNORECASE,
 )
@@ -1312,48 +1315,71 @@ _LATIN_RE = re.compile(
 )
 
 
-def _event_blob(e):
-    return f"{e.get('title') or e.get('name') or ''} {e.get('venue') or ''} {e.get('_source_venue') or ''} {e.get('desc') or e.get('description') or ''}"
+_JAZZ_VENUES = ("wally's", "wallys", "scullers", "regattabar", "mad monkfish", "beehive", "lilypad")
+_FILM_VENUES = ("brattle", "coolidge corner theatre", "harvard film archive", "somerville theatre", "kendall square cinema")
+_BOOKSTORES = ("harvard book store", "porter square books", "brookline booksmith", "trident booksellers",
+               "lovestruck books", "all she wrote books")
 
 
 def _matches_niche(niche, e):
+    """Title, category and genre decide; a venue counts only where it's all about the niche
+    (Wally's for jazz), never because its name has a keyword ("Crystal Ballroom", "Opera House")."""
     cat = _effective_category(e).lower()
     genre = e.get("music_genre") or e.get("genre") or ""
-    blob = _event_blob(e)
-    title_venue = f"{e.get('title') or e.get('name') or ''} {e.get('venue') or ''} {e.get('_source_venue') or ''}"
+    title = e.get("title") or e.get("name") or ""
+    venue = f"{e.get('venue') or ''} {e.get('_source_venue') or ''}".lower()
+    kids = cat in ("kids", "family")
 
     if niche == "goth":
-        if _GOTH_EXCLUDE_RE.search(blob):
+        if cat not in _GOTH_CATS:
             return False
-        if "manray" in (e.get("venue") or "").lower() or "manray" in (e.get("_source_venue") or "").lower():
-            return True
-        return bool(_GOTH_RE.search(title_venue))
+        desc = e.get("desc") or e.get("description") or ""
+        if _GOTH_EXCLUDE_RE.search(f"{title} {desc}") or re.search(r"(?i)\b(?:tribute|britpop)\b", title):
+            return False
+        return bool(_GOTH_NIGHTS_RE.search(title.strip()) or _GOTH_RE.search(title) or _GOTH_RE.search(desc))
     if niche == "lgbtq":
         return bool(is_lgbtq_event(e))
     if niche == "jazz":
-        return genre == "jazz_blues" or bool(_JAZZ_RE.search(title_venue))
-    if niche == "film":
-        return cat == "film" or bool(_FILM_RE.search(title_venue))
-    if niche == "theater":
-        return cat == "theater"
-    if niche == "dance":
-        return cat == "dance" or bool(_DANCE_RE.search(title_venue))
-    if niche == "book":
-        return cat == "books" or bool(_BOOK_RE.search(title_venue))
-    if niche == "classical":
-        return genre == "classical" or cat == "classical" or bool(_CLASSICAL_RE.search(title_venue))
-    if niche == "metal":
-        if _METAL_EXCLUDE_RE.search(blob):
+        if kids or cat in ("dance", "services") or re.search(r"(?i)\b(?:candlelight|open mic)\b", title):
             return False
-        return bool(_METAL_RE.search(blob))
+        if cat in ("music", "clubbing") and any(v in venue for v in _JAZZ_VENUES):
+            return True
+        return bool(_JAZZ_RE.search(title)) or (genre == "jazz_blues" and cat in ("music", "clubbing"))
+    if niche == "film":
+        if kids:
+            return False
+        return (cat == "film" and any(v in venue for v in _FILM_VENUES + ("cinema", "film", "theatre", "theater"))) \
+            or bool(_FILM_RE.search(title))
+    if niche == "theater":
+        return cat in ("theater", "stage")
+    if niche == "dance":
+        if kids:
+            return False
+        return (cat == "dance" and not re.search(r"(?i)\bnutcracker\b", title)) or bool(_DANCE_RE.search(title))
+    if niche == "book":
+        if re.search(r"(?i)\b(?:trivia|speed[- ]?dating|anniversary party|grades?\s*\d|ages\s*\d|children|kids|elementary|teens?)\b", title):
+            return False
+        return cat == "books" or bool(_BOOK_RE.search(title)) or (cat in ("talks", "community") and any(b in venue for b in _BOOKSTORES))
+    if niche == "classical":
+        if kids or cat in ("theater", "stage", "comedy", "talks", "dance", "film") or re.search(r"(?i)\bjazz\b", title):
+            return False
+        return genre == "classical" or cat == "classical" or bool(_CLASSICAL_RE.search(title))
+    if niche == "metal":
+        if kids or cat not in ("music", "clubbing") or _METAL_EXCLUDE_RE.search(title):
+            return False
+        if re.search(r"(?i)\b(?:broadway|tribute|drag|britpop|new wave)\b", title):
+            return False
+        return bool(_METAL_RE.search(title))
     if niche == "crafts":
-        return bool(_CRAFTS_RE.search(title_venue))
+        return bool(_CRAFTS_RE.search(title)) or (cat in ("services", "art", "arts") and any(v in venue for v in ("gather here", "artisans asylum", "artisan's asylum")))
     if niche == "karaoke":
-        return bool(_KARAOKE_RE.search(title_venue))
+        return not kids and bool(_KARAOKE_RE.search(title))
     if niche == "fitness":
-        return cat == "outdoors" or bool(_FITNESS_RE.search(title_venue))
+        if kids or re.search(r"(?i)\b(?:meeting|committee|carousel)\b", title):
+            return False
+        return cat in ("outdoors", "fitness") or bool(_FITNESS_RE.search(title))
     if niche == "latin":
-        return bool(_LATIN_RE.search(title_venue))
+        return cat in ("music", "clubbing", "dance") and bool(_LATIN_RE.search(f"{title} {venue}"))
     return False
 
 
