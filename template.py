@@ -8784,7 +8784,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
         recur_flag = "hourly" if is_hourly else ("weekly" if recurring else "once")
         recur_badge = '<span class="recur">↻ hourly</span>' if is_hourly else ('<span class="recur">↻ weekly</span>' if recurring else "")
         alts = e.get("_alt_sources") or []
-        alt_html = ""
+        alt_html = also_listed_html = ""
         if alts:
             alt_parts, other_titles = [], []
             for a in alts:
@@ -8804,7 +8804,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
                 alt_joined = " · ".join(alt_parts)
                 alt_html = f'<span class="alt-sources">also on {alt_joined}</span>'
             if other_titles:
-                alt_html += f'<span class="also-listed">Also listed: {" · ".join(other_titles)}</span>'
+                also_listed_html = f'<span class="also-listed">Also listed: {" · ".join(other_titles)}</span>'
 
         compare_html = _build_compare_links(e, raw_title)
 
@@ -8861,12 +8861,12 @@ def render_page(results, weather=None, luckyseat_shows=None):
         else:
             venue_html = ""
 
-        extra_tags = []
-        if alt_html:
-            extra_tags.append(alt_html)
+        # "also on" carries its own " · " so hiding it on phones takes the dot with it
+        extra_html = f'<span class="also-on"> · {alt_html}</span>' if alt_html else ""
+        if also_listed_html:
+            extra_html += also_listed_html if alt_html else f" · {also_listed_html}"
         if compare_html:
-            extra_tags.append(compare_html)
-        extra_html = (" · " + " · ".join(extra_tags)) if extra_tags else ""
+            extra_html += f" · {compare_html}"
 
         cal_html = '<span class="cal-links"><button type="button" class="cal-btn gcal-btn" title="Add to Google Calendar">+ GCal</button> <button type="button" class="cal-btn ics-btn" title="Download .ics">+ .ics</button></span>' if e.get("date") else ""
         star_btn = '<button type="button" class="star-btn" title="Add to My Schedule" aria-label="Add to My Schedule">☆</button>'
@@ -9465,6 +9465,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
     line-height: 1.05;
     text-shadow: 0 2px 20px rgba(0,0,0,0.6);
   }}
+  .banner-title .banner-home {{ color: inherit; text-decoration: none; }}
   .banner-tagline {{
     display: block;
     margin-top: 6px;
@@ -10316,7 +10317,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
   /* Phones: just title, price, time and venue. The "Why we recommend" note stays; the
      scraped description and "(via source)" are clutter on a small screen. */
   @media (max-width: 640px) {{
-    .event .desc, .event .venue-via {{ display: none; }}
+    .event .desc, .event .venue-via, .event .also-on {{ display: none; }}
   }}
   .bucket.empty {{ display: none; }}
 
@@ -12889,7 +12890,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
         </div>
       </div>
       <div class="banner-title-row">
-        <h1 class="banner-title">Wicked Boston Events<span class="banner-tagline">Things to do in Boston, Cambridge &amp; Somerville this week</span></h1>
+        <h1 class="banner-title"><a href="/" class="banner-home" title="Back to all events">Wicked Boston Events</a><span class="banner-tagline">Things to do in Boston, Cambridge &amp; Somerville this week</span></h1>
       </div>
       {holiday_greetings}
       <div class="banner-meta-pill">
@@ -15572,6 +15573,12 @@ def render_page(results, weather=None, luckyseat_shows=None):
       try {{ localStorage.removeItem('boston_saved_venues'); }} catch (_) {{}}
       apply();
     }}
+
+    // The title goes to "/" with no #filters; also forget the saved venue picks so it really is the default view
+    const bannerHome = document.querySelector('.banner-home');
+    if (bannerHome) bannerHome.addEventListener('click', () => {{
+      try {{ localStorage.removeItem('boston_saved_venues'); }} catch (_) {{}}
+    }});
 
     const btnResetFilters = document.getElementById('btn-reset-filters');
     if (btnResetFilters) btnResetFilters.addEventListener('click', resetAllFilters);
