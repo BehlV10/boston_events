@@ -7561,9 +7561,20 @@ def _normalize_title_head(title, venue=None):
     return t
 
 
+_RESALE_RE = re.compile(r"(?i)\b(seatgeek|stubhub|vividseats|vivid seats|tickpick|gametime)\b")
+
+
+def _is_resale_link(a):
+    """A resale marketplace listing; not worth an "also on" link next to the real seller."""
+    return bool(_RESALE_RE.search(a.get("venue") or "") or _RESALE_RE.search(a.get("url") or ""))
+
+
 def _source_priority(s):
     s = (s or "").lower()
-    if s in ("ticketmaster", "seatgeek") or s.startswith("eventbrite"):
+    # SeatGeek resells tickets: any other listing (Ticketmaster, AXS, the venue) is the better link
+    if s == "seatgeek":
+        return 0
+    if s == "ticketmaster" or s.startswith("eventbrite"):
         return 1
     if s in ("the boston calendar", "do617", "boston shows", "little muse", "resident advisor boston"):
         return 5
@@ -8713,7 +8724,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
         if alts:
             alt_parts, other_titles = [], []
             for a in alts:
-                if not a.get("url"):
+                if not a.get("url") or _is_resale_link(a):
                     continue
                 v_name = escape(a.get("venue") or "source")
                 a_price = f" ({escape(a['price'])})" if a.get("price") and a["price"] != e.get("price") else ""
