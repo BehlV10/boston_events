@@ -119,6 +119,20 @@ class MainPageUXTest(unittest.TestCase):
         self.assertGreater(map_pos, pin_pos)
         self.assertLess(map_pos - pin_pos, 400)
 
+    def test_timeframe_popover_full_width_and_mobile_single_row(self):
+        self.assertNotIn("max-width: 360px;", self.html)
+        self.assertIn(".timeframe-popover {", self.html)
+        popover_css = self.html[self.html.index(".timeframe-popover {"):self.html.index(".timeframe-popover {") + 260]
+        self.assertIn("width: 100%;", popover_css)
+        self.assertIn("box-sizing: border-box;", popover_css)
+        self.assertIn("padding: 4px 7px;", self.html)
+
+    def test_cities_and_genres_collapsible_on_click(self):
+        self.assertIn(".city-section.collapsed > .buckets { display: none; }", self.html)
+        self.assertIn(".bucket.collapsed > ul { display: none; }", self.html)
+        self.assertIn("ev.target.closest('.city-head')", self.html)
+        self.assertIn("ev.target.closest('.bucket-head')", self.html)
+
 
 if __name__ == "__main__":
     unittest.main()
