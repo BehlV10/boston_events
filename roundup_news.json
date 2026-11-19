@@ -1,6 +1,15 @@
 {
   "_about": "What's new on the site, shown at the top of the Reddit roundups for a week after `date`. Newest first; links are Markdown; optional `label` shows in bold before the text.",
   "items": [
+    {"date": "2026-11-19", "label": "Simple view", "text": "A new button above the list trims every event down to time, title and venue for quick scanning"},
+    {"date": "2026-11-19", "label": "Time windows", "text": "Only free after 8? The new \"time window\" button next to \"pick date\" shows just the hours you want"},
+    {"date": "2026-11-19", "label": "Collapsible sections", "text": "Tap any city or category heading to collapse it and skip past it"},
+    {"date": "2026-11-19", "label": "On your phone", "text": "Event cards are simpler on phones: just the title, time, price, venue and why we recommend it"},
+    {"date": "2026-11-19", "label": "Daily picks", "text": "A [highlights page](https://www.wickedbostonevents.com/boston-event-highlights/) with the best picks for each day, up to 3 weeks out"},
+    {"date": "2026-11-19", "label": "New pages", "text": "[Goth, industrial & darkwave](https://www.wickedbostonevents.com/goth/), [LGBTQ+ & drag](https://www.wickedbostonevents.com/lgbtq/), [live jazz](https://www.wickedbostonevents.com/jazz/), [indie & repertory film](https://www.wickedbostonevents.com/film/), [social dance](https://www.wickedbostonevents.com/dance/), [Latin nightlife](https://www.wickedbostonevents.com/latin/), [karaoke & open mics](https://www.wickedbostonevents.com/karaoke/) and a few more. Still tuning these, so tell me what's missing"},
+    {"date": "2026-11-19", "label": "Better ticket links", "text": "Event links now prefer the venue or the original seller (Ticketmaster, AXS) over resale sites"},
+    {"date": "2026-11-19", "label": "New venues", "text": "The Footlight Club in JP, Pandemonium Books & Games, Don't Tell Aunty, and the Palladium and Hanover Theatre in Worcester"},
+    {"date": "2026-11-19", "label": "Small fixes", "text": "The venue list is alphabetical, Map sits next to Drop Pin, and clicking the site title resets all filters"},
     {"date": "2026-11-12", "label": "Winter Markets", "text": "New subpage for [Local Markets & Winter Festivals](https://www.wickedbostonevents.com/markets-festivals-boston/)"},
     {"date": "2026-11-12", "label": "EDM fans", "text": "Added a page for local [EDM/DJ shows in the Boston area](https://www.wickedbostonevents.com/boston-edm/)"},
     {"date": "2026-11-12", "label": "For parents", "text": "I added pages for [family events filterable by age](https://www.wickedbostonevents.com/kids-family-events-boston/) and [summer camp registration info and deadlines](https://www.wickedbostonevents.com/summer-camps/) per a few parents reaching out"},
