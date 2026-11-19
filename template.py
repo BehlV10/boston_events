@@ -8722,6 +8722,13 @@ def _merge_duplicates(events, word_freq=None):
                 if owner_date:
                     match["date"] = owner_date
 
+            # A date-only listing (Ticketmaster before the time is announced) takes the first real
+            # time a duplicate offers. SeatGeek's "-12-pm/" links are its own no-time default.
+            if (re.fullmatch(r"\d{4}-\d{2}-\d{2}", str(match.get("date") or ""))
+                    and "T" in str(e.get("date") or "") and e_time and not is_placeholder_url):
+                match["_time"] = e_time
+                match["date"] = e["date"]
+
             # The venue's own price beats a listings site's ("$5 + fee" from Club Café over "Free").
             if new_prio > cur_prio and e.get("price"):
                 match["price"] = e["price"]

@@ -7880,19 +7880,22 @@ def _ticketmaster_pages(key):
             break
 
 
+def _tm_time_unknown(start):
+    """Ticketmaster lists some events (BC football, Nov 2026) with a date but no start time yet.
+    We used to fill in 7pm, which then beat the team's own noon kickoff in the duplicate merge."""
+    return bool(start.get("localDate")) and (
+        not start.get("localTime") or bool(start.get("timeTBA")) or bool(start.get("noSpecificTime")))
+
+
 def scrape_ticketmaster(_url, _ua):
     key = os.environ.get("TICKETMASTER_API_KEY") or "oo1qd0wzLe7WJpm61ALQuUCTMXGK7U5z"
     events = []
     for ev in _ticketmaster_pages(key):
         start = ev.get("dates", {}).get("start", {})
         iso = start.get("dateTime")
-        if not iso and start.get("localDate"):
-            try:
-                iso = datetime.fromisoformat(f"{start['localDate']}T19:00:00").replace(
-                    tzinfo=EASTERN,
-                ).astimezone(timezone.utc).isoformat()
-            except ValueError:
-                iso = None
+        if _tm_time_unknown(start):
+            # Date only: the page shows "Time TBA" and the merge takes a duplicate's real time
+            iso = start["localDate"]
         venues = ev.get("_embedded", {}).get("venues") or []
         venue = venues[0]["name"] if venues and venues[0].get("name") else "Ticketmaster"
         loc = venues[0].get("location") if venues else {}
@@ -12206,8 +12209,10 @@ def scrape_ticketmaster_discovery(url, ua):
         if not name or is_placeholder_or_closed_event(name):
             continue
 
-        start_date = ev.get("dates", {}).get("start", {}).get("localDate")
-        start_time = ev.get("dates", {}).get("start", {}).get("localTime") or "19:00:00"
+        start = ev.get("dates", {}).get("start", {})
+        start_date = start.get("localDate")
+        time_unknown = _tm_time_unknown(start)
+        start_time = "00:00:00" if time_unknown else start["localTime"]
         if not start_date:
             continue
         try:
@@ -12254,7 +12259,7 @@ def scrape_ticketmaster_discovery(url, ua):
 
         events.append({
             "name": name,
-            "date": dt.astimezone(timezone.utc).isoformat(),
+            "date": start_date if time_unknown else dt.astimezone(timezone.utc).isoformat(),
             "url": link,
             "venue": vname,
             "price": price,
