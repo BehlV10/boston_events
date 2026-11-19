@@ -466,6 +466,82 @@ def resolve_subarea(city, event, geo=None):
         return ("Outer Suburbs", "suburbs_other")
 
 
+_SUBURB_TOWNS = (
+    "Acton", "Amesbury", "Amherst", "Andover", "Arlington", "Ashland", "Attleboro", "Auburndale",
+    "Bedford", "Belmont", "Beverly", "Billerica", "Boxborough", "Braintree", "Brockton", "Brookline",
+    "Burlington", "Canton", "Carlisle", "Chelmsford", "Chelsea", "Chestnut Hill", "Cohasset",
+    "Concord", "Danvers", "Dedham", "Dover", "Duxbury", "Easton", "Everett", "Fall River",
+    "Fitchburg", "Foxborough", "Framingham", "Franklin", "Gloucester", "Grafton", "Groton",
+    "Hanover", "Haverhill", "Hingham", "Holbrook", "Holliston", "Hopkinton", "Hudson", "Hull",
+    "Ipswich", "Lawrence", "Lexington", "Lincoln", "Littleton", "Lowell", "Lynn", "Lynnfield",
+    "Malden", "Manchester", "Mansfield", "Marblehead", "Marlborough", "Marshfield", "Maynard",
+    "Medfield", "Medford", "Medway", "Melrose", "Methuen", "Middleton", "Milford", "Millis",
+    "Milton", "Nahant", "Natick", "Needham", "New Bedford", "Newburyport", "Newton",
+    "Newton Centre", "Newtonville", "Norfolk", "North Andover", "North Attleboro",
+    "North Reading", "Northborough", "Norwell", "Norwood", "Peabody", "Pembroke", "Plymouth",
+    "Providence", "Quincy", "Randolph", "Reading", "Revere", "Rockland", "Rockport", "Salem",
+    "Saugus", "Scituate", "Sharon", "Sherborn", "Shrewsbury", "Southborough", "Stoneham",
+    "Stoughton", "Stow", "Sudbury", "Swampscott", "Taunton", "Tewksbury", "Topsfield",
+    "Wakefield", "Walpole", "Waltham", "Watertown", "Wayland", "Wellesley", "Wenham",
+    "West Newton", "Westborough", "Westford", "Weston", "Westwood", "Weymouth", "Whitman",
+    "Wilmington", "Winchester", "Winthrop", "Woburn", "Worcester", "Wrentham",
+)
+_SUBURB_TOWN_RE = re.compile(
+    r"\b(" + "|".join(re.escape(t) for t in sorted(_SUBURB_TOWNS, key=len, reverse=True)) + r")\b",
+    re.IGNORECASE,
+)
+_SUBURB_TOWN_CANON = {t.lower(): t for t in _SUBURB_TOWNS}
+_ADDR_CITY_STATE_RE = re.compile(
+    r",\s*([A-Za-z][A-Za-z .'-]{1,28}?)\s*,\s*(MA|NH|RI|CT|ME|VT)\b"
+)
+_GENERIC_NEIGH = {"", "greater boston", "outer suburbs", "boston", "cambridge", "somerville", "other"}
+
+
+def infer_suburb_town(event, geo=None):
+    """Best specific town/city name for an event outside Boston/Cambridge/Somerville."""
+    loc = (event.get("locality") or "").strip()
+    if loc and loc.lower() not in _GENERIC_NEIGH:
+        return loc
+
+    if not geo:
+        geo = resolve_event_geo(event)
+
+    # 1. Explicit ", Town, ST" in address/location/geo address
+    for field in (
+        event.get("address"),
+        event.get("location"),
+        (geo or {}).get("address"),
+        event.get("venue"),
+    ):
+        if not field:
+            continue
+        m = _ADDR_CITY_STATE_RE.search(str(field))
+        if m:
+            town = m.group(1).strip()
+            st = m.group(2).upper()
+            if town.lower() not in _GENERIC_NEIGH and not re.search(r"\d", town):
+                town = _SUBURB_TOWN_CANON.get(town.lower(), town)
+                return f"{town}, {st}" if st != "MA" else town
+
+    # 2. Curated geo neighborhood (e.g. "Worcester", "Wellesley", "Salem, NH", "Medford Square")
+    neigh = ((geo or {}).get("neighborhood") or "").strip()
+    if neigh and neigh.lower() not in _GENERIC_NEIGH:
+        # Clean compound labels like "Chestnut Hill / Brighton" -> "Chestnut Hill"
+        primary = neigh.split("/")[0].strip()
+        if primary and primary.lower() not in _GENERIC_NEIGH:
+            return primary
+
+    # 3. Known town name in venue, source venue, or address
+    for field in (event.get("venue"), event.get("address"), event.get("location"), event.get("_source_venue")):
+        if not field:
+            continue
+        m = _SUBURB_TOWN_RE.search(str(field))
+        if m:
+            return _SUBURB_TOWN_CANON[m.group(1).lower()]
+
+    return ""
+
+
 def resolve_transit_lines(city, sub_slug, event, geo=None):
     """Return comma-separated MBTA Rapid Transit lines ('red', 'green', 'orange', 'blue') serving the event."""
     lines = []
@@ -974,6 +1050,19 @@ def build_seo_directory_html(all_events_flat, all_venue_names):
           <li><a href="boston-edm/">Boston EDM &amp; Electronic Shows</a></li>
           <li><a href="college/">College Games, Concerts &amp; Talks</a></li>
           <li><a href="markets-festivals-boston/">Markets, Fairs &amp; Festivals</a></li>
+          <li><a href="goth/">Goth, Industrial &amp; Darkwave Nights</a></li>
+          <li><a href="lgbtq/">LGBTQ+, Queer &amp; Drag Events</a></li>
+          <li><a href="jazz/">Live Jazz &amp; Blues</a></li>
+          <li><a href="film/">Indie, Repertory &amp; 35mm Film</a></li>
+          <li><a href="theater/">Theater, Broadway &amp; Stage</a></li>
+          <li><a href="dance/">Social Dance (Salsa, Swing &amp; More)</a></li>
+          <li><a href="book/">Author Talks &amp; Book Events</a></li>
+          <li><a href="classical/">Classical, Chamber &amp; Symphony</a></li>
+          <li><a href="metal/">Punk, Metal &amp; Hardcore Shows</a></li>
+          <li><a href="crafts/">Crafts, Pottery &amp; Workshops</a></li>
+          <li><a href="karaoke/">Karaoke, Open Mics &amp; Poetry</a></li>
+          <li><a href="fitness/">Run Clubs, Fitness &amp; Outdoors</a></li>
+          <li><a href="latin/">Latin Nightlife (Reggaeton &amp; Salsa)</a></li>
         </ul>
       </div>
 
@@ -1146,9 +1235,141 @@ def _is_edm_event(e):
     return False
 
 
+_GOTH_RE = re.compile(
+    r"\b(?:goth|gothic|industrial|darkwave|coldwave|ebm|post[- ]?punk|synthpop|new wave|"
+    r"crypt|xmortis|fetish|dark rave|witch house|deathrock|minimal synth|karaoke noir|"
+    r"heroes\b.*manray|manray|chamber:\s*goth)\b",
+    re.IGNORECASE,
+)
+_GOTH_EXCLUDE_RE = re.compile(
+    r"\b(?:sawstop|table saw|woodworking|cabinet saw|industrial design|industrial arts|"
+    r"remembrance ceremony|graduation|award ceremony|tea ceremony|citizenship|"
+    r"real estate|manufacturing|safety training|architecture tour)\b",
+    re.IGNORECASE,
+)
+_JAZZ_RE = re.compile(
+    r"\b(?:jazz|blues|bebop|big band|swing band|ragtime|gypsy jazz|bossa nova|"
+    r"wally'?s|scullers|regattabar|mad monkfish|beehive)\b",
+    re.IGNORECASE,
+)
+_FILM_RE = re.compile(
+    r"\b(?:35mm|70mm|film festival|movie screening|cinema|film screening|short films?|"
+    r"brattle theat|coolidge corner|harvard film archive|silent film)\b",
+    re.IGNORECASE,
+)
+_DANCE_RE = re.compile(
+    r"\b(?:salsa|bachata|swing danc|lindy hop|contra danc|west coast swing|westie|"
+    r"tango|kizomba|zouk|ballroom|line danc|havana club|social danc|ceili|ceilidh|"
+    r"square danc|scottish country danc|folk danc)\b",
+    re.IGNORECASE,
+)
+_BOOK_RE = re.compile(
+    r"\b(?:author talk|book launch|book signing|book club|book reading|poetry reading|"
+    r"harvard book store|porter square books|brookline booksmith|trident booksellers|"
+    r"lovestruck books|all she wrote books|literary|storyteller|storytelling)\b",
+    re.IGNORECASE,
+)
+_CLASSICAL_RE = re.compile(
+    r"\b(?:symphony|orchestra|philharmonic|chamber music|string quartet|recital|"
+    r"concerto|sonata|choral|choir|opera|baroque|early music|jordan hall|"
+    r"new england conservatory|longy school)\b",
+    re.IGNORECASE,
+)
+_METAL_RE = re.compile(
+    r"\b(?:metal|punk|hardcore|doom|thrash|deathcore|shoegaze|emo night|post[- ]?hardcore|"
+    r"sludge|grindcore|screamo|black metal|death metal|heavy metal|pop[- ]?punk|ska[- ]?punk|"
+    r"crust punk|noise rock|stoner rock)\b",
+    re.IGNORECASE,
+)
+_METAL_EXCLUDE_RE = re.compile(
+    r"\b(?:metalworking|sheet metal|welding|blacksmith|metalsmith|jewelry|foundry class|"
+    r"cnc|machining|fabrication|lathe)\b",
+    re.IGNORECASE,
+)
+_CRAFTS_RE = re.compile(
+    r"\b(?:pottery|ceramic|ceramics|knitting|knit night|crochet|sewing|embroidery|"
+    r"printmaking|glassblowing|stained glass|paint\s*(?:&|and)\s*sip|watercolor|"
+    r"weaving|woodworking|bookbinding|craft night|craft nite|craft workshop|"
+    r"maker workshop|quilting|macrame|calligraphy|linocut|terracotta|clay table|"
+    r"gather here|artisans asylum|origami|wreath making|candle making|soap making|"
+    r"flower arranging|terrarium|floral workshop)\b",
+    re.IGNORECASE,
+)
+_KARAOKE_RE = re.compile(
+    r"\b(?:karaoke|open mic|poetry slam|poetry jam|spoken word|sing[- ]?along)\b",
+    re.IGNORECASE,
+)
+_FITNESS_RE = re.compile(
+    r"\b(?:run club|running club|5k|10k|half marathon|hike|hiking|trail walk|yoga|"
+    r"pilates|zumba|bike ride|cycling|november project|bird walk|birding|kayak|"
+    r"paddleboard|(?:fitness|workout|outdoor)\s+boot\s*camp|group run|fun run|fitness|workout|stretch)\b",
+    re.IGNORECASE,
+)
+_LATIN_RE = re.compile(
+    r"\b(?:reggaeton|perreo|salsa|bachata|cumbia|merengue|latin night|bad bunny|"
+    r"dembow|noche latina|fiesta latina|latin jazz|afro[- ]?latin|la fabrica|havana club)\b",
+    re.IGNORECASE,
+)
+
+
+def _event_blob(e):
+    return f"{e.get('title') or e.get('name') or ''} {e.get('venue') or ''} {e.get('_source_venue') or ''} {e.get('desc') or e.get('description') or ''}"
+
+
+def _matches_niche(niche, e):
+    cat = _effective_category(e).lower()
+    genre = e.get("music_genre") or e.get("genre") or ""
+    blob = _event_blob(e)
+    title_venue = f"{e.get('title') or e.get('name') or ''} {e.get('venue') or ''} {e.get('_source_venue') or ''}"
+
+    if niche == "goth":
+        if _GOTH_EXCLUDE_RE.search(blob):
+            return False
+        if "manray" in (e.get("venue") or "").lower() or "manray" in (e.get("_source_venue") or "").lower():
+            return True
+        return bool(_GOTH_RE.search(title_venue))
+    if niche == "lgbtq":
+        return bool(is_lgbtq_event(e))
+    if niche == "jazz":
+        return genre == "jazz_blues" or bool(_JAZZ_RE.search(title_venue))
+    if niche == "film":
+        return cat == "film" or bool(_FILM_RE.search(title_venue))
+    if niche == "theater":
+        return cat == "theater"
+    if niche == "dance":
+        return cat == "dance" or bool(_DANCE_RE.search(title_venue))
+    if niche == "book":
+        return cat == "books" or bool(_BOOK_RE.search(title_venue))
+    if niche == "classical":
+        return genre == "classical" or cat == "classical" or bool(_CLASSICAL_RE.search(title_venue))
+    if niche == "metal":
+        if _METAL_EXCLUDE_RE.search(blob):
+            return False
+        return bool(_METAL_RE.search(blob))
+    if niche == "crafts":
+        return bool(_CRAFTS_RE.search(title_venue))
+    if niche == "karaoke":
+        return bool(_KARAOKE_RE.search(title_venue))
+    if niche == "fitness":
+        return cat == "outdoors" or bool(_FITNESS_RE.search(title_venue))
+    if niche == "latin":
+        return bool(_LATIN_RE.search(title_venue))
+    return False
+
+
 def filter_events_for_hub(hub, events):
     if hub.get("style") == "edm":
         filtered = [e for e in events if _is_edm_event(e)]
+        if hub.get("limit"):
+            filtered = filtered[:hub["limit"]]
+        return filtered
+
+    if hub.get("niche_filter"):
+        niche = hub["niche_filter"]
+        filtered = [e for e in events if _matches_niche(niche, e)]
+        if hub.get("window_days"):
+            last_day = datetime.now(EASTERN).date() + timedelta(days=hub["window_days"])
+            filtered = [e for e in filtered if (_parse_event_eastern_date(e) or last_day) <= last_day]
         if hub.get("limit"):
             filtered = filtered[:hub["limit"]]
         return filtered
@@ -1480,6 +1701,151 @@ HUBS = {
         "og_badge": "FREE EVENTS",
         "og_image": "og-free.jpg",
         "query": "#free=1"
+    },
+
+    # 3. Niche & Subculture Guides
+    "goth": {
+        "title": "Goth, Industrial & Darkwave Nights in Boston & Cambridge",
+        "h1": "Goth, Industrial & Darkwave Nights",
+        "niche_filter": "goth",
+        "limit": 120,
+        "show_details": True,
+        "subtitle": "Goth, industrial, darkwave, post-punk, EBM, synthpop, and fetish club nights across ManRay (Crypt, HEROES, Karaoke Noir), Middle East (Xmortis), Midway Cafe (Chamber), and local venues.",
+        "og_badge": "GOTH & INDUSTRIAL",
+        "og_image": "og-goth.jpg",
+        "query": "#q=goth"
+    },
+    "lgbtq": {
+        "title": "LGBTQ+, Queer & Drag Events in Boston & Cambridge",
+        "h1": "LGBTQ+, Queer & Drag Events",
+        "niche_filter": "lgbtq",
+        "limit": 150,
+        "show_details": True,
+        "subtitle": "Queer nightlife, drag shows, sapphic craft meetups, comedy, and community nights across Club Café, Dani's Queer Bar, Legacy, Jacques, ManRay, and Greater Boston.",
+        "og_badge": "LGBTQ+ & QUEER",
+        "og_image": "og-lgbtq.jpg",
+        "query": "#lgbtq=1"
+    },
+    "jazz": {
+        "title": "Live Jazz & Blues in Boston, Cambridge & Somerville",
+        "h1": "Live Jazz & Blues",
+        "niche_filter": "jazz",
+        "limit": 150,
+        "show_details": True,
+        "subtitle": "Nightly jazz, blues, swing, and jam sessions across Wally's, Scullers, Regattabar, The Mad Monkfish, The Lilypad, Beehive, Lou's, Berklee, and NEC.",
+        "og_badge": "JAZZ & BLUES",
+        "og_image": "og-jazz.jpg",
+        "query": "#cat=Music+%26+nightlife&genre=jazz_blues"
+    },
+    "film": {
+        "title": "Indie, Repertory & 35mm Film Screenings in Boston",
+        "h1": "Indie, Repertory & 35mm Film",
+        "niche_filter": "film",
+        "limit": 150,
+        "show_details": True,
+        "subtitle": "35mm & 70mm screenings, cult classics, director Q&As, and film festivals at Brattle Theatre, Coolidge Corner, Harvard Film Archive, Somerville Theatre, and MFA.",
+        "og_badge": "INDIE & REP FILM",
+        "og_image": "og-film.jpg",
+        "query": "#cat=Arts+%26+culture"
+    },
+    "theater": {
+        "title": "Theater, Broadway & Stage Shows in Boston",
+        "h1": "Theater, Broadway & Stage",
+        "niche_filter": "theater",
+        "limit": 180,
+        "show_details": True,
+        "subtitle": "Broadway tours, local plays, musicals, and fringe theater across Emerson Colonial, Citizens Bank Opera House, A.R.T., Huntington, ArtsEmerson, Lyric Stage, SpeakEasy, and BCA.",
+        "og_badge": "THEATER & STAGE",
+        "og_image": "og-theater.jpg",
+        "query": "#cat=Stage"
+    },
+    "dance": {
+        "title": "Social Dance Nights in Boston: Salsa, Bachata, Swing & Contra",
+        "h1": "Social Dance: Salsa, Swing & More",
+        "niche_filter": "dance",
+        "limit": 150,
+        "show_details": True,
+        "subtitle": "Salsa, bachata, Lindy Hop, West Coast Swing, contra, tango, and line dancing socials with beginner lessons across Havana Club, Boston Swing Central, Westie 617, and local halls.",
+        "og_badge": "SOCIAL DANCE",
+        "og_image": "og-dance.jpg",
+        "query": "#cat=Dance"
+    },
+    "book": {
+        "title": "Author Talks, Readings & Book Events in Boston & Cambridge",
+        "h1": "Author Talks & Book Events",
+        "niche_filter": "book",
+        "limit": 150,
+        "show_details": True,
+        "subtitle": "Book launches, author talks, poetry readings, and literary nights at Harvard Book Store, Porter Square Books, Brookline Booksmith, Trident, Lovestruck Books, and BPL.",
+        "og_badge": "BOOKS & READINGS",
+        "og_image": "og-book.jpg",
+        "query": "#cat=Arts+%26+culture"
+    },
+    "classical": {
+        "title": "Classical, Chamber & Conservatory Concerts in Boston",
+        "h1": "Classical, Chamber & Symphony",
+        "niche_filter": "classical",
+        "limit": 150,
+        "show_details": True,
+        "subtitle": "Orchestra performances, chamber music, opera, and free conservatory recitals across Symphony Hall, NEC Jordan Hall, Longy School of Music, Berklee, and Celebrity Series.",
+        "og_badge": "CLASSICAL & CHAMBER",
+        "og_image": "og-classical.jpg",
+        "query": "#cat=Music+%26+nightlife&genre=classical"
+    },
+    "metal": {
+        "title": "Punk, Metal & Hardcore Shows in Boston & Cambridge",
+        "h1": "Punk, Metal & Hardcore Shows",
+        "niche_filter": "metal",
+        "limit": 150,
+        "show_details": True,
+        "subtitle": "Heavy metal, punk, hardcore, doom, shoegaze, and emo nights across O'Brien's Pub, Middle East, Sonia, Deep Cuts, The Jungle, Midway Cafe, and Roadrunner.",
+        "og_badge": "PUNK & METAL",
+        "og_image": "og-metal.jpg",
+        "query": "#q=metal"
+    },
+    "crafts": {
+        "title": "Crafts, Pottery & Hands-On Workshops in Boston & Cambridge",
+        "h1": "Crafts, Pottery & Workshops",
+        "niche_filter": "crafts",
+        "limit": 150,
+        "show_details": True,
+        "subtitle": "Pottery, knitting, sewing, printmaking, glassblowing, paint & sip, and DIY maker workshops at Gather Here, The Clay Table, Artisans Asylum, CCAE, and Boston Public Market.",
+        "og_badge": "CRAFTS & WORKSHOPS",
+        "og_image": "og-crafts.jpg",
+        "query": "#q=workshop"
+    },
+    "karaoke": {
+        "title": "Karaoke, Open Mics & Poetry Slams in Boston & Cambridge",
+        "h1": "Karaoke, Open Mics & Poetry",
+        "niche_filter": "karaoke",
+        "limit": 150,
+        "show_details": True,
+        "subtitle": "Karaoke nights, music and comedy open mics, and poetry slams across Lizard Lounge, Cantab Lounge, ManRay (Karaoke Noir), Boston Public Market, and neighborhood bars.",
+        "og_badge": "KARAOKE & OPEN MICS",
+        "og_image": "og-karaoke.jpg",
+        "query": "#q=karaoke"
+    },
+    "fitness": {
+        "title": "Run Clubs, Fitness & Outdoor Events in Boston",
+        "h1": "Run Clubs, Fitness & Outdoors",
+        "niche_filter": "fitness",
+        "limit": 150,
+        "show_details": True,
+        "subtitle": "Free run clubs, outdoor yoga, group hikes, bike rides, bird walks, and fitness meetups with November Project, Boston Adventure Club, and local breweries.",
+        "og_badge": "FITNESS & OUTDOORS",
+        "og_image": "og-fitness.jpg",
+        "query": "#cat=Sports+%26+outdoors"
+    },
+    "latin": {
+        "title": "Latin Nightlife, Reggaeton & Salsa in Boston & Cambridge",
+        "h1": "Latin Nightlife: Reggaeton & Salsa",
+        "niche_filter": "latin",
+        "limit": 150,
+        "show_details": True,
+        "subtitle": "Reggaeton, salsa, bachata, perreo, cumbia, and live Latin music across Havana Club, La Fabrica Central, Royale, Big Night Live, and Middle East.",
+        "og_badge": "LATIN NIGHTLIFE",
+        "og_image": "og-latin.jpg",
+        "query": "#q=latin"
     }
 }
 
@@ -1492,7 +1858,8 @@ def _hub_place_label(city, e):
     except Exception:
         sub = ""
     if city == "other":
-        return (e.get("locality") or "").strip() or (sub if sub and sub != "Outer Suburbs" else "Greater Boston")
+        town = infer_suburb_town(e)
+        return town or (sub if sub and sub != "Outer Suburbs" else "Greater Boston")
     if not sub or sub.startswith("Other ") or sub == city_label:
         return city_label
     return f"{sub}, {city_label}"
@@ -8750,10 +9117,12 @@ def render_page(results, weather=None, luckyseat_shows=None):
             geo_btn = ' <button type="button" class="venue-map-jump" title="View on Map"><span class="chip-icon">📍</span><span class="indie-jump-label">map</span></button>'
 
         sub_name, sub_slug = resolve_subarea(city, e, geo)
-        if sub_slug == "suburbs_other" and e.get("locality"):
-            sub_name = e["locality"]  # show the actual town; the filter group stays "Outer Suburbs"
-        elif sub_slug == "suburbs_other" and e.get("_venue_unknown"):
-            sub_name = "Location TBA"  # the source hid the venue; don't claim it's in the suburbs
+        if city == "other":
+            town = infer_suburb_town(e, geo)
+            if town:
+                sub_name = town  # show the actual town; the filter group stays in data-subarea
+            elif sub_slug == "suburbs_other" and e.get("_venue_unknown"):
+                sub_name = "Location TBA"  # the source hid the venue; don't claim it's in the suburbs
         sub_attrs = f' data-subarea="{escape(sub_slug)}"'
         sub_tag = f' <span class="subarea-tag">· {escape(sub_name)}</span>'
 
@@ -9137,12 +9506,13 @@ def render_page(results, weather=None, luckyseat_shows=None):
     for e in all_events_flat:
         venue_counts[e.get("_source_venue", "")] = venue_counts.get(e.get("_source_venue", ""), 0) + 1
 
+    sorted_venue_names = sorted(all_venue_names, key=lambda v: v.strip().lower())
     venue_boxes = "\n".join(
         f'''<label class="chk">
             <input type="checkbox" class="venue-chk" value="{escape(v)}" checked>
             <span>{escape(v)} <span class="count">{venue_counts.get(v, 0)}</span></span>
           </label>'''
-        for v in all_venue_names
+        for v in sorted_venue_names
     )
 
     city_order = ["boston", "cambridge", "somerville", "other"]
@@ -10658,7 +11028,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
   .view-switch-bar {{
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
+    flex-wrap: wrap;
     gap: 8px;
     background: var(--card);
     border: 1px solid var(--border);
@@ -10702,8 +11073,10 @@ def render_page(results, weather=None, luckyseat_shows=None):
   .view-actions {{
     display: inline-flex;
     align-items: center;
+    gap: 8px;
   }}
-  .map-toggle-btn {{
+  .map-toggle-btn,
+  .simple-view-btn {{
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--border);
     color: var(--muted);
@@ -10718,16 +11091,67 @@ def render_page(results, weather=None, luckyseat_shows=None):
     justify-content: center;
     transition: all 0.15s ease;
   }}
-  .map-toggle-btn:hover {{
+  .map-toggle-btn:hover,
+  .simple-view-btn:hover {{
     color: var(--fg);
     border-color: var(--accent);
   }}
-  .map-toggle-btn.active {{
+  .map-toggle-btn.active,
+  .simple-view-btn.active {{
     background: rgba(93, 155, 255, 0.18);
     border-color: var(--accent);
     color: var(--accent);
     font-weight: 700;
     box-shadow: 0 0 10px rgba(93, 155, 255, 0.25);
+  }}
+  /* Simple View: compact scan mode showing just time, title, and venue */
+  body.simple-view li.event {{
+    padding: 6px 0;
+  }}
+  body.simple-view li.event .desc,
+  body.simple-view li.event .curator-note,
+  body.simple-view li.event .alt-sources,
+  body.simple-view li.event .also-listed,
+  body.simple-view li.event .badge-highlight,
+  body.simple-view li.event .recur,
+  body.simple-view li.event .cal-links,
+  body.simple-view li.event .cat-pill,
+  body.simple-view li.event .genre-pill,
+  body.simple-view li.event .college-pill,
+  body.simple-view li.event .subarea-tag,
+  body.simple-view li.event .venue-via,
+  body.simple-view li.event .venue-map-jump,
+  body.simple-view li.event .price {{
+    display: none !important;
+  }}
+  body.simple-view li.event .venue-tag {{
+    font-size: 0;
+    margin-top: 2px;
+  }}
+  body.simple-view li.event .venue-link,
+  body.simple-view li.event .venue-online {{
+    font-size: 12px;
+  }}
+  /* Top Timeframe Window Popover (next to date selector) */
+  .timeframe-popover {{
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    margin-top: 8px;
+    max-width: 360px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  }}
+  .timeframe-popover .timeframe-popover-head {{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+  }}
+  #timeframe-toggle-btn.active {{
+    border-color: var(--accent);
+    color: var(--accent);
   }}
   .share-filter-btn {{
     background: transparent;
@@ -12866,26 +13290,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
           <input type="checkbox" id="lgbtq-only-chk">
           <span><span class="chip-icon">🏳️‍🌈 </span>LGBTQ+ events only</span>
         </label>
-        <div class="timeframe-toggle-wrap" style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--border);">
-          <label class="timeframe-toggle" for="timeframe-enable-chk">
-            <input type="checkbox" id="timeframe-enable-chk">
-            <span><span class="chip-icon">⏱️ </span>Set timeframe window</span>
-          </label>
-          <div class="custom-time-range" id="custom-time-range" style="display: none; margin-top: 10px;">
-            <div class="time-select-row">
-              <div class="time-input-wrap">
-                <label for="time-from-select">From</label>
-                <select id="time-from-select" class="time-dropdown"></select>
-              </div>
-              <div class="time-range-arrow">→</div>
-              <div class="time-input-wrap">
-                <label for="time-to-select">To</label>
-                <select id="time-to-select" class="time-dropdown"></select>
-              </div>
-            </div>
-            <div class="time-range-active-indicator" id="time-range-active-indicator" style="display:none;"></div>
-          </div>
-        </div>
       </div>
       <div class="filter-group">
         <h3>Category <span class="spacer"></span> <button type="button" id="cat-all">all</button> <button type="button" id="cat-none">none</button></h3>
@@ -12934,6 +13338,9 @@ def render_page(results, weather=None, luckyseat_shows=None):
           <button type="button" class="map-toggle-btn" id="btn-view-map" title="Toggle interactive venue map">
             <span id="map-btn-label">Map</span>
           </button>
+          <button type="button" class="simple-view-btn" id="btn-simple-view" aria-pressed="false" title="Toggle compact simple view (time, title, and venue only)">
+            <span>Simple view</span>
+          </button>
         </div>
       </div>
       <div class="location-chips-bar" id="location-chips">
@@ -12949,8 +13356,30 @@ def render_page(results, weather=None, luckyseat_shows=None):
         <button type="button" id="week-next" aria-label="Next">next →</button>
         <button type="button" id="week-today">today</button>
         <button type="button" id="cal-toggle" aria-expanded="false"><span class="chip-icon">📅 </span>pick date</button>
+        <button type="button" id="timeframe-toggle-btn" aria-expanded="false" title="Filter events to a specific time window"><span class="chip-icon">⏱️ </span>time window</button>
         <button type="button" class="chip chip-time-custom" id="quick-custom-time-chip" style="display:none;" title="Click to clear timeframe filter"><span id="active-timeframe-label"></span> <span class="chip-icon" style="margin-left:4px;">✕</span></button>
         <button type="button" class="chip chip-active-genre" id="quick-active-genre-chip" style="display:none;" title="Click to clear genre filter"><span id="active-genre-label"></span> <span class="chip-icon" style="margin-left:4px;">✕</span></button>
+      </div>
+      <div class="timeframe-popover custom-time-range" id="custom-time-range" style="display: none;">
+        <div class="timeframe-popover-head">
+          <label class="timeframe-toggle" for="timeframe-enable-chk">
+            <input type="checkbox" id="timeframe-enable-chk">
+            <span><span class="chip-icon">⏱️ </span>Filter by time window</span>
+          </label>
+          <button type="button" class="btn-clear-time-range" id="btn-clear-time-window">Clear</button>
+        </div>
+        <div class="time-select-row">
+          <div class="time-input-wrap">
+            <label for="time-from-select">From</label>
+            <select id="time-from-select" class="time-dropdown"></select>
+          </div>
+          <div class="time-range-arrow">→</div>
+          <div class="time-input-wrap">
+            <label for="time-to-select">To</label>
+            <select id="time-to-select" class="time-dropdown"></select>
+          </div>
+        </div>
+        <div class="time-range-active-indicator" id="time-range-active-indicator" style="display:none;"></div>
       </div>
       <div class="mini-cal" id="mini-cal" hidden>
         <div class="mini-cal-head">
@@ -15573,10 +16002,60 @@ def render_page(results, weather=None, luckyseat_shows=None):
       }});
     }});
 
+    const timeframeToggleBtn = document.getElementById('timeframe-toggle-btn');
+    const btnClearTimeWindow = document.getElementById('btn-clear-time-window');
+    const btnSimpleView = document.getElementById('btn-simple-view');
+
+    function setSimpleView(on) {{
+      document.body.classList.toggle('simple-view', !!on);
+      if (btnSimpleView) {{
+        btnSimpleView.classList.toggle('active', !!on);
+        btnSimpleView.setAttribute('aria-pressed', on ? 'true' : 'false');
+      }}
+      try {{ localStorage.setItem('boston_events_simple_view', on ? '1' : '0'); }} catch (e) {{}}
+    }}
+    try {{
+      if (localStorage.getItem('boston_events_simple_view') === '1') setSimpleView(true);
+    }} catch (e) {{}}
+    if (btnSimpleView) {{
+      btnSimpleView.addEventListener('click', () => {{
+        setSimpleView(!document.body.classList.contains('simple-view'));
+      }});
+    }}
+
+    function closeTimeframePopover() {{
+      if (customTimeRangeDiv) customTimeRangeDiv.style.display = 'none';
+      if (timeframeToggleBtn) timeframeToggleBtn.setAttribute('aria-expanded', 'false');
+    }}
+
+    if (timeframeToggleBtn && customTimeRangeDiv) {{
+      timeframeToggleBtn.addEventListener('click', () => {{
+        const open = customTimeRangeDiv.style.display !== 'none';
+        if (open) {{
+          closeTimeframePopover();
+        }} else {{
+          if (typeof miniCal !== 'undefined' && miniCal) miniCal.hidden = true;
+          if (typeof calToggle !== 'undefined' && calToggle) calToggle.setAttribute('aria-expanded', 'false');
+          customTimeRangeDiv.style.display = 'block';
+          timeframeToggleBtn.setAttribute('aria-expanded', 'true');
+        }}
+      }});
+    }}
+
+    if (btnClearTimeWindow) {{
+      btnClearTimeWindow.addEventListener('click', () => {{
+        if (timeframeEnableChk) timeframeEnableChk.checked = false;
+        if (timeframeToggleBtn) timeframeToggleBtn.classList.remove('active');
+        closeTimeframePopover();
+        setTimeRange(null, null);
+      }});
+    }}
+
     if (quickCustomTimeChip) {{
       quickCustomTimeChip.addEventListener('click', () => {{
         if (timeframeEnableChk) timeframeEnableChk.checked = false;
-        if (customTimeRangeDiv) customTimeRangeDiv.style.display = 'none';
+        if (timeframeToggleBtn) timeframeToggleBtn.classList.remove('active');
+        closeTimeframePopover();
         setTimeRange(null, null);
       }});
     }}
@@ -15585,11 +16064,12 @@ def render_page(results, weather=None, luckyseat_shows=None):
       timeframeEnableChk.addEventListener('change', () => {{
         if (timeframeEnableChk.checked) {{
           if (customTimeRangeDiv) customTimeRangeDiv.style.display = 'block';
+          if (timeframeToggleBtn) timeframeToggleBtn.classList.add('active');
           const f = (timeFromSelect && timeFromSelect.value) ? timeFromSelect.value : '20:00';
           const t = (timeToSelect && timeToSelect.value) ? timeToSelect.value : '24:00';
           setTimeRange(f, t);
         }} else {{
-          if (customTimeRangeDiv) customTimeRangeDiv.style.display = 'none';
+          if (timeframeToggleBtn) timeframeToggleBtn.classList.remove('active');
           setTimeRange(null, null);
         }}
       }});
@@ -15602,6 +16082,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
         syncToOptions(f, currentTo);
         const t = timeToSelect ? timeToSelect.value : '24:00';
         if (timeframeEnableChk) timeframeEnableChk.checked = true;
+        if (timeframeToggleBtn) timeframeToggleBtn.classList.add('active');
         setTimeRange(f, t);
       }});
     }}
@@ -15610,6 +16091,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
         const f = timeFromSelect ? timeFromSelect.value : '20:00';
         const t = timeToSelect.value;
         if (timeframeEnableChk) timeframeEnableChk.checked = true;
+        if (timeframeToggleBtn) timeframeToggleBtn.classList.add('active');
         setTimeRange(f, t);
       }});
     }}
