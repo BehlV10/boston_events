@@ -4820,7 +4820,8 @@ def scrape_middle_east(url, ua):
     """Middle East Cambridge — TicketWeb plugin embeds event list as static HTML.
     
     Scrapes upcoming shows across all Middle East rooms (Downstairs, Upstairs,
-    Corner/Bakery, ZuZu, Sonia) across up to 5 pages with precise showtimes and pricing.
+    Corner/Bakery, ZuZu, Sonia) with precise showtimes and pricing. Reads pages until one is
+    empty (up to 15). Five pages only reached about three weeks out; in Nov 2026 there were 9.
     """
     events = []
     seen_keys = set()
@@ -4828,7 +4829,7 @@ def scrape_middle_east(url, ua):
     year = now.year
     base_url = url.rstrip("/")
 
-    for page in range(1, 6):
+    for page in range(1, 16):
         purl = f"{base_url}/page/{page}/" if page > 1 else url
         try:
             soup = fetch_soup(purl, ua)
