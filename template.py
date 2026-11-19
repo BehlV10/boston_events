@@ -10313,6 +10313,11 @@ def render_page(results, weather=None, luckyseat_shows=None):
     overflow: hidden;
     max-width: 100%;
   }}
+  /* Phones: just title, price, time and venue. The "Why we recommend" note stays; the
+     scraped description and "(via source)" are clutter on a small screen. */
+  @media (max-width: 640px) {{
+    .event .desc, .event .venue-via {{ display: none; }}
+  }}
   .bucket.empty {{ display: none; }}
 
   /* Filter Groups */
