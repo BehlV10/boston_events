@@ -11210,10 +11210,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
     gap: 10px;
     margin-bottom: 10px;
   }}
-  #timeframe-toggle-btn.active {{
-    border-color: var(--accent);
-    color: var(--accent);
-  }}
   .share-filter-btn {{
     background: transparent;
     border: 1px solid var(--border);
@@ -13424,7 +13420,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
         <button type="button" id="week-today">today</button>
         <button type="button" id="cal-toggle" aria-expanded="false"><span class="chip-icon">📅 </span>pick date</button>
         <button type="button" id="timeframe-toggle-btn" aria-expanded="false" title="Filter events to a specific time window"><span class="chip-icon">⏱️ </span>time window</button>
-        <button type="button" class="chip chip-time-custom" id="quick-custom-time-chip" style="display:none;" title="Click to clear timeframe filter"><span id="active-timeframe-label"></span> <span class="chip-icon" style="margin-left:4px;">✕</span></button>
         <button type="button" class="chip chip-active-genre" id="quick-active-genre-chip" style="display:none;" title="Click to clear genre filter"><span id="active-genre-label"></span> <span class="chip-icon" style="margin-left:4px;">✕</span></button>
       </div>
       <div class="timeframe-popover custom-time-range" id="custom-time-range" style="display: none;">
@@ -13798,8 +13793,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
     const timeframeEnableChk = document.getElementById('timeframe-enable-chk');
     const customTimeRangeDiv = document.getElementById('custom-time-range');
     const timeRangeIndicator = document.getElementById('time-range-active-indicator');
-    const quickCustomTimeChip = document.getElementById('quick-custom-time-chip');
-    const activeTimeframeLabel = document.getElementById('active-timeframe-label');
 
     const HOURLY_TIMES = [
       {{ val: '00:00', mins: 0, label: '12:00 AM (Midnight)' }},
@@ -13966,21 +13959,18 @@ def render_page(results, weather=None, luckyseat_shows=None):
         }}
       }}
 
-      if (quickCustomTimeChip && activeTimeframeLabel) {{
-        if (isCustomActive) {{
-          let label = '';
-          if (timeFrom !== null && timeTo !== null) {{
-            label = `${{formatMinutesToLabel(timeFrom)}} – ${{formatMinutesToLabel(timeTo)}}`;
-          }} else if (timeFrom !== null) {{
-            label = `From ${{formatMinutesToLabel(timeFrom)}}`;
-          }} else if (timeTo !== null) {{
-            label = `Until ${{formatMinutesToLabel(timeTo)}}`;
-          }}
-          activeTimeframeLabel.textContent = `⏱️ ${{label}}`;
-          quickCustomTimeChip.style.display = 'inline-flex';
-        }} else {{
-          quickCustomTimeChip.style.display = 'none';
+      // Like "pick date", the button itself shows the active range; a separate chip used to
+      // wrap onto its own line, and the panel's Clear button turns the filter off
+      if (tfBtn) {{
+        let label = 'time window';
+        if (timeFrom !== null && timeTo !== null) {{
+          label = `${{formatMinutesToLabel(timeFrom)}} – ${{formatMinutesToLabel(timeTo)}}`;
+        }} else if (timeFrom !== null) {{
+          label = `From ${{formatMinutesToLabel(timeFrom)}}`;
+        }} else if (timeTo !== null) {{
+          label = `Until ${{formatMinutesToLabel(timeTo)}}`;
         }}
+        tfBtn.innerHTML = `<span class="chip-icon">⏱️ </span>${{label}}`;
       }}
     }}
 
@@ -16141,15 +16131,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
 
     if (btnClearTimeWindow) {{
       btnClearTimeWindow.addEventListener('click', () => {{
-        if (timeframeEnableChk) timeframeEnableChk.checked = false;
-        if (timeframeToggleBtn) timeframeToggleBtn.classList.remove('active');
-        closeTimeframePopover();
-        setTimeRange(null, null);
-      }});
-    }}
-
-    if (quickCustomTimeChip) {{
-      quickCustomTimeChip.addEventListener('click', () => {{
         if (timeframeEnableChk) timeframeEnableChk.checked = false;
         if (timeframeToggleBtn) timeframeToggleBtn.classList.remove('active');
         closeTimeframePopover();
