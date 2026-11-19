@@ -531,15 +531,27 @@ def infer_suburb_town(event, geo=None):
         if primary and primary.lower() not in _GENERIC_NEIGH:
             return primary
 
-    # 3. Known town name in venue, source venue, or address
+    # 3. Known town name in venue, source venue, or address: "Winchester Public Library",
+    # "Lowell Memorial Auditorium". Not a street, park or building named after a town
+    # ("Hanover Street Chapel", "Franklin Park", "Lowell House", "The Reading Room").
     for field in (event.get("venue"), event.get("address"), event.get("location"), event.get("_source_venue")):
         if not field:
             continue
-        m = _SUBURB_TOWN_RE.search(str(field))
-        if m:
+        for m in _SUBURB_TOWN_IN_NAME_RE.finditer(str(field)):
+            before = str(field)[:m.start()]
+            if re.search(r"(?i)\bthe\s+$", before):
+                continue
             return _SUBURB_TOWN_CANON[m.group(1).lower()]
 
     return ""
+
+
+# Case-sensitive: town names are capitalized; "reading" or "concord grape" aren't towns
+_SUBURB_TOWN_IN_NAME_RE = re.compile(
+    r"\b(" + "|".join(re.escape(t) for t in sorted(_SUBURB_TOWNS, key=len, reverse=True)) + r")\b"
+    r"(?!\s+(?:St|St\.|Street|Ave|Ave\.|Avenue|Rd|Rd\.|Road|Blvd|Boulevard|Ln|Lane|Way|Pl|Place|Ct|Court|"
+    r"Dr|Drive|Terrace|Park|Square|Sq|Wharf|Pier|House|Hall|Room|Rooms|Building|Bldg|Quad|Yard|Gate|Gardens?)\b)"
+)
 
 
 def resolve_transit_lines(city, sub_slug, event, geo=None):
@@ -1687,7 +1699,7 @@ HUBS = {
         "subtitle": "Live stand-up comedy shows, improv, and open mics across The Comedy Studio, The 88 Club, The Rockwell, and Wilbur.",
         "og_badge": "COMEDY & IMPROV",
         "og_image": "og-comedy.jpg",
-        "query": "#cat=Comedy"
+        "query": "#cat=Stage"
     },
     "free": {
         "title": "Free Events in Boston & Cambridge",
@@ -1834,7 +1846,7 @@ HUBS = {
         "subtitle": "Free run clubs, outdoor yoga, group hikes, bike rides, bird walks, and fitness meetups with November Project, Boston Adventure Club, and local breweries.",
         "og_badge": "FITNESS & OUTDOORS",
         "og_image": "og-fitness.jpg",
-        "query": "#cat=Sports+%26+outdoors"
+        "query": "#cat=Play"
     },
     "latin": {
         "title": "Latin Nightlife, Reggaeton & Salsa in Boston & Cambridge",
@@ -13866,9 +13878,10 @@ def render_page(results, weather=None, luckyseat_shows=None):
       if (timeframeEnableChk) {{
         timeframeEnableChk.checked = isCustomActive;
       }}
-      if (customTimeRangeDiv) {{
-        customTimeRangeDiv.style.display = isCustomActive ? 'block' : 'none';
-      }}
+      // The panel is a popover that only the "time window" button opens; a time range from a
+      // shared link or a reset just lights up (or clears) the button
+      const tfBtn = document.getElementById('timeframe-toggle-btn');
+      if (tfBtn) tfBtn.classList.toggle('active', isCustomActive);
 
       if (timeFromSelect && timeFrom !== null) {{
         timeFromSelect.value = formatMinutesToHHMM(timeFrom);
@@ -15717,6 +15730,11 @@ def render_page(results, weather=None, luckyseat_shows=None):
       if (open) {{
         cal.removeAttribute('hidden');
         renderCal();
+        // One popover at a time: opening the calendar closes the time window
+        const tw = document.getElementById('custom-time-range');
+        if (tw) tw.style.display = 'none';
+        const twBtn = document.getElementById('timeframe-toggle-btn');
+        if (twBtn) twBtn.setAttribute('aria-expanded', 'false');
       }} else {{
         cal.setAttribute('hidden', '');
       }}
@@ -16034,8 +16052,11 @@ def render_page(results, weather=None, luckyseat_shows=None):
         if (open) {{
           closeTimeframePopover();
         }} else {{
-          if (typeof miniCal !== 'undefined' && miniCal) miniCal.hidden = true;
-          if (typeof calToggle !== 'undefined' && calToggle) calToggle.setAttribute('aria-expanded', 'false');
+          // One popover at a time: opening the time window closes the calendar
+          const cal = document.getElementById('mini-cal');
+          if (cal) cal.setAttribute('hidden', '');
+          const calBtn = document.getElementById('cal-toggle');
+          if (calBtn) calBtn.setAttribute('aria-expanded', 'false');
           customTimeRangeDiv.style.display = 'block';
           timeframeToggleBtn.setAttribute('aria-expanded', 'true');
         }}

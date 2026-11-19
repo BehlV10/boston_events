@@ -122,3 +122,23 @@ class MainPageUXTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class FollowUpFixesTest(unittest.TestCase):
+    def test_town_names_inside_streets_and_buildings_are_not_towns(self):
+        for venue in ["Hanover Street Chapel", "The Reading Room", "Franklin Park", "Lowell House, Harvard"]:
+            ev = {"venue": venue}
+            town = T.infer_suburb_town(ev, resolve_event_geo(ev))
+            self.assertNotIn(town, ("Hanover", "Reading", "Franklin", "Lowell"), venue)
+
+    def test_every_hub_calendar_link_names_a_real_category(self):
+        from urllib.parse import parse_qs
+        from scrapers import CATEGORY_BUCKETS
+        buckets = {name for name, _ in CATEGORY_BUCKETS}
+        for slug, hub in T.HUBS.items():
+            q = hub.get("query") or ""
+            if not q.startswith("#"):
+                continue
+            for cat in (parse_qs(q[1:]).get("cat") or [""])[0].split(","):
+                if cat:
+                    self.assertIn(cat, buckets, f"/{slug}/ links to #cat={cat}")
