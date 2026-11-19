@@ -10,7 +10,7 @@ import unicodedata
 from collections import defaultdict
 from datetime import date, datetime, timedelta, timezone
 from html import escape, unescape
-from urllib.parse import quote, quote_plus, urlparse
+from urllib.parse import quote, urlparse
 
 from scrapers import (
     EASTERN,
@@ -7481,24 +7481,6 @@ GENERIC_HEADS = {
     "happy hour", "karaoke", "jazz night", "reunion", "tour", "tours", "market"
 }
 
-COMMERCIAL_VENUES = {
-    "td garden", "fenway park", "fenway", "gillette stadium", "mgm music hall",
-    "house of blues", "roadrunner", "royale", "the wilbur", "wilbur theatre",
-    "chevalier theatre", "citizens bank opera house", "citizens opera house",
-    "boch center", "wang theatre", "shubert theatre", "paradise rock club",
-    "brighton music hall", "leader bank pavilion", "big night live", "the sinclair",
-    "crystal ballroom", "middle east", "city winery", "laugh boston",
-    "boston symphony orchestra", "symphony hall", "huntington theatre",
-    "emerson colonial theatre", "agganis arena"
-}
-
-EXCLUDE_VENUES_OR_SOURCES = {
-    "museum", "library", "bookstore", "booksmith", "farmers market",
-    "park run", "board games", "trivia", "contra dance", "language lovers",
-    "hiking", "photography", "volunteer", "mit events", "botanic", "church", "cathedral"
-}
-
-
 GENERIC_DESCRIPTOR_PREFIXES = {
     "recital", "concert", "workshop", "screening", "lecture", "class",
     "showcase", "exhibition", "panel", "presentation", "meeting",
@@ -7577,63 +7559,6 @@ def _normalize_title_head(title, venue=None):
     t = re.sub(r"\bmusic\s+", "", t, flags=re.I)
     t = re.sub(r"[^a-z0-9]+", " ", t).strip()
     return t
-
-
-def _clean_ticket_query(title):
-    if not title:
-        return ""
-    q = title
-    q = re.sub(r"^(?:broadway in boston|presents|live nation presents|bowery presents):\s*", "", q, flags=re.IGNORECASE)
-    q = re.sub(r"^(?:nba\s+|mlb\s+|nhl\s+|nfl\s+)?(?:preseason|rescheduled|postponed):\s*", "", q, flags=re.IGNORECASE)
-    q = re.sub(r"\s*[\(\[](?:18\+|21\+|all ages|sold out|matinee|late show|early show|touring|preseason)[^\)\]]*[\)\]]", "", q, flags=re.IGNORECASE)
-    if ":" in q:
-        head, _ = q.split(":", 1)
-        if len(head.strip()) >= 3 and not any(gen in head.lower() for gen in ["tour", "special", "an evening", "night", "live"]):
-            q = head.strip()
-    for q_sep in [" “", " \"", " - ", " – ", " — "]:
-        if q_sep in q:
-            head, _ = q.split(q_sep, 1)
-            if len(head.strip()) >= 4:
-                q = head.strip()
-                break
-    q = re.sub(r"\s*-\s*Boston\b.*", "", q, flags=re.IGNORECASE)
-    q = re.sub(r"[\"“”]", "", q)
-    q = re.sub(r"\s+", " ", q).strip()
-    return q
-
-
-def _is_commercial_ticketed(e):
-    p = (e.get("price") or "").lower()
-    if "free" in p or p in ("$0", "0"):
-        return False
-    source = (e.get("_source_venue") or "").lower()
-    venue = (e.get("venue") or "").lower()
-    name = (e.get("name") or "").lower()
-    cat = (e.get("category") or "").lower()
-    if any(ex in source or ex in venue for ex in EXCLUDE_VENUES_OR_SOURCES):
-        return False
-    if "museum tour" in name or "walking tour" in name or "historical tour" in name:
-        return False
-    if any(s in source for s in ["ticketmaster", "seatgeek", "boston sports", "bowery presents"]):
-        return True
-    if any(cv in venue or cv in source for cv in COMMERCIAL_VENUES):
-        return True
-    if cat in ("music", "sports", "comedy", "theater") and e.get("price"):
-        return True
-    return False
-
-
-def _build_compare_links(e, raw_title):
-    if not _is_commercial_ticketed(e):
-        return ""
-    q = _clean_ticket_query(raw_title)
-    if not q or len(q) < 3:
-        return ""
-    encoded_q = quote_plus(q)
-    gt_url = f"https://gametime.co/search?q={encoded_q}"
-    sh_url = f"https://www.stubhub.com/search?q={encoded_q}"
-    label = "compare prices" if e.get("price") else "tickets"
-    return f'<span class="compare-tickets">{label}: <a href="{escape(gt_url)}" target="_blank" rel="noopener">Gametime</a> · <a href="{escape(sh_url)}" target="_blank" rel="noopener">StubHub</a></span>'
 
 
 def _source_priority(s):
@@ -8806,8 +8731,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
             if other_titles:
                 also_listed_html = f'<span class="also-listed">Also listed: {" · ".join(other_titles)}</span>'
 
-        compare_html = _build_compare_links(e, raw_title)
-
         geo = resolve_event_geo(e)
         geo_attrs = ""
         geo_btn = ""
@@ -8865,8 +8788,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
         extra_html = f'<span class="also-on"> · {alt_html}</span>' if alt_html else ""
         if also_listed_html:
             extra_html += also_listed_html if alt_html else f" · {also_listed_html}"
-        if compare_html:
-            extra_html += f" · {compare_html}"
 
         cal_html = '<span class="cal-links"><button type="button" class="cal-btn gcal-btn" title="Add to Google Calendar">+ GCal</button> <button type="button" class="cal-btn ics-btn" title="Download .ics">+ .ics</button></span>' if e.get("date") else ""
         star_btn = '<button type="button" class="star-btn" title="Add to My Schedule" aria-label="Add to My Schedule">☆</button>'
@@ -10298,9 +10219,6 @@ def render_page(results, weather=None, luckyseat_shows=None):
   .also-listed a {{ color: var(--accent); text-decoration: none; }}
   .also-listed a:hover {{ text-decoration: underline; }}
   .also-listed .also-src {{ color: var(--muted); }}
-  .compare-tickets {{ color: var(--muted); font-size: 11px; }}
-  .compare-tickets a {{ color: #8bb2ff; text-decoration: none; border-bottom: 1px dotted rgba(139,178,255,0.4); }}
-  .compare-tickets a:hover {{ color: #fff; border-bottom-color: #fff; }}
   .desc {{
     color: var(--muted);
     font-size: 12px;
