@@ -10419,7 +10419,25 @@ def render_page(results, weather=None, luckyseat_shows=None):
     justify-content: space-between;
     padding-bottom: 8px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    cursor: pointer;
+    user-select: none;
   }}
+  .city-head::after {{
+    content: "▾";
+    font-size: 12px;
+    color: var(--muted);
+    margin-left: 8px;
+    transition: transform 0.15s ease;
+    flex-shrink: 0;
+  }}
+  .city-head .count {{ margin-left: auto; }}
+  .city-section.collapsed > .buckets {{ display: none; }}
+  .city-section.collapsed > .city-head {{
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom-color: transparent;
+  }}
+  .city-section.collapsed > .city-head::after {{ transform: rotate(-90deg); }}
   .city-pill {{
     display: inline-flex;
     align-items: center;
@@ -10460,8 +10478,12 @@ def render_page(results, weather=None, luckyseat_shows=None):
   .bucket[data-bucket="Deals & Specials"]   {{ --accent: #c678dd; }}
   .bucket[data-bucket="Tech & Startups"]    {{ --accent: #7aa2f7; }}
   .bucket[data-bucket="Markets & Festivals"] {{ --accent: #f4a261; }}
-  .bucket-head {{ display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); font-weight: 600; }}
+  .bucket-head {{ display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); font-weight: 600; cursor: pointer; user-select: none; }}
+  .bucket-head::after {{ content: "▾"; font-size: 11px; color: var(--muted); margin-left: auto; transition: transform 0.15s ease; }}
   .bucket-head .count {{ background: transparent; color: var(--muted); }}
+  .bucket.collapsed > ul {{ display: none; }}
+  .bucket.collapsed > .bucket-head {{ margin-bottom: 0; }}
+  .bucket.collapsed > .bucket-head::after {{ transform: rotate(-90deg); }}
   .bucket ul {{ list-style: none; padding: 0; margin: 0; }}
 
   /* Event Cards */
@@ -11177,7 +11199,8 @@ def render_page(results, weather=None, luckyseat_shows=None):
     border-radius: var(--radius-md);
     padding: 12px 14px;
     margin-top: 8px;
-    max-width: 360px;
+    width: 100%;
+    box-sizing: border-box;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
   }}
   .timeframe-popover .timeframe-popover-head {{
@@ -11799,9 +11822,15 @@ def render_page(results, weather=None, luckyseat_shows=None):
 
     .week-nav {{
       justify-content: space-between;
-      gap: 6px;
-      padding: 8px 10px;
+      gap: 4px;
+      padding: 8px 8px;
       flex-wrap: wrap;
+    }}
+    .week-nav button {{
+      padding: 4px 7px;
+      font-size: 11px;
+      white-space: nowrap;
+      flex-shrink: 0;
     }}
     #week-label, #week-label-b {{
       min-width: 0;
@@ -16066,6 +16095,27 @@ def render_page(results, weather=None, luckyseat_shows=None):
         setSimpleView(!document.body.classList.contains('simple-view'));
       }});
     }}
+
+    // Collapsible city and genre/category sections on click (delegated so deferred days work too)
+    document.addEventListener('click', (ev) => {{
+      const cityHead = ev.target.closest('.city-head');
+      if (cityHead) {{
+        const sec = cityHead.closest('.city-section');
+        if (sec) {{
+          const collapsed = sec.classList.toggle('collapsed');
+          cityHead.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+        }}
+        return;
+      }}
+      const bucketHead = ev.target.closest('.bucket-head');
+      if (bucketHead) {{
+        const bucket = bucketHead.closest('.bucket');
+        if (bucket) {{
+          const collapsed = bucket.classList.toggle('collapsed');
+          bucketHead.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+        }}
+      }}
+    }});
 
     function closeTimeframePopover() {{
       if (customTimeRangeDiv) customTimeRangeDiv.style.display = 'none';
