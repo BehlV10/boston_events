@@ -15345,6 +15345,11 @@ MANUAL_RECURRING_EVENTS = [
         ("Live Band Line Dancing", "https://www.lorettaslastcall.com/events/", 2, 20, 0),
         ("Sunday Line Dancing", "https://www.lorettaslastcall.com/events/", 6, 20, 0),
     ]),
+    # ManRay's calendar only shows the current month; Crypt runs every Wednesday. Same title and
+    # venue as the scraped listing so the two merge once ManRay posts the month.
+    ("ManRay", "https://manrayclub.com/crypt-9/", "clubbing", [
+        ("Crypt - ManRay's Weekly Goth/Industrial Night", "https://manrayclub.com/crypt-9/", 2, 22, 0, "$7 before 10 PM, $10 after"),
+    ]),
     ("Sabina Mezcalería", "https://www.instagram.com/sabinamezcaleria/", "dance", [
         ("Sunday Live Salsa & Latin Jazz Brunch", "https://www.instagram.com/sabinamezcaleria/", 6, 13, 0),
     ]),
