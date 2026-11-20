@@ -50,7 +50,13 @@ jobs:
           restore-keys: |
             venue-cache-${{ runner.os }}-
 
-      - run: python server.py export events.json
+      - name: Scrape events (full on schedule/manual; reuse snapshot on push)
+        run: |
+          if [ "${{ github.event_name }}" = "push" ] && [ -s events.json ] && [ $(wc -c < events.json) -gt 100000 ]; then
+            echo "Fast deploy on push: reusing existing events.json ($(wc -c < events.json) bytes)"
+          else
+            python server.py export events.json
+          fi
       - run: python server.py export html index.html
       - run: cp index.html events.html
 
@@ -67,7 +73,7 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add events.json index.html events.html feed.xml events.ics *.txt robots.txt sitemap.xml og-*.jpg partiful_sources.json boston/ cambridge/ somerville/ music/ comedy/ free/ free-events-boston-this-weekend/ cambridge-events-tonight/ live-music-somerville/ board-game-nights-boston/ kids-family-events-boston/ summer-camps/ boston-edm/ boston-event-highlights/ things-to-do-boston/ boston-events-today/ boston-events-this-weekend/ roundup/ community_events.json highlights.json luckyseat_shows.json camps.json
+          git add events.json index.html events.html feed.xml events.ics *.txt robots.txt sitemap.xml og-*.jpg partiful_sources.json boston/ cambridge/ somerville/ music/ comedy/ free/ free-events-boston-this-weekend/ cambridge-events-tonight/ live-music-somerville/ board-game-nights-boston/ kids-family-events-boston/ summer-camps/ boston-edm/ boston-event-highlights/ things-to-do-boston/ boston-events-today/ boston-events-this-weekend/ markets-festivals-boston/ college/ goth/ lgbtq/ jazz/ film/ theater/ dance/ book/ classical/ metal/ crafts/ karaoke/ fitness/ latin/ roundup/ community_events.json highlights.json luckyseat_shows.json camps.json
           if git diff --staged --quiet; then
             echo "no changes"
           else

@@ -9264,6 +9264,96 @@ def scrape_boston_jewish_film_festival(url, ua):
     return events
 
 
+_IFPA_BOSTON_PLACE_RE = re.compile(
+    r"\b(?:Boston|Cambridge|Somerville|Brookline|Watertown|Medford|Malden|Everett|"
+    r"Chelsea|Revere|Arlington|Belmont|Newton|Waltham|Quincy|Allston|Brighton|"
+    r"Jamaica Plain|Dorchester|Roxbury|Charlestown|Salem|Beverly|Melrose|Stoneham|Winchester)\b",
+    re.IGNORECASE,
+)
+
+
+def _parse_ifpa_tournament(html_text):
+    """Extract street address and optional start time from an IFPA tournament detail page."""
+    soup = BeautifulSoup(html_text or "", "html.parser")
+    info = {}
+    addr_el = soup.select_one("address") or soup.find(string=re.compile(r"\bMA\s+\d{5}\b"))
+    if addr_el:
+        raw_addr = addr_el.get_text(" ", strip=True) if hasattr(addr_el, "get_text") else str(addr_el).strip()
+        info["address"] = re.sub(r"\s+", " ", raw_addr).strip()
+    body_text = soup.get_text(" ", strip=True)
+    tm = re.search(r"\b(?:start(?:s|ing)?|doors?|check[- ]?in)?\s*(\d{1,2}):(\d{2})\s*(am|pm)\b", body_text, re.I)
+    if tm:
+        h, m, ap = int(tm.group(1)), int(tm.group(2)), tm.group(3).lower()
+        if ap == "pm" and h != 12:
+            h += 12
+        elif ap == "am" and h == 12:
+            h = 0
+        if not (h == 0 and m == 0):
+            info["hm"] = (h, m)
+    return info
+
+
+def scrape_ifpa_nearby(url, ua, fetch_detail=None, max_details=25):
+    """IFPA pinball tournaments near Greater Boston (calendar 'near location' search)."""
+    resp = _SESSION.get(url, headers={"User-Agent": ua or UA_CHROME}, timeout=15)
+    resp.raise_for_status()
+    soup = BeautifulSoup(resp.text, "html.parser")
+    today = datetime.now(EASTERN).date()
+    rows = []
+    for item in soup.select("[id^=search_result_]"):
+        a = item.select_one("h5 a[href*='tournaments/view.php']")
+        line = item.select_one("p.mb-1 small")
+        if not a or not line:
+            continue
+        parts = [p.strip() for p in line.get_text(" ", strip=True).split("|")]
+        place = parts[0] if parts else ""
+        if not _IFPA_BOSTON_PLACE_RE.search(place):
+            continue
+        m = re.search(r"([A-Z][a-z]{2})\s+(\d{1,2}),\s+(\d{4})", " ".join(parts[1:]))
+        if not m:
+            continue
+        try:
+            day = datetime.strptime(" ".join(m.groups()), "%b %d %Y").date()
+        except ValueError:
+            continue
+        if day < today:
+            continue
+        rows.append((day, a.get_text(" ", strip=True), urljoin("https://www.ifpapinball.com/", a["href"]), place))
+
+    rows.sort()
+    events = []
+    for i, (day, name, t_url, place) in enumerate(rows):
+        info = {}
+        if i < max_details:
+            try:
+                if fetch_detail:
+                    detail_html = fetch_detail(t_url)
+                else:
+                    dr = _SESSION.get(t_url, headers={"User-Agent": ua or UA_CHROME}, timeout=12)
+                    detail_html = dr.text if dr.status_code == 200 else ""
+                info = _parse_ifpa_tournament(detail_html)
+            except Exception:
+                info = {}
+        hh, mm = info.get("hm") or (19, 0)
+        dt = datetime(day.year, day.month, day.day, hh, mm, tzinfo=EASTERN)
+        addr = (info.get("address") or place).replace(", United States", "")
+        at = re.search(r"@\s*([^)|]+)", name)
+        venue = at.group(1).strip() if at else place.split(",")[0].strip()
+        ev = {
+            "name": name if re.search(r"pinball", name, re.I) else f"{name} (Pinball Tournament)",
+            "date": dt.astimezone(timezone.utc).isoformat(),
+            "url": t_url,
+            "venue": venue or place,
+            "address": addr,
+            "price": None,
+            "category": "gaming",
+        }
+        if not info.get("hm"):
+            ev["time_unknown"] = True
+        events.append(ev)
+    return events
+
+
 def scrape_sowa_christmas_market(url, ua):
     """11th Annual SoWa Christmas Market at SoWa Power Station (South End)."""
     schedule = []
@@ -15260,6 +15350,7 @@ _ALL_VENUES = [
     {"name": "Greek Cuisine Fall Fest", "url": "https://www.saintathanasius.org/news/greek-festival/", "ua": UA_CHROME, "scraper": scrape_arlington_greek_fall_fest, "default_category": "food"},
     {"name": "Rebel Rebel & Dear Annie (via Eventbrite)", "url": "https://www.eventbrite.com/o/rebel-rebel-wine-bar-17982652543", "ua": UA_CHROME, "scraper": scrape_eventbrite_org, "default_category": "community"},
     {"name": "Boston Jewish Film Festival", "url": "https://www.bostonjcc.org/program/boston-jewish-film-festival/", "ua": UA_CHROME, "scraper": scrape_boston_jewish_film_festival, "default_category": "film"},
+    {"name": "IFPA Pinball Tournaments (Boston)", "url": "https://www.ifpapinball.com/calendar/search.php?type=near&latitude=42.3601&longitude=-71.0589&distance=15&distance_type=m", "ua": UA_CHROME, "scraper": scrape_ifpa_nearby, "default_category": "gaming"},
 ]
 
 # Sites found from submitted flyers (scripts/probe_source.py opens a PR adding them here). Each
@@ -16796,8 +16887,29 @@ def _drop_overnight_starts(results):
         result["events"] = kept
 
 
+RUN_FAILURES = []  # post-scrape pass exceptions logged so partial results still deploy
+
+
+def _run_pass(name, fn, *args, default=None, **kwargs):
+    """Run a post-scrape pass safely: log and continue on error so the site still deploys."""
+    try:
+        return fn(*args, **kwargs)
+    except Exception as e:
+        msg = f"{name}: {type(e).__name__}: {e}"
+        RUN_FAILURES.append(msg)
+        print(f"WARNING: post-scrape pass failed — {msg}")
+        try:
+            os.makedirs(".cache", exist_ok=True)
+            with open(os.path.join(".cache", "run_failures.txt"), "a", encoding="utf-8") as f:
+                f.write(f"{datetime.now(timezone.utc).isoformat()} {msg}\n")
+        except Exception:
+            pass
+        return default
+
+
 def _do_scrape_all(force=False):
     HOST_GATE.reset()  # a site that refused us yesterday gets asked again, once
+    RUN_FAILURES.clear()
 
     def _worker(v):
         return _scrape_one(v, force=force)
@@ -16806,12 +16918,14 @@ def _do_scrape_all(force=False):
         results = list(ex.map(_worker, VENUES))
     order = {v["name"]: i for i, v in enumerate(VENUES)}
     results.sort(key=lambda r: order.get(r["venue"], 999))
-    results.extend(_expand_manual_recurring())
-    results.extend(_load_community_events())
-    _fix_listings(results)
-    _use_show_times(results)
-    results.append(_boston_shows_fill_in(results))
-    _drop_overnight_starts(results)
+    results.extend(_run_pass("manual_recurring", _expand_manual_recurring, default=[]) or [])
+    results.extend(_run_pass("community_events", _load_community_events, default=[]) or [])
+    _run_pass("fix_listings", _fix_listings, results)
+    _run_pass("use_show_times", _use_show_times, results)
+    bs_fill = _run_pass("boston_shows_fill_in", _boston_shows_fill_in, results)
+    if bs_fill:
+        results.append(bs_fill)
+    _run_pass("drop_overnight_starts", _drop_overnight_starts, results)
     with _cache_lock:
         _cache["data"] = results
         _cache["ts"] = time.time()

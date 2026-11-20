@@ -83,7 +83,32 @@ def source_status(venues, refused=None, now=None, days=WINDOW_DAYS):
     return rows
 
 
-def _markdown(rows, overnight=()):
+def detect_shrunk_sources(rows, prev_sources, min_prev=10, drop_ratio=0.5):
+    """Flag sources whose event count dropped sharply (>=50% from >=10 events) vs the last run."""
+    prev_map = {
+        (s.get("source") or "").lower(): int(s.get("events") or 0)
+        for s in (prev_sources or [])
+        if s.get("source")
+    }
+    shrunk = []
+    for r in rows:
+        name = r.get("source") or ""
+        prev_cnt = prev_map.get(name.lower(), 0)
+        cur_cnt = int(r.get("events") or 0)
+        if prev_cnt >= min_prev and cur_cnt <= int(prev_cnt * (1.0 - drop_ratio)):
+            pct = round((1.0 - (cur_cnt / prev_cnt)) * 100)
+            shrunk.append({
+                "source": name,
+                "url": r.get("url") or "",
+                "prev_events": prev_cnt,
+                "events": cur_cnt,
+                "drop_pct": pct,
+            })
+    shrunk.sort(key=lambda s: (-s["drop_pct"], s["source"].lower()))
+    return shrunk
+
+
+def _markdown(rows, overnight=(), shrunk=()):
     count = lambda s: sum(1 for r in rows if r["status"] == s)
     out = ["## Source health", "",
            f"{len(rows)} sources: **{count('ok')} OK**, {count('error')} errored, {count('refused')} refused us, "
@@ -94,6 +119,12 @@ def _markdown(rows, overnight=()):
         for r in problems:
             note = r["error"] or ("kept last good data" if r["kept_last_good"] else "")
             out.append(f"| [{r['source']}]({r['url']}) | {r['status']} | {r['events']} | {r['next_event'] or '—'} | {note} |")
+        out.append("")
+    if shrunk:
+        out += ["### Shrunk sources", "", "Sources whose event count dropped by 50%+ since the last run (possible markup change).", "",
+                "| Source | Previous | Now | Drop |", "|---|---|---|---|"]
+        for s in shrunk:
+            out.append(f"| [{s['source']}]({s['url']}) | {s['prev_events']} | {s['events']} | -{s['drop_pct']}% |")
         out.append("")
     if overnight:
         out += ["### Removed for a 1–6 AM start", "", "Each of these has a wrong time at its source.", "",
@@ -106,20 +137,30 @@ def _markdown(rows, overnight=()):
 
 
 def write_report(venues, refused=None, path=os.path.join(".cache", "source_status.json"), overnight=()):
+    prev_sources = []
+    if path and os.path.exists(path):
+        try:
+            with open(path, encoding="utf-8") as f:
+                prev_sources = json.load(f).get("sources") or []
+        except Exception:
+            prev_sources = []
     rows = source_status(venues, refused)
+    shrunk = detect_shrunk_sources(rows, prev_sources)
     os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
         json.dump({"generated_at": datetime.now(timezone.utc).isoformat(), "window_days": WINDOW_DAYS,
-                   "sources": rows, "known_unscrapable": KNOWN_UNSCRAPABLE,
+                   "sources": rows, "shrunk_sources": shrunk, "known_unscrapable": KNOWN_UNSCRAPABLE,
                    "overnight_removed": list(overnight)}, f, indent=1)
     summary = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary:
         with open(summary, "a", encoding="utf-8") as f:
-            f.write(_markdown(rows, overnight))
+            f.write(_markdown(rows, overnight, shrunk))
     for r in rows:
         if r["status"] != "ok":
             print(f"source {r['status']:7s} {r['source']}: {r['events']} events, next {r['next_event'] or 'none'}"
                   + (f" ({r['error']})" if r["error"] else ""))
+    for s in shrunk:
+        print(f"source shrunk : {s['source']}: {s['prev_events']} -> {s['events']} (-{s['drop_pct']}%)")
     for o in overnight:
         print(f"overnight start removed: {o['source']}: {o['name']} ({o['start'][:16]})")
     return rows

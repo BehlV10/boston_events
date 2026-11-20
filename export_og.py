@@ -5,7 +5,8 @@ and city hubs using Pillow. Unfurls crisply on iMessage, Slack, Discord, Twitter
 """
 
 import os
-from datetime import datetime
+import re
+from datetime import datetime, timezone
 
 try:
     from PIL import Image, ImageDraw, ImageFont
@@ -153,7 +154,112 @@ def generate_single_card(output_path, badge_text, title, event_count, subtitle=N
     return True
 
 
-def generate_crisp_main_card(output_path, total_events=8200):
+_OG_SHOWCASE_CATS = ("music", "comedy", "theater", "art", "markets", "books", "dance", "clubbing", "outdoors")
+_OG_SKIP_CATS = {"services", "family", "deals", "other"}
+_OG_CAT_COLORS = {
+    "music": "#7aa2f7", "comedy": "#bb9af7", "theater": "#f0a07a", "film": "#7dcfff",
+    "art": "#ffd866", "books": "#9ece6a", "dance": "#ff7ab2", "clubbing": "#f7768e",
+    "markets": "#f4a261", "food": "#ff9e64", "outdoors": "#73daca", "sports": "#2ac3de",
+    "gaming": "#b4f9f8", "community": "#c0caf5",
+}
+
+
+def _clean_og_venue(venue):
+    return re.sub(r"\s*\(.*$", "", (venue or "").strip()).strip()
+
+
+def _clean_og_title(name):
+    return re.sub(
+        r"\s*\|\s*(?:mon|tue|tues|wed|thu|thur|thurs|fri|sat|sun)\b.*$",
+        "", (name or "").strip(), flags=re.I,
+    ).strip()
+
+
+def _parse_og_time(e):
+    from scrapers import EASTERN
+    t = e.get("_time")
+    if t is not None:
+        return t
+    raw = e.get("date")
+    if not raw or raw == "tba" or ("T" not in str(raw) and " " not in str(raw)):
+        return None
+    try:
+        dt = datetime.fromisoformat(str(raw).replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=EASTERN)
+        return dt.astimezone(EASTERN)
+    except ValueError:
+        return None
+
+
+def select_og_picks(events, count=4):
+    """Pick up to `count` varied, prime-time Boston/Cambridge/Somerville events for og-image.jpg."""
+    from scrapers import EASTERN
+    from template import _event_city
+
+    now = datetime.now(EASTERN)
+    deduped = []
+    seen = set()
+    for e in events or []:
+        name = _clean_og_title(e.get("name") or e.get("title") or "")
+        key = name.lower()
+        if not name or key in seen or e.get("_time_unknown") or e.get("_venue_unknown"):
+            continue
+        t = _parse_og_time(e)
+        if not t or t < now:
+            continue
+        seen.add(key)
+        deduped.append((e, t))
+
+    prime = []
+    for e, t in deduped:
+        cat = (e.get("category") or "").lower()
+        if cat in _OG_SKIP_CATS:
+            continue
+        if not (11 <= t.hour <= 22):
+            continue
+        venue = _clean_og_venue(e.get("venue") or "")
+        if not venue or re.match(r"^\d+\s+", venue):
+            continue
+        city = _event_city(e.get("venue") or "", e.get("_source_venue"), e)
+        if city == "other":
+            continue
+        prime.append((e, t))
+
+    prime.sort(key=lambda pair: (
+        -(len(pair[0].get("_alt_sources") or [])),
+        0 if 17 <= pair[1].hour <= 21 else 1,
+        pair[1],
+    ))
+
+    picks = []
+    picked_ids = set()
+    for cat in _OG_SHOWCASE_CATS:
+        for e, t in prime:
+            if (e.get("category") or "").lower() == cat and id(e) not in picked_ids:
+                picks.append((e, t))
+                picked_ids.add(id(e))
+                break
+        if len(picks) >= count:
+            break
+
+    for pool in (prime, deduped):
+        for e, t in pool:
+            if len(picks) >= count:
+                break
+            if id(e) not in picked_ids:
+                picks.append((e, t))
+                picked_ids.add(id(e))
+
+    return picks[:count]
+
+
+def _truncate_text(text, max_len):
+    s = (text or "").strip()
+    return s if len(s) <= max_len else s[: max_len - 1].rstrip() + "…"
+
+
+def generate_crisp_main_card(output_path, total_events=8200, events=None):
     """Render a crisp, modern, human-designed 1200x630 product showcase OG card."""
     if not HAS_PIL:
         return False
@@ -230,7 +336,7 @@ def generate_crisp_main_card(output_path, total_events=8200):
     draw.line([(px, 552), (px + 450, 552)], fill="#1e293b", width=1)
     draw.text((px, 572), "wickedbostonevents.com", fill="#60a5fa", font=font_footer)
     draw.text((px + 235, 572), "·", fill="#475569", font=font_footer)
-    draw.text((px + 252, 572), "Updated Hourly · Transit-Mapped", fill="#94a3b8", font=font_badge_sub)
+    draw.text((px + 252, 572), "Updated Daily · Transit-Mapped", fill="#94a3b8", font=font_badge_sub)
 
     # --- RIGHT PRODUCT MOCKUP ---
     mx, my, mw, mh = 566, 52, 564, 526
@@ -255,13 +361,25 @@ def generate_crisp_main_card(output_path, total_events=8200):
         draw.text((lx, my + 31), label, fill="#ffffff" if active else "#94a3b8", font=font_card_head)
         cx += pill_w + 10
 
-    # 4 Event Cards Mock
-    mock_events = [
-        ("MUSIC", "#7aa2f7", "Tonight · 8:00 PM", "Khruangbin — A La Sala Tour", "MGM Music Hall at Fenway · Boston"),
-        ("COMEDY", "#bb9af7", "Tomorrow · 7:30 PM", "Taylor Tomlinson: Live Standup", "The Wilbur Theatre · Boston"),
-        ("INDIE / ROCK", "#7dcfff", "Friday · 8:30 PM", "Japanese Breakfast with Guests", "Roadrunner · Brighton / Boston"),
-        ("STAGE & ARTS", "#f0a07a", "Saturday · 7:00 PM", "Boston Symphony Orchestra", "Symphony Hall · Back Bay")
-    ]
+    # 4 Event Cards (live prime-time picks across distinct categories, fallback to showcase defaults)
+    picks = select_og_picks(events, count=4) if events else []
+    if picks:
+        mock_events = []
+        for ev, t in picks:
+            cat_raw = (ev.get("category") or "music").lower()
+            accent_col = _OG_CAT_COLORS.get(cat_raw, "#7aa2f7")
+            day_lbl = t.strftime("%a %b %-d") if os.name != "nt" else t.strftime("%a %b %d")
+            time_lbl = t.strftime("%-I:%M %p") if os.name != "nt" else t.strftime("%I:%M %p").lstrip("0")
+            title_lbl = _truncate_text(_clean_og_title(ev.get("name") or ev.get("title") or ""), 34)
+            venue_lbl = _truncate_text(_clean_og_venue(ev.get("venue") or ev.get("_source_venue") or "Boston"), 38)
+            mock_events.append((cat_raw.upper(), accent_col, f"{day_lbl} · {time_lbl}", title_lbl, venue_lbl))
+    else:
+        mock_events = [
+            ("MUSIC", "#7aa2f7", "Tonight · 8:00 PM", "Live Concerts & Indie Shows", "Roadrunner · Brighton / Boston"),
+            ("COMEDY", "#bb9af7", "Tomorrow · 7:30 PM", "Stand-Up & Improv Nights", "The Comedy Studio · Cambridge"),
+            ("THEATER", "#f0a07a", "Friday · 7:30 PM", "Broadway & Local Stage", "Emerson Colonial · Theater District"),
+            ("ARTS", "#ffd866", "Saturday · 11:00 AM", "Markets, Film & Exhibitions", "SoWa & Brattle Theatre · Greater Boston")
+        ]
     ey = my + 74
     for cat, accent_col, time_str, event_title, venue_str in mock_events:
         draw.rounded_rectangle([(mx + 18, ey), (mx + mw - 18, ey + 88)], radius=10, fill="#141a29", outline="#1e293b", width=1)
@@ -274,7 +392,7 @@ def generate_crisp_main_card(output_path, total_events=8200):
         draw.text((mx + 38, ey + 58), venue_str, fill="#64748b", font=font_event_venue)
         ey += 98
 
-    draw.text((mx + 38, my + mh - 36), "● 100+ Live Boston Venues Monitored Hourly", fill="#10b981", font=font_tag_pill)
+    draw.text((mx + 38, my + mh - 36), "● 100+ Live Boston Venues Monitored Daily", fill="#10b981", font=font_tag_pill)
 
     os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
     img.save(output_path, "JPEG", quality=92, optimize=True)
@@ -294,7 +412,7 @@ def generate_all_og_cards(base_dir, events, hubs):
     # 1. Main site OpenGraph card
     main_og_path = os.path.join(base_dir, "og-image.jpg")
     try:
-        if generate_crisp_main_card(main_og_path, total_events=len(events)):
+        if generate_crisp_main_card(main_og_path, total_events=len(events), events=events):
             generated.append("og-image.jpg")
             print(f"Generated main OG card: og-image.jpg ({len(events):,} events)")
     except Exception as e:
