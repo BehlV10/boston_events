@@ -9092,12 +9092,25 @@ def render_page(results, weather=None, luckyseat_shows=None):
         is_free = _is_event_free(e)
         price_raw = escape(e["price"]) if e.get("price") else ""
         if price_raw:
-            if "free" in price_raw.lower() or price_raw in ("$0", "0"):
+            low_p = price_raw.lower()
+            if "no cover" in low_p:
+                price_tag = f'<span class="price free">{price_raw}</span>'
+            elif "free" in low_p and any(k in low_p for k in ("before", "rsvp", "w/", "with", "min", "drink", "catch", "member", "student")):
+                price_tag = f'<span class="price free free-catch" title="Free with a condition — check listing">{price_raw}</span>'
+            elif "free" in low_p or price_raw in ("$0", "0"):
                 price_tag = f'<span class="price free">{price_raw}</span>'
             else:
                 price_tag = f'<span class="price">{price_raw}</span>'
         elif is_free:
-            price_tag = '<span class="price free">Free</span>'
+            blob_low = f"{e.get('name') or ''} {e.get('description') or ''}".lower()
+            if "no cover" in blob_low:
+                price_tag = '<span class="price free">No cover</span>'
+            elif re.search(r"\bfree\s+(?:before|until|til|'til)\s+\d", blob_low):
+                price_tag = '<span class="price free free-catch" title="Free before a cutoff time — check listing">Free w/ catch</span>'
+            elif re.search(r"\bfree\s+(?:with|w/)\s+rsvp\b", blob_low):
+                price_tag = '<span class="price free free-catch" title="Free with RSVP">Free / RSVP</span>'
+            else:
+                price_tag = '<span class="price free">Free</span>'
         else:
             price_tag = ""
 
@@ -10655,6 +10668,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
   .venue-tag a.college-tag:hover {{ color: var(--fg); text-decoration: none; }}
   .price {{ display:inline-block; margin-left: 8px; background: rgba(255,255,255,0.06); color: var(--muted); font-size: 11px; padding: 2px 7px; border-radius: 5px; font-weight: 500; vertical-align: middle; }}
   .price.free {{ background: var(--green-bg); color: var(--green); border: 1px solid var(--green-border); font-weight: 700; }}
+  .price.free-catch {{ background: rgba(245, 158, 11, 0.14); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.35); font-weight: 600; }}
   .price.ticketed {{ background: rgba(139, 178, 255, 0.12); color: #8bb2ff; border: 1px solid rgba(139, 178, 255, 0.3); font-weight: 600; font-size: 10px; }}
   .cal-links {{ display: inline-flex; align-items: center; gap: 4px; margin-left: 4px; }}
   .cal-btn {{ background: rgba(255,255,255,0.04); border: 1px solid var(--border); color: var(--muted); padding: 2px 7px; border-radius: 5px; font-size: 10px; font-weight: 500; text-decoration: none; cursor: pointer; line-height: 1.3; display: inline-flex; align-items: center; gap: 3px; font-family: inherit; transition: all 0.15s ease; }}
@@ -15143,6 +15157,16 @@ def render_page(results, weather=None, luckyseat_shows=None):
           }}
         }} catch (_) {{}}
       }}
+      if ((!hParams && !sParams) || (!hasParam('cat'))) {{
+        try {{
+          const savedCats = JSON.parse(localStorage.getItem('boston_saved_cats') || 'null');
+          if (Array.isArray(savedCats) && savedCats.length > 0) {{
+            const catSet = new Set(savedCats);
+            catBoxes.forEach(b => {{ b.checked = catSet.has(b.value); }});
+            syncArtsPanel();
+          }}
+        }} catch (_) {{}}
+      }}
     }}
 
     function apply() {{
@@ -15863,6 +15887,19 @@ def render_page(results, weather=None, luckyseat_shows=None):
       apply();
       stateToHash();
     }}));
+    function saveCatsState() {{
+      const checkedCats = Array.from(catBoxes).filter(b => b.checked).map(b => b.value);
+      const isDefault = catBoxes.every(b => b.checked === !defaultUncheckedCats.has(b.value));
+      try {{
+        if (isDefault || checkedCats.length === 0) {{
+          localStorage.removeItem('boston_saved_cats');
+        }} else {{
+          localStorage.setItem('boston_saved_cats', JSON.stringify(checkedCats));
+        }}
+      }} catch (_) {{}}
+    }}
+    catBoxes.forEach(b => b.addEventListener('change', saveCatsState));
+
     function saveVenuesState() {{
       const allVenues = venueBoxes.length;
       const checkedVenuesList = Array.from(venueBoxes).filter(b => b.checked).map(b => b.value);
@@ -15890,6 +15927,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
       genreBoxes.forEach(b => b.checked = true);
       const subContainer = document.getElementById('subgenre-container');
       if (subContainer) subContainer.classList.remove('disabled');
+      saveCatsState();
       apply();
     }});
     document.getElementById('cat-none').addEventListener('click', () => {{
@@ -15899,6 +15937,7 @@ def render_page(results, weather=None, luckyseat_shows=None):
       genreBoxes.forEach(b => b.checked = false);
       const subContainer = document.getElementById('subgenre-container');
       if (subContainer) subContainer.classList.add('disabled');
+      saveCatsState();
       apply();
     }});
     const genreAllBtn = document.getElementById('genre-all');
@@ -15998,14 +16037,20 @@ def render_page(results, weather=None, luckyseat_shows=None):
       cityBoxes.forEach(b => b.checked = true);
       recurBoxes.forEach(b => b.checked = true);
       venueBoxes.forEach(b => b.checked = true);
-      try {{ localStorage.removeItem('boston_saved_venues'); }} catch (_) {{}}
+      try {{
+        localStorage.removeItem('boston_saved_venues');
+        localStorage.removeItem('boston_saved_cats');
+      }} catch (_) {{}}
       apply();
     }}
 
-    // The title goes to "/" with no #filters; also forget the saved venue picks so it really is the default view
+    // The title goes to "/" with no #filters; also forget the saved venue & category picks so it really is the default view
     const bannerHome = document.querySelector('.banner-home');
     if (bannerHome) bannerHome.addEventListener('click', () => {{
-      try {{ localStorage.removeItem('boston_saved_venues'); }} catch (_) {{}}
+      try {{
+        localStorage.removeItem('boston_saved_venues');
+        localStorage.removeItem('boston_saved_cats');
+      }} catch (_) {{}}
     }});
 
     const btnResetFilters = document.getElementById('btn-reset-filters');
