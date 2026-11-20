@@ -142,6 +142,31 @@ class GameDeduplication(unittest.TestCase):
         freq = template.title_word_freq([own, tm, sg])
         self.assertEqual(len(template._merge_duplicates([tm, sg, own], freq)), 1)
 
+    def test_ticketmaster_without_a_time_takes_the_schools_kickoff(self):
+        # BC vs Syracuse, Nov 2026: Ticketmaster had no time, we filled in 7pm, and that replaced
+        # the noon kickoff from bceagles.com and SeatGeek.
+        names = ("Boston College Eagles Football vs. Syracuse University Football",
+                 "Syracuse Orange at Boston College Eagles Football",
+                 "Boston College Football vs Syracuse - Jay McGillis Memorial Senior Day Game")
+        tm = self._game(names[0], "Alumni Stadium", "Ticketmaster", hour=0, date="2026-11-14")
+        sg = self._game(names[1], "Alumni Stadium", "SeatGeek", hour=12,
+                        url="https://seatgeek.com/bc-tickets/ncaa-football/2026-11-14-12-pm/1")
+        own = self._game(names[2], "Alumni Stadium (BC)", "Boston College Eagles Athletics", hour=12)
+        for order in ([tm, sg, own], [own, sg, tm], [tm, own, sg]):
+            batch = [dict(e) for e in order]
+            merged = template._merge_duplicates(batch, template.title_word_freq(batch))
+            self.assertEqual({(e["_time"].hour, "T" in e["date"]) for e in merged}, {(12, True)}, order)
+
+    def test_ticketmaster_without_a_time_alone_shows_time_tba(self):
+        tm = self._game("Boston College Eagles Football vs. Syracuse University Football", "Alumni Stadium",
+                        "Ticketmaster", hour=0, date="2026-11-14")
+        self.assertEqual(template.format_when(tm), "Time TBA")
+
+    def test_ticketmaster_scraper_sends_date_only_when_time_is_unknown(self):
+        self.assertTrue(scrapers._tm_time_unknown({"localDate": "2026-11-21", "dateTBA": False}))
+        self.assertTrue(scrapers._tm_time_unknown({"localDate": "2026-11-21", "localTime": "19:00:00", "timeTBA": True}))
+        self.assertFalse(scrapers._tm_time_unknown({"localDate": "2026-11-21", "localTime": "12:00:00"}))
+
     def test_mens_and_womens_games_at_the_same_time_stay_separate(self):
         men = self._game("Tufts University Men's Squash vs Cornell University", "Tufts Athletics", "Tufts Jumbos Athletics")
         women = self._game("Tufts University Women's Squash vs Cornell University", "Tufts Athletics", "Tufts Jumbos Athletics")
