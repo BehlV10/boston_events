@@ -8169,6 +8169,59 @@ def _is_event_specific_link(url):
     return any(h in u.netloc.lower() for h in _RSVP_HOSTS) and len(path) >= 6 and bool(re.search(r"\d|/", path))
 
 
+# Primary ticket sellers a venue sells through. When a card links to the venue's own website and a
+# duplicate listing sits on one of these, the seller's event page becomes the main link.
+_PRIMARY_SELLER_HOSTS = ("ticketmaster.com", "livenation.com", "ticketweb.com", "axs.com", "etix.com")
+
+
+def _primary_seller_link(url):
+    """True for one event's page on Ticketmaster/Live Nation/TicketWeb/AXS/Etix (not a venue or search page)."""
+    try:
+        u = urlparse((url or "").strip())
+    except ValueError:
+        return False
+    host = u.netloc.lower().split(":")[0]
+    if not any(host == h or host.endswith("." + h) for h in _PRIMARY_SELLER_HOSTS):
+        return False
+    path = u.path.lower()
+    return bool(re.search(r"/(?:events?|ticket/p)/", path + "/") and re.search(r"\d", path)) and "/venue/" not in path
+
+
+def _same_venue_name(a, b):
+    """'House of Blues Boston' / 'House of Blues' agree; 'Smalls' / 'Mezzrow' do not."""
+    ka, kb = _venue_key(a), _venue_key(b)
+    if not ka or not kb:
+        return False
+    if ka == kb or (min(len(ka), len(kb)) >= 5 and (ka.startswith(kb) or kb.startswith(ka))):
+        return True
+    wa, wb = _venue_words(a), _venue_words(b)
+    return bool(wa and wb and (wa <= wb or wb <= wa))
+
+
+def _prefer_seller_link(match, candidates):
+    """Point the card at the venue's own ticket seller when its listing is the same event at the same venue.
+    `candidates` are (url, venue, start time) of the listings just merged. The seller listing's own venue
+    and start time must match the card's: merged cards sometimes pair a venue's show with another venue's
+    TicketWeb listing, and a touring listing at 7:00 next to the Huntington's own 7:30 isn't its seller."""
+    cur = match.get("url")
+    if _primary_seller_link(cur) or _is_resale_link({"url": cur or ""}):
+        return
+    for url, venue, start in candidates:
+        if not url or url == cur or not _primary_seller_link(url):
+            continue
+        if not _same_venue_name(venue, match.get("venue")):
+            continue
+        if start is not None and match.get("_time") is not None and start != match["_time"]:
+            continue
+        alts = match.setdefault("_alt_sources", [])
+        alts[:] = [a for a in alts if a.get("url") != url]
+        if cur and not any(a.get("url") == cur for a in alts):
+            alts.append({"venue": match.get("_source_venue"), "url": cur, "price": match.get("price"),
+                         "name": match.get("name")})
+        match["url"] = url
+        return
+
+
 def _is_generic_link(url):
     """A site root or listing page rather than an event page: "x.com", "x.com/events/"."""
     try:
@@ -8684,6 +8737,7 @@ def _merge_duplicates(events, word_freq=None):
             own = lambda x: bool(_venue_words(x.get("_source_venue")) & _venue_words(x.get("venue")))
             if new_prio == cur_prio and own(e) and not own(match):
                 new_prio += 1
+            pre_link = (match.get("url"), match.get("venue"), match.get("_time"))
             if (m_is_placeholder and e_is_evening) or (new_prio > cur_prio):
                 old_url = match.get("url")
                 old_src = match.get("_source_venue")
@@ -8707,6 +8761,7 @@ def _merge_duplicates(events, word_freq=None):
                     match["_time"] = e_time
             elif src_url and not is_placeholder_url and not any(a.get("url") == src_url for a in match["_alt_sources"]) and src_url != match.get("url"):
                 match["_alt_sources"].append({"venue": src_name, "url": src_url, "price": e.get("price"), "name": e.get("name")})
+            _prefer_seller_link(match, [(src_url, e.get("venue"), e_time), pre_link])
 
             # If match has 19:00:00 (Eventbrite discovery fallback) while e has a real/earlier time, prefer e
             m_time = match.get("_time")

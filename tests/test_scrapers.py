@@ -2316,8 +2316,10 @@ class TestBostonEvents(unittest.TestCase):
         self.assertEqual(len(merged_willi), 1, "Willi Carlisle 12 PM placeholder should merge with 8 PM show into 1 event")
         self.assertEqual(merged_willi[0]["_source_venue"], "Crystal Ballroom")
         self.assertEqual(merged_willi[0]["_time"].hour, 20, "Showtime should be 8:00 PM (hour 20), not 12:00 PM")
-        self.assertEqual(merged_willi[0]["url"], "https://www.crystalballroomboston.com/events/willi-carlisle/")
+        # The venue sells through Ticketmaster, so that's the main link; the venue's page stays as "also on"
+        self.assertEqual(merged_willi[0]["url"], "https://www.ticketmaster.com/willi-carlisle-the-universal-bubba-tour-somerville-massachusetts-11-03-2026/event/010064EA80986481")
         alt_urls = [a.get("url") for a in merged_willi[0].get("_alt_sources", [])]
+        self.assertIn("https://www.crystalballroomboston.com/events/willi-carlisle/", alt_urls)
         self.assertIn("https://seatgeek.com/willi-carlisle-tickets/somerville-massachusetts-crystal-ballroom-at-somerville-theatre-2026-11-03-8-pm/concert/18376099", alt_urls)
         self.assertNotIn("https://seatgeek.com/willi-carlisle-tickets/somerville-massachusetts-crystal-ballroom-at-somerville-theatre-2026-11-03-12-pm/concert/18664484", alt_urls)
 
